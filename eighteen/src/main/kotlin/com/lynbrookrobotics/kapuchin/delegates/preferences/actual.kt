@@ -4,7 +4,8 @@ import com.lynbrookrobotics.kapuchin.Quan
 import com.lynbrookrobotics.kapuchin.subsystems.Named
 import edu.wpi.first.wpilibj.Preferences
 import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
+import kotlin.reflect.KProperty0
+import kotlin.reflect.full.extensionReceiverParameter
 
 val impl = Preferences.getInstance()
 
@@ -17,11 +18,24 @@ actual fun preference(fallback: Float) = Preference(fallback, impl::getFloat)
 actual fun preference(fallback: Int) = Preference(fallback, impl::getInt)
 actual fun preference(fallback: Long) = Preference(fallback, impl::getLong)
 
-actual fun <Q : Quan<Q>> preference(fallback: Double, conversion: KProperty1<Double, Q>) =
-        UomPreference(fallback, conversion, impl::getDouble)
+private fun <Q : Quan<Q>> setupUom(uomFunc: KProperty0<Q>): Pair<Double, (Double) -> Q> {
+    val uom = uomFunc()
+    val uomValue = (uomFunc.extensionReceiverParameter as Number).toDouble()
+    val conversionFactor = uom.siValue / uomValue
+
+    return uomValue to { it -> uom.new(it * conversionFactor) }
+}
+
+actual fun <Q : Quan<Q>> preference(fallback: KProperty0<Q>): UomPreference<Q> {
+    val (uomValue, uomConversion) = setupUom(fallback)
+    return UomPreference(uomValue, fallback.name, uomConversion, impl::getDouble)
+}
 
 actual fun <Error : Quan<Error>, Compensation : Quan<Compensation>> preference(
-        fallbackError: Double, errorConversion: KProperty1<Double, Error>,
-        fallbackComp: Double, compConversion: KProperty1<Double, Compensation>
-): GainPreference<Error, Compensation> =
-        GainPreference(fallbackError, errorConversion, fallbackComp, compConversion, impl::getDouble)
+        fallbackError: KProperty0<Error>,
+        fallbackComp: KProperty0<Compensation>
+): GainPreference<Error, Compensation> {
+    val (errorValue, errorConversion) = setupUom(fallbackError)
+    val (compValue, compConversion) = setupUom(fallbackComp)
+    return GainPreference(errorValue, fallbackError.name, errorConversion, compValue, fallbackComp.name, compConversion, impl::getDouble)
+}
