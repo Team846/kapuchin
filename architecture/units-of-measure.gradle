@@ -1,0 +1,40 @@
+generateUnitsOfMeasure {
+    relationships += r(
+            d(T: 1), d(T: 2), // time
+            d(L: 1), // length
+    ) + r(
+            d(M: 1, L: 2, T: -3, I: -1), // volts
+            d(M: 1, L: 2, T: -3, I: -2), // ohms
+            d(I: 1), // amps
+            d(T: 1), // time
+    ) + r(
+            d(), // angle
+            d(T: 1), d(T: 2), // time
+            d(L: 1), // length
+    )
+
+    quantities += si.quantities + [
+            q("Absement", d(L: 1, T: 1)),
+            q("AngularAbsement", d(T: 1))
+    ].toSet()
+    unitsOfMeasure += si.units
+
+    unitsOfMeasure += [
+            u("Inch", 0.0254, d(L: 1)),
+            u("Foot", 0.3048, d(L: 1)),
+            u("FootPerSecond", 0.3048, d(L: 1, T: -1)),
+            u("FootPerSecondSquared", 0.3048, d(L: 1, T: -2)),
+
+            u("Minute", 60, d(T: 1)),
+            u("Rpm", 6.2832, d(T: -1)),
+
+            u("Percent", 0.01, d()),
+            u("Degree", 0.01745, d()),
+            u("Turn", 6.2832, d()),
+            u("Tick", 1.0, d()),
+            u("DutyCycle", 1.0, d()),
+    ].toSet()
+}
+
+sourceSets.main.kotlin.srcDir generateUnitsOfMeasure.generatedSrcDir
+compileKotlinCommon.dependsOn(generateUnitsOfMeasure)
