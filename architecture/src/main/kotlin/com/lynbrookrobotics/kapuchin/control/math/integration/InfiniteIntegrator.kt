@@ -10,7 +10,6 @@ open class InfiniteIntegrator<IntegralOfQ, Q>(private val init: IntegralOfQ) : I
     protected val zero = init.new(0.0)
     protected var sum = zero
 
-
     override fun invoke(x2: Time, y2: Q) = (sum + recentRectangle(x2, y2))
             .also { sum = it }
 

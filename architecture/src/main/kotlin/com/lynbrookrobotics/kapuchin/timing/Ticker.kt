@@ -7,4 +7,3 @@ expect class Ticker(name: String, priority: Priority, period: Time) {
     fun runOnTick(order: ExecutionOrder = First, run: (Time) -> Unit)
     fun waitOnTick(): Time
 }
-

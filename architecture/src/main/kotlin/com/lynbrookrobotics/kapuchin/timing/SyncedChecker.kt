@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.Comp
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
 import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 

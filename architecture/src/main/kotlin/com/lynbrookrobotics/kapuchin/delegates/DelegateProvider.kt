@@ -5,7 +5,7 @@ import kotlin.reflect.KProperty
 
 interface DelegateProvider<in ThisRef, out Value> {
     operator fun provideDelegate(
-            thisRef: ThisRef,
-            prop: KProperty<*>
+        thisRef: ThisRef,
+        prop: KProperty<*>
     ): ReadOnlyProperty<ThisRef, Value>
 }

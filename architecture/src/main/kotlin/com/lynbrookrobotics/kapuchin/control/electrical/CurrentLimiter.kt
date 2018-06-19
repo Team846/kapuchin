@@ -4,7 +4,7 @@ import info.kunalsheth.units.generated.Ampere
 import info.kunalsheth.units.generated.Volt
 
 class CurrentLimiter(
-        val limit: Ampere
+    val limit: Ampere
 ) : (Ampere, Volt, Volt) -> Volt {
     override operator fun invoke(currDraw: Ampere, currApplied: Volt, target: Volt): Volt {
         val r = currApplied / currDraw

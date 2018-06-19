@@ -3,7 +3,6 @@ package com.lynbrookrobotics.kapuchin.delegates.sensors
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.Hardware
-import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.Time
 
 fun <C, H, T> C.withComponentSensor(read: H.(Time) -> TimeStamped<T>)

@@ -9,8 +9,8 @@ import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 
 open class PidControlLoop<Input, Integ, Deriv, Output, Config>(
-        private val config: Config,
-        private val target: (Time) -> Input
+    private val config: Config,
+    private val target: (Time) -> Input
 ) : ControlLoop<Input, Output>
         where Input : Quantity<Input, Integ, Deriv>,
               Integ : Quantity<Integ, *, Input>,

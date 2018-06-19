@@ -23,7 +23,7 @@ actual class Ticker actual constructor(name: String, priority: Priority, private
 
     private var runOnTick: Set<(tickStart: Time) -> Unit> = emptySet()
     actual fun runOnTick(order: ExecutionOrder, run: (tickStart: Time) -> Unit) {
-        runOnTick = when(order) {
+        runOnTick = when (order) {
             First -> setOf(run) + runOnTick
             Last -> runOnTick + run
         }

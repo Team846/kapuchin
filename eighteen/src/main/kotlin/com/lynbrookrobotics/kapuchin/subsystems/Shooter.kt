@@ -52,4 +52,3 @@ class ShooterHardware : Hardware<ShooterHardware, ShooterComponent>() {
     val frontEsc = Spark(frontEscPort)
     val backEsc = Spark(backEscPort)
 }
-

@@ -8,8 +8,10 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 class UomPreference<Value>(
-        private val fallback: Double, private val uomName: String, private val conversion: (Double) -> Value,
-        private val get: (String, Double) -> Double
+    private val fallback: Double,
+    private val uomName: String,
+    private val conversion: (Double) -> Value,
+    private val get: (String, Double) -> Double
 ) : WithEventLoop, DelegateProvider<Named, Value>
         where Value : Quan<Value> {
 
