@@ -6,10 +6,10 @@ import info.kunalsheth.units.generated.Quantity
 import info.kunalsheth.units.generated.Time
 
 data class PidConfig<Input, Integ, Deriv, Output>(
-        val kP: (Time, Input) -> Gain<Input, Output>,
-        val kI: (Time, Input) -> Gain<Integ, Output>,
-        val kD: (Time, Input) -> Gain<Deriv, Output>,
-        val kF: (Time, Input) -> Gain<Input, Output>? =
+        val kP: (Time, Input) -> Gain<Output, Input>,
+        val kI: (Time, Input) -> Gain<Output, Integ>,
+        val kD: (Time, Input) -> Gain<Output, Deriv>,
+        val kF: (Time, Input) -> Gain<Output, Input>? =
                 { _, _ -> null },
         val integralFalloff: Int = -1
 )
@@ -19,10 +19,10 @@ data class PidConfig<Input, Integ, Deriv, Output>(
               Output : Quan<Output> {
 
     constructor(
-            kP: Gain<Input, Output>,
-            kI: Gain<Integ, Output>,
-            kD: Gain<Deriv, Output>,
-            kF: Gain<Input, Output>? = null,
+            kP: Gain<Output, Input>,
+            kI: Gain<Output, Integ>,
+            kD: Gain<Output, Deriv>,
+            kF: Gain<Output, Input>? = null,
             integralFalloff: Int = -1
     ) : this(
             { _, _ -> kP },
