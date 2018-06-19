@@ -15,6 +15,6 @@ expect fun preference(fallback: Long): Preference<Long>
 
 expect fun <Q : Quan<Q>> preference(fallback: KProperty0<Q>): UomPreference<Q>
 expect fun <Error : Quan<Error>, Compensation : Quan<Compensation>> preference(
-        fallbackError: KProperty0<Error>,
-        fallbackComp: KProperty0<Compensation>
+        fallbackComp: KProperty0<Compensation>,
+        fallbackError: KProperty0<Error>
 ): GainPreference<Error, Compensation>

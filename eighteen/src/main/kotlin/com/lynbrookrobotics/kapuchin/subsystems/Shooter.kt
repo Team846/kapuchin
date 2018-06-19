@@ -9,8 +9,6 @@ import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
-import kotlin.reflect.KProperty0
-import kotlin.reflect.KProperty1
 
 class ShooterComponent(hardware: ShooterHardware, es: ElectricalSystemComponent) : Component<ShooterComponent, ShooterHardware, Pair<Volt, Volt>>(hardware) {
     val frontVelocity by withComponentSensor {
@@ -22,8 +20,8 @@ class ShooterComponent(hardware: ShooterHardware, es: ElectricalSystemComponent)
     }
 
     val kP by preference(
-            12.0::Volt,
-            3000.0::Rpm
+            3000.0::Rpm,
+            12.0::Volt
     )
     val topSpeed by preference(6500.0::Rpm)
     val kF = Gain(12.Volt, topSpeed)
