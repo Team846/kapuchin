@@ -18,7 +18,6 @@ actual class PlatformThread actual constructor(name: String, priority: Priority,
             Highest, RealTime -> 10 to 1 // Thread.MAX_PRIORITY
         }
 
-
         thread = thread(name = name, priority = jvmPriority) {
             log(Level.Debug) { "Starting $name Thread" }
             Threads.setCurrentThreadPriority(priority == RealTime, roboRioPriority)

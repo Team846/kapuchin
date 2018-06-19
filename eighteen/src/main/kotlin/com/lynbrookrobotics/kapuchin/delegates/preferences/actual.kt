@@ -32,8 +32,8 @@ actual fun <Q : Quan<Q>> preference(fallback: KProperty0<Q>): UomPreference<Q> {
 }
 
 actual fun <Compensation : Quan<Compensation>, Error : Quan<Error>> preference(
-        fallbackComp: KProperty0<Compensation>,
-        fallbackError: KProperty0<Error>
+    fallbackComp: KProperty0<Compensation>,
+    fallbackError: KProperty0<Error>
 ): GainPreference<Compensation, Error> {
     val (errorValue, errorConversion) = setupUom(fallbackError)
     val (compValue, compConversion) = setupUom(fallbackComp)

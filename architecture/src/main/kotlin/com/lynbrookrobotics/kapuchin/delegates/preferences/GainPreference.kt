@@ -9,9 +9,13 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 class GainPreference<Compensation, Error>(
-        private val fallbackComp: Double, private val compUomName: String, private val compConversion: (Double) -> Compensation,
-        private val fallbackError: Double, private val errorUomName: String, private val errorConversion: (Double) -> Error,
-        private val get: (String, Double) -> Double
+    private val fallbackComp: Double,
+    private val compUomName: String,
+    private val compConversion: (Double) -> Compensation,
+    private val fallbackError: Double,
+    private val errorUomName: String,
+    private val errorConversion: (Double) -> Error,
+    private val get: (String, Double) -> Double
 ) : WithEventLoop, DelegateProvider<Named, Gain<Compensation, Error>>
         where Compensation : Quan<Compensation>,
               Error : Quan<Error> {
