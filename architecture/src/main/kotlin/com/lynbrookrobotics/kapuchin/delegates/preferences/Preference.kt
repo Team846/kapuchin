@@ -6,7 +6,11 @@ import com.lynbrookrobotics.kapuchin.subsystems.Named
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class Preference<Value>(private val fallback: Value, private val get: (String, Value) -> Value, private val nameSuffix: String = "") : WithEventLoop, DelegateProvider<Named, Value> {
+open class Preference<Value>(
+        private val fallback: Value,
+        private val get: (String, Value) -> Value,
+        private val nameSuffix: String = ""
+) : WithEventLoop, DelegateProvider<Named, Value> {
 
     private lateinit var name: String
     private var value: Value? = null

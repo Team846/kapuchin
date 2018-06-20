@@ -28,7 +28,7 @@ private fun <Q : Quan<Q>> setupUom(uomFunc: KProperty0<Q>): Pair<Double, (Double
 
 actual fun <Q : Quan<Q>> preference(fallback: KProperty0<Q>): UomPreference<Q> {
     val (uomValue, uomConversion) = setupUom(fallback)
-    return UomPreference(uomValue, fallback.name, uomConversion, impl::getDouble)
+    return UomPreference(uomConversion, fallback.name, uomValue, impl::getDouble, "")
 }
 
 actual fun <Compensation : Quan<Compensation>, Error : Quan<Error>> preference(
