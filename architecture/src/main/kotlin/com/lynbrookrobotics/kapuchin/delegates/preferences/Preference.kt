@@ -7,6 +7,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 open class Preference<Value>(
+        private val thisRef: Named,
         private val fallback: Value,
         private val get: (String, Value) -> Value,
         private val nameSuffix: String = ""
@@ -21,7 +22,7 @@ open class Preference<Value>(
         }
     }
 
-    override fun provideDelegate(thisRef: Named, prop: KProperty<*>): ReadOnlyProperty<Named, Value> {
+    override fun provideDelegate(x: Named, prop: KProperty<*>): ReadOnlyProperty<Named, Value> {
         name = namePreference(thisRef, prop) + nameSuffix
 
         return object : ReadOnlyProperty<Named, Value> {

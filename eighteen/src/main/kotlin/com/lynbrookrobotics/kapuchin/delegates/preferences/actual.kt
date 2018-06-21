@@ -12,11 +12,11 @@ private val impl = Preferences.getInstance()
 actual fun namePreference(thisRef: Named, prop: KProperty<*>) =
         "${thisRef.name}/${prop.name}"
 
-actual fun preference(fallback: Boolean) = Preference(fallback, impl::getBoolean)
-actual fun preference(fallback: Double) = Preference(fallback, impl::getDouble)
-actual fun preference(fallback: Float) = Preference(fallback, impl::getFloat)
-actual fun preference(fallback: Int) = Preference(fallback, impl::getInt)
-actual fun preference(fallback: Long) = Preference(fallback, impl::getLong)
+actual fun Named.preference(fallback: Boolean) = Preference(this, fallback, impl::getBoolean)
+actual fun Named.preference(fallback: Double) = Preference(this, fallback, impl::getDouble)
+actual fun Named.preference(fallback: Float) = Preference(this, fallback, impl::getFloat)
+actual fun Named.preference(fallback: Int) = Preference(this, fallback, impl::getInt)
+actual fun Named.preference(fallback: Long) = Preference(this, fallback, impl::getLong)
 
 private fun <Q : Quan<Q>> setupUom(uomFunc: KProperty0<Q>): Pair<Double, (Double) -> Q> {
     val uom = uomFunc()
@@ -26,7 +26,7 @@ private fun <Q : Quan<Q>> setupUom(uomFunc: KProperty0<Q>): Pair<Double, (Double
     return uomValue to { it -> uom.new(it * conversionFactor) }
 }
 
-actual fun <Q : Quan<Q>> preference(fallback: KProperty0<Q>): UomPreference<Q> {
+actual fun <Q : Quan<Q>> Named.preference(fallback: KProperty0<Q>): UomPreference<Q> {
     val (uomValue, uomConversion) = setupUom(fallback)
-    return UomPreference(uomConversion, fallback.name, uomValue, impl::getDouble)
+    return UomPreference(uomConversion, fallback.name, this, uomValue, impl::getDouble)
 }
