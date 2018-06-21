@@ -7,7 +7,7 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 import kotlin.reflect.full.extensionReceiverParameter
 
-val impl = Preferences.getInstance()
+private val impl = Preferences.getInstance()
 
 actual fun namePreference(thisRef: Named, prop: KProperty<*>) =
         "${thisRef.name}/${prop.name}"
@@ -28,19 +28,5 @@ private fun <Q : Quan<Q>> setupUom(uomFunc: KProperty0<Q>): Pair<Double, (Double
 
 actual fun <Q : Quan<Q>> preference(fallback: KProperty0<Q>): UomPreference<Q> {
     val (uomValue, uomConversion) = setupUom(fallback)
-    return UomPreference(uomConversion, fallback.name, uomValue, impl::getDouble, "")
-}
-
-actual fun <Compensation : Quan<Compensation>, Error : Quan<Error>> preference(
-        fallbackComp: KProperty0<Compensation>,
-        fallbackError: KProperty0<Error>
-): GainPreference<Compensation, Error> {
-    val (errorValue, errorConversion) = setupUom(fallbackError)
-    val (compValue, compConversion) = setupUom(fallbackComp)
-
-    return GainPreference(
-            compValue, fallbackComp.name, compConversion,
-            errorValue, fallbackError.name, errorConversion,
-            impl::getDouble
-    )
+    return UomPreference(uomConversion, fallback.name, uomValue, impl::getDouble)
 }
