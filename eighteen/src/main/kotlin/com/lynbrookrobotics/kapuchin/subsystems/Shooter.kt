@@ -20,8 +20,9 @@ class ShooterComponent(hardware: ShooterHardware, es: ElectricalSystemComponent)
     }
 
     val kP: Gain<Volt, AngularVelocity> by preference {
-        val a = 1
-        { Gain(12.Volt, 3000.Rpm) }
+        val compensation by preference(12::Volt)
+        val forError by preference(3000::Rpm)
+        fun() = Gain(compensation, forError)
     }
 
     val topSpeed by preference(6500.0::Rpm)
