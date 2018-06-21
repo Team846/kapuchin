@@ -12,9 +12,6 @@ private val impl = Preferences.getInstance()
 actual fun namePreference(thisRef: Named, prop: KProperty<*>) =
         "${thisRef.name}/${prop.name}"
 
-actual fun nameLayer(thisRef: Named, layer: String) =
-        "${thisRef.name}/$layer"
-
 actual fun preference(fallback: Boolean) = Preference(fallback, impl::getBoolean)
 actual fun preference(fallback: Double) = Preference(fallback, impl::getDouble)
 actual fun preference(fallback: Float) = Preference(fallback, impl::getFloat)
