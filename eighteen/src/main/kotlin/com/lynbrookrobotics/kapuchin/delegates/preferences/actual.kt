@@ -17,16 +17,13 @@ actual fun Named.preference(fallback: Double) = Preference(this, fallback, impl:
 actual fun Named.preference(fallback: Float) = Preference(this, fallback, impl::getFloat)
 actual fun Named.preference(fallback: Int) = Preference(this, fallback, impl::getInt)
 actual fun Named.preference(fallback: Long) = Preference(this, fallback, impl::getLong)
-
-private fun <Q : Quan<Q>> setupUom(uomFunc: KProperty0<Q>): Pair<Double, (Double) -> Q> {
-    val uom = uomFunc()
-    val uomValue = (uomFunc.extensionReceiverParameter as Number).toDouble()
+actual fun <Q : Quan<Q>> Named.preference(fallback: KProperty0<Q>): UomPreference<Q> {
+    val uom = fallback()
+    val uomValue = (fallback.extensionReceiverParameter as Number).toDouble()
     val conversionFactor = uom.siValue / uomValue
 
-    return uomValue to { it -> uom.new(it * conversionFactor) }
-}
-
-actual fun <Q : Quan<Q>> Named.preference(fallback: KProperty0<Q>): UomPreference<Q> {
-    val (uomValue, uomConversion) = setupUom(fallback)
-    return UomPreference(uomConversion, fallback.name, this, uomValue, impl::getDouble)
+    return UomPreference(
+            { it -> uom.new(it * conversionFactor) },
+            fallback.name, this, uomValue, impl::getDouble
+    )
 }

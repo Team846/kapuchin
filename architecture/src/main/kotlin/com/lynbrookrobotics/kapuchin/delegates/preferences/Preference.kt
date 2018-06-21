@@ -11,7 +11,7 @@ open class Preference<Value>(
         private val fallback: Value,
         private val get: (String, Value) -> Value,
         private val nameSuffix: String = ""
-) : WithEventLoop, DelegateProvider<Named, Value> {
+) : WithEventLoop, DelegateProvider<Any?, Value> {
 
     private lateinit var name: String
     private var value: Value? = null
@@ -22,11 +22,11 @@ open class Preference<Value>(
         }
     }
 
-    override fun provideDelegate(x: Named, prop: KProperty<*>): ReadOnlyProperty<Named, Value> {
+    override fun provideDelegate(x: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         name = namePreference(thisRef, prop) + nameSuffix
 
-        return object : ReadOnlyProperty<Named, Value> {
-            override fun getValue(thisRef: Named, property: KProperty<*>) = value ?: get(name, fallback)
+        return object : ReadOnlyProperty<Any?, Value> {
+            override fun getValue(x: Any?, property: KProperty<*>) = value ?: get(name, fallback)
         }
     }
 }
