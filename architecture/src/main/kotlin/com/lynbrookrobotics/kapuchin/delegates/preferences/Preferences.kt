@@ -13,4 +13,4 @@ expect fun preference(fallback: Float): Preference<Float>
 expect fun preference(fallback: Int): Preference<Int>
 expect fun preference(fallback: Long): Preference<Long>
 expect fun <Q : Quan<Q>> preference(fallback: KProperty0<Q>): UomPreference<Q>
-fun <Value> preference(nameSuffix: String = "", get: Named.() -> Value) = PreferenceLayer(nameSuffix, get)
+fun <Value> preference(nameSuffix: String = "", get:  Named.() -> (() -> Value)) = PreferenceLayer(nameSuffix, get)

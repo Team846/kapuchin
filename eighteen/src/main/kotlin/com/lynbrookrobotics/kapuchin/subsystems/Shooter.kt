@@ -19,10 +19,11 @@ class ShooterComponent(hardware: ShooterHardware, es: ElectricalSystemComponent)
         180.Degree / backHallEffect.period.Second stampWith it
     }
 
-    val kP by preference(
-            3000.0::Rpm,
-            12.0::Volt
-    )
+    val kP: Gain<Volt, AngularVelocity> by preference {
+        val a = 1
+        { Gain(12.Volt, 3000.Rpm) }
+    }
+
     val topSpeed by preference(6500.0::Rpm)
     val kF = Gain(12.Volt, topSpeed)
 
