@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.Quan
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
 import com.lynbrookrobotics.kapuchin.delegates.WithEventLoop
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0

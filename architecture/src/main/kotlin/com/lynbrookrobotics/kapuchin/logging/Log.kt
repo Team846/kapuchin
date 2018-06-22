@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.subsystems.Named
 import kotlinx.coroutines.experimental.launch
 
 fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = emptyArray(), message: suspend () -> String) = launch {

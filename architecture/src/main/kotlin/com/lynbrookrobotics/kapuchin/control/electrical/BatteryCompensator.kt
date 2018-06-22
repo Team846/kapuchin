@@ -3,7 +3,7 @@ package com.lynbrookrobotics.kapuchin.control.electrical
 import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
 import info.kunalsheth.units.generated.Dimensionless
 import info.kunalsheth.units.generated.Volt
 

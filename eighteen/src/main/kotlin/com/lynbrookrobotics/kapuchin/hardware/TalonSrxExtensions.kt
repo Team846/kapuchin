@@ -14,7 +14,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedOutputWriter
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
 import info.kunalsheth.units.generated.*
 
 fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOffloadedOutputWriter {

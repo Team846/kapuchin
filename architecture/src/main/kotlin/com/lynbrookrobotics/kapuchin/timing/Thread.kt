@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
 
 fun Named.PlatformThread(name: String, priority: Priority, run: () -> Unit) = PlatformThread(this, name, priority, run)
 

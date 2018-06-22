@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.delegates.preferences
 
 import com.lynbrookrobotics.kapuchin.Quan
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
 import kotlin.reflect.KProperty0
 
 expect fun <Q : Quan<Q>> Named.pref(fallback: KProperty0<Q>): UomPreference<Q>

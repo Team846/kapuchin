@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.Level
 import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import edu.wpi.first.wpilibj.Threads
 import kotlin.concurrent.thread

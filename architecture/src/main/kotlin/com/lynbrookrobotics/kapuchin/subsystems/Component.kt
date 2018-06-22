@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
+import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.Ticker
 import info.kunalsheth.units.generated.Time

@@ -1,9 +1,8 @@
 package com.lynbrookrobotics.kapuchin.delegates.preferences
 
 import com.lynbrookrobotics.kapuchin.Quan
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
 import edu.wpi.first.wpilibj.Preferences
-import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 import kotlin.reflect.full.extensionReceiverParameter
 

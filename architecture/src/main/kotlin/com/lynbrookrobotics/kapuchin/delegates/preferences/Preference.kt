@@ -2,8 +2,8 @@ package com.lynbrookrobotics.kapuchin.delegates.preferences
 
 import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
 import com.lynbrookrobotics.kapuchin.delegates.WithEventLoop
-import com.lynbrookrobotics.kapuchin.subsystems.Named
-import com.lynbrookrobotics.kapuchin.subsystems.nameLayer
+import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.nameLayer
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
