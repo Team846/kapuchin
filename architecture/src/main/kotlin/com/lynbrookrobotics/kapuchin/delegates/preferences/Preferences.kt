@@ -14,13 +14,13 @@ expect fun Named.pref(fallback: Float): Preference<Float>
 expect fun Named.pref(fallback: Int): Preference<Int>
 expect fun Named.pref(fallback: Long): Preference<Long>
 expect fun <Q : Quan<Q>> Named.pref(fallback: KProperty0<Q>): UomPreference<Q>
-fun <Value> Named.pref(nameSuffix: String = "", get: Named.() -> (() -> Value)) = PreferenceLayer(nameSuffix, get)
+fun <Value> Named.pref(nameSuffix: String = "", get: Named.() -> (() -> Value)) = PreferenceLayer(this, nameSuffix, get)
 
-fun <C, E> Named.prefGain(compensation: KProperty0<C>, forError: KProperty0<E>)
+fun <C, E> Named.pref(fallbackCompensation: KProperty0<C>, fallbackForError: KProperty0<E>)
         where C : Quan<C>,
               E : Quan<E> =
         pref {
-            val compensation by pref(compensation)
-            val forError by pref(forError)
+            val compensation by pref(fallbackCompensation)
+            val forError by pref(fallbackForError)
             ({ Gain(compensation, forError) })
         }
