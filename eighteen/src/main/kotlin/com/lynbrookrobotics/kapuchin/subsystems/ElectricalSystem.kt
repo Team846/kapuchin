@@ -17,7 +17,7 @@ class ElectricalSystemComponent(hardware: ElectricalSystemHardware) : Component<
 }
 
 class ElectricalSystemHardware : Hardware<ElectricalSystemHardware, ElectricalSystemComponent>() {
-    override val name = "Electrical System"
+    override val subsystemName = "Electrical System"
     override val priority = Priority.Lowest
     override val period = 3.Minute
     override val syncThreshold = 1.milli(::Second)

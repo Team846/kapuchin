@@ -29,7 +29,7 @@ class DriverComponent(hardware: DriverHardware) : Component<DriverComponent, Dri
 }
 
 class DriverHardware : Hardware<DriverHardware, DriverComponent>() {
-    override val name = "Shooter"
+    override val subsystemName = "Driver"
     override val priority = Priority.RealTime
     override val period = 20.milli(::Second)
     override val syncThreshold = 3.milli(::Second)
