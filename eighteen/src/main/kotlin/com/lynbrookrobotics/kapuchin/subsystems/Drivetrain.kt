@@ -6,7 +6,6 @@ import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversio
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VoltageOutput
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.*
@@ -30,9 +29,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val perFeedbackQuantity by pref(360::Degree)
         ({
             OffloadedNativeConversion(
-                    nativeOutputUnits = nativeOutputUnits,
-                    perOutputQuantity = perOutputQuantity,
-                    nativeFeedbackUnits = nativeFeedbackUnits,
+                    nativeOutputUnits = nativeOutputUnits, perOutputQuantity = perOutputQuantity, nativeFeedbackUnits = nativeFeedbackUnits,
                     perFeedbackQuantity = wheelCircumference * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
             )
         })
@@ -45,9 +42,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         ({ PidGains(kP, kI, kD) })
     }
 
-    val offloadedPositionGains get() = OffloadedPidGains(
-            kP =
-    )
+    val offloadedPositionGains get() = offloadedSettings.native(positionGains)
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> =
             { TwoSided(VoltageOutput(12.Volt), VoltageOutput((12.Volt))) }
