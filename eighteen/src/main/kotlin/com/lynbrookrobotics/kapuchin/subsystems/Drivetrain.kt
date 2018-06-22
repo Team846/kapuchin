@@ -16,7 +16,6 @@ import kotlin.math.PI
 class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
 
     val wheelDiameter by pref(6::Inch)
-    val wheelCircumference get() = wheelDiameter * PI
 
     val encoderToWheelGears by pref {
         val driver by pref(18)
@@ -32,7 +31,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         ({
             OffloadedNativeConversion(
                     nativeOutputUnits = nativeOutputUnits, perOutputQuantity = perOutputQuantity, nativeFeedbackUnits = nativeFeedbackUnits,
-                    perFeedbackQuantity = wheelCircumference * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
+                    perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
             )
         })
     }
@@ -44,17 +43,16 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         ({ PidGains(kP, kI, kD) })
     }
 
-    val offloadedPositionGains get() = offloadedSettings.native(velocityGains)
-
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         VelocityOutput(
-                offloadedPositionGains,
+                offloadedSettings.native(velocityGains),
                 offloadedSettings.native(0.FootPerSecond)
         ).let { TwoSided(it, it) }
     }
 
     override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
-
+        leftLazyOutput(value.left)
+        rightLazyOutput(value.right)
     }
 }
 
@@ -72,10 +70,10 @@ class DrivetrainHardware : Hardware<DrivetrainHardware, DrivetrainComponent>() {
     val escCanTimeout by pref(0.001::Second)
 
     val leftMasterEsc = TalonSRX(leftMasterEscId)
-    val leftMasterLazyOutput = lazyOutput(leftMasterEsc, escCanTimeout)
+    val leftLazyOutput = lazyOutput(leftMasterEsc, escCanTimeout)
     val leftSlaveEsc = TalonSRX(leftSlaveEscId)
 
     val rightMasterEsc = TalonSRX(rightMasterEscId)
-    val rightMasterLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
+    val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
     val rightSlaveEsc = TalonSRX(rightSlaveEscId)
 }

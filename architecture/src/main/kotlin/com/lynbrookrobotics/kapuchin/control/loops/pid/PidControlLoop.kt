@@ -19,6 +19,8 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
               Output : Quantity<Output, *, *>,
               Gains : PidGains<Input, Integ, Deriv, Output> {
 
+    constructor(gains: Gains, target: (Time) -> Input) : this({ _, _ -> gains }, target)
+
     private val zero = target(currentTime).new(0.0)
     private val derivative = Differentiator(zero / 1.Second)
     private val integral = (gains(currentTime, zero)).run {
