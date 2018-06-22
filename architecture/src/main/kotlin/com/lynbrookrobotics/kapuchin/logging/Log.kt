@@ -1,6 +1,9 @@
 package com.lynbrookrobotics.kapuchin.logging
 
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
+
+expect fun Named.log(level: Level, throwable: Throwable, message: suspend () -> String): Job
 
 fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = emptyArray(), message: suspend () -> String) = launch {
     printAtLevel(level, messageToString(this@log, stackTrace, message))
