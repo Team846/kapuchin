@@ -6,6 +6,8 @@ import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
+import com.lynbrookrobotics.kapuchin.hardware.configMaster
+import com.lynbrookrobotics.kapuchin.hardware.configSlave
 import com.lynbrookrobotics.kapuchin.hardware.dsl.hardw
 import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
@@ -19,16 +21,16 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val wheelDiameter by pref(6::Inch)
 
     val encoderToWheelGears by pref {
-        val driver by pref(18)
-        val driven by pref(74)
-        ({ GearTrain(driver, driven) })
+        val encoderGear by pref(18)
+        val wheelGear by pref(74)
+        ({ GearTrain(encoderGear, wheelGear) })
     }
 
     val offloadedSettings by pref {
         val nativeOutputUnits by pref(1023::Tick)
         val perOutputQuantity by pref(12::Volt)
         val nativeFeedbackUnits by pref(4096::Tick)
-        val perFeedbackQuantity by pref(360::Degree)
+        val perFeedbackQuantity by pref(1::Turn)
         ({
             OffloadedNativeConversion(
                     nativeOutputUnits = nativeOutputUnits, perOutputQuantity = perOutputQuantity, nativeFeedbackUnits = nativeFeedbackUnits,
@@ -46,8 +48,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         VelocityOutput(
-                offloadedSettings.native(velocityGains),
-                offloadedSettings.native(0.FootPerSecond)
+                offloadedSettings.native(velocityGains), offloadedSettings.native(0.FootPerSecond)
         ).let { TwoSided(it, it) }
     }
 
@@ -70,11 +71,27 @@ class DrivetrainHardware : Hardware<DrivetrainHardware, DrivetrainComponent>() {
 
     val escCanTimeout by pref(0.001::Second)
 
-    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }
-    val leftLazyOutput = lazyOutput(leftMasterEsc, escCanTimeout)
-    val leftSlaveEsc by hardw { TalonSRX(leftSlaveEscId) }.configure { it.follow(leftMasterEsc) }
 
-    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }
+    val voltageCompensation by pref(11::Volt)
+    val currentLimit by pref(20::Ampere)
+
+
+    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
+        configMaster(it, voltageCompensation, currentLimit)
+    }
+    val leftSlaveEsc by hardw { TalonSRX(leftSlaveEscId) }.configure {
+        configSlave(it, voltageCompensation, currentLimit)
+        it.follow(leftMasterEsc)
+    }
+    val leftLazyOutput = lazyOutput(leftMasterEsc, escCanTimeout)
+
+
+    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
+        configMaster(it, voltageCompensation, currentLimit)
+    }
+    val rightSlaveEsc by hardw { TalonSRX(rightSlaveEscId) }.configure {
+        configSlave(it, voltageCompensation, currentLimit)
+        it.follow(rightMasterEsc)
+    }
     val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
-    val rightSlaveEsc by hardw { TalonSRX(rightSlaveEscId) }.configure { it.follow(rightMasterEsc) }
 }

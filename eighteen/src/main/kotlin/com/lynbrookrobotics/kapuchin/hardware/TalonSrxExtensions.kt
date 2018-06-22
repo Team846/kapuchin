@@ -13,8 +13,8 @@ import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedOutputWriter
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
-import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.log
 import info.kunalsheth.units.generated.*
 
 fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOffloadedOutputWriter {
@@ -58,13 +58,11 @@ fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLim
     }
 }
 
-fun configMasterToSlave(master: TalonSRX, slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, multiIdx: Boolean = false) {
+fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, multiIdx: Boolean = false) {
     generalSetup(master, voltageCompensation, currentLimit)
-    generalSetup(slave, voltageCompensation, currentLimit)
     val t = 0
     val slow = 1000
 
-    StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slow, t) }
     StatusFrameEnhanced.values().forEach { master.setStatusFramePeriod(it, slow, t) }
 
     mapOf(
@@ -79,6 +77,11 @@ fun configMasterToSlave(master: TalonSRX, slave: BaseMotorController, voltageCom
 
     master.configVelocityMeasurementPeriod(Period_5Ms, t)
     master.configVelocityMeasurementWindow(4, t)
+}
 
-    slave.follow(master)
+fun configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, multiIdx: Boolean = false) {
+    generalSetup(slave, voltageCompensation, currentLimit)
+    val t = 0
+    val slow = 1000
+    StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slow, t) }
 }
