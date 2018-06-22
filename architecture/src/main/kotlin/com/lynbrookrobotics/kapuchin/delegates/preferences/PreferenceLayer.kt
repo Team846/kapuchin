@@ -9,7 +9,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
 
-fun <Value> Named.pref(nameSuffix: String = "", get: Named.() -> (() -> Value)) = PreferenceLayer(this, nameSuffix, get)
+fun <Value> Named.pref(nameSuffix: String = "", get: Named.() -> (() -> Value)) = PreferenceLayer(this, get, nameSuffix)
 
 fun <C, E> Named.pref(fallbackCompensation: KProperty0<C>, fallbackForError: KProperty0<E>)
         where C : Quan<C>,
@@ -22,8 +22,8 @@ fun <C, E> Named.pref(fallbackCompensation: KProperty0<C>, fallbackForError: KPr
 
 class PreferenceLayer<Value>(
         private val parent: Named,
-        private val nameSuffix: String = "",
-        private val construct: Named.() -> (() -> Value)
+        private val construct: Named.() -> () -> Value,
+        private val nameSuffix: String = ""
 ) : WithEventLoop, DelegateProvider<Any?, Value> {
 
     private lateinit var get: () -> Value
