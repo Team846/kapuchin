@@ -1,15 +1,15 @@
 package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.Level
-import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.log
 import edu.wpi.first.wpilibj.hal.NotifierJNI
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.micro
 
-actual class Ticker internal actual constructor(parent: Named, name: String, priority: Priority, val period: Time) : Named(parent, name) {
+actual class Ticker internal actual constructor(parent: Named, priority: Priority, val period: Time, name: String) : Named(parent, name) {
     private val notifierHandle = NotifierJNI.initializeNotifier()
     private val startTime = currentTime
 
