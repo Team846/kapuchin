@@ -9,3 +9,5 @@ actual suspend fun printAtLevel(level: Level, formattedMessage: String) = when (
 }
 
 actual typealias StackTraceElement = java.lang.StackTraceElement
+
+actual fun nameLayer(parent: Named?, child: String) = "${parent?.name ?: ""}/$child"
