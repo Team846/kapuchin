@@ -21,6 +21,7 @@ generateUnitsOfMeasure {
 
     unitsOfMeasure += [
             u("Inch", 0.0254, d(L: 1)),
+            u("FootSecond", 0.3048, d(L: 1, T: 1)),
             u("Foot", 0.3048, d(L: 1)),
             u("FootPerSecond", 0.3048, d(L: 1, T: -1)),
             u("FootPerSecondSquared", 0.3048, d(L: 1, T: -2)),

@@ -7,9 +7,10 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 class PreferenceLayer<Value>(
+        private val thisRef: Named,
         private val nameSuffix: String = "",
         private val construct: Named.() -> (() -> Value)
-) : WithEventLoop, DelegateProvider<Named, Value> {
+) : WithEventLoop, DelegateProvider<Any?, Value> {
 
     private lateinit var get: () -> Value
     private var value: Value? = null
@@ -20,13 +21,13 @@ class PreferenceLayer<Value>(
         }
     }
 
-    override fun provideDelegate(thisRef: Named, prop: KProperty<*>): ReadOnlyProperty<Named, Value> {
+    override fun provideDelegate(x: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         get = object : Named {
             override val name = namePreference(thisRef, prop) + nameSuffix
         }.run(construct)
 
-        return object : ReadOnlyProperty<Named, Value> {
-            override fun getValue(thisRef: Named, property: KProperty<*>) = value!!
+        return object : ReadOnlyProperty<Any?, Value> {
+            override fun getValue(x: Any?, property: KProperty<*>) = value!!
         }
     }
 }
