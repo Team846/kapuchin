@@ -8,9 +8,9 @@ expect fun <Q : Quan<Q>> Named.pref(fallback: KProperty0<Q>): UomPreference<Q>
 
 class UomPreference<Value>(
         conversion: (Double) -> Value, uomName: String,
-        thisRef: Named, fallback: Double, get: (String, Double) -> Double
+        parent: Named, fallback: Double, get: (String, Double) -> Double
 ) : Preference<Value>(
-        thisRef = thisRef,
+        parent = parent,
         fallback = conversion(fallback),
         get = { name, _ -> conversion(get(name, fallback)) },
         nameSuffix = " ($uomName)"

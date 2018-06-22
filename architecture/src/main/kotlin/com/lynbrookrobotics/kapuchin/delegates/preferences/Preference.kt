@@ -14,7 +14,7 @@ expect fun Named.pref(fallback: Int): Preference<Int>
 expect fun Named.pref(fallback: Long): Preference<Long>
 
 open class Preference<Value>(
-        private val thisRef: Named,
+        private val parent: Named,
         private val fallback: Value,
         private val get: (String, Value) -> Value,
         private val nameSuffix: String = ""
@@ -29,11 +29,11 @@ open class Preference<Value>(
         }
     }
 
-    override fun provideDelegate(x: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        name = nameLayer(thisRef, prop.name) + nameSuffix
+    override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
+        name = nameLayer(parent, prop.name) + nameSuffix
 
         return object : ReadOnlyProperty<Any?, Value> {
-            override fun getValue(x: Any?, property: KProperty<*>) = value ?: get(name, fallback)
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(name, fallback)
         }
     }
 }

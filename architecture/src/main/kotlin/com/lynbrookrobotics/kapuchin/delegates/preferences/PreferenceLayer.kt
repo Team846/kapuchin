@@ -21,7 +21,7 @@ fun <C, E> Named.pref(fallbackCompensation: KProperty0<C>, fallbackForError: KPr
         }
 
 class PreferenceLayer<Value>(
-        private val thisRef: Named,
+        private val parent: Named,
         private val nameSuffix: String = "",
         private val construct: Named.() -> (() -> Value)
 ) : WithEventLoop, DelegateProvider<Any?, Value> {
@@ -35,11 +35,11 @@ class PreferenceLayer<Value>(
         }
     }
 
-    override fun provideDelegate(x: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        get = object : Named(thisRef, prop.name + nameSuffix) {}.run(construct)
+    override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
+        get = object : Named(parent, prop.name + nameSuffix) {}.run(construct)
 
         return object : ReadOnlyProperty<Any?, Value> {
-            override fun getValue(x: Any?, property: KProperty<*>) = value!!
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!
         }
     }
 }
