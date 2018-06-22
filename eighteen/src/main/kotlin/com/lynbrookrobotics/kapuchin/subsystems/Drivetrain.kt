@@ -3,9 +3,9 @@ package com.lynbrookrobotics.kapuchin.subsystems
 import com.lynbrookrobotics.kapuchin.control.TwoSided
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.TalonNativeConversion
-import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VoltageOutput
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.*
@@ -27,8 +27,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val perEncoderAngle by pref(360::Degree)
         ({
             TalonNativeConversion(
-                    nativeUnits = nativeUnits,
-                    perQuantity = wheelCircumference * encoderToWheelGears.inputToOutput(perEncoderAngle).Turn
+                    nativeFeedbackUnits = nativeUnits,
+                    perFeedbackQuantity = wheelCircumference * encoderToWheelGears.inputToOutput(perEncoderAngle).Turn
             )
         })
     }
@@ -37,11 +37,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val kP by pref(12::Volt, 3::Foot)
         val kI by pref(0::Volt, 1::FootSecond)
         val kD by pref(12::Volt, 13::FootPerSecond)
-        ({ PidGains(kP, kI, kD) })
-    }
-
-    val nativePositionGains() {
-
+        ({ OffloadedPidGains(kP, kI, kD) })
     }
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> =

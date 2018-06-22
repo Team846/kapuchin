@@ -5,10 +5,10 @@ import info.kunalsheth.units.generated.Volt
 
 sealed class OffloadedOutput
 
-data class VelocityOutput(override val config: OffloadedPidConfig, override val output: Double)
+data class VelocityOutput(override val gains: OffloadedPidGains, override val output: Double)
     : OffloadedOutput(), OffloadedPidControlLoop
 
-data class PositionOutput(override val config: OffloadedPidConfig, override val output: Double)
+data class PositionOutput(override val gains: OffloadedPidGains, override val output: Double)
     : OffloadedOutput(), OffloadedPidControlLoop
 
 data class VoltageOutput(val output: Volt) : OffloadedOutput()

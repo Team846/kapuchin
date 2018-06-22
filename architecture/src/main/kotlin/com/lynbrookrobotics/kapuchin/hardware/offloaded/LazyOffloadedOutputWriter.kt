@@ -14,16 +14,16 @@ class LazyOffloadedOutputWriter(
         private val writeCurrent: (Ampere) -> Unit
 ) : (OffloadedOutput) -> Unit {
 
-    private var current: OffloadedPidConfig? = null
+    private var current: OffloadedPidGains? = null
 
     override fun invoke(output: OffloadedOutput) {
         if (output is OffloadedPidControlLoop) {
-            val (newKp, newKi, newKd, newKf) = output.config
+            val (newKp, newKi, newKd, newKf) = output.gains
             if (newKp != current?.kP) writeKp(newKp)
             if (newKi != current?.kI) writeKi(newKi)
             if (newKd != current?.kD) writeKd(newKd)
             if (newKf != current?.kF) writeKf(newKf)
-            current = output.config
+            current = output.gains
         }
 
         when (output) {
