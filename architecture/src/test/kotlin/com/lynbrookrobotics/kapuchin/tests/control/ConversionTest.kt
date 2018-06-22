@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
-import com.lynbrookrobotics.kapuchin.control.conversion.TalonNativeConversion
+import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.WheelConversion
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
@@ -54,7 +54,7 @@ class ConversionTest {
 
     @Test
     fun `talon real and native methods should be inverses`() {
-        anyInt.filter { it != 0 }.map { resolution -> TalonNativeConversion(resolution.Tick, 8.46.Metre) }
+        anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(resolution.Tick, 8.46.Metre) }
                 .forEach { conversion ->
                     anyDouble.map { it.Foot }.forEach { x ->
                         x `is equal to?` conversion.realPosition(conversion.native(x))

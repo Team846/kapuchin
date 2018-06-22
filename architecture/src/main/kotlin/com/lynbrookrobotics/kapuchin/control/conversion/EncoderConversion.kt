@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin.control.conversion
 
 import info.kunalsheth.units.generated.*
 
-class EncoderConversion(val ticks: Tick, val perRevolution: Angle) {
+class EncoderConversion(ticks: Tick, perRevolution: Angle) {
     private val ticksPerRevolution = ticks / perRevolution
 
     fun ticks(x: AngularAbsement) = ticks(x / t) * t
@@ -16,7 +16,7 @@ class EncoderConversion(val ticks: Tick, val perRevolution: Angle) {
     fun angle(x: `T⁻²`) = angle(x * t) / t
 
     companion object {
-        protected val t = 1.Second
-        protected val fullTurn: Angle = 360.Degree
+        private val t = 1.Second
+        private val fullTurn: Angle = 360.Degree
     }
 }

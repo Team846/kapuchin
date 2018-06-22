@@ -2,7 +2,8 @@ package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.TwoSided
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
-import com.lynbrookrobotics.kapuchin.control.conversion.TalonNativeConversion
+import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
+import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains
@@ -22,13 +23,17 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         ({ GearTrain(driver, driven) })
     }
 
-    val encoderSettings by pref {
-        val nativeUnits by pref(4096::Tick)
-        val perEncoderAngle by pref(360::Degree)
+    val offloadedSettings by pref {
+        val nativeOutputUnits by pref(1023::Tick)
+        val perOutputQuantity by pref(12::Volt)
+        val nativeFeedbackUnits by pref(4096::Tick)
+        val perFeedbackQuantity by pref(360::Degree)
         ({
-            TalonNativeConversion(
-                    nativeFeedbackUnits = nativeUnits,
-                    perFeedbackQuantity = wheelCircumference * encoderToWheelGears.inputToOutput(perEncoderAngle).Turn
+            OffloadedNativeConversion(
+                    nativeOutputUnits = nativeOutputUnits,
+                    perOutputQuantity = perOutputQuantity,
+                    nativeFeedbackUnits = nativeFeedbackUnits,
+                    perFeedbackQuantity = wheelCircumference * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
             )
         })
     }
@@ -37,8 +42,12 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val kP by pref(12::Volt, 3::Foot)
         val kI by pref(0::Volt, 1::FootSecond)
         val kD by pref(12::Volt, 13::FootPerSecond)
-        ({ OffloadedPidGains(kP, kI, kD) })
+        ({ PidGains(kP, kI, kD) })
     }
+
+    val offloadedPositionGains get() = OffloadedPidGains(
+            kP =
+    )
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> =
             { TwoSided(VoltageOutput(12.Volt), VoltageOutput((12.Volt))) }
