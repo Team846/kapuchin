@@ -9,9 +9,6 @@ import kotlin.reflect.full.extensionReceiverParameter
 
 private val impl = Preferences.getInstance()
 
-actual fun namePreference(thisRef: Named, prop: KProperty<*>) =
-        "${thisRef.name}/${prop.name}"
-
 actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::getBoolean)
 actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::getDouble)
 actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::getFloat)

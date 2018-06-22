@@ -1,20 +1,19 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import com.lynbrookrobotics.kapuchin.logging.Level.Warning
+import com.lynbrookrobotics.kapuchin.logging.Level
 import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.*
+import com.lynbrookrobotics.kapuchin.subsystems.Named
 import edu.wpi.first.wpilibj.hal.NotifierJNI
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.micro
 
-actual class Ticker actual constructor(name: String, priority: Priority, private val period: Time) {
-
+actual class Ticker internal actual constructor(parent: Named, name: String, priority: Priority, val period: Time) : Named(parent, name) {
     private val notifierHandle = NotifierJNI.initializeNotifier()
     private val startTime = currentTime
 
-    private val thread = PlatformThread("$name Thread", priority) {
+    private val thread = PlatformThread(parent, name, priority) {
         while (true) {
             val tickStart = waitOnTick()
             runOnTick.forEach { it(tickStart) }
@@ -23,9 +22,9 @@ actual class Ticker actual constructor(name: String, priority: Priority, private
 
     private var runOnTick: Set<(tickStart: Time) -> Unit> = emptySet()
     actual fun runOnTick(order: ExecutionOrder, run: (tickStart: Time) -> Unit) {
-        runOnTick = when(order) {
-            First -> setOf(run) + runOnTick
-            Last -> runOnTick + run
+        runOnTick = when (order) {
+            ExecutionOrder.First -> setOf(run) + runOnTick
+            ExecutionOrder.Last -> runOnTick + run
         }
     }
 
@@ -39,7 +38,7 @@ actual class Ticker actual constructor(name: String, priority: Priority, private
         val periodIndex = ((currentTime - startTime) / period)
                 .siValue.toLong() + 1
 
-        if (periodIndex > lastPeriodIndex + 1) log(Warning) {
+        if (periodIndex > lastPeriodIndex + 1) log(Level.Warning) {
             "$thread overran its loop by ${currentTime - startTime} out of $period"
         }
 

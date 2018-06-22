@@ -18,7 +18,7 @@ class AsyncSensor<C, H, T>(hardware: H, read: H.(Time) -> TimeStamped<T>) : Sens
     private val priority: Priority = hardware.priority
 
     override fun provideDelegate(thisRef: Comp, prop: KProperty<*>): ReadOnlyProperty<Comp, TimeStamped<T>> {
-        PlatformThread("${thisRef.name} ${prop.name} Thread", priority) {
+        PlatformThread(thisRef, prop.name, priority) {
             while (true) {
                 val tickStart = thisRef.ticker.waitOnTick()
                 value = optimizedRead(tickStart)

@@ -20,9 +20,10 @@ actual class PlatformThread actual constructor(parent: Named, name: String, prio
         }
 
 
+        val formattedName = "${parent.name} $name Thread"
         thread = parent.run {
-            thread(name = name, priority = jvmPriority) {
-                log(Level.Debug) { "Starting $name Thread" }
+            thread(name = formattedName, priority = jvmPriority) {
+                log(Level.Debug) { "Starting $formattedName Thread" }
                 Threads.setCurrentThreadPriority(priority == RealTime, roboRioPriority)
                 run()
             }.apply {
