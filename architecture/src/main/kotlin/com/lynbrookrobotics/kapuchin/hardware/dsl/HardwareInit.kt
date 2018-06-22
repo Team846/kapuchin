@@ -7,7 +7,7 @@ import com.lynbrookrobotics.kapuchin.logging.log
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-fun Named.hardw(initialize: Named.() -> Unit, nameSuffix: String = "") = HardwareInit(this, initialize, nameSuffix = nameSuffix)
+fun <Value> Named.hardw(nameSuffix: String = "", initialize: Named.() -> Value) = HardwareInit(this, initialize, nameSuffix = nameSuffix)
 
 class HardwareInit<Value>(
         private val parent: Named,
@@ -17,7 +17,6 @@ class HardwareInit<Value>(
         private val nameSuffix: String = ""
 ) : DelegateProvider<Any?, Value> {
 
-    private lateinit var get: () -> Value
     private var value: Value? = null
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {

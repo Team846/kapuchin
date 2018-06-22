@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
 import com.lynbrookrobotics.kapuchin.delegates.sensors.withComponentSensor
+import com.lynbrookrobotics.kapuchin.hardware.dsl.hardw
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.Spark
@@ -46,12 +47,12 @@ class ShooterHardware : Hardware<ShooterHardware, ShooterComponent>() {
 
     val frontHallEffectPort by pref(0)
     val backHallEffectPort by pref(1)
-    val frontHallEffect = Counter(frontHallEffectPort)
-    val backHallEffect = Counter(backHallEffectPort)
+    val frontHallEffect by hardw { Counter(frontHallEffectPort) }
+    val backHallEffect by hardw { Counter(backHallEffectPort) }
 
     val frontEscPort by pref(0)
     val backEscPort by pref(1)
-    val frontEsc = Spark(frontEscPort)
-    val backEsc = Spark(backEscPort)
+    val frontEsc by hardw { Spark(frontEscPort) }
+    val backEsc by hardw { Spark(backEscPort) }
 }
 

@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.math.NumVector
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
 import com.lynbrookrobotics.kapuchin.delegates.sensors.withEventLoopSensor
+import com.lynbrookrobotics.kapuchin.hardware.dsl.hardw
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
 import info.kunalsheth.units.generated.Second
@@ -35,11 +36,11 @@ class DriverHardware : Hardware<DriverHardware, DriverComponent>() {
     override val syncThreshold = 3.milli(::Second)
 
     val operatorPort by pref(1)
-    val operatorStick = Joystick(operatorPort)
+    val operatorStick by hardw { Joystick(operatorPort) }
 
     val driverPort by pref(0)
-    val driverStick = Joystick(driverPort)
+    val driverStick by hardw { Joystick(driverPort) }
 
     val wheelPort by pref(2)
-    val driverWheel = Joystick(wheelPort)
+    val driverWheel by hardw { Joystick(wheelPort) }
 }

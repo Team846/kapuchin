@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
+import com.lynbrookrobotics.kapuchin.hardware.dsl.hardw
 import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
@@ -69,11 +70,11 @@ class DrivetrainHardware : Hardware<DrivetrainHardware, DrivetrainComponent>() {
 
     val escCanTimeout by pref(0.001::Second)
 
-    val leftMasterEsc = TalonSRX(leftMasterEscId)
+    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }
     val leftLazyOutput = lazyOutput(leftMasterEsc, escCanTimeout)
-    val leftSlaveEsc = TalonSRX(leftSlaveEscId)
+    val leftSlaveEsc by hardw { TalonSRX(leftSlaveEscId) }.configure { it.follow(leftMasterEsc) }
 
-    val rightMasterEsc = TalonSRX(rightMasterEscId)
+    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }
     val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
-    val rightSlaveEsc = TalonSRX(rightSlaveEscId)
+    val rightSlaveEsc by hardw { TalonSRX(rightSlaveEscId) }.configure { it.follow(rightMasterEsc) }
 }
