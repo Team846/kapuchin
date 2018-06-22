@@ -16,7 +16,7 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Config>(
               Integ : Quantity<Integ, *, Input>,
               Deriv : Quantity<Deriv, Input, *>,
               Output : Quantity<Output, *, *>,
-              Config : PidConfig<Input, Integ, Deriv, Output> {
+              Config : PidGains<Input, Integ, Deriv, Output> {
 
     private val zero = target(0.Second).new(0.0)
     private val derivative = Differentiator(zero / 1.Second)

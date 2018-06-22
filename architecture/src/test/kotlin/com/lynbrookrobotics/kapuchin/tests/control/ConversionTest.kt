@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
-import com.lynbrookrobotics.kapuchin.control.conversion.SimpleGearTrain
+import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.TalonNativeConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.WheelConversion
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
@@ -70,7 +70,7 @@ class ConversionTest {
         anyInt.filter { it > 0 }.forEach { input ->
             anyInt.filter { it > 0 }.forEach { idlers ->
                 anyInt.filter { it > 0 }
-                        .map { output -> SimpleGearTrain(input, idlers, output) }
+                        .map { output -> GearTrain(input, idlers, output) }
                         .forEach { gearTrain ->
                             anyDouble.map { it.Degree }.forEach { x ->
                                 x `is equal to?` gearTrain.outputToInput(gearTrain.inputToOutput(x))

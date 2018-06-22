@@ -1,11 +1,8 @@
 package com.lynbrookrobotics.kapuchin.control.conversion
 
-import info.kunalsheth.units.generated.Angle
-import info.kunalsheth.units.generated.AngularAcceleration
-import info.kunalsheth.units.generated.AngularVelocity
-import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.*
 
-data class SimpleGearTrain(val inputTeeth: Int, val idlers: Int = 0, val outputTeeth: Int) {
+data class GearTrain(val inputTeeth: Int, val outputTeeth: Int, val idlers: Int = 0) {
     private val flip = if (idlers % 2 == 0) 1 else -1
 
     private val inOverOut = inputTeeth.toDouble() / outputTeeth
