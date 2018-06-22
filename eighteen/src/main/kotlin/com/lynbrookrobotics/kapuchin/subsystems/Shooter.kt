@@ -3,7 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.delegates.preferences.preference
+import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
 import com.lynbrookrobotics.kapuchin.delegates.sensors.withComponentSensor
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Counter
@@ -19,13 +19,13 @@ class ShooterComponent(hardware: ShooterHardware, es: ElectricalSystemComponent)
         180.Degree / backHallEffect.period.Second stampWith it
     }
 
-    val kP: Gain<Volt, AngularVelocity> by preference {
-        val compensation by preference(12::Volt)
-        val forError by preference(3000::Rpm)
+    val kP: Gain<Volt, AngularVelocity> by pref {
+        val compensation by pref(12::Volt)
+        val forError by pref(3000::Rpm)
         fun() = Gain(compensation, forError)
     }
 
-    val topSpeed by preference(6500.0::Rpm)
+    val topSpeed by pref(6500.0::Rpm)
     val kF = Gain(12.Volt, topSpeed)
 
     val battery by es.batterySensor
@@ -44,13 +44,13 @@ class ShooterHardware : Hardware<ShooterHardware, ShooterComponent>() {
     override val period = 10.milli(::Second)
     override val syncThreshold = 0.5.milli(::Second)
 
-    val frontHallEffectPort by preference(0)
-    val backHallEffectPort by preference(1)
+    val frontHallEffectPort by pref(0)
+    val backHallEffectPort by pref(1)
     val frontHallEffect = Counter(frontHallEffectPort)
     val backHallEffect = Counter(backHallEffectPort)
 
-    val frontEscPort by preference(0)
-    val backEscPort by preference(1)
+    val frontEscPort by pref(0)
+    val backEscPort by pref(1)
     val frontEsc = Spark(frontEscPort)
     val backEsc = Spark(backEscPort)
 }
