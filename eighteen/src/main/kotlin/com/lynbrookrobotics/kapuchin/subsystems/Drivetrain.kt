@@ -1,12 +1,14 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.control.TwoSided
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedOutputWriter
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.VoltageOutput
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.*
 import kotlin.math.PI
@@ -35,17 +37,21 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         })
     }
 
-    val positionGains by pref {
-        val kP by pref(12::Volt, 3::Foot)
-        val kI by pref(0::Volt, 1::FootSecond)
-        val kD by pref(12::Volt, 13::FootPerSecond)
+    val velocityGains by pref {
+        val kP by pref(12::Volt, 3::FootPerSecond)
+        val kI by pref(4::Volt, 1::Foot)
+        val kD by pref(0::Volt, 1::FootPerSecondSquared)
         ({ PidGains(kP, kI, kD) })
     }
 
-    val offloadedPositionGains get() = offloadedSettings.native(positionGains)
+    val offloadedPositionGains get() = offloadedSettings.native(velocityGains)
 
-    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> =
-            { TwoSided(VoltageOutput(12.Volt), VoltageOutput((12.Volt))) }
+    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
+        VelocityOutput(
+                offloadedPositionGains,
+                offloadedSettings.native(0.FootPerSecond)
+        ).let { TwoSided(it, it) }
+    }
 
     override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
 
@@ -57,4 +63,14 @@ class DrivetrainHardware : Hardware<DrivetrainHardware, DrivetrainComponent>() {
     override val period = 15.milli(::Second)
     override val syncThreshold = 1.milli(::Second)
     override val name = "Drivetrain"
+
+    val leftSlaveEscId by pref(14)
+    val rightSlaveEscId by pref(13)
+    val rightMasterEscId by pref(11)
+    val leftMasterEscId by pref(12)
+
+    val leftSlaveEsc = TalonSRX(leftSlaveEscId)
+    val leftSlaveLazyOutput = LazyOffloadedOutputWriter(
+
+    )
 }

@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
 import info.kunalsheth.units.generated.Ampere
-import info.kunalsheth.units.generated.Volt
+import info.kunalsheth.units.generated.Dimensionless
 
 class LazyOffloadedOutputWriter(
         private val writeKp: (Double) -> Unit,
@@ -10,7 +10,7 @@ class LazyOffloadedOutputWriter(
         private val writeKf: (Double) -> Unit,
         private val writeVelocity: (Double) -> Unit,
         private val writePosition: (Double) -> Unit,
-        private val writeVoltage: (Volt) -> Unit,
+        private val writePercent: (Dimensionless) -> Unit,
         private val writeCurrent: (Ampere) -> Unit
 ) : (OffloadedOutput) -> Unit {
 
@@ -29,7 +29,7 @@ class LazyOffloadedOutputWriter(
         when (output) {
             is VelocityOutput -> writeVelocity(output.output)
             is PositionOutput -> writePosition(output.output)
-            is VoltageOutput -> writeVoltage(output.output)
+            is PercentOutput -> writePercent(output.output)
             is CurrentOutput -> writeCurrent(output.output)
         }
     }
