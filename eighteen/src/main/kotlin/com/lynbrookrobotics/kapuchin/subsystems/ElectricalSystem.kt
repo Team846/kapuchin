@@ -16,7 +16,7 @@ class ElectricalSystemComponent(hardware: ElectricalSystemHardware) : Component<
     override fun ElectricalSystemHardware.output(value: Unit) {}
 }
 
-class ElectricalSystemHardware : Hardware<ElectricalSystemHardware, ElectricalSystemComponent>() {
+class ElectricalSystemHardware : SubsystemHardware<ElectricalSystemHardware, ElectricalSystemComponent>() {
     override val subsystemName = "Electrical System"
     override val priority = Priority.Lowest
     override val period = 3.Minute

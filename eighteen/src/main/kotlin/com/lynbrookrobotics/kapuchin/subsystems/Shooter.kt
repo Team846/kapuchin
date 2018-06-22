@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
-import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.delegates.preferences.pref
 import com.lynbrookrobotics.kapuchin.delegates.sensors.withComponentSensor
 import com.lynbrookrobotics.kapuchin.hardware.dsl.hardw
@@ -39,7 +38,7 @@ class ShooterComponent(hardware: ShooterHardware, es: ElectricalSystemComponent)
     }
 }
 
-class ShooterHardware : Hardware<ShooterHardware, ShooterComponent>() {
+class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
     override val subsystemName = "Shooter"
     override val priority = Priority.RealTime
     override val period = 10.milli(::Second)

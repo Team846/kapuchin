@@ -29,7 +29,7 @@ class DriverComponent(hardware: DriverHardware) : Component<DriverComponent, Dri
     override fun DriverHardware.output(value: Unit) {}
 }
 
-class DriverHardware : Hardware<DriverHardware, DriverComponent>() {
+class DriverHardware : SubsystemHardware<DriverHardware, DriverComponent>() {
     override val subsystemName = "Driver"
     override val priority = Priority.RealTime
     override val period = 20.milli(::Second)
