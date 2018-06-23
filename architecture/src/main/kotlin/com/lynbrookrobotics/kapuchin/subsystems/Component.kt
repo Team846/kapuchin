@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.Time
 
 abstract class Component<This, H, Output>(val hardware: H) : Named(null, hardware.name)
         where This : Component<This, H, Output>,
-              H : Hardware<H, This> {
+              H : SubsystemHardware<H, This> {
 
     val ticker by lazy { Ticker(hardware.priority, hardware.period) }
 

@@ -58,7 +58,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     }
 }
 
-class DrivetrainHardware : Hardware<DrivetrainHardware, DrivetrainComponent>() {
+class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
     override val period = 15.milli(::Second)
     override val syncThreshold = 1.milli(::Second)

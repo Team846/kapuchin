@@ -12,7 +12,7 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
 
         val electrical = ::ElectricalSystemComponent dependsOn ::ElectricalSystemHardware
-        val shooter = ::ShooterComponent dependsOn (::ShooterHardware to electrical)
+//        val shooter = ::ShooterComponent dependsOn (::ShooterHardware to electrical)
 
         HAL.observeUserProgramStarting()
 
