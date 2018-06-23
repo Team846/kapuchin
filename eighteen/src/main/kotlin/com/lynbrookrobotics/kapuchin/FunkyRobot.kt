@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.delegates.WithEventLoop
+import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
