@@ -1,10 +1,10 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
+import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.Quan
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
-import com.lynbrookrobotics.kapuchin.DelegateProvider
-import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
