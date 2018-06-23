@@ -1,11 +1,11 @@
-package com.lynbrookrobotics.kapuchin.hardware.dsl
+package com.lynbrookrobotics.kapuchin.hardware
 
+import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
-import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
-import com.lynbrookrobotics.kapuchin.delegates.sensors.AsyncSensor
-import com.lynbrookrobotics.kapuchin.delegates.sensors.EagerSensor
-import com.lynbrookrobotics.kapuchin.delegates.sensors.WithComponentSensor
-import com.lynbrookrobotics.kapuchin.delegates.sensors.WithEventLoopSensor
+import com.lynbrookrobotics.kapuchin.hardware.sensors.AsyncSensor
+import com.lynbrookrobotics.kapuchin.hardware.sensors.EagerSensor
+import com.lynbrookrobotics.kapuchin.hardware.sensors.WithComponentSensor
+import com.lynbrookrobotics.kapuchin.hardware.sensors.WithEventLoopSensor
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log

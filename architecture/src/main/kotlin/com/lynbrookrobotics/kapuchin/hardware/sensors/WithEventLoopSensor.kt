@@ -1,7 +1,7 @@
-package com.lynbrookrobotics.kapuchin.delegates.sensors
+package com.lynbrookrobotics.kapuchin.hardware.sensors
 
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
-import com.lynbrookrobotics.kapuchin.delegates.WithEventLoop
+import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Time
 import kotlin.properties.ReadOnlyProperty

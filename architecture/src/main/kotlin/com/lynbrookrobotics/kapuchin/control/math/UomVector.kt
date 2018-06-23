@@ -10,3 +10,4 @@ interface Vector<T> {
 
 data class UomVector<Q : Quan<Q>>(override val x: Q, override val y: Q, override val z: Q) : Vector<Q>
 data class NumVector(override val x: Double, override val y: Double, override val z: Double) : Vector<Double>
+data class TwoSided<Value>(val left: Value, val right: Value)

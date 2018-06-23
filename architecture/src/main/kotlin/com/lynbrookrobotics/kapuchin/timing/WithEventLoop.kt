@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.delegates
+package com.lynbrookrobotics.kapuchin.timing
 
 interface WithEventLoop {
     companion object {

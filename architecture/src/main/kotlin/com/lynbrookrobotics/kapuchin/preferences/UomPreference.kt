@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.delegates.preferences
+package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.Quan
 import com.lynbrookrobotics.kapuchin.logging.Named

@@ -1,7 +1,7 @@
-package com.lynbrookrobotics.kapuchin.delegates.sensors
+package com.lynbrookrobotics.kapuchin.hardware.sensors
 
+import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
-import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 

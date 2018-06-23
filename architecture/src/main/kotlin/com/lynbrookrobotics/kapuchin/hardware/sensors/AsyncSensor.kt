@@ -1,7 +1,7 @@
-package com.lynbrookrobotics.kapuchin.delegates.sensors
+package com.lynbrookrobotics.kapuchin.hardware.sensors
 
-import com.lynbrookrobotics.kapuchin.Comp
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
+import com.lynbrookrobotics.kapuchin.subsystems.Comp
 import com.lynbrookrobotics.kapuchin.timing.PlatformThread
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.currentTime
