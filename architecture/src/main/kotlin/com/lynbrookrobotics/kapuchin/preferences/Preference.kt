@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
-import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
+import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.delegates.WithEventLoop
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.nameLayer

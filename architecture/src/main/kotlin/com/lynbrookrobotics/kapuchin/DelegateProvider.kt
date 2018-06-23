@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.delegates
+package com.lynbrookrobotics.kapuchin
 
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty

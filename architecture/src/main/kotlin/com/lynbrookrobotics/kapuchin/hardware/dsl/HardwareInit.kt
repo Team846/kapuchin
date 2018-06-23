@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware.dsl
 
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
-import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
+import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.hardware.sensors.AsyncSensor
 import com.lynbrookrobotics.kapuchin.hardware.sensors.EagerSensor
 import com.lynbrookrobotics.kapuchin.hardware.sensors.WithComponentSensor
