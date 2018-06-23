@@ -9,7 +9,7 @@ import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
 import com.lynbrookrobotics.kapuchin.hardware.configSlave
-import com.lynbrookrobotics.kapuchin.hardware.dsl.hardw
+import com.lynbrookrobotics.kapuchin.hardware.hardw
 import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput

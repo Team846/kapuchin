@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.hardware.dsl
+package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
 import com.lynbrookrobotics.kapuchin.DelegateProvider

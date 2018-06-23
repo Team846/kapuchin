@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.stampSince
-import com.lynbrookrobotics.kapuchin.hardware.dsl.hardw
+import com.lynbrookrobotics.kapuchin.hardware.hardw
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.*

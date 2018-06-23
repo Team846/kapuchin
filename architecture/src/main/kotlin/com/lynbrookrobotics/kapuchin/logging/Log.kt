@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
+import com.lynbrookrobotics.kapuchin.Quan
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import kotlin.math.pow

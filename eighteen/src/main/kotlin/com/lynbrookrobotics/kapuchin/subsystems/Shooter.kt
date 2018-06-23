@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.hardware.dsl.hardw
+import com.lynbrookrobotics.kapuchin.hardware.hardw
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.Spark
