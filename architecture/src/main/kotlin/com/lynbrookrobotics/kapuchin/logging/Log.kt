@@ -1,13 +1,16 @@
 package com.lynbrookrobotics.kapuchin.logging
 
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 
-fun Any.log(level: Level, stackTrace: Array<StackTraceElement>? = emptyArray(), message: suspend () -> String) = launch {
-    printAtLevel(level, messageToString(this, stackTrace, message))
+expect fun Named.log(level: Level, throwable: Throwable, message: suspend () -> String): Job
+
+fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = emptyArray(), message: suspend () -> String) = launch {
+    printAtLevel(level, messageToString(this@log, stackTrace, message))
 }
 
-private suspend fun messageToString(sender: Any, stackTrace: Array<StackTraceElement>?, message: suspend () -> String): String {
-    val senderHeader = "$sender: "
+private suspend fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?, message: suspend () -> String): String {
+    val senderHeader = "${sender.name}: "
     val indent = " ".repeat(senderHeader.length)
     val newLine = "\n$indent"
     val indentedMessage = message().replace("\n", newLine)

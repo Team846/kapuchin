@@ -2,12 +2,19 @@ package com.lynbrookrobotics.kapuchin.delegates.preferences
 
 import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
 import com.lynbrookrobotics.kapuchin.delegates.WithEventLoop
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.nameLayer
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+expect fun Named.pref(fallback: Boolean): Preference<Boolean>
+expect fun Named.pref(fallback: Double): Preference<Double>
+expect fun Named.pref(fallback: Float): Preference<Float>
+expect fun Named.pref(fallback: Int): Preference<Int>
+expect fun Named.pref(fallback: Long): Preference<Long>
+
 open class Preference<Value>(
-        private val thisRef: Named,
+        private val parent: Named,
         private val fallback: Value,
         private val get: (String, Value) -> Value,
         private val nameSuffix: String = ""
@@ -22,11 +29,11 @@ open class Preference<Value>(
         }
     }
 
-    override fun provideDelegate(x: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        name = namePreference(thisRef, prop) + nameSuffix
+    override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
+        name = nameLayer(parent, prop.name) + nameSuffix
 
         return object : ReadOnlyProperty<Any?, Value> {
-            override fun getValue(x: Any?, property: KProperty<*>) = value ?: get(name, fallback)
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(name, fallback)
         }
     }
 }

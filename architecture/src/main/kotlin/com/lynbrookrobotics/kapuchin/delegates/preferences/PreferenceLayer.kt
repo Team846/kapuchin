@@ -1,15 +1,30 @@
 package com.lynbrookrobotics.kapuchin.delegates.preferences
 
+import com.lynbrookrobotics.kapuchin.Quan
+import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
 import com.lynbrookrobotics.kapuchin.delegates.WithEventLoop
-import com.lynbrookrobotics.kapuchin.subsystems.Named
+import com.lynbrookrobotics.kapuchin.logging.Named
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty0
+
+fun <Value> Named.pref(nameSuffix: String = "", get: Named.() -> (() -> Value)) = PreferenceLayer(this, get, nameSuffix)
+
+fun <C, E> Named.pref(fallbackCompensation: KProperty0<C>, fallbackForError: KProperty0<E>)
+        where C : Quan<C>,
+              E : Quan<E> =
+        pref {
+            val compensation by pref(fallbackCompensation)
+            val forError by pref(fallbackForError)
+            ({ Gain(compensation, forError) })
+        }
 
 class PreferenceLayer<Value>(
-        private val nameSuffix: String = "",
-        private val construct: Named.() -> (() -> Value)
-) : WithEventLoop, DelegateProvider<Named, Value> {
+        private val parent: Named,
+        private val construct: Named.() -> () -> Value,
+        private val nameSuffix: String = ""
+) : WithEventLoop, DelegateProvider<Any?, Value> {
 
     private lateinit var get: () -> Value
     private var value: Value? = null
@@ -20,13 +35,11 @@ class PreferenceLayer<Value>(
         }
     }
 
-    override fun provideDelegate(thisRef: Named, prop: KProperty<*>): ReadOnlyProperty<Named, Value> {
-        get = object : Named {
-            override val name = namePreference(thisRef, prop) + nameSuffix
-        }.run(construct)
+    override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
+        get = object : Named(parent, prop.name + nameSuffix) {}.run(construct)
 
-        return object : ReadOnlyProperty<Named, Value> {
-            override fun getValue(thisRef: Named, property: KProperty<*>) = value!!
+        return object : ReadOnlyProperty<Any?, Value> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!
         }
     }
 }

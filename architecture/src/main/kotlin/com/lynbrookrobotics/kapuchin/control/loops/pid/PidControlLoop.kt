@@ -4,38 +4,42 @@ import com.lynbrookrobotics.kapuchin.control.loops.ControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.Differentiator
 import com.lynbrookrobotics.kapuchin.control.math.integration.FiniteIntegrator
 import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Quantity
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 
-open class PidControlLoop<Input, Integ, Deriv, Output, Config>(
-        private val config: Config,
+open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
+        private val gains: (Time, Input) -> Gains,
         private val target: (Time) -> Input
 ) : ControlLoop<Input, Output>
         where Input : Quantity<Input, Integ, Deriv>,
               Integ : Quantity<Integ, *, Input>,
               Deriv : Quantity<Deriv, Input, *>,
               Output : Quantity<Output, *, *>,
-              Config : PidConfig<Input, Integ, Deriv, Output> {
+              Gains : PidGains<Input, Integ, Deriv, Output> {
 
-    private val zero = target(0.Second).new(0.0)
+    constructor(gains: Gains, target: (Time) -> Input) : this({ _, _ -> gains }, target)
+
+    private val zero = target(currentTime).new(0.0)
     private val derivative = Differentiator(zero / 1.Second)
-    private val integral =
-            if (config.integralFalloff > 0) FiniteIntegrator(config.integralFalloff, zero * 1.Second)
-            else InfiniteIntegrator(zero * 1.Second)
+    private val integral = (gains(currentTime, zero)).run {
+        if (integralFalloff > 0) FiniteIntegrator(integralFalloff, zero * 1.Second)
+        else InfiniteIntegrator(zero * 1.Second)
+    }
 
-    override fun invoke(stamp: Time, current: Input): Output = config.run {
+    override fun invoke(stamp: Time, current: Input): Output = gains(stamp, current).run {
         val target = target(stamp)
         val error = error(target, current)
 
         val deriv = derivative(stamp, error)
         val integ = integral(stamp, error)
 
-        val output = kP(stamp, current) * error +
-                kI(stamp, current) * integ +
-                kD(stamp, current) * deriv
+        val output = kP * error +
+                kI * integ +
+                kD * deriv
 
-        kF(stamp, current)?.times(target)
+        kF?.times(target)
                 ?.let { it + output }
                 ?: output
     }

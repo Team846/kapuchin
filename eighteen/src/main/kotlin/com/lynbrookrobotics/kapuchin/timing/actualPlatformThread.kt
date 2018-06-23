@@ -2,11 +2,12 @@ package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.Level
 import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import edu.wpi.first.wpilibj.Threads
 import kotlin.concurrent.thread
 
-actual class PlatformThread actual constructor(name: String, priority: Priority, run: () -> Unit) {
+actual class PlatformThread actual constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
     private val thread: Thread
 
     init {
@@ -19,15 +20,18 @@ actual class PlatformThread actual constructor(name: String, priority: Priority,
         }
 
 
-        thread = thread(name = name, priority = jvmPriority) {
-            log(Level.Debug) { "Starting $name Thread" }
-            Threads.setCurrentThreadPriority(priority == RealTime, roboRioPriority)
-            run()
-        }
-
-        thread.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
-            log(Level.Error, e.stackTrace) { e.message!! }
-            thread.start()
+        val formattedName = "${parent.name} $name Thread"
+        thread = parent.run {
+            thread(name = formattedName, priority = jvmPriority) {
+                log(Level.Debug) { "Starting $formattedName Thread" }
+                Threads.setCurrentThreadPriority(priority == RealTime, roboRioPriority)
+                run()
+            }.apply {
+                uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
+                    log(Level.Error, e.stackTrace) { e.message!! }
+                    start()
+                }
+            }
         }
     }
 }

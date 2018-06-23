@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.control.loops
 
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
-import com.lynbrookrobotics.kapuchin.control.loops.pid.PidConfig
+import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyInt
@@ -12,7 +12,7 @@ class PidTest {
 
     @Test
     fun `pid kP is proportional`() {
-        val pid = PidControlLoop(PidConfig(
+        val pid = PidControlLoop(PidGains(
                 Gain(6.Volt, 1.Foot),
                 Gain(0.Volt, 1.Foot * 1.Second),
                 Gain(0.Volt, 1.FootPerSecond)
@@ -30,7 +30,7 @@ class PidTest {
 
     @Test
     fun `pid kI is integral`() {
-        val pid = PidControlLoop(PidConfig(
+        val pid = PidControlLoop(PidGains(
                 Gain(0.Volt, 1.Foot),
                 Gain(6.Volt, 1.Foot * 1.Second),
                 Gain(0.Volt, 1.FootPerSecond)
@@ -52,7 +52,7 @@ class PidTest {
 
     @Test
     fun `pid kD is derivative`() {
-        val pid = PidControlLoop(PidConfig(
+        val pid = PidControlLoop(PidGains(
                 Gain(0.Volt, 1.Foot),
                 Gain(0.Volt, 1.Foot * 1.Second),
                 Gain(6.Volt, 1.FootPerSecond)
@@ -78,7 +78,7 @@ class PidTest {
 
     @Test
     fun `pid kF is feedforward`() {
-        val pid = PidControlLoop(PidConfig(
+        val pid = PidControlLoop(PidGains(
                 Gain(1.Volt, 1.FootPerSecond),
                 Gain(0.Volt, 1.Foot),
                 Gain(0.Volt, 1.FootPerSecondSquared),
@@ -98,7 +98,7 @@ class PidTest {
     @Test
     fun `pid integral falloff caps integral error`() {
         anyInt.filter { it > 0 }.forEach { falloff ->
-            val pid = PidControlLoop(PidConfig(
+            val pid = PidControlLoop(PidGains(
                     Gain(6.Volt, 1.Foot),
                     Gain(1.Volt, 1.Foot * 1.Second),
                     Gain(2.Volt, 1.FootPerSecond),

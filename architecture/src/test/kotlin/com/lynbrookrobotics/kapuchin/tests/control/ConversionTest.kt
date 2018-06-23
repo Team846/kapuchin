@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
-import com.lynbrookrobotics.kapuchin.control.conversion.SimpleGearTrain
-import com.lynbrookrobotics.kapuchin.control.conversion.TalonNativeConversion
+import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
+import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.WheelConversion
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
@@ -54,13 +54,13 @@ class ConversionTest {
 
     @Test
     fun `talon real and native methods should be inverses`() {
-        anyInt.filter { it != 0 }.map { resolution -> TalonNativeConversion(resolution.Tick, 8.46.Metre) }
+        anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(1023.Tick, 12.Volt, resolution.Tick, 8.46.Metre) }
                 .forEach { conversion ->
                     anyDouble.map { it.Foot }.forEach { x ->
-                        x `is equal to?` conversion.realPosition(conversion.native(x))
+                        x `is equal to?` conversion.realPosition(conversion.native(x).Tick)
 
                         val dx = x / t
-                        dx `is equal to?` conversion.realVelocity(conversion.native(dx))
+                        dx `is equal to?` conversion.realVelocity(conversion.native(dx).Tick)
                     }
                 }
     }
@@ -70,7 +70,7 @@ class ConversionTest {
         anyInt.filter { it > 0 }.forEach { input ->
             anyInt.filter { it > 0 }.forEach { idlers ->
                 anyInt.filter { it > 0 }
-                        .map { output -> SimpleGearTrain(input, idlers, output) }
+                        .map { output -> GearTrain(input, idlers, output) }
                         .forEach { gearTrain ->
                             anyDouble.map { it.Degree }.forEach { x ->
                                 x `is equal to?` gearTrain.outputToInput(gearTrain.inputToOutput(x))
