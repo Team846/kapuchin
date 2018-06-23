@@ -5,12 +5,9 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
+import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.hardware.configMaster
-import com.lynbrookrobotics.kapuchin.hardware.configSlave
-import com.lynbrookrobotics.kapuchin.hardware.hardw
-import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.*
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
@@ -78,8 +75,17 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     val idx = 0
-    val leftEncoder = readWithComponent {
-
+    val position = readWithComponent {
+        TwoSided(
+                offloadedSettings.realPosition(leftMasterEsc.getSelectedSensorPosition(idx)),
+                offloadedSettings.realPosition(rightMasterEsc.getSelectedSensorPosition(idx))
+        ) stampWith it
+    }
+    val velocity = readWithComponent {
+        TwoSided(
+                offloadedSettings.realVelocity(leftMasterEsc.getSelectedSensorVelocity(idx)),
+                offloadedSettings.realVelocity(rightMasterEsc.getSelectedSensorVelocity(idx))
+        ) stampWith it
     }
 
     val driftTolerance by pref(1::DegreePerSecond)
