@@ -16,6 +16,13 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(null, hardwar
 
     protected abstract fun H.output(value: Output)
 
+    override fun equals(other: Any?) = when (other) {
+        is Component<*, *, *> -> this.name == other.name
+        else -> false
+    }
+
+    override fun hashCode() = name.hashCode()
+
     init {
         ticker.runOnTick(Last) { tickStart ->
             hardware.output(
