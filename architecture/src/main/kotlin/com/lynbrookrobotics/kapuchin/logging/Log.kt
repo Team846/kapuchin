@@ -2,6 +2,8 @@ package com.lynbrookrobotics.kapuchin.logging
 
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
+import kotlin.math.pow
+import kotlin.math.round
 
 expect fun Named.log(level: Level, throwable: Throwable, message: suspend () -> String): Job
 
@@ -19,3 +21,10 @@ private suspend fun messageToString(sender: Named, stackTrace: Array<StackTraceE
 }
 
 expect suspend fun printAtLevel(level: Level, formattedMessage: String)
+
+infix fun Number.withDecimals(decimalPlaces: Int) = toDouble().let {
+    val shifter = 10.0.pow(decimalPlaces)
+    round(it * shifter) / shifter
+}
+
+infix fun <Q : Quan<Q>> Q.withDecimals(decimalPlaces: Int) = new(siValue withDecimals decimalPlaces)
