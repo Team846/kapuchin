@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
 import com.lynbrookrobotics.kapuchin.hardware.configSlave
 import com.lynbrookrobotics.kapuchin.hardware.hardw
@@ -48,9 +49,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
 
-    val driftTolerance by pref(0.1::DegreePerSecond)
-    val imu by hardw { ADIS16448_IMU() }.verify {
-        setOf(it.rateX, it.rateY, it.rateZ).map { it.DegreePerSecond }
-                .all { it in -driftTolerance..+driftTolerance }
-    }.readEagerly { }
+    val driftTolerance by pref(1::DegreePerSecond)
+    val gyro by hardw { ADIS16448_IMU() }.verify("Gyro should not drift after calibration") {
+        it.rate.DegreePerSecond in -driftTolerance..+driftTolerance
+    }.readEagerly {
+        GyroInput(angle.Degree, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith lastSampleTime.Second
+    }
 }

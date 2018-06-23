@@ -48,9 +48,9 @@ class HardwareInit<Hardw>(
             parent, initialize, { configure(it); f(it) }, validate, nameSuffix
     )
 
-    fun verify(message: String, f: Named.(Hardw) -> Boolean) = HardwareInit(
+    fun verify(that: String, f: Named.(Hardw) -> Boolean) = HardwareInit(
             parent, initialize, configure,
-            { validate(it) && f(it).also { if (!it) log(Error) { message } } },
+            { validate(it) && f(it).also { if (!it) log(Error) { that } } },
             nameSuffix
     )
 
