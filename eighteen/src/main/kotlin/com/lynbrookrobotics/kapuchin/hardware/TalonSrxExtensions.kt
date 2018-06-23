@@ -2,11 +2,8 @@ package com.lynbrookrobotics.kapuchin.hardware
 
 import com.ctre.phoenix.ErrorCode
 import com.ctre.phoenix.ErrorCode.OK
-import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.ControlMode.*
-import com.ctre.phoenix.motorcontrol.NeutralMode
-import com.ctre.phoenix.motorcontrol.StatusFrame
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.*
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController
@@ -55,22 +52,27 @@ fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLim
     if (esc is TalonSRX) {
         esc.configContinuousCurrentLimit(currentLimit.Ampere.toInt(), t)
         esc.configPeakCurrentLimit(0, t) // simpler, single-threshold limiting
+        esc.enableCurrentLimit(true)
     }
 }
 
-fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, multiIdx: Boolean = false) {
+fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, vararg feedback: FeedbackDevice) {
     generalSetup(master, voltageCompensation, currentLimit)
     val t = 0
     val slow = 1000
+
+    feedback.forEachIndexed { i, sensor -> master.configSelectedFeedbackSensor(sensor, i, t) }
 
     StatusFrameEnhanced.values().forEach { master.setStatusFramePeriod(it, slow, t) }
 
     mapOf(
             Status_1_General to 5, // tells slaves what to output
-            Status_2_Feedback0 to 10, // tells RoboRIO about selected sensor data
-            Status_12_Feedback1 to if (multiIdx) 10 else slow, // tells RoboRIO about selected sensor data
-            Status_13_Base_PIDF0 to 15, // current error, integral, and derivative
-            Status_13_Base_PIDF0 to if (multiIdx) 15 else slow // current error, integral, and derivative
+
+            Status_2_Feedback0 to if (feedback.isNotEmpty()) 10 else slow, // tells RoboRIO about selected sensor data
+            Status_12_Feedback1 to if (feedback.size > 1) 10 else slow, // tells RoboRIO about selected sensor data
+
+            Status_13_Base_PIDF0 to if (feedback.isNotEmpty()) 15 else slow, // current error, integral, and derivative
+            Status_14_Turn_PIDF1 to if (feedback.size > 1) 15 else slow // current error, integral, and derivative
     ).forEach { frame, period ->
         master.setStatusFramePeriod(frame, period, t)
     }

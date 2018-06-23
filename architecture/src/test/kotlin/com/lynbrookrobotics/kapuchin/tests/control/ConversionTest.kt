@@ -54,13 +54,13 @@ class ConversionTest {
 
     @Test
     fun `talon real and native methods should be inverses`() {
-        anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(1023.Tick, 12.Volt, resolution.Tick, 8.46.Metre) }
+        anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(1023, 12.Volt, resolution, 8.46.Metre) }
                 .forEach { conversion ->
                     anyDouble.map { it.Foot }.forEach { x ->
-                        x `is equal to?` conversion.realPosition(conversion.native(x).Tick)
+                        x `is equal to?` conversion.realPosition(conversion.native(x))
 
                         val dx = x / t
-                        dx `is equal to?` conversion.realVelocity(conversion.native(dx).Tick)
+                        dx `is equal to?` conversion.realVelocity(conversion.native(dx))
                     }
                 }
     }

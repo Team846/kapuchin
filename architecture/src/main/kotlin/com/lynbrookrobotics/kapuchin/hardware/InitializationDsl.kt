@@ -16,6 +16,10 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 fun <Value> SubsystemHardware<*, *>.hardw(nameSuffix: String = "", initialize: Named.() -> Value) = HardwareInit(this, initialize, nameSuffix = nameSuffix)
+fun <Input> SubsystemHardware<*, *>.readWithComponent(read: (Time) -> TimeStamped<Input>) = WithComponentSensor(syncThreshold, read)
+fun <Input> SubsystemHardware<*, *>.readWithEventLoop(read: (Time) -> TimeStamped<Input>) = WithEventLoopSensor(syncThreshold, read)
+fun <Input> SubsystemHardware<*, *>.readAsynchronously(read: (Time) -> TimeStamped<Input>) = AsyncSensor(syncThreshold, priority, read)
+fun <Input> SubsystemHardware<*, *>.readEagerly(read: (Time) -> TimeStamped<Input>) = EagerSensor(syncThreshold, read)
 
 class HardwareInit<Hardw>(
         private val parent: SubsystemHardware<*, *>,

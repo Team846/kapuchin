@@ -15,27 +15,6 @@ import kotlin.math.PI
 
 class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
 
-    val wheelDiameter by pref(6::Inch)
-
-    val encoderToWheelGears by pref {
-        val encoderGear by pref(18)
-        val wheelGear by pref(74)
-        ({ GearTrain(encoderGear, wheelGear) })
-    }
-
-    val offloadedSettings by pref {
-        val nativeOutputUnits by pref(1023::Tick)
-        val perOutputQuantity by pref(12::Volt)
-        val nativeFeedbackUnits by pref(4096::Tick)
-        val perFeedbackQuantity by pref(1::Turn)
-        ({
-            OffloadedNativeConversion(
-                    nativeOutputUnits = nativeOutputUnits, perOutputQuantity = perOutputQuantity, nativeFeedbackUnits = nativeFeedbackUnits,
-                    perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
-            )
-        })
-    }
-
     val maxLeftSpeed by pref(13::FootPerSecond)
     val maxRightSpeed by pref(13.3::FootPerSecond)
     val topSpeed get() = maxLeftSpeed min maxRightSpeed
