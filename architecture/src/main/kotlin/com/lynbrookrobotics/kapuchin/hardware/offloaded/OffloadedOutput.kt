@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
-import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import info.kunalsheth.units.generated.Ampere
 import info.kunalsheth.units.generated.Dimensionless
 
