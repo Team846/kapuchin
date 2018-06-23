@@ -79,7 +79,7 @@ fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampe
     master.configVelocityMeasurementWindow(4, t)
 }
 
-fun configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, multiIdx: Boolean = false) {
+fun configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
     generalSetup(slave, voltageCompensation, currentLimit)
     val t = 0
     val slow = 1000

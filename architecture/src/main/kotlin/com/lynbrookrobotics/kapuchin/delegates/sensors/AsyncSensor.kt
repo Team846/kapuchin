@@ -9,7 +9,7 @@ import info.kunalsheth.units.generated.Time
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class AsyncSensor<Input>(syncThreshold: Time, private val priority: Priority, read: (Time) -> TimeStamped<Input>) : Sensor<Input>(syncThreshold, read) {
+class AsyncSensor<Input>(syncThreshold: Time, private val priority: Priority, read: (Time) -> TimeStamped<Input>) : Sensor<Comp, Input>(syncThreshold, read) {
 
     override fun provideDelegate(thisRef: Comp, prop: KProperty<*>): ReadOnlyProperty<Comp, TimeStamped<Input>> {
         PlatformThread(thisRef, prop.name, priority) {

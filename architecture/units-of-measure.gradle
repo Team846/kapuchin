@@ -26,14 +26,17 @@ generateUnitsOfMeasure {
             u("FootPerSecond", 0.3048, d(L: 1, T: -1)),
             u("FootPerSecondSquared", 0.3048, d(L: 1, T: -2)),
 
-            u("Minute", 60, d(T: 1)),
+            u("Turn", 6.2832, d()),
             u("Rpm", 6.2832, d(T: -1)),
+            u("DegreeSecond", 0.01745, d(T: 1)),
+            u("Degree", 0.01745, d()),
+            u("DegreePerSecond", 0.01745, d(T: -1)),
+            u("DegreePerSecondSquared", 0.01745, d(T: -2)),
+
+            u("Minute", 60, d(T: 1)),
 
             u("Percent", 0.01, d()),
-            u("Degree", 0.01745, d()),
-            u("Turn", 6.2832, d()),
             u("Tick", 1.0, d()),
-            u("DutyCycle", 1.0, d()),
     ].toSet()
 }
 

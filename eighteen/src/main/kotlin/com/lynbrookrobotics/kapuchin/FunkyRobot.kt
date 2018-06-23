@@ -17,7 +17,7 @@ class FunkyRobot : RobotBase() {
         val driverHardware = ::DriverHardware.safeCall()
 
         val drivetrainHardware = ::DrivetrainHardware.safeCall()
-        val drivetrainComponent = drivetrainHardware creates ::DrivetrainComponent
+        val drivetrainComponent = drivetrainHardware with driverHardware creates ::DrivetrainComponent
 
         HAL.observeUserProgramStarting()
 

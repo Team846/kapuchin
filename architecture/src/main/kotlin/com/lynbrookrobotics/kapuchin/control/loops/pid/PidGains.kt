@@ -9,7 +9,7 @@ data class PidGains<Input, Integ, Deriv, Output>(
         val kI: Gain<Output, Integ>,
         val kD: Gain<Output, Deriv>,
         val kF: Gain<Output, Input>? = null,
-        val integralFalloff: Int = -1
+        val integralFalloff: Int = 500
 )
         where Input : Quantity<Input, Integ, Deriv>,
               Integ : Quantity<Integ, *, Input>,

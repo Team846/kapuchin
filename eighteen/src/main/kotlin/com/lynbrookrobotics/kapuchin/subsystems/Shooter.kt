@@ -25,8 +25,8 @@ class ShooterComponent(hardware: ShooterHardware, es: ElectricalSystemHardware) 
     override val fallbackController: ShooterComponent.(Time) -> Pair<Volt, Volt> = { 0.Volt to 0.Volt }
 
     override fun ShooterHardware.output(value: Pair<Volt, Volt>) {
-        frontEsc.set(voltageToDutyCycle(value.first, battery.value).DutyCycle)
-        backEsc.set(voltageToDutyCycle(value.first, battery.value).DutyCycle)
+        frontEsc.set(voltageToDutyCycle(value.first, battery.value).Tick)
+        backEsc.set(voltageToDutyCycle(value.first, battery.value).Tick)
     }
 }
 

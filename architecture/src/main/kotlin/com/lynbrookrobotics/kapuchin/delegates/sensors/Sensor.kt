@@ -6,7 +6,7 @@ import com.lynbrookrobotics.kapuchin.delegates.DelegateProvider
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 
-abstract class Sensor<Input>(private val syncThreshold: Time, private val read: (Time) -> TimeStamped<Input>) : DelegateProvider<Comp, TimeStamped<Input>> {
+abstract class Sensor<Receiver, Input>(private val syncThreshold: Time, private val read: (Time) -> TimeStamped<Input>) : DelegateProvider<Receiver, TimeStamped<Input>> {
 
     protected var value: TimeStamped<Input>? = null
     protected fun optimizedRead(currentTime: Time) = value

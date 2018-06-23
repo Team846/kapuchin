@@ -8,7 +8,7 @@ import info.kunalsheth.units.generated.Time
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-open class WithComponentSensor<Input>(syncThreshold: Time, read: (Time) -> TimeStamped<Input>) : Sensor<Input>( syncThreshold, read) {
+open class WithComponentSensor<Input>(syncThreshold: Time, read: (Time) -> TimeStamped<Input>) : Sensor<Comp, Input>( syncThreshold, read) {
 
     override fun provideDelegate(thisRef: Comp, prop: KProperty<*>): ReadOnlyProperty<Comp, TimeStamped<Input>> {
         thisRef.ticker.runOnTick { tickStart -> value = optimizedRead(tickStart) }
