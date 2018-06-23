@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
+import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
 import com.lynbrookrobotics.kapuchin.hardware.configSlave
@@ -8,10 +9,7 @@ import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
-import info.kunalsheth.units.generated.Ampere
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Volt
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.generated.*
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
@@ -49,4 +47,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.follow(rightMasterEsc)
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
+
+    val driftTolerance by pref(0.1::DegreePerSecond)
+    val imu by hardw { ADIS16448_IMU() }.verify {
+        setOf(it.rateX, it.rateY, it.rateZ).map { it.DegreePerSecond }
+                .all { it in -driftTolerance..+driftTolerance }
+    }.readEagerly { }
 }

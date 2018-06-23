@@ -44,8 +44,15 @@ class HardwareInit<Hardw>(
         }
     }
 
-    fun configure(f: Named.(Hardw) -> Unit) = HardwareInit(parent, initialize, { configure(it); f(it) }, validate, nameSuffix)
-    fun verify(f: Named.(Hardw) -> Boolean) = HardwareInit(parent, initialize, configure, { validate(it) && f(it) }, nameSuffix)
+    fun configure(f: Named.(Hardw) -> Unit) = HardwareInit(
+            parent, initialize, { configure(it); f(it) }, validate, nameSuffix
+    )
+
+    fun verify(message: String, f: Named.(Hardw) -> Boolean) = HardwareInit(
+            parent, initialize, configure,
+            { validate(it) && f(it).also { if (!it) log(Error) { message } } },
+            nameSuffix
+    )
 
     fun <Input> readWithComponent(
             syncThreshold: Time = parent.syncThreshold,
