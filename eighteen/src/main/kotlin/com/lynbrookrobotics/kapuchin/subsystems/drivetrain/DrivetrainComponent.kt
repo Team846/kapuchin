@@ -18,6 +18,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
     val maxLeftSpeed by pref(13::FootPerSecond)
     val maxRightSpeed by pref(13.3::FootPerSecond)
     val topSpeed get() = maxLeftSpeed min maxRightSpeed
+
     val velocityGains by pref {
         val kP by pref(12::Volt, 3::FootPerSecond)
         val kI by pref(4::Volt, 1::Foot)
@@ -38,7 +39,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         VelocityOutput(
-                offloadedSettings.native(velocityGains), offloadedSettings.native(0.FootPerSecond)
+                hardware.offloadedSettings.native(velocityGains), hardware.offloadedSettings.native(0.FootPerSecond)
         ).let { TwoSided(it, it) }
     }
 

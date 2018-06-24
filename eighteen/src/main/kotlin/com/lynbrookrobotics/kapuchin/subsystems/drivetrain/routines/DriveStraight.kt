@@ -13,6 +13,6 @@ fun DrivetrainComponent.driveStraight(
         maxSpeed: Velocity,
         maxDecel: Acceleration = maxAccel
 ): DrivetrainSubroutine {
-    val initialVelocity = 
+    val initialVelocity by hardware.position
     val targetVelocity = v(maxAccel, )
 }
