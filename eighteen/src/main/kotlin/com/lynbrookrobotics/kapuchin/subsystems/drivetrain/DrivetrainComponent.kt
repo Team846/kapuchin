@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversio
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
+import com.lynbrookrobotics.kapuchin.control.math.avg
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
@@ -42,6 +43,13 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
         })
     }
 
+    val positionGains by pref {
+        val kP by pref(12::Volt, 3::Foot)
+        val kI by pref(4::Volt, 1::FootSecond)
+        val kD by pref(0::Volt, 1::FootPerSecond)
+        ({ PidGains(kP, kI, kD) })
+    }
+
     val velocityGains by pref {
         val kP by pref(12::Volt, 3::FootPerSecond)
         val kI by pref(4::Volt, 1::Foot)
@@ -53,11 +61,11 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
 
     val trackSize by pref(2::Foot)
     val maxTurningSpeed get() = topSpeed / (trackSize / 2)
-    val turningVelocityGains by pref {
-        val kP by pref(6::FootPerSecond, 45::DegreePerSecond)
-        val kI by pref(2::FootPerSecond, 45::Degree)
-        val kD by pref(0::FootPerSecond, 45::DegreePerSecondSquared)
-        ({ PidGains(kP, kI, kD, Gain(topSpeed, maxTurningSpeed)) })
+    val turningPositionGains by pref {
+        val kP by pref(6::FootPerSecond, 45::Degree)
+        val kI by pref(2::FootPerSecond, 45::DegreeSecond)
+        val kD by pref(0::FootPerSecond, 45::DegreePerSecond)
+        ({ PidGains(kP, kI, kD) })
     }
 
     val idx = 0
@@ -67,12 +75,14 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
                 offloadedSettings.realPosition(hardware.rightMasterEsc.getSelectedSensorPosition(idx))
         ) stampWith it
     }
+    val forwardPosition get() = position.value.avg stampWith position.stamp
     val velocity by readWithComponent {
         TwoSided(
                 offloadedSettings.realVelocity(hardware.leftMasterEsc.getSelectedSensorVelocity(idx)),
                 offloadedSettings.realVelocity(hardware.rightMasterEsc.getSelectedSensorVelocity(idx))
         ) stampWith it
     }
+    val forwardVelocity get() = velocity.value.avg stampWith velocity.stamp
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         VelocityOutput(
