@@ -53,41 +53,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
 
-    val wheelDiameter by pref(6::Inch)
-
-    val encoderToWheelGears by pref {
-        val encoderGear by pref(18)
-        val wheelGear by pref(74)
-        ({ GearTrain(encoderGear, wheelGear) })
-    }
-
-    val offloadedSettings by pref {
-        val nativeOutputUnits by pref(1023)
-        val perOutputQuantity by pref(12::Volt)
-        val nativeFeedbackUnits by pref(4096)
-        val perFeedbackQuantity by pref(1::Turn)
-        ({
-            OffloadedNativeConversion(
-                    nativeOutputUnits = nativeOutputUnits, perOutputQuantity = perOutputQuantity, nativeFeedbackUnits = nativeFeedbackUnits,
-                    perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
-            )
-        })
-    }
-
-    val idx = 0
-    val position = readWithComponent {
-        TwoSided(
-                offloadedSettings.realPosition(leftMasterEsc.getSelectedSensorPosition(idx)),
-                offloadedSettings.realPosition(rightMasterEsc.getSelectedSensorPosition(idx))
-        ) stampWith it
-    }
-    val velocity = readWithComponent {
-        TwoSided(
-                offloadedSettings.realVelocity(leftMasterEsc.getSelectedSensorVelocity(idx)),
-                offloadedSettings.realVelocity(rightMasterEsc.getSelectedSensorVelocity(idx))
-        ) stampWith it
-    }
-
     val driftTolerance by pref(1::DegreePerSecond)
     val gyro by hardw { ADIS16448_IMU() }.verify("Gyro should not drift after calibration") {
         it.rate.DegreePerSecond in -driftTolerance..+driftTolerance
