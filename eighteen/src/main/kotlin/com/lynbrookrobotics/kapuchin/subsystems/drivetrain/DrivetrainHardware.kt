@@ -3,16 +3,16 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
-import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
-import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.hardware.configMaster
+import com.lynbrookrobotics.kapuchin.hardware.configSlave
+import com.lynbrookrobotics.kapuchin.hardware.hardw
+import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.*
-import kotlin.math.PI
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
@@ -55,7 +55,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val driftTolerance by pref(1::DegreePerSecond)
     val gyro by hardw { ADIS16448_IMU() }.verify("Gyro should not drift after calibration") {
-        it.rate.DegreePerSecond in -driftTolerance..+driftTolerance
+        it.rate.DegreePerSecond in 0.DegreePerSecond withToleranceOf driftTolerance
     }.readEagerly {
         GyroInput(angle.Degree, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith lastSampleTime.Second
     }

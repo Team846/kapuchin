@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversio
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
-import com.lynbrookrobotics.kapuchin.control.math.avg
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
@@ -75,14 +74,12 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
                 offloadedSettings.realPosition(hardware.rightMasterEsc.getSelectedSensorPosition(idx))
         ) stampWith it
     }
-    val forwardPosition get() = position.value.avg stampWith position.stamp
     val velocity by readWithComponent {
         TwoSided(
                 offloadedSettings.realVelocity(hardware.leftMasterEsc.getSelectedSensorVelocity(idx)),
                 offloadedSettings.realVelocity(hardware.rightMasterEsc.getSelectedSensorVelocity(idx))
         ) stampWith it
     }
-    val forwardVelocity get() = velocity.value.avg stampWith velocity.stamp
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         VelocityOutput(

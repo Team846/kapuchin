@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
 import com.lynbrookrobotics.kapuchin.Quan
+import com.lynbrookrobotics.kapuchin.control.avg
 
 interface Vector<T> {
     val x: T
@@ -12,4 +13,13 @@ data class UomVector<Q : Quan<Q>>(override val x: Q, override val y: Q, override
 data class NumVector(override val x: Double, override val y: Double, override val z: Double) : Vector<Double>
 data class TwoSided<Value>(val left: Value, val right: Value)
 
-val <Q : Quan<Q>> TwoSided<Q>.avg get() = (left + right) / 2
+val <Q : Quan<Q>> TwoSided<Q>.avg get() = avg(left, right)
+operator fun <Q : Quan<Q>> TwoSided<Q>.plus(that: TwoSided<Q>) = TwoSided(
+        this.left + that.left,
+        this.right + that.right
+)
+
+operator fun <Q : Quan<Q>> TwoSided<Q>.minus(that: TwoSided<Q>) = TwoSided(
+        this.left - that.left,
+        this.right - that.right
+)

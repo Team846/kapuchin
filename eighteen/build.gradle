@@ -45,7 +45,7 @@ kotlin.experimental.coroutines "enable"
 
 jar {
     from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.eighteen.FunkyMonkeyRobot')
+    manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobot')
 }
 
 jacocoTestReport {

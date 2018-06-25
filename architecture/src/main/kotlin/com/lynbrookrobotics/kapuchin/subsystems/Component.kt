@@ -2,14 +2,14 @@ package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
-import com.lynbrookrobotics.kapuchin.timing.Ticker
+import com.lynbrookrobotics.kapuchin.timing.ticker
 import info.kunalsheth.units.generated.Time
 
 abstract class Component<This, H, Output>(val hardware: H) : Named(null, hardware.name)
         where This : Component<This, H, Output>,
               H : SubsystemHardware<H, This> {
 
-    val ticker by lazy { Ticker(hardware.priority, hardware.period) }
+    val ticker by lazy { ticker(hardware.priority, hardware.period) }
 
     var controller: (This.(Time) -> Output)? = null
     abstract val fallbackController: This.(Time) -> Output

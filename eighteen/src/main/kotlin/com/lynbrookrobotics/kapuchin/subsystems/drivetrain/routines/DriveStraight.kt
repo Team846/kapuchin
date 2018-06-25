@@ -2,15 +2,19 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain.routines
 
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
+import com.lynbrookrobotics.kapuchin.control.math.avg
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionProfile
+import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
+import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
 fun DrivetrainComponent.drive(
-        distance: Length, radius: Length,
+        distance: Length, distanceTolerance: Length,
+        radius: Length, angleTolerance: Angle,
         acceleration: Acceleration,
         topSpeed: Velocity,
         deceleration: Acceleration = acceleration,
@@ -35,7 +39,7 @@ fun DrivetrainComponent.drive(
     val shortLongRatio = minMagR / maxMagR
 
     val longerProfile = TrapezoidalMotionProfile(
-            distance = maxMagR,
+            distance = sL maxMag sR,
             startingSpeed = kickstart,
             acceleration = acceleration,
             topSpeed = topSpeed,
@@ -43,7 +47,7 @@ fun DrivetrainComponent.drive(
             endingSpeed = endingSpeed
     )
     val shorterProfile = TrapezoidalMotionProfile(
-            distance = minMagR,
+            distance = sL minMag sR,
             startingSpeed = kickstart * shortLongRatio,
             acceleration = acceleration * shortLongRatio,
             topSpeed = topSpeed * shortLongRatio,
@@ -55,25 +59,26 @@ fun DrivetrainComponent.drive(
 
     val gains = offloadedSettings.native(velocityGains)
 
-    val startingPosition = forwardPosition
-    fun deltaPosition() = forwardPosition.value - startingPosition.value
+    val startingPosition = position
+    fun deltaPosition() = position - startingPosition
 
-    val direction by hardware.gyro
-    val startingDirection = direction.value.angle
-    fun deltaDirection() = direction.value.angle - startingDirection
+    val gyro by hardware.gyro.withTimeStamps
+    val startingDirection = gyro.value.angle
+    fun deltaDirection() = gyro.value.angle - startingDirection
 
     // θ = s ÷ r
     val turningControl = PidControlLoop(turningPositionGains) {
-        radius.let { deltaPosition() / it }
+        (startingPosition - position).avg / radius
     }
 
     return DrivetrainSubroutine(
             "Drive Straight", this,
             {
-                val turn = turningControl(direction.stamp, deltaDirection())
+                val turn = turningControl(gyro.stamp, deltaDirection())
 
-                val leftTarget = leftProfile(deltaPosition()) + turn
-                val rightTarget = rightProfile(deltaPosition()) - turn
+                val deltaPosition = deltaPosition()
+                val leftTarget = leftProfile(deltaPosition.left) + turn
+                val rightTarget = rightProfile(deltaPosition.right) - turn
 
                 TwoSided(
                         VelocityOutput(gains, offloadedSettings.native(leftTarget)),
@@ -81,7 +86,8 @@ fun DrivetrainComponent.drive(
                 )
             },
             {
-
+                deltaPosition().avg in distance withToleranceOf distanceTolerance &&
+                        deltaDirection() in theta withToleranceOf angleTolerance
             }
     )
 }

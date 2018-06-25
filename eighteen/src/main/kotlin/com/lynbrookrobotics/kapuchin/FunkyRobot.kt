@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.hal.HAL
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-
         val electricalHardware = ::ElectricalSystemHardware.safeCall()
         val electricalComponent = electricalHardware creates ::ElectricalSystemComponent
 
