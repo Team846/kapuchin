@@ -3,7 +3,7 @@ package com.lynbrookrobotics.kapuchin.hardware.offloaded
 import info.kunalsheth.units.generated.Ampere
 import info.kunalsheth.units.generated.Dimensionless
 
-class LazyOffloadedOutputWriter(
+class LazyOffloadedGainWriter(
         private val writeKp: (Double) -> Unit,
         private val writeKi: (Double) -> Unit,
         private val writeKd: (Double) -> Unit,

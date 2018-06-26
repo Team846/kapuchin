@@ -8,19 +8,19 @@ import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.*
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedOutputWriter
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedGainWriter
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
 import info.kunalsheth.units.generated.*
 
-fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOffloadedOutputWriter {
+fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOffloadedGainWriter {
     fun wrap(f: (Int, Double, Int) -> ErrorCode): (Double) -> Unit = {
         val err = f(idx, it, timeout.milli(T::Second).toInt())
         if (err != OK) log(Error) { "TalonSRX returned error code $err" }
     }
 
-    return LazyOffloadedOutputWriter(
+    return LazyOffloadedGainWriter(
             writeKp = wrap(talonSRX::config_kP),
             writeKi = wrap(talonSRX::config_kI),
             writeKd = wrap(talonSRX::config_kD),
