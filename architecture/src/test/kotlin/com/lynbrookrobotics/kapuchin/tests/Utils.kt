@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests
 
-import com.lynbrookrobotics.kapuchin.Quan
+import com.lynbrookrobotics.kapuchin.control.Quan
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 
 val anyInt = setOf(0, 1, 2, 373, 1024, 1492, 8397)

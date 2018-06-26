@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.Quan
+import com.lynbrookrobotics.kapuchin.control.Quan
 import info.kunalsheth.units.generated.Time
 
 class ThresholdChecker<Q : Quan<Q>>(val threshold: Q, val forDuration: Time) : (Time, Q) -> Boolean {

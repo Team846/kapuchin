@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
-import com.lynbrookrobotics.kapuchin.Quan
+import com.lynbrookrobotics.kapuchin.control.Quan
 import com.lynbrookrobotics.kapuchin.logging.Named
 import edu.wpi.first.wpilibj.Preferences
 import kotlin.reflect.KProperty0
