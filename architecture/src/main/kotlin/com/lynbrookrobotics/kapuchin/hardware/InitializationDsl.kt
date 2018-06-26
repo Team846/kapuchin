@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.hardware.sensors.WithEventLoopSensor
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.subsystems.Comp
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.Time
@@ -16,6 +17,16 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 fun <Value> SubsystemHardware<*, *>.hardw(nameSuffix: String = "", initialize: Named.() -> Value) = HardwareInit(this, initialize, nameSuffix = nameSuffix)
+
+fun <Input> SubsystemHardware<*, *>.readWithComponent(read: (Time) -> TimeStamped<Input>) = WithComponentSensor(syncThreshold, read)
+fun <Input> SubsystemHardware<*, *>.readWithEventLoop(read: (Time) -> TimeStamped<Input>) = WithEventLoopSensor(syncThreshold, read)
+fun <Input> SubsystemHardware<*, *>.readAsynchronously(read: (Time) -> TimeStamped<Input>) = AsyncSensor(syncThreshold, priority, read)
+fun <Input> SubsystemHardware<*, *>.readEagerly(read: (Time) -> TimeStamped<Input>) = EagerSensor(syncThreshold, read)
+
+fun <Input> Comp.readWithComponent(read: (Time) -> TimeStamped<Input>) = hardware.readWithComponent(read)
+fun <Input> Comp.readWithEventLoop(read: (Time) -> TimeStamped<Input>) = hardware.readWithEventLoop(read)
+fun <Input> Comp.readAsynchronously(read: (Time) -> TimeStamped<Input>) = hardware.readAsynchronously(read)
+fun <Input> Comp.readEagerly(read: (Time) -> TimeStamped<Input>) = hardware.readEagerly(read)
 
 class HardwareInit<Hardw>(
         private val parent: SubsystemHardware<*, *>,
@@ -44,8 +55,15 @@ class HardwareInit<Hardw>(
         }
     }
 
-    fun configure(f: Named.(Hardw) -> Unit) = HardwareInit(parent, initialize, { configure(it); f(it) }, validate, nameSuffix)
-    fun verify(f: Named.(Hardw) -> Boolean) = HardwareInit(parent, initialize, configure, { validate(it) && f(it) }, nameSuffix)
+    fun configure(f: Named.(Hardw) -> Unit) = HardwareInit(
+            parent, initialize, { configure(it); f(it) }, validate, nameSuffix
+    )
+
+    fun verify(that: String, f: Named.(Hardw) -> Boolean) = HardwareInit(
+            parent, initialize, configure,
+            { validate(it) && f(it).also { if (!it) log(Error) { that } } },
+            nameSuffix
+    )
 
     fun <Input> readWithComponent(
             syncThreshold: Time = parent.syncThreshold,

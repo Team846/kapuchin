@@ -1,13 +1,14 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
 import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-
         val electricalHardware = ::ElectricalSystemHardware.safeCall()
         val electricalComponent = electricalHardware creates ::ElectricalSystemComponent
 

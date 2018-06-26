@@ -14,11 +14,14 @@ dependencies {
     expectedBy project(":architecture")
     compile wpilib()
     compile ctre()
+    compile 'com.github.juchong:ADIS16448-RoboRIO-Driver:2018.3'
 
     testCompile 'junit:junit:4.12'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 }
+
+repositories.maven { url 'https://jitpack.io' }
 
 deploy {
     targets { target('roborio', RoboRIO) { team = 846 } }
@@ -42,7 +45,7 @@ kotlin.experimental.coroutines "enable"
 
 jar {
     from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.eighteen.FunkyMonkeyRobot')
+    manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobot')
 }
 
 jacocoTestReport {

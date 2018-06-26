@@ -5,12 +5,15 @@ import com.lynbrookrobotics.kapuchin.control.div
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Quantity
+import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.milli
 import kotlin.jvm.JvmName
 
 class OffloadedNativeConversion<O, I, Q, D, DD>(
-        val nativeOutputUnits: Tick, val perOutputQuantity: O,
-        val nativeFeedbackUnits: Tick, val perFeedbackQuantity: Q,
+        val nativeOutputUnits: Int, val perOutputQuantity: O,
+        val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
         val nativeTimeUnit: Time = 100.milli(::Second),
         val nativeLoopTime: Time = 1.milli(::Second)
 )
@@ -21,13 +24,13 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
               DD : Quantity<DD, D, *> {
 
     @JvmName("nativeOutput")
-    fun native(x: O) = (nativeOutputUnits * (x / perOutputQuantity)).Tick
+    fun native(x: O) = (nativeOutputUnits * (x / perOutputQuantity))
 
     @JvmName("nativeAbsement")
     fun native(x: I) = native(x / nativeLoopTime)
 
     @JvmName("nativePosition")
-    fun native(x: Q) = (nativeFeedbackUnits * (x / perFeedbackQuantity)).Tick
+    fun native(x: Q) = (nativeFeedbackUnits * (x / perFeedbackQuantity))
 
     @JvmName("nativeVelocity")
     fun native(x: D) = native(x * nativeTimeUnit)
@@ -35,8 +38,8 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
     @JvmName("nativeAcceleration")
     fun native(x: DD) = native(x * nativeLoopTime)
 
-    fun realPosition(x: Tick) = perFeedbackQuantity * (x / nativeFeedbackUnits).siValue
-    fun realVelocity(x: Tick) = realPosition(x / nativeTimeUnit.Second) / 1.Second
+    fun realPosition(x: Number) = perFeedbackQuantity * (x.toDouble() / nativeFeedbackUnits)
+    fun realVelocity(x: Number) = realPosition(x.toDouble() / nativeTimeUnit.Second) / 1.Second
 
     @JvmName("nativeAbsementGain")
     fun native(x: Gain<O, I>) = native(x.compensation) / native(x.forError)

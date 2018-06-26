@@ -23,9 +23,10 @@ actual class PlatformThread actual constructor(parent: Named, name: String, prio
         val formattedName = "${parent.name} $name Thread"
         thread = parent.run {
             thread(name = formattedName, priority = jvmPriority) {
-                log(Level.Debug) { "Starting $formattedName Thread" }
+                log(Level.Debug) { "Starting $formattedName" }
                 Threads.setCurrentThreadPriority(priority == RealTime, roboRioPriority)
                 run()
+                log(Level.Debug) { "$formattedName Exiting" }
             }.apply {
                 uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
                     log(Level.Error, e.stackTrace) { e.message!! }

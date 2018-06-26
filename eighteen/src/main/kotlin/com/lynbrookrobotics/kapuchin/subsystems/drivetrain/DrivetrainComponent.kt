@@ -1,23 +1,25 @@
-package com.lynbrookrobotics.kapuchin.subsystems
+package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
-import com.lynbrookrobotics.kapuchin.hardware.configMaster
-import com.lynbrookrobotics.kapuchin.hardware.configSlave
-import com.lynbrookrobotics.kapuchin.hardware.hardw
-import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
+import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
+import com.lynbrookrobotics.kapuchin.hardware.readWithComponent
 import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.subsystems.Component
+import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import info.kunalsheth.units.generated.*
 import kotlin.math.PI
 
 class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
+
+    val maxLeftSpeed by pref(13::FootPerSecond)
+    val maxRightSpeed by pref(13.3::FootPerSecond)
+    val topSpeed get() = maxLeftSpeed min maxRightSpeed
 
     val wheelDiameter by pref(6::Inch)
 
@@ -28,9 +30,9 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
     }
 
     val offloadedSettings by pref {
-        val nativeOutputUnits by pref(1023::Tick)
+        val nativeOutputUnits by pref(1023)
         val perOutputQuantity by pref(12::Volt)
-        val nativeFeedbackUnits by pref(4096::Tick)
+        val nativeFeedbackUnits by pref(4096)
         val perFeedbackQuantity by pref(1::Turn)
         ({
             OffloadedNativeConversion(
@@ -40,9 +42,13 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
         })
     }
 
-    val maxLeftSpeed by pref(13::FootPerSecond)
-    val maxRightSpeed by pref(13.3::FootPerSecond)
-    val topSpeed get() = maxLeftSpeed min maxRightSpeed
+    val positionGains by pref {
+        val kP by pref(12::Volt, 3::Foot)
+        val kI by pref(4::Volt, 1::FootSecond)
+        val kD by pref(0::Volt, 1::FootPerSecond)
+        ({ PidGains(kP, kI, kD) })
+    }
+
     val velocityGains by pref {
         val kP by pref(12::Volt, 3::FootPerSecond)
         val kI by pref(4::Volt, 1::Foot)
@@ -54,11 +60,25 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
 
     val trackSize by pref(2::Foot)
     val maxTurningSpeed get() = topSpeed / (trackSize / 2)
-    val turningVelocityGains by pref {
-        val kP by pref(6::FootPerSecond, 45::DegreePerSecond)
-        val kI by pref(2::FootPerSecond, 45::Degree)
-        val kD by pref(0::FootPerSecond, 45::DegreePerSecondSquared)
-        ({ PidGains(kP, kI, kD, Gain(topSpeed, maxTurningSpeed)) })
+    val turningPositionGains by pref {
+        val kP by pref(6::FootPerSecond, 45::Degree)
+        val kI by pref(2::FootPerSecond, 45::DegreeSecond)
+        val kD by pref(0::FootPerSecond, 45::DegreePerSecond)
+        ({ PidGains(kP, kI, kD) })
+    }
+
+    val idx = 0
+    val position by readWithComponent {
+        TwoSided(
+                offloadedSettings.realPosition(hardware.leftMasterEsc.getSelectedSensorPosition(idx)),
+                offloadedSettings.realPosition(hardware.rightMasterEsc.getSelectedSensorPosition(idx))
+        ) stampWith it
+    }
+    val velocity by readWithComponent {
+        TwoSided(
+                offloadedSettings.realVelocity(hardware.leftMasterEsc.getSelectedSensorVelocity(idx)),
+                offloadedSettings.realVelocity(hardware.rightMasterEsc.getSelectedSensorVelocity(idx))
+        ) stampWith it
     }
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
@@ -71,42 +91,4 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
         leftLazyOutput(value.left)
         rightLazyOutput(value.right)
     }
-}
-
-class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
-    override val priority = Priority.RealTime
-    override val period = 15.milli(::Second)
-    override val syncThreshold = 1.milli(::Second)
-    override val subsystemName = "Drivetrain"
-
-    val leftSlaveEscId by pref(14)
-    val rightSlaveEscId by pref(13)
-    val rightMasterEscId by pref(11)
-    val leftMasterEscId by pref(12)
-
-    val escCanTimeout by pref(0.001::Second)
-
-
-    val operatingVoltage by pref(11::Volt)
-    val currentLimit by pref(20::Ampere)
-
-
-    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit)
-    }
-    val leftSlaveEsc by hardw { TalonSRX(leftSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit)
-        it.follow(leftMasterEsc)
-    }
-    val leftLazyOutput = lazyOutput(leftMasterEsc, escCanTimeout)
-
-
-    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit)
-    }
-    val rightSlaveEsc by hardw { TalonSRX(rightSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit)
-        it.follow(rightMasterEsc)
-    }
-    val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
 }
