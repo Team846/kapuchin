@@ -12,8 +12,6 @@ class RampRateLimiter(
         lastValue: TimeStamped<Volt> = 0.Volt stampWith currentTime
 ) : (Time, Volt) -> Volt {
 
-    private val absLimit = limit.abs
-
     private var lastStamp: Time = lastValue.stamp
     private var lastOutput: Volt = lastValue.value
 
@@ -23,8 +21,8 @@ class RampRateLimiter(
         val ramp = dv / dt
 
         return when {
-            ramp > absLimit -> lastOutput + dt * absLimit
-            ramp < -absLimit -> lastOutput - dt * absLimit
+            ramp > limit -> lastOutput + dt * limit
+            ramp < -limit -> lastOutput - dt * limit
             else -> target
         }.also {
             lastOutput = it
