@@ -21,11 +21,12 @@ actual class Ticker internal actual constructor(parent: Named, priority: Priorit
     }
 
     private var runOnTick: Set<(tickStart: Time) -> Unit> = emptySet()
-    actual fun runOnTick(order: ExecutionOrder, run: (tickStart: Time) -> Unit) {
+    actual fun runOnTick(order: ExecutionOrder, run: (tickStart: Time) -> Unit): Cancel {
         runOnTick = when (order) {
             ExecutionOrder.First -> setOf(run) + runOnTick
             ExecutionOrder.Last -> runOnTick + run
         }
+        return { runOnTick -= run }
     }
 
     actual fun waitOnTick(): Time {

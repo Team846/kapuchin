@@ -15,7 +15,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import info.kunalsheth.units.generated.*
 import kotlin.math.PI
 
-class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
+class DrivetrainComponent(hardware: DrivetrainHardware, val driver: DriverHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
 
     val maxLeftSpeed by pref(13::FootPerSecond)
     val maxRightSpeed by pref(13.3::FootPerSecond)
@@ -49,7 +49,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
         ({ PidGains(kP, kI, kD) })
     }
 
-    val velocityGains by pref {
+    private val velocityGains by pref {
         val kP by pref(12::Volt, 3::FootPerSecond)
         val kI by pref(4::Volt, 1::Foot)
         val kD by pref(0::Volt, 1::FootPerSecondSquared)

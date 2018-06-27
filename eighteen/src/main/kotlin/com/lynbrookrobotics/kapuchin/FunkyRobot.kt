@@ -3,9 +3,12 @@ package com.lynbrookrobotics.kapuchin
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.routines.teleopDrive
 import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withTimeout
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
@@ -21,6 +24,12 @@ class FunkyRobot : RobotBase() {
         val drivetrainComponent = drivetrainHardware with driverHardware creates ::DrivetrainComponent
 
         HAL.observeUserProgramStarting()
+
+        launch {
+            withTimeout(10000) {
+                drivetrainComponent?.teleopDrive { false }
+            }
+        }
 
         while (true) {
             m_ds.waitForData()

@@ -9,10 +9,11 @@ import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
+import com.lynbrookrobotics.kapuchin.routines.autoroutine
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
-fun DrivetrainComponent.drive(
+suspend fun DrivetrainComponent.driveArc(
         distance: Length, distanceTolerance: Length,
         radius: Length, angleTolerance: Angle,
         acceleration: Acceleration,
@@ -20,7 +21,7 @@ fun DrivetrainComponent.drive(
         deceleration: Acceleration = acceleration,
         endingSpeed: Velocity = 0.FootPerSecond,
         kickstart: Velocity = 3.Inch / 1.Second
-): DrivetrainSubroutine {
+) {
     // s = rθ
     val theta = distance / radius
     val rL = (radius + trackSize / 2)
@@ -57,7 +58,8 @@ fun DrivetrainComponent.drive(
     val leftProfile = if (maxMagR == rL) longerProfile else shorterProfile
     val rightProfile = if (maxMagR == rR) longerProfile else shorterProfile
 
-    val gains = offloadedSettings.native(velocityGains)
+    val leftGains = offloadedSettings.native(leftVelocityGains)
+    val rightGains = offloadedSettings.native(rightVelocityGains)
 
     val startingPosition = position
     fun deltaPosition() = position - startingPosition
@@ -71,9 +73,8 @@ fun DrivetrainComponent.drive(
         (startingPosition - position).avg / radius
     }
 
-    return DrivetrainSubroutine(
-            "Drive Straight", this,
-            {
+    autoroutine(
+            newController = {
                 val turn = turningControl(gyro.stamp, deltaDirection())
 
                 val deltaPosition = deltaPosition()
@@ -81,11 +82,11 @@ fun DrivetrainComponent.drive(
                 val rightTarget = rightProfile(deltaPosition.right) - turn
 
                 TwoSided(
-                        VelocityOutput(gains, offloadedSettings.native(leftTarget)),
-                        VelocityOutput(gains, offloadedSettings.native(rightTarget))
+                        VelocityOutput(leftGains, offloadedSettings.native(leftTarget)),
+                        VelocityOutput(rightGains, offloadedSettings.native(rightTarget))
                 )
             },
-            {
+            isFinished = {
                 deltaPosition().avg in distance withToleranceOf distanceTolerance &&
                         deltaDirection() in theta withToleranceOf angleTolerance
             }
