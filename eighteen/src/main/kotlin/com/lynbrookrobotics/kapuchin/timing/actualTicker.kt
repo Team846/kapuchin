@@ -9,7 +9,7 @@ import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.micro
 
-actual class Ticker internal actual constructor(parent: Named, priority: Priority, val period: Time, name: String) : Named(parent, name) {
+actual class Ticker internal actual constructor(parent: Named, priority: Priority, val period: Time, name: String) : Named(name, parent) {
     private val notifierHandle = NotifierJNI.initializeNotifier()
     private val startTime = currentTime
 

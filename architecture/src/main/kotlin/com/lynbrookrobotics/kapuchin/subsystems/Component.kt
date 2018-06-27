@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.ticker
 import info.kunalsheth.units.generated.Time
 
-abstract class Component<This, H, Output>(val hardware: H) : Named(null, hardware.name)
+abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name, null)
         where This : Component<This, H, Output>,
               H : SubsystemHardware<H, This> {
 

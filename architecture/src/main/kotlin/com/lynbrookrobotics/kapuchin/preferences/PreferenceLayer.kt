@@ -36,7 +36,7 @@ class PreferenceLayer<Value>(
     }
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        get = object : Named(parent, prop.name + nameSuffix) {}.run(construct)
+        get = object : Named(prop.name + nameSuffix, parent) {}.run(construct)
 
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!

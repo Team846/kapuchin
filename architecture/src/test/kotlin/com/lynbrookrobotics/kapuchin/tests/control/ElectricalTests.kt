@@ -3,9 +3,12 @@ package com.lynbrookrobotics.kapuchin.tests.control
 import com.lynbrookrobotics.kapuchin.control.electrical.MotorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.OutsideThresholdChecker
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
+import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
+import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
 import info.kunalsheth.units.generated.*
 import kotlin.math.sin
@@ -91,5 +94,15 @@ class ElectricalTests {
                 .takeWhile { it - negativeOutsideStartTime < duration }
                 .forEach { checker(it, -25.1.Ampere) `is equal to?` false }
         checker(negativeOutsideStartTime + duration + incr * 1, -25.1.Ampere) `is equal to?` true
+    }
+
+    @Test
+    fun `battery compensator calculates correct duty cycle`() {
+        object : Named("Battery Compensator Test") {}.run {
+            voltageToDutyCycle(11.Volt, 11.Volt) `is equal to?` 100.Percent
+            voltageToDutyCycle(9.Volt, 10.Volt) `is equal to?` 90.Percent
+            voltageToDutyCycle(-7.5.Volt, 10.Volt) `is equal to?` -75.Percent
+            voltageToDutyCycle(12.Volt, 10.Volt) `is greater than or equal to?` 100.Percent
+        }
     }
 }

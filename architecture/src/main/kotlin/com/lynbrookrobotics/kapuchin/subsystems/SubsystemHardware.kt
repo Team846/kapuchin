@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.Time
 
-abstract class SubsystemHardware<This, C> : Named(null, "override val name = ...")
+abstract class SubsystemHardware<This, C> : Named("override val name = ...", null)
         where This : SubsystemHardware<This, C>,
               C : Component<C, This, *> {
     abstract val priority: Priority
