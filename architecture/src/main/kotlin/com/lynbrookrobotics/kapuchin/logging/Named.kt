@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-abstract class Named(parent: Named? = null, name: String) {
+abstract class Named(name: String, parent: Named? = null) {
     open val name = nameLayer(parent, name)
 }
 

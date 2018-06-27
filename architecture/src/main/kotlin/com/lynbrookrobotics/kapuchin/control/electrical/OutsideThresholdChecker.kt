@@ -1,14 +1,14 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.Quan
+import com.lynbrookrobotics.kapuchin.control.Quan
 import info.kunalsheth.units.generated.Time
 
-class ThresholdChecker<Q : Quan<Q>>(val threshold: Q, val forDuration: Time) : (Time, Q) -> Boolean {
+class OutsideThresholdChecker<Q : Quan<Q>>(val safeRange: ClosedRange<Q>, val forDuration: Time) : (Time, Q) -> Boolean {
 
     private var start: Time? = null
 
     override fun invoke(x: Time, y: Q) =
-            if (y > threshold) {
+            if (y !in safeRange) {
                 if (start == null) start = x
                 x - (start ?: x) > forDuration
             } else {

@@ -19,7 +19,7 @@ open class InfiniteIntegrator<IntegralOfQ, Q>(private val init: IntegralOfQ) : I
     protected fun recentRectangle(x2: Time, y2: Q) = (
             if (::x1.isInitialized && ::y1.isInitialized) {
                 val height = (y1 + y2) / 2
-                val width = (x1 - x2).abs
+                val width = (x2 - x1)
                 height * width
             } else init
             )
