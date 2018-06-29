@@ -9,16 +9,17 @@ import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.hardware.readWithComponent
+import com.lynbrookrobotics.kapuchin.hardware.readWithEventLoop
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import info.kunalsheth.units.generated.*
 import kotlin.math.PI
 
-class DrivetrainComponent(hardware: DrivetrainHardware, val driver: DriverHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
+class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
 
-    val maxLeftSpeed by pref(13::FootPerSecond)
-    val maxRightSpeed by pref(13.3::FootPerSecond)
+    private val maxLeftSpeed by pref(13::FootPerSecond)
+    private val maxRightSpeed by pref(13.3::FootPerSecond)
     val topSpeed get() = maxLeftSpeed min maxRightSpeed
 
     val wheelDiameter by pref(6::Inch)
@@ -80,6 +81,9 @@ class DrivetrainComponent(hardware: DrivetrainHardware, val driver: DriverHardwa
                 offloadedSettings.realVelocity(hardware.rightMasterEsc.getSelectedSensorVelocity(idx))
         ) stampWith it
     }
+
+    val driverThrottle by readWithEventLoop { -driver.driverStick.y stampWith it }
+    val driverSteering by readWithEventLoop { driver.driverWheel.x stampWith it }
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         VelocityOutput(

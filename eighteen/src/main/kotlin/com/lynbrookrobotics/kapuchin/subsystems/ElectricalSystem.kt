@@ -6,12 +6,7 @@ import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.*
 
-class ElectricalSystemComponent(hardware: ElectricalSystemHardware) : Component<ElectricalSystemComponent, ElectricalSystemHardware, Unit>(hardware) {
-    override val fallbackController: ElectricalSystemComponent.(Time) -> Unit = {}
-    override fun ElectricalSystemHardware.output(value: Unit) {}
-}
-
-class ElectricalSystemHardware : SubsystemHardware<ElectricalSystemHardware, ElectricalSystemComponent>() {
+class ElectricalSystemHardware : SubsystemHardware<ElectricalSystemHardware, Nothing>() {
     override val subsystemName = "Electrical System"
     override val priority = Priority.Lowest
     override val period = 3.Minute

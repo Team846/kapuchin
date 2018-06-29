@@ -6,13 +6,13 @@ import kotlinx.coroutines.experimental.launch
 import kotlin.math.pow
 import kotlin.math.round
 
-expect fun Named.log(level: Level, throwable: Throwable, message: suspend () -> String): Job
+expect fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job
 
-fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = emptyArray(), message: suspend () -> String) = launch {
+fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String) = launch {
     printAtLevel(level, messageToString(this@log, stackTrace, message))
 }
 
-private suspend fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?, message: suspend () -> String): String {
+private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?, message: () -> String): String {
     val senderHeader = "${sender.name}: "
     val indent = " ".repeat(senderHeader.length)
     val newLine = "\n$indent"
@@ -21,7 +21,7 @@ private suspend fun messageToString(sender: Named, stackTrace: Array<StackTraceE
             (stackTrace?.joinToString(prefix = newLine, postfix = newLine, limit = 7) ?: "")
 }
 
-expect suspend fun printAtLevel(level: Level, formattedMessage: String)
+expect fun printAtLevel(level: Level, formattedMessage: String)
 
 infix fun Number.withDecimals(decimalPlaces: Int) = toDouble().let {
     val shifter = 10.0.pow(decimalPlaces)

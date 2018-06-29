@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.drivetrain.routines
+package com.lynbrookrobotics.kapuchin.routines.teleop
 
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
@@ -13,7 +13,23 @@ import com.lynbrookrobotics.kapuchin.routines.autoroutine
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
-suspend fun DrivetrainComponent.driveArc(
+suspend fun DrivetrainComponent.teleop(isFinished: DrivetrainComponent.(Time) -> Boolean) {
+    return autoroutine(
+            newController = {
+                val forward = topSpeed * driverThrottle
+                val steering = topSpeed * driverSteering
+                offloadedSettings.run {
+                    TwoSided(
+                            VelocityOutput(native(leftVelocityGains), native(forward + steering)),
+                            VelocityOutput(native(leftVelocityGains), native(forward - steering))
+                    )
+                }
+            },
+            isFinished = isFinished
+    )
+}
+
+suspend fun DrivetrainComponent.arc(
         distance: Length, distanceTolerance: Length,
         radius: Length, angleTolerance: Angle,
         acceleration: Acceleration,
