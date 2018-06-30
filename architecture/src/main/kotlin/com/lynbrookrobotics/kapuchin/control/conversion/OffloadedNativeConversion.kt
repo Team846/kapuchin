@@ -14,6 +14,7 @@ import kotlin.jvm.JvmName
 class OffloadedNativeConversion<O, I, Q, D, DD>(
         val nativeOutputUnits: Int, val perOutputQuantity: O,
         val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
+        val feedbackZero: Q = perFeedbackQuantity.new(0.0),
         val nativeTimeUnit: Time = 100.milli(::Second),
         val nativeLoopTime: Time = 1.milli(::Second)
 )
@@ -23,29 +24,32 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
               D : Quantity<D, Q, DD>,
               DD : Quantity<DD, D, *> {
 
+    private fun convert(x: Q) = x * nativeFeedbackUnits / perFeedbackQuantity
+    private fun convert(x: Number) = perFeedbackQuantity / nativeFeedbackUnits * x
+
     @JvmName("nativeOutput")
-    fun native(x: O) = (nativeOutputUnits * (x / perOutputQuantity))
+    fun native(x: O) = x * nativeOutputUnits / perOutputQuantity
 
     @JvmName("nativeAbsement")
-    fun native(x: I) = native(x / nativeLoopTime)
+    fun native(x: I) = convert(x / nativeLoopTime)
 
     @JvmName("nativePosition")
-    fun native(x: Q) = (nativeFeedbackUnits * (x / perFeedbackQuantity))
+    fun native(x: Q) = convert(x + feedbackZero)
 
     @JvmName("nativeVelocity")
-    fun native(x: D) = native(x * nativeTimeUnit)
+    fun native(x: D) = convert(x * nativeTimeUnit)
 
     @JvmName("nativeAcceleration")
     fun native(x: DD) = native(x * nativeLoopTime)
 
-    fun realPosition(x: Number) = perFeedbackQuantity * (x.toDouble() / nativeFeedbackUnits)
-    fun realVelocity(x: Number) = realPosition(x.toDouble() / nativeTimeUnit.Second) / 1.Second
+    fun realPosition(x: Number) = convert(x) - feedbackZero
+    fun realVelocity(x: Number) = convert(x) / nativeTimeUnit
 
     @JvmName("nativeAbsementGain")
     fun native(x: Gain<O, I>) = native(x.compensation) / native(x.forError)
 
     @JvmName("nativePositionGain")
-    fun native(x: Gain<O, Q>) = native(x.compensation) / native(x.forError)
+    fun native(x: Gain<O, Q>) = native(x.compensation) / convert(x.forError)
 
     @JvmName("nativeVelocityGain")
     fun native(x: Gain<O, D>) = native(x.compensation) / native(x.forError)

@@ -31,13 +31,11 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
     }
 
     val offloadedSettings by pref {
-        val nativeOutputUnits by pref(1023)
-        val perOutputQuantity by pref(12::Volt)
         val nativeFeedbackUnits by pref(4096)
         val perFeedbackQuantity by pref(1::Turn)
         ({
             OffloadedNativeConversion(
-                    nativeOutputUnits = nativeOutputUnits, perOutputQuantity = perOutputQuantity, nativeFeedbackUnits = nativeFeedbackUnits,
+                    nativeOutputUnits = 1023, perOutputQuantity = hardware.operatingVoltage, nativeFeedbackUnits = nativeFeedbackUnits,
                     perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
             )
         })

@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.WheelConversion
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
-import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
 import com.lynbrookrobotics.kapuchin.tests.anyInt
@@ -56,7 +55,7 @@ class ConversionTest {
 
     @Test
     fun `offloaded real and native methods are inverses`() {
-        anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(1023, 12.Volt, resolution, 8.46.Metre) }
+        anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(1023, 12.Volt, resolution, 8.46.Metre, 1.Foot) }
                 .forEach { conversion ->
                     anyDouble.map { it.Foot }.forEach { x ->
                         x `is equal to?` conversion.realPosition(conversion.native(x))
