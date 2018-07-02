@@ -4,7 +4,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.routines.teleopDrive
-import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
+import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
 import kotlinx.coroutines.experimental.launch
@@ -33,7 +34,7 @@ class FunkyRobot : RobotBase() {
 
         while (true) {
             m_ds.waitForData()
-            WithEventLoop.update()
+            EventLoop.tick(currentTime)
         }
     }
 }

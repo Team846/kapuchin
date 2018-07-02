@@ -1,3 +1,5 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-typealias Cancel = () -> Unit
+class Cancel(private val f: () -> Unit) {
+    fun cancel() = f()
+}
