@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.control.Quan
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
+import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
@@ -24,19 +24,18 @@ class PreferenceLayer<Value>(
         private val parent: Named,
         private val construct: Named.() -> () -> Value,
         private val nameSuffix: String = ""
-) : WithEventLoop, DelegateProvider<Any?, Value> {
+) : DelegateProvider<Any?, Value> {
 
     private lateinit var get: () -> Value
     private var value: Value? = null
 
-    override fun update() {
-        if (this::get.isInitialized) {
-            value = get()
-        }
-    }
-
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         get = object : Named(prop.name + nameSuffix, parent) {}.run(construct)
+        EventLoop.runOnTick {
+            if (this::get.isInitialized) {
+                value = get()
+            }
+        }
 
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!
