@@ -3,16 +3,21 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
+import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
+import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
 import com.lynbrookrobotics.kapuchin.hardware.configSlave
-import com.lynbrookrobotics.kapuchin.hardware.hardw
 import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.*
+import kotlin.math.PI
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
@@ -53,10 +58,47 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
 
+
+    val wheelDiameter by pref(6::Inch)
+
+    val encoderToWheelGears by pref {
+        val encoderGear by pref(18)
+        val wheelGear by pref(74)
+        ({ GearTrain(encoderGear, wheelGear) })
+    }
+
+    val offloadedSettings by pref {
+        val nativeFeedbackUnits by pref(4096)
+        val perFeedbackQuantity by pref(1::Turn)
+        ({
+            OffloadedNativeConversion(
+                    nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage, nativeFeedbackUnits = nativeFeedbackUnits,
+                    perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
+            )
+        })
+    }
+
+    val idx = 0
+    val position = sensor {
+        TwoSided(
+                offloadedSettings.realPosition(leftMasterEsc.getSelectedSensorPosition(idx)),
+                offloadedSettings.realPosition(rightMasterEsc.getSelectedSensorPosition(idx))
+        ) stampWith it
+    }
+    val velocity = sensor {
+        TwoSided(
+                offloadedSettings.realVelocity(leftMasterEsc.getSelectedSensorVelocity(idx)),
+                offloadedSettings.realVelocity(rightMasterEsc.getSelectedSensorVelocity(idx))
+        ) stampWith it
+    }
+
     val driftTolerance by pref(1::DegreePerSecond)
     val gyro by hardw { ADIS16448_IMU() }.verify("Gyro should not drift after calibration") {
         it.rate.DegreePerSecond in 0.DegreePerSecond withToleranceOf driftTolerance
-    }.readEagerly {
-        GyroInput(angle.Degree, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith lastSampleTime.Second
+    }
+    val gyroInput = sensor {
+        gyro.run {
+            GyroInput(angle.Degree, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith lastSampleTime.Second
+        }
     }
 }

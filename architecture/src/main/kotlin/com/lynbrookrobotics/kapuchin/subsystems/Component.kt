@@ -36,19 +36,21 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
         }
     }
 
-    private fun <Input> Sensor<Input>.readOnTick() = startUpdates<This> { _, _ ->
-        ticker.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
-    }
+    val <Input> Sensor<Input>.readOnTick
+        get() = startUpdates { _ ->
+            ticker.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
+        }
 
-    private fun <Input> Sensor<Input>.readWithEventLoop() = startUpdates<This> { _, _ ->
-        EventLoop.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
-    }
+    val <Input> Sensor<Input>.readWithEventLoop
+        get() = startUpdates { _ ->
+            EventLoop.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
+        }
 
-    private fun <Input> Sensor<Input>.readAsynchronously(name: String, priority: Priority) = startUpdates<This> { _, _ ->
-        PlatformThread(this@Component, name, priority) {
+    fun <Input> Sensor<Input>.readAsynchronously(priority: Priority) = startUpdates {
+        PlatformThread(this@Component, it.name, priority) {
             while (true) value = optimizedRead(ticker.waitOnTick(), hardware.syncThreshold)
         }
     }
 
-    private fun <Input> Sensor<Input>.readEagerly() = startUpdates<This> { _, _ -> }
+    val <Input> Sensor<Input>.readEagerly get() = startUpdates { _ -> }
 }

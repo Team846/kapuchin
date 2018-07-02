@@ -1,32 +1,31 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
+import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.hardware.hardw
+import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
 
-class ShooterComponent(hardware: ShooterHardware, es: ElectricalSystemHardware) : Component<ShooterComponent, ShooterHardware, Pair<Volt, Volt>>(hardware) {
-    val kP: Gain<Volt, AngularVelocity> by pref {
-        val compensation by pref(12::Volt)
-        val forError by pref(3000::Rpm)
-        fun() = Gain(compensation, forError)
-    }
+class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, Pair<Dimensionless, Dimensionless>>(hardware) {
 
     val topSpeed by pref(6500.0::Rpm)
-    val kF = Gain(12.Volt, topSpeed)
+    val gains by pref {
+        val kP by pref(12::Volt, 2000::Rpm)
+        val kI by pref(0::Volt, 1::Turn)
+        val kD by pref(0::Volt, 1::DegreePerSecondSquared)
+        val kF = Gain(12.Volt, topSpeed)
+        ({ PidGains(kP, kI, kD, kF) })
+    }
 
-    val battery by es.batteryVoltage
+    override val fallbackController: ShooterComponent.(Time) -> Pair<Dimensionless, Dimensionless> = { 0.Percent to 0.Percent }
 
-    override val fallbackController: ShooterComponent.(Time) -> Pair<Volt, Volt> = { 0.Volt to 0.Volt }
-
-    override fun ShooterHardware.output(value: Pair<Volt, Volt>) {
-        frontEsc.set(voltageToDutyCycle(value.first, battery).Tick)
-        backEsc.set(voltageToDutyCycle(value.first, battery).Tick)
+    override fun ShooterHardware.output(value: Pair<Dimensionless, Dimensionless>) {
+        frontEsc.set(value.first.Tick)
+        backEsc.set(value.second.Tick)
     }
 }
 
@@ -38,10 +37,10 @@ class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
 
     val frontHallEffectPort by pref(0)
     val backHallEffectPort by pref(1)
-    val frontHallEffect by hardw { Counter(frontHallEffectPort) }.readWithComponent {
+    val frontHallEffect by hardw { Counter(frontHallEffectPort) }.sensor {
         180.Degree / period.Second stampWith it
     }
-    val backHallEffect by hardw { Counter(backHallEffectPort) }.readWithComponent {
+    val backHallEffect by hardw { Counter(backHallEffectPort) }.sensor {
         180.Degree / period.Second stampWith it
     }
 

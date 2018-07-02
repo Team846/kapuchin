@@ -1,45 +1,21 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
-import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
-import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
-import com.lynbrookrobotics.kapuchin.control.stampWith
+import com.lynbrookrobotics.kapuchin.hardware.Sensor
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
-import com.lynbrookrobotics.kapuchin.hardware.readWithComponent
-import com.lynbrookrobotics.kapuchin.hardware.readWithEventLoop
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import info.kunalsheth.units.generated.*
-import kotlin.math.PI
 
-class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
+class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
 
     private val maxLeftSpeed by pref(13::FootPerSecond)
     private val maxRightSpeed by pref(13.3::FootPerSecond)
     val topSpeed get() = maxLeftSpeed min maxRightSpeed
-
-    val wheelDiameter by pref(6::Inch)
-
-    val encoderToWheelGears by pref {
-        val encoderGear by pref(18)
-        val wheelGear by pref(74)
-        ({ GearTrain(encoderGear, wheelGear) })
-    }
-
-    val offloadedSettings by pref {
-        val nativeFeedbackUnits by pref(4096)
-        val perFeedbackQuantity by pref(1::Turn)
-        ({
-            OffloadedNativeConversion(
-                    nativeOutputUnits = 1023, perOutputQuantity = hardware.operatingVoltage, nativeFeedbackUnits = nativeFeedbackUnits,
-                    perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
-            )
-        })
-    }
 
     val positionGains by pref {
         val kP by pref(12::Volt, 3::Foot)
@@ -66,26 +42,9 @@ class DrivetrainComponent(hardware: DrivetrainHardware, driver: DriverHardware) 
         ({ PidGains(kP, kI, kD) })
     }
 
-    val idx = 0
-    val position by readWithComponent {
-        TwoSided(
-                offloadedSettings.realPosition(hardware.leftMasterEsc.getSelectedSensorPosition(idx)),
-                offloadedSettings.realPosition(hardware.rightMasterEsc.getSelectedSensorPosition(idx))
-        ) stampWith it
-    }
-    val velocity by readWithComponent {
-        TwoSided(
-                offloadedSettings.realVelocity(hardware.leftMasterEsc.getSelectedSensorVelocity(idx)),
-                offloadedSettings.realVelocity(hardware.rightMasterEsc.getSelectedSensorVelocity(idx))
-        ) stampWith it
-    }
-
-    val driverThrottle by readWithEventLoop { -driver.driverStick.y stampWith it }
-    val driverSteering by readWithEventLoop { driver.driverWheel.x stampWith it }
-
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         VelocityOutput(
-                offloadedSettings.native(velocityGains), offloadedSettings.native(0.FootPerSecond)
+                hardware.offloadedSettings.native(velocityGains), hardware.offloadedSettings.native(0.FootPerSecond)
         ).let { TwoSided(it, it) }
     }
 

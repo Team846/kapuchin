@@ -1,8 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.hardware.hardw
-import com.lynbrookrobotics.kapuchin.hardware.readEagerly
+import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Solenoid
@@ -10,13 +8,7 @@ import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.milli
 
-class ClimberHooksComponent(hardware: ClimberHooksHardware, driver: DriverHardware) : Component<ClimberHooksComponent, ClimberHooksHardware, Boolean>(hardware) {
-    val deployButton1 by pref(11)
-    val deployButton2 by pref(14)
-    val isTriggered by readEagerly {
-        (driver.operatorStick.getRawButton(deployButton1) && driver.operatorStick.getRawButton(deployButton2)) stampWith it
-    }
-
+class ClimberHooksComponent(hardware: ClimberHooksHardware) : Component<ClimberHooksComponent, ClimberHooksHardware, Boolean>(hardware) {
     override val fallbackController: ClimberHooksComponent.(Time) -> Boolean = { false }
     override fun ClimberHooksHardware.output(value: Boolean) = solenoidValve.set(value)
 }

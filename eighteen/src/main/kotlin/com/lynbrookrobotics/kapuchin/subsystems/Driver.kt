@@ -1,6 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
+import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
@@ -21,4 +23,13 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
 
     val wheelPort by pref(2)
     val driverWheel by hardw { Joystick(wheelPort) }
+
+    // CLIMBER HOOKS
+    private val deployHooksButtonA by pref(11)
+    private val deployHooksButtonB by pref(14)
+    val deployHooks = sensor { operatorStick.run { getRawButton(deployHooksButtonA) && getRawButton(deployHooksButtonB) } stampWith it }
+
+    //DRIVETRAIN
+    val accelerator = sensor { -driverStick.y stampWith it }
+    val steering = sensor { driverWheel.x stampWith it }
 }

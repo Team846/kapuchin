@@ -4,8 +4,8 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice.Analog
 import com.ctre.phoenix.motorcontrol.NeutralMode.Brake
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
+import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
-import com.lynbrookrobotics.kapuchin.hardware.hardw
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref

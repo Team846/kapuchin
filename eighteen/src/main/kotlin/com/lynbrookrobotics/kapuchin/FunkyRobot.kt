@@ -16,18 +16,18 @@ class FunkyRobot : RobotBase() {
         val electricalHardware = ::ElectricalSystemHardware.safeCall()
 
         val shooterHardware = ::ShooterHardware.safeCall()
-        val shooterComponent = shooterHardware with electricalHardware creates ::ShooterComponent
+        val shooterComponent = shooterHardware creates ::ShooterComponent
 
         val driverHardware = ::DriverHardware.safeCall()
 
         val drivetrainHardware = ::DrivetrainHardware.safeCall()
-        val drivetrainComponent = drivetrainHardware with driverHardware creates ::DrivetrainComponent
+        val drivetrainComponent = drivetrainHardware creates ::DrivetrainComponent
 
         HAL.observeUserProgramStarting()
 
         launch {
             withTimeout(10000) {
-                drivetrainComponent?.teleop { false }
+                drivetrainComponent?.teleop(driverHardware!!) { false }
             }
         }
 

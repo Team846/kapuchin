@@ -1,10 +1,13 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
+import com.lynbrookrobotics.kapuchin.control.TimeStamped
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
+import info.kunalsheth.units.generated.Time
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -43,6 +46,12 @@ class HardwareInit<Hardw> private constructor(
             parent, initialize, configure,
             { validate(it) && f(it).also { if (!it) log(Error) { that } } },
             nameSuffix
+    )
+
+    fun <Input> sensor(read: Hardw.(Time) -> TimeStamped<Input>) = HardwareInit(
+            parent,
+            { val hardw = initialize(); parent.sensor(hardw, read) },
+            nameSuffix = nameSuffix
     )
 
     companion object {
