@@ -6,7 +6,7 @@ import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.PlatformThread
 import com.lynbrookrobotics.kapuchin.timing.Priority
-import com.lynbrookrobotics.kapuchin.timing.ticker
+import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
 import info.kunalsheth.units.generated.Time
 
 abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name, null)
