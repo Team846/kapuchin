@@ -29,10 +29,9 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
 
     init {
         ticker.runOnTick(Last) { tickStart ->
-            hardware.output(
-                    @Suppress("UNCHECKED_CAST")
-                    (controller ?: fallbackController)(this as This, tickStart)
-            )
+            val controller: (This.(Time) -> Output)? = controller ?: fallbackController
+            @Suppress("UNCHECKED_CAST")
+            controller?.let { hardware.output(it(this as This, tickStart)) }
         }
     }
 

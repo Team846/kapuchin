@@ -30,36 +30,34 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val rightMasterEscId by pref(11)
     val leftMasterEscId by pref(12)
 
-    val escCanTimeout by pref(0.001::Second)
 
-
-    val operatingVoltage by pref(11::Volt)
-    val currentLimit by pref(20::Ampere)
+    val operatingVoltage by pref(11, `To Volt`)
+    val currentLimit by pref(20, `To Ampere`)
 
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, QuadEncoder)
+        configMaster(it, operatingVoltage, currentLimit, period / 2, QuadEncoder)
     }
     val leftSlaveEsc by hardw { TalonSRX(leftSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit)
+        configSlave(it, operatingVoltage, currentLimit, period / 2)
         it.follow(leftMasterEsc)
     }
-    val leftLazyOutput = lazyOutput(leftMasterEsc, escCanTimeout)
+    val leftLazyOutput = lazyOutput(leftMasterEsc, syncThreshold)
 
 
     val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, QuadEncoder)
+        configMaster(it, operatingVoltage, currentLimit, period / 2, QuadEncoder)
         it.inverted = true
     }
     val rightSlaveEsc by hardw { TalonSRX(rightSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit)
+        configSlave(it, operatingVoltage, currentLimit, period / 2)
         it.follow(rightMasterEsc)
         it.inverted = true
     }
-    val rightLazyOutput = lazyOutput(rightMasterEsc, escCanTimeout)
+    val rightLazyOutput = lazyOutput(rightMasterEsc, syncThreshold)
 
 
-    val wheelDiameter by pref(6::Inch)
+    val wheelDiameter by pref(6, `To Inch`)
 
     val encoderToWheelGears by pref {
         val encoderGear by pref(18)
@@ -69,7 +67,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val offloadedSettings by pref {
         val nativeFeedbackUnits by pref(4096)
-        val perFeedbackQuantity by pref(1::Turn)
+        val perFeedbackQuantity by pref(1, `To Turn`)
         ({
             OffloadedNativeConversion(
                     nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage, nativeFeedbackUnits = nativeFeedbackUnits,
@@ -92,7 +90,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         ) stampWith it
     }
 
-    val driftTolerance by pref(1::DegreePerSecond)
+    val driftTolerance by pref(1, `To DegreePerSecond`)
     val gyro by hardw { ADIS16448_IMU() }.verify("Gyro should not drift after calibration") {
         it.rate.DegreePerSecond in 0.DegreePerSecond withToleranceOf driftTolerance
     }

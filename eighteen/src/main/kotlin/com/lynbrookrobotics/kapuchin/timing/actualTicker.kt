@@ -1,8 +1,9 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import com.lynbrookrobotics.kapuchin.logging.Level
+import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import edu.wpi.first.wpilibj.hal.NotifierJNI
 import info.kunalsheth.units.generated.*
 
@@ -23,8 +24,8 @@ actual class Ticker private actual constructor(parent: Named, priority: Priority
     private fun updateAlarm() {
         val periodIndex = ((currentTime - startTime) / period).Tick.toLong() + 1
 
-        if (periodIndex > lastPeriodIndex + 1) log(Level.Warning) {
-            "$thread overran its loop by ${currentTime - startTime} out of $period"
+        if (periodIndex > lastPeriodIndex + 1) log(Warning) {
+            "$name overran its ${period withDecimals 4} loop by ${currentTime - startTime withDecimals 4}"
         }
 
         if (lastPeriodIndex != periodIndex) NotifierJNI.updateNotifierAlarm(

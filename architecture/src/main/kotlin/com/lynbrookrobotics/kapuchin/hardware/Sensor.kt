@@ -2,11 +2,13 @@ package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
+import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
+import kotlin.jvm.JvmName
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
