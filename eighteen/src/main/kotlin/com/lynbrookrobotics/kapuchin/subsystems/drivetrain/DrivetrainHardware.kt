@@ -25,10 +25,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val syncThreshold = 1.milli(::Second)
     override val subsystemName = "Drivetrain"
 
-    val leftSlaveEscId by pref(14)
-    val rightSlaveEscId by pref(13)
-    val rightMasterEscId by pref(11)
-    val leftMasterEscId by pref(12)
+    val leftSlaveEscId by pref(12)
+    val rightSlaveEscId by pref(14)
+    val rightMasterEscId by pref(13)
+    val leftMasterEscId by pref(11)
 
 
     val operatingVoltage by pref(11, `To Volt`)

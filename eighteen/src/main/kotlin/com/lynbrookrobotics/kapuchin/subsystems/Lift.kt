@@ -27,8 +27,8 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     val collectHeight by pref(0, `To Inch`)
     val exchangeHeight by pref(4, `To Inch`)
     val switchHeight by pref(25, `To Inch`)
-    val lowScaleHeight by pref(64, `To Inch`)
-    val highScaleHeight by pref(66, `To Inch`)
+    val lowScaleHeight by pref(53, `To Inch`)
+    val highScaleHeight by pref(75, `To Inch`)
     val positionTolerance by pref(2, `To Inch`)
 
     val twistAdjustRange by pref(10, `To Inch`)

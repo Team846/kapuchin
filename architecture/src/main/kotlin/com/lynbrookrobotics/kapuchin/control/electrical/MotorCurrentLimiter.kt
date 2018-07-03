@@ -8,11 +8,20 @@ import info.kunalsheth.units.generated.Volt
 class MotorCurrentLimiter(
         val maxVoltage: Volt, val freeSpeed: AngularVelocity,
         stall: Ampere, val limit: Ampere
-) : (AngularVelocity, Volt) -> Volt {
+) : (AngularVelocity, Volt) -> Volt, (Volt, Ampere, Volt) -> Volt {
     private val motorR: Ohm = maxVoltage / stall
 
-    override operator fun invoke(currentSpeed: AngularVelocity, target: Volt): Volt {
-        val emf = emf(currentSpeed, freeSpeed, maxVoltage)
+    override operator fun invoke(speed: AngularVelocity, target: Volt) = limit(
+            emf = speed / freeSpeed * maxVoltage,
+            target = target
+    )
+
+    override operator fun invoke(applying: Volt, drawing: Ampere, target: Volt) = limit(
+            emf = applying - drawing * motorR,
+            target = target
+    )
+
+    private fun limit(emf: Volt, target: Volt): Volt {
         val expectedCurrent = (target - emf) / motorR
 
         return when {
@@ -21,7 +30,4 @@ class MotorCurrentLimiter(
             else -> target
         }
     }
-
-    private fun emf(currentSpeed: AngularVelocity, freeSpeed: AngularVelocity, maxVoltage: Volt): Volt =
-            (currentSpeed / freeSpeed) * maxVoltage
 }

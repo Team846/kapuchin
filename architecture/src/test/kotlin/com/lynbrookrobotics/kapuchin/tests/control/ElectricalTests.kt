@@ -58,10 +58,12 @@ class ElectricalTests {
         repeat(100) {
             val target = incr * it
             limiter(0.Rpm, target) `is equal to?` if (target > maxStartupVoltage) maxStartupVoltage else target
+            limiter(0.Volt, 0.Ampere, target) `is equal to?` if (target > maxStartupVoltage) maxStartupVoltage else target
         }
         repeat(100) {
             val target = -incr * it
             limiter(0.Rpm, target) `is equal to?` if (target < -maxStartupVoltage) -maxStartupVoltage else target
+            limiter(0.Volt, 0.Ampere, target) `is equal to?` if (target < -maxStartupVoltage) -maxStartupVoltage else target
         }
     }
 
