@@ -17,8 +17,8 @@ private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?
     val indent = " ".repeat(senderHeader.length)
     val newLine = "\n$indent"
     val indentedMessage = message().replace("\n", newLine)
-    return "$senderHeader$indentedMessage$newLine" +
-            (stackTrace?.joinToString(prefix = newLine, postfix = newLine, limit = 7) ?: "")
+    return "$senderHeader$indentedMessage" +
+            (stackTrace?.joinToString(prefix = newLine, postfix = newLine, separator = newLine, limit = 7) ?: "")
 }
 
 expect fun printAtLevel(level: Level, formattedMessage: String)

@@ -5,9 +5,9 @@ import edu.wpi.first.wpilibj.DriverStation
 actual fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(level, throwable.stackTrace, message)
 
 actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
-    Level.Error -> DriverStation.reportError(formattedMessage, false)
-    Level.Warning -> DriverStation.reportWarning(formattedMessage, false)
-    Level.Debug -> println(formattedMessage)
+    Level.Error -> println("ERROR $formattedMessage")
+    Level.Warning -> println("WARNING $formattedMessage")
+    Level.Debug -> println("DEBUG $formattedMessage")
 }
 
 actual typealias StackTraceElement = java.lang.StackTraceElement

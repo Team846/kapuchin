@@ -32,7 +32,7 @@ fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOfflo
     )
 }
 
-fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, timeout: Time = 0.5.Second) {
+fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, outputPeriod: Time, timeout: Time = 0.5.Second) {
     val t = timeout.milli(T::Second).toInt()
 
     esc.setNeutralMode(NeutralMode.Coast)
@@ -43,11 +43,14 @@ fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLim
     esc.configNominalOutputReverse(0.0, t)
     esc.configNominalOutputForward(0.0, t)
     esc.configPeakOutputForward(1.0, t)
-    esc.configNeutralDeadband(0.001 /*min*/, t)
+    esc.configNeutralDeadband(0.001, t)
 
     esc.configVoltageCompSaturation(voltageCompensation.Volt, t)
     esc.configVoltageMeasurementFilter(32, t)
     esc.enableVoltageCompensation(true)
+
+    val outPeriodT = outputPeriod.milli(T::Second).toInt()
+    ControlFrame.values().forEach { esc.setControlFramePeriod(it, outPeriodT) }
 
     if (esc is TalonSRX) {
         esc.configContinuousCurrentLimit(currentLimit.Ampere.toInt(), t)
@@ -56,10 +59,10 @@ fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLim
     }
 }
 
-fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, vararg feedback: FeedbackDevice, timeout: Time = 0.5.Second) {
+fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, outputPeriod: Time, vararg feedback: FeedbackDevice, timeout: Time = 0.5.Second) {
     val t = timeout.milli(T::Second).toInt()
 
-    generalSetup(master, voltageCompensation, currentLimit)
+    generalSetup(master, voltageCompensation, currentLimit, outputPeriod)
 
     feedback.forEachIndexed { i, sensor -> master.configSelectedFeedbackSensor(sensor, i, t) }
 
@@ -82,8 +85,8 @@ fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampe
     master.configVelocityMeasurementWindow(4, t)
 }
 
-fun configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, timeout: Time = 0.5.Second) {
-    generalSetup(slave, voltageCompensation, currentLimit)
+fun configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, outputPeriod: Time, timeout: Time = 0.5.Second) {
+    generalSetup(slave, voltageCompensation, currentLimit, outputPeriod)
     val slow = 1000
     val t = timeout.milli(T::Second).toInt()
     StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slow, t) }

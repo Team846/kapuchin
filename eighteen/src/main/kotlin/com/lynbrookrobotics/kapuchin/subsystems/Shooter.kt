@@ -12,11 +12,11 @@ import info.kunalsheth.units.generated.*
 
 class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, Pair<Dimensionless, Dimensionless>>(hardware) {
 
-    val topSpeed by pref(6500.0::Rpm)
+    val topSpeed by pref(6500.0, `To Rpm`)
     val gains by pref {
-        val kP by pref(12::Volt, 2000::Rpm)
-        val kI by pref(0::Volt, 1::Turn)
-        val kD by pref(0::Volt, 1::DegreePerSecondSquared)
+        val kP by pref(12, `To Volt`, 2000, `To Rpm`)
+        val kI by pref(0, `To Volt`, 1, `To Turn`)
+        val kD by pref(0, `To Volt`, 1, `To DegreePerSecondSquared`)
         val kF = Gain(12.Volt, topSpeed)
         ({ PidGains(kP, kI, kD, kF) })
     }

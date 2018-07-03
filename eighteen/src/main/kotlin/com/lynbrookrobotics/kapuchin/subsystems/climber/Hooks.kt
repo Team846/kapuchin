@@ -1,19 +1,21 @@
-package com.lynbrookrobotics.kapuchin.subsystems
+package com.lynbrookrobotics.kapuchin.subsystems.climber
 
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.preferences.pref
+import com.lynbrookrobotics.kapuchin.subsystems.Component
+import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.milli
 
-class ClimberHooksComponent(hardware: ClimberHooksHardware) : Component<ClimberHooksComponent, ClimberHooksHardware, Boolean>(hardware) {
-    override val fallbackController: ClimberHooksComponent.(Time) -> Boolean = { false }
-    override fun ClimberHooksHardware.output(value: Boolean) = solenoidValve.set(value)
+class HooksComponent(hardware: HooksHardware) : Component<HooksComponent, HooksHardware, Boolean>(hardware) {
+    override val fallbackController: HooksComponent.(Time) -> Boolean = { false }
+    override fun HooksHardware.output(value: Boolean) = solenoidValve.set(value)
 }
 
-class ClimberHooksHardware : SubsystemHardware<ClimberHooksHardware, ClimberHooksComponent>() {
+class HooksHardware : SubsystemHardware<HooksHardware, HooksComponent>() {
     override val priority = Priority.Low
     override val period = 100.milli(::Second)
     override val syncThreshold = 50.milli(::Second)

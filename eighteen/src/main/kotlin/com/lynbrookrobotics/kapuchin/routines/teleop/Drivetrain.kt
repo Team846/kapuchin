@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
+import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.math.avg
@@ -11,12 +12,20 @@ import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.routines.autoroutine
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
+import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
-suspend fun DrivetrainComponent.teleop(driver: DriverHardware, isFinished: DrivetrainComponent.(Time) -> Boolean) {
+suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent, isFinished: DrivetrainComponent.(Time) -> Boolean) {
     val driverThrottle by driver.accelerator.readEagerly.withoutStamps
     val driverSteering by driver.steering.readEagerly.withoutStamps
+    val liftHeight by lift.hardware.position.readOnTick.withoutStamps
+
+    val slew = RampRateLimiter {
+        if (liftHeight !in lift.collectHeight withToleranceOf lift.positionTolerance)
+            maxAccelerationWithLiftUp / (liftHeight / lift.hardware.maxHeight)
+        else 1.giga { FootPerSecondSquared }
+    }
 
     return autoroutine(
             newController = {
@@ -24,8 +33,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, isFinished: Drive
                 val steering = topSpeed * driverSteering
                 hardware.offloadedSettings.run {
                     TwoSided(
-                            VelocityOutput(native(leftVelocityGains), native(forward + steering)),
-                            VelocityOutput(native(leftVelocityGains), native(forward - steering))
+                            VelocityOutput(native(leftVelocityGains), native(slew(it, forward + steering))),
+                            VelocityOutput(native(rightVelocityGains), native(slew(it, forward - steering)))
                     )
                 }
             },

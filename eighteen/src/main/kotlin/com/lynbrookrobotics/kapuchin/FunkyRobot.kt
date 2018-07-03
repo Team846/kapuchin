@@ -23,12 +23,15 @@ class FunkyRobot : RobotBase() {
         val drivetrainHardware = ::DrivetrainHardware.safeCall()
         val drivetrainComponent = drivetrainHardware creates ::DrivetrainComponent
 
+        val liftHardware = ::LiftHardware.safeCall()
+        val liftComponent = liftHardware creates ::LiftComponent
+
         HAL.observeUserProgramStarting()
 
         launch {
-            withTimeout(10000) {
-                drivetrainComponent?.teleop(driverHardware!!) { false }
-            }
+//            withTimeout(1000000000) {
+                drivetrainComponent?.teleop(driverHardware!!, liftComponent!!) { false }
+//            }
         }
 
         while (true) {
