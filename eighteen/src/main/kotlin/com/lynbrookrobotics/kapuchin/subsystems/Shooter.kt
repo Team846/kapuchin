@@ -24,8 +24,8 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
     override val fallbackController: ShooterComponent.(Time) -> Pair<Dimensionless, Dimensionless> = { 0.Percent to 0.Percent }
 
     override fun ShooterHardware.output(value: Pair<Dimensionless, Dimensionless>) {
-        frontEsc.set(value.first.Tick)
-        backEsc.set(value.second.Tick)
+        frontEsc.set(value.first.siValue)
+        backEsc.set(value.second.siValue)
     }
 }
 

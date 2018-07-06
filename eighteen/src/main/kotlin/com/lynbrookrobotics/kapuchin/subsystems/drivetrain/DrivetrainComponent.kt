@@ -43,9 +43,9 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val maxAccelerationWithLiftUp by pref(3, `To FootPerSecondSquared`)
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
-        VelocityOutput(
+        TwoSided(VelocityOutput(
                 hardware.offloadedSettings.native(velocityGains), hardware.offloadedSettings.native(0.FootPerSecond)
-        ).let { TwoSided(it, it) }
+        ))
     }
 
     override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {

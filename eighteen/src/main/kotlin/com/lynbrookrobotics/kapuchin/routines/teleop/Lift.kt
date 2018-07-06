@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.Sensor
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
-import com.lynbrookrobotics.kapuchin.routines.autoroutine
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runRoutine
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import info.kunalsheth.units.generated.Length
@@ -29,7 +29,7 @@ suspend fun LiftComponent.teleop(driver: DriverHardware, isFinished: LiftCompone
 
     val currentPosition by hardware.position.readOnTick.withoutStamps
 
-    autoroutine(
+    runRoutine("Teleop",
             newController = {
                 if (overrideLift) PercentOutput(manualOverride.Tick)
                 else PositionOutput(hardware.offloadedSettings.native(positionGains),
@@ -50,7 +50,7 @@ suspend fun LiftComponent.teleop(driver: DriverHardware, isFinished: LiftCompone
 
 suspend fun LiftComponent.to(height: Length, tolerance: Length = positionTolerance) {
     val position by hardware.position.readOnTick.withoutStamps
-    autoroutine(
+    runRoutine("To Height",
             newController = {
                 PositionOutput(
                         hardware.offloadedSettings.native(positionGains),

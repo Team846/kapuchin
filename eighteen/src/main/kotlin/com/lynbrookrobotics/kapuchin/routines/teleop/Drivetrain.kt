@@ -4,37 +4,55 @@ import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.math.avg
+import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionProfile
 import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
-import com.lynbrookrobotics.kapuchin.routines.autoroutine
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runRoutine
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
+import kotlin.math.sign
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent, isFinished: DrivetrainComponent.(Time) -> Boolean) {
-    val driverThrottle by driver.accelerator.readEagerly.withoutStamps
-    val driverSteering by driver.steering.readEagerly.withoutStamps
-    val liftHeight by lift.hardware.position.readOnTick.withoutStamps
+    val accelerator by driver.accelerator.readOnTick.withoutStamps
+    val steering by driver.steering.readOnTick.withoutStamps
+    val gyro by hardware.gyroInput.readEagerly.withoutStamps
 
-    val slew = RampRateLimiter {
-        if (liftHeight !in lift.collectHeight withToleranceOf lift.positionTolerance)
-            maxAccelerationWithLiftUp / (liftHeight / lift.hardware.maxHeight)
+    val liftHeight by lift.hardware.position.readOnTick.withoutStamps
+    val liftActivationThreshold = lift.collectHeight withToleranceOf lift.positionTolerance
+
+    val slewFunction: (Time) -> Acceleration = {
+        if (liftHeight !in liftActivationThreshold) maxAccelerationWithLiftUp / (liftHeight / lift.hardware.maxHeight)
         else 1.giga { FootPerSecondSquared }
     }
 
-    return autoroutine(
+    val leftSlew = RampRateLimiter(limit = slewFunction)
+    val rightSlew = RampRateLimiter(limit = slewFunction)
+
+    val turnTargetIntegrator = InfiniteIntegrator(gyro.angle)
+    val turnControl = PidControlLoop(turningPositionGains) {
+        turnTargetIntegrator(it, maxTurningSpeed * steering / (accelerator + steering))
+    }
+
+    fun sqrWithSign(x: Double) = x * x * x.sign
+
+    runRoutine("Teleop",
             newController = {
-                val forward = topSpeed * driverThrottle
-                val steering = topSpeed * driverSteering
+                val forwardVelocity = topSpeed * sqrWithSign(accelerator)
+                val steeringVelocity = topSpeed * sqrWithSign(steering) + turnControl(it, gyro.angle)
+
+                val left = leftSlew(it, forwardVelocity + steeringVelocity)
+                val right = rightSlew(it, steeringVelocity - steeringVelocity)
+
                 hardware.offloadedSettings.run {
                     TwoSided(
-                            VelocityOutput(native(leftVelocityGains), native(slew(it, forward + steering))),
-                            VelocityOutput(native(rightVelocityGains), native(slew(it, forward - steering)))
+                            VelocityOutput(native(leftVelocityGains), native(left)),
+                            VelocityOutput(native(rightVelocityGains), native(right))
                     )
                 }
             },
@@ -103,7 +121,7 @@ suspend fun DrivetrainComponent.arc(
         (startingPosition - position).avg / radius
     }
 
-    autoroutine(
+    runRoutine("Arc",
             newController = {
                 val turn = turningControl(gyro.stamp, deltaDirection())
 

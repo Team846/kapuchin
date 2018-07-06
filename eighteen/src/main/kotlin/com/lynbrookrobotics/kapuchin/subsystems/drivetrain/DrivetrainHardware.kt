@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
@@ -38,23 +39,23 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, period / 2, QuadEncoder)
     }
-    val leftSlaveEsc by hardw { TalonSRX(leftSlaveEscId) }.configure {
+    val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
         configSlave(it, operatingVoltage, currentLimit, period / 2)
         it.follow(leftMasterEsc)
     }
-    val leftLazyOutput = lazyOutput(leftMasterEsc, syncThreshold)
+    val leftLazyOutput = lazyOutput(leftMasterEsc, 0.Second)
 
 
     val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, period / 2, QuadEncoder)
         it.inverted = true
     }
-    val rightSlaveEsc by hardw { TalonSRX(rightSlaveEscId) }.configure {
+    val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
         configSlave(it, operatingVoltage, currentLimit, period / 2)
         it.follow(rightMasterEsc)
         it.inverted = true
     }
-    val rightLazyOutput = lazyOutput(rightMasterEsc, syncThreshold)
+    val rightLazyOutput = lazyOutput(rightMasterEsc, 0.Second)
 
 
     val wheelDiameter by pref(6, `To Inch`)

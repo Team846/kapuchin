@@ -6,6 +6,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
+import edu.wpi.first.networktables.NetworkTable
+import edu.wpi.first.wpilibj.Preferences
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
 import kotlinx.coroutines.experimental.launch

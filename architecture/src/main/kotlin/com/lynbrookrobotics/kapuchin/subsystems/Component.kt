@@ -2,21 +2,33 @@ package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.hardware.Sensor
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.routines.Routine
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.PlatformThread
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Time
 
 abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name, null)
         where This : Component<This, H, Output>,
               H : SubsystemHardware<H, This> {
 
+    @Suppress("UNCHECKED_CAST")
+    private val thisAsThis = this as This
+
     val ticker by lazy { ticker(hardware.priority, hardware.period) }
 
-    var controller: (This.(Time) -> Output)? = null
     abstract val fallbackController: This.(Time) -> Output
+    var routine: Routine<This, H, Output>? = null
+        get() = synchronized(this) {
+            field?.takeUnless { it.isFinished(thisAsThis, currentTime) }.also { routine = it }
+        }
+        set(value) = synchronized(this) {
+            field.takeIf { it !== value }?.run { stop() }
+            field = value
+        }
 
     protected abstract fun H.output(value: Output)
 
@@ -29,9 +41,10 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
 
     init {
         ticker.runOnTick(Last) { tickStart ->
-            val controller: (This.(Time) -> Output)? = controller ?: fallbackController
-            @Suppress("UNCHECKED_CAST")
-            controller?.let { hardware.output(it(this as This, tickStart)) }
+            @Suppress("UNNECESSARY_SAFE_CALL")
+            (routine?.controller ?: fallbackController)
+                    ?.invoke(thisAsThis, tickStart)
+                    ?.let { hardware.output(it) }
         }
     }
 

@@ -43,8 +43,8 @@ class WinchHardware : SubsystemHardware<WinchHardware, WinchComponent>() {
     val maxReverse by pref(10, `To Percent`)
     val middleEsc by hardw { TalonSRX(middleEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, period)
-        it.configPeakOutputForward(maxForward.Tick, 100)
-        it.configPeakOutputReverse(-maxReverse.Tick, 100)
+        it.configPeakOutputForward(maxForward.siValue, 100)
+        it.configPeakOutputReverse(-maxReverse.siValue, 100)
     }
     val lazyOutput = lazyOutput(middleEsc, syncThreshold)
 
