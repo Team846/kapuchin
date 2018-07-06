@@ -74,8 +74,8 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
         val t = 100
 
         // SAFETY
-        it.configPeakOutputForward(maxOutput.Tick, t)
-        it.configPeakOutputReverse(-maxOutput.Tick, t)
+        it.configPeakOutputForward(maxOutput.siValue, t)
+        it.configPeakOutputReverse(-maxOutput.siValue, t)
 
         it.configReverseSoftLimitThreshold(offloadedSettings.native(minHeight).toInt(), t)
         it.configReverseSoftLimitEnable(true, t)

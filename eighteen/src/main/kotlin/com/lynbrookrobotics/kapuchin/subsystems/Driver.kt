@@ -1,8 +1,12 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.stampWith
+import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.logging.Level.Debug
+import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
@@ -15,9 +19,18 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val period = 20.milli(::Second)
     override val syncThreshold = 3.milli(::Second)
 
-    val operatorStick by hardw { Joystick(1) }
-    val driverStick by hardw { Joystick(0) }
-    val driverWheel by hardw { Joystick(2) }
+    val operatorStick by hardw { Joystick(1) }.verify("the operator joystick is connected") {
+        log(Debug) { it.name } // TESTING
+        true
+    }
+    val driverStick by hardw { Joystick(0) }.verify("the driver joystick is connected") {
+        log(Debug) { it.name } // TESTING
+        true
+    }
+    val driverWheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
+        log(Debug) { it.name } // TESTING
+        true
+    }
 
     enum class JoystickButton(val raw: Int) {
         Trigger(1), BottomTrigger(2), LeftTrigger(3), RightTrigger(4),
@@ -36,9 +49,13 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     // CLIMBER WINCH
     val climb = s { driverStick[LeftOne] }
 
+    // CLIMBER FORKS
+
     // DRIVETRAIN
-    val accelerator = s { -driverStick.y }
-    val steering = s { driverWheel.x }
+    val activationTolerance by pref(0.05)
+    val inactiveRange = 0 withToleranceOf activationTolerance
+    val accelerator = s { -(driverStick.y.takeUnless { it in inactiveRange } ?: 0.0) }
+    val steering = s { driverWheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
 
     // LIFT
     val twistAdjust = s { operatorStick.z }
@@ -49,4 +66,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val highScale = s { operatorStick[RightTrigger] }
     val maxHeight = s { operatorStick[LeftOne] }
     val manualLift = s { operatorStick[LeftFive] }
+
+    // COLLECTOR ROLLERS
+    val purge = s { driverStick[LeftTrigger] || operatorStick[Trigger] }
 }

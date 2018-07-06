@@ -7,9 +7,9 @@ import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import info.kunalsheth.units.generated.Dimensionless
 import info.kunalsheth.units.generated.Volt
 
-fun Named.voltageToDutyCycle(target: Volt, current: Volt): Dimensionless {
-    if (target > current) log(Warning) {
-        "${target.Volt withDecimals 1} volt target cannot be reached with a ${current.Volt withDecimals 1} volt battery."
+fun Named.voltageToDutyCycle(target: Volt, vBat: Volt): Dimensionless {
+    if (target > vBat) log(Warning) {
+        "${target.Volt withDecimals 1} volt target cannot be reached with a ${vBat.Volt withDecimals 1} volt battery."
     }
-    return target / current
+    return target / vBat
 }
