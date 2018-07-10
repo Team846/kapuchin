@@ -43,7 +43,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
 
     runRoutine("Teleop") {
         val forwardVelocity = topSpeed * sqrWithSign(accelerator)
-        val steeringVelocity = topSpeed * sqrWithSign(steering) + turnControl(it, gyro.angle)
+        val steeringVelocity = topSpeed * steering + turnControl(it, gyro.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)
         val right = rightSlew(it, forwardVelocity - steeringVelocity)

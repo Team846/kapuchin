@@ -15,13 +15,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     private val maxRightSpeed by pref(13.3, `To FootPerSecond`)
     val topSpeed get() = maxLeftSpeed min maxRightSpeed
 
-    val positionGains by pref {
-        val kP by pref(12, `To Volt`, 3, `To Foot`)
-        val kI by pref(4, `To Volt`, 1, `To FootSecond`)
-        val kD by pref(0, `To Volt`, 1, `To FootPerSecond`)
-        ({ PidGains(kP, kI, kD) })
-    }
-
     private val velocityGains by pref {
         val kP by pref(0, `To Volt`, 3, `To FootPerSecond`)
         val kI by pref(0, `To Volt`, 1, `To Foot`)
