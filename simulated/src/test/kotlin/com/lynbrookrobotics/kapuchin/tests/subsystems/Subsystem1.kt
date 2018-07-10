@@ -19,8 +19,8 @@ class Subsystem1Component(hardware: Subsystem1Hardware) : Component<Subsystem1Co
 
 class Subsystem1Hardware : SubsystemHardware<Subsystem1Hardware, Subsystem1Component>() {
     override val priority = Priority.RealTime
-    override val period = 25.milli(::Second)
-    override val syncThreshold = 5.milli(::Second)
+    override val period = 1.Second
+    override val syncThreshold = 0.5.Second
     override val subsystemName = "Test Subsys. 1"
 
 }
