@@ -1,69 +1,52 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.Priority
-import info.kunalsheth.units.generated.Second
+import com.lynbrookrobotics.kapuchin.tests.hardware.TSH
 import org.junit.Test
 
 class SubsystemHardwareTest {
 
-    private abstract class TSH : SubsystemHardware<TSH, Nothing>() {
-        override val priority = Priority.RealTime
-        override val period = 2.Second
-        override val syncThreshold = 0.5.Second
-        override val subsystemName = "Test Subsystem Hardware"
-    }
+    private fun rte(): Nothing = throw RuntimeException("Hello World!")
 
-    @Test(expected = IllegalStateException::class)
+    @Test(expected = RuntimeException::class)
     fun `initialization fails on exception during hardware initialization`() {
-        class SH : TSH() {
-            val workingHardware1 by hardw { Any() }
-            val workingHardware2 by hardw { Any() }
-            val brokenHardware by hardw { Any().also { error("Intentionally broken hardware") } }
+        object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
+            val brokenHardware by hardw { Any().also { rte() } }
                     .configure { /**/ }
-                    .verify("Should fail before verification") { true }
+                    .verify("Should fail before verification") { false }
         }
-        SH()
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test(expected = RuntimeException::class)
     fun `initialization fails on exception during hardware configuration`() {
-        class SH : TSH() {
-            val workingHardware1 by hardw { Any() }
-            val workingHardware2 by hardw { Any() }
+        object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val brokenHardware by hardw { Any() }
-                    .configure { error("Intentionally broken hardware") }
-                    .verify("Should fail before verification") { true }
+                    .configure { rte() }
+                    .verify("Should fail before verification") { false }
         }
-        SH()
     }
 
     @Test(expected = IllegalStateException::class)
     fun `initialization fails on false hardware verification`() {
-        class SH : TSH() {
-            val workingHardware1 by hardw { Any() }
-            val workingHardware2 by hardw { Any() }
+        object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val brokenHardware by hardw { Any() }
                     .configure { /*do something here*/ }
                     .verify("Intentionally broken hardware") { false }
         }
-        SH()
     }
 
     @Test
     fun `initialization succeeds on true hardware verification and no exceptions`() {
-        class SH : TSH() {
+        object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val workingHardware1 by hardw { Any() }
-                    .configure { /**/ }
+                    .configure { /*do something here*/ }
                     .verify("Hardware1 is working") { true }
             val workingHardware2 by hardw { Any() }
-                    .configure { /**/ }
+                    .configure { /*do something here*/ }
                     .verify("Hardware2 is working") { true }
             val workingHardware3 by hardw { Any() }
                     .configure { /*do something here*/ }
                     .verify("Hardware3 is working") { true }
         }
-        SH()
     }
 }

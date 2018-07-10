@@ -24,7 +24,7 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
             object : DelegateProvider<Any?, Input> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = forSensor.run {
-                        value ?: optimizedRead(currentTime, 0.Second)
+                        value ?: optimizedRead(currentTime, 0.Second).also { value = it }
                     }.value
                 }.also { startUpdates(prop) }
             }
@@ -34,7 +34,7 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
             object : DelegateProvider<Any?, TimeStamped<Input>> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, TimeStamped<Input>> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = forSensor.run {
-                        value ?: optimizedRead(currentTime, 0.Second)
+                        value ?: optimizedRead(currentTime, 0.Second).also { value = it }
                     }
                 }.also { startUpdates(prop) }
             }

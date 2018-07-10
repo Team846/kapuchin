@@ -23,8 +23,11 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
     abstract val fallbackController: This.(Time) -> Output
 
     var routine: Routine<This, H, Output>? = null
-        private set
-        get() = field?.takeIf { it.isActive }
+        private set(value) = synchronized(this) {
+            field.takeUnless { it === value }?.cancel()
+            field = value
+        }
+        get() = synchronized(this) { field?.takeIf { it.isActive } }
 
     suspend fun runRoutine(name: String, controller: This.(Time) -> Output?) = suspendCancellableCoroutine<Unit> { cont ->
         routine = Routine(thisAsThis, name, controller, cont)

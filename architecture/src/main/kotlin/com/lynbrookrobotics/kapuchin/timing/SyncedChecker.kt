@@ -7,11 +7,11 @@ import com.lynbrookrobotics.kapuchin.logging.log
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 
-fun Named.checkSync(threshold: Time, vararg sensorReadings: TimeStamped<*>) {
+fun Named.checkInSync(threshold: Time, vararg sensorReadings: TimeStamped<*>): Boolean {
     val timings = sensorReadings.map(TimeStamped<*>::stamp)
             .let { if (it.isEmpty()) listOf(0.Second) else it }
 
-    if (timings.max()!! - timings.min()!! > threshold) log(Warning) {
-        "$name sensor readings are out of sync.\nthreshold: $threshold\ntimings: $timings"
+    return (timings.max()!! - timings.min()!! < threshold).also {
+        if (!it) log(Warning) { "$name sensor readings are out of sync.\nthreshold: $threshold\ntimings: $timings" }
     }
 }

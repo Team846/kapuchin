@@ -15,7 +15,7 @@ class Routine<C, H, Output>(
 ) :
         Named(name, parent),
         (C, Time) -> Output,
-        Job by cont.context[Job.Key]!!
+        Job by cont as Job
 
         where C : Component<C, H, Output>,
               H : SubsystemHardware<H, C> {

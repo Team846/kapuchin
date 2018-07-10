@@ -26,7 +26,7 @@ class HardwareInit<Hardw> private constructor(
             try {
                 initialize()
                         .also { configure(it) }
-                        .also { if (!validate(it)) throw IllegalStateException("Initialized hardware is invalid.") }
+                        .also { if (!validate(it)) error("Initialized hardware is invalid.") }
             } catch (t: Throwable) {
                 log(Error, t) { "Error during creation.\nMessage: ${t.message}\nCause: ${t.cause}" }
                 throw t

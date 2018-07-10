@@ -8,12 +8,12 @@ import java.util.concurrent.TimeUnit
 actual class Ticker private actual constructor(parent: Named, priority: Priority, private val period: Time, name: String) : Named(name, parent), Clock {
     override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
 
-    val exec = Executors.newSingleThreadScheduledExecutor()
+    private val exec = Executors.newSingleThreadScheduledExecutor()!!
 
     init {
         exec.scheduleAtFixedRate(
                 { tick(currentTime) },
-                100, period.micro(T::Second).toLong(), TimeUnit.MICROSECONDS
+                100, period.milli(T::Second).toLong(), TimeUnit.MILLISECONDS
         )
     }
 
