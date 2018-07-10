@@ -4,7 +4,6 @@ import jaci.openrio.gradle.frc.RoboRIO
 
 apply plugin: 'kotlin-platform-jvm'
 apply plugin: 'jaci.openrio.gradle.GradleRIO'
-apply plugin: 'jacoco'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -15,10 +14,6 @@ dependencies {
     compile wpilib()
     compile ctre()
     compile 'com.github.juchong:ADIS16448-RoboRIO-Driver:2018.3'
-
-    testCompile 'junit:junit:4.12'
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 }
 
 repositories.maven { url 'https://jitpack.io' }
@@ -51,11 +46,3 @@ jar {
     from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobot')
 }
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        html.enabled false
-    }
-}
-check.dependsOn jacocoTestReport

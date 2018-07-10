@@ -1,0 +1,8 @@
+
+# This file is created by:
+#   1) Emptying the contents of this file
+#   2) Deploying robot code
+#   3) Running robot code with the `-verbose:class` flag
+#   4) Recording which classes were loaded
+
+java.lang.Object
