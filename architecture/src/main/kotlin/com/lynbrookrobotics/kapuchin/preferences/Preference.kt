@@ -29,7 +29,8 @@ open class Preference<Value>(
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         name = nameLayer(parent, prop.name) + nameSuffix
-        init(name, get(name, fallback))
+//        init(name, get(name, fallback))
+        init(name, fallback)
         EventLoop.runOnTick { value = get(name, fallback) }
 
         return object : ReadOnlyProperty<Any?, Value> {

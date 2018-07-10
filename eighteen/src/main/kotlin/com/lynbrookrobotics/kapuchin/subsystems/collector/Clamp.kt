@@ -24,6 +24,6 @@ class ClampHardware : SubsystemHardware<ClampHardware, ClampComponent>() {
     override val syncThreshold = 50.milli(::Second)
     override val subsystemName = "Collector Pivot"
 
-    val solenoidPort by pref(1)
+    val solenoidPort by pref(2)
     val solenoid by hardw { Solenoid(solenoidPort) }
 }

@@ -19,15 +19,15 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val period = 20.milli(::Second)
     override val syncThreshold = 3.milli(::Second)
 
-    val operatorStick by hardw { Joystick(1) }.verify("the operator joystick is connected") {
+    val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
         log(Debug) { it.name } // TESTING
         true
     }
-    val driverStick by hardw { Joystick(0) }.verify("the driver joystick is connected") {
+    val driver by hardw { Joystick(0) }.verify("the driver joystick is connected") {
         log(Debug) { it.name } // TESTING
         true
     }
-    val driverWheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
+    val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
         log(Debug) { it.name } // TESTING
         true
     }
@@ -41,32 +41,32 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     operator fun Joystick.get(button: JoystickButton) = getRawButton(button.raw)
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val manualOverride = s { -operatorStick.y }
-
-    // CLIMBER HOOKS
-    val deployHooks = s { operatorStick[RightOne] && operatorStick[RightSix] }
-
-    // CLIMBER WINCH
-    val climb = s { driverStick[LeftOne] }
-
-    // CLIMBER FORKS
-
-    // DRIVETRAIN
     val activationTolerance by pref(0.05)
     val inactiveRange = 0 withToleranceOf activationTolerance
-    val accelerator = s { -(driverStick.y.takeUnless { it in inactiveRange } ?: 0.0) }
-    val steering = s { driverWheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
+    val manualOverride = s { -(operator.y.takeUnless { it in inactiveRange } ?: 0.0) }
+
+    // CLIMBER
+    val deployHooks = s { operator[RightOne] && operator[RightSix] }
+    val deployForks = s { operator[RightThree] }
+    val climb = s { driver[LeftOne] }
+    val manualClimb = s { operator[RightFour] }
+
+    // DRIVETRAIN
+    val accelerator = s { -(driver.y.takeUnless { it in inactiveRange } ?: 0.0) }
+    val steering = s { wheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
 
     // LIFT
-    val twistAdjust = s { operatorStick.z }
-    val collect = s { driverStick[Trigger] }
-    val exchange = s { operatorStick[BottomTrigger] }
-    val switch = s { operatorStick[LeftTrigger] }
-    val lowScale = s { operatorStick[LeftFour] }
-    val highScale = s { operatorStick[RightTrigger] }
-    val maxHeight = s { operatorStick[LeftOne] }
-    val manualLift = s { operatorStick[LeftFive] }
+    val twistAdjust = s { operator.z }
+    val collect = s { driver[Trigger] }
+    val exchange = s { operator[BottomTrigger] }
+    val switch = s { operator[LeftTrigger] }
+    val lowScale = s { operator[LeftFour] }
+    val highScale = s { operator[RightTrigger] }
+    val maxHeight = s { operator[LeftOne] }
+    val manualLift = s { operator[LeftFive] }
 
-    // COLLECTOR ROLLERS
-    val purge = s { driverStick[LeftTrigger] || operatorStick[Trigger] }
+    // COLLECTOR
+    val purge = s { driver[LeftTrigger] || operator[Trigger] }
+    val pivotDown = s { driver[Trigger] || driver[BottomTrigger] || operator[LeftTwo] }
+    val openClamp = s { driver[BottomTrigger] || operator[LeftThree] }
 }

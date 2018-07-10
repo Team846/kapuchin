@@ -11,14 +11,13 @@ import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runRoutine
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 import kotlin.math.sign
 
-suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent, isFinished: DrivetrainComponent.(Time) -> Boolean) {
+suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
     val gyro by hardware.gyroInput.readEagerly.withoutStamps
@@ -36,28 +35,28 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
 
     val turnTargetIntegrator = InfiniteIntegrator(gyro.angle)
     val turnControl = PidControlLoop(turningPositionGains) {
-        turnTargetIntegrator(it, maxTurningSpeed * steering / (accelerator + steering))
+       val a = if (steering == 0.0) turnTargetIntegrator(it, 0.DegreePerSecond)
+        else turnTargetIntegrator(it, maxTurningSpeed * steering / (accelerator + steering))
+        println("target: $a")
+        a
     }
 
     fun sqrWithSign(x: Double) = x * x * x.sign
 
-    runRoutine("Teleop",
-            newController = {
-                val forwardVelocity = topSpeed * sqrWithSign(accelerator)
-                val steeringVelocity = topSpeed * sqrWithSign(steering) + turnControl(it, gyro.angle)
+    runRoutine("Teleop") {
+        val forwardVelocity = topSpeed * sqrWithSign(accelerator)
+        val steeringVelocity = topSpeed * sqrWithSign(steering) + turnControl(it, gyro.angle)
 
-                val left = leftSlew(it, forwardVelocity + steeringVelocity)
-                val right = rightSlew(it, steeringVelocity - steeringVelocity)
+        val left = leftSlew(it, forwardVelocity + steeringVelocity)
+        val right = rightSlew(it, forwardVelocity - steeringVelocity)
 
-                hardware.offloadedSettings.run {
-                    TwoSided(
-                            VelocityOutput(native(leftVelocityGains), native(left)),
-                            VelocityOutput(native(rightVelocityGains), native(right))
-                    )
-                }
-            },
-            isFinished = isFinished
-    )
+        hardware.offloadedSettings.run {
+            TwoSided(
+                    VelocityOutput(native(leftVelocityGains), native(left)),
+                    VelocityOutput(native(rightVelocityGains), native(right))
+            )
+        }
+    }
 }
 
 suspend fun DrivetrainComponent.arc(
@@ -121,22 +120,22 @@ suspend fun DrivetrainComponent.arc(
         (startingPosition - position).avg / radius
     }
 
-    runRoutine("Arc",
-            newController = {
-                val turn = turningControl(gyro.stamp, deltaDirection())
-
-                val deltaPosition = deltaPosition()
-                val leftTarget = leftProfile(deltaPosition.left) + turn
-                val rightTarget = rightProfile(deltaPosition.right) - turn
-
-                TwoSided(
-                        VelocityOutput(leftGains, hardware.offloadedSettings.native(leftTarget)),
-                        VelocityOutput(rightGains, hardware.offloadedSettings.native(rightTarget))
-                )
-            },
-            isFinished = {
+    runRoutine("Arc") {
+        if (
                 deltaPosition().avg in distance withToleranceOf distanceTolerance &&
-                        deltaDirection() in theta withToleranceOf angleTolerance
-            }
-    )
+                deltaDirection() in theta withToleranceOf angleTolerance
+        ) null
+        else {
+            val turn = turningControl(gyro.stamp, deltaDirection())
+
+            val deltaPosition = deltaPosition()
+            val leftTarget = leftProfile(deltaPosition.left) + turn
+            val rightTarget = rightProfile(deltaPosition.right) - turn
+
+            TwoSided(
+                    VelocityOutput(leftGains, hardware.offloadedSettings.native(leftTarget)),
+                    VelocityOutput(rightGains, hardware.offloadedSettings.native(rightTarget))
+            )
+        }
+    }
 }

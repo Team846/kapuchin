@@ -8,8 +8,8 @@ import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.PlatformThread
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
-import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Time
+import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 
 abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name, null)
         where This : Component<This, H, Output>,
@@ -18,31 +18,24 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
     @Suppress("UNCHECKED_CAST")
     private val thisAsThis = this as This
 
-    val ticker by lazy { ticker(hardware.priority, hardware.period) }
+    val ticker = ticker(hardware.priority, hardware.period)
 
     abstract val fallbackController: This.(Time) -> Output
+
     var routine: Routine<This, H, Output>? = null
-        get() = synchronized(this) {
-            field?.takeUnless { it.isFinished(thisAsThis, currentTime) }.also { routine = it }
-        }
-        set(value) = synchronized(this) {
-            field.takeIf { it !== value }?.run { stop() }
-            field = value
-        }
+        private set
+        get() = field?.takeIf { it.isActive }
 
-    protected abstract fun H.output(value: Output)
-
-    override fun equals(other: Any?) = when (other) {
-        is Component<*, *, *> -> this.name == other.name
-        else -> false
+    suspend fun runRoutine(name: String, controller: This.(Time) -> Output?) = suspendCancellableCoroutine<Unit> { cont ->
+        routine = Routine(thisAsThis, name, controller, cont)
     }
 
-    override fun hashCode() = name.hashCode()
+    protected abstract fun H.output(value: Output)
 
     init {
         ticker.runOnTick(Last) { tickStart ->
             @Suppress("UNNECESSARY_SAFE_CALL")
-            (routine?.controller ?: fallbackController)
+            (routine ?: fallbackController)
                     ?.invoke(thisAsThis, tickStart)
                     ?.let { hardware.output(it) }
         }
@@ -65,4 +58,11 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
     }
 
     val <Input> Sensor<Input>.readEagerly get() = startUpdates { _ -> }
+
+    override fun equals(other: Any?) = when (other) {
+        is Component<*, *, *> -> this.name == other.name
+        else -> false
+    }
+
+    override fun hashCode() = name.hashCode()
 }
