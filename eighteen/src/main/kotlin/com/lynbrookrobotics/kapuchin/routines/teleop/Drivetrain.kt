@@ -35,10 +35,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
 
     val turnTargetIntegrator = InfiniteIntegrator(gyro.angle)
     val turnControl = PidControlLoop(turningPositionGains) {
-       val a = if (steering == 0.0) turnTargetIntegrator(it, 0.DegreePerSecond)
+        if (steering == 0.0) turnTargetIntegrator(it, 0.DegreePerSecond)
         else turnTargetIntegrator(it, maxTurningSpeed * steering / (accelerator + steering))
-        println("target: $a")
-        a
     }
 
     fun sqrWithSign(x: Double) = x * x * x.sign
