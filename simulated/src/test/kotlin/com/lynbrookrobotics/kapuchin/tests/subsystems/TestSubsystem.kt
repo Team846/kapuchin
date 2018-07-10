@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.tests.hardware
+package com.lynbrookrobotics.kapuchin.tests.subsystems
 
 import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.logging.log
@@ -17,7 +17,7 @@ abstract class TC<This, H>(hardware: H) : Component<This, H, String>(hardware)
     override val fallbackController: This.(Time) -> String = { "fallback controller" }
 
     override fun H.output(value: String) {
-        val msg = "output @ ${currentTime withDecimals 4} by thread #${Thread.currentThread().id} = $value"
+        val msg = "output @ ${currentTime withDecimals 2} by thread #${Thread.currentThread().id} = $value"
         log(Debug) { msg }
     }
 }
