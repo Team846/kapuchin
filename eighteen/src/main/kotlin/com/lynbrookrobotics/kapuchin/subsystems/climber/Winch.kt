@@ -14,7 +14,7 @@ import info.kunalsheth.units.generated.*
 
 class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchHardware, Volt>(hardware) {
 
-    val climbSpeed by pref(10, `To Volt`)
+    val climbStrength by pref(10, `To Volt`)
 
     override val fallbackController: WinchComponent.(Time) -> Volt = { 0.Volt }
 
@@ -32,14 +32,8 @@ class WinchHardware : SubsystemHardware<WinchHardware, WinchComponent>() {
     val operatingVoltage by pref(11, `To Volt`)
     val currentLimit by pref(30, `To Ampere`)
 
-    val leftEscId by pref(5)
-    val leftEsc by hardw { TalonSRX(leftEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, period)
-        it.follow(middleEsc)
-    }
-
-    val middleEscId by pref(6)
-    val maxForward by pref(85, `To Percent`)
+    val middleEscId by pref(16)
+    val maxForward by pref(100, `To Percent`)
     val maxReverse by pref(10, `To Percent`)
     val middleEsc by hardw { TalonSRX(middleEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, period)
@@ -48,9 +42,17 @@ class WinchHardware : SubsystemHardware<WinchHardware, WinchComponent>() {
     }
     val lazyOutput = lazyOutput(middleEsc, syncThreshold)
 
-    val rightEscId by pref(7)
+    val leftEscId by pref(15)
+    val leftEsc by hardw { TalonSRX(leftEscId) }.configure {
+        configSlave(it, operatingVoltage, currentLimit, period)
+        it.configPeakOutputReverse(0.0, 100)
+        it.follow(middleEsc)
+    }
+
+    val rightEscId by pref(17)
     val rightEsc by hardw { TalonSRX(rightEscId) }.configure {
         configSlave(it, operatingVoltage, currentLimit, period)
+        it.configPeakOutputReverse(0.0, 100)
         it.follow(middleEsc)
     }
 }

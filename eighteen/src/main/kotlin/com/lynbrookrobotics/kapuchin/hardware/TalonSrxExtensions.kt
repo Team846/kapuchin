@@ -15,8 +15,9 @@ import com.lynbrookrobotics.kapuchin.logging.log
 import info.kunalsheth.units.generated.*
 
 fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOffloadedGainWriter {
+    val t = timeout.milli(T::Second).toInt()
     fun wrap(f: (Int, Double, Int) -> ErrorCode): (Double) -> Unit = {
-        val err = f(idx, it, timeout.milli(T::Second).toInt())
+        val err = f(idx, it, t)
         if (err != OK) log(Error) { "TalonSRX returned error code $err" }
     }
 

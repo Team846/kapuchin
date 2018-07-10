@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.stampSince
-import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.preferences.pref
@@ -22,11 +21,14 @@ class ElectricalSystemHardware : SubsystemHardware<ElectricalSystemHardware, Not
     val batteryVoltage = sensor { RobotController.getBatteryVoltage().Volt stampSince it }
 
     val rollersPdpPort by pref {
-        val left by pref(0)
-        val right by pref(1)
+        val left by pref(8)
+        val right by pref(9)
         ({ TwoSided(left, right) })
     }
     val rollersInputCurrent = sensor {
-        TwoSided(pdp.getCurrent(rollersPdpPort.left).Ampere, pdp.getCurrent(rollersPdpPort.right).Ampere) stampWith it
+        TwoSided(
+                pdp.getCurrent(rollersPdpPort.left).Ampere,
+                pdp.getCurrent(rollersPdpPort.right).Ampere
+        ) stampSince it
     }
 }

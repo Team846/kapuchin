@@ -40,7 +40,7 @@ class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHa
         leftEsc.set(voltageToDutyCycle(
                 target = currentLimiter(
                         applying = vBat * leftDc,
-                        drawing = inputCurrent.left / leftDc,
+                        drawing = inputCurrent.left / if (leftDc == 0.0) 1.0 else leftDc,
                         target = value.left
                 ), vBat = vBat
         ).siValue)
@@ -48,7 +48,7 @@ class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHa
         rightEsc.set(voltageToDutyCycle(
                 target = currentLimiter(
                         applying = vBat * rightDc,
-                        drawing = inputCurrent.left / rightDc,
+                        drawing = inputCurrent.left / if (rightDc == 0.0) 1.0 else rightDc,
                         target = value.left
                 ), vBat = vBat
         ).siValue)

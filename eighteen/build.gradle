@@ -28,7 +28,7 @@ deploy {
     artifacts {
         artifact(rootProject.name, FRCJavaArtifact) {
             targets << 'roborio'
-//            jvmArgs << '-Xmx=128m'
+//            jvmArgs << '-verbose:class'
 //            arguments << 'myCustomArgs'
 //            debug = true
 //            debugPort = 8348

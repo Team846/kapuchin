@@ -20,20 +20,21 @@ actual class Ticker private actual constructor(parent: Named, priority: Priority
 
     private val notifierHandle = NotifierJNI.initializeNotifier()
     private val startTime = currentTime
-    private var lastPeriodIndex = -1L
+    private var periodIndex = -1L
     private fun updateAlarm() {
-        val periodIndex = ((currentTime - startTime) / period).Tick.toLong() + 1
+        val dt = currentTime - startTime
+        val nextPeriodIndex = (dt / period).Tick.toLong() + 1
 
-        if (periodIndex > lastPeriodIndex + 1) log(Warning) {
-            "$name overran its ${period withDecimals 4} loop by ${currentTime - startTime withDecimals 4}"
+        if (nextPeriodIndex > periodIndex + 1) log(Warning) {
+            "$name overran its ${period withDecimals 4} loop by ${dt - period * periodIndex withDecimals 4}"
         }
 
-        if (lastPeriodIndex != periodIndex) NotifierJNI.updateNotifierAlarm(
+        if (nextPeriodIndex != periodIndex) NotifierJNI.updateNotifierAlarm(
                 notifierHandle,
-                (startTime + period * periodIndex).micro(T::Second).toLong()
+                (startTime + period * nextPeriodIndex).micro(T::Second).toLong()
         )
 
-        lastPeriodIndex = periodIndex
+        periodIndex = nextPeriodIndex
     }
 
     actual companion object {
