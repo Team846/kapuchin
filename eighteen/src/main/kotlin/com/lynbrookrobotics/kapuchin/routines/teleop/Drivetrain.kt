@@ -15,12 +15,13 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
+import kotlin.math.absoluteValue
 import kotlin.math.sign
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
-    val gyro by hardware.gyroInput.readEagerly.withoutStamps
+    val gyro by hardware.gyroInput.readEagerly.withStamps
 
     val liftHeight by lift.hardware.position.readOnTick.withoutStamps
     val liftActivationThreshold = lift.collectHeight withToleranceOf lift.positionTolerance
@@ -33,17 +34,19 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     val leftSlew = RampRateLimiter(limit = slewFunction)
     val rightSlew = RampRateLimiter(limit = slewFunction)
 
-    val turnTargetIntegrator = InfiniteIntegrator(gyro.angle)
+    val turnTargetIntegrator = InfiniteIntegrator(gyro.value.angle)
     val turnControl = PidControlLoop(turningPositionGains) {
-        if (steering == 0.0) turnTargetIntegrator(it, 0.DegreePerSecond)
-        else turnTargetIntegrator(it, maxTurningSpeed * steering / (accelerator + steering))
+        val steeringForwardBlend =
+                if (steering == 0.0) 0.0
+                else steering.absoluteValue / (steering.absoluteValue + accelerator.absoluteValue)
+        turnTargetIntegrator(it, maxTurningSpeed * steering * steeringForwardBlend)
     }
 
     fun sqrWithSign(x: Double) = x * x * x.sign
 
     runRoutine("Teleop") {
         val forwardVelocity = topSpeed * sqrWithSign(accelerator)
-        val steeringVelocity = topSpeed * steering + turnControl(it, gyro.angle)
+        val steeringVelocity = topSpeed * steering + turnControl(gyro.stamp, gyro.value.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)
         val right = rightSlew(it, forwardVelocity - steeringVelocity)
@@ -57,83 +60,125 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     }
 }
 
-suspend fun DrivetrainComponent.arc(
-        distance: Length, distanceTolerance: Length,
-        radius: Length, angleTolerance: Angle,
+suspend fun DrivetrainComponent.arcTo(
+        bearing: Angle, radius: Length,
+        angleTolerance: Angle, distanceTolerance: Length,
+
         acceleration: Acceleration,
         topSpeed: Velocity,
         deceleration: Acceleration = acceleration,
         endingSpeed: Velocity = 0.FootPerSecond,
         kickstart: Velocity = 3.Inch / 1.Second
 ) {
-    // s = rθ
-    val theta = distance / radius
-    val rL = (radius + trackSize / 2)
-    val rR = (radius - trackSize / 2)
+    val position by hardware.position.readOnTick.withoutStamps
+    val velocity by hardware.velocity.readOnTick.withoutStamps
+    val gyro by hardware.gyroInput.readEagerly.withStamps
 
-    // s₁ * (r₂ ÷ r₁) = s₂
-    // v₁ * (r₂ ÷ r₁) = v₂
-    // a₁ * (r₂ ÷ r₁) = a₂
-    val rlRatio = rL / radius
-    val rrRatio = rR / radius
-    val sL = distance * rlRatio
-    val sR = distance * rrRatio
+    // s = r × θ
+    val theta = bearing - gyro.value.angle
+    val rL = radius + trackSize / 2
+    val rR = radius - trackSize / 2
+    val sL = rL * theta
+    val sR = rR * theta
 
-    val minMagR = rL minMag rR
-    val maxMagR = rL maxMag rR
-    val shortLongRatio = minMagR / maxMagR
+    val rSmall = rL minMag rR
+    val rBig = rL maxMag rR
+    val rSmallBigRatio = rSmall / rBig
 
-    val longerProfile = TrapezoidalMotionProfile(
+    val profile = TrapezoidalMotionProfile(
             distance = sL maxMag sR,
-            startingSpeed = kickstart,
+            startingSpeed = kickstart maxMag velocity.avg,
             acceleration = acceleration,
             topSpeed = topSpeed,
             deceleration = deceleration,
             endingSpeed = endingSpeed
     )
-    val shorterProfile = TrapezoidalMotionProfile(
-            distance = sL minMag sR,
-            startingSpeed = kickstart * shortLongRatio,
-            acceleration = acceleration * shortLongRatio,
-            topSpeed = topSpeed * shortLongRatio,
-            deceleration = deceleration * shortLongRatio,
-            endingSpeed = endingSpeed * shortLongRatio
-    )
-    val leftProfile = if (maxMagR == rL) longerProfile else shorterProfile
-    val rightProfile = if (maxMagR == rR) longerProfile else shorterProfile
 
-    val leftGains = hardware.offloadedSettings.native(leftVelocityGains)
-    val rightGains = hardware.offloadedSettings.native(rightVelocityGains)
-
-    val position by hardware.position.readOnTick.withoutStamps
-    val startingPosition = position
-    fun deltaPosition() = position - startingPosition
-
-    val gyro by hardware.gyroInput.readEagerly.withStamps
-    val startingDirection = gyro.value.angle
-    fun deltaDirection() = gyro.value.angle - startingDirection
-
-    // θ = s ÷ r
-    val turningControl = PidControlLoop(turningPositionGains) {
-        (startingPosition - position).avg / radius
+    val startingPostion = position
+    val turnControl = PidControlLoop(turningPositionGains) {
+        // θ = s ÷ r
+        (position.avg - startingPostion.avg) / radius
     }
 
+    val slRange = sL withToleranceOf distanceTolerance
+    val srRange = sR withToleranceOf distanceTolerance
+    val bearingRange = bearing withToleranceOf angleTolerance
     runRoutine("Arc") {
         if (
-                deltaPosition().avg in distance withToleranceOf distanceTolerance &&
-                deltaDirection() in theta withToleranceOf angleTolerance
+                position.left in slRange &&
+                position.right in srRange &&
+                gyro.value.angle in bearingRange
         ) null
         else {
-            val turn = turningControl(gyro.stamp, deltaDirection())
+            val turn = turnControl(gyro.stamp, gyro.value.angle)
 
-            val deltaPosition = deltaPosition()
-            val leftTarget = leftProfile(deltaPosition.left) + turn
-            val rightTarget = rightProfile(deltaPosition.right) - turn
+            val dx = position - startingPostion
+            val bigTarget = profile(if (rBig == rL) dx.left else dx.right)
 
-            TwoSided(
-                    VelocityOutput(leftGains, hardware.offloadedSettings.native(leftTarget)),
-                    VelocityOutput(rightGains, hardware.offloadedSettings.native(rightTarget))
-            )
+            // s₂ = s₁ × (r₂ ÷ r₁)
+            // v₂ = v₁ × (r₂ ÷ r₁)
+            // a₂ = a₁ × (r₂ ÷ r₁)
+            val left = (if (rBig == rL) bigTarget else bigTarget * rSmallBigRatio) + turn
+            val right = (if (rBig == rR) bigTarget else bigTarget * rSmallBigRatio) - turn
+
+            hardware.offloadedSettings.run {
+                TwoSided(
+                        VelocityOutput(native(leftVelocityGains), native(left)),
+                        VelocityOutput(native(rightVelocityGains), native(right))
+                )
+            }
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.driveStraight(
+        distance: Length, bearing: Angle,
+        distanceTolerance: Length, angleTolerance: Angle,
+
+        acceleration: Acceleration,
+        topSpeed: Velocity,
+        deceleration: Acceleration = acceleration,
+        endingSpeed: Velocity = 0.FootPerSecond,
+        kickstart: Velocity = 3.Inch / 1.Second
+) {
+    val position by hardware.position.readOnTick.withoutStamps
+    val velocity by hardware.velocity.readOnTick.withoutStamps
+    val gyro by hardware.gyroInput.readEagerly.withStamps
+
+    val profile = TrapezoidalMotionProfile(
+            distance = distance,
+            startingSpeed = kickstart maxMag velocity.avg,
+            acceleration = acceleration,
+            topSpeed = topSpeed,
+            deceleration = deceleration,
+            endingSpeed = endingSpeed
+    )
+
+    val startingPostion = position
+    val turnControl = PidControlLoop(turningPositionGains) { bearing }
+
+    val distanceRange = distance withToleranceOf distanceTolerance
+    val bearingRange = bearing withToleranceOf angleTolerance
+
+    runRoutine("Straight") {
+        if (
+                position.left in distanceRange &&
+                position.right in distanceRange &&
+                gyro.value.angle in bearingRange
+        ) null
+        else {
+            val turn = turnControl(gyro.stamp, gyro.value.angle)
+
+            val dx = position - startingPostion
+            val left = profile(dx.left) + turn
+            val right = profile(dx.right) - turn
+
+            hardware.offloadedSettings.run {
+                TwoSided(
+                        VelocityOutput(native(leftVelocityGains), native(left)),
+                        VelocityOutput(native(rightVelocityGains), native(right))
+                )
+            }
         }
     }
 }
