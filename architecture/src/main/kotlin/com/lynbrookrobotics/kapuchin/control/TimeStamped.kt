@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control
 
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.Quantity
 import info.kunalsheth.units.generated.Time
 import kotlin.jvm.JvmName
 
