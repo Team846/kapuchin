@@ -52,14 +52,13 @@ data class Subsystems(
         }
 
         fun init(): Subsystems {
-            val electricalSystemHardware = ElectricalSystemHardware()
             return Subsystems(
                     forks = ForksComponent(ForksHardware()),
                     hooks = HooksComponent(HooksHardware()),
                     winch = WinchComponent(WinchHardware()),
                     clamp = ClampComponent(ClampHardware()),
                     pivot = PivotComponent(PivotHardware()),
-                    rollers = RollersComponent(RollersHardware(), electricalSystemHardware),
+                    rollers = RollersComponent(RollersHardware(), ElectricalSystemHardware()),
                     drivetrain = DrivetrainComponent(DrivetrainHardware()),
                     lift = LiftComponent(LiftHardware()),
                     driverHardware = DriverHardware()

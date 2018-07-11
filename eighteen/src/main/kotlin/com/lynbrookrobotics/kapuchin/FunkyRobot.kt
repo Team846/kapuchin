@@ -25,8 +25,23 @@ class FunkyRobot : RobotBase() {
         }
     }
 
-    fun loadClasses() {
-
+    private fun loadClasses() {
+        val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
+        Thread.currentThread()
+                .contextClassLoader
+                .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
+                .bufferedReader()
+                .lineSequence()
+                .filter { it.matches(classNameRegex) }
+                .map { it.replace(classNameRegex, "$1") }
+                .forEach {
+                    try {
+                        val c = Class.forName(it)
+                        println("Loaded ${c.simpleName} class")
+                    } catch (t: Throwable) {
+                        println("Could not load $it")
+                    }
+                }
     }
 
     fun Subsystems.teleop() = launchAll(
