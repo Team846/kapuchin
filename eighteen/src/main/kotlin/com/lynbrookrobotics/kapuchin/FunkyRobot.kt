@@ -1,10 +1,11 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.routines.teleopDrive
-import com.lynbrookrobotics.kapuchin.timing.WithEventLoop
+import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
 import kotlinx.coroutines.experimental.launch
@@ -13,27 +14,26 @@ import kotlinx.coroutines.experimental.withTimeout
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         val electricalHardware = ::ElectricalSystemHardware.safeCall()
-        val electricalComponent = electricalHardware creates ::ElectricalSystemComponent
 
         val shooterHardware = ::ShooterHardware.safeCall()
-        val shooterComponent = shooterHardware with electricalHardware creates ::ShooterComponent
+        val shooterComponent = shooterHardware creates ::ShooterComponent
 
         val driverHardware = ::DriverHardware.safeCall()
 
         val drivetrainHardware = ::DrivetrainHardware.safeCall()
-        val drivetrainComponent = drivetrainHardware with driverHardware creates ::DrivetrainComponent
+        val drivetrainComponent = drivetrainHardware creates ::DrivetrainComponent
 
         HAL.observeUserProgramStarting()
 
         launch {
             withTimeout(10000) {
-                drivetrainComponent?.teleopDrive { false }
+                drivetrainComponent?.teleop(driverHardware!!) { false }
             }
         }
 
         while (true) {
             m_ds.waitForData()
-            WithEventLoop.update()
+            EventLoop.tick(currentTime)
         }
     }
 }

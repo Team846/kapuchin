@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.drivetrain.routines
+package com.lynbrookrobotics.kapuchin.routines.teleop
 
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
@@ -10,10 +10,30 @@ import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.routines.autoroutine
+import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
-suspend fun DrivetrainComponent.driveArc(
+suspend fun DrivetrainComponent.teleop(driver: DriverHardware, isFinished: DrivetrainComponent.(Time) -> Boolean) {
+    val driverThrottle by driver.accelerator.readEagerly.withoutStamps
+    val driverSteering by driver.steering.readEagerly.withoutStamps
+
+    return autoroutine(
+            newController = {
+                val forward = topSpeed * driverThrottle
+                val steering = topSpeed * driverSteering
+                hardware.offloadedSettings.run {
+                    TwoSided(
+                            VelocityOutput(native(leftVelocityGains), native(forward + steering)),
+                            VelocityOutput(native(leftVelocityGains), native(forward - steering))
+                    )
+                }
+            },
+            isFinished = isFinished
+    )
+}
+
+suspend fun DrivetrainComponent.arc(
         distance: Length, distanceTolerance: Length,
         radius: Length, angleTolerance: Angle,
         acceleration: Acceleration,
@@ -58,13 +78,14 @@ suspend fun DrivetrainComponent.driveArc(
     val leftProfile = if (maxMagR == rL) longerProfile else shorterProfile
     val rightProfile = if (maxMagR == rR) longerProfile else shorterProfile
 
-    val leftGains = offloadedSettings.native(leftVelocityGains)
-    val rightGains = offloadedSettings.native(rightVelocityGains)
+    val leftGains = hardware.offloadedSettings.native(leftVelocityGains)
+    val rightGains = hardware.offloadedSettings.native(rightVelocityGains)
 
+    val position by hardware.position.readOnTick.withoutStamps
     val startingPosition = position
     fun deltaPosition() = position - startingPosition
 
-    val gyro by hardware.gyro.withTimeStamps
+    val gyro by hardware.gyroInput.readEagerly.withStamps
     val startingDirection = gyro.value.angle
     fun deltaDirection() = gyro.value.angle - startingDirection
 
@@ -82,8 +103,8 @@ suspend fun DrivetrainComponent.driveArc(
                 val rightTarget = rightProfile(deltaPosition.right) - turn
 
                 TwoSided(
-                        VelocityOutput(leftGains, offloadedSettings.native(leftTarget)),
-                        VelocityOutput(rightGains, offloadedSettings.native(rightTarget))
+                        VelocityOutput(leftGains, hardware.offloadedSettings.native(leftTarget)),
+                        VelocityOutput(rightGains, hardware.offloadedSettings.native(rightTarget))
                 )
             },
             isFinished = {

@@ -32,8 +32,8 @@ fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOfflo
     )
 }
 
-fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
-    val t = 0
+fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, timeout: Time = 0.5.Second) {
+    val t = timeout.milli(T::Second).toInt()
 
     esc.setNeutralMode(NeutralMode.Coast)
     esc.configOpenloopRamp(0.0, t)
@@ -56,13 +56,14 @@ fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLim
     }
 }
 
-fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, vararg feedback: FeedbackDevice) {
+fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, vararg feedback: FeedbackDevice, timeout: Time = 0.5.Second) {
+    val t = timeout.milli(T::Second).toInt()
+
     generalSetup(master, voltageCompensation, currentLimit)
-    val t = 0
-    val slow = 1000
 
     feedback.forEachIndexed { i, sensor -> master.configSelectedFeedbackSensor(sensor, i, t) }
 
+    val slow = 1000
     StatusFrameEnhanced.values().forEach { master.setStatusFramePeriod(it, slow, t) }
 
     mapOf(
@@ -81,9 +82,9 @@ fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampe
     master.configVelocityMeasurementWindow(4, t)
 }
 
-fun configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
+fun configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, timeout: Time = 0.5.Second) {
     generalSetup(slave, voltageCompensation, currentLimit)
-    val t = 0
     val slow = 1000
+    val t = timeout.milli(T::Second).toInt()
     StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slow, t) }
 }
