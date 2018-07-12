@@ -25,10 +25,10 @@ class ElectricalSystemHardware : SubsystemHardware<ElectricalSystemHardware, Not
         val right by pref(9)
         ({ TwoSided(left, right) })
     }
-    val rollersInputCurrent = sensor {
+    val rollersInputCurrent = sensor(pdp) {
         TwoSided(
-                pdp.getCurrent(rollersPdpPort.left).Ampere,
-                pdp.getCurrent(rollersPdpPort.right).Ampere
+                getCurrent(rollersPdpPort.left).Ampere,
+                getCurrent(rollersPdpPort.right).Ampere
         ) stampSince it
     }
 }

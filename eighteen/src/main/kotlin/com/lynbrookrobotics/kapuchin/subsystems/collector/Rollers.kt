@@ -23,7 +23,7 @@ class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHa
     override val fallbackController: RollersComponent.(Time) -> TwoSided<Volt> = { TwoSided(-cubeHoldStrength) }
 
     private val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
-    private val inputCurrent by electrical.rollersInputCurrent.readEagerly.withoutStamps
+    private val inputCurrent by electrical.rollersInputCurrent.readOnTick.withoutStamps
     private val currentLimiter by pref {
         val currentLimit by pref(30, `To Ampere`)
         val freeSpeed by pref(19000, `To Rpm`)
@@ -48,8 +48,8 @@ class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHa
         rightEsc.set(voltageToDutyCycle(
                 target = currentLimiter(
                         applying = vBat * rightDc,
-                        drawing = inputCurrent.left / if (rightDc == 0.0) 1.0 else rightDc,
-                        target = value.left
+                        drawing = inputCurrent.right / if (rightDc == 0.0) 1.0 else rightDc,
+                        target = value.right
                 ), vBat = vBat
         ).siValue)
     }

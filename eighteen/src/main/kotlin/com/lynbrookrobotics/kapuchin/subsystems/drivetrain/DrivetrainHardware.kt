@@ -7,13 +7,16 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
+import com.lynbrookrobotics.kapuchin.control.math.avg
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
 import com.lynbrookrobotics.kapuchin.hardware.configSlave
 import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
+import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
@@ -84,20 +87,23 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
                 offloadedSettings.realPosition(rightMasterEsc.getSelectedSensorPosition(idx))
         ) stampWith it
     }
+            .with(graph("Left Position", `To Foot`)) { it.left }
+            .with(graph("Right Position", `To Foot`)) { it.right }
+
     val velocity = sensor {
         TwoSided(
                 offloadedSettings.realVelocity(leftMasterEsc.getSelectedSensorVelocity(idx)),
                 offloadedSettings.realVelocity(rightMasterEsc.getSelectedSensorVelocity(idx))
         ) stampWith it
-    }
+    }.with(graph("Forward Velocity", `To FootPerSecond`)) { it.avg }
 
     val driftTolerance by pref(1, `To DegreePerSecond`)
     val gyro by hardw { ADIS16448_IMU() }.verify("Gyro should not drift after calibration") {
         it.rate.DegreePerSecond in 0.DegreePerSecond withToleranceOf driftTolerance
     }
-    val gyroInput = sensor {
-        gyro.run {
-            GyroInput(angle.Degree, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith lastSampleTime.Second
-        }
+    val gyroInput = sensor(gyro) {
+        GyroInput(angle.Degree, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
     }
+            .with(graph("Bearing", `To Degree`)) { it.angle }
+            .with(graph("Angular Velocity", `To DegreePerSecond`)) { it.velocity }
 }
