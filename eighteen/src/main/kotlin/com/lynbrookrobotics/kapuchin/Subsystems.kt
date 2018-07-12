@@ -11,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
+import edu.wpi.first.wpilibj.hal.HAL
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.runBlocking
 
@@ -31,7 +32,7 @@ data class Subsystems(
             { rollers.teleop(driverHardware) },
             { drivetrain.teleop(driverHardware, lift) },
             { lift.teleop(driverHardware) }
-    )
+    ).also { HAL.observeUserProgramTeleop() }
 
     companion object : Named("Subsystems Initializer") {
         fun concurrentInit() = runBlocking {

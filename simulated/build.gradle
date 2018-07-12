@@ -1,7 +1,3 @@
-import jaci.openrio.gradle.GradleRIOPlugin
-import jaci.openrio.gradle.frc.FRCJavaArtifact
-import jaci.openrio.gradle.frc.RoboRIO
-
 apply plugin: 'kotlin-platform-jvm'
 apply plugin: 'jacoco'
 
