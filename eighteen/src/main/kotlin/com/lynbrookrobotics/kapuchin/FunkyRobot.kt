@@ -1,11 +1,15 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
+import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.milli
+import kotlinx.coroutines.experimental.DefaultDispatcher
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
@@ -13,15 +17,24 @@ class FunkyRobot : RobotBase() {
 
         val subsystems = Subsystems.init()
 
-        System.gc()
-
         HAL.observeUserProgramStarting()
 
-        subsystems.teleop()
+        val eventLoopPeriod = 20.milli(::Second)
+
+        val doNothing = launch { }
+        var currentJob: Job = doNothing
 
         while (true) {
-            m_ds.waitForData()
+            m_ds.waitForData(eventLoopPeriod.Second)
             EventLoop.tick(currentTime)
+
+            if (!currentJob.isActive) {
+                System.gc()
+
+                currentJob =
+                        subsystems::teleop runWhile { isEnabled && isOperatorControl }
+                        ?: doNothing
+            }
         }
     }
 
@@ -43,15 +56,4 @@ class FunkyRobot : RobotBase() {
                     }
                 }
     }
-
-    fun Subsystems.teleop() = launchAll(
-            { forks.teleop(driverHardware) },
-            { hooks.teleop(driverHardware, lift) },
-            { winch.teleop(driverHardware) },
-            { clamp.teleop(driverHardware) },
-            { pivot.teleop(driverHardware) },
-            { rollers.teleop(driverHardware) },
-            { drivetrain.teleop(driverHardware, lift) },
-            { lift.teleop(driverHardware) }
-    )
 }

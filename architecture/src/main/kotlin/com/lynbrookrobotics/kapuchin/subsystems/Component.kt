@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.timing.PlatformThread
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
 import info.kunalsheth.units.generated.Time
+import kotlinx.coroutines.experimental.CancellationException
 import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 
 abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name, null)
@@ -29,8 +30,13 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
         }
         get() = synchronized(this) { field?.takeIf { it.isActive } }
 
-    suspend fun runRoutine(name: String, controller: This.(Time) -> Output?) = suspendCancellableCoroutine<Unit> { cont ->
-        routine = Routine(thisAsThis, name, controller, cont)
+    suspend fun runRoutine(name: String, controller: This.(Time) -> Output?) {
+        try {
+            suspendCancellableCoroutine<Unit> { cont ->
+                routine = Routine(thisAsThis, name, controller, cont)
+            }
+        } catch (e: CancellationException) {
+        }
     }
 
     protected abstract fun H.output(value: Output)

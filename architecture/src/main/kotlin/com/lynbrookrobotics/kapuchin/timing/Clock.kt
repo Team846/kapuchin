@@ -13,7 +13,7 @@ interface Clock {
             First -> listOf(run) + jobs
             Last -> jobs + run
         }
-        Cancel { jobs -= run }
+        Cancel { synchronized(this) { jobs -= run } }
     }
 
     fun tick(atTime: Time) = jobs.forEach { it(atTime) }

@@ -15,6 +15,7 @@ actual class Ticker private actual constructor(parent: Named, priority: Priority
 
     actual fun waitOnTick(): Time {
         updateAlarm()
+        // Thread.yield()
         return NotifierJNI.waitForNotifierAlarm(notifierHandle).micro(::Second)
     }
 
