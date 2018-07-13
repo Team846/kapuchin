@@ -27,7 +27,7 @@ open class Sensor<Input> protected constructor(internal val read: (Time) -> Time
             object : DelegateProvider<Any?, Input> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = forSensor.run {
-                        value ?: optimizedRead(currentTime, 0.Second).also { value = it }
+                        value ?: optimizedRead(currentTime, 0.Second)//.also { value = it } // this is buggy for eager sensors // todo FIX, it just returns the last value, however old
                     }.value
                 }.also { startUpdates(prop) }
             }
@@ -37,7 +37,7 @@ open class Sensor<Input> protected constructor(internal val read: (Time) -> Time
             object : DelegateProvider<Any?, TimeStamped<Input>> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, TimeStamped<Input>> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = forSensor.run {
-                        value ?: optimizedRead(currentTime, 0.Second).also { value = it }
+                        value ?: optimizedRead(currentTime, 0.Second)//.also { value = it }
                     }
                 }.also { startUpdates(prop) }
             }

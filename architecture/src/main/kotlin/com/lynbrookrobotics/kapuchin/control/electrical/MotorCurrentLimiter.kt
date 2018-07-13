@@ -16,6 +16,7 @@ class MotorCurrentLimiter(
             target = target
     )
 
+    // todo this is broken
     override operator fun invoke(applying: Volt, drawing: Ampere, target: Volt) = limit(
             emf = applying - drawing * motorR,
             target = target

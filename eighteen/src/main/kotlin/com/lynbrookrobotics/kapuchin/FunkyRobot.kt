@@ -5,16 +5,18 @@ import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-        loadClasses()
+        val classloading = loadClasses()
 
         val subsystems = Subsystems.init()
+
+        runBlocking { classloading.join() }
 
         HAL.observeUserProgramStarting()
 
@@ -32,12 +34,13 @@ class FunkyRobot : RobotBase() {
 
                 currentJob =
                         subsystems::teleop runWhile { isEnabled && isOperatorControl }
+                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
                         ?: doNothing
             }
         }
     }
 
-    private fun loadClasses() {
+    private fun loadClasses() = launch {
         val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
         Thread.currentThread()
                 .contextClassLoader
@@ -47,11 +50,11 @@ class FunkyRobot : RobotBase() {
                 .filter { it.matches(classNameRegex) }
                 .map { it.replace(classNameRegex, "$1") }
                 .forEach {
-                    try {
-                        val c = Class.forName(it)
-                        println("Loaded ${c.simpleName} class")
-                    } catch (t: Throwable) {
-                        println("Could not load $it")
+                    launch(coroutineContext) {
+                        try {
+                            Class.forName(it)
+                        } catch (t: Throwable) {
+                        }
                     }
                 }
     }

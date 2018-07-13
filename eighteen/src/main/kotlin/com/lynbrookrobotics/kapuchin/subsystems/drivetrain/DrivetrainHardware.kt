@@ -29,10 +29,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val syncThreshold = 1.milli(::Second)
     override val subsystemName = "Drivetrain"
 
-    val leftSlaveEscId by pref(12)
-    val rightSlaveEscId by pref(14)
-    val rightMasterEscId by pref(13)
-    val leftMasterEscId by pref(11)
+    val leftSlaveEscId by pref(14)
+    val rightSlaveEscId by pref(13)
+    val rightMasterEscId by pref(11)
+    val leftMasterEscId by pref(12)
 
 
     val operatingVoltage by pref(11, `To Volt`)
@@ -87,23 +87,26 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
                 offloadedSettings.realPosition(rightMasterEsc.getSelectedSensorPosition(idx))
         ) stampWith it
     }
-            .with(graph("Left Position", `To Foot`)) { it.left }
-            .with(graph("Right Position", `To Foot`)) { it.right }
+//            .with(graph("Left Position", `To Foot`)) { it.left }
+//            .with(graph("Right Position", `To Foot`)) { it.right }
 
     val velocity = sensor {
         TwoSided(
                 offloadedSettings.realVelocity(leftMasterEsc.getSelectedSensorVelocity(idx)),
                 offloadedSettings.realVelocity(rightMasterEsc.getSelectedSensorVelocity(idx))
         ) stampWith it
-    }.with(graph("Forward Velocity", `To FootPerSecond`)) { it.avg }
+    }//.with(graph("Forward Velocity", `To FootPerSecond`)) { it.avg }
 
     val driftTolerance by pref(1, `To DegreePerSecond`)
-    val gyro by hardw { ADIS16448_IMU() }.verify("Gyro should not drift after calibration") {
-        it.rate.DegreePerSecond in 0.DegreePerSecond withToleranceOf driftTolerance
-    }
+    private lateinit var startingAngle: Angle
+    val gyro by hardw { ADIS16448_IMU() }
+            .configure { startingAngle = it.angle.Degree }
+            .verify("Gyro should not drift after calibration") {
+                it.rate.DegreePerSecond in 0.DegreePerSecond withToleranceOf driftTolerance
+            }
     val gyroInput = sensor(gyro) {
-        GyroInput(angle.Degree, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
+        GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
     }
-            .with(graph("Bearing", `To Degree`)) { it.angle }
-            .with(graph("Angular Velocity", `To DegreePerSecond`)) { it.velocity }
+//            .with(graph("Bearing", `To Degree`)) { it.angle }
+//            .with(graph("Angular Velocity", `To DegreePerSecond`)) { it.velocity }
 }

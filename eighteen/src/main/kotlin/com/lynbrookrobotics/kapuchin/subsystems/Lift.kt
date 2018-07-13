@@ -47,8 +47,8 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val currentLimit by pref(30, `To Ampere`)
 
     // SAFETY
-    val maxHeight by pref(60, `To Inch`)
-    val minHeight by pref(20, `To Inch`)
+    val maxHeight by pref(80, `To Inch`)
+    val minHeight by pref(0, `To Inch`)
 
     val offloadedSettings by pref {
         val nativeFeedbackUnits by pref(615)
@@ -64,12 +64,11 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
         })
     }
 
-    val escCanId by pref(18)
-    val maxOutput by pref(20, `To Percent`)
+    val escCanId by pref(20)
+    val maxOutput by pref(70, `To Percent`)
     val idx = 0
     val esc by hardw { TalonSRX(escCanId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, period, Analog)
-        it.setNeutralMode(Brake)
 
         val t = 100
 

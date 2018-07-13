@@ -26,9 +26,9 @@ actual class Ticker private actual constructor(parent: Named, priority: Priority
         val dt = currentTime - startTime
         val nextPeriodIndex = (dt / period).Tick.toLong() + 1
 
-        if (nextPeriodIndex > periodIndex + 1) log(Warning) {
-            "$name overran its ${period withDecimals 4} loop by ${dt - period * periodIndex withDecimals 4}"
-        }
+//        if (nextPeriodIndex > periodIndex + 1) log(Warning) {
+//            "$name overran its ${period withDecimals 4} loop by ${dt - period * periodIndex withDecimals 4}"
+//        }
 
         if (nextPeriodIndex != periodIndex) NotifierJNI.updateNotifierAlarm(
                 notifierHandle,

@@ -16,7 +16,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 import kotlin.math.absoluteValue
-import kotlin.math.sign
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
@@ -24,11 +23,11 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     val gyro by hardware.gyroInput.readEagerly.withStamps
 
     val liftHeight by lift.hardware.position.readOnTick.withoutStamps
-    val liftActivationThreshold = lift.collectHeight withToleranceOf lift.positionTolerance
+    val liftActivationThreshold = lift.collectHeight + lift.positionTolerance
 
     val slewFunction: (Time) -> Acceleration = {
-        if (liftHeight !in liftActivationThreshold) maxAccelerationWithLiftUp / (liftHeight / lift.hardware.maxHeight)
-        else 1.giga { FootPerSecondSquared }
+        if (liftHeight > liftActivationThreshold) maxAccelerationWithLiftUp / (liftHeight / lift.hardware.maxHeight)
+        else 1000.FootPerSecondSquared
     }
 
     val leftSlew = RampRateLimiter(limit = slewFunction)
@@ -42,10 +41,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
         turnTargetIntegrator(it, maxTurningSpeed * steering * steeringForwardBlend)
     }
 
-    fun sqrWithSign(x: Double) = x * x * x.sign
-
     runRoutine("Teleop") {
-        val forwardVelocity = topSpeed * sqrWithSign(accelerator)
+        val forwardVelocity = topSpeed * accelerator
         val steeringVelocity = topSpeed * steering + turnControl(gyro.stamp, gyro.value.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)

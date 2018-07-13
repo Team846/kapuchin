@@ -16,42 +16,16 @@ class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHa
 
     val purgeStrength by pref(12, `To Volt`)
     val collectStrength by pref(9, `To Volt`)
-    val cubeAdjustCycle by pref(3, `To Hertz`)
-    val cubeAdjustStrength by pref(8, `To Volt`)
-    val cubeHoldStrength by pref(4, `To Volt`)
+    val cubeAdjustCycle by pref(4, `To Hertz`)
+    val cubeAdjustStrength by pref(3, `To Volt`)
+    val cubeHoldStrength by pref(2, `To Volt`)
 
     override val fallbackController: RollersComponent.(Time) -> TwoSided<Volt> = { TwoSided(-cubeHoldStrength) }
 
     private val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
-    private val inputCurrent by electrical.rollersInputCurrent.readOnTick.withoutStamps
-    private val currentLimiter by pref {
-        val currentLimit by pref(30, `To Ampere`)
-        val freeSpeed by pref(19000, `To Rpm`)
-        val stallCurrent by pref(85, `To Ampere`)
-        ({
-            MotorCurrentLimiter(12.Volt, freeSpeed, stallCurrent, currentLimit)
-        })
-    }
-
     override fun RollersHardware.output(value: TwoSided<Volt>) {
-        val leftDc = leftEsc.get()
-        val rightDc = rightEsc.get()
-
-        leftEsc.set(voltageToDutyCycle(
-                target = currentLimiter(
-                        applying = vBat * leftDc,
-                        drawing = inputCurrent.left / if (leftDc == 0.0) 1.0 else leftDc,
-                        target = value.left
-                ), vBat = vBat
-        ).siValue)
-
-        rightEsc.set(voltageToDutyCycle(
-                target = currentLimiter(
-                        applying = vBat * rightDc,
-                        drawing = inputCurrent.right / if (rightDc == 0.0) 1.0 else rightDc,
-                        target = value.right
-                ), vBat = vBat
-        ).siValue)
+        leftEsc.set(voltageToDutyCycle(target = value.left, vBat = vBat).siValue)
+        rightEsc.set(voltageToDutyCycle(target = value.right, vBat = vBat).siValue)
     }
 }
 

@@ -12,6 +12,7 @@ import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.milli
+import kotlin.math.sign
 
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val subsystemName = "Driver"
@@ -41,7 +42,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     operator fun Joystick.get(button: JoystickButton) = getRawButton(button.raw)
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val activationTolerance by pref(0.05)
+    val activationTolerance by pref(0.01)
     val inactiveRange = 0 withToleranceOf activationTolerance
     val manualOverride = s { -(operator.y.takeUnless { it in inactiveRange } ?: 0.0) }
 
@@ -52,7 +53,9 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val manualClimb = s { operator[RightFour] }
 
     // DRIVETRAIN
-    val accelerator = s { -(driver.y.takeUnless { it in inactiveRange } ?: 0.0) }
+    fun sqrWithSign(x: Double) = x * x * x.sign
+
+    val accelerator = s { sqrWithSign(-(driver.y.takeUnless { it in inactiveRange } ?: 0.0)) }
     val steering = s { wheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
 
     // LIFT
