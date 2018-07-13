@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.Analog
-import com.ctre.phoenix.motorcontrol.NeutralMode.Brake
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
@@ -13,10 +12,10 @@ import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import info.kunalsheth.units.generated.*
 
-class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware) {
+class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
     val positionGains by pref {
         val kP by pref(12, `To Volt`, 8, `To Inch`)
         val kI by pref(0, `To Volt`, 1, `To FootSecond`)
@@ -38,7 +37,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
 }
 
 class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
-    override val priority = Priority.Medium
+    override val priority get() = TODO()
     override val period = 20.milli(::Second)
     override val syncThreshold = 1.milli(::Second)
     override val subsystemName = "Lift"
@@ -82,6 +81,6 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
         it.configForwardSoftLimitThreshold(offloadedSettings.native(maxHeight).toInt(), t)
         it.configForwardSoftLimitEnable(true, t)
     }
-    val lazyOutput = lazyOutput(esc, syncThreshold, idx)
+    val lazyOutput = lazyOutput(esc, period / 2, idx)
     val position = sensor { offloadedSettings.realPosition(esc.getSelectedSensorPosition(idx)) stampWith it }
 }

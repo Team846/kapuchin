@@ -36,7 +36,7 @@ abstract class TSH<This, C>(override val subsystemName: String) : SubsystemHardw
         where This : SubsystemHardware<This, C>,
               C : Component<C, This, *> {
 
-    override val priority = Priority.RealTime
-    override val period = 0.2.Second
-    override val syncThreshold = period / 10
+    final override val priority = Priority.RealTime
+    final override val period = 0.2.Second
+    final override val syncThreshold = period / 10
 }

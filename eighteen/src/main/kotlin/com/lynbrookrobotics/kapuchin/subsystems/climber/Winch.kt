@@ -9,10 +9,10 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import info.kunalsheth.units.generated.*
 
-class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchHardware, Volt>(hardware) {
+class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchHardware, Volt>(hardware, EventLoop) {
 
     val climbStrength by pref(10, `To Volt`)
 
@@ -24,7 +24,7 @@ class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchH
 }
 
 class WinchHardware : SubsystemHardware<WinchHardware, WinchComponent>() {
-    override val priority = Priority.Low
+    override val priority get() = TODO()
     override val period = 100.milli(::Second)
     override val syncThreshold = 50.milli(::Second)
     override val subsystemName = "Climber Winch"
@@ -36,22 +36,22 @@ class WinchHardware : SubsystemHardware<WinchHardware, WinchComponent>() {
     val maxForward by pref(100, `To Percent`)
     val maxReverse by pref(10, `To Percent`)
     val middleEsc by hardw { TalonSRX(middleEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, period)
+        configMaster(it, operatingVoltage, currentLimit, period / 2)
         it.configPeakOutputForward(maxForward.siValue, 100)
         it.configPeakOutputReverse(-maxReverse.siValue, 100)
     }
-    val lazyOutput = lazyOutput(middleEsc, syncThreshold)
+    val lazyOutput = lazyOutput(middleEsc, period / 2)
 
     val leftEscId by pref(5)
     val leftEsc by hardw { TalonSRX(leftEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, period)
+        configSlave(it, operatingVoltage, currentLimit, period / 2)
         it.configPeakOutputReverse(0.0, 100)
         it.follow(middleEsc)
     }
 
     val rightEscId by pref(7)
     val rightEsc by hardw { TalonSRX(rightEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, period)
+        configSlave(it, operatingVoltage, currentLimit, period / 2)
         it.configPeakOutputReverse(0.0, 100)
         it.follow(middleEsc)
     }
