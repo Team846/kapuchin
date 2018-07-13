@@ -1,11 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.routine
 
-import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
-import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.Second
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 import kotlinx.coroutines.experimental.withTimeoutOrNull
@@ -13,19 +10,8 @@ import org.junit.Test
 
 class RoutineTest {
 
-    private class RoutineTestSH : TSH<RoutineTestSH, RoutineTestC>("RoutineTest Hardware") {
-        override val period = 0.2.Second
-        override val syncThreshold = period / 10
-    }
-
-    private object RoutineTestC : TC<RoutineTestC, RoutineTestSH>(RoutineTestSH()) {
-        var out = emptyList<String>()
-
-        override fun RoutineTestSH.output(value: String) {
-            println("output @ ${currentTime withDecimals 2} by thread #${Thread.currentThread().id} = $value")
-            out += value
-        }
-    }
+    private class RoutineTestSH : TSH<RoutineTestSH, RoutineTestC>("RoutineTest Hardware")
+    private object RoutineTestC : TC<RoutineTestC, RoutineTestSH>(RoutineTestSH())
 
     private suspend fun RoutineTestC.countTo(n: Int) {
         var counter = 0

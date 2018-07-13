@@ -3,23 +3,22 @@ package com.lynbrookrobotics.kapuchin.subsystems
 import com.lynbrookrobotics.kapuchin.hardware.Sensor
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine
+import com.lynbrookrobotics.kapuchin.timing.Clock
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
-import com.lynbrookrobotics.kapuchin.timing.PlatformThread
-import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
 import info.kunalsheth.units.generated.Time
 import kotlinx.coroutines.experimental.CancellationException
 import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 
-abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name, null)
+abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? = null) : Named(hardware.name, null)
         where This : Component<This, H, Output>,
               H : SubsystemHardware<H, This> {
 
     @Suppress("UNCHECKED_CAST")
     private val thisAsThis = this as This
 
-    val ticker = ticker(hardware.priority, hardware.period)
+    val clock = customClock ?: ticker(hardware.priority, hardware.period)
 
     abstract val fallbackController: This.(Time) -> Output
 
@@ -42,7 +41,8 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
     protected abstract fun H.output(value: Output)
 
     init {
-        ticker.runOnTick(Last) { tickStart ->
+        @Suppress("LeakingThis")
+        clock.runOnTick(Last) { tickStart ->
             @Suppress("UNNECESSARY_SAFE_CALL")
             (routine ?: fallbackController)
                     ?.invoke(thisAsThis, tickStart)
@@ -52,7 +52,7 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
 
     val <Input> Sensor<Input>.readOnTick
         get() = startUpdates { _ ->
-            ticker.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
+            clock.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
         }
 
     val <Input> Sensor<Input>.readWithEventLoop

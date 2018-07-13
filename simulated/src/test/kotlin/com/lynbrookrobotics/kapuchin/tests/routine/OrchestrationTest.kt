@@ -1,14 +1,14 @@
 package com.lynbrookrobotics.kapuchin.tests.routine
 
-import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
+import com.lynbrookrobotics.kapuchin.tests.subsystems.checkCount
+import com.lynbrookrobotics.kapuchin.tests.subsystems.countTo
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.Second
 import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Test
@@ -16,28 +16,8 @@ import kotlin.math.min
 
 class OrchestrationTest {
 
-    private class OrchestrationTestSH(id: Int) : TSH<OrchestrationTestSH, OrchestrationTestC>("OrchestrationTest Hardware $id") {
-        override val period = 0.2.Second
-        override val syncThreshold = period / 10
-    }
-
-    private class OrchestrationTestC(id: Int) : TC<OrchestrationTestC, OrchestrationTestSH>(OrchestrationTestSH(id)) {
-        var out = emptyList<String>()
-
-        override fun OrchestrationTestSH.output(value: String) {
-            println("output @ ${currentTime withDecimals 2} by thread #${Thread.currentThread().id} = $value")
-            out += value
-        }
-    }
-
-    private suspend fun OrchestrationTestC.countTo(n: Int) {
-        var counter = 0
-        runRoutine("Count to $n") { "countTo($n)".takeIf { counter++ < n } }
-    }
-
-    private fun OrchestrationTestC.checkCount(number: Int, times: Int) {
-        out.count { it == "countTo($number)" } `is equal to?` times
-    }
+    private class OrchestrationTestSH(id: Int) : TSH<OrchestrationTestSH, OrchestrationTestC>("OrchestrationTest Hardware $id")
+    private class OrchestrationTestC(id: Int) : TC<OrchestrationTestC, OrchestrationTestSH>(OrchestrationTestSH(id))
 
     @Test(timeout = 4 * 1000)
     fun `launchAll launches all routines`() = runBlocking {

@@ -19,8 +19,6 @@ class SensorTest {
     private class SensorTestSH : TSH<SensorTestSH, SensorTestC>("SensorTest Hardware") {
         val sensorA = sensor { Math.random() stampWith currentTime }
         val sensorB = sensor { Math.random() stampWith currentTime }
-        override val period = 0.2.Second
-        override val syncThreshold = period / 10
     }
 
     private object SensorTestC : TC<SensorTestC, SensorTestSH>(SensorTestSH())

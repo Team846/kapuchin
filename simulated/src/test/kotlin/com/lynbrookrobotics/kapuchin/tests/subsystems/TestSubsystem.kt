@@ -1,24 +1,35 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
-import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
+import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
+import com.lynbrookrobotics.kapuchin.timing.Clock
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 
-abstract class TC<This, H>(hardware: H) : Component<This, H, String>(hardware)
+abstract class TC<This, H>(hardware: H, customClock: Clock? = null) : Component<This, H, String>(hardware, customClock)
         where This : TC<This, H>,
               H : SubsystemHardware<H, This> {
 
     override val fallbackController: This.(Time) -> String = { "fallback controller" }
+    var out = emptyList<String>()
 
     override fun H.output(value: String) {
+        out += value
         println("output @ ${currentTime withDecimals 2} by thread #${Thread.currentThread().id} = $value")
     }
+}
+
+suspend fun Component<*, *, String>.countTo(n: Int) {
+    var counter = 0
+    runRoutine("Count to $n") { "countTo($n)".takeIf { counter++ < n } }
+}
+
+fun TC<*, *>.checkCount(number: Int, times: Int) {
+    out.count { it == "countTo($number)" } `is equal to?` times
 }
 
 abstract class TSH<This, C>(override val subsystemName: String) : SubsystemHardware<This, C>()
@@ -26,6 +37,6 @@ abstract class TSH<This, C>(override val subsystemName: String) : SubsystemHardw
               C : Component<C, This, *> {
 
     override val priority = Priority.RealTime
-    override val period = 1.Second
-    override val syncThreshold = 0.5.Second
+    override val period = 0.2.Second
+    override val syncThreshold = period / 10
 }
