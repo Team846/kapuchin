@@ -60,12 +60,6 @@ abstract class Component<This, H, Output>(val hardware: H) : Named(hardware.name
             EventLoop.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
         }
 
-    fun <Input> Sensor<Input>.readAsynchronously(priority: Priority) = startUpdates {
-        PlatformThread(this@Component, it.name, priority) {
-            while (true) value = optimizedRead(ticker.waitOnTick(), hardware.syncThreshold)
-        }
-    }
-
     val <Input> Sensor<Input>.readEagerly get() = startUpdates { _ -> }
 
     override fun equals(other: Any?) = when (other) {
