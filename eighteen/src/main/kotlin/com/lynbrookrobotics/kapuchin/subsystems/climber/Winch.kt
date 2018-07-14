@@ -36,22 +36,22 @@ class WinchHardware : SubsystemHardware<WinchHardware, WinchComponent>() {
     val maxForward by pref(100, `To Percent`)
     val maxReverse by pref(10, `To Percent`)
     val middleEsc by hardw { TalonSRX(middleEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, period / 2)
+        configMaster(it, operatingVoltage, currentLimit)
         it.configPeakOutputForward(maxForward.siValue, 100)
         it.configPeakOutputReverse(-maxReverse.siValue, 100)
     }
-    val lazyOutput = lazyOutput(middleEsc, period / 2)
+    val lazyOutput = lazyOutput(middleEsc)
 
     val leftEscId by pref(5)
     val leftEsc by hardw { TalonSRX(leftEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, period / 2)
+        configSlave(it, operatingVoltage, currentLimit)
         it.configPeakOutputReverse(0.0, 100)
         it.follow(middleEsc)
     }
 
     val rightEscId by pref(7)
     val rightEsc by hardw { TalonSRX(rightEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, period / 2)
+        configSlave(it, operatingVoltage, currentLimit)
         it.configPeakOutputReverse(0.0, 100)
         it.follow(middleEsc)
     }

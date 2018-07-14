@@ -1,25 +1,23 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.ctre.phoenix.ErrorCode
-import com.ctre.phoenix.ErrorCode.OK
 import com.ctre.phoenix.motorcontrol.*
+import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
 import com.ctre.phoenix.motorcontrol.ControlMode.*
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.*
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedGainWriter
-import com.lynbrookrobotics.kapuchin.logging.Level.Error
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import info.kunalsheth.units.generated.*
 
-fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOffloadedGainWriter {
-    val t = timeout.milli(T::Second).toInt()
-    fun wrap(f: (Int, Double, Int) -> ErrorCode): (Double) -> Unit = {
-        val err = f(idx, it, t)
-        if (err != OK) log(Error) { "TalonSRX returned error code $err" }
-    }
+private val configTimeout = 5 * 1000
+private val slowStatusFrameRate = 1000
+
+fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOffloadedGainWriter {
+    val gainConfigTimeout = (period / 2).milli(T::Second).toInt()
+    fun wrap(f: (Int, Double, Int) -> ErrorCode): (Double) -> Unit = { f(idx, it, gainConfigTimeout) }
 
     return LazyOffloadedGainWriter(
             writeKp = wrap(talonSRX::config_kP),
@@ -33,62 +31,55 @@ fun Named.lazyOutput(talonSRX: TalonSRX, timeout: Time, idx: Int = 0): LazyOfflo
     )
 }
 
-fun generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, outputPeriod: Time, timeout: Time = 5.Second) {
-    val t = timeout.milli(T::Second).toInt()
-
+fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
     esc.setNeutralMode(NeutralMode.Brake)
-    esc.configOpenloopRamp(0.0, t)
-    esc.configClosedloopRamp(0.0, t)
+    esc.configOpenloopRamp(0.0, configTimeout)
+    esc.configClosedloopRamp(0.0, configTimeout)
 
-    esc.configPeakOutputReverse(-1.0, t)
-    esc.configNominalOutputReverse(0.0, t)
-    esc.configNominalOutputForward(0.0, t)
-    esc.configPeakOutputForward(1.0, t)
-    esc.configNeutralDeadband(0.001, t)
+    esc.configPeakOutputReverse(-1.0, configTimeout)
+    esc.configNominalOutputReverse(0.0, configTimeout)
+    esc.configNominalOutputForward(0.0, configTimeout)
+    esc.configPeakOutputForward(1.0, configTimeout)
+    esc.configNeutralDeadband(0.001, configTimeout)
 
-    esc.configVoltageCompSaturation(voltageCompensation.Volt, t)
-    esc.configVoltageMeasurementFilter(32, t)
+    esc.configVoltageCompSaturation(voltageCompensation.Volt, configTimeout)
+    esc.configVoltageMeasurementFilter(32, configTimeout)
     esc.enableVoltageCompensation(true)
 
-    val outPeriodT = outputPeriod.milli(T::Second).toInt()
-    ControlFrame.values().forEach { esc.setControlFramePeriod(it, outPeriodT) }
+    val controlFramePeriod = syncThreshold.milli(T::Second).toInt()
+    esc.setControlFramePeriod(Control_3_General, controlFramePeriod)
 
     if (esc is TalonSRX) {
-        esc.configContinuousCurrentLimit(currentLimit.Ampere.toInt(), t)
-        esc.configPeakCurrentLimit(0, t) // simpler, single-threshold limiting
+        esc.configContinuousCurrentLimit(currentLimit.Ampere.toInt(), configTimeout)
+        esc.configPeakCurrentLimit(0, configTimeout) // simpler, single-threshold limiting
         esc.enableCurrentLimit(true)
     }
 }
 
-fun configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, outputPeriod: Time, vararg feedback: FeedbackDevice, timeout: Time = 5.Second) {
-    val t = timeout.milli(T::Second).toInt()
+fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, vararg feedback: FeedbackDevice) {
+    generalSetup(master, voltageCompensation, currentLimit)
 
-    generalSetup(master, voltageCompensation, currentLimit, outputPeriod)
+    feedback.forEachIndexed { i, sensor -> master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
 
-    feedback.forEachIndexed { i, sensor -> master.configSelectedFeedbackSensor(sensor, i, t) }
-
-    val slow = 1000
-    StatusFrameEnhanced.values().forEach { master.setStatusFramePeriod(it, slow, t) }
+    StatusFrameEnhanced.values().forEach { master.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
 
     mapOf(
             Status_1_General to 5, // tells slaves what to output
 
-            Status_2_Feedback0 to if (feedback.isNotEmpty()) 10 else slow, // tells RoboRIO about selected sensor data
-            Status_12_Feedback1 to if (feedback.size > 1) 10 else slow, // tells RoboRIO about selected sensor data
+            Status_2_Feedback0 to if (feedback.isNotEmpty()) 10 else slowStatusFrameRate, // tells RoboRIO about selected sensor data
+            Status_12_Feedback1 to if (feedback.size > 1) 10 else slowStatusFrameRate, // tells RoboRIO about selected sensor data
 
-            Status_13_Base_PIDF0 to if (feedback.isNotEmpty()) 15 else slow, // current error, integral, and derivative
-            Status_14_Turn_PIDF1 to if (feedback.size > 1) 15 else slow // current error, integral, and derivative
+            Status_13_Base_PIDF0 to if (feedback.isNotEmpty()) 15 else slowStatusFrameRate, // current error, integral, and derivative
+            Status_14_Turn_PIDF1 to if (feedback.size > 1) 15 else slowStatusFrameRate // current error, integral, and derivative
     ).forEach { frame, period ->
-        master.setStatusFramePeriod(frame, period, t)
+        master.setStatusFramePeriod(frame, period, configTimeout)
     }
 
-    master.configVelocityMeasurementPeriod(Period_5Ms, t)
-    master.configVelocityMeasurementWindow(4, t)
+    master.configVelocityMeasurementPeriod(Period_5Ms, configTimeout)
+    master.configVelocityMeasurementWindow(4, configTimeout)
 }
 
-fun configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, outputPeriod: Time, timeout: Time = 5.Second) {
-    generalSetup(slave, voltageCompensation, currentLimit, outputPeriod)
-    val slow = 1000
-    val t = timeout.milli(T::Second).toInt()
-    StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slow, t) }
+fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
+    generalSetup(slave, voltageCompensation, currentLimit)
+    StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
 }

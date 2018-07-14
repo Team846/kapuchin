@@ -37,25 +37,25 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, period / 2, QuadEncoder)
+        configMaster(it, operatingVoltage, currentLimit, QuadEncoder)
     }
     val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, period / 2)
+        configSlave(it, operatingVoltage, currentLimit)
         it.follow(leftMasterEsc)
     }
-    val leftLazyOutput = lazyOutput(leftMasterEsc, period / 2)
+    val leftLazyOutput = lazyOutput(leftMasterEsc)
 
 
     val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, period / 2, QuadEncoder)
+        configMaster(it, operatingVoltage, currentLimit, QuadEncoder)
         it.inverted = true
     }
     val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, period / 2)
+        configSlave(it, operatingVoltage, currentLimit)
         it.follow(rightMasterEsc)
         it.inverted = true
     }
-    val rightLazyOutput = lazyOutput(rightMasterEsc, period / 2)
+    val rightLazyOutput = lazyOutput(rightMasterEsc)
 
 
     val wheelDiameter by pref(6, `To Inch`)

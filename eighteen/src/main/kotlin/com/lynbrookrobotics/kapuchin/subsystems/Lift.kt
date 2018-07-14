@@ -13,6 +13,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.*
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
@@ -37,9 +38,9 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
 }
 
 class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
-    override val priority get() = TODO()
+    override val priority = Priority.Low
     override val period = 20.milli(::Second)
-    override val syncThreshold = 1.milli(::Second)
+    override val syncThreshold = 5.milli(::Second)
     override val subsystemName = "Lift"
 
     val operatingVoltage by pref(12, `To Volt`)
@@ -67,9 +68,9 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val maxOutput by pref(70, `To Percent`)
     val idx = 0
     val esc by hardw { TalonSRX(escCanId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, period, Analog)
+        configMaster(it, operatingVoltage, currentLimit, Analog)
 
-        val t = 100
+        val t = 5000
 
         // SAFETY
         it.configPeakOutputForward(maxOutput.siValue, t)
@@ -81,6 +82,6 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
         it.configForwardSoftLimitThreshold(offloadedSettings.native(maxHeight).toInt(), t)
         it.configForwardSoftLimitEnable(true, t)
     }
-    val lazyOutput = lazyOutput(esc, period / 2, idx)
+    val lazyOutput = lazyOutput(esc, idx)
     val position = sensor { offloadedSettings.realPosition(esc.getSelectedSensorPosition(idx)) stampWith it }
 }
