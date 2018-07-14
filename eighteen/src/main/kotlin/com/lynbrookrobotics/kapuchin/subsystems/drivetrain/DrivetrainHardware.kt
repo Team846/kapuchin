@@ -23,7 +23,7 @@ import kotlin.math.PI
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
     override val period = 15.milli(::Second)
-    override val syncThreshold = 1.milli(::Second)
+    override val syncThreshold = 3.milli(::Second)
     override val subsystemName = "Drivetrain"
 
     val leftSlaveEscId by pref(14)
