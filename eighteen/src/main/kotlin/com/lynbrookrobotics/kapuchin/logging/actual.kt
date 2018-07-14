@@ -22,7 +22,7 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
 
     private var running = launch { }
     private val safeName = name.replace("""[^\w\d]""".toRegex(), "_")
-    private val printer = File("/tmp/$safeName-${currentTime.Second}.csv")
+    private val printer = File("/tmp/$safeName.csv")
             .printWriter(US_ASCII).also { it.println("value,stamp") }
 
     actual override fun invoke(stamp: Time, value: Q) = synchronized(this) {
