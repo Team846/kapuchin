@@ -1,15 +1,45 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import edu.wpi.first.wpilibj.DriverStation
-
-actual fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(level, throwable.stackTrace, message)
+import com.lynbrookrobotics.kapuchin.control.Quan
+import com.lynbrookrobotics.kapuchin.timing.currentTime
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.UomConverter
+import kotlinx.coroutines.experimental.launch
+import java.io.File
+import kotlin.text.Charsets.US_ASCII
 
 actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
-    Level.Error -> DriverStation.reportError(formattedMessage, false)
-    Level.Warning -> DriverStation.reportWarning(formattedMessage, false)
-    Level.Debug -> println(formattedMessage)
+    Level.Error -> println("ERROR $formattedMessage")
+    Level.Warning -> println("WARNING $formattedMessage")
+    Level.Debug -> println("DEBUG $formattedMessage")
+}
+
+actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: String, private val withUnits: UomConverter<Q>) :
+        Named("$of (${withUnits.unitName})", parent),
+        (Time, Q) -> Unit {
+
+    private var running = launch { }
+    private val safeName = name.replace("""[^\w\d]""".toRegex(), "_")
+    private val printer = File("/tmp/$safeName.csv")
+            .printWriter(US_ASCII).also { it.println("value,stamp") }
+
+    actual override fun invoke(stamp: Time, value: Q) = synchronized(this) {
+        if (running.isCompleted) launch {
+            SmartDashboard.putNumber(name, withUnits(value))
+            printer.println("$value,${stamp.Second}")
+        }.also { running = it }
+    }
+
+    actual companion object {
+        actual fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>) =
+                Grapher(this, of, withUnits)
+    }
 }
 
 actual typealias StackTraceElement = java.lang.StackTraceElement
 
-actual fun nameLayer(parent: Named?, child: String): String = "${parent?.name ?: ""}/$child"
+actual val Throwable.platformStackTrace: Array<StackTraceElement> get() = stackTrace
+
+actual fun nameLayer(parent: Named?, child: String): String = "${parent?.name?.plus('/') ?: ""}$child"

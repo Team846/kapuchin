@@ -1,39 +1,61 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
-import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
+import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withTimeout
+import kotlinx.coroutines.experimental.runBlocking
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-        val electricalHardware = ::ElectricalSystemHardware.safeCall()
+        val classloading = loadClasses()
 
-        val shooterHardware = ::ShooterHardware.safeCall()
-        val shooterComponent = shooterHardware creates ::ShooterComponent
+        val subsystems = Subsystems.init()
 
-        val driverHardware = ::DriverHardware.safeCall()
-
-        val drivetrainHardware = ::DrivetrainHardware.safeCall()
-        val drivetrainComponent = drivetrainHardware creates ::DrivetrainComponent
+        runBlocking { classloading.join() }
 
         HAL.observeUserProgramStarting()
 
-        launch {
-            withTimeout(10000) {
-                drivetrainComponent?.teleop(driverHardware!!) { false }
-            }
-        }
+        val eventLoopPeriod = 20.milli(::Second)
+
+        val doNothing = launch { }
+        var currentJob: Job = doNothing
 
         while (true) {
-            m_ds.waitForData()
+            m_ds.waitForData(eventLoopPeriod.Second)
             EventLoop.tick(currentTime)
+
+            if (!currentJob.isActive) {
+                System.gc()
+
+                currentJob =
+                        subsystems::teleop runWhile { isEnabled && isOperatorControl }
+                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
+                        ?: doNothing
+            }
         }
+    }
+
+    private fun loadClasses() = launch {
+        val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
+        Thread.currentThread()
+                .contextClassLoader
+                .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
+                .bufferedReader()
+                .lineSequence()
+                .filter { it.matches(classNameRegex) }
+                .map { it.replace(classNameRegex, "$1") }
+                .forEach {
+                    launch(coroutineContext) {
+                        try {
+                            Class.forName(it)
+                        } catch (t: Throwable) {
+                        }
+                    }
+                }
     }
 }

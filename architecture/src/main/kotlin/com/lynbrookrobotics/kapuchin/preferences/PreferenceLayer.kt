@@ -5,18 +5,18 @@ import com.lynbrookrobotics.kapuchin.control.Quan
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import info.kunalsheth.units.generated.UomConverter
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
 
 fun <Value> Named.pref(nameSuffix: String = "", get: Named.() -> (() -> Value)) = PreferenceLayer(this, get, nameSuffix)
 
-fun <C, E> Named.pref(fallbackCompensation: KProperty0<C>, fallbackForError: KProperty0<E>)
+fun <C, E> Named.pref(comp: Number, compUnits: UomConverter<C>, err: Number, errUnits: UomConverter<E>)
         where C : Quan<C>,
               E : Quan<E> =
         pref {
-            val compensation by pref(fallbackCompensation)
-            val forError by pref(fallbackForError)
+            val compensation by pref(comp, compUnits)
+            val forError by pref(err, errUnits)
             ({ Gain(compensation, forError) })
         }
 
@@ -38,7 +38,7 @@ class PreferenceLayer<Value>(
         }
 
         return object : ReadOnlyProperty<Any?, Value> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get()
         }
     }
 }

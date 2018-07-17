@@ -20,9 +20,7 @@ class ElectricalTests {
     fun `ramp rate limiting ramps up and down output`() {
         val startRampUpTime = 846.Minute
 
-        val limiter = RampRateLimiter(
-                12.VoltPerSecond, 0.Volt stampWith startRampUpTime
-        )
+        val limiter = RampRateLimiter(0.Volt stampWith startRampUpTime) { 12.VoltPerSecond }
 
         val incr = 3.milli(::Second)
 
@@ -60,10 +58,12 @@ class ElectricalTests {
         repeat(100) {
             val target = incr * it
             limiter(0.Rpm, target) `is equal to?` if (target > maxStartupVoltage) maxStartupVoltage else target
+            limiter(0.Volt, 0.Ampere, target) `is equal to?` if (target > maxStartupVoltage) maxStartupVoltage else target
         }
         repeat(100) {
             val target = -incr * it
             limiter(0.Rpm, target) `is equal to?` if (target < -maxStartupVoltage) -maxStartupVoltage else target
+            limiter(0.Volt, 0.Ampere, target) `is equal to?` if (target < -maxStartupVoltage) -maxStartupVoltage else target
         }
     }
 

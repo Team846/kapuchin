@@ -5,13 +5,15 @@ import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import info.kunalsheth.units.generated.Time
 
 interface Clock {
-    var jobs: Set<(tickStart: Time) -> Unit>
-    fun runOnTick(order: ExecutionOrder = First, run: (tickStart: Time) -> Unit): Cancel {
+    var jobs: List<(tickStart: Time) -> Unit>
+
+    fun runOnTick(order: ExecutionOrder = First, run: (tickStart: Time) -> Unit) = synchronized(this) {
+        jobs -= run
         jobs = when (order) {
-            First -> setOf(run) + jobs
+            First -> listOf(run) + jobs
             Last -> jobs + run
         }
-        return Cancel { jobs -= run }
+        Cancel { synchronized(this) { jobs -= run } }
     }
 
     fun tick(atTime: Time) = jobs.forEach { it(atTime) }
