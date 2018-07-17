@@ -27,9 +27,9 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val trackSize by pref(2, `To Foot`)
     val maxTurningSpeed get() = topSpeed / (trackSize / 2)
     val turningPositionGains by pref {
-        val kP by pref(3, `To FootPerSecond`, 45, `To Degree`)
+        val kP by pref(2, `To FootPerSecond`, 60, `To Degree`)
         val kI by pref(0, `To FootPerSecond`, 45, `To DegreeSecond`)
-        val kD by pref(1, `To FootPerSecond`, 60, `To DegreePerSecond`)
+        val kD by pref(0, `To FootPerSecond`, 90, `To DegreePerSecond`)
         ({ PidGains(kP, kI, kD) })
     }
 

@@ -40,20 +40,20 @@ data class Subsystems(
 
     fun backAndForthAuto() = launch {
         drivetrain.driveStraight(
-                10.Foot, 0.Degree,
+                8.Foot, 0.Degree,
                 1.Inch, 2.Degree,
-                5.FootPerSecondSquared,
-                10.FootPerSecond
+                2.FootPerSecondSquared,
+                3.FootPerSecond
         )
 
-        delay(10000)
-
-        drivetrain.driveStraight(
-                -10.Foot, 0.Degree,
-                1.Inch, 2.Degree,
-                5.FootPerSecondSquared,
-                10.FootPerSecond
-        )
+//        delay(10000)
+//
+//        drivetrain.driveStraight(
+//                -10.Foot, 0.Degree,
+//                1.Inch, 2.Degree,
+//                5.FootPerSecondSquared,
+//                10.FootPerSecond
+//        )
     }.also { HAL.observeUserProgramTeleop() }
 
     companion object : Named("Subsystems Initializer") {

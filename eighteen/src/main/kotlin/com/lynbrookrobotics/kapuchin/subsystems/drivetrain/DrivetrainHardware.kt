@@ -33,7 +33,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
 
     val operatingVoltage by pref(11, `To Volt`)
-    val currentLimit by pref(20, `To Ampere`)
+    val currentLimit by pref(10, `To Ampere`)
 
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {

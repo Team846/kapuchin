@@ -166,9 +166,9 @@ suspend fun DrivetrainComponent.driveStraight(
         else {
             val turn = turnControl(gyro.stamp, gyro.value.angle)
 
-            val dx = position - startingPostion
-            val left = profile(dx.left) + turn
-            val right = profile(dx.right) - turn
+            val forward = profile((position - startingPostion).avg)
+            val left = forward + turn
+            val right = forward - turn
 
             hardware.offloadedSettings.run {
                 TwoSided(

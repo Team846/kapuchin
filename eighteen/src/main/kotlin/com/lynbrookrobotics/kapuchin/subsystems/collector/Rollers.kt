@@ -17,7 +17,7 @@ class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHa
     val collectStrength by pref(9, `To Volt`)
     val cubeAdjustCycle by pref(4, `To Hertz`)
     val cubeAdjustStrength by pref(3, `To Volt`)
-    val cubeHoldStrength by pref(2, `To Volt`)
+    val cubeHoldStrength by pref(4, `To Volt`)
 
     override val fallbackController: RollersComponent.(Time) -> TwoSided<Volt> = { TwoSided(-cubeHoldStrength) }
 
