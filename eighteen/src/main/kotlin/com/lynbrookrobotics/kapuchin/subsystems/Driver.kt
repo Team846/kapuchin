@@ -42,7 +42,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     operator fun Joystick.get(button: JoystickButton) = getRawButton(button.raw)
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val activationTolerance by pref(0.01)
+    val activationTolerance by pref(0.03)
     val inactiveRange = 0 withToleranceOf activationTolerance
     val manualOverride = s { -(operator.y.takeUnless { it in inactiveRange } ?: 0.0) }
 
@@ -56,7 +56,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     fun sqrWithSign(x: Double) = x * x * x.sign
 
     val accelerator = s { sqrWithSign(-(driver.y.takeUnless { it in inactiveRange } ?: 0.0)) }
-    val steering = s { wheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
+    val steering = s { sqrWithSign(wheel.x.takeUnless { it in inactiveRange } ?: 0.0) }
 
     // LIFT
     val twistAdjust = s { operator.z }

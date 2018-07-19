@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.math.avg
-import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionProfile
 import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
@@ -15,12 +14,10 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
-import kotlin.math.absoluteValue
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
-    val gyro by hardware.gyroInput.readEagerly.withStamps
 
     val liftHeight by lift.hardware.position.readOnTick.withoutStamps
     val liftActivationThreshold = lift.collectHeight + lift.positionTolerance
@@ -33,20 +30,9 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     val leftSlew = RampRateLimiter(limit = slewFunction)
     val rightSlew = RampRateLimiter(limit = slewFunction)
 
-    val turnTargetIntegrator = InfiniteIntegrator(gyro.value.angle)
-    val turnControl = PidControlLoop(turningPositionGains) {
-        val steeringForwardBlend =
-                if (steering == 0.0) 0.0
-                else steering.absoluteValue / (steering.absoluteValue + accelerator.absoluteValue)
-        turnTargetIntegrator(it, maxTurningSpeed * steering * steeringForwardBlend)
-    }
-
     runRoutine("Teleop") {
-        val forwardVelocity = topSpeed * accelerator
-        val steeringVelocity = topSpeed * steering + turnControl(gyro.stamp, gyro.value.angle)
-
-        val left = leftSlew(it, forwardVelocity + steeringVelocity)
-        val right = rightSlew(it, forwardVelocity - steeringVelocity)
+        val left = leftSlew(it, topSpeed * (accelerator + steering))
+        val right = rightSlew(it, topSpeed * (accelerator - steering))
 
         hardware.offloadedSettings.run {
             TwoSided(
