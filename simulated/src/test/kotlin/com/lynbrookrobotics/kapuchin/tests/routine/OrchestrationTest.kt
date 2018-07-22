@@ -48,7 +48,7 @@ class OrchestrationTest {
         j1.cancelAndJoin()
 
         comps.forEachIndexed { i, c ->
-            c.checkCount(i + 1, 1)
+            c.checkCount(i + 1, 1) // todo This can fail from time to time, `0 != 1`
         }
 
         comps.forEach { it.out = emptyList() }
