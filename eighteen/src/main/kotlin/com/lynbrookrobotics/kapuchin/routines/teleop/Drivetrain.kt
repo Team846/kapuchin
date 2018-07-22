@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
@@ -114,7 +115,7 @@ suspend fun DrivetrainComponent.arcTo(
     }
 }
 
-suspend fun DrivetrainComponent.driveStraight(
+suspend fun DrivetrainComponent.driveStraightTrapezoidal(
         distance: Length, bearing: Angle,
         distanceTolerance: Length, angleTolerance: Angle,
 
@@ -122,7 +123,7 @@ suspend fun DrivetrainComponent.driveStraight(
         topSpeed: Velocity,
         deceleration: Acceleration = acceleration,
         endingSpeed: Velocity = 0.FootPerSecond,
-        kickstart: Velocity = 3.Inch / Second
+        kickstart: Velocity = 6.Inch / Second
 ) {
     val position by hardware.position.readOnTick.withoutStamps
     val velocity by hardware.velocity.readOnTick.withoutStamps
@@ -145,8 +146,7 @@ suspend fun DrivetrainComponent.driveStraight(
 
     runRoutine("Straight") {
         if (
-                position.left in distanceRange &&
-                position.right in distanceRange &&
+                position.avg in distanceRange &&
                 gyro.value.angle in bearingRange
         ) null
         else {
@@ -162,6 +162,26 @@ suspend fun DrivetrainComponent.driveStraight(
                         VelocityOutput(native(rightVelocityGains), native(right))
                 )
             }
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.driveStraightPid(
+        distance: Length, distanceTolerance: Length
+) {
+    val position by hardware.position.readOnTick.withoutStamps
+    val distanceRange = distance withToleranceOf distanceTolerance
+
+    val left = position.left + distance
+    val right = position.right + distance
+
+    runRoutine("Straight") {
+        if (position.avg in distanceRange) null
+        else hardware.offloadedSettings.run {
+            TwoSided(
+                    PositionOutput(native(positionGains), native(left)),
+                    PositionOutput(native(positionGains), native(right))
+            )
         }
     }
 }

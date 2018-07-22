@@ -21,16 +21,13 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val syncThreshold = 3.milli(Second)
 
     val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
-        log(Debug) { it.name } // TESTING
-        true
+        it.name == "T.16000M"
     }
     val driver by hardw { Joystick(0) }.verify("the driver joystick is connected") {
-        log(Debug) { it.name } // TESTING
-        true
+        it.name == "T.16000M"
     }
     val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
-        log(Debug) { it.name } // TESTING
-        true
+        it.name == "FGT Rumble 3-in-1"
     }
 
     enum class JoystickButton(val raw: Int) {

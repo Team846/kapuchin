@@ -43,8 +43,11 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val syncThreshold = 5.milli(Second)
     override val subsystemName = "Lift"
 
+
     val operatingVoltage by pref(12, Volt)
     val currentLimit by pref(30, Ampere)
+    val staticFrictionCompensation by pref(0.5, Volt)
+
 
     // SAFETY
     val maxHeight by pref(80, Inch)
@@ -68,7 +71,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val maxOutput by pref(70, Percent)
     val idx = 0
     val esc by hardw { TalonSRX(escCanId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, Analog)
+        configMaster(it, operatingVoltage, currentLimit, staticFrictionCompensation, Analog)
 
         val t = 5000
 

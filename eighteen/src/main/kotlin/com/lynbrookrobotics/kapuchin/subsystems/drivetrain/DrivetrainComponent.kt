@@ -21,8 +21,19 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val kD by pref(0, Volt, 1, FootPerSecondSquared)
         ({ PidGains(kP, kI, kD) })
     }
-    val leftVelocityGains get() = velocityGains.copy(kF = Gain(hardware.operatingVoltage, maxLeftSpeed))
-    val rightVelocityGains get() = velocityGains.copy(kF = Gain(hardware.operatingVoltage, maxRightSpeed))
+    val leftVelocityGains
+        get() = velocityGains.copy(kF = Gain(hardware.operatingVoltage + hardware.staticFrictionCompensation,
+                maxLeftSpeed))
+    val rightVelocityGains
+        get() = velocityGains.copy(kF = Gain(hardware.operatingVoltage + hardware.staticFrictionCompensation,
+                maxRightSpeed))
+
+    val positionGains by pref {
+        val kP by pref(3, Volt, 2, Foot)
+        val kI by pref(0, Volt, 1, FootSecond)
+        val kD by pref(0, Volt, 1, FootPerSecond)
+        ({ PidGains(kP, kI, kD) })
+    }
 
     val trackSize by pref(2, Foot)
     val maxTurningSpeed get() = topSpeed / (trackSize / 2)
