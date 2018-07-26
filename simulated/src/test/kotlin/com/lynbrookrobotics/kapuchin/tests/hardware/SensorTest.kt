@@ -12,6 +12,7 @@ import com.lynbrookrobotics.kapuchin.timing.checkInSync
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import kotlinx.coroutines.experimental.runBlocking
+import org.junit.Ignore
 import org.junit.Test
 
 class SensorTest {
@@ -97,6 +98,54 @@ class SensorTest {
             runRoutine(name) {
                 a1 `is equal to?` a2
                 b1 `is equal to?` b2
+                name.takeIf { runs-- > 0 }
+            }
+        }
+    }
+
+    @Ignore
+    @Test(timeout = 3 * 1000)
+    fun `sensors do not duplicate update lambdas`() = runBlocking {
+        val name = "sensors do not duplicate runOnTick lambdas"
+        SensorTestC.run {
+            val ogClockJobs = clock.jobs.size
+            val ogElJobs = EventLoop.jobs.size
+
+            val a1 by hardware.sensorA.readOnTick.withStamps
+            val a2 by hardware.sensorA.readOnTick.withoutStamps
+            val a3 by hardware.sensorA.readOnTick.withStamps
+            val a4 by hardware.sensorA.readOnTick.withoutStamps
+
+            val a5 by hardware.sensorA.readWithEventLoop.withStamps
+            val a6 by hardware.sensorA.readWithEventLoop.withoutStamps
+            val a7 by hardware.sensorA.readWithEventLoop.withStamps
+            val a8 by hardware.sensorA.readWithEventLoop.withoutStamps
+
+            val b1 by hardware.sensorB.readOnTick.withStamps
+            val b2 by hardware.sensorB.readOnTick.withoutStamps
+            val b3 by hardware.sensorB.readOnTick.withStamps
+            val b4 by hardware.sensorB.readOnTick.withoutStamps
+
+            val b5 by hardware.sensorB.readWithEventLoop.withStamps
+            val b6 by hardware.sensorB.readWithEventLoop.withoutStamps
+            val b7 by hardware.sensorB.readWithEventLoop.withStamps
+            val b8 by hardware.sensorB.readWithEventLoop.withoutStamps
+
+            var runs = 10
+            runRoutine(name) {
+                a1 `is equal to?` a3
+                a2 `is equal to?` a4
+                a5 `is equal to?` a7
+                a6 `is equal to?` a8
+
+                b1 `is equal to?` b3
+                b2 `is equal to?` b4
+                b5 `is equal to?` b7
+                b6 `is equal to?` b8
+
+                ogClockJobs + 2 `is equal to?` clock.jobs.size
+                ogElJobs + 2 `is equal to?` EventLoop.jobs.size
+
                 name.takeIf { runs-- > 0 }
             }
         }
