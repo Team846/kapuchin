@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
-class Delay<T> constructor(val lookBack: Int) : (T) -> T? {
+class Delay<T>(val lookBack: Int) : (T) -> T? {
 
     @Suppress("UNCHECKED_CAST") // this is a workaround
     private val buffer = arrayOfNulls<Any>(lookBack) as Array<T?>
