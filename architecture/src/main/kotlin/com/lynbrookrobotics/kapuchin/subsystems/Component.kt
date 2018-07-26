@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.timing.Clock
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Time
 import kotlinx.coroutines.experimental.CancellationException
 import kotlinx.coroutines.experimental.suspendCancellableCoroutine
@@ -51,16 +52,19 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
     }
 
     val <Input> Sensor<Input>.readOnTick
-        get() = startUpdates { _ ->
-            clock.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
-        }
+        get() = Sensor.UpdateSource(this, startUpdates = { s ->
+            clock.runOnTick { s.value = optimizedRead(it, hardware.syncThreshold) }
+        })
 
     val <Input> Sensor<Input>.readWithEventLoop
-        get() = startUpdates { _ ->
+        get() = Sensor.UpdateSource(this, startUpdates = { _ ->
             EventLoop.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
-        }
+        })
 
-    val <Input> Sensor<Input>.readEagerly get() = startUpdates { _ -> }
+    val <Input> Sensor<Input>.readEagerly
+        get() = Sensor.UpdateSource(this, getValue = { _ ->
+            optimizedRead(currentTime, hardware.syncThreshold).also { value = it }
+        })
 
     override fun equals(other: Any?) = when (other) {
         is Component<*, *, *> -> this.name == other.name

@@ -9,7 +9,7 @@ import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import info.kunalsheth.units.generated.*
 
-class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
+class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<Ampere>>(hardware) {
 
     private val maxLeftSpeed by pref(13, FootPerSecond)
     private val maxRightSpeed by pref(13.3, FootPerSecond)
@@ -52,7 +52,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         ))
     }
 
-    override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
+    private val currentSpeed by hardware.velocity.readEagerly
+    override fun DrivetrainHardware.output(value: TwoSided<Ampere>) {
         leftLazyOutput(value.left)
         rightLazyOutput(value.right)
     }
