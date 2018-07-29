@@ -1,17 +1,16 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.control.plusOrMinus
+import com.lynbrookrobotics.kapuchin.hardware.AlpsRdc80
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
-import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
 import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.generated.*
 import kotlin.math.sign
 
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
@@ -29,6 +28,9 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
         it.name == "FGT Rumble 3-in-1"
     }
+    val absoluteWheel by hardw { Joystick(3) }.verify("the driver absolute wheel is connected"){
+        it.name == "BU0836A_1"
+    }
 
     enum class JoystickButton(val raw: Int) {
         Trigger(1), BottomTrigger(2), LeftTrigger(3), RightTrigger(4),
@@ -40,7 +42,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
     val activationTolerance by pref(0.03)
-    val inactiveRange = 0 withToleranceOf activationTolerance
+    val inactiveRange = 0 plusOrMinus activationTolerance
     val manualOverride = s { -(operator.y.takeUnless { it in inactiveRange } ?: 0.0) }
 
     // CLIMBER
@@ -54,6 +56,10 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
 
     val accelerator = s { sqrWithSign(-(driver.y.takeUnless { it in inactiveRange } ?: 0.0)) }
     val steering = s { sqrWithSign(wheel.x.takeUnless { it in inactiveRange } ?: 0.0) }
+
+    val absoluteSteeringPhaseCalibration by pref(180 + 12.9, Degree)
+    val absSteerConversion = AlpsRdc80(absoluteSteeringPhaseCalibration)
+    val absoluteSteering = s { absSteerConversion(absoluteWheel.x, absoluteWheel.y) }
 
     // LIFT
     val twistAdjust = s { operator.z }

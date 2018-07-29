@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.electrical.OutsideThresholdChecker
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.control.plusOrMinus
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`
@@ -71,7 +71,7 @@ class ElectricalTests {
     fun `threshold checker triggers after duration outside safe range`() {
         val duration = 3.Second
         val tolerance = 25.Ampere
-        val safeRange = 0.Ampere withToleranceOf tolerance
+        val safeRange = 0.Ampere plusOrMinus tolerance
         val checker = OutsideThresholdChecker(safeRange, duration)
 
         val insideStartTime = 846.Minute

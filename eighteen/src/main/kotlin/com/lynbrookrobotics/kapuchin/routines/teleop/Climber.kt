@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.control.plusOrMinus
 import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
@@ -14,7 +14,7 @@ suspend fun HooksComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     var state = false
     val isTriggered by driver.deployHooks.readEagerly.withoutStamps
     val liftPosition by lift.hardware.position.readEagerly.withoutStamps
-    val liftSafeThreshold = lift.collectHeight withToleranceOf lift.positionTolerance
+    val liftSafeThreshold = lift.collectHeight plusOrMinus lift.positionTolerance
 
     runRoutine("Teleop") {
         if (isTriggered) state = !state

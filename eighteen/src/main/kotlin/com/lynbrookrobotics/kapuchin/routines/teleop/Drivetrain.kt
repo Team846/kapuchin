@@ -8,8 +8,8 @@ import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionPr
 import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
+import com.lynbrookrobotics.kapuchin.control.plusOrMinus
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
@@ -19,6 +19,8 @@ import info.kunalsheth.units.generated.*
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
+    val absSteering by driver.absoluteSteering.readOnTick.withoutStamps
+    val gyro by hardware.gyroInput.readEagerly.withStamps
 
     val liftHeight by lift.hardware.position.readOnTick.withoutStamps
     val liftActivationThreshold = lift.collectHeight + lift.positionTolerance
@@ -84,9 +86,9 @@ suspend fun DrivetrainComponent.arcTo(
         (position.avg - startingPostion.avg) / radius
     }
 
-    val slRange = sL withToleranceOf distanceTolerance
-    val srRange = sR withToleranceOf distanceTolerance
-    val bearingRange = bearing withToleranceOf angleTolerance
+    val slRange = sL plusOrMinus distanceTolerance
+    val srRange = sR plusOrMinus distanceTolerance
+    val bearingRange = bearing plusOrMinus angleTolerance
     runRoutine("Arc") {
         if (
                 position.left in slRange &&
@@ -141,8 +143,8 @@ suspend fun DrivetrainComponent.driveStraightTrapezoidal(
     val startingPostion = position
     val turnControl = PidControlLoop(turningPositionGains) { bearing }
 
-    val distanceRange = distance withToleranceOf distanceTolerance
-    val bearingRange = bearing withToleranceOf angleTolerance
+    val distanceRange = distance plusOrMinus distanceTolerance
+    val bearingRange = bearing plusOrMinus angleTolerance
 
     runRoutine("Straight") {
         if (
@@ -170,7 +172,7 @@ suspend fun DrivetrainComponent.driveStraightPid(
         distance: Length, distanceTolerance: Length
 ) {
     val position by hardware.position.readOnTick.withoutStamps
-    val distanceRange = distance withToleranceOf distanceTolerance
+    val distanceRange = distance plusOrMinus distanceTolerance
 
     val left = position.left + distance
     val right = position.right + distance
