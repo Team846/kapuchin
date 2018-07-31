@@ -17,8 +17,8 @@ import kotlin.math.sign
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val subsystemName = "Driver"
     override val priority = Priority.RealTime
-    override val period = 20.milli(::Second)
-    override val syncThreshold = 3.milli(::Second)
+    override val period = 20.milli(Second)
+    override val syncThreshold = 3.milli(Second)
 
     val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
         log(Debug) { it.name } // TESTING

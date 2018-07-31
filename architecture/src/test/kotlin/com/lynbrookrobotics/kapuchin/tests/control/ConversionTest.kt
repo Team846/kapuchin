@@ -1,10 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
-import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
-import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
-import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
-import com.lynbrookrobotics.kapuchin.control.conversion.WheelConversion
+import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
+import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
 import com.lynbrookrobotics.kapuchin.tests.anyInt
@@ -12,14 +10,12 @@ import info.kunalsheth.units.generated.*
 import kotlin.test.Test
 
 class ConversionTest {
-    private val t = 1.Second
-
     @Test
     fun `encoder ticks and angle methods are inverses`() {
-        anyInt.filter { it != 0 }.map { resolution -> EncoderConversion(resolution.Tick, 360.Degree) }
+        anyInt.filter { it != 0 }.map { resolution -> EncoderConversion(resolution.Each, 360.Degree) }
                 .forEach { conversion ->
-                    anyDouble.map { it.Tick }.forEach { x ->
-                        x `is equal to?` conversion.ticks(conversion.angle(x))
+                    anyDouble.map { it.Each }.forEach { x ->
+                        x.Each `is equal to?` (conversion.ticks(conversion.angle(x.Each)) withDecimals 5)
 
                         val ix = x * t
                         ix `is equal to?` conversion.ticks(conversion.angle(ix))
@@ -74,11 +70,11 @@ class ConversionTest {
                         conversion.native(-x) * 2 `is equal to?` -conversion.native(x * 2)
                         conversion.native(Gain(20.Volt, x)) `is equal to?` conversion.native(Gain(10.Volt, x)) * 2
 
-                        val ix = x * 1.Second
+                        val ix = x * Second
                         conversion.native(-ix) * 2 `is equal to?` -conversion.native(ix * 2)
                         conversion.native(Gain(20.Volt, ix)) `is equal to?` conversion.native(Gain(10.Volt, ix)) * 2
 
-                        val dx = x / 1.Second
+                        val dx = x / Second
                         conversion.native(-dx) * 2 `is equal to?` -conversion.native(dx * 2)
                         conversion.native(Gain(20.Volt, dx)) `is equal to?` conversion.native(Gain(10.Volt, dx)) * 2
 

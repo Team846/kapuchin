@@ -1,8 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control
 
-import info.kunalsheth.units.generated.Quantity
-
-typealias Quan<Q> = Quantity<Q, *, *>
+import info.kunalsheth.units.generated.Quan
 
 operator fun <Q : Quan<Q>> Q.div(that: Q): Double = this.siValue / that.siValue
 fun <Q : Quan<Q>> avg(a: Q, b: Q) = (a + b) / 2

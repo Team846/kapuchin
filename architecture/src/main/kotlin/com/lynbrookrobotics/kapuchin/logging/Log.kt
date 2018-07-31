@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.control.Quan
+import info.kunalsheth.units.generated.Quan
 import kotlinx.coroutines.experimental.launch
 import kotlin.math.pow
 import kotlin.math.round

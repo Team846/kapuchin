@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.control.Quan
+import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Time
 
 class OutsideThresholdChecker<Q : Quan<Q>>(val safeRange: ClosedRange<Q>, val forDuration: Time) : (Time, Q) -> Boolean {
