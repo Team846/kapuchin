@@ -25,13 +25,13 @@ class ElectricalTests {
         val incr = 3.milli(Second)
 
         generateSequence(startRampUpTime) { it + incr }
-                .takeWhile { it - startRampUpTime < 1.Second }
+                .takeWhile { it - startRampUpTime < Second }
                 .forEach { 12.Volt `is greater than?` limiter(it, 12.Volt) }
         repeat(50) {
-            limiter(startRampUpTime + 1.Second + incr * it, 12.Volt) `is equal to?` 12.Volt
+            limiter(startRampUpTime + Second + incr * it, 12.Volt) `is equal to?` 12.Volt
         }
 
-        val startRampDownTime = startRampUpTime + 1.Second + incr * 49
+        val startRampDownTime = startRampUpTime + Second + incr * 49
 
         generateSequence(startRampDownTime) { it + incr }
                 .takeWhile { it - startRampDownTime < 2.Second }

@@ -22,10 +22,10 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
     constructor(gains: Gains, target: (Time) -> Input) : this({ _, _ -> gains }, target)
 
     private val zero = target(currentTime) * 0
-    private val derivative = Differentiator(zero / 1.Second)
+    private val derivative = Differentiator(zero / Second)
     private val integral = (gains(currentTime, zero)).run {
-        if (integralFalloff > 0) FiniteIntegrator(integralFalloff, zero * 1.Second)
-        else InfiniteIntegrator(zero * 1.Second)
+        if (integralFalloff > 0) FiniteIntegrator(integralFalloff, zero * Second)
+        else InfiniteIntegrator(zero * Second)
     }
 
     override fun invoke(stamp: Time, current: Input): Output = gains(stamp, current).run {
