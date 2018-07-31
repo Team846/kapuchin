@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control
 
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Time
 import kotlin.jvm.JvmName
 
 data class TimeStamped<out Q>(val stamp: Time, val value: Q)

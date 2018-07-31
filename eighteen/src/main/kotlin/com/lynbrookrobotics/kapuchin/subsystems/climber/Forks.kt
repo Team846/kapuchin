@@ -18,7 +18,7 @@ class ForksComponent(hardware: ForksHardware) : Component<ForksComponent, ForksH
 class ForksHardware : SubsystemHardware<ForksHardware, ForksComponent>() {
     override val priority get() = TODO()
     override val period get() = TODO()
-    override val syncThreshold = 50.milli(Second)
+    override val syncThreshold = 50.milli(::Second)
     override val subsystemName = "Climber Forks"
 
     val solenoidPort by pref(3)

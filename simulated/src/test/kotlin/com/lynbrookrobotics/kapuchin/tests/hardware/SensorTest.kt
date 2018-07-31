@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.checkInSync
 import com.lynbrookrobotics.kapuchin.timing.currentTime
+import info.kunalsheth.units.generated.Second
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Test
 

@@ -20,7 +20,7 @@ class FunkyRobot : RobotBase() {
 
         HAL.observeUserProgramStarting()
 
-        val eventLoopPeriod = 20.milli(Second)
+        val eventLoopPeriod = 20.milli(::Second)
 
         val doNothing = launch { }
         var currentJob: Job = doNothing
@@ -34,7 +34,7 @@ class FunkyRobot : RobotBase() {
 
                 currentJob =
                         subsystems::teleop runWhile { isEnabled && isOperatorControl }
-                        ?: subsystems::currentPositionTest runWhile { isEnabled && isAutonomous }
+                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
                         ?: doNothing
             }
         }

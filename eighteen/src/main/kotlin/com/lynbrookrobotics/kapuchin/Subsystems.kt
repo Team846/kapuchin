@@ -1,11 +1,8 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.control.math.TwoSided
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraightPid
-import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraightTrapezoidal
+import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
 import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
@@ -15,7 +12,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.experimental.async
@@ -42,33 +38,22 @@ data class Subsystems(
             { lift.teleop(driverHardware) }
     ).also { HAL.observeUserProgramTeleop() }
 
-    fun staticFrictionTestAuto() = launch {
-        drivetrain.runRoutine("Static Friction Test") {
-            TwoSided(PercentOutput(hardware.staticFrictionCompensation / hardware.operatingVoltage))
-        }
-    }
-
-    fun currentPositionTest() = launch {
-        drivetrain.runRoutine("Current Position Test") {
-            val pos = drivetrain.hardware.position.read(currentTime)
-            println("left: ${pos.value.left.Foot} ft")
-            println("left: ${pos.value.right.Foot} ft")
-
-            TwoSided(PercentOutput(0.Percent))
-        }
-    }
-
     fun backAndForthAuto() = launch {
-        drivetrain.driveStraightPid(8.Foot, 3.Inch)
-
-        delay(1000)
-
-        drivetrain.driveStraightTrapezoidal(
-                -8.Foot, 0.Degree,
+        drivetrain.driveStraight(
+                8.Foot, 0.Degree,
                 1.Inch, 2.Degree,
                 2.FootPerSecondSquared,
                 3.FootPerSecond
         )
+
+//        delay(10000)
+//
+//        drivetrain.driveStraight(
+//                -10.Foot, 0.Degree,
+//                1.Inch, 2.Degree,
+//                5.FootPerSecondSquared,
+//                10.FootPerSecond
+//        )
     }.also { HAL.observeUserProgramTeleop() }
 
     companion object : Named("Subsystems Initializer") {

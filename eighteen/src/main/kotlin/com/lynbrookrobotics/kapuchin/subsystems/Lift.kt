@@ -18,20 +18,20 @@ import info.kunalsheth.units.generated.*
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
     val positionGains by pref {
-        val kP by pref(12, Volt, 8, Inch)
-        val kI by pref(0, Volt, 1, FootSecond)
-        val kD by pref(0, Volt, 1, FootPerSecond)
+        val kP by pref(12, `To Volt`, 8, `To Inch`)
+        val kI by pref(0, `To Volt`, 1, `To FootSecond`)
+        val kD by pref(0, `To Volt`, 1, `To FootPerSecond`)
         ({ PidGains(kP, kI, kD) })
     }
 
-    val collectHeight by pref(0, Inch)
-    val exchangeHeight by pref(4, Inch)
-    val switchHeight by pref(25, Inch)
-    val lowScaleHeight by pref(53, Inch)
-    val highScaleHeight by pref(75, Inch)
-    val positionTolerance by pref(2, Inch)
+    val collectHeight by pref(0, `To Inch`)
+    val exchangeHeight by pref(4, `To Inch`)
+    val switchHeight by pref(25, `To Inch`)
+    val lowScaleHeight by pref(53, `To Inch`)
+    val highScaleHeight by pref(75, `To Inch`)
+    val positionTolerance by pref(2, `To Inch`)
 
-    val twistAdjustRange by pref(10, Inch)
+    val twistAdjustRange by pref(10, `To Inch`)
 
     override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = { PercentOutput(0.Percent) }
     override fun LiftHardware.output(value: OffloadedOutput) = lazyOutput(value)
@@ -39,24 +39,21 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
 
 class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val priority = Priority.Low
-    override val period = 20.milli(Second)
-    override val syncThreshold = 5.milli(Second)
+    override val period = 20.milli(::Second)
+    override val syncThreshold = 5.milli(::Second)
     override val subsystemName = "Lift"
 
-
-    val operatingVoltage by pref(12, Volt)
-    val currentLimit by pref(30, Ampere)
-    val staticFrictionCompensation by pref(0.5, Volt)
-
+    val operatingVoltage by pref(12, `To Volt`)
+    val currentLimit by pref(30, `To Ampere`)
 
     // SAFETY
-    val maxHeight by pref(80, Inch)
-    val minHeight by pref(0, Inch)
+    val maxHeight by pref(80, `To Inch`)
+    val minHeight by pref(0, `To Inch`)
 
     val offloadedSettings by pref {
         val nativeFeedbackUnits by pref(615)
-        val perFeedbackQuantity by pref(80.25, Inch)
-        val zeroOffset by pref(11.2, Inch)
+        val perFeedbackQuantity by pref(80.25, `To Inch`)
+        val zeroOffset by pref(11.2, `To Inch`)
 
         ({
             OffloadedNativeConversion(
@@ -68,10 +65,10 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     }
 
     val escCanId by pref(20)
-    val maxOutput by pref(70, Percent)
+    val maxOutput by pref(70, `To Percent`)
     val idx = 0
     val esc by hardw { TalonSRX(escCanId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, staticFrictionCompensation, Analog)
+        configMaster(it, operatingVoltage, currentLimit, Analog)
 
         val t = 5000
 

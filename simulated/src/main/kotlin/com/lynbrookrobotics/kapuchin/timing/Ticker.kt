@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.Named
 import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.milli
 import java.util.concurrent.Executors
@@ -15,13 +16,13 @@ actual class Ticker private actual constructor(parent: Named, priority: Priority
     init {
         exec.scheduleAtFixedRate(
                 { tick(currentTime) },
-                100, period.milli(Second).toLong(), TimeUnit.MILLISECONDS
+                100, period.milli(T::Second).toLong(), TimeUnit.MILLISECONDS
         )
     }
 
     actual fun waitOnTick(): Time {
         // todo do this correctly
-        Thread.sleep(period.milli(Second).toLong())
+        Thread.sleep(period.milli(T::Second).toLong())
         return currentTime
     }
 

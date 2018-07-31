@@ -17,17 +17,20 @@ import kotlin.math.sign
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val subsystemName = "Driver"
     override val priority = Priority.RealTime
-    override val period = 20.milli(Second)
-    override val syncThreshold = 3.milli(Second)
+    override val period = 20.milli(::Second)
+    override val syncThreshold = 3.milli(::Second)
 
     val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
-        it.name == "T.16000M"
+        log(Debug) { it.name } // TESTING
+        true
     }
     val driver by hardw { Joystick(0) }.verify("the driver joystick is connected") {
-        it.name == "T.16000M"
+        log(Debug) { it.name } // TESTING
+        true
     }
     val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
-        it.name == "FGT Rumble 3-in-1"
+        log(Debug) { it.name } // TESTING
+        true
     }
 
     enum class JoystickButton(val raw: Int) {
@@ -39,7 +42,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     operator fun Joystick.get(button: JoystickButton) = getRawButton(button.raw)
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val activationTolerance by pref(0.03)
+    val activationTolerance by pref(0.01)
     val inactiveRange = 0 withToleranceOf activationTolerance
     val manualOverride = s { -(operator.y.takeUnless { it in inactiveRange } ?: 0.0) }
 
@@ -53,7 +56,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     fun sqrWithSign(x: Double) = x * x * x.sign
 
     val accelerator = s { sqrWithSign(-(driver.y.takeUnless { it in inactiveRange } ?: 0.0)) }
-    val steering = s { sqrWithSign(wheel.x.takeUnless { it in inactiveRange } ?: 0.0) }
+    val steering = s { wheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
 
     // LIFT
     val twistAdjust = s { operator.z }

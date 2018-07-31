@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.nano
 
 actual val currentTime
     get() = try {
-        RobotController.getFPGATime().micro(Second)
+        RobotController.getFPGATime().micro(::Second)
     } catch (t: Throwable) {
-        System.nanoTime().nano(Second)
+        System.nanoTime().nano(::Second)
     }

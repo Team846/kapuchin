@@ -1,10 +1,10 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
+import com.lynbrookrobotics.kapuchin.control.Quan
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.nameLayer
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
-import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
