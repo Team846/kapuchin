@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.WheelConversion
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
+import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
 import com.lynbrookrobotics.kapuchin.tests.anyInt
@@ -19,7 +20,7 @@ class ConversionTest {
         anyInt.filter { it != 0 }.map { resolution -> EncoderConversion(resolution.Each, 360.Degree) }
                 .forEach { conversion ->
                     anyDouble.map { it.Each }.forEach { x ->
-                        x `is equal to?` conversion.ticks(conversion.angle(x))
+                        x.Each `is equal to?` (conversion.ticks(conversion.angle(x.Each)) withDecimals 5)
 
                         val ix = x * t
                         ix `is equal to?` conversion.ticks(conversion.angle(ix))
