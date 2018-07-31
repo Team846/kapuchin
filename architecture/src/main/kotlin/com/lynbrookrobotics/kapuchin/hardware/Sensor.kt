@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
-import com.lynbrookrobotics.kapuchin.control.Quan
+import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
 import com.lynbrookrobotics.kapuchin.control.invoke
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
@@ -27,7 +27,8 @@ open class Sensor<Input> protected constructor(internal val read: (Time) -> Time
             object : DelegateProvider<Any?, Input> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = forSensor.run {
-                        value ?: optimizedRead(currentTime, 0.Second)//.also { value = it } // this is buggy for eager sensors // todo FIX, it just returns the last value, however old
+                        value
+                                ?: optimizedRead(currentTime, 0.Second)//.also { value = it } // this is buggy for eager sensors // todo FIX, it just returns the last value, however old
                     }.value
                 }.also { startUpdates(prop) }
             }

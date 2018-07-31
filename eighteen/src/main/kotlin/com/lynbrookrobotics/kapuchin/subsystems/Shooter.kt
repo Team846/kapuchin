@@ -12,11 +12,11 @@ import info.kunalsheth.units.generated.*
 
 class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, Pair<Dimensionless, Dimensionless>>(hardware) {
 
-    val topSpeed by pref(6500.0, `To Rpm`)
+    val topSpeed by pref(6500.0, Rpm)
     val gains by pref {
-        val kP by pref(12, `To Volt`, 2000, `To Rpm`)
-        val kI by pref(0, `To Volt`, 1, `To Turn`)
-        val kD by pref(0, `To Volt`, 1, `To DegreePerSecondSquared`)
+        val kP by pref(12, Volt, 2000, Rpm)
+        val kI by pref(0, Volt, 1, Turn)
+        val kD by pref(0, Volt, 1, DegreePerSecondSquared)
         val kF = Gain(12.Volt, topSpeed)
         ({ PidGains(kP, kI, kD, kF) })
     }
@@ -32,8 +32,8 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
 class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
     override val subsystemName = "Shooter"
     override val priority = Priority.RealTime
-    override val period = 10.milli(::Second)
-    override val syncThreshold = 1.milli(::Second)
+    override val period = 10.milli(Second)
+    override val syncThreshold = 1.milli(Second)
 
     val frontHallEffectPort by pref(0)
     val backHallEffectPort by pref(1)

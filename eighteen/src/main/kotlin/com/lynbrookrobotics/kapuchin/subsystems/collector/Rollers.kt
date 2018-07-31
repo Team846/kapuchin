@@ -13,11 +13,11 @@ import info.kunalsheth.units.generated.*
 
 class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHardware) : Component<RollersComponent, RollersHardware, TwoSided<Volt>>(hardware, EventLoop) {
 
-    val purgeStrength by pref(12, `To Volt`)
-    val collectStrength by pref(9, `To Volt`)
-    val cubeAdjustCycle by pref(4, `To Hertz`)
-    val cubeAdjustStrength by pref(3, `To Volt`)
-    val cubeHoldStrength by pref(4, `To Volt`)
+    val purgeStrength by pref(12, Volt)
+    val collectStrength by pref(9, Volt)
+    val cubeAdjustCycle by pref(4, Hertz)
+    val cubeAdjustStrength by pref(3, Volt)
+    val cubeHoldStrength by pref(4, Volt)
 
     override val fallbackController: RollersComponent.(Time) -> TwoSided<Volt> = { TwoSided(-cubeHoldStrength) }
 
@@ -31,7 +31,7 @@ class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHa
 class RollersHardware : SubsystemHardware<RollersHardware, RollersComponent>() {
     override val priority get() = TODO()
     override val period get() = TODO()
-    override val syncThreshold = 50.milli(::Second)
+    override val syncThreshold = 50.milli(Second)
     override val subsystemName = "Collector Rollers"
 
     val leftPwmPort by pref(1)

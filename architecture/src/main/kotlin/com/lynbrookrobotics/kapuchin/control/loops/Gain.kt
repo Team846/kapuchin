@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.loops
 
-import com.lynbrookrobotics.kapuchin.control.Quan
+import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.control.div
 
 data class Gain<Compensation, Error>(

@@ -22,8 +22,8 @@ import kotlin.math.PI
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
-    override val period = 15.milli(::Second)
-    override val syncThreshold = 3.milli(::Second)
+    override val period = 15.milli(Second)
+    override val syncThreshold = 3.milli(Second)
     override val subsystemName = "Drivetrain"
 
     val leftSlaveEscId by pref(14)
@@ -32,8 +32,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val leftMasterEscId by pref(12)
 
 
-    val operatingVoltage by pref(11, `To Volt`)
-    val currentLimit by pref(10, `To Ampere`)
+    val operatingVoltage by pref(11, Volt)
+    val currentLimit by pref(10, Ampere)
 
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
@@ -58,7 +58,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val rightLazyOutput = lazyOutput(rightMasterEsc)
 
 
-    val wheelDiameter by pref(6, `To Inch`)
+    val wheelDiameter by pref(6, Inch)
 
     val encoderToWheelGears by pref {
         val encoderGear by pref(18)
@@ -68,7 +68,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val offloadedSettings by pref {
         val nativeFeedbackUnits by pref(4096)
-        val perFeedbackQuantity by pref(1, `To Turn`)
+        val perFeedbackQuantity by pref(1, Turn)
         ({
             OffloadedNativeConversion(
                     nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage, nativeFeedbackUnits = nativeFeedbackUnits,
@@ -84,17 +84,17 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
                 offloadedSettings.realPosition(rightMasterEsc.getSelectedSensorPosition(idx))
         ) stampWith it
     }
-//            .with(graph("Left Position", `To Foot`)) { it.left }
-//            .with(graph("Right Position", `To Foot`)) { it.right }
+//            .with(graph("Left Position", Foot)) { it.left }
+//            .with(graph("Right Position", Foot)) { it.right }
 
     val velocity = sensor {
         TwoSided(
                 offloadedSettings.realVelocity(leftMasterEsc.getSelectedSensorVelocity(idx)),
                 offloadedSettings.realVelocity(rightMasterEsc.getSelectedSensorVelocity(idx))
         ) stampWith it
-    }//.with(graph("Forward Velocity", `To FootPerSecond`)) { it.avg }
+    }//.with(graph("Forward Velocity", FootPerSecond)) { it.avg }
 
-    val driftTolerance by pref(1, `To DegreePerSecond`)
+    val driftTolerance by pref(1, DegreePerSecond)
     private lateinit var startingAngle: Angle
     val gyro by hardw { ADIS16448_IMU() }
             .configure { startingAngle = it.angle.Degree }
@@ -104,6 +104,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val gyroInput = sensor(gyro) {
         GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
     }
-//            .with(graph("Bearing", `To Degree`)) { it.angle }
-//            .with(graph("Angular Velocity", `To DegreePerSecond`)) { it.velocity }
+//            .with(graph("Bearing", Degree)) { it.angle }
+//            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
 }
