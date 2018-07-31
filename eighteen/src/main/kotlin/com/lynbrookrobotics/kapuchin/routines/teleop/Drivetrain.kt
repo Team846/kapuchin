@@ -65,7 +65,7 @@ suspend fun DrivetrainComponent.arcTo(
         topSpeed: Velocity,
         deceleration: Acceleration = acceleration,
         endingSpeed: Velocity = 0.FootPerSecond,
-        kickstart: Velocity = 3.Inch / Second
+        kickstart: Velocity = 3.Inch / 1.Second
 ) {
     val position by hardware.position.readOnTick.withoutStamps
     val velocity by hardware.velocity.readOnTick.withoutStamps
@@ -136,7 +136,7 @@ suspend fun DrivetrainComponent.driveStraight(
         topSpeed: Velocity,
         deceleration: Acceleration = acceleration,
         endingSpeed: Velocity = 0.FootPerSecond,
-        kickstart: Velocity = 3.Inch / Second
+        kickstart: Velocity = 3.Inch / 1.Second
 ) {
     val position by hardware.position.readOnTick.withoutStamps
     val velocity by hardware.velocity.readOnTick.withoutStamps

@@ -26,4 +26,8 @@ data class GearTrain(val inputTeeth: Int, val outputTeeth: Int, val idlers: Int 
 
     fun outputToInput(driveOutput: AngularAcceleration) =
             outputToInput(driveOutput * t) / t
+
+    companion object {
+        private val t = 1.Second
+    }
 }

@@ -14,7 +14,7 @@ import info.kunalsheth.units.generated.*
 
 class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchHardware, Volt>(hardware, EventLoop) {
 
-    val climbStrength by pref(10, Volt)
+    val climbStrength by pref(10, `To Volt`)
 
     override val fallbackController: WinchComponent.(Time) -> Volt = { 0.Volt }
 
@@ -25,16 +25,16 @@ class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchH
 
 class WinchHardware : SubsystemHardware<WinchHardware, WinchComponent>() {
     override val priority get() = TODO()
-    override val period = 100.milli(Second)
-    override val syncThreshold = 50.milli(Second)
+    override val period = 100.milli(::Second)
+    override val syncThreshold = 50.milli(::Second)
     override val subsystemName = "Climber Winch"
 
-    val operatingVoltage by pref(11, Volt)
-    val currentLimit by pref(30, Ampere)
+    val operatingVoltage by pref(11, `To Volt`)
+    val currentLimit by pref(30, `To Ampere`)
 
     val middleEscId by pref(6)
-    val maxForward by pref(100, Percent)
-    val maxReverse by pref(10, Percent)
+    val maxForward by pref(100, `To Percent`)
+    val maxReverse by pref(10, `To Percent`)
     val middleEsc by hardw { TalonSRX(middleEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit)
         it.configPeakOutputForward(maxForward.siValue, 100)

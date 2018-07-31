@@ -6,7 +6,9 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Foot
+import info.kunalsheth.units.generated.Length
+import info.kunalsheth.units.generated.Tick
 
 suspend fun LiftComponent.teleop(driver: DriverHardware) {
     fun <I> r(s: Sensor<I>) = s.readWithEventLoop.withoutStamps
@@ -27,8 +29,8 @@ suspend fun LiftComponent.teleop(driver: DriverHardware) {
     val currentPosition by hardware.position.readOnTick.withoutStamps
 
     runRoutine("Teleop") {
-        //        println(currentPosition.Foot)
-        if (overrideLift) PercentOutput(manualOverride.Each)
+//        println(currentPosition.Foot)
+        if (overrideLift) PercentOutput(manualOverride.Tick)
         else PositionOutput(hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(when {
                     toCollect || toDeployHooks -> collectHeight

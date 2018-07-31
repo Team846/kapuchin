@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import info.kunalsheth.units.generated.Quan
+import com.lynbrookrobotics.kapuchin.control.Quan
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.UomConverter
 

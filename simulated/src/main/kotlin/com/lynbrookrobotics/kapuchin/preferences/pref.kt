@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
-import info.kunalsheth.units.generated.Quan
+import com.lynbrookrobotics.kapuchin.control.Quan
 import com.lynbrookrobotics.kapuchin.logging.Named
 import info.kunalsheth.units.generated.UomConverter
 

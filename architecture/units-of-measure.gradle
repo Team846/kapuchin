@@ -13,11 +13,11 @@ generateUnitsOfMeasure {
             d(L: 1), // length
     )
 
-    quantities += [
-            q("Each", d()),
+    quantities += si.quantities + [
             q("Absement", d(L: 1, T: 1)),
             q("AngularAbsement", d(T: 1))
     ].toSet()
+    unitsOfMeasure += si.units
 
     unitsOfMeasure += [
             u("Inch", 0.0254, d(L: 1)),
@@ -36,7 +36,7 @@ generateUnitsOfMeasure {
             u("Minute", 60, d(T: 1)),
 
             u("Percent", 0.01, d()),
-            u("Each", 1.0, d()),
+            u("Tick", 1.0, d()),
 
             u("VoltPerSecond", 1.0, d(L: 2, M: 1, T: -4, I: -1)),
     ].toSet()

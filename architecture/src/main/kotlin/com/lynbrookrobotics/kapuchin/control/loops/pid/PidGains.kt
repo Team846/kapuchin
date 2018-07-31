@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.loops.pid
 
+import com.lynbrookrobotics.kapuchin.control.Quan
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
-import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Quantity
 
 data class PidGains<Input, Integ, Deriv, Output>(

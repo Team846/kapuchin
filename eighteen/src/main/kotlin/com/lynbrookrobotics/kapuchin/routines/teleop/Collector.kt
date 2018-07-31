@@ -5,14 +5,14 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.collector.ClampComponent
 import com.lynbrookrobotics.kapuchin.subsystems.collector.PivotComponent
 import com.lynbrookrobotics.kapuchin.subsystems.collector.RollersComponent
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Tick
 
 suspend fun RollersComponent.teleop(driver: DriverHardware) {
     val toCollect by driver.collect.readEagerly.withoutStamps
     val toPurge by driver.purge.readEagerly.withoutStamps
 
     runRoutine("Teleop") {
-        val adjust = cubeAdjustStrength * if ((it * cubeAdjustCycle).Each.toInt() % 2 == 0) 1 else -1
+        val adjust = cubeAdjustStrength * if ((it * cubeAdjustCycle).Tick.toInt() % 2 == 0) 1 else -1
         when {
             toCollect -> TwoSided(-collectStrength + adjust, -collectStrength - adjust)
             toPurge -> TwoSided(purgeStrength)

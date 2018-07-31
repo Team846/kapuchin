@@ -16,7 +16,7 @@ private val configTimeout = 5 * 1000
 private val slowStatusFrameRate = 1000
 
 fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOffloadedGainWriter {
-    val gainConfigTimeout = (period / 2).milli(Second).toInt()
+    val gainConfigTimeout = (period / 2).milli(T::Second).toInt()
     fun wrap(f: (Int, Double, Int) -> ErrorCode): (Double) -> Unit = { f(idx, it, gainConfigTimeout) }
 
     return LazyOffloadedGainWriter(
@@ -24,7 +24,7 @@ fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOf
             writeKi = wrap(talonSRX::config_kI),
             writeKd = wrap(talonSRX::config_kD),
             writeKf = wrap(talonSRX::config_kF),
-            writePercent = { talonSRX.set(PercentOutput, it.Each) },
+            writePercent = { talonSRX.set(PercentOutput, it.Tick) },
             writeCurrent = { talonSRX.set(Current, it.Ampere) },
             writePosition = { talonSRX.set(Position, it) },
             writeVelocity = { talonSRX.set(ControlMode.Velocity, it) }
@@ -46,7 +46,7 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
     esc.configVoltageMeasurementFilter(32, configTimeout)
     esc.enableVoltageCompensation(true)
 
-    val controlFramePeriod = syncThreshold.milli(Second).toInt()
+    val controlFramePeriod = syncThreshold.milli(T::Second).toInt()
     esc.setControlFramePeriod(Control_3_General, controlFramePeriod)
 
     if (esc is TalonSRX) {
