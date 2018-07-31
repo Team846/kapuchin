@@ -13,11 +13,10 @@ generateUnitsOfMeasure {
             d(L: 1), // length
     )
 
-    quantities += si.quantities + [
+    quantities += [
             q("Absement", d(L: 1, T: 1)),
             q("AngularAbsement", d(T: 1))
     ].toSet()
-    unitsOfMeasure += si.units
 
     unitsOfMeasure += [
             u("Inch", 0.0254, d(L: 1)),
