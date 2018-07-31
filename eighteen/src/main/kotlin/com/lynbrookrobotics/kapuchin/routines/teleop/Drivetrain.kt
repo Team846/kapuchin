@@ -18,8 +18,8 @@ import info.kunalsheth.units.generated.*
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
-    val steering by driver.steering.readOnTick.withoutStamps
-    val absSteering by driver.absoluteSteering.readOnTick.withoutStamps
+//    val steering by driver.steering.readOnTick.withoutStamps
+    val absSteering by driver.absoluteSteering.readEagerly.withoutStamps
     val gyro by hardware.gyroInput.readEagerly.withStamps
 
     val liftHeight by lift.hardware.position.readOnTick.withoutStamps
@@ -33,9 +33,14 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     val leftSlew = RampRateLimiter(limit = slewFunction)
     val rightSlew = RampRateLimiter(limit = slewFunction)
 
+    val turnControl = PidControlLoop(turningPositionGains) { absSteering }
+
     runRoutine("Teleop") {
-        val left = leftSlew(it, topSpeed * (accelerator + steering))
-        val right = rightSlew(it, topSpeed * (accelerator - steering))
+        val forwardVelocity = topSpeed * accelerator
+        val steeringVelocity = /* topSpeed * steering */ + turnControl(gyro.stamp, gyro.value.angle)
+
+        val left = leftSlew(it, forwardVelocity + steeringVelocity)
+        val right = rightSlew(it, forwardVelocity - steeringVelocity)
 
         hardware.offloadedSettings.run {
             TwoSided(
