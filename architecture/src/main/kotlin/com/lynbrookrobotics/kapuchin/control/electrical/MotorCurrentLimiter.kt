@@ -1,9 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import info.kunalsheth.units.generated.Ampere
-import info.kunalsheth.units.generated.AngularVelocity
-import info.kunalsheth.units.generated.Ohm
-import info.kunalsheth.units.generated.Volt
+import info.kunalsheth.units.generated.*
 
 class MotorCurrentLimiter(
         val maxVoltage: Volt, val freeSpeed: AngularVelocity,

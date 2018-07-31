@@ -21,7 +21,7 @@ class ClampComponent(hardware: ClampHardware) : Component<ClampComponent, ClampH
 class ClampHardware : SubsystemHardware<ClampHardware, ClampComponent>() {
     override val priority get() = TODO()
     override val period get() = TODO()
-    override val syncThreshold = 50.milli(::Second)
+    override val syncThreshold = 50.milli(Second)
     override val subsystemName = "Collector Pivot"
 
     val solenoidPort by pref(2)

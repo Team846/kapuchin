@@ -12,8 +12,4 @@ class WheelConversion(val radius: Length) {
     fun length(x: Radian): Length = x * radius
     fun length(x: AngularVelocity): Velocity = length(x * t) / t
     fun length(x: AngularAcceleration): Acceleration = length(x * t) / t
-
-    companion object {
-        private val t = 1.Second
-    }
 }

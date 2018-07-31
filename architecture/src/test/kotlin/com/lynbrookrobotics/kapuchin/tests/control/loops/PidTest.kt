@@ -14,11 +14,11 @@ class PidTest {
     fun `pid kP is proportional`() {
         val pid = PidControlLoop(PidGains(
                 Gain(6.Volt, 1.Foot),
-                Gain(0.Volt, 1.Foot * 1.Second),
+                Gain(0.Volt, 1.FootSecond),
                 Gain(0.Volt, 1.FootPerSecond)
         )) { _ -> 0.Foot }
 
-        val dt = 200.milli { Second }
+        val dt = 200.milli(Second)
         repeat(20) { time ->
             pid(time.Second + dt * 0, -2.Foot) `is equal to?` 12.Volt
             pid(time.Second + dt * 1, -1.Foot) `is equal to?` 6.Volt
@@ -32,12 +32,12 @@ class PidTest {
     fun `pid kI is integral`() {
         val pid = PidControlLoop(PidGains(
                 Gain(0.Volt, 1.Foot),
-                Gain(6.Volt, 1.Foot * 1.Second),
+                Gain(6.Volt, 1.FootSecond),
                 Gain(0.Volt, 1.FootPerSecond)
         )) { _ -> 0.Foot }
 
         val acc = Array(10) { time ->
-            pid(time.Second, -1.Foot)
+            pid(time.Second, -Foot)
         }
 
         val shift = 10.Second
@@ -54,7 +54,7 @@ class PidTest {
     fun `pid kD is derivative`() {
         val pid = PidControlLoop(PidGains(
                 Gain(0.Volt, 1.Foot),
-                Gain(0.Volt, 1.Foot * 1.Second),
+                Gain(0.Volt, 1.FootSecond),
                 Gain(6.Volt, 1.FootPerSecond)
         )) { _ -> 0.Foot }
 
@@ -85,7 +85,7 @@ class PidTest {
                 Gain(6.Volt, 1.FootPerSecond)
         )) { _ -> 10.FootPerSecond }
 
-        val dt = 200.milli { Second }
+        val dt = 200.milli(Second)
         repeat(20) { time ->
             pid(time.Second + dt * 0, 8.FootPerSecond) `is equal to?` 62.Volt
             pid(time.Second + dt * 1, 9.FootPerSecond) `is equal to?` 61.Volt
@@ -100,16 +100,16 @@ class PidTest {
         anyInt.filter { it > 0 }.forEach { falloff ->
             val pid = PidControlLoop(PidGains(
                     Gain(6.Volt, 1.Foot),
-                    Gain(1.Volt, 1.Foot * 1.Second),
+                    Gain(1.Volt, 1.FootSecond),
                     Gain(2.Volt, 1.FootPerSecond),
                     null,
                     falloff
             )) { _ -> 0.Foot }
 
             repeat(falloff) { time ->
-                pid(time.Second, -1.Foot)
+                pid(time.Second, -Foot)
             }
-            pid(falloff.Second, -1.Foot) `is equal to?` pid((falloff + 1).Second, -1.Foot)
+            pid(falloff.Second, -Foot) `is equal to?` pid((falloff + 1).Second, -Foot)
         }
     }
 }

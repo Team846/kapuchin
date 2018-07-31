@@ -21,7 +21,7 @@ class PivotComponent(hardware: PivotHardware) : Component<PivotComponent, PivotH
 class PivotHardware : SubsystemHardware<PivotHardware, PivotComponent>() {
     override val priority get() = TODO()
     override val period get() = TODO()
-    override val syncThreshold = 50.milli(::Second)
+    override val syncThreshold = 50.milli(Second)
     override val subsystemName = "Collector Pivot"
 
     val solenoidPort by pref(1)
