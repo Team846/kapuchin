@@ -27,7 +27,7 @@ suspend fun LiftComponent.teleop(driver: DriverHardware) {
     val currentPosition by hardware.position.readOnTick.withoutStamps
 
     runRoutine("Teleop") {
-//        println(currentPosition.Foot)
+        //        println(currentPosition.Foot)
         if (overrideLift) PercentOutput(manualOverride.Each)
         else PositionOutput(hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(when {

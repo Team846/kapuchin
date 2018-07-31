@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
-import com.lynbrookrobotics.kapuchin.control.Quan
+import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.control.avg
 
 interface Vector<T> {

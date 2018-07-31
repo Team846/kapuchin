@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.Named
 import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.milli
 import java.util.concurrent.Executors

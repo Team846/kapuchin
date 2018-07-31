@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.control.Quan
+import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.Second

@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.conversion
 
-import com.lynbrookrobotics.kapuchin.control.Quan
+import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.control.div
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
