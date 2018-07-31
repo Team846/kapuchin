@@ -48,16 +48,6 @@ data class Subsystems(
         }
     }
 
-    fun currentPositionTest() = launch {
-        drivetrain.runRoutine("Current Position Test") {
-            val pos = drivetrain.hardware.position.read(currentTime)
-            println("left: ${pos.value.left.Foot} ft")
-            println("left: ${pos.value.right.Foot} ft")
-
-            TwoSided(PercentOutput(0.Percent))
-        }
-    }
-
     fun backAndForthAuto() = launch {
         drivetrain.driveStraightPid(8.Foot, 3.Inch)
 
