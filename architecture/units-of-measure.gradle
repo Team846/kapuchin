@@ -14,6 +14,7 @@ generateUnitsOfMeasure {
     )
 
     quantities += [
+            q("Each", d()),
             q("Absement", d(L: 1, T: 1)),
             q("AngularAbsement", d(T: 1))
     ].toSet()
@@ -35,7 +36,7 @@ generateUnitsOfMeasure {
             u("Minute", 60, d(T: 1)),
 
             u("Percent", 0.01, d()),
-            u("Tick", 1.0, d()),
+            u("Each", 1.0, d()),
 
             u("VoltPerSecond", 1.0, d(L: 2, M: 1, T: -4, I: -1)),
     ].toSet()

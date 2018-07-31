@@ -16,9 +16,9 @@ class ConversionTest {
 
     @Test
     fun `encoder ticks and angle methods are inverses`() {
-        anyInt.filter { it != 0 }.map { resolution -> EncoderConversion(resolution.Tick, 360.Degree) }
+        anyInt.filter { it != 0 }.map { resolution -> EncoderConversion(resolution.Each, 360.Degree) }
                 .forEach { conversion ->
-                    anyDouble.map { it.Tick }.forEach { x ->
+                    anyDouble.map { it.Each }.forEach { x ->
                         x `is equal to?` conversion.ticks(conversion.angle(x))
 
                         val ix = x * t

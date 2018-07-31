@@ -10,15 +10,14 @@ import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.generated.*
 import kotlin.math.sign
 
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val subsystemName = "Driver"
     override val priority = Priority.RealTime
-    override val period = 20.milli(::Second)
-    override val syncThreshold = 3.milli(::Second)
+    override val period = 20.milli(Second)
+    override val syncThreshold = 3.milli(Second)
 
     val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
         log(Debug) { it.name } // TESTING

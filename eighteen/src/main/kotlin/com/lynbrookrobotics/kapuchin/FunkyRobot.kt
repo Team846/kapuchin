@@ -20,7 +20,7 @@ class FunkyRobot : RobotBase() {
 
         HAL.observeUserProgramStarting()
 
-        val eventLoopPeriod = 20.milli(::Second)
+        val eventLoopPeriod = 20.milli(Second)
 
         val doNothing = launch { }
         var currentJob: Job = doNothing

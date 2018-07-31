@@ -22,7 +22,7 @@ class ElectricalTests {
 
         val limiter = RampRateLimiter(0.Volt stampWith startRampUpTime) { 12.VoltPerSecond }
 
-        val incr = 3.milli(::Second)
+        val incr = 3.milli(Second)
 
         generateSequence(startRampUpTime) { it + incr }
                 .takeWhile { it - startRampUpTime < 1.Second }
@@ -75,7 +75,7 @@ class ElectricalTests {
         val checker = OutsideThresholdChecker(safeRange, duration)
 
         val insideStartTime = 846.Minute
-        val incr = 3.milli(::Second)
+        val incr = 3.milli(Second)
         repeat(100) {
             checker(insideStartTime + incr * it, tolerance * sin(it.toFloat())) `is equal to?` false
         }

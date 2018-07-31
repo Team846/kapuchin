@@ -16,13 +16,13 @@ actual class Ticker private actual constructor(parent: Named, priority: Priority
     init {
         exec.scheduleAtFixedRate(
                 { tick(currentTime) },
-                100, period.milli(T::Second).toLong(), TimeUnit.MILLISECONDS
+                100, period.milli(Second).toLong(), TimeUnit.MILLISECONDS
         )
     }
 
     actual fun waitOnTick(): Time {
         // todo do this correctly
-        Thread.sleep(period.milli(T::Second).toLong())
+        Thread.sleep(period.milli(Second).toLong())
         return currentTime
     }
 

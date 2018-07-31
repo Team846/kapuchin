@@ -18,7 +18,7 @@ class PidTest {
                 Gain(0.Volt, 1.FootPerSecond)
         )) { _ -> 0.Foot }
 
-        val dt = 200.milli { Second }
+        val dt = 200.milli(Second)
         repeat(20) { time ->
             pid(time.Second + dt * 0, -2.Foot) `is equal to?` 12.Volt
             pid(time.Second + dt * 1, -1.Foot) `is equal to?` 6.Volt
@@ -85,7 +85,7 @@ class PidTest {
                 Gain(6.Volt, 1.FootPerSecond)
         )) { _ -> 10.FootPerSecond }
 
-        val dt = 200.milli { Second }
+        val dt = 200.milli(Second)
         repeat(20) { time ->
             pid(time.Second + dt * 0, 8.FootPerSecond) `is equal to?` 62.Volt
             pid(time.Second + dt * 1, 9.FootPerSecond) `is equal to?` 61.Volt
