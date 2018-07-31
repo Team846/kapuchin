@@ -14,7 +14,7 @@ import kotlin.jvm.JvmName
 class OffloadedNativeConversion<O, I, Q, D, DD>(
         val nativeOutputUnits: Int, val perOutputQuantity: O,
         val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
-        val feedbackZero: Q = perFeedbackQuantity.new(0.0),
+        val feedbackZero: Q = perFeedbackQuantity * 0,
         val nativeTimeUnit: Time = 100.milli(Second),
         val nativeLoopTime: Time = 1.milli(Second)
 )
