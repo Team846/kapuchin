@@ -10,7 +10,7 @@ import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
-import com.lynbrookrobotics.kapuchin.control.plusOrMinus
+import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
@@ -24,10 +24,11 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     val gyro by hardware.gyroInput.readEagerly.withStamps
 
     val liftHeight by lift.hardware.position.readOnTick.withoutStamps
-    val liftActivationThreshold = lift.collectHeight + lift.positionTolerance
+    val liftActivationThreshold = lift.switchHeight + lift.positionTolerance
 
     val slewFunction: (Time) -> Acceleration = {
-        if (liftHeight > liftActivationThreshold) maxAccelerationWithLiftUp / (liftHeight / lift.hardware.maxHeight)
+        if (liftHeight > liftActivationThreshold) maxAccelerationWithLiftUp /
+                ((liftHeight - liftActivationThreshold) / (lift.hardware.maxHeight - liftActivationThreshold))
         else 1000.FootPerSecondSquared
     }
 
@@ -35,11 +36,13 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     val rightSlew = RampRateLimiter(limit = slewFunction)
 
     var absSteeringOffset = gyro.value.angle
-    val turnControl = PidControlLoop(turningPositionGains) { absSteering }
+    val turnControl = PidControlLoop(turningPositionGains) { absSteering + absSteeringOffset }
 
     runRoutine("Teleop") {
         val forwardVelocity = topSpeed * accelerator
-        val steeringVelocity = topSpeed * steering //+ turnControl(gyro.stamp, gyro.value.angle)
+
+        if(steering != 0.0) absSteeringOffset = gyro.value.angle - absSteering
+        val steeringVelocity = topSpeed * steering + turnControl(gyro.stamp, gyro.value.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)
         val right = rightSlew(it, forwardVelocity - steeringVelocity)
@@ -93,9 +96,9 @@ suspend fun DrivetrainComponent.arcTo(
         (position.avg - startingPostion.avg) / radius
     }
 
-    val slRange = sL plusOrMinus distanceTolerance
-    val srRange = sR plusOrMinus distanceTolerance
-    val bearingRange = bearing plusOrMinus angleTolerance
+    val slRange = sL withToleranceOf distanceTolerance
+    val srRange = sR withToleranceOf distanceTolerance
+    val bearingRange = bearing withToleranceOf angleTolerance
     runRoutine("Arc") {
         if (
                 position.left in slRange &&
@@ -150,8 +153,8 @@ suspend fun DrivetrainComponent.driveStraightTrapezoidal(
     val startingPostion = position
     val turnControl = PidControlLoop(turningPositionGains) { bearing }
 
-    val distanceRange = distance plusOrMinus distanceTolerance
-    val bearingRange = bearing plusOrMinus angleTolerance
+    val distanceRange = distance withToleranceOf distanceTolerance
+    val bearingRange = bearing withToleranceOf angleTolerance
 
     runRoutine("Straight") {
         if (
@@ -179,7 +182,7 @@ suspend fun DrivetrainComponent.driveStraightPid(
         distance: Length, distanceTolerance: Length
 ) {
     val position by hardware.position.readOnTick.withoutStamps
-    val distanceRange = distance plusOrMinus distanceTolerance
+    val distanceRange = distance withToleranceOf distanceTolerance
 
     val left = position.left + distance
     val right = position.right + distance

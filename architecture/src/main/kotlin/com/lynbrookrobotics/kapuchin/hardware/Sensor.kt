@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.DelegateProvider
 import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
 import com.lynbrookrobotics.kapuchin.control.invoke
-import com.lynbrookrobotics.kapuchin.control.plusOrMinus
+import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.logging.Grapher
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.currentTime
@@ -17,7 +17,7 @@ open class Sensor<Input> protected constructor(internal val read: (Time) -> Time
 
     internal var value: TimeStamped<Input>? = null
     internal open fun optimizedRead(atTime: Time, syncThreshold: Time) = value
-            ?.takeIf { it.stamp in atTime plusOrMinus syncThreshold }
+            ?.takeIf { it.stamp in atTime withToleranceOf syncThreshold }
             ?: read(atTime)
 
     internal fun startUpdates(f: (KProperty<*>) -> Unit) = UpdateSource(this, f)
