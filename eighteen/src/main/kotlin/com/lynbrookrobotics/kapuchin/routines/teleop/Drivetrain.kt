@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
+import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.math.avg
@@ -18,7 +19,7 @@ import info.kunalsheth.units.generated.*
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
-//    val steering by driver.steering.readOnTick.withoutStamps
+    val steering by driver.steering.readOnTick.withoutStamps
     val absSteering by driver.absoluteSteering.readEagerly.withoutStamps
     val gyro by hardware.gyroInput.readEagerly.withStamps
 
@@ -33,11 +34,12 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     val leftSlew = RampRateLimiter(limit = slewFunction)
     val rightSlew = RampRateLimiter(limit = slewFunction)
 
+    var absSteeringOffset = gyro.value.angle
     val turnControl = PidControlLoop(turningPositionGains) { absSteering }
 
     runRoutine("Teleop") {
         val forwardVelocity = topSpeed * accelerator
-        val steeringVelocity = /* topSpeed * steering */ + turnControl(gyro.stamp, gyro.value.angle)
+        val steeringVelocity = topSpeed * steering //+ turnControl(gyro.stamp, gyro.value.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)
         val right = rightSlew(it, forwardVelocity - steeringVelocity)

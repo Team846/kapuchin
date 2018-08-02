@@ -8,23 +8,36 @@ import kotlin.math.absoluteValue
 
 class AlpsRdc80(private val phase: Angle) : (Double, Double) -> Angle {
 
-    private val readableRange = 0 plusOrMinus 0.7
+    private val readable = 0.6
+    private val mustRead = 0.1
+
+    private val readableRange = 0 plusOrMinus readable
+    private val mustReadRange = 0 plusOrMinus mustRead
     private val halfTurn = 0.5.Turn
 
     private var loopAround = 0.Turn
     private var wasPositive = false
     private var wasNegative = false
-    private val posLoopRng = 160.Degree..180.Degree
-    private val negLoopRng = -180.Degree..-160.Degree
+    private val posLoopRng = 130.Degree..185.Degree
+    private val negLoopRng = -185.Degree..-130.Degree
 
     override fun invoke(a: Double, b: Double): Angle {
         val angA = (halfTurn * (a + 1)) % 1.Turn - halfTurn
         val angB = (halfTurn * (b + 1) + phase) % 1.Turn - halfTurn
 
-        val weightA = weight(a)
-        val weightB = weight(b)
+        val weight =
+                if (a in mustReadRange || b !in readableRange) {
+                    println("a in mustReadRange || b !in readableRange")
+                    1.0
+                } else if (b in mustReadRange || a !in readableRange) {
+                    println("b in mustReadRange || a !in readableRange")
+                    0.0
+                } else {
+                    println("else")
+                    (b.absoluteValue - mustRead) / (readable - mustRead)
+                }
 
-        val angle = (angA * weightA + angB * weightB) / (weightA + weightB)
+        val angle = angA * weight + angB * (1 - weight)
 
         if (wasNegative && angle in posLoopRng) loopAround -= 1.Turn
         if (wasPositive && angle in negLoopRng) loopAround += 1.Turn
@@ -33,8 +46,4 @@ class AlpsRdc80(private val phase: Angle) : (Double, Double) -> Angle {
 
         return angle + loopAround
     }
-
-    private fun weight(x: Double) =
-            if (x in readableRange) readableRange.endInclusive - x.absoluteValue
-            else 0.0
 }

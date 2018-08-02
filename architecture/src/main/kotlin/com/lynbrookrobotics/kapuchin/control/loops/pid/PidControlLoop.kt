@@ -28,9 +28,12 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
         else InfiniteIntegrator(zero * Second)
     }
 
+    var error: Input = zero
+        private set
+
     override fun invoke(stamp: Time, current: Input): Output = gains(stamp, current).run {
         val target = target(stamp)
-        val error = error(target, current)
+        error = error(target, current)
 
         val deriv = derivative(stamp, error)
         val integ = integral(stamp, error)

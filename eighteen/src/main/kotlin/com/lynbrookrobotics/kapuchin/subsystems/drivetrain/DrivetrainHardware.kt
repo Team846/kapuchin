@@ -25,7 +25,7 @@ import kotlin.math.PI
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
-    override val period = 15.milli(Second)
+    override val period = 20.milli(Second)
     override val syncThreshold = 3.milli(Second)
     override val subsystemName = "Drivetrain"
 
@@ -36,7 +36,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
 
     val operatingVoltage by pref(11, Volt)
-    val currentLimit by pref(15, Ampere)
+    val currentLimit by pref(10, Ampere)
     val staticFrictionCompensation by pref(1.35, Volt)
 
 

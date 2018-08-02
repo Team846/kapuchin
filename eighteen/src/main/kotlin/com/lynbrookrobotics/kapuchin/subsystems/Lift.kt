@@ -50,7 +50,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
 
 
     // SAFETY
-    val maxHeight by pref(80, Inch)
+    val maxHeight by pref(30, Inch)
     val minHeight by pref(0, Inch)
 
     val offloadedSettings by pref {

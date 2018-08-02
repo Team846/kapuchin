@@ -29,7 +29,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
         it.name == "FGT Rumble 3-in-1"
     }
     val absoluteWheel by hardw { Joystick(3) }.verify("the driver absolute wheel is connected"){
-        it.name == "BU0836A_1"
+        it.name == "BU0836A Interface"
     }
 
     enum class JoystickButton(val raw: Int) {
