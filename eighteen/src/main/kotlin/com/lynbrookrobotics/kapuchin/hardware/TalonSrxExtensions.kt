@@ -32,7 +32,7 @@ fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOf
 }
 
 fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
-    esc.setNeutralMode(NeutralMode.Brake)
+    esc.setNeutralMode(NeutralMode.Coast)
     esc.configOpenloopRamp(0.0, configTimeout)
     esc.configClosedloopRamp(0.0, configTimeout)
 
@@ -44,7 +44,7 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
 
     esc.configVoltageCompSaturation(voltageCompensation.Volt, configTimeout)
     esc.configVoltageMeasurementFilter(32, configTimeout)
-    esc.enableVoltageCompensation(true)
+    esc.enableVoltageCompensation(false)
 
     val controlFramePeriod = syncThreshold.milli(Second).toInt()
     esc.setControlFramePeriod(Control_3_General, controlFramePeriod)
@@ -52,7 +52,7 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
     if (esc is TalonSRX) {
         esc.configContinuousCurrentLimit(currentLimit.Ampere.toInt(), configTimeout)
         esc.configPeakCurrentLimit(0, configTimeout) // simpler, single-threshold limiting
-        esc.enableCurrentLimit(true)
+        esc.enableCurrentLimit(false)
     }
 }
 

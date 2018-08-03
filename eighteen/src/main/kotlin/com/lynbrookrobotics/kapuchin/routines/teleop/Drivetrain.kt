@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
+import com.lynbrookrobotics.kapuchin.control.electrical.MotorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
@@ -10,10 +11,13 @@ import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.CurrentOutput
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
+import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 import kotlin.math.absoluteValue
 
@@ -177,5 +181,53 @@ suspend fun DrivetrainComponent.driveStraight(
                 )
             }
         }
+    }
+}
+
+suspend fun DrivetrainComponent.pulseLeft(min: Dimensionless, max: Dimensionless, pulse: Second) {
+//    val currentDraw = graph("current draw", Ampere)
+
+    val dio = DigitalOutput(0)
+
+    runRoutine("Pulse Left") {
+
+        val dc = if ((it / pulse).Each.toInt() % 2 == 0) {
+            dio.set(false)
+            min
+        } else {
+            dio.set(true)
+            max
+        }
+
+        TwoSided(
+                PercentOutput(dc), PercentOutput(0.Percent)
+        )
+    }
+
+    dio.free()
+}
+
+suspend fun DrivetrainComponent.applyTalonSrxCurrent(value: Ampere) {
+
+    runRoutine("Apply TalonSRX Current") {
+        TwoSided(
+                CurrentOutput(value),
+                PercentOutput(0.Percent)
+        )
+    }
+}
+
+suspend fun DrivetrainComponent.applyCurrent(x: Ampere) {
+    val currentLimiter = MotorCurrentLimiter(12.Volt, 5330.Rpm, 131.Ampere, x)
+
+    val speed by hardware.velocity.readOnTick.withoutStamps
+
+    runRoutine("Apply Current") {
+        TwoSided(
+                PercentOutput(
+                        currentLimiter(5330.Rpm * (speed.left / 16.FootPerSecond), 100.Volt) / hardware.operatingVoltage
+                ),
+                PercentOutput(0.Percent)
+        )
     }
 }

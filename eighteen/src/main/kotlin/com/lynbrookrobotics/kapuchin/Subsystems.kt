@@ -2,7 +2,9 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
+import com.lynbrookrobotics.kapuchin.routines.teleop.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.routines.teleop.pulseLeft
 import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
@@ -17,6 +19,7 @@ import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.withTimeoutOrNull
 
 data class Subsystems(
         val forks: ForksComponent, val hooks: HooksComponent, val winch: WinchComponent,
@@ -54,6 +57,18 @@ data class Subsystems(
 //                10.FootPerSecond
 //        )
     }.also { HAL.observeUserProgramTeleop() }
+
+    fun currentTestingAuto() = launch {
+        drivetrain.pulseLeft(20.Percent, 50.Percent, 2.5.Second)
+//        while(true) {
+//            withTimeoutOrNull(5000) {
+//                drivetrain.applyCurrent(20.Ampere)
+//            }
+//            withTimeoutOrNull(5000) {
+//                drivetrain.applyCurrent(-10.Ampere)
+//            }
+//        }
+    }
 
     companion object : Named("Subsystems Initializer") {
         fun concurrentInit() = runBlocking {
