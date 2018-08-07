@@ -110,7 +110,7 @@ class SensorTest {
         }
     }
 
-    @Test(timeout = 4 * 1000)
+    @Test(timeout = 6 * 1000)
     fun `sensor lambdas are released upon routine completion`() = runBlocking {
         val name = "sensor lambdas are released upon routine completion"
         SensorTestC.run {
@@ -152,6 +152,37 @@ class SensorTest {
                 }
             }
 
+            suspend fun badRoutine() = startRoutine(name) {
+                val a1 by hardware.sensorA.readOnTick.withStamps
+                val a2 by hardware.sensorA.readWithEventLoop.withStamps
+                val a3 by hardware.sensorA.readEagerly.withStamps
+
+                val a4 by hardware.sensorA.readOnTick.withoutStamps
+                val a5 by hardware.sensorA.readWithEventLoop.withoutStamps
+                val a6 by hardware.sensorA.readEagerly.withoutStamps
+
+                val b1 by hardware.sensorB.readOnTick.withStamps
+                val b2 by hardware.sensorB.readWithEventLoop.withStamps
+                val b3 by hardware.sensorB.readEagerly.withStamps
+
+                val b4 by hardware.sensorB.readOnTick.withoutStamps
+                val b5 by hardware.sensorB.readWithEventLoop.withoutStamps
+                val b6 by hardware.sensorB.readEagerly.withoutStamps
+
+                var runs = 5
+                controller {
+                    a1.value `is equal to?` a4
+                    a2.value `is equal to?` a5
+                    a3.value `is equal to?` a6
+
+                    b1.value `is equal to?` b4
+                    b2.value `is equal to?` b5
+                    b3.value `is equal to?` b6
+                    if(runs == 2) error("This routine is broken!")
+                    name.takeIf { runs-- > 0 }
+                }
+            }
+
             routine()
             check()
 
@@ -165,24 +196,30 @@ class SensorTest {
             j2.cancel()
             check()
 
-            val j3 = launch {
+            val j3 = badRoutine()
+            check()
+
+            val j4 = launch { badRoutine() }
+            check()
+
+            val j5 = launch {
                 routine()
                 routine()
                 routine()
             }
             while (routine == null) Thread.sleep(1)
-            j3.cancel()
+            j5.cancel()
             check()
 
 
-            val j4 = launch {
+            val j6 = launch {
                 routine()
                 routine()
                 routine()
             }
             while (routine == null) Thread.sleep(1)
             routine!!.cancel()
-            j4.join()
+            j6.join()
             check()
         }
     }

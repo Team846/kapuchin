@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Cancel
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.milli
@@ -26,8 +27,14 @@ class Routine<C, H, Output>(
         where C : Component<C, H, Output>,
               H : SubsystemHardware<H, C> {
 
-    override fun invoke(c: C, t: Time) = controller(c, t)
-            ?: c.fallbackController(c, t).also { cont.resume(Unit) }
+    override fun invoke(c: C, t: Time) =
+            try {
+                controller(c, t) ?:
+                c.fallbackController(c, t).also { cont.resume(Unit) }
+            } catch (e: Throwable) {
+                cont.resumeWithException(e)
+                c.fallbackController(c, currentTime)
+            }
 
     companion object {
         fun launchAll(vararg routines: suspend () -> Unit) = launch {
