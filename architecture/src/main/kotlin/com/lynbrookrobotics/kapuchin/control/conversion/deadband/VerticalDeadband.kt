@@ -1,9 +1,9 @@
-package com.lynbrookrobotics.kapuchin.control.conversion
+package com.lynbrookrobotics.kapuchin.control.conversion.deadband
 
 import info.kunalsheth.units.generated.*
 import com.lynbrookrobotics.kapuchin.control.div
 
-class MinOutputMap<Q : Quan<Q>>(val min: Q, val max: Q) : (Q) -> Q {
+class VerticalDeadband<Q : Quan<Q>>(val min: Q, val max: Q) : (Q) -> Q {
 
     private val slope = (max - min) / max
 

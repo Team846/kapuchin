@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
+import com.lynbrookrobotics.kapuchin.control.conversion.deadband.VerticalDeadband
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
@@ -115,7 +116,7 @@ class ConversionTest {
     @Test
     fun `vertical deadbands are mapped correctly`() {
         anyDouble.filter { it > 0 && it < 1.0 }.forEach {
-            val mapping = MinOutputMap(it.Percent, 100.Percent)
+            val mapping = VerticalDeadband(it.Percent, 100.Percent)
             val tol = 0.01.Percent
 
             mapping(0.0.Percent) `is within?` (0.0.Percent withToleranceOf tol)
