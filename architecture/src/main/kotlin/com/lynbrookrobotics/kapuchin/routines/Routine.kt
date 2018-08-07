@@ -5,9 +5,13 @@ import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Cancel
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.milli
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.CancellableContinuation
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 
 class Routine<C, H, Output>(
@@ -43,5 +47,11 @@ class Routine<C, H, Output>(
 
             job
         } else null
+
+        suspend fun delay(time: Time) =
+                delay(time.milli(Second).toInt())
+
+        suspend fun withTimeout(time: Time, block: suspend () -> Unit) =
+                withTimeoutOrNull(time.milli(Second).toInt()) { block() }
     }
 }

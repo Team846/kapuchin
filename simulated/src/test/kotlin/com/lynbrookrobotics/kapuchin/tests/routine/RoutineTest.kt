@@ -13,9 +13,11 @@ class RoutineTest {
     private class RoutineTestSH : TSH<RoutineTestSH, RoutineTestC>("RoutineTest Hardware")
     private object RoutineTestC : TC<RoutineTestC, RoutineTestSH>(RoutineTestSH())
 
-    private suspend fun RoutineTestC.countTo(n: Int) {
+    private suspend fun RoutineTestC.countTo(n: Int) = startRoutine("count to $n") {
         var counter = 0
-        runRoutine("Count to $n") { "countTo($n)".takeIf { counter++ < n } }
+        controller {
+            "countTo($n)".takeIf { counter++ < n }
+        }
     }
 
     private fun check(eight: Int, four: Int, six: Int) {

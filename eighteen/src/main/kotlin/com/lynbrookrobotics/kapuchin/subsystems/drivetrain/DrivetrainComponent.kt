@@ -41,7 +41,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         ))
     }
 
-    private val currentSpeed by hardware.velocity.readEagerly.withoutStamps
     override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
         leftLazyOutput(value.left)
         rightLazyOutput(value.right)

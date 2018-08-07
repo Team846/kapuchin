@@ -13,7 +13,7 @@ import info.kunalsheth.units.generated.Time
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class Sensor<Input> protected constructor(private val read: (Time) -> TimeStamped<Input>) {
+class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<Input>) {
 
     internal var value: TimeStamped<Input>? = null
     internal fun optimizedRead(atTime: Time, syncThreshold: Time) = value
@@ -28,21 +28,17 @@ class Sensor<Input> protected constructor(private val read: (Time) -> TimeStampe
             }
     ) {
 
-        val withoutStamps by lazy<DelegateProvider<Any?, Input>> {
-            object : DelegateProvider<Any?, Input> {
+        val withoutStamps get() = object : DelegateProvider<Any?, Input> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).value
                 }.also { startUpdates(forSensor) }
             }
-        }
 
-        val withStamps by lazy<DelegateProvider<Any?, TimeStamped<Input>>> {
-            object : DelegateProvider<Any?, TimeStamped<Input>> {
+        val withStamps get() = object : DelegateProvider<Any?, TimeStamped<Input>> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, TimeStamped<Input>> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor)
                 }.also { startUpdates(forSensor) }
             }
-        }
     }
 
     companion object {

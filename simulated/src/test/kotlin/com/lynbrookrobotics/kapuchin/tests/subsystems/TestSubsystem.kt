@@ -23,9 +23,9 @@ abstract class TC<This, H>(hardware: H, customClock: Clock? = null) : Component<
     }
 }
 
-suspend fun Component<*, *, String>.countTo(n: Int) {
+suspend fun Component<*, *, String>.countTo(n: Int) = startRoutine("count to $n") {
     var counter = 0
-    runRoutine("Count to $n") { "countTo($n)".takeIf { counter++ < n } }
+    { "countTo($n)".takeIf { counter++ < n } }
 }
 
 fun TC<*, *>.checkCount(number: Int, times: Int) {

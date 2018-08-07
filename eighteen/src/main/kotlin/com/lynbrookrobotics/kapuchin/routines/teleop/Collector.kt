@@ -7,33 +7,37 @@ import com.lynbrookrobotics.kapuchin.subsystems.collector.PivotComponent
 import com.lynbrookrobotics.kapuchin.subsystems.collector.RollersComponent
 import info.kunalsheth.units.generated.*
 
-suspend fun RollersComponent.teleop(driver: DriverHardware) {
+suspend fun RollersComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val toCollect by driver.collect.readEagerly.withoutStamps
     val toPurge by driver.purge.readEagerly.withoutStamps
 
-    runRoutine("Teleop") {
-        val adjust = cubeAdjustStrength * if ((it * cubeAdjustCycle).Each.toInt() % 2 == 0) 1 else -1
+    controller {
         when {
-            toCollect -> TwoSided(-collectStrength + adjust, -collectStrength - adjust)
+            toCollect -> cornerAdjustingCollection(it)
             toPurge -> TwoSided(purgeStrength)
             else -> TwoSided(-cubeHoldStrength)
         }
     }
 }
 
-suspend fun RollersComponent.purge() = runRoutine("Purge") { TwoSided(purgeStrength) }
-suspend fun RollersComponent.collect() = runRoutine("Collect") { TwoSided(-collectStrength) }
+suspend fun RollersComponent.purge() = startRoutine("purge") { controller { TwoSided(purgeStrength) } }
+suspend fun RollersComponent.collect() = startRoutine("collect") { controller { cornerAdjustingCollection(it) } }
 
-suspend fun PivotComponent.teleop(driver: DriverHardware) {
+private fun RollersComponent.cornerAdjustingCollection(now: Time): TwoSided<Volt> {
+    val adjust = cubeAdjustStrength * if ((now * cubeAdjustCycle).Each.toInt() % 2 == 0) 1 else -1
+    return TwoSided(-collectStrength + adjust, -collectStrength - adjust)
+}
+
+suspend fun PivotComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val isTriggered by driver.pivotDown.readEagerly.withoutStamps
-    runRoutine("Teleop") { isTriggered }
+    controller { isTriggered }
 }
 
-suspend fun PivotComponent.pivot() = runRoutine("Pivot Down") { true }
+suspend fun PivotComponent.pivot() = startRoutine("down") { controller { true } }
 
-suspend fun ClampComponent.teleop(driver: DriverHardware) {
+suspend fun ClampComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val isTriggered by driver.openClamp.readEagerly.withoutStamps
-    runRoutine("Teleop") { isTriggered }
+    controller { isTriggered }
 }
 
-suspend fun ClampComponent.open() = runRoutine("Open Clamp") { true }
+suspend fun ClampComponent.open() = startRoutine("open") { controller { true } }

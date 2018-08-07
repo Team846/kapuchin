@@ -8,7 +8,6 @@ interface Clock {
     var jobs: List<(tickStart: Time) -> Unit>
 
     fun runOnTick(order: ExecutionOrder = First, run: (tickStart: Time) -> Unit) = synchronized(this) {
-        jobs -= run
         jobs = when (order) {
             First -> listOf(run) + jobs
             Last -> jobs + run

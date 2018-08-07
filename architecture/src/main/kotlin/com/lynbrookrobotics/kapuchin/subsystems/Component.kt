@@ -1,13 +1,14 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.hardware.Sensor
+import com.lynbrookrobotics.kapuchin.logging.Level.Debug
+import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.logging.platformStackTrace
 import com.lynbrookrobotics.kapuchin.routines.Routine
 import com.lynbrookrobotics.kapuchin.timing.Clock
-import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
-import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Time
 import kotlinx.coroutines.experimental.CancellationException
 import kotlinx.coroutines.experimental.suspendCancellableCoroutine
@@ -30,14 +31,26 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
         }
         get() = synchronized(this) { field?.takeIf { it.isActive } }
 
-    suspend fun runRoutine(name: String, controller: This.(Time) -> Output?) {
+    suspend fun startRoutine(
+            name: String,
+            setup: SensorScope.() -> This.(Time) -> Output?
+    ) {
+        val scope = SensorScope(this)
         try {
+            val controller = scope.run(setup)
             suspendCancellableCoroutine<Unit> { cont ->
                 routine = Routine(thisAsThis, name, controller, cont)
             }
-        } catch (e: CancellationException) {
+        } catch (c: CancellationException) {
+            log(Debug) { "${hardware.subsystemName}'s $name routine was cancelled.\nMessage: ${c.message}" }
+        } catch (t: Throwable) {
+            log(Error, t.platformStackTrace) { "An exception was thrown from ${hardware.subsystemName}'s $name routine.\nMessage: ${t.message}" }
+        } finally {
+            scope.close()
         }
     }
+
+    fun controller(controller: This.(Time) -> Output?) = controller
 
     protected abstract fun H.output(value: Output)
 
@@ -50,21 +63,6 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
                     ?.let { hardware.output(it) }
         }
     }
-
-    val <Input> Sensor<Input>.readOnTick
-        get() = Sensor.UpdateSource(this, startUpdates = { s ->
-            clock.runOnTick { s.value = optimizedRead(it, hardware.syncThreshold) }
-        })
-
-    val <Input> Sensor<Input>.readWithEventLoop
-        get() = Sensor.UpdateSource(this, startUpdates = { _ ->
-            EventLoop.runOnTick { value = optimizedRead(it, hardware.syncThreshold) }
-        })
-
-    val <Input> Sensor<Input>.readEagerly
-        get() = Sensor.UpdateSource(this, getValue = { _ ->
-            optimizedRead(currentTime, hardware.syncThreshold).also { value = it }
-        })
 
     override fun equals(other: Any?) = when (other) {
         is Component<*, *, *> -> this.name == other.name
