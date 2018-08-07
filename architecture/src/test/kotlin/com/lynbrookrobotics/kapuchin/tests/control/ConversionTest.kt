@@ -113,16 +113,16 @@ class ConversionTest {
     }
 
     @Test
-    fun `outputs are mapped correctly`() {
+    fun `vertical deadbands are mapped correctly`() {
         anyDouble.filter { it > 0 && it < 1.0 }.forEach {
-            val mapping = MinOutputMap(it)
-            val tol = 0.001
+            val mapping = MinOutputMap(it.Percent, 100.Percent)
+            val tol = 0.01.Percent
 
-            mapping(0.0) `is within?` (0.0 withToleranceOf tol)
-            mapping(tol / 2) `is within?` (it withToleranceOf tol)
-            mapping(1.0) `is within?` (1.0 withToleranceOf tol)
-            mapping(-tol / 2) `is within?` (-it withToleranceOf tol)
-            mapping(-1.0) `is within?` (-1.0 withToleranceOf tol)
+            mapping(0.0.Percent) `is within?` (0.0.Percent withToleranceOf tol)
+            mapping(tol / 2) `is within?` (it.Percent withToleranceOf tol)
+            mapping(100.Percent) `is within?` (100.Percent withToleranceOf tol)
+            mapping(-tol / 2) `is within?` (-it.Percent withToleranceOf tol)
+            mapping(-100.Percent) `is within?` (-100.Percent withToleranceOf tol)
         }
     }
 }
