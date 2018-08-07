@@ -12,5 +12,5 @@ infix fun <Q : Quan<Q>> Q.minMag(that: Q) = if (this.abs < that.abs) this else t
 infix fun <Q : Quan<Q>> Q.maxMag(that: Q) = if (this.abs > that.abs) this else that
 
 infix fun <Q : Quan<Q>> Q.withToleranceOf(of: Q) = (this - of)..(this + of)
-infix fun Double.withToleranceOf(of:Double) = (this - of)..(this + of)
+infix fun Double.withToleranceOf(of: Double) = (this - of)..(this + of)
 infix fun Number.withToleranceOf(of: Number) = this.toDouble() withToleranceOf of.toDouble()

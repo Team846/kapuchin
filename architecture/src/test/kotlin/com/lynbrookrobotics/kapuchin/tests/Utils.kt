@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests
 
-import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
+import info.kunalsheth.units.generated.Quan
 
 val anyInt = setOf(0, 1, 2, 373, 1024, 1492, 8397)
         .flatMap { setOf(it, -it) }
@@ -24,7 +24,7 @@ infix fun <Q : Quan<Q>> Q.`is equal to?`(that: Q) =
 infix fun <T : Any?> T.`is equal to?`(that: T) =
         assert(this == that) { "Expecting $this = $that, however $this ≠ $that" }
 
-infix fun <T: Comparable<T>> T.`is within?`(range: ClosedRange<T>) =
+infix fun <T : Comparable<T>> T.`is within?`(range: ClosedRange<T>) =
         assert(this in range) {
             val rangeText = "[${range.start}, ${range.endInclusive}]"
             "Expecting $this ∈ $rangeText, however $this ∉ $rangeText"

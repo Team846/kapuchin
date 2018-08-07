@@ -26,16 +26,16 @@ class AlpsRdc80(private val phase: Angle) : (Double, Double) -> Angle {
         val angB = (halfTurn * (b + 1) + phase) % 1.Turn - halfTurn
 
         val weight = when {
-                    a in mustReadRange || b !in readableRange -> {
-                        println("a in mustReadRange || b !in readableRange")
-                        1.0
-                    }
-                    b in mustReadRange || a !in readableRange -> {
-                        println("b in mustReadRange || a !in readableRange")
-                        0.0
-                    }
-                    else -> (b.absoluteValue - mustRead) / (readable - mustRead)
-                }
+            a in mustReadRange || b !in readableRange -> {
+                println("a in mustReadRange || b !in readableRange")
+                1.0
+            }
+            b in mustReadRange || a !in readableRange -> {
+                println("b in mustReadRange || a !in readableRange")
+                0.0
+            }
+            else -> (b.absoluteValue - mustRead) / (readable - mustRead)
+        }
 
         val angle = angA * weight + angB * (1 - weight)
 

@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control
 
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Quan
 
 class Hysteresis<Q : Quan<Q>>(val range: ClosedRange<Q>) : (Q) -> Boolean {
     private var isTriggered = false

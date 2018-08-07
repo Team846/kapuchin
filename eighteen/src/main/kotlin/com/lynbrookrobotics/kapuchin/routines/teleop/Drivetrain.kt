@@ -41,7 +41,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     runRoutine("Teleop") {
         val forwardVelocity = topSpeed * accelerator
 
-        if(steering != 0.0) absSteeringOffset = gyro.value.angle - absSteering
+        if (steering != 0.0) absSteeringOffset = gyro.value.angle - absSteering
         val steeringVelocity = topSpeed * steering + turnControl(gyro.stamp, gyro.value.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)
@@ -174,26 +174,6 @@ suspend fun DrivetrainComponent.driveStraightTrapezoidal(
                         VelocityOutput(native(rightVelocityGains), native(right))
                 )
             }
-        }
-    }
-}
-
-suspend fun DrivetrainComponent.driveStraightPid(
-        distance: Length, distanceTolerance: Length
-) {
-    val position by hardware.position.readOnTick.withoutStamps
-    val distanceRange = distance withToleranceOf distanceTolerance
-
-    val left = position.left + distance
-    val right = position.right + distance
-
-    runRoutine("Straight") {
-        if (position.avg in distanceRange) null
-        else hardware.offloadedSettings.run {
-            TwoSided(
-                    PositionOutput(native(positionGains), native(left)),
-                    PositionOutput(native(positionGains), native(right))
-            )
         }
     }
 }

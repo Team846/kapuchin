@@ -34,7 +34,7 @@ class FunkyRobot : RobotBase() {
 
                 currentJob =
                         subsystems::teleop runWhile { isEnabled && isOperatorControl }
-                        ?: subsystems::currentPositionTest runWhile { isEnabled && isAutonomous }
+                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
                         ?: doNothing
             }
         }

@@ -23,7 +23,7 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
     private val printer = File("/tmp/$safeName.csv")
             .printWriter(US_ASCII).also { it.println("${Second.unitName},${withUnits.unitName}") }
 
-    actual override fun invoke(stamp: Time, value: Q) {
+    actual override fun invoke(stamp: Time, value: Q) = synchronized(this) {
         if (running.isCompleted) launch {
             val converted = withUnits(value)
 //            SmartDashboard.putNumber(name, converted)
