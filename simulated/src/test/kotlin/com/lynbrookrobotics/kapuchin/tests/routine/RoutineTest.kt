@@ -1,11 +1,13 @@
 package com.lynbrookrobotics.kapuchin.tests.routine
 
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
+import info.kunalsheth.units.generated.Second
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
-import kotlinx.coroutines.experimental.withTimeoutOrNull
 import org.junit.Test
 
 class RoutineTest {
@@ -40,17 +42,23 @@ class RoutineTest {
     }
 
     @Test(timeout = 7 * 1000)
-    fun `routines continue to run sequentially after a timeout`() = runBlocking {
+    fun `routines can still run after one times out`() = runBlocking {
         RoutineTestC.out = emptyList()
 
         RoutineTestC.countTo(8)
         check(8, 0, 0)
 
-        withTimeoutOrNull(2000) { RoutineTestC.countTo(Int.MAX_VALUE) }
+        withTimeout(1.Second) { RoutineTestC.countTo(Int.MAX_VALUE) }
         RoutineTestC.out.count { it == "countTo(${Int.MAX_VALUE})" } `is equal to?` 10
 
         RoutineTestC.countTo(4)
         check(8, 4, 0)
+
+        val j = launch { RoutineTestC.countTo(Int.MAX_VALUE) }
+        delay(1.Second)
+        j.cancel()
+        RoutineTestC.out.count { it == "countTo(${Int.MAX_VALUE})" } `is equal to?` 20
+
         RoutineTestC.countTo(6)
         check(8, 4, 6)
     }
