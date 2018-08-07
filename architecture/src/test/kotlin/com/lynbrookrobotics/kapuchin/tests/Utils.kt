@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests
 
-import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
+import info.kunalsheth.units.generated.Quan
 
 val anyInt = setOf(0, 1, 2, 373, 1024, 1492, 8397)
         .flatMap { setOf(it, -it) }

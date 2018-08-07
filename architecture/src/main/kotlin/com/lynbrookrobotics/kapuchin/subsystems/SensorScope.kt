@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.timing.Cancel
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 
-class SensorScope(private val c: Component<*,*,*>) {
+class SensorScope(private val c: Component<*, *, *>) {
 
     fun close() = cleanup.forEach { it.cancel() }
     private var cleanup = emptyList<Cancel>()

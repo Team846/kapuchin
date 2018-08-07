@@ -28,13 +28,15 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
             }
     ) {
 
-        val withoutStamps get() = object : DelegateProvider<Any?, Input> {
+        val withoutStamps
+            get() = object : DelegateProvider<Any?, Input> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).value
                 }.also { startUpdates(forSensor) }
             }
 
-        val withStamps get() = object : DelegateProvider<Any?, TimeStamped<Input>> {
+        val withStamps
+            get() = object : DelegateProvider<Any?, TimeStamped<Input>> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, TimeStamped<Input>> {
                     override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor)
                 }.also { startUpdates(forSensor) }
