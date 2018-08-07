@@ -17,7 +17,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
-suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
+suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
     val absSteering by driver.absoluteSteering.readEagerly.withoutStamps
@@ -38,7 +38,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     var absSteeringOffset = gyro.value.angle
     val turnControl = PidControlLoop(turningPositionGains) { absSteering + absSteeringOffset }
 
-    runRoutine("Teleop") {
+    controller {
         val forwardVelocity = topSpeed * accelerator
 
         if (steering != 0.0) absSteeringOffset = gyro.value.angle - absSteering
@@ -65,7 +65,7 @@ suspend fun DrivetrainComponent.arcTo(
         deceleration: Acceleration = acceleration,
         endingSpeed: Velocity = 0.FootPerSecond,
         kickstart: Velocity = 3.Inch / Second
-) {
+) = startRoutine("arc") {
     val position by hardware.position.readOnTick.withoutStamps
     val velocity by hardware.velocity.readOnTick.withoutStamps
     val gyro by hardware.gyroInput.readEagerly.withStamps
@@ -99,7 +99,8 @@ suspend fun DrivetrainComponent.arcTo(
     val slRange = sL withToleranceOf distanceTolerance
     val srRange = sR withToleranceOf distanceTolerance
     val bearingRange = bearing withToleranceOf angleTolerance
-    runRoutine("Arc") {
+
+    controller {
         if (
                 position.left in slRange &&
                 position.right in srRange &&
@@ -136,7 +137,7 @@ suspend fun DrivetrainComponent.driveStraightTrapezoidal(
         deceleration: Acceleration = acceleration,
         endingSpeed: Velocity = 0.FootPerSecond,
         kickstart: Velocity = 6.Inch / Second
-) {
+) = startRoutine("straight") {
     val position by hardware.position.readOnTick.withoutStamps
     val velocity by hardware.velocity.readOnTick.withoutStamps
     val gyro by hardware.gyroInput.readEagerly.withStamps
@@ -156,7 +157,7 @@ suspend fun DrivetrainComponent.driveStraightTrapezoidal(
     val distanceRange = distance withToleranceOf distanceTolerance
     val bearingRange = bearing withToleranceOf angleTolerance
 
-    runRoutine("Straight") {
+    controller {
         if (
                 position.avg in distanceRange &&
                 gyro.value.angle in bearingRange

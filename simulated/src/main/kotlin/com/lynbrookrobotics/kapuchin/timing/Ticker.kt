@@ -14,7 +14,14 @@ actual class Ticker private actual constructor(parent: Named, priority: Priority
 
     init {
         exec.scheduleAtFixedRate(
-                { tick(currentTime) },
+                {
+                    try {
+                        tick(currentTime)
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
+                        throw e
+                    }
+                },
                 100, period.milli(Second).toLong(), TimeUnit.MILLISECONDS
         )
     }

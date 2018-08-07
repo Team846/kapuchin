@@ -10,8 +10,9 @@ import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 
-class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHardware) : Component<RollersComponent, RollersHardware, TwoSided<Volt>>(hardware, EventLoop) {
+class RollersComponent(hardware: RollersHardware, private val electrical: ElectricalSystemHardware) : Component<RollersComponent, RollersHardware, TwoSided<Volt>>(hardware, EventLoop) {
 
     val purgeStrength by pref(12, Volt)
     val collectStrength by pref(12, Volt)
@@ -21,8 +22,8 @@ class RollersComponent(hardware: RollersHardware, electrical: ElectricalSystemHa
 
     override val fallbackController: RollersComponent.(Time) -> TwoSided<Volt> = { TwoSided(-cubeHoldStrength) }
 
-    private val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
     override fun RollersHardware.output(value: TwoSided<Volt>) {
+        val vBat = electrical.batteryVoltage.optimizedRead(currentTime, syncThreshold).value
         leftEsc.set(voltageToDutyCycle(value.left, vBat).siValue)
         rightEsc.set(voltageToDutyCycle(value.right, vBat).siValue)
     }

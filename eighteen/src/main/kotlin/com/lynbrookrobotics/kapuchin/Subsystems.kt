@@ -39,7 +39,12 @@ data class Subsystems(
     ).also { HAL.observeUserProgramTeleop() }
 
     fun backAndForthAuto() = launch {
-        drivetrain.driveStraightPid(8.Foot, 3.Inch)
+        drivetrain.driveStraightTrapezoidal(
+                8.Foot, 0.Degree,
+                1.Inch, 2.Degree,
+                5.FootPerSecondSquared,
+                5.FootPerSecond
+        )
 
         delay(1000)
 

@@ -13,36 +13,34 @@ import info.kunalsheth.units.generated.Time
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-open class Sensor<Input> protected constructor(internal val read: (Time) -> TimeStamped<Input>) {
+class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<Input>) {
 
     internal var value: TimeStamped<Input>? = null
-    internal open fun optimizedRead(atTime: Time, syncThreshold: Time) = value
+    internal fun optimizedRead(atTime: Time, syncThreshold: Time) = value
             ?.takeIf { it.stamp in atTime withToleranceOf syncThreshold }
             ?: read(atTime)
 
-    internal fun startUpdates(f: (KProperty<*>) -> Unit) = UpdateSource(this, f)
-    class UpdateSource<Input>(val forSensor: Sensor<Input>, val startUpdates: (KProperty<*>) -> Unit) {
+    class UpdateSource<Input>(
+            private val forSensor: Sensor<Input>,
+            private val startUpdates: (Sensor<Input>) -> Unit = { _ -> },
+            private val getValue: (Sensor<Input>) -> TimeStamped<Input> = {
+                it.value ?: it.optimizedRead(currentTime, 0.Second)
+            }
+    ) {
 
-        val withoutStamps by lazy<DelegateProvider<Any?, Input>> {
-            object : DelegateProvider<Any?, Input> {
+        val withoutStamps
+            get() = object : DelegateProvider<Any?, Input> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
-                    override fun getValue(thisRef: Any?, property: KProperty<*>) = forSensor.run {
-                        value
-                                ?: optimizedRead(currentTime, 0.Second)//.also { value = it } // this is buggy for eager sensors // todo FIX, it just returns the last value, however old
-                    }.value
-                }.also { startUpdates(prop) }
+                    override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).value
+                }.also { startUpdates(forSensor) }
             }
-        }
 
-        val withStamps by lazy<DelegateProvider<Any?, TimeStamped<Input>>> {
-            object : DelegateProvider<Any?, TimeStamped<Input>> {
+        val withStamps
+            get() = object : DelegateProvider<Any?, TimeStamped<Input>> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, TimeStamped<Input>> {
-                    override fun getValue(thisRef: Any?, property: KProperty<*>) = forSensor.run {
-                        value ?: optimizedRead(currentTime, 0.Second)//.also { value = it }
-                    }
-                }.also { startUpdates(prop) }
+                    override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor)
+                }.also { startUpdates(forSensor) }
             }
-        }
     }
 
     companion object {

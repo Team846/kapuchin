@@ -1,11 +1,13 @@
 package com.lynbrookrobotics.kapuchin.tests.routine
 
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
+import info.kunalsheth.units.generated.Second
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
-import kotlinx.coroutines.experimental.withTimeoutOrNull
 import org.junit.Test
 
 class RoutineTest {
@@ -13,9 +15,11 @@ class RoutineTest {
     private class RoutineTestSH : TSH<RoutineTestSH, RoutineTestC>("RoutineTest Hardware")
     private object RoutineTestC : TC<RoutineTestC, RoutineTestSH>(RoutineTestSH())
 
-    private suspend fun RoutineTestC.countTo(n: Int) {
+    private suspend fun RoutineTestC.countTo(n: Int) = startRoutine("count to $n") {
         var counter = 0
-        runRoutine("Count to $n") { "countTo($n)".takeIf { counter++ < n } }
+        controller {
+            "countTo($n)".takeIf { counter++ < n }
+        }
     }
 
     private fun check(eight: Int, four: Int, six: Int) {
@@ -24,7 +28,7 @@ class RoutineTest {
         RoutineTestC.out.count { it == "countTo(6)" } `is equal to?` six
     }
 
-    @Test(timeout = 5 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `routines run sequentially by ending themselves`() = runBlocking {
         RoutineTestC.out = emptyList()
 
@@ -37,18 +41,24 @@ class RoutineTest {
         check(8, 4, 6)
     }
 
-    @Test(timeout = 7 * 1000)
-    fun `routines continue to run sequentially after a timeout`() = runBlocking {
+    @Test(timeout = 5 * 1000)
+    fun `routines can still run after one times out`() = runBlocking {
         RoutineTestC.out = emptyList()
 
         RoutineTestC.countTo(8)
         check(8, 0, 0)
 
-        withTimeoutOrNull(2000) { RoutineTestC.countTo(Int.MAX_VALUE) }
+        withTimeout(1.Second) { RoutineTestC.countTo(Int.MAX_VALUE) }
         RoutineTestC.out.count { it == "countTo(${Int.MAX_VALUE})" } `is equal to?` 10
 
         RoutineTestC.countTo(4)
         check(8, 4, 0)
+
+        val j = launch { RoutineTestC.countTo(Int.MAX_VALUE) }
+        delay(1.Second)
+        j.cancel()
+        RoutineTestC.out.count { it == "countTo(${Int.MAX_VALUE})" } `is equal to?` 20
+
         RoutineTestC.countTo(6)
         check(8, 4, 6)
     }
