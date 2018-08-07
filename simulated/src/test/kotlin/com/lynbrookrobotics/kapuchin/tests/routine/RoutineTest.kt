@@ -28,7 +28,7 @@ class RoutineTest {
         RoutineTestC.out.count { it == "countTo(6)" } `is equal to?` six
     }
 
-    @Test(timeout = 5 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `routines run sequentially by ending themselves`() = runBlocking {
         RoutineTestC.out = emptyList()
 
@@ -41,7 +41,7 @@ class RoutineTest {
         check(8, 4, 6)
     }
 
-    @Test(timeout = 7 * 1000)
+    @Test(timeout = 5 * 1000)
     fun `routines can still run after one times out`() = runBlocking {
         RoutineTestC.out = emptyList()
 

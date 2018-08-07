@@ -19,7 +19,7 @@ class OrchestrationTest {
     private class OrchestrationTestSH(id: Int) : TSH<OrchestrationTestSH, OrchestrationTestC>("OrchestrationTest Hardware $id")
     private class OrchestrationTestC(id: Int) : TC<OrchestrationTestC, OrchestrationTestSH>(OrchestrationTestSH(id))
 
-    @Test(timeout = 4 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `launchAll launches all routines`() = runBlocking {
         val comps = List(15) { OrchestrationTestC(it) }
         launchAll(
@@ -33,7 +33,7 @@ class OrchestrationTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 2 * 1000)
     fun `launchAll can be cancelled externally`() = runBlocking {
         val last = 10
         val comps = List(last + 1) { OrchestrationTestC(it) }
@@ -66,7 +66,7 @@ class OrchestrationTest {
         comps[last].checkCount(last, 0)
     }
 
-    @Test(timeout = 10 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `runWhile runs only when its predicate is true`() = runBlocking {
         val comps = List(10) { OrchestrationTestC(it) }
         fun doSomething() = launchAll(

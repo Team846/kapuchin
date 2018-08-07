@@ -23,7 +23,7 @@ class SensorTest {
 
     private object SensorTestC : TC<SensorTestC, SensorTestSH>(SensorTestSH())
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 2 * 1000)
     fun `sensors read on tick are in sync`() = runBlocking {
         val name = "sensors read on tick are in sync"
         SensorTestC.run {
@@ -67,7 +67,7 @@ class SensorTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 2 * 1000)
     fun `sensors read eagerly are eager and efficient`() = runBlocking {
         val name = "sensors read eagerly are eager and efficient"
         SensorTestC.run {
@@ -91,7 +91,7 @@ class SensorTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 2 * 1000)
     fun `sensors are read efficiently`() = runBlocking {
         val name = "sensors are read efficiently"
         SensorTestC.run {
@@ -110,7 +110,7 @@ class SensorTest {
         }
     }
 
-    @Test(timeout = 6 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `sensor lambdas are released upon routine completion`() = runBlocking {
         val name = "sensor lambdas are released upon routine completion"
         SensorTestC.run {
