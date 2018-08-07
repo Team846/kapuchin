@@ -2,8 +2,10 @@ package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
+import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
+import com.lynbrookrobotics.kapuchin.tests.`is within?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
 import com.lynbrookrobotics.kapuchin.tests.anyInt
 import info.kunalsheth.units.generated.*
@@ -107,6 +109,20 @@ class ConversionTest {
                             }
                         }
             }
+        }
+    }
+
+    @Test
+    fun `outputs are mapped correctly`() {
+        anyDouble.filter { it > 0 && it < 1.0 }.forEach {
+            val mapping = MinOutputMap(it)
+            val tol = 0.001
+
+            mapping(0.0) `is within?` (0.0 withToleranceOf tol)
+            mapping(tol / 2) `is within?` (it withToleranceOf tol)
+            mapping(1.0) `is within?` (1.0 withToleranceOf tol)
+            mapping(-tol / 2) `is within?` (-it withToleranceOf tol)
+            mapping(-1.0) `is within?` (-1.0 withToleranceOf tol)
         }
     }
 }
