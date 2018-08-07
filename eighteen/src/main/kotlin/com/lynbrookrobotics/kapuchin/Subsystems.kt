@@ -59,7 +59,7 @@ data class Subsystems(
     }.also { HAL.observeUserProgramTeleop() }
 
     fun currentTestingAuto() = launch {
-        drivetrain.pulseLeft(20.Percent, 50.Percent, 2.5.Second)
+        //drivetrain.pulseLeft(20.Percent, 50.Percent, 2.5.Second)
 //        while(true) {
 //            withTimeoutOrNull(5000) {
 //                drivetrain.applyCurrent(20.Ampere)
@@ -68,6 +68,7 @@ data class Subsystems(
 //                drivetrain.applyCurrent(-10.Ampere)
 //            }
 //        }
+        drivetrain.testDeadbandBreakCoast()
     }
 
     companion object : Named("Subsystems Initializer") {

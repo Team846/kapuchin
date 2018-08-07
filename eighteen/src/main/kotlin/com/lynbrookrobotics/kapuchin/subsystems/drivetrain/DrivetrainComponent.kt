@@ -33,6 +33,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         ({ PidGains(kP, kI, kD) })
     }
 
+    val deadbandTestValue by pref(0.1, Percent)
+
     val maxAccelerationWithLiftUp by pref(3, FootPerSecondSquared)
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {

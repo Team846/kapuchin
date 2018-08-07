@@ -12,7 +12,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedGainWriter
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import info.kunalsheth.units.generated.*
 
-private val configTimeout = 5 * 1000
+private val configTimeout = 0
 private val slowStatusFrameRate = 1000
 
 fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOffloadedGainWriter {
@@ -40,7 +40,7 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
     esc.configNominalOutputReverse(0.0, configTimeout)
     esc.configNominalOutputForward(0.0, configTimeout)
     esc.configPeakOutputForward(1.0, configTimeout)
-    esc.configNeutralDeadband(0.001, configTimeout)
+    esc.configNeutralDeadband(0.1, configTimeout)
 
     esc.configVoltageCompSaturation(voltageCompensation.Volt, configTimeout)
     esc.configVoltageMeasurementFilter(32, configTimeout)

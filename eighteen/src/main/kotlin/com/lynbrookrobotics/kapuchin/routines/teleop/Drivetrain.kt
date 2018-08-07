@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
+import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.lynbrookrobotics.kapuchin.control.electrical.MotorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
@@ -14,12 +15,18 @@ import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.CurrentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
+import com.lynbrookrobotics.kapuchin.logging.Level
+import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.withTimeoutOrNull
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
@@ -229,5 +236,50 @@ suspend fun DrivetrainComponent.applyCurrent(x: Ampere) {
                 ),
                 PercentOutput(0.Percent)
         )
+    }
+}
+
+suspend fun DrivetrainComponent.testDeadband() {
+    runRoutine("test deadband") {
+        TwoSided(
+                PercentOutput(deadbandTestValue),
+                PercentOutput(0.Percent)
+        )
+    }
+}
+
+suspend fun DrivetrainComponent.testDeadbandBreakCoast() {
+    hardware.leftMasterEsc.setNeutralMode(NeutralMode.Brake)
+    hardware.leftSlaveEsc.setNeutralMode(NeutralMode.Brake)
+    log(Debug) { "Testing in break mode with ${deadbandTestValue.Percent}%" }
+    withTimeoutOrNull(5000) {
+        runRoutine("apply dc") {
+            TwoSided(PercentOutput(80.Percent), PercentOutput(0.Percent))
+        }
+    }
+    withTimeoutOrNull(5000) {
+        runRoutine("test deadband break coast") {
+            TwoSided(
+                    PercentOutput(deadbandTestValue),
+                    PercentOutput(0.Percent)
+            )
+        }
+    }
+
+    hardware.leftMasterEsc.setNeutralMode(NeutralMode.Coast)
+    hardware.leftSlaveEsc.setNeutralMode(NeutralMode.Coast)
+    log(Debug) { "Testing in ccoast mode with ${deadbandTestValue.Percent}%" }
+    withTimeoutOrNull(5000) {
+        runRoutine("apply dc") {
+            TwoSided(PercentOutput(80.Percent), PercentOutput(0.Percent))
+        }
+    }
+    withTimeoutOrNull(30000) {
+        runRoutine("test deadband break coast") {
+            TwoSided(
+                    PercentOutput(deadbandTestValue),
+                    PercentOutput(0.Percent)
+            )
+        }
     }
 }
