@@ -24,6 +24,12 @@ infix fun <Q : Quan<Q>> Q.`is equal to?`(that: Q) =
 infix fun <T : Any?> T.`is equal to?`(that: T) =
         assert(this == that) { "Expecting $this = $that, however $this ≠ $that" }
 
+infix fun <T: Comparable<T>> T.`is within?`(range: ClosedRange<T>) =
+        assert(this in range) {
+            val rangeText = "[${range.start}, ${range.endInclusive}]"
+            "Expecting $this ∈ $rangeText, however $this ∉ $rangeText"
+        }
+
 infix fun <T : Comparable<T>> T.`is greater than?`(that: T) =
         assert(this > that) { "Expecting $this > $that, however $this ≤ $that" }
 
