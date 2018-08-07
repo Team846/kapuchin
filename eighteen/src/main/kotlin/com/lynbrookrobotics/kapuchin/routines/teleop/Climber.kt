@@ -10,13 +10,13 @@ import com.lynbrookrobotics.kapuchin.subsystems.climber.HooksComponent
 import com.lynbrookrobotics.kapuchin.subsystems.climber.WinchComponent
 import info.kunalsheth.units.generated.Volt
 
-suspend fun HooksComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
+suspend fun HooksComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     var state = false
     val isTriggered by driver.deployHooks.readEagerly.withoutStamps
     val liftPosition by lift.hardware.position.readEagerly.withoutStamps
     val liftSafeThreshold = lift.collectHeight withToleranceOf lift.positionTolerance
 
-    runRoutine("Teleop") {
+    controller {
         if (isTriggered) state = !state
         if (state && liftPosition !in liftSafeThreshold) {
             log(Warning) { "Cannot deploy hooks until lift is lowered" }
@@ -25,13 +25,13 @@ suspend fun HooksComponent.teleop(driver: DriverHardware, lift: LiftComponent) {
     }
 }
 
-suspend fun WinchComponent.teleop(driver: DriverHardware) {
+suspend fun WinchComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val isClimbing by driver.climb.readEagerly.withoutStamps
 
     val manualOverride by driver.manualOverride.readEagerly.withoutStamps
     val overrideWinch by driver.manualClimb.readEagerly.withoutStamps
 
-    runRoutine("Teleop") {
+    controller {
         when {
             overrideWinch -> hardware.operatingVoltage * manualOverride
             isClimbing -> climbStrength
@@ -40,7 +40,7 @@ suspend fun WinchComponent.teleop(driver: DriverHardware) {
     }
 }
 
-suspend fun ForksComponent.teleop(driver: DriverHardware) {
+suspend fun ForksComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val isTriggered by driver.deployForks.readEagerly.withoutStamps
-    runRoutine("Teleop") { isTriggered }
+    controller { isTriggered }
 }

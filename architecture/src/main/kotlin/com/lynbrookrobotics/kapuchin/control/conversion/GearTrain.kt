@@ -3,7 +3,6 @@ package com.lynbrookrobotics.kapuchin.control.conversion
 import info.kunalsheth.units.generated.Angle
 import info.kunalsheth.units.generated.AngularAcceleration
 import info.kunalsheth.units.generated.AngularVelocity
-import info.kunalsheth.units.generated.Second
 
 data class GearTrain(val inputTeeth: Int, val outputTeeth: Int, val idlers: Int = 0) {
     private val flip = if (idlers % 2 == 0) 1 else -1

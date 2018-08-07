@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import info.kunalsheth.units.generated.*
 
-suspend fun LiftComponent.teleop(driver: DriverHardware) {
+suspend fun LiftComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     fun <I> r(s: Sensor<I>) = s.readWithEventLoop.withoutStamps
 
     val twistAdjust by r(driver.twistAdjust)
@@ -26,7 +26,7 @@ suspend fun LiftComponent.teleop(driver: DriverHardware) {
 
     val currentPosition by hardware.position.readOnTick.withoutStamps
 
-    runRoutine("Teleop") {
+    controller {
         //        println(currentPosition.Foot)
         if (overrideLift) PercentOutput(manualOverride.Each)
         else PositionOutput(hardware.offloadedSettings.native(positionGains),
@@ -43,9 +43,9 @@ suspend fun LiftComponent.teleop(driver: DriverHardware) {
     }
 }
 
-suspend fun LiftComponent.to(height: Length, tolerance: Length = positionTolerance) {
+suspend fun LiftComponent.to(height: Length, tolerance: Length = positionTolerance) = startRoutine("to") {
     val position by hardware.position.readOnTick.withoutStamps
-    runRoutine("To Height") {
+    controller {
         if (position in height withToleranceOf tolerance) null
         else PositionOutput(
                 hardware.offloadedSettings.native(positionGains),
