@@ -1,9 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
-import com.lynbrookrobotics.kapuchin.control.electrical.MotorCurrentLimiter
-import com.lynbrookrobotics.kapuchin.control.electrical.OutsideThresholdChecker
-import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
-import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
+import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.logging.Named
@@ -65,6 +62,40 @@ class ElectricalTests {
             limiter(0.Rpm, target) `is equal to?` if (target < -maxStartupVoltage) -maxStartupVoltage else target
             limiter(0.Volt, 0.Ampere, target) `is equal to?` if (target < -maxStartupVoltage) -maxStartupVoltage else target
         }
+    }
+
+    @Test
+    fun `motor current applicator compensates for emf`() {
+        val maxVoltage = 12.Volt
+        val stallCurrent = 130.Ampere
+        val freeSpeed = 5000.Rpm
+
+        val mca = MotorCurrentApplicator(
+                maxVoltage, freeSpeed, stallCurrent
+        )
+
+        mca(0.Rpm, stallCurrent) `is equal to?` maxVoltage
+        mca(0.Rpm, stallCurrent / 2) `is equal to?` maxVoltage / 2
+        mca(0.Rpm, -stallCurrent) `is equal to?` -maxVoltage
+        mca(0.Rpm, -stallCurrent / 2) `is equal to?` -maxVoltage / 2
+
+        mca(freeSpeed, -stallCurrent * 2) `is equal to?` -maxVoltage
+        mca(freeSpeed, -stallCurrent) `is equal to?` 0.Volt
+        mca(freeSpeed, -stallCurrent / 2) `is equal to?` maxVoltage / 2
+
+        mca(freeSpeed / 2, -stallCurrent) `is equal to?` -maxVoltage / 2
+        mca(freeSpeed / 2, -stallCurrent / 2) `is equal to?` 0.Volt
+        mca(freeSpeed / 2, stallCurrent) `is equal to?` maxVoltage * 1.5
+        mca(freeSpeed / 2, stallCurrent / 2) `is equal to?` maxVoltage
+
+        mca(-freeSpeed / 2, stallCurrent) `is equal to?` maxVoltage / 2
+        mca(-freeSpeed / 2, stallCurrent / 2) `is equal to?` 0.Volt
+        mca(-freeSpeed / 2, -stallCurrent) `is equal to?` -maxVoltage * 1.5
+        mca(-freeSpeed / 2, -stallCurrent / 2) `is equal to?` -maxVoltage
+
+        mca(-freeSpeed, stallCurrent * 2) `is equal to?` maxVoltage
+        mca(-freeSpeed, stallCurrent) `is equal to?` 0.Volt
+        mca(-freeSpeed, stallCurrent / 2) `is equal to?` -maxVoltage / 2
     }
 
     @Test
