@@ -1,48 +1,47 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
+import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.math.avg
-import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionProfile
 import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
-import kotlin.math.absoluteValue
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
+    val absSteering by driver.absoluteSteering.readEagerly.withoutStamps
     val gyro by hardware.gyroInput.readEagerly.withStamps
 
     val liftHeight by lift.hardware.position.readOnTick.withoutStamps
-    val liftActivationThreshold = lift.collectHeight + lift.positionTolerance
+    val liftActivationThreshold = lift.switchHeight + lift.positionTolerance
 
     val slewFunction: (Time) -> Acceleration = {
-        if (liftHeight > liftActivationThreshold) maxAccelerationWithLiftUp / (liftHeight / lift.hardware.maxHeight)
+        if (liftHeight > liftActivationThreshold) maxAccelerationWithLiftUp /
+                ((liftHeight - liftActivationThreshold) / (lift.hardware.maxHeight - liftActivationThreshold))
         else 1000.FootPerSecondSquared
     }
 
     val leftSlew = RampRateLimiter(limit = slewFunction)
     val rightSlew = RampRateLimiter(limit = slewFunction)
 
-    val turnTargetIntegrator = InfiniteIntegrator(gyro.value.angle)
-    val turnControl = PidControlLoop(turningPositionGains) {
-        val steeringForwardBlend =
-                if (steering == 0.0) 0.0
-                else steering.absoluteValue / (steering.absoluteValue + accelerator.absoluteValue)
-        turnTargetIntegrator(it, maxTurningSpeed * steering * steeringForwardBlend)
-    }
+    var absSteeringOffset = gyro.value.angle
+    val turnControl = PidControlLoop(turningPositionGains) { absSteering + absSteeringOffset }
 
     controller {
         val forwardVelocity = topSpeed * accelerator
+
+        if (steering != 0.0) absSteeringOffset = gyro.value.angle - absSteering
         val steeringVelocity = topSpeed * steering + turnControl(gyro.stamp, gyro.value.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)
@@ -129,7 +128,7 @@ suspend fun DrivetrainComponent.arcTo(
     }
 }
 
-suspend fun DrivetrainComponent.driveStraight(
+suspend fun DrivetrainComponent.driveStraightTrapezoidal(
         distance: Length, bearing: Angle,
         distanceTolerance: Length, angleTolerance: Angle,
 
@@ -137,7 +136,7 @@ suspend fun DrivetrainComponent.driveStraight(
         topSpeed: Velocity,
         deceleration: Acceleration = acceleration,
         endingSpeed: Velocity = 0.FootPerSecond,
-        kickstart: Velocity = 3.Inch / Second
+        kickstart: Velocity = 6.Inch / Second
 ) = startRoutine("straight") {
     val position by hardware.position.readOnTick.withoutStamps
     val velocity by hardware.velocity.readOnTick.withoutStamps
@@ -160,8 +159,7 @@ suspend fun DrivetrainComponent.driveStraight(
 
     controller {
         if (
-                position.left in distanceRange &&
-                position.right in distanceRange &&
+                position.avg in distanceRange &&
                 gyro.value.angle in bearingRange
         ) null
         else {

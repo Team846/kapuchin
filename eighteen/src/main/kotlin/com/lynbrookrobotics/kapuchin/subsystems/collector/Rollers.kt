@@ -15,7 +15,7 @@ import com.lynbrookrobotics.kapuchin.timing.currentTime
 class RollersComponent(hardware: RollersHardware, private val electrical: ElectricalSystemHardware) : Component<RollersComponent, RollersHardware, TwoSided<Volt>>(hardware, EventLoop) {
 
     val purgeStrength by pref(12, Volt)
-    val collectStrength by pref(9, Volt)
+    val collectStrength by pref(12, Volt)
     val cubeAdjustCycle by pref(4, Hertz)
     val cubeAdjustStrength by pref(3, Volt)
     val cubeHoldStrength by pref(4, Volt)

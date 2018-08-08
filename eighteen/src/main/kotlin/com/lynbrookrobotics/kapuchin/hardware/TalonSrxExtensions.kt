@@ -31,14 +31,14 @@ fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOf
     )
 }
 
-fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
+fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, staticFrictionCompensation: Volt) {
     esc.setNeutralMode(NeutralMode.Brake)
     esc.configOpenloopRamp(0.0, configTimeout)
     esc.configClosedloopRamp(0.0, configTimeout)
 
     esc.configPeakOutputReverse(-1.0, configTimeout)
-    esc.configNominalOutputReverse(0.0, configTimeout)
-    esc.configNominalOutputForward(0.0, configTimeout)
+    esc.configNominalOutputReverse(-(staticFrictionCompensation / voltageCompensation).siValue, configTimeout)
+    esc.configNominalOutputForward((staticFrictionCompensation / voltageCompensation).siValue, configTimeout)
     esc.configPeakOutputForward(1.0, configTimeout)
     esc.configNeutralDeadband(0.001, configTimeout)
 
@@ -56,8 +56,8 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
     }
 }
 
-fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, vararg feedback: FeedbackDevice) {
-    generalSetup(master, voltageCompensation, currentLimit)
+fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, staticFrictionCompensation: Volt, vararg feedback: FeedbackDevice) {
+    generalSetup(master, voltageCompensation, currentLimit, staticFrictionCompensation)
 
     feedback.forEachIndexed { i, sensor -> master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
 
@@ -79,7 +79,7 @@ fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: 
     master.configVelocityMeasurementWindow(4, configTimeout)
 }
 
-fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
-    generalSetup(slave, voltageCompensation, currentLimit)
+fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere, staticFrictionCompensation: Volt) {
+    generalSetup(slave, voltageCompensation, currentLimit, staticFrictionCompensation)
     StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
 }

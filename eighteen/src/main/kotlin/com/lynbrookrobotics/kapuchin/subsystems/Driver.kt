@@ -2,16 +2,15 @@ package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.hardware.AlpsRdc80
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
-import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
 import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.generated.*
 import kotlin.math.sign
 
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
@@ -21,16 +20,16 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val syncThreshold = 3.milli(Second)
 
     val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
-        log(Debug) { it.name } // TESTING
-        true
+        it.name == "T.16000M"
     }
     val driver by hardw { Joystick(0) }.verify("the driver joystick is connected") {
-        log(Debug) { it.name } // TESTING
-        true
+        it.name == "T.16000M"
     }
     val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
-        log(Debug) { it.name } // TESTING
-        true
+        it.name == "FGT Rumble 3-in-1"
+    }
+    val absoluteWheel by hardw { Joystick(3) }.verify("the driver absolute wheel is connected") {
+        it.name == "BU0836A Interface"
     }
 
     enum class JoystickButton(val raw: Int) {
@@ -42,7 +41,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     operator fun Joystick.get(button: JoystickButton) = getRawButton(button.raw)
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val activationTolerance by pref(0.01)
+    val activationTolerance by pref(0.03)
     val inactiveRange = 0 withToleranceOf activationTolerance
     val manualOverride = s { -(operator.y.takeUnless { it in inactiveRange } ?: 0.0) }
 
@@ -56,7 +55,11 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     fun sqrWithSign(x: Double) = x * x * x.sign
 
     val accelerator = s { sqrWithSign(-(driver.y.takeUnless { it in inactiveRange } ?: 0.0)) }
-    val steering = s { wheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
+    val steering = s { sqrWithSign(wheel.x.takeUnless { it in inactiveRange } ?: 0.0) }
+
+    val absoluteSteeringPhaseCalibration by pref(180 + 12.9, Degree)
+    val absSteerConversion = AlpsRdc80(absoluteSteeringPhaseCalibration)
+    val absoluteSteering = s { absSteerConversion(absoluteWheel.x, absoluteWheel.y) }
 
     // LIFT
     val twistAdjust = s { operator.z }

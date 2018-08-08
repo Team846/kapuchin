@@ -10,9 +10,7 @@ fun <Q : Quan<Q>> avg(first: Q, vararg x: Q) = first.new(
 
 infix fun <Q : Quan<Q>> Q.minMag(that: Q) = if (this.abs < that.abs) this else that
 infix fun <Q : Quan<Q>> Q.maxMag(that: Q) = if (this.abs > that.abs) this else that
+
 infix fun <Q : Quan<Q>> Q.withToleranceOf(of: Q) = (this - of)..(this + of)
-infix fun Number.withToleranceOf(of: Number): ClosedFloatingPointRange<Double> {
-    val center = toDouble()
-    val range = of.toDouble()
-    return center - range..center + range
-}
+infix fun Double.withToleranceOf(of: Double) = (this - of)..(this + of)
+infix fun Number.withToleranceOf(of: Number) = this.toDouble() withToleranceOf of.toDouble()

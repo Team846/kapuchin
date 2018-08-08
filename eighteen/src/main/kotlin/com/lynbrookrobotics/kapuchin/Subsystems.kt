@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
+import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraightTrapezoidal
 import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
@@ -15,6 +15,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
 import edu.wpi.first.wpilibj.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 
@@ -38,21 +39,21 @@ data class Subsystems(
     ).also { HAL.observeUserProgramTeleop() }
 
     fun backAndForthAuto() = launch {
-        drivetrain.driveStraight(
+        drivetrain.driveStraightTrapezoidal(
                 8.Foot, 0.Degree,
+                1.Inch, 2.Degree,
+                5.FootPerSecondSquared,
+                5.FootPerSecond
+        )
+
+        delay(1000)
+
+        drivetrain.driveStraightTrapezoidal(
+                -8.Foot, 0.Degree,
                 1.Inch, 2.Degree,
                 2.FootPerSecondSquared,
                 3.FootPerSecond
         )
-
-//        delay(10000)
-//
-//        drivetrain.driveStraight(
-//                -10.Foot, 0.Degree,
-//                1.Inch, 2.Degree,
-//                5.FootPerSecondSquared,
-//                10.FootPerSecond
-//        )
     }.also { HAL.observeUserProgramTeleop() }
 
     companion object : Named("Subsystems Initializer") {
