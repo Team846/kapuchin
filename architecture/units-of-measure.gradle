@@ -1,16 +1,24 @@
 generateUnitsOfMeasure {
     relationships += r(
             d(T: 1), d(T: 2), // time
-            d(L: 1), d(L: 2) // length
+            d(L: 1), d(L: 2), // length
+    ) + r(
+            d(), // angle
+            d(T: 1), d(T: 2), // time
+            d(L: 1), // length
+    ) + r(
+            d(M: 1), // mass
+            d(L: 1, T: -2), // acceleration
+            d(M: 1, L: 1, T: -2), // force
+            d(M: 1, L: 2, T: -2), // torque
     ) + r(
             d(M: 1, L: 2, T: -3, I: -1), // volts
             d(M: 1, L: 2, T: -3, I: -2), // ohms
             d(I: 1), // amps
             d(T: 1), // time
     ) + r(
-            d(), // angle
-            d(T: 1), d(T: 2), // time
-            d(L: 1), // length
+            d(M: 1, L: 2, T: -2), // torque
+            d(I: 1), // amps
     )
 
     quantities += [

@@ -44,7 +44,7 @@ class OrchestrationTest {
                 }.toTypedArray()
         )
 
-        while (comps.all { it.out.count { it == "countTo(${last + 1})" } < 1 }) Thread.sleep(1)
+        while (comps[last].out.count { it == "countTo(${last + 1})" } < 1) Thread.sleep(1)
         j1.cancelAndJoin()
 
         comps.forEachIndexed { i, c ->
