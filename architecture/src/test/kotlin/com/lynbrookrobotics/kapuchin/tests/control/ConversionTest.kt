@@ -30,26 +30,6 @@ class ConversionTest {
     }
 
     @Test
-    fun `wheel length and angle methods are inverses`() {
-        anyInt.filter { it > 0 }
-                .map { radius -> WheelConversion(radius.Inch) }
-                .forEach { conversion ->
-                    anyDouble.map { it.Foot }.forEach { x ->
-                        x `is equal to?` conversion.length(conversion.angle(x))
-
-                        val ix = x * t
-                        ix `is equal to?` conversion.length(conversion.angle(ix))
-
-                        val dx = x / t
-                        dx `is equal to?` conversion.length(conversion.angle(dx))
-
-                        val ddx = dx / t
-                        ddx `is equal to?` conversion.length(conversion.angle(ddx))
-                    }
-                }
-    }
-
-    @Test
     fun `offloaded real and native methods are inverses`() {
         anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(1023, 12.Volt, resolution, 8.46.Metre, 1.Foot) }
                 .forEach { conversion ->

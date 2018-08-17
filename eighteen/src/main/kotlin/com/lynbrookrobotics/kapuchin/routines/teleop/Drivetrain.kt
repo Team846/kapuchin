@@ -74,8 +74,8 @@ suspend fun DrivetrainComponent.arcTo(
     val theta = bearing - gyro.value.angle
     val rL = radius + trackSize / 2
     val rR = radius - trackSize / 2
-    val sL = rL * theta
-    val sR = rR * theta
+    val sL = rL * theta / Radian
+    val sR = rR * theta / Radian
 
     val rSmall = rL minMag rR
     val rBig = rL maxMag rR
@@ -93,7 +93,7 @@ suspend fun DrivetrainComponent.arcTo(
     val startingPostion = position
     val turnControl = PidControlLoop(turningPositionGains) {
         // θ = s ÷ r
-        (position.avg - startingPostion.avg) / radius
+        (position.avg - startingPostion.avg) / radius * Radian
     }
 
     val slRange = sL withToleranceOf distanceTolerance
