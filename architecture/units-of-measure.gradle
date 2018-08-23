@@ -1,3 +1,5 @@
+import static java.lang.Math.PI
+
 generateUnitsOfMeasure {
     relationships += r(
             d(T: 1), d(T: 2), // time
@@ -8,15 +10,15 @@ generateUnitsOfMeasure {
             d(I: 1), // amps
             d(T: 1), // time
     ) + r(
-            d(), // angle
+            d(), // dimensionless
+            d(A: 1), // angle
             d(T: 1), d(T: 2), // time
             d(L: 1), // length
     )
 
     quantities += [
-            q("Each", d()),
             q("Absement", d(L: 1, T: 1)),
-            q("AngularAbsement", d(T: 1))
+            q("AngularAbsement", d(A: 1, T: 1))
     ].toSet()
 
     unitsOfMeasure += [
@@ -26,12 +28,12 @@ generateUnitsOfMeasure {
             u("FootPerSecond", 0.3048, d(L: 1, T: -1)),
             u("FootPerSecondSquared", 0.3048, d(L: 1, T: -2)),
 
-            u("Turn", 6.2832, d()),
-            u("Rpm", 6.2832, d(T: -1)),
-            u("DegreeSecond", 0.01745, d(T: 1)),
-            u("Degree", 0.01745, d()),
-            u("DegreePerSecond", 0.01745, d(T: -1)),
-            u("DegreePerSecondSquared", 0.01745, d(T: -2)),
+            u("Turn", 2 * PI, d(A: 1)),
+            u("Rpm", 2 * PI / 60, d(A: 1, T: -1)),
+            u("DegreeSecond", PI / 180, d(A: 1, T: 1)),
+            u("Degree", PI / 180, d(A: 1)),
+            u("DegreePerSecond", PI / 180, d(A: 1, T: -1)),
+            u("DegreePerSecondSquared", PI / 180, d(A: 1, T: -2)),
 
             u("Minute", 60, d(T: 1)),
 
