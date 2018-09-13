@@ -14,13 +14,18 @@ class DeadbandTest {
     fun `vertical deadbands are mapped correctly`() {
         anyDouble.filter { it > 0 && it < 100 }.forEach {
             val mapping = VerticalDeadband(it.Percent, 100.Percent)
-            val tol = 0.01.Percent
-
-            mapping(0.0.Percent) `is within?` (0.0.Percent withToleranceOf tol)
-            mapping(tol / 2) `is within?` (it.Percent withToleranceOf tol)
-            mapping(100.Percent) `is within?` (100.Percent withToleranceOf tol)
-            mapping(-tol / 2) `is within?` (-it.Percent withToleranceOf tol)
-            mapping(-100.Percent) `is within?` (-100.Percent withToleranceOf tol)
+//            val tol = 0.01.Percent
+//
+//            mapping(0.0.Percent) `is within?` (0.0.Percent withToleranceOf tol)
+//            mapping(tol / 2) `is within?` (it.Percent withToleranceOf tol)
+//            mapping(100.Percent) `is within?` (100.Percent withToleranceOf tol)
+//            mapping(-tol / 2) `is within?` (-it.Percent withToleranceOf tol)
+//            mapping(-100.Percent) `is within?` (-100.Percent withToleranceOf tol)
+            mapping(0.0.Percent) `is equal to?` 0.0.Percent
+            mapping(1E-5.Percent) `is equal to?` it.Percent
+            mapping(100.Percent) `is equal to?` 100.Percent
+            mapping(-1E-5.Percent) `is equal to?` -it.Percent
+            mapping(-100.Percent) `is equal to?` -100.Percent
         }
     }
 

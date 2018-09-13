@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.tests
 
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import info.kunalsheth.units.generated.Quan
+import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 
 val anyInt = setOf(0, 1, 2, 373, 1024, 1492, 8397)
         .flatMap { setOf(it, -it) }
@@ -11,13 +12,15 @@ val anyDouble = setOf(0.001, 0.3, 0.8, 1.0, 1.4, 3.7, 9.0, 23.9, 77.3, 1429.5)
         .flatMap { setOf(it, -it) }
         .toSet()
 
-private const val numericalTolerance = 1E-5
-private val <Q : Quan<Q>> Q.tolerance
-    get() = (this.new(numericalTolerance))
-            .let { (this - it)..(this + it) }
+private const val tol = 1E-5
 
 infix fun <Q : Quan<Q>> Q.`is equal to?`(that: Q) =
-        assert(this in that.tolerance) {
+        assert(this in that withToleranceOf that.new(tol)) {
+            "Expecting ${this withDecimals 3} ≈ ${that withDecimals 3}, however ${this withDecimals 3} ≉ ${that withDecimals 3}"
+        }
+
+infix fun Double.`is equal to?`(that: Double) =
+        assert(this in that withToleranceOf tol) {
             "Expecting ${this withDecimals 3} ≈ ${that withDecimals 3}, however ${this withDecimals 3} ≉ ${that withDecimals 3}"
         }
 
