@@ -33,11 +33,11 @@ class TrapezoidalMotionProfilingTest {
 
         0.FootPerSecond `is equal to?` basicProfile(target)
         repeat(20) {
-            val profileInput = target + Inch + it.Foot
+            val profileInput = target + 1.Inch + it.Foot
             val profile = basicProfile(profileInput)
 
             0.FootPerSecond `is greater than?` profile
-            profile `is greater than?` basicProfile(profileInput + Foot)
+            profile `is greater than?` basicProfile(profileInput + 1.Foot)
         }
     }
 
@@ -45,7 +45,7 @@ class TrapezoidalMotionProfilingTest {
     fun `the robot should go forwards if it undershoots its stopping point`() {
         val target = basicProfile.distance
         repeat(target.Foot.toInt() - 1) {
-            val profileInput = it.Foot + Inch
+            val profileInput = it.Foot + 1.Inch
             val profile = basicProfile(profileInput)
 
             profile `is greater than?` 0.FootPerSecond
@@ -59,11 +59,11 @@ class TrapezoidalMotionProfilingTest {
 
         0.FootPerSecond `is equal to?` backwardsProfile(target)
         repeat(20) {
-            val profileInput = target - Inch - it.Foot
+            val profileInput = target - 1.Inch - it.Foot
             val profile = backwardsProfile(profileInput)
 
             profile `is greater than?` 0.FootPerSecond
-            backwardsProfile(profileInput - Foot) `is greater than?` profile
+            backwardsProfile(profileInput - 1.Foot) `is greater than?` profile
         }
     }
 
@@ -71,7 +71,7 @@ class TrapezoidalMotionProfilingTest {
     fun `the robot should go backwards if it undershoots its stopping point in reverse`() {
         val target = backwardsProfile.distance
         repeat(target.Foot.toInt().absoluteValue - 1) {
-            val profileInput = -it.Foot - Inch
+            val profileInput = -it.Foot - 1.Inch
             val profile = backwardsProfile(profileInput)
 
             0.FootPerSecond `is greater than?` profile

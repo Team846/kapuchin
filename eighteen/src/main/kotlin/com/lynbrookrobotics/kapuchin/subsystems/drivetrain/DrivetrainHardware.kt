@@ -8,7 +8,6 @@ import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
@@ -99,7 +98,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val gyro by hardw { ADIS16448_IMU() }
             .configure { startingAngle = it.angle.Degree }
             .verify("Gyro should not drift after calibration") {
-                it.rate.DegreePerSecond in 0.DegreePerSecond withToleranceOf driftTolerance
+                it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
             }
     val gyroInput = sensor(gyro) {
         GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?

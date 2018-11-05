@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
 import info.kunalsheth.units.generated.Ampere
 import info.kunalsheth.units.generated.Dimensionless
+import info.kunalsheth.units.generated.I
 
 class LazyOffloadedGainWriter(
         private val writeKp: (Double) -> Unit,
@@ -11,7 +12,7 @@ class LazyOffloadedGainWriter(
         private val writeVelocity: (Double) -> Unit,
         private val writePosition: (Double) -> Unit,
         private val writePercent: (Dimensionless) -> Unit,
-        private val writeCurrent: (Ampere) -> Unit
+        private val writeCurrent: (I) -> Unit
 ) : (OffloadedOutput) -> Unit {
 
     private var current: OffloadedPidGains? = null

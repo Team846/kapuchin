@@ -3,13 +3,10 @@ package com.lynbrookrobotics.kapuchin.routines.teleop
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
-import com.lynbrookrobotics.kapuchin.control.math.avg
 import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionProfile
-import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
@@ -97,9 +94,9 @@ suspend fun DrivetrainComponent.arcTo(
         (position.avg - startingPostion.avg) / radius * Radian
     }
 
-    val slRange = sL withToleranceOf distanceTolerance
-    val srRange = sR withToleranceOf distanceTolerance
-    val bearingRange = bearing withToleranceOf angleTolerance
+    val slRange = sL `±` distanceTolerance
+    val srRange = sR `±` distanceTolerance
+    val bearingRange = bearing `±` angleTolerance
 
     controller {
         if (
@@ -155,8 +152,8 @@ suspend fun DrivetrainComponent.driveStraight(
     val startingPostion = position
     val turnControl = PidControlLoop(turningPositionGains) { bearing }
 
-    val distanceRange = distance withToleranceOf distanceTolerance
-    val bearingRange = bearing withToleranceOf angleTolerance
+    val distanceRange = distance `±` distanceTolerance
+    val bearingRange = bearing `±` angleTolerance
 
     controller {
         if (

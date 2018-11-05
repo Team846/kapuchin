@@ -18,7 +18,10 @@ generateUnitsOfMeasure {
 
     quantities += [
             q("Absement", d(L: 1, T: 1)),
-            q("AngularAbsement", d(A: 1, T: 1))
+            q("AngularAbsement", d(A: 1, T: 1)),
+
+            q("V", d(M: 1, L: 2, T: -3, I: -1)), // volts
+            q("R", d(M: 1, L: 2, T: -3, I: -2)), // ohms
     ].toSet()
 
     unitsOfMeasure += [

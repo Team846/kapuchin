@@ -31,7 +31,7 @@ fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOf
     )
 }
 
-fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
+fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: V, currentLimit: I) {
     esc.setNeutralMode(NeutralMode.Brake)
     esc.configOpenloopRamp(0.0, configTimeout)
     esc.configClosedloopRamp(0.0, configTimeout)
@@ -56,7 +56,7 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
     }
 }
 
-fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: Volt, currentLimit: Ampere, vararg feedback: FeedbackDevice) {
+fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: V, currentLimit: I, vararg feedback: FeedbackDevice) {
     generalSetup(master, voltageCompensation, currentLimit)
 
     feedback.forEachIndexed { i, sensor -> master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
@@ -79,7 +79,7 @@ fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: 
     master.configVelocityMeasurementWindow(4, configTimeout)
 }
 
-fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: Volt, currentLimit: Ampere) {
+fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: V, currentLimit: I) {
     generalSetup(slave, voltageCompensation, currentLimit)
     StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
 }

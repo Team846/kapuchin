@@ -12,7 +12,7 @@ class PidTest {
 
     @Test
     fun `pid kP is proportional`() {
-        val pid = PidControlLoop(PidGains(
+        val pid = PidControlLoop(::div, ::times, PidGains(
                 Gain(6.Volt, 1.Foot),
                 Gain(0.Volt, 1.FootSecond),
                 Gain(0.Volt, 1.FootPerSecond)
@@ -30,7 +30,7 @@ class PidTest {
 
     @Test
     fun `pid kI is integral`() {
-        val pid = PidControlLoop(PidGains(
+        val pid = PidControlLoop(::div, ::times, PidGains(
                 Gain(0.Volt, 1.Foot),
                 Gain(6.Volt, 1.FootSecond),
                 Gain(0.Volt, 1.FootPerSecond)
@@ -52,7 +52,7 @@ class PidTest {
 
     @Test
     fun `pid kD is derivative`() {
-        val pid = PidControlLoop(PidGains(
+        val pid = PidControlLoop(::div, ::times, PidGains(
                 Gain(0.Volt, 1.Foot),
                 Gain(0.Volt, 1.FootSecond),
                 Gain(6.Volt, 1.FootPerSecond)
@@ -78,7 +78,7 @@ class PidTest {
 
     @Test
     fun `pid kF is feedforward`() {
-        val pid = PidControlLoop(PidGains(
+        val pid = PidControlLoop(::div, ::times, PidGains(
                 Gain(1.Volt, 1.FootPerSecond),
                 Gain(0.Volt, 1.Foot),
                 Gain(0.Volt, 1.FootPerSecondSquared),
@@ -98,7 +98,7 @@ class PidTest {
     @Test
     fun `pid integral falloff caps integral error`() {
         anyInt.filter { it > 0 }.forEach { falloff ->
-            val pid = PidControlLoop(PidGains(
+            val pid = PidControlLoop(::div, ::times, PidGains(
                     Gain(6.Volt, 1.Foot),
                     Gain(1.Volt, 1.FootSecond),
                     Gain(2.Volt, 1.FootPerSecond),

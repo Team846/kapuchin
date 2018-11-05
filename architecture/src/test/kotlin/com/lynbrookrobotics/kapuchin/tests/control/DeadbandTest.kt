@@ -2,11 +2,11 @@ package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.HorizontalDeadband
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.VerticalDeadband
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is within?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
 import info.kunalsheth.units.generated.Percent
+import info.kunalsheth.units.generated.`±`
 import kotlin.test.Test
 
 class DeadbandTest {
@@ -16,11 +16,11 @@ class DeadbandTest {
             val mapping = VerticalDeadband(it.Percent, 100.Percent)
             val tol = 0.01.Percent
 
-            mapping(0.0.Percent) `is within?` (0.0.Percent withToleranceOf tol)
-            mapping(tol / 2) `is within?` (it.Percent withToleranceOf tol)
-            mapping(100.Percent) `is within?` (100.Percent withToleranceOf tol)
-            mapping(-tol / 2) `is within?` (-it.Percent withToleranceOf tol)
-            mapping(-100.Percent) `is within?` (-100.Percent withToleranceOf tol)
+            mapping(0.0.Percent) `is within?` (0.0.Percent `±` tol)
+            mapping(tol / 2) `is within?` (it.Percent `±` tol)
+            mapping(100.Percent) `is within?` (100.Percent `±` tol)
+            mapping(-tol / 2) `is within?` (-it.Percent `±` tol)
+            mapping(-100.Percent) `is within?` (-100.Percent `±` tol)
         }
     }
 
@@ -30,11 +30,11 @@ class DeadbandTest {
             val mapping = HorizontalDeadband(it.Percent, 100.Percent)
             val tol = 0.01.Percent
 
-            mapping(0.0.Percent) `is within?` (0.0.Percent withToleranceOf tol)
-            mapping(it.Percent / 2) `is within?` (0.0.Percent withToleranceOf tol)
-            mapping(100.Percent) `is within?` (100.Percent withToleranceOf tol)
-            mapping(-it.Percent / 2) `is within?` (0.0.Percent withToleranceOf tol)
-            mapping(-100.Percent) `is within?` (-100.Percent withToleranceOf tol)
+            mapping(0.0.Percent) `is within?` (0.0.Percent `±` tol)
+            mapping(it.Percent / 2) `is within?` (0.0.Percent `±` tol)
+            mapping(100.Percent) `is within?` (100.Percent `±` tol)
+            mapping(-it.Percent / 2) `is within?` (0.0.Percent `±` tol)
+            mapping(-100.Percent) `is within?` (-100.Percent `±` tol)
         }
     }
 

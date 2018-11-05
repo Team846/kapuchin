@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.Sensor
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
@@ -46,7 +45,7 @@ suspend fun LiftComponent.teleop(driver: DriverHardware) = startRoutine("teleop"
 suspend fun LiftComponent.to(height: Length, tolerance: Length = positionTolerance) = startRoutine("to") {
     val position by hardware.position.readOnTick.withoutStamps
     controller {
-        if (position in height withToleranceOf tolerance) null
+        if (position in height `±` tolerance) null
         else PositionOutput(
                 hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(height)

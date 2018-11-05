@@ -1,30 +1,29 @@
 package com.lynbrookrobotics.kapuchin.control.math.integration
 
-import info.kunalsheth.units.generated.Quantity
+import info.kunalsheth.units.generated.Quan
+import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
-open class InfiniteIntegrator<IntegralOfQ, Q>(private val init: IntegralOfQ) : Integrator<IntegralOfQ, Q>
-        where IntegralOfQ : Quantity<IntegralOfQ, *, Q>,
-              Q : Quantity<Q, IntegralOfQ, *> {
+open class InfiniteIntegrator<Q, SQDT>(
+        private val times: (Q, T) -> SQDT,
+        private var x1: Time,
+        private var y1: Q
+) : Integrator<Q, SQDT>
 
-    protected val zero = init * 0
-    protected var sum = zero
+        where SQDT : Quan<SQDT>,
+              Q : Quan<Q> {
 
+    protected var sum = times(y1 * 0, x1)
 
-    override fun invoke(x2: Time, y2: Q) = (sum + recentRectangle(x2, y2))
-            .also { sum = it }
+    override fun invoke(x2: Time, y2: Q): SQDT {
+        sum += recentTrapezoid(x2, y2)
+        return sum
+    }
 
-    private lateinit var x1: Time
-    private lateinit var y1: Q
-    protected fun recentRectangle(x2: Time, y2: Q) = (
-            if (::x1.isInitialized && ::y1.isInitialized) {
-                val height = (y1 + y2) / 2
-                val width = (x2 - x1)
-                height * width
-            } else init
-            )
-            .also {
-                x1 = x2
-                y1 = y2
-            }
+    protected fun recentTrapezoid(x2: Time, y2: Q) = times(
+            (y2 + y1) / 2, x2 - x1
+    ).also {
+        x1 = x2
+        y1 = y2
+    }
 }

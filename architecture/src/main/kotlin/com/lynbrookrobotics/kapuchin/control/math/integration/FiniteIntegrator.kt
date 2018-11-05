@@ -1,20 +1,27 @@
 package com.lynbrookrobotics.kapuchin.control.math.integration
 
 import com.lynbrookrobotics.kapuchin.control.math.Delay
-import info.kunalsheth.units.generated.Quantity
+import info.kunalsheth.units.generated.Quan
+import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
-class FiniteIntegrator<IntegralOfQ, Q>(val falloff: Int, init: IntegralOfQ) : InfiniteIntegrator<IntegralOfQ, Q>(init)
-        where IntegralOfQ : Quantity<IntegralOfQ, *, Q>,
-              Q : Quantity<Q, IntegralOfQ, *> {
+class FiniteIntegrator<Q, SQDT>(
+        times: (Q, T) -> SQDT,
+        x1: Time, y1: Q,
+        val falloff: Int
+) : InfiniteIntegrator<Q, SQDT>(times, x1, y1)
 
-    private val delayed = Delay<IntegralOfQ>(falloff)
+        where SQDT : Quan<SQDT>,
+              Q : Quan<Q> {
 
-    override fun invoke(x2: Time, y2: Q): IntegralOfQ {
-        val rectangle = recentRectangle(x2, y2)
-        val delayed = delayed(rectangle) ?: zero
+    private val delayed = Delay<SQDT>(falloff)
+    private val zero = sum * 0
 
-        return (sum + rectangle - delayed)
-                .also { sum = it }
+    override fun invoke(x2: Time, y2: Q): SQDT {
+        val trapezoid = recentTrapezoid(x2, y2)
+        val delayed = delayed(trapezoid) ?: zero
+
+        sum += trapezoid - delayed
+        return sum
     }
 }
