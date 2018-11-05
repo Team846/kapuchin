@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.avg
 import kotlin.jvm.JvmName
 
 @Deprecated(
-        message = "try to use two separate parameters wherever possible",
+        message = "Try to use two separate parameters wherever possible",
         replaceWith = ReplaceWith("stamp: Time, value: Q")
 )
 data class TimeStamped<out Q>(val stamp: Time, val value: Q)

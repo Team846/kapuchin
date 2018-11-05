@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
+import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.stampWith
@@ -69,7 +70,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         val nativeFeedbackUnits by pref(4096)
         val perFeedbackQuantity by pref(1, Turn)
         ({
-            OffloadedNativeConversion<V, Absement, L, Velocity, Acceleration>(::div, ::div, ::times, ::times,
+            LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
                     nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage,
                     nativeFeedbackUnits = nativeFeedbackUnits,
                     perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn

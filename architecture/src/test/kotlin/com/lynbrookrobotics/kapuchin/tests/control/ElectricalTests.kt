@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.control.electrical.MotorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.OutsideThresholdChecker
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
-import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`
@@ -20,13 +19,13 @@ class ElectricalTests {
         val startRampUpTime = 846.Minute
 
         val limiter = RampRateLimiter(::div, ::times,
-                0.Volt stampWith startRampUpTime
+                startRampUpTime, 0.Volt
         ) { 12.VoltPerSecond }
 
         val incr = 3.milli(Second)
 
         generateSequence(startRampUpTime) { it + incr }
-                .takeWhile { it - startRampUpTime < 1.Second }
+                .takeWhile { startRampUpTime - it > 0.Second }
                 .forEach { 12.Volt `is greater than?` limiter(it, 12.Volt) }
         repeat(50) {
             limiter(startRampUpTime + 1.Second + incr * it, 12.Volt) `is equal to?` 12.Volt
@@ -35,7 +34,7 @@ class ElectricalTests {
         val startRampDownTime = startRampUpTime + 1.Second + incr * 49
 
         generateSequence(startRampDownTime) { it + incr }
-                .takeWhile { it - startRampDownTime < 2.Second }
+                .takeWhile { startRampDownTime - it > 0.Second }
                 .forEach { limiter(it, -12.Volt) `is greater than?` -12.Volt }
         repeat(50) {
             limiter(startRampDownTime + 2.Second + incr * it, -12.Volt) `is equal to?` -12.Volt

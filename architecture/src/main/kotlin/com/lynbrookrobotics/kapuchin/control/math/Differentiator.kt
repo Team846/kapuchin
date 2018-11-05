@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.Time
 
 class Differentiator<Q, DQDT>(
         private val div: (Q, T) -> DQDT,
-        private var x1: Time = currentTime,
+        private var x1: Time,
         private var y1: Q
 ) : (Time, Q) -> DQDT
 

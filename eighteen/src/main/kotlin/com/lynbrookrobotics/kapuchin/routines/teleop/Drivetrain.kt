@@ -3,8 +3,10 @@ package com.lynbrookrobotics.kapuchin.routines.teleop
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
+import com.lynbrookrobotics.kapuchin.control.math.avg
 import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionProfile
+import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
@@ -98,7 +100,7 @@ suspend fun DrivetrainComponent.arcTo(
     )
 
     val startingPostion = position
-    val turnControl = PidControlLoop(turningPositionGains) {
+    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) {
         // θ = s ÷ r
         (position.avg - startingPostion.avg) / radius * Radian
     }
@@ -159,7 +161,7 @@ suspend fun DrivetrainComponent.driveStraight(
     )
 
     val startingPostion = position
-    val turnControl = PidControlLoop(turningPositionGains) { bearing }
+    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) { bearing }
 
     val distanceRange = distance `±` distanceTolerance
     val bearingRange = bearing `±` angleTolerance

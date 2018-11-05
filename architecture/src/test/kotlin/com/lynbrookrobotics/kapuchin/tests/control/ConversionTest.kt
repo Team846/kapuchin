@@ -1,9 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
-import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
-import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
-import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
-import com.lynbrookrobotics.kapuchin.control.conversion.t
+import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
@@ -35,7 +32,7 @@ class ConversionTest {
     @Test
     fun `offloaded real and native methods are inverses`() {
         anyInt.filter { it != 0 }.map { resolution ->
-            OffloadedNativeConversion<V, Absement, Length, Velocity, Acceleration>(
+            LinearOffloadedNativeConversion(
                     ::div, ::div, ::times, ::times,
                     1023, 12.Volt, resolution, 8.46.Metre, 1.Foot
             )
