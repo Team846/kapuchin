@@ -1,12 +1,13 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
 class Differentiator<Q, DQDT>(
         private val div: (Q, T) -> DQDT,
-        private var x1: Time,
+        private var x1: Time = currentTime,
         private var y1: Q
 ) : (Time, Q) -> DQDT
 

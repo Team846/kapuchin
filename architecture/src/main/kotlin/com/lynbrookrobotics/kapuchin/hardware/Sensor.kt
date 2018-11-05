@@ -1,12 +1,11 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
-import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
-import com.lynbrookrobotics.kapuchin.control.invoke
 import com.lynbrookrobotics.kapuchin.logging.Grapher
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.currentTime
+import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.`±`
@@ -48,7 +47,7 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
         fun <Hardw, Input> SubsystemHardware<*, *>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) = Sensor { read(hardw, it) }
 
         fun <QInput : Quan<QInput>> Sensor<QInput>.with(graph: Grapher<QInput>) =
-                Sensor { t -> read(t).also { graph(it) } }
+                Sensor { t -> read(t).also { graph(it.stamp, it.value) } }
 
         fun <Input, QInput : Quan<QInput>> Sensor<Input>.with(graph: Grapher<QInput>, structure: (Input) -> QInput) =
                 Sensor { t -> read(t).also { graph(it.stamp, structure(it.value)) } }

@@ -69,8 +69,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         val nativeFeedbackUnits by pref(4096)
         val perFeedbackQuantity by pref(1, Turn)
         ({
-            OffloadedNativeConversion(
-                    nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage, nativeFeedbackUnits = nativeFeedbackUnits,
+            OffloadedNativeConversion<V, Absement, L, Velocity, Acceleration>(::div, ::div, ::times, ::times,
+                    nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage,
+                    nativeFeedbackUnits = nativeFeedbackUnits,
                     perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
             )
         })

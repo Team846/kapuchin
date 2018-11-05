@@ -1,19 +1,16 @@
 package com.lynbrookrobotics.kapuchin.control
 
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Quan
+import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.avg
 import kotlin.jvm.JvmName
 
+@Deprecated(
+        message = "try to use two separate parameters wherever possible",
+        replaceWith = ReplaceWith("stamp: Time, value: Q")
+)
 data class TimeStamped<out Q>(val stamp: Time, val value: Q)
 
 infix fun <Q> Q.stampWith(withTime: Time) = TimeStamped(withTime, this)
 infix fun <Q> Q.stampSince(start: Time) = TimeStamped(avg(start, currentTime), this)
-
-@JvmName("stampValueInvoke")
-operator fun <Q, R> ((Time, Q) -> R).invoke(value: TimeStamped<Q>) = this(value.stamp, value.value)
-
-@JvmName("valueStampInvoke")
-operator fun <Q, R> ((Q, Time) -> R).invoke(value: TimeStamped<Q>) = this(value.value, value.stamp)
-
-operator fun <Q : Quan<Q>> TimeStamped<Q>.plus(that: Q) = copy(value = this.value + that)
-operator fun <Q : Quan<Q>> TimeStamped<Q>.minus(that: Q) = copy(value = this.value - that)

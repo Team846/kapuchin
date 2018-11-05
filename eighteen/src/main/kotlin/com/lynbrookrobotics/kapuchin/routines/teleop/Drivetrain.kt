@@ -11,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
 import kotlin.math.absoluteValue
 
@@ -27,11 +28,19 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
         else 1000.FootPerSecondSquared
     }
 
-    val leftSlew = RampRateLimiter(limit = slewFunction)
-    val rightSlew = RampRateLimiter(limit = slewFunction)
+    val leftSlew = RampRateLimiter(::div, ::times,
+            currentTime, 0.FootPerSecond,
+            limit = slewFunction
+    )
+    val rightSlew = RampRateLimiter(::div, ::times,
+            currentTime, 0.FootPerSecond,
+            limit = slewFunction
+    )
 
-    val turnTargetIntegrator = InfiniteIntegrator(gyro.value.angle)
-    val turnControl = PidControlLoop(turningPositionGains) {
+    val turnTargetIntegrator = InfiniteIntegrator(::times,
+            gyro.stamp, gyro.value.velocity
+    )
+    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) {
         val steeringForwardBlend =
                 if (steering == 0.0) 0.0
                 else steering.absoluteValue / (steering.absoluteValue + accelerator.absoluteValue)
