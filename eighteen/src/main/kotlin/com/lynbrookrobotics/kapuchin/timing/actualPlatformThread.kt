@@ -5,6 +5,8 @@ import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
 import edu.wpi.first.wpilibj.Threads
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlin.concurrent.thread
 
 actual class PlatformThread actual constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
@@ -38,3 +40,5 @@ actual class PlatformThread actual constructor(parent: Named, name: String, prio
         }
     }
 }
+
+actual val coroutine: CoroutineScope = GlobalScope

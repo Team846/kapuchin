@@ -1,12 +1,13 @@
 package com.lynbrookrobotics.kapuchin.logging
 
+import com.lynbrookrobotics.kapuchin.timing.coroutine
 import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.UomConverter
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.text.Charsets.US_ASCII
 
@@ -20,13 +21,13 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
         Named("$of (${withUnits.unitName})", parent),
         (Time, Q) -> Unit {
 
-    private var running = launch { }
+    private var running = coroutine.launch { }
     private val safeName = name.replace("""[^\w\d]""".toRegex(), "_")
     private val printer = File("/tmp/$safeName.csv")
             .printWriter(US_ASCII).also { it.println("value,stamp") }
 
     actual override fun invoke(stamp: Time, value: Q) = synchronized(this) {
-        if (running.isCompleted) launch {
+        if (running.isCompleted) coroutine.launch {
             SmartDashboard.putNumber(name, withUnits(value))
             printer.println("$value,${stamp.Second}")
         }.also { running = it }

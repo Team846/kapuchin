@@ -1,13 +1,14 @@
 package com.lynbrookrobotics.kapuchin.logging
 
+import com.lynbrookrobotics.kapuchin.timing.coroutine
 import info.kunalsheth.units.generated.Quan
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.launch
 import kotlin.math.pow
 import kotlin.math.round
 
 fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(level, throwable.platformStackTrace, message)
 
-fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String) = launch {
+fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String) = coroutine.launch {
     printAtLevel(level, messageToString(this@log, stackTrace, message))
 }
 

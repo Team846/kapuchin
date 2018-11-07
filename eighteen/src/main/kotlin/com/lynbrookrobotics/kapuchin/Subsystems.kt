@@ -12,11 +12,12 @@ import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
+import com.lynbrookrobotics.kapuchin.timing.coroutine
 import edu.wpi.first.wpilibj.hal.HAL
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 data class Subsystems(
         val forks: ForksComponent, val hooks: HooksComponent, val winch: WinchComponent,
@@ -37,7 +38,7 @@ data class Subsystems(
             { lift.teleop(driverHardware) }
     ).also { HAL.observeUserProgramTeleop() }
 
-    fun backAndForthAuto() = launch {
+    fun backAndForthAuto() = coroutine.launch {
         drivetrain.driveStraight(
                 8.Foot, 0.Degree,
                 1.Inch, 2.Degree,

@@ -10,8 +10,8 @@ import com.lynbrookrobotics.kapuchin.timing.Clock
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
 import info.kunalsheth.units.generated.Time
-import kotlinx.coroutines.experimental.CancellationException
-import kotlinx.coroutines.experimental.suspendCancellableCoroutine
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? = null) : Named(hardware.name, null)
         where This : Component<This, H, Output>,

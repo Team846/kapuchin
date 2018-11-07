@@ -9,8 +9,8 @@ import com.lynbrookrobotics.kapuchin.tests.subsystems.checkCount
 import com.lynbrookrobotics.kapuchin.tests.subsystems.countTo
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import kotlinx.coroutines.experimental.cancelAndJoin
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.math.min
 
