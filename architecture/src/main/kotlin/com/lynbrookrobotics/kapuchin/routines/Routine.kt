@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Cancel
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.coroutine
+import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
@@ -35,7 +35,7 @@ class Routine<C, H, Output>(
             }
 
     companion object {
-        fun launchAll(vararg routines: suspend () -> Unit) = coroutine.launch {
+        fun launchAll(vararg routines: suspend () -> Unit) = scope.launch {
             routines.forEach { launch { it() } }
         }
 

@@ -12,7 +12,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.kapuchin.timing.coroutine
+import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.wpilibj.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
@@ -38,7 +38,7 @@ data class Subsystems(
             { lift.teleop(driverHardware) }
     ).also { HAL.observeUserProgramTeleop() }
 
-    fun backAndForthAuto() = coroutine.launch {
+    fun backAndForthAuto() = scope.launch {
         drivetrain.driveStraight(
                 8.Foot, 0.Degree,
                 1.Inch, 2.Degree,

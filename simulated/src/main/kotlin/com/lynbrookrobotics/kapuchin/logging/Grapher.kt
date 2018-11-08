@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.timing.coroutine
+import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
@@ -18,7 +18,7 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
             .printWriter(Charsets.US_ASCII).also { it.println("value,stamp") }
 
     actual override fun invoke(stamp: Time, value: Q) {
-        coroutine.launch { printer.println("$value,${stamp.Second}") }
+        scope.launch { printer.println("$value,${stamp.Second}") }
     }
 
     actual companion object {

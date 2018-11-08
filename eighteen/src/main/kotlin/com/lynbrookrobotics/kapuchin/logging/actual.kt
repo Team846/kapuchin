@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.timing.coroutine
+import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
@@ -20,13 +20,13 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
         Named by Named("$of (${withUnits.unitName})", parent),
         (Time, Q) -> Unit {
 
-    private var running = coroutine.launch { }
+    private var running = scope.launch { }
     private val safeName = name.replace("""[^\w\d]""".toRegex(), "_")
     private val printer = File("/tmp/$safeName.csv")
             .printWriter(US_ASCII).also { it.println("value,stamp") }
 
     actual override fun invoke(stamp: Time, value: Q) {
-        if (running.isCompleted) coroutine.launch {
+        if (running.isCompleted) scope.launch {
             SmartDashboard.putNumber(name, withUnits(value))
             printer.println("$value,${stamp.Second}")
         }.also { running = it }

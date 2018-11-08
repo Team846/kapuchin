@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
-import com.lynbrookrobotics.kapuchin.timing.coroutine
+import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Second
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -68,14 +68,14 @@ class RoutineTest {
     fun `routines can be cancelled externally`() {
         RoutineTestC.out = emptyList()
 
-        val j1 = coroutine.launch { RoutineTestC.countTo(8) }
+        val j1 = scope.launch { RoutineTestC.countTo(8) }
         while (RoutineTestC.routine == null) Thread.sleep(1)
         j1.cancel()
         RoutineTestC.routine `is equal to?` null
         check(0, 0, 0)
 
 
-        val j2 = coroutine.launch { RoutineTestC.countTo(4) }
+        val j2 = scope.launch { RoutineTestC.countTo(4) }
         while (RoutineTestC.routine == null) Thread.sleep(1)
         RoutineTestC.routine!!.cancel()
         RoutineTestC.routine `is equal to?` null
@@ -83,7 +83,7 @@ class RoutineTest {
         check(0, 0, 0)
 
 
-        val j3 = coroutine.launch {
+        val j3 = scope.launch {
             RoutineTestC.countTo(8)
             RoutineTestC.countTo(4)
             RoutineTestC.countTo(6)
@@ -94,7 +94,7 @@ class RoutineTest {
         check(0, 0, 0)
 
 
-        val j4 = coroutine.launch {
+        val j4 = scope.launch {
             RoutineTestC.countTo(8)
             RoutineTestC.countTo(4)
             RoutineTestC.countTo(6)
@@ -109,9 +109,9 @@ class RoutineTest {
     fun `routines can be cancelled internally`() {
         RoutineTestC.out = emptyList()
 
-        val j1 = coroutine.launch { RoutineTestC.countTo(8) }
+        val j1 = scope.launch { RoutineTestC.countTo(8) }
         while (!j1.isActive) Thread.sleep(1)
-        val j2 = coroutine.launch { RoutineTestC.countTo(4) }
+        val j2 = scope.launch { RoutineTestC.countTo(4) }
         while (j1.isActive) Thread.sleep(1)
         runBlocking { j2.join() }
         check(0, 4, 0)

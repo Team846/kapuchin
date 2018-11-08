@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.timing.coroutine
+import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Quan
 import kotlinx.coroutines.launch
 import kotlin.math.pow
@@ -8,7 +8,7 @@ import kotlin.math.round
 
 fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(level, throwable.platformStackTrace, message)
 
-fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String) = coroutine.launch {
+fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String) = scope.launch {
     printAtLevel(level, messageToString(this@log, stackTrace, message))
 }
 
