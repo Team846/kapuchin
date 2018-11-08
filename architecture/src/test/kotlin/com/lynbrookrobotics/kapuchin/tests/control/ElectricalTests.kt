@@ -98,7 +98,7 @@ class ElectricalTests {
 
     @Test
     fun `battery compensator calculates correct duty cycle`() {
-        object : Named("Battery Compensator Test") {}.run {
+        Named("Battery Compensator Test").run {
             voltageToDutyCycle(11.Volt, 11.Volt) `is equal to?` 100.Percent
             voltageToDutyCycle(9.Volt, 10.Volt) `is equal to?` 90.Percent
             voltageToDutyCycle(-7.5.Volt, 10.Volt) `is equal to?` -75.Percent

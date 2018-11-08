@@ -18,7 +18,7 @@ actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
 }
 
 actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: String, private val withUnits: UomConverter<Q>) :
-        Named("$of (${withUnits.unitName})", parent),
+        Named by Named("$of (${withUnits.unitName})", parent),
         (Time, Q) -> Unit {
 
     private var running = coroutine.launch { }

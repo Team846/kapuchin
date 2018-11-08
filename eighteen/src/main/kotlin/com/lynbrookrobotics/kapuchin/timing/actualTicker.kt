@@ -4,7 +4,15 @@ import com.lynbrookrobotics.kapuchin.logging.Named
 import edu.wpi.first.wpilibj.hal.NotifierJNI
 import info.kunalsheth.units.generated.*
 
-actual class Ticker private actual constructor(parent: Named, priority: Priority, val period: Time, name: String) : Named(name, parent), Clock {
+actual class Ticker private actual constructor(
+        parent: Named,
+        priority: Priority,
+        val period: Time,
+        name: String
+) :
+        Named by Named(name, parent),
+        Clock {
+
     override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
     private val thread = PlatformThread(parent, name, priority) {
         while (true) tick(waitOnTick())

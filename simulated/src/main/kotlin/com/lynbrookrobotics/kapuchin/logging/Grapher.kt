@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: String, private val withUnits: UomConverter<Q>) :
-        Named("$of (${withUnits.unitName})", parent),
+        Named by Named("$of (${withUnits.unitName})", parent),
         (Time, Q) -> Unit {
 
     private val safeName = name.replace("""[^\w\d]""".toRegex(), "_")

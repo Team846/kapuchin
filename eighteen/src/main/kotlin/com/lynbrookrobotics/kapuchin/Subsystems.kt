@@ -56,7 +56,7 @@ data class Subsystems(
 //        )
     }.also { HAL.observeUserProgramTeleop() }
 
-    companion object : Named("Subsystems Initializer") {
+    companion object : Named by Named("Subsystems Initializer") {
         fun concurrentInit() = runBlocking {
             val forks = async { ForksComponent(ForksHardware()) }
             val hooks = async { HooksComponent(HooksHardware()) }

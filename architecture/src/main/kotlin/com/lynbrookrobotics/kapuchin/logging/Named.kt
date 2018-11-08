@@ -1,7 +1,13 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-abstract class Named(name: String, parent: Named? = null) {
-    open val name = nameLayer(parent, name)
+interface Named {
+    val name: String
+
+    companion object {
+        operator fun invoke(name: String, parent: Named? = null) = object : Named {
+            override val name = nameLayer(parent, name)
+        }
+    }
 }
 
 expect fun nameLayer(parent: Named?, child: String): String

@@ -51,7 +51,7 @@ class FunkyRobot : RobotBase() {
                 .filter { it.matches(classNameRegex) }
                 .map { it.replace(classNameRegex, "$1") }
                 .forEach {
-                    launch(coroutineContext) {
+                    launch {
                         try {
                             Class.forName(it)
                         } catch (t: Throwable) {

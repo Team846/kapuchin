@@ -19,7 +19,7 @@ class Routine<C, H, Output>(
         private val controller: C.(Time) -> Output?,
         private val cont: CancellableContinuation<Unit>
 ) :
-        Named(name, parent),
+        Named by Named(name, parent),
         (C, Time) -> Output,
         Job by cont as Job
 
@@ -36,7 +36,7 @@ class Routine<C, H, Output>(
 
     companion object {
         fun launchAll(vararg routines: suspend () -> Unit) = coroutine.launch {
-            routines.forEach { launch(coroutineContext) { it() } }
+            routines.forEach { launch { it() } }
         }
 
         infix fun (() -> Job).runWhile(predicate: () -> Boolean) = if (predicate()) {

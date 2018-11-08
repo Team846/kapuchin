@@ -178,7 +178,7 @@ class SensorTest {
                     b1.value `is equal to?` b4
                     b2.value `is equal to?` b5
                     b3.value `is equal to?` b6
-                    if(runs == 2) error("This routine is broken!")
+                    if (runs == 2) error("This routine is broken!")
                     name.takeIf { runs-- > 0 }
                 }
             }

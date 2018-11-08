@@ -13,7 +13,7 @@ import info.kunalsheth.units.generated.Time
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 
-abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? = null) : Named(hardware.name, null)
+abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? = null) : Named by Named(hardware.name)
         where This : Component<This, H, Output>,
               H : SubsystemHardware<H, This> {
 

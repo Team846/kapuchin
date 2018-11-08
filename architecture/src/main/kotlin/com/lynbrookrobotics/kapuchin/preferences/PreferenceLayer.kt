@@ -30,7 +30,7 @@ class PreferenceLayer<Value>(
     private var value: Value? = null
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        get = object : Named(prop.name + nameSuffix, parent) {}.run(construct)
+        get = Named(prop.name + nameSuffix, parent).run(construct)
         EventLoop.runOnTick {
             if (this::get.isInitialized) {
                 value = get()
