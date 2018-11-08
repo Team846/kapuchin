@@ -70,7 +70,7 @@ class RoutineTest {
 
         val j1 = coroutine.launch { RoutineTestC.countTo(8) }
         while (RoutineTestC.routine == null) Thread.sleep(1)
-        j1.cancel() `is equal to?` true
+        j1.cancel()
         RoutineTestC.routine `is equal to?` null
         check(0, 0, 0)
 
@@ -89,7 +89,7 @@ class RoutineTest {
             RoutineTestC.countTo(6)
         }
         while (RoutineTestC.routine == null) Thread.sleep(1)
-        j3.cancel() `is equal to?` true
+        j3.cancel()
         RoutineTestC.routine `is equal to?` null
         check(0, 0, 0)
 

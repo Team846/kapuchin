@@ -17,20 +17,20 @@ import kotlin.coroutines.resumeWithException
 class Routine<C, H, Output>(
         parent: C, name: String,
         private val controller: C.(Time) -> Output?,
-        private val cont: CancellableContinuation<Unit>
+        cont: CancellableContinuation<Unit>
 ) :
+        CancellableContinuation<Unit> by cont,
         Named by Named(name, parent),
-        (C, Time) -> Output,
-        Job by cont as Job
+        (C, Time) -> Output
 
         where C : Component<C, H, Output>,
               H : SubsystemHardware<H, C> {
 
     override fun invoke(c: C, t: Time) =
             try {
-                controller(c, t) ?: c.fallbackController(c, t).also { cont.resume(Unit) }
+                controller(c, t) ?: c.fallbackController(c, t).also { resume(Unit) }
             } catch (e: Throwable) {
-                cont.resumeWithException(e)
+                resumeWithException(e)
                 c.fallbackController(c, currentTime)
             }
 

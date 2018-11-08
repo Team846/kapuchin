@@ -8,6 +8,7 @@ import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.checkInSync
+import com.lynbrookrobotics.kapuchin.timing.coroutine
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.avg
 import kotlinx.coroutines.launch
@@ -186,12 +187,12 @@ class SensorTest {
             routine()
             check()
 
-            val j1 = launch { routine() }
+            val j1 = coroutine.launch { routine() }
             while (routine == null) Thread.sleep(1)
             routine!!.cancel()
             check()
 
-            val j2 = launch { routine() }
+            val j2 = coroutine.launch { routine() }
             while (!j2.isActive) Thread.sleep(1)
             j2.cancel()
             check()
@@ -199,10 +200,10 @@ class SensorTest {
             val j3 = badRoutine()
             check()
 
-            val j4 = launch { badRoutine() }
+            val j4 = coroutine.launch { badRoutine() }
             check()
 
-            val j5 = launch {
+            val j5 = coroutine.launch {
                 routine()
                 routine()
                 routine()
@@ -212,7 +213,7 @@ class SensorTest {
             check()
 
 
-            val j6 = launch {
+            val j6 = coroutine.launch {
                 routine()
                 routine()
                 routine()
