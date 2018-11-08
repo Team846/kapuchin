@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.routines.Routine
 import com.lynbrookrobotics.kapuchin.timing.Clock
 import com.lynbrookrobotics.kapuchin.timing.ExecutionOrder.Last
 import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
+import com.lynbrookrobotics.kapuchin.timing.blockingMutex
 import info.kunalsheth.units.generated.Time
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -25,11 +26,11 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
     abstract val fallbackController: This.(Time) -> Output
 
     var routine: Routine<This, H, Output>? = null
-        private set(value) = synchronized(this) {
+        private set(value) = blockingMutex(this) {
             field.takeUnless { it === value }?.cancel()
             field = value
         }
-        get() = synchronized(this) { field?.takeIf { it.isActive } }
+        get() = blockingMutex(this) { field?.takeIf { it.isActive } }
 
     suspend fun startRoutine(
             name: String,

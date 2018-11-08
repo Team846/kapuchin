@@ -42,3 +42,4 @@ actual class PlatformThread actual constructor(parent: Named, name: String, prio
 }
 
 actual val coroutine: CoroutineScope = GlobalScope
+actual inline fun <R> blockingMutex(lock: Any, block: () -> R) = kotlin.synchronized(lock, block)
