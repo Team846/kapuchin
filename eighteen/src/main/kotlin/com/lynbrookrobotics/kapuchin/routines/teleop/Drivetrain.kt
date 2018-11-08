@@ -40,7 +40,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     )
 
     val turnTargetIntegrator = InfiniteIntegrator(::times,
-            gyro.stamp, gyro.value.velocity
+            gyro.x, gyro.y.velocity
     )
     val turnControl = PidControlLoop(::div, ::times, turningPositionGains) {
         val steeringForwardBlend =
@@ -51,7 +51,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
 
     controller {
         val forwardVelocity = topSpeed * accelerator
-        val steeringVelocity = topSpeed * steering + turnControl(gyro.stamp, gyro.value.angle)
+        val steeringVelocity = topSpeed * steering + turnControl(gyro.x, gyro.y.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)
         val right = rightSlew(it, forwardVelocity - steeringVelocity)
@@ -80,7 +80,7 @@ suspend fun DrivetrainComponent.arcTo(
     val gyro by hardware.gyroInput.readEagerly.withStamps
 
     // s = r × θ
-    val theta = bearing - gyro.value.angle
+    val theta = bearing - gyro.y.angle
     val rL = radius + trackSize / 2
     val rR = radius - trackSize / 2
     val sL = rL * theta / Radian
@@ -113,10 +113,10 @@ suspend fun DrivetrainComponent.arcTo(
         if (
                 position.left in slRange &&
                 position.right in srRange &&
-                gyro.value.angle in bearingRange
+                gyro.y.angle in bearingRange
         ) null
         else {
-            val turn = turnControl(gyro.stamp, gyro.value.angle)
+            val turn = turnControl(gyro.x, gyro.y.angle)
 
             val dx = position - startingPostion
             val bigTarget = profile(if (rBig == rL) dx.left else dx.right)
@@ -170,10 +170,10 @@ suspend fun DrivetrainComponent.driveStraight(
         if (
                 position.left in distanceRange &&
                 position.right in distanceRange &&
-                gyro.value.angle in bearingRange
+                gyro.y.angle in bearingRange
         ) null
         else {
-            val turn = turnControl(gyro.stamp, gyro.value.angle)
+            val turn = turnControl(gyro.x, gyro.y.angle)
 
             val forward = profile((position - startingPostion).avg)
             val left = forward + turn

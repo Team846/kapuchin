@@ -34,8 +34,8 @@ class SensorTest {
                 var runs = 10
                 controller {
                     checkInSync(hardware.syncThreshold, a, b) `is equal to?` true
-                    currentTime `is greater than?` a.stamp
-                    currentTime `is greater than?` b.stamp
+                    currentTime `is greater than?` a.x
+                    currentTime `is greater than?` b.x
                     name.takeIf { runs-- > 0 }
                 }
             }
@@ -55,10 +55,10 @@ class SensorTest {
                     if (runs % 2 == 0) EventLoop.tick(currentTime)
 
                     checkInSync(hardware.syncThreshold, a, b) `is equal to?` true
-                    currentTime `is greater than?` a.stamp
-                    currentTime `is greater than?` b.stamp
+                    currentTime `is greater than?` a.x
+                    currentTime `is greater than?` b.x
 
-                    val thisStamp = avg(a.stamp, b.stamp)
+                    val thisStamp = avg(a.x, b.x)
                     if (runs % 2 == 1) lastStamp `is equal to?` thisStamp
                     lastStamp = thisStamp
 
@@ -83,7 +83,7 @@ class SensorTest {
                     val b2 = b
 
                     b2 `is equal to?` b1
-                    b1.stamp `is greater than?` a2.stamp
+                    b1.x `is greater than?` a2.x
                     a2 `is equal to?` a1
 
                     name.takeIf { runs-- > 0 }
@@ -142,13 +142,13 @@ class SensorTest {
 
                 var runs = 5
                 controller {
-                    a1.value `is equal to?` a4
-                    a2.value `is equal to?` a5
-                    a3.value `is equal to?` a6
+                    a1.y `is equal to?` a4
+                    a2.y `is equal to?` a5
+                    a3.y `is equal to?` a6
 
-                    b1.value `is equal to?` b4
-                    b2.value `is equal to?` b5
-                    b3.value `is equal to?` b6
+                    b1.y `is equal to?` b4
+                    b2.y `is equal to?` b5
+                    b3.y `is equal to?` b6
                     name.takeIf { runs-- > 0 }
                 }
             }
@@ -172,13 +172,13 @@ class SensorTest {
 
                 var runs = 5
                 controller {
-                    a1.value `is equal to?` a4
-                    a2.value `is equal to?` a5
-                    a3.value `is equal to?` a6
+                    a1.y `is equal to?` a4
+                    a2.y `is equal to?` a5
+                    a3.y `is equal to?` a6
 
-                    b1.value `is equal to?` b4
-                    b2.value `is equal to?` b5
-                    b3.value `is equal to?` b6
+                    b1.y `is equal to?` b4
+                    b2.y `is equal to?` b5
+                    b3.y `is equal to?` b6
                     if (runs == 2) error("This routine is broken!")
                     name.takeIf { runs-- > 0 }
                 }

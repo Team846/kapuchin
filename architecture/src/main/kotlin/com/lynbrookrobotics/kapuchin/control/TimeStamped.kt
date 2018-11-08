@@ -8,9 +8,9 @@ import kotlin.jvm.JvmName
 
 @Deprecated(
         message = "Try to use two separate parameters wherever possible",
-        replaceWith = ReplaceWith("stamp: Time, value: Q")
+        replaceWith = ReplaceWith("x: Time, y: Q")
 )
-data class TimeStamped<out Q>(val stamp: Time, val value: Q)
+data class TimeStamped<out Q>(val x: Time, val y: Q)
 
 infix fun <Q> Q.stampWith(withTime: Time) = TimeStamped(withTime, this)
 infix fun <Q> Q.stampSince(start: Time) = TimeStamped(avg(start, currentTime), this)

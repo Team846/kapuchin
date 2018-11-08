@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
@@ -15,10 +15,10 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
 
     private val safeName = name.replace("""[^\w\d]""".toRegex(), "_")
     private val printer = File("/tmp/$safeName-${currentTime.Second}.csv")
-            .printWriter(Charsets.US_ASCII).also { it.println("value,stamp") }
+            .printWriter(Charsets.US_ASCII).also { it.println("seconds,${withUnits.unitName}") }
 
-    actual override fun invoke(stamp: Time, value: Q) {
-        scope.launch { printer.println("$value,${stamp.Second}") }
+    actual override fun invoke(x: Time, y: Q) {
+        scope.launch { printer.println("${x.Second},${withUnits(y)}") }
     }
 
     actual companion object {

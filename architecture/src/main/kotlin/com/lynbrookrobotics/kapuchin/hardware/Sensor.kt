@@ -16,7 +16,7 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
 
     internal var value: TimeStamped<Input>? = null
     internal fun optimizedRead(atTime: Time, syncThreshold: Time) = value
-            ?.takeIf { it.stamp in atTime `±` syncThreshold }
+            ?.takeIf { it.x in atTime `±` syncThreshold }
             ?: read(atTime)
 
     class UpdateSource<Input>(
@@ -30,7 +30,7 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
         val withoutStamps
             get() = object : DelegateProvider<Any?, Input> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
-                    override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).value
+                    override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).y
                 }.also { startUpdates(forSensor) }
             }
 
@@ -47,9 +47,9 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
         fun <Hardw, Input> SubsystemHardware<*, *>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) = Sensor { read(hardw, it) }
 
         fun <QInput : Quan<QInput>> Sensor<QInput>.with(graph: Grapher<QInput>) =
-                Sensor { t -> read(t).also { graph(it.stamp, it.value) } }
+                Sensor { t -> read(t).also { graph(it.x, it.y) } }
 
         fun <Input, QInput : Quan<QInput>> Sensor<Input>.with(graph: Grapher<QInput>, structure: (Input) -> QInput) =
-                Sensor { t -> read(t).also { graph(it.stamp, structure(it.value)) } }
+                Sensor { t -> read(t).also { graph(it.x, structure(it.y)) } }
     }
 }

@@ -23,7 +23,7 @@ class RollersComponent(hardware: RollersHardware, private val electrical: Electr
     override val fallbackController: RollersComponent.(Time) -> TwoSided<V> = { TwoSided(-cubeHoldStrength) }
 
     override fun RollersHardware.output(value: TwoSided<V>) {
-        val vBat = electrical.batteryVoltage.optimizedRead(currentTime, syncThreshold).value
+        val vBat = electrical.batteryVoltage.optimizedRead(currentTime, syncThreshold).y
         leftEsc.set(voltageToDutyCycle(value.left, vBat).siValue)
         rightEsc.set(voltageToDutyCycle(value.right, vBat).siValue)
     }
