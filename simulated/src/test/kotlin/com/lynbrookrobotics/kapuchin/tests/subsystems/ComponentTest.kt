@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.coroutine
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -13,7 +14,7 @@ class ComponentTest {
 
     @Test(timeout = 1 * 1000)
     fun `event loop components only update on event loop ticks`() {
-        val j = launch { ComponentTestElc.countTo(10) }
+        val j = coroutine.launch { ComponentTestElc.countTo(10) }
         while (ComponentTestElc.routine == null) Thread.sleep(1)
         ComponentTestElc.checkCount(10, 0)
         EventLoop.tick(currentTime)
