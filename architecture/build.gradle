@@ -9,5 +9,3 @@ dependencies {
 }
 
 apply from: 'units-of-measure.gradle'
-
-kotlin.experimental.coroutines 'enable'
