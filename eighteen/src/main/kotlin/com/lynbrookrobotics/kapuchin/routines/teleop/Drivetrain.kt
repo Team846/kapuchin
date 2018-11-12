@@ -9,11 +9,11 @@ import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionPr
 import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
 import kotlin.math.absoluteValue
 
@@ -30,11 +30,19 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
         else 1000.FootPerSecondSquared
     }
 
-    val leftSlew = RampRateLimiter(limit = slewFunction)
-    val rightSlew = RampRateLimiter(limit = slewFunction)
+    val leftSlew = RampRateLimiter(::div, ::times,
+            currentTime, 0.FootPerSecond,
+            limit = slewFunction
+    )
+    val rightSlew = RampRateLimiter(::div, ::times,
+            currentTime, 0.FootPerSecond,
+            limit = slewFunction
+    )
 
-    val turnTargetIntegrator = InfiniteIntegrator(gyro.value.angle)
-    val turnControl = PidControlLoop(turningPositionGains) {
+    val turnTargetIntegrator = InfiniteIntegrator(::times,
+            gyro.x, gyro.y.velocity
+    )
+    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) {
         val steeringForwardBlend =
                 if (steering == 0.0) 0.0
                 else steering.absoluteValue / (steering.absoluteValue + accelerator.absoluteValue)
@@ -43,7 +51,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
 
     controller {
         val forwardVelocity = topSpeed * accelerator
-        val steeringVelocity = topSpeed * steering + turnControl(gyro.stamp, gyro.value.angle)
+        val steeringVelocity = topSpeed * steering + turnControl(gyro.x, gyro.y.angle)
 
         val left = leftSlew(it, forwardVelocity + steeringVelocity)
         val right = rightSlew(it, forwardVelocity - steeringVelocity)
@@ -72,7 +80,7 @@ suspend fun DrivetrainComponent.arcTo(
     val gyro by hardware.gyroInput.readEagerly.withStamps
 
     // s = r × θ
-    val theta = bearing - gyro.value.angle
+    val theta = bearing - gyro.y.angle
     val rL = radius + trackSize / 2
     val rR = radius - trackSize / 2
     val sL = rL * theta / Radian
@@ -92,23 +100,23 @@ suspend fun DrivetrainComponent.arcTo(
     )
 
     val startingPostion = position
-    val turnControl = PidControlLoop(turningPositionGains) {
+    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) {
         // θ = s ÷ r
         (position.avg - startingPostion.avg) / radius * Radian
     }
 
-    val slRange = sL withToleranceOf distanceTolerance
-    val srRange = sR withToleranceOf distanceTolerance
-    val bearingRange = bearing withToleranceOf angleTolerance
+    val slRange = sL `±` distanceTolerance
+    val srRange = sR `±` distanceTolerance
+    val bearingRange = bearing `±` angleTolerance
 
     controller {
         if (
                 position.left in slRange &&
                 position.right in srRange &&
-                gyro.value.angle in bearingRange
+                gyro.y.angle in bearingRange
         ) null
         else {
-            val turn = turnControl(gyro.stamp, gyro.value.angle)
+            val turn = turnControl(gyro.x, gyro.y.angle)
 
             val dx = position - startingPostion
             val bigTarget = profile(if (rBig == rL) dx.left else dx.right)
@@ -153,19 +161,19 @@ suspend fun DrivetrainComponent.driveStraight(
     )
 
     val startingPostion = position
-    val turnControl = PidControlLoop(turningPositionGains) { bearing }
+    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) { bearing }
 
-    val distanceRange = distance withToleranceOf distanceTolerance
-    val bearingRange = bearing withToleranceOf angleTolerance
+    val distanceRange = distance `±` distanceTolerance
+    val bearingRange = bearing `±` angleTolerance
 
     controller {
         if (
                 position.left in distanceRange &&
                 position.right in distanceRange &&
-                gyro.value.angle in bearingRange
+                gyro.y.angle in bearingRange
         ) null
         else {
-            val turn = turnControl(gyro.stamp, gyro.value.angle)
+            val turn = turnControl(gyro.x, gyro.y.angle)
 
             val forward = profile((position - startingPostion).avg)
             val left = forward + turn

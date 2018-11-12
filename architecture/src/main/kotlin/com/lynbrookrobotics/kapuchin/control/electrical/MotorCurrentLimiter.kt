@@ -3,23 +3,26 @@ package com.lynbrookrobotics.kapuchin.control.electrical
 import info.kunalsheth.units.generated.*
 
 class MotorCurrentLimiter(
-        val maxVoltage: Volt, val freeSpeed: AngularVelocity,
-        stall: Ampere, val limit: Ampere
-) : (AngularVelocity, Volt) -> Volt, (Volt, Ampere, Volt) -> Volt {
-    private val motorR: Ohm = maxVoltage / stall
+        val maxVoltage: V, val freeSpeed: AngularVelocity,
+        stall: I, val limit: I
+) :
+        (AngularVelocity, V) -> V,
+        (V, I, V) -> V {
 
-    override operator fun invoke(speed: AngularVelocity, target: Volt) = limit(
+    private val motorR: ElectricalResistance = maxVoltage / stall
+
+    override operator fun invoke(speed: AngularVelocity, target: V) = limit(
             emf = speed / freeSpeed * maxVoltage,
             target = target
     )
 
     // todo this is broken
-    override operator fun invoke(applying: Volt, drawing: Ampere, target: Volt) = limit(
+    override operator fun invoke(applying: V, drawing: I, target: V) = limit(
             emf = applying - drawing * motorR,
             target = target
     )
 
-    private fun limit(emf: Volt, target: Volt): Volt {
+    private fun limit(emf: V, target: V): V {
         val expectedCurrent = (target - emf) / motorR
 
         return when {

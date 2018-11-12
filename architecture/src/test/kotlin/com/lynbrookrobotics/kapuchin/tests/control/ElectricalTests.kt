@@ -4,8 +4,6 @@ import com.lynbrookrobotics.kapuchin.control.electrical.MotorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.OutsideThresholdChecker
 import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
-import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`
@@ -20,21 +18,23 @@ class ElectricalTests {
     fun `ramp rate limiting ramps up and down output`() {
         val startRampUpTime = 846.Minute
 
-        val limiter = RampRateLimiter(0.Volt stampWith startRampUpTime) { 12.VoltPerSecond }
+        val limiter = RampRateLimiter(::div, ::times,
+                startRampUpTime, 0.Volt
+        ) { 12.VoltPerSecond }
 
         val incr = 3.milli(Second)
 
         generateSequence(startRampUpTime) { it + incr }
-                .takeWhile { it - startRampUpTime < Second }
+                .takeWhile { startRampUpTime - it > 0.Second }
                 .forEach { 12.Volt `is greater than?` limiter(it, 12.Volt) }
         repeat(50) {
-            limiter(startRampUpTime + Second + incr * it, 12.Volt) `is equal to?` 12.Volt
+            limiter(startRampUpTime + 1.Second + incr * it, 12.Volt) `is equal to?` 12.Volt
         }
 
-        val startRampDownTime = startRampUpTime + Second + incr * 49
+        val startRampDownTime = startRampUpTime + 1.Second + incr * 49
 
         generateSequence(startRampDownTime) { it + incr }
-                .takeWhile { it - startRampDownTime < 2.Second }
+                .takeWhile { startRampDownTime - it > 0.Second }
                 .forEach { limiter(it, -12.Volt) `is greater than?` -12.Volt }
         repeat(50) {
             limiter(startRampDownTime + 2.Second + incr * it, -12.Volt) `is equal to?` -12.Volt
@@ -71,7 +71,7 @@ class ElectricalTests {
     fun `threshold checker triggers after duration outside safe range`() {
         val duration = 3.Second
         val tolerance = 25.Ampere
-        val safeRange = 0.Ampere withToleranceOf tolerance
+        val safeRange = 0.Ampere `±` tolerance
         val checker = OutsideThresholdChecker(safeRange, duration)
 
         val insideStartTime = 846.Minute
@@ -98,7 +98,7 @@ class ElectricalTests {
 
     @Test
     fun `battery compensator calculates correct duty cycle`() {
-        object : Named("Battery Compensator Test") {}.run {
+        Named("Battery Compensator Test").run {
             voltageToDutyCycle(11.Volt, 11.Volt) `is equal to?` 100.Percent
             voltageToDutyCycle(9.Volt, 10.Volt) `is equal to?` 90.Percent
             voltageToDutyCycle(-7.5.Volt, 10.Volt) `is equal to?` -75.Percent

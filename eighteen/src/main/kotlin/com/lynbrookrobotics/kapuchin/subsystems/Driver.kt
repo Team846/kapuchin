@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
+import com.lynbrookrobotics.kapuchin.control.`±`
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.logging.Level.Debug
@@ -43,7 +43,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
     val activationTolerance by pref(0.01)
-    val inactiveRange = 0 withToleranceOf activationTolerance
+    val inactiveRange = 0 `±` activationTolerance
     val manualOverride = s { -(operator.y.takeUnless { it in inactiveRange } ?: 0.0) }
 
     // CLIMBER

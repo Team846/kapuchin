@@ -7,10 +7,16 @@ import info.kunalsheth.units.generated.milli
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-actual class Ticker private actual constructor(parent: Named, priority: Priority, private val period: Time, name: String) : Named(name, parent), Clock {
-    override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
+actual class Ticker private actual constructor(
+        parent: Named,
+        priority: Priority,
+        val period: Time,
+        name: String
+) :
+        Named by Named(name, parent),
+        Clock {
 
-    private val exec = Executors.newSingleThreadScheduledExecutor()!!
+    override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
 
     init {
         exec.scheduleAtFixedRate(
@@ -34,5 +40,6 @@ actual class Ticker private actual constructor(parent: Named, priority: Priority
 
     actual companion object {
         actual fun Named.ticker(priority: Priority, period: Time, name: String) = Ticker(this, priority, period, name)
+        private val exec = Executors.newSingleThreadScheduledExecutor()!!
     }
 }

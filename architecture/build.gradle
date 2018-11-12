@@ -2,12 +2,10 @@ apply plugin: 'kotlin-platform-common'
 apply plugin: 'info.kunalsheth.units.gradle'
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:0.22.5'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.0.0'
 
-    testCompile "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version"
 }
 
 apply from: 'units-of-measure.gradle'
-
-kotlin.experimental.coroutines 'enable'

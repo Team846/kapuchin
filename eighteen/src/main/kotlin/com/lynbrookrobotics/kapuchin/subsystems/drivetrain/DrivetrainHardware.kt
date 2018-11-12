@@ -5,10 +5,10 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
+import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.stampWith
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
@@ -70,8 +70,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         val nativeFeedbackUnits by pref(4096)
         val perFeedbackQuantity by pref(1, Turn)
         ({
-            OffloadedNativeConversion(
-                    nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage, nativeFeedbackUnits = nativeFeedbackUnits,
+            LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
+                    nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage,
+                    nativeFeedbackUnits = nativeFeedbackUnits,
                     perFeedbackQuantity = wheelDiameter * PI * encoderToWheelGears.inputToOutput(perFeedbackQuantity).Turn
             )
         })
@@ -99,7 +100,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val gyro by hardw { ADIS16448_IMU() }
             .configure { startingAngle = it.angle.Degree }
             .verify("Gyro should not drift after calibration") {
-                it.rate.DegreePerSecond in 0.DegreePerSecond withToleranceOf driftTolerance
+                it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
             }
     val gyroInput = sensor(gyro) {
         GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?

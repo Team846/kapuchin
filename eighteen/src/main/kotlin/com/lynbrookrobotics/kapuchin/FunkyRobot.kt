@@ -6,9 +6,10 @@ import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import com.lynbrookrobotics.kapuchin.timing.scope
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
@@ -22,7 +23,7 @@ class FunkyRobot : RobotBase() {
 
         val eventLoopPeriod = 20.milli(Second)
 
-        val doNothing = launch { }
+        val doNothing = scope.launch { }
         var currentJob: Job = doNothing
 
         while (true) {
@@ -40,7 +41,7 @@ class FunkyRobot : RobotBase() {
         }
     }
 
-    private fun loadClasses() = launch {
+    private fun loadClasses() = scope.launch {
         val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
         Thread.currentThread()
                 .contextClassLoader
@@ -50,7 +51,7 @@ class FunkyRobot : RobotBase() {
                 .filter { it.matches(classNameRegex) }
                 .map { it.replace(classNameRegex, "$1") }
                 .forEach {
-                    launch(coroutineContext) {
+                    launch {
                         try {
                             Class.forName(it)
                         } catch (t: Throwable) {

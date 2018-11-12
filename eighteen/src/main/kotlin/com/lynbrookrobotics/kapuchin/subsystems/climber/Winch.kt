@@ -12,13 +12,13 @@ import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import info.kunalsheth.units.generated.*
 
-class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchHardware, Volt>(hardware, EventLoop) {
+class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchHardware, V>(hardware, EventLoop) {
 
     val climbStrength by pref(10, Volt)
 
-    override val fallbackController: WinchComponent.(Time) -> Volt = { 0.Volt }
+    override val fallbackController: WinchComponent.(Time) -> V = { 0.Volt }
 
-    override fun WinchHardware.output(value: Volt) = lazyOutput(PercentOutput(
+    override fun WinchHardware.output(value: V) = lazyOutput(PercentOutput(
             value / hardware.operatingVoltage
     ))
 }

@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
 import info.kunalsheth.units.generated.Quan
-import com.lynbrookrobotics.kapuchin.control.avg
+import info.kunalsheth.units.generated.avg
 
 interface Vector<T> {
     val x: T
@@ -16,6 +16,7 @@ data class TwoSided<out Value>(val left: Value, val right: Value) {
 }
 
 val <Q : Quan<Q>> TwoSided<Q>.avg get() = avg(left, right)
+
 operator fun <Q : Quan<Q>> TwoSided<Q>.plus(that: TwoSided<Q>) = TwoSided(
         this.left + that.left,
         this.right + that.right

@@ -1,17 +1,17 @@
 package com.lynbrookrobotics.kapuchin.control.conversion
 
-import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.control.div
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains
-import info.kunalsheth.units.generated.Quantity
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.generated.*
 import kotlin.jvm.JvmName
 
 class OffloadedNativeConversion<O, I, Q, D, DD>(
+        private val d2: (I, T) -> Q,
+        private val d1: (Q, T) -> D,
+        private val t1: (D, T) -> Q,
+        private val t2: (DD, T) -> D,
         val nativeOutputUnits: Int, val perOutputQuantity: O,
         val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
         val feedbackZero: Q = perFeedbackQuantity * 0,
@@ -19,10 +19,10 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
         val nativeLoopTime: Time = 1.milli(Second)
 )
         where O : Quan<O>,
-              Q : Quantity<Q, I, D>,
-              I : Quantity<I, *, Q>,
-              D : Quantity<D, Q, DD>,
-              DD : Quantity<DD, D, *> {
+              Q : Quan<Q>,
+              I : Quan<I>,
+              D : Quan<D>,
+              DD : Quan<DD> {
 
     private fun convert(x: Q) = x * nativeFeedbackUnits / perFeedbackQuantity
     private fun convert(x: Number) = perFeedbackQuantity / nativeFeedbackUnits * x
@@ -31,19 +31,19 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
     fun native(x: O) = x * nativeOutputUnits / perOutputQuantity
 
     @JvmName("nativeAbsement")
-    fun native(x: I) = convert(x / nativeLoopTime)
+    fun native(x: I) = convert(d2(x, nativeLoopTime))
 
     @JvmName("nativePosition")
     fun native(x: Q) = convert(x + feedbackZero)
 
     @JvmName("nativeVelocity")
-    fun native(x: D) = convert(x * nativeTimeUnit)
+    fun native(x: D) = convert(t1(x, nativeTimeUnit))
 
     @JvmName("nativeAcceleration")
-    fun native(x: DD) = native(x * nativeLoopTime)
+    fun native(x: DD) = native(t2(x, nativeLoopTime))
 
     fun realPosition(x: Number) = convert(x) - feedbackZero
-    fun realVelocity(x: Number) = convert(x) / nativeTimeUnit
+    fun realVelocity(x: Number) = d1(convert(x), nativeTimeUnit)
 
     @JvmName("nativeAbsementGain")
     fun native(x: Gain<O, I>) = native(x.compensation) / native(x.forError)

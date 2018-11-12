@@ -1,35 +1,34 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.control.TimeStamped
-import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.Quantity
-import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.Quan
+import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
 class RampRateLimiter<Q, D>(
-        lastValue: TimeStamped<Q>? = null,
+        private val div: (Q, T) -> D,
+        private val times: (D, T) -> Q,
+        private var x1: Time,
+        private var y1: Q,
         val limit: (Time) -> D
 ) : (Time, Q) -> Q
-        where Q : Quantity<Q, *, D>,
-              D : Quantity<D, Q, *> {
 
-    private var lastStamp: Time = lastValue?.stamp ?: currentTime
-    private var lastOutput: Q = lastValue?.value ?: limit(lastStamp) * 0.Second
+        where Q : Quan<Q>,
+              D : Quan<D> {
 
-    override operator fun invoke(stamp: Time, target: Q): Q {
-        val limit = limit(stamp)
+    override operator fun invoke(x2: Time, y2: Q): Q {
+        val limit = limit(x2)
 
-        val dt = stamp - lastStamp
-        val dv = target - lastOutput
-        val ramp = dv / dt
+        val dt = x2 - x1
+        val dv = y2 - y1
+        val ramp = div(dv, dt)
 
         return when {
-            ramp > limit -> lastOutput + limit * dt
-            ramp < -limit -> lastOutput - limit * dt
-            else -> target
+            ramp > limit -> y1 + times(limit, dt)
+            ramp < -limit -> y1 - times(limit, dt)
+            else -> y2
         }.also {
-            lastOutput = it
-            lastStamp = stamp
+            x1 = x2
+            y1 = y2
         }
     }
 }

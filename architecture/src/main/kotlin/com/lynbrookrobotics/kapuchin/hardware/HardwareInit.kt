@@ -22,7 +22,7 @@ class HardwareInit<Hardw> private constructor(
     private var value: Hardw? = null
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Hardw> {
-        value = object : Named(prop.name + nameSuffix, parent) {}.run {
+        value = Named(prop.name + nameSuffix, parent).run {
             try {
                 initialize()
                         .also { configure(it) }

@@ -8,7 +8,7 @@ import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 
 fun Named.checkInSync(threshold: Time, vararg sensorReadings: TimeStamped<*>): Boolean {
-    val timings = sensorReadings.map(TimeStamped<*>::stamp)
+    val timings = sensorReadings.map(TimeStamped<*>::x)
             .let { if (it.isEmpty()) listOf(0.Second) else it }
 
     return (timings.max()!! - timings.min()!! < threshold).also {

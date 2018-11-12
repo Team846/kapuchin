@@ -9,8 +9,8 @@ import com.lynbrookrobotics.kapuchin.tests.subsystems.checkCount
 import com.lynbrookrobotics.kapuchin.tests.subsystems.countTo
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import kotlinx.coroutines.experimental.cancelAndJoin
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.math.min
 
@@ -48,7 +48,7 @@ class OrchestrationTest {
         j1.cancelAndJoin()
 
         comps.forEachIndexed { i, c ->
-            c.checkCount(i + 1, 1)
+            c.checkCount(i + 1, 1, 1)
         }
 
         comps.forEach { it.out = emptyList() }
@@ -61,9 +61,9 @@ class OrchestrationTest {
         comps[last].routine!!.cancel()
         j2.join()
         comps.take(last).forEachIndexed { i, c ->
-            c.checkCount(i, i)
+            c.checkCount(i, i, 1)
         }
-        comps[last].checkCount(last, 0)
+        comps[last].checkCount(last, 0, 1)
     }
 
     @Test(timeout = 3 * 1000)
@@ -89,6 +89,6 @@ class OrchestrationTest {
             Thread.sleep(1)
             EventLoop.tick(currentTime)
         }
-        comps.forEachIndexed { i, c -> c.checkCount(i, min(first, i)) }
+        comps.forEachIndexed { i, c -> c.checkCount(i, min(first, i), 1) }
     }
 }

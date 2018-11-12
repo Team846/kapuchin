@@ -1,15 +1,14 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
-import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
-import com.lynbrookrobotics.kapuchin.control.invoke
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.logging.Grapher
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.currentTime
+import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.`±`
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -17,7 +16,7 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
 
     internal var value: TimeStamped<Input>? = null
     internal fun optimizedRead(atTime: Time, syncThreshold: Time) = value
-            ?.takeIf { it.stamp in atTime withToleranceOf syncThreshold }
+            ?.takeIf { it.x in atTime `±` syncThreshold }
             ?: read(atTime)
 
     class UpdateSource<Input>(
@@ -31,7 +30,7 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
         val withoutStamps
             get() = object : DelegateProvider<Any?, Input> {
                 override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
-                    override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).value
+                    override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).y
                 }.also { startUpdates(forSensor) }
             }
 
@@ -48,9 +47,9 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
         fun <Hardw, Input> SubsystemHardware<*, *>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) = Sensor { read(hardw, it) }
 
         fun <QInput : Quan<QInput>> Sensor<QInput>.with(graph: Grapher<QInput>) =
-                Sensor { t -> read(t).also { graph(it) } }
+                Sensor { t -> read(t).also { graph(it.x, it.y) } }
 
         fun <Input, QInput : Quan<QInput>> Sensor<Input>.with(graph: Grapher<QInput>, structure: (Input) -> QInput) =
-                Sensor { t -> read(t).also { graph(it.stamp, structure(it.value)) } }
+                Sensor { t -> read(t).also { graph(it.x, structure(it.y)) } }
     }
 }

@@ -5,40 +5,38 @@ import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Cancel
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.milli
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.CancellableContinuation
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class Routine<C, H, Output>(
         parent: C, name: String,
         private val controller: C.(Time) -> Output?,
-        private val cont: CancellableContinuation<Unit>
+        cont: CancellableContinuation<Unit>
 ) :
-        Named(name, parent),
-        (C, Time) -> Output,
-        Job by cont as Job
+        CancellableContinuation<Unit> by cont,
+        Named by Named(name, parent),
+        (C, Time) -> Output
 
         where C : Component<C, H, Output>,
               H : SubsystemHardware<H, C> {
 
     override fun invoke(c: C, t: Time) =
             try {
-                controller(c, t) ?:
-                c.fallbackController(c, t).also { cont.resume(Unit) }
+                controller(c, t) ?: c.fallbackController(c, t).also { resume(Unit) }
             } catch (e: Throwable) {
-                cont.resumeWithException(e)
-                c.fallbackController(c, currentTime)
+                resumeWithException(e)
+                c.fallbackController(c, t)
             }
 
     companion object {
-        fun launchAll(vararg routines: suspend () -> Unit) = launch {
-            routines.forEach { launch(coroutineContext) { it() } }
+        fun launchAll(vararg routines: suspend () -> Unit) = scope.launch {
+            routines.forEach { launch { it() } }
         }
 
         infix fun (() -> Job).runWhile(predicate: () -> Boolean) = if (predicate()) {
@@ -56,9 +54,9 @@ class Routine<C, H, Output>(
         } else null
 
         suspend fun delay(time: Time) =
-                delay(time.milli(Second).toInt())
+                delay(time.milli(Second).toLong())
 
         suspend fun withTimeout(time: Time, block: suspend () -> Unit) =
-                withTimeoutOrNull(time.milli(Second).toInt()) { block() }
+                withTimeoutOrNull(time.milli(Second).toLong()) { block() }
     }
 }

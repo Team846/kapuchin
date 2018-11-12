@@ -1,14 +1,13 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import info.kunalsheth.units.generated.Quan
-import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.UomConverter
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.text.Charsets.US_ASCII
 
 actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
     Level.Error -> println("ERROR $formattedMessage")
@@ -17,18 +16,18 @@ actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
 }
 
 actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: String, private val withUnits: UomConverter<Q>) :
-        Named("$of (${withUnits.unitName})", parent),
+        Named by Named("$of (${withUnits.unitName})", parent),
         (Time, Q) -> Unit {
 
-    private var running = launch { }
+    private var running = scope.launch { }
     private val safeName = name.replace("""[^\w\d]""".toRegex(), "_")
     private val printer = File("/tmp/$safeName.csv")
-            .printWriter(US_ASCII).also { it.println("value,stamp") }
+            .printWriter(Charsets.US_ASCII).also { it.println("seconds,${withUnits.unitName}") }
 
-    actual override fun invoke(stamp: Time, value: Q) = synchronized(this) {
-        if (running.isCompleted) launch {
-            SmartDashboard.putNumber(name, withUnits(value))
-            printer.println("$value,${stamp.Second}")
+    actual override fun invoke(x: Time, y: Q) {
+        if (running.isCompleted) scope.launch {
+            SmartDashboard.putNumber(name, withUnits(y))
+            printer.println("${x.Second},${withUnits(y)}")
         }.also { running = it }
     }
 

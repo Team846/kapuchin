@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.tests.hardware
 
-import com.lynbrookrobotics.kapuchin.control.avg
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
@@ -9,9 +8,11 @@ import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.checkInSync
+import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
+import info.kunalsheth.units.generated.avg
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class SensorTest {
@@ -21,20 +22,20 @@ class SensorTest {
         val sensorB = sensor { Math.random() stampWith currentTime }
     }
 
-    private object SensorTestC : TC<SensorTestC, SensorTestSH>(SensorTestSH())
+    private class SensorTestC : TC<SensorTestC, SensorTestSH>(SensorTestSH())
 
     @Test(timeout = 2 * 1000)
     fun `sensors read on tick are in sync`() = runBlocking {
         val name = "sensors read on tick are in sync"
-        SensorTestC.run {
+        SensorTestC().run {
             startRoutine(name) {
                 val a by hardware.sensorA.readOnTick.withStamps
                 val b by hardware.sensorB.readOnTick.withStamps
                 var runs = 10
                 controller {
                     checkInSync(hardware.syncThreshold, a, b) `is equal to?` true
-                    currentTime `is greater than?` a.stamp
-                    currentTime `is greater than?` b.stamp
+                    currentTime `is greater than?` a.x
+                    currentTime `is greater than?` b.x
                     name.takeIf { runs-- > 0 }
                 }
             }
@@ -44,7 +45,7 @@ class SensorTest {
     @Test(timeout = 3 * 1000)
     fun `sensors read on event loop are in sync`() = runBlocking {
         val name = "sensors read on tick are in sync"
-        SensorTestC.run {
+        SensorTestC().run {
             startRoutine(name) {
                 val a by hardware.sensorA.readWithEventLoop.withStamps
                 val b by hardware.sensorB.readWithEventLoop.withStamps
@@ -54,10 +55,10 @@ class SensorTest {
                     if (runs % 2 == 0) EventLoop.tick(currentTime)
 
                     checkInSync(hardware.syncThreshold, a, b) `is equal to?` true
-                    currentTime `is greater than?` a.stamp
-                    currentTime `is greater than?` b.stamp
+                    currentTime `is greater than?` a.x
+                    currentTime `is greater than?` b.x
 
-                    val thisStamp = avg(a.stamp, b.stamp)
+                    val thisStamp = avg(a.x, b.x)
                     if (runs % 2 == 1) lastStamp `is equal to?` thisStamp
                     lastStamp = thisStamp
 
@@ -70,7 +71,7 @@ class SensorTest {
     @Test(timeout = 2 * 1000)
     fun `sensors read eagerly are eager and efficient`() = runBlocking {
         val name = "sensors read eagerly are eager and efficient"
-        SensorTestC.run {
+        SensorTestC().run {
             startRoutine(name) {
                 val a by hardware.sensorA.readEagerly.withStamps
                 val b by hardware.sensorB.readEagerly.withStamps
@@ -82,7 +83,7 @@ class SensorTest {
                     val b2 = b
 
                     b2 `is equal to?` b1
-                    b1.stamp `is greater than?` a2.stamp
+                    b1.x `is greater than?` a2.x
                     a2 `is equal to?` a1
 
                     name.takeIf { runs-- > 0 }
@@ -94,7 +95,7 @@ class SensorTest {
     @Test(timeout = 2 * 1000)
     fun `sensors are read efficiently`() = runBlocking {
         val name = "sensors are read efficiently"
-        SensorTestC.run {
+        SensorTestC().run {
             startRoutine(name) {
                 val a1 by hardware.sensorA.readOnTick.withStamps
                 val a2 by hardware.sensorA.readEagerly.withStamps
@@ -113,7 +114,7 @@ class SensorTest {
     @Test(timeout = 4 * 1000)
     fun `sensor lambdas are released upon routine completion`() = runBlocking {
         val name = "sensor lambdas are released upon routine completion"
-        SensorTestC.run {
+        SensorTestC().run {
 
             val ogClockJobs = clock.jobs.size
             val ogElJobs = EventLoop.jobs.size
@@ -141,13 +142,13 @@ class SensorTest {
 
                 var runs = 5
                 controller {
-                    a1.value `is equal to?` a4
-                    a2.value `is equal to?` a5
-                    a3.value `is equal to?` a6
+                    a1.y `is equal to?` a4
+                    a2.y `is equal to?` a5
+                    a3.y `is equal to?` a6
 
-                    b1.value `is equal to?` b4
-                    b2.value `is equal to?` b5
-                    b3.value `is equal to?` b6
+                    b1.y `is equal to?` b4
+                    b2.y `is equal to?` b5
+                    b3.y `is equal to?` b6
                     name.takeIf { runs-- > 0 }
                 }
             }
@@ -171,14 +172,14 @@ class SensorTest {
 
                 var runs = 5
                 controller {
-                    a1.value `is equal to?` a4
-                    a2.value `is equal to?` a5
-                    a3.value `is equal to?` a6
+                    a1.y `is equal to?` a4
+                    a2.y `is equal to?` a5
+                    a3.y `is equal to?` a6
 
-                    b1.value `is equal to?` b4
-                    b2.value `is equal to?` b5
-                    b3.value `is equal to?` b6
-                    if(runs == 2) error("This routine is broken!")
+                    b1.y `is equal to?` b4
+                    b2.y `is equal to?` b5
+                    b3.y `is equal to?` b6
+                    if (runs == 2) error("This routine is broken!")
                     name.takeIf { runs-- > 0 }
                 }
             }
@@ -186,12 +187,12 @@ class SensorTest {
             routine()
             check()
 
-            val j1 = launch { routine() }
+            val j1 = scope.launch { routine() }
             while (routine == null) Thread.sleep(1)
             routine!!.cancel()
             check()
 
-            val j2 = launch { routine() }
+            val j2 = scope.launch { routine() }
             while (!j2.isActive) Thread.sleep(1)
             j2.cancel()
             check()
@@ -199,10 +200,10 @@ class SensorTest {
             val j3 = badRoutine()
             check()
 
-            val j4 = launch { badRoutine() }
+            val j4 = scope.launch { badRoutine() }
             check()
 
-            val j5 = launch {
+            val j5 = scope.launch {
                 routine()
                 routine()
                 routine()
@@ -212,7 +213,7 @@ class SensorTest {
             check()
 
 
-            val j6 = launch {
+            val j6 = scope.launch {
                 routine()
                 routine()
                 routine()

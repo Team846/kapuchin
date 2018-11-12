@@ -1,13 +1,9 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.HorizontalDeadband
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.VerticalDeadband
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
-import com.lynbrookrobotics.kapuchin.control.withToleranceOf
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
-import com.lynbrookrobotics.kapuchin.tests.`is within?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
 import com.lynbrookrobotics.kapuchin.tests.anyInt
 import info.kunalsheth.units.generated.*
@@ -16,7 +12,7 @@ import kotlin.test.Test
 class ConversionTest {
     @Test
     fun `encoder ticks and angle methods are inverses`() {
-        anyInt.filter { it != 0 }.map { resolution -> EncoderConversion(resolution.Each, 360.Degree) }
+        anyInt.filter { it != 0 }.map { resolution -> EncoderConversion(resolution, 360.Degree) }
                 .forEach { conversion ->
                     anyDouble.map { it.Each }.forEach { x ->
                         x.Each `is equal to?` (conversion.ticks(conversion.angle(x.Each)) withDecimals 5)
@@ -35,42 +31,50 @@ class ConversionTest {
 
     @Test
     fun `offloaded real and native methods are inverses`() {
-        anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(1023, 12.Volt, resolution, 8.46.Metre, 1.Foot) }
-                .forEach { conversion ->
-                    anyDouble.map { it.Foot }.forEach { x ->
-                        x `is equal to?` conversion.realPosition(conversion.native(x))
+        anyInt.filter { it != 0 }.map { resolution ->
+            LinearOffloadedNativeConversion(
+                    ::div, ::div, ::times, ::times,
+                    1023, 12.Volt, resolution, 8.46.Metre, 1.Foot
+            )
+        }.forEach { conversion ->
+            anyDouble.map { it.Foot }.forEach { x ->
+                x `is equal to?` conversion.realPosition(conversion.native(x))
 
-                        val dx = x / t
-                        dx `is equal to?` conversion.realVelocity(conversion.native(dx))
-                    }
-                }
+                val dx = x / t
+                dx `is equal to?` conversion.realVelocity(conversion.native(dx))
+            }
+        }
     }
 
     @Test
     fun `offloaded native methods are linear`() {
-        anyInt.filter { it != 0 }.map { resolution -> OffloadedNativeConversion(1023, 12.Volt, resolution, 8.46.Metre) }
-                .forEach { conversion ->
-                    anyDouble.map { it.Foot }.forEach { x ->
-                        conversion.native(-x) * 2 `is equal to?` -conversion.native(x * 2)
-                        conversion.native(Gain(20.Volt, x)) `is equal to?` conversion.native(Gain(10.Volt, x)) * 2
+        anyInt.filter { it != 0 }.map { resolution ->
+            OffloadedNativeConversion<V, Absement, Length, Velocity, Acceleration>(
+                    ::div, ::div, ::times, ::times,
+                    1023, 12.Volt, resolution, 8.46.Metre
+            )
+        }.forEach { conversion ->
+            anyDouble.map { it.Foot }.forEach { x ->
+                conversion.native(-x) * 2 `is equal to?` -conversion.native(x * 2)
+                conversion.native(Gain(20.Volt, x)) `is equal to?` conversion.native(Gain(10.Volt, x)) * 2
 
-                        val ix = x * Second
-                        conversion.native(-ix) * 2 `is equal to?` -conversion.native(ix * 2)
-                        conversion.native(Gain(20.Volt, ix)) `is equal to?` conversion.native(Gain(10.Volt, ix)) * 2
+                val ix = x * Second
+                conversion.native(-ix) * 2 `is equal to?` -conversion.native(ix * 2)
+                conversion.native(Gain(20.Volt, ix)) `is equal to?` conversion.native(Gain(10.Volt, ix)) * 2
 
-                        val dx = x / Second
-                        conversion.native(-dx) * 2 `is equal to?` -conversion.native(dx * 2)
-                        conversion.native(Gain(20.Volt, dx)) `is equal to?` conversion.native(Gain(10.Volt, dx)) * 2
+                val dx = x / Second
+                conversion.native(-dx) * 2 `is equal to?` -conversion.native(dx * 2)
+                conversion.native(Gain(20.Volt, dx)) `is equal to?` conversion.native(Gain(10.Volt, dx)) * 2
 
-                        val ddx = dx / t
-                        conversion.native(-ddx) * 2 `is equal to?` -conversion.native(ddx * 2)
-                        conversion.native(Gain(20.Volt, ddx)) `is equal to?` conversion.native(Gain(10.Volt, ddx)) * 2
-                    }
+                val ddx = dx / t
+                conversion.native(-ddx) * 2 `is equal to?` -conversion.native(ddx * 2)
+                conversion.native(Gain(20.Volt, ddx)) `is equal to?` conversion.native(Gain(10.Volt, ddx)) * 2
+            }
 
-                    anyDouble.map { it.Volt }.forEach { x ->
-                        conversion.native(-x) * 2 `is equal to?` -conversion.native(x * 2)
-                    }
-                }
+            anyDouble.map { it.Volt }.forEach { x ->
+                conversion.native(-x) * 2 `is equal to?` -conversion.native(x * 2)
+            }
+        }
     }
 
     @Test

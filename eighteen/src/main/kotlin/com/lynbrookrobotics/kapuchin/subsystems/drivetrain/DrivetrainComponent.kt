@@ -37,7 +37,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         TwoSided(VelocityOutput(
-                hardware.offloadedSettings.native(velocityGains), hardware.offloadedSettings.native(0.FootPerSecond)
+                hardware.offloadedSettings.native(velocityGains),
+                hardware.offloadedSettings.native(0.FootPerSecond)
         ))
     }
 
