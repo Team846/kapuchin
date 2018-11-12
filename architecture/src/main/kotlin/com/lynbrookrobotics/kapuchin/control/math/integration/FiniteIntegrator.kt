@@ -11,7 +11,7 @@ import info.kunalsheth.units.generated.Time
  *
  * Adds up the last `falloff` trapezoids
  *
- * @authors Kunal
+ * @author Kunal
  * @see InfiniteIntegrator
  *
  * @param Q type of input

@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.control.div
  *
  * Intended for control code to overcome friction and close small errors
  *
- * @authors Alvyn, Kunal
+ * @author Alvyn, Kunal
  * @see HorizontalDeadband
  *
  * @param Q type of input and output

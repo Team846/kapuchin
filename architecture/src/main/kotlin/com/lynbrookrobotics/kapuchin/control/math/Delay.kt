@@ -5,7 +5,7 @@ package com.lynbrookrobotics.kapuchin.control.math
  *
  * Adds new inputs to a queue, returning the oldest element
  *
- * @authors Kunal
+ * @author Kunal
  *
  * @param T type of delayed values
  * @param lookBack must be greater than zero

@@ -10,7 +10,7 @@ import info.kunalsheth.units.generated.Time
  * Could be used to improve logging behavior.
  * Could be used to terminate autonomous routines in case the robot is stalled.
  *
- * @authors Kunal
+ * @author Kunal
  * @see MotorCurrentLimiter
  *
  * @param Q type of input

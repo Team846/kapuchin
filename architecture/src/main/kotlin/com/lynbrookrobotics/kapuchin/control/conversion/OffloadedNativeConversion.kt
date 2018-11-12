@@ -13,7 +13,7 @@ import kotlin.jvm.JvmName
  * Utility functions for converting between offloaded sensor feedback values and actual units.
  * Intended for TalonSRXs. Please look at the TalonSRX software manual for more information.
  *
- * @authors Kunal
+ * @author Kunal
  * @see EncoderConversion
  * @see GearTrain
  *

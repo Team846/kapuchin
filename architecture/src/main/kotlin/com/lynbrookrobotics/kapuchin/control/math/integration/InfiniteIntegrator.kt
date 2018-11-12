@@ -9,7 +9,7 @@ import info.kunalsheth.units.generated.Time
  *
  * Adds up trapezoids since creation
  *
- * @authors Kunal
+ * @author Kunal
  * @see FiniteIntegrator
  *
  * @param Q type of input

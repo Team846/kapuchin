@@ -9,7 +9,7 @@ import info.kunalsheth.units.generated.*
  *
  * Utility functions for converting between encoder outputs and angles
  *
- * @authors Kunal
+ * @author Kunal
  * @see OffloadedNativeConversion
  * @see GearTrain
  *

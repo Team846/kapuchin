@@ -10,7 +10,7 @@ import info.kunalsheth.units.generated.Time
  *
  * Takes the slope of the last two inputs
  *
- * @authors Kunal
+ * @author Kunal
  * @see RampRateLimiter
  *
  * @param Q type of input

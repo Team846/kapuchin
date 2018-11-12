@@ -10,7 +10,7 @@ import info.kunalsheth.units.generated.Time
  *
  * Intended to prevent excess current draw when controlling motors without feedback.
  *
- * @authors Kunal
+ * @author Kunal
  * @see MotorCurrentLimiter
  * @see Differentiator
  *

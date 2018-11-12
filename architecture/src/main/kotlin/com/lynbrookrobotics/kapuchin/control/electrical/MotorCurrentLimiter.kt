@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.*
  *
  * Prevents control code from damaging motors and/or causing brownouts. Also limits acceleration.
  *
- * @authors Kunal
+ * @author Kunal
  * @see OutsideThresholdChecker
  * @see RampRateLimiter
  *
