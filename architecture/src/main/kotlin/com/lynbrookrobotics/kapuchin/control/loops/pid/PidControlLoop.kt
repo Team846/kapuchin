@@ -33,8 +33,8 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
         div: (Input, T) -> Deriv,
         times: (Input, T) -> Integ,
         private val gains: (Time, Input) -> Gains,
-        private val target: (Time) -> Input,
-        integralFalloff: Int = 100
+        integralFalloff: Int = 100,
+        private val target: (Time) -> Input
 ) : ControlLoop<Input, Output>
         where Input : Quan<Input>,
               Integ : Quan<Integ>,
@@ -45,9 +45,9 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
     constructor(div: (Input, T) -> Deriv,
                 times: (Input, T) -> Integ,
                 gains: Gains,
-                target: (Time) -> Input,
-                integralFalloff: Int = 100
-    ) : this(div, times, { _, _ -> gains }, target, integralFalloff)
+                integralFalloff: Int = 100,
+                target: (Time) -> Input
+    ) : this(div, times, { _, _ -> gains }, integralFalloff, target)
 
     private val zero = target(currentTime) * 0
     private val derivative = Differentiator(div, currentTime, zero)

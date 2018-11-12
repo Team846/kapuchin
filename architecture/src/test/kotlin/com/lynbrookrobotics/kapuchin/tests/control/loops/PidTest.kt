@@ -102,9 +102,8 @@ class PidTest {
                     Gain(6.Volt, 1.Foot),
                     Gain(1.Volt, 1.FootSecond),
                     Gain(2.Volt, 1.FootPerSecond),
-                    null,
-                    falloff
-            )) { _ -> 0.Foot }
+                    null
+            ), falloff) { _ -> 0.Foot }
 
             repeat(falloff) { time ->
                 pid(time.Second, -Foot)
