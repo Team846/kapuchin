@@ -31,7 +31,7 @@ class Routine<C, H, Output>(
                 controller(c, t) ?: c.fallbackController(c, t).also { resume(Unit) }
             } catch (e: Throwable) {
                 resumeWithException(e)
-                c.fallbackController(c, currentTime)
+                c.fallbackController(c, t)
             }
 
     companion object {

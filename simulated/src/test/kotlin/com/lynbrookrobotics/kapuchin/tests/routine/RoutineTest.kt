@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
+import com.lynbrookrobotics.kapuchin.tests.subsystems.checkCount
 import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Second
 import kotlinx.coroutines.launch
@@ -23,10 +24,10 @@ class RoutineTest {
         }
     }
 
-    private fun check(eight: Int, four: Int, six: Int) {
-        RoutineTestC.out.count { it == "countTo(8)" } `is equal to?` eight
-        RoutineTestC.out.count { it == "countTo(4)" } `is equal to?` four
-        RoutineTestC.out.count { it == "countTo(6)" } `is equal to?` six
+    private fun check(eight: Int, four: Int, six: Int, tolerance: Int = 0) {
+        RoutineTestC.checkCount(8, eight, tolerance)
+        RoutineTestC.checkCount(4, four, tolerance)
+        RoutineTestC.checkCount(6, six, tolerance)
     }
 
     @Test(timeout = 3 * 1000)
@@ -50,7 +51,7 @@ class RoutineTest {
         check(8, 0, 0)
 
         withTimeout(1.Second) { RoutineTestC.countTo(Int.MAX_VALUE) }
-        RoutineTestC.out.count { it == "countTo(${Int.MAX_VALUE})" } `is equal to?` 10
+        RoutineTestC.checkCount(Int.MAX_VALUE, 10, 1)
 
         RoutineTestC.countTo(4)
         check(8, 4, 0)
@@ -58,7 +59,7 @@ class RoutineTest {
         val j = launch { RoutineTestC.countTo(Int.MAX_VALUE) }
         delay(1.Second)
         j.cancel()
-        RoutineTestC.out.count { it == "countTo(${Int.MAX_VALUE})" } `is equal to?` 20
+        RoutineTestC.checkCount(Int.MAX_VALUE, 20, 1)
 
         RoutineTestC.countTo(6)
         check(8, 4, 6)
@@ -72,7 +73,7 @@ class RoutineTest {
         while (RoutineTestC.routine == null) Thread.sleep(1)
         j1.cancel()
         RoutineTestC.routine `is equal to?` null
-        check(0, 0, 0)
+        check(0, 0, 0, 1)
 
 
         val j2 = scope.launch { RoutineTestC.countTo(4) }
@@ -80,7 +81,7 @@ class RoutineTest {
         RoutineTestC.routine!!.cancel()
         RoutineTestC.routine `is equal to?` null
         while (j2.isActive) Thread.sleep(1)
-        check(0, 0, 0)
+        check(0, 0, 0, 1)
 
 
         val j3 = scope.launch {
@@ -91,7 +92,7 @@ class RoutineTest {
         while (RoutineTestC.routine == null) Thread.sleep(1)
         j3.cancel()
         RoutineTestC.routine `is equal to?` null
-        check(0, 0, 0)
+        check(0, 0, 0, 1)
 
 
         val j4 = scope.launch {
@@ -102,7 +103,7 @@ class RoutineTest {
         while (RoutineTestC.out.count { it == "countTo(8)" } < 1) Thread.sleep(1)
         RoutineTestC.routine!!.cancel()
         while (j4.isActive) Thread.sleep(1)
-        check(1, 4, 6)
+        check(1, 4, 6, 1)
     }
 
     @Test(timeout = 2 * 1000)

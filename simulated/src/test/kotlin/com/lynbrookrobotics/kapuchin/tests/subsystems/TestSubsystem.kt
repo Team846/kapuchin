@@ -3,12 +3,13 @@ package com.lynbrookrobotics.kapuchin.tests.subsystems
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
+import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`
 import com.lynbrookrobotics.kapuchin.timing.Clock
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
+import kotlin.math.abs
 
 abstract class TC<This, H>(hardware: H, customClock: Clock? = null) : Component<This, H, String>(hardware, customClock)
         where This : TC<This, H>,
@@ -28,8 +29,8 @@ suspend fun Component<*, *, String>.countTo(n: Int) = startRoutine("count to $n"
     { "countTo($n)".takeIf { counter++ < n } }
 }
 
-fun TC<*, *>.checkCount(number: Int, times: Int) {
-    out.count { it == "countTo($number)" } `is equal to?` times
+fun TC<*, *>.checkCount(number: Int, times: Int, tolerance: Int = 0) {
+    tolerance `is greater than or equal to?` abs(out.count { it == "countTo($number)" } - times)
 }
 
 abstract class TSH<This, C>(override val subsystemName: String) : SubsystemHardware<This, C>()
