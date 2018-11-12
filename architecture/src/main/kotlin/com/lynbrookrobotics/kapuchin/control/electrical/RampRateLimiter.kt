@@ -1,9 +1,26 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
+import com.lynbrookrobotics.kapuchin.control.math.Differentiator
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
+/**
+ * Prevents values from increasing too fast
+ *
+ * Intended to prevent excess current draw when controlling motors without feedback.
+ *
+ * @authors Kunal
+ * @see MotorCurrentLimiter
+ * @see Differentiator
+ *
+ * @param div UOM proof (just pass in `::div`)
+ * @param times UOM proof (just pass in `::times`)
+ * @param x1 start time
+ * @param y1 initial value
+ *
+ * @property limit function returning max ramp rate
+ */
 class RampRateLimiter<Q, D>(
         private val div: (Q, T) -> D,
         private val times: (D, T) -> Q,

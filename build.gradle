@@ -24,8 +24,12 @@ allprojects {
 
 apply plugin: 'org.jetbrains.dokka'
 dokka { // https://github.com/Kotlin/dokka/blob/master/README.md#output_formats
-    outputFormat = 'html'
     outputDirectory = "docs"
-    sourceDirs = files('architecture/src/main/kotlin')
-    impliedPlatforms = []
+    sourceDirs = files('architecture/src/main/kotlin', 'architecture/build/uom/')
+    reportUndocumented = false
+    
+    packageOptions {
+        prefix = 'com.lynbrookrobotics.kapuchin.control'
+        reportUndocumented = true
+    }
 }

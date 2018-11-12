@@ -1,10 +1,28 @@
 package com.lynbrookrobotics.kapuchin.control.math.integration
 
+import com.lynbrookrobotics.kapuchin.control.conversion.deadband.HorizontalDeadband
 import com.lynbrookrobotics.kapuchin.control.math.Delay
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
+/**
+ * Calculates an integral
+ *
+ * Adds up the last `falloff` trapezoids
+ *
+ * @authors Kunal
+ * @see InfiniteIntegrator
+ *
+ * @param Q type of input
+ * @param SQDT integral of input
+ *
+ * @param times UOM proof (just pass in `::times`)
+ * @param x1 starting time
+ * @param y1 initial value
+ *
+ * @property falloff number of trapezoids to look back when accumulating
+ */
 class FiniteIntegrator<Q, SQDT>(
         times: (Q, T) -> SQDT,
         x1: Time, y1: Q,

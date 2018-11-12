@@ -7,6 +7,38 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains
 import info.kunalsheth.units.generated.*
 import kotlin.jvm.JvmName
 
+/**
+ * CAN electronic speed controller sensor conversion utility
+ *
+ * Utility functions for converting between offloaded sensor feedback values and actual units.
+ * Intended for TalonSRXs. Please look at the TalonSRX software manual for more information.
+ *
+ * @authors Kunal
+ * @see EncoderConversion
+ * @see GearTrain
+ *
+ * @param O type of output
+ * @param I integral of sensor input
+ * @param Q type of sensor input
+ * @param D derivative of sensor input
+ * @param DD second derivative of sensor input
+ *
+ * @param d2 UOM proof (just pass in `::div`)
+ * @param d1 UOM proof (just pass in `::div`)
+ * @param t1 UOM proof (just pass in `::times`)
+ * @param t2 UOM proof (just pass in `::times`)
+ *
+ * @property nativeOutputUnits ESC API value corresponding to 1 `perOutputQuantity`
+ * @property perOutputQuantity output corresponding to `nativeOutputUnits` value
+ *
+ * @property nativeFeedbackUnits ESC API value corresponding to 1 `perFeedbackQuantity`
+ * @property perFeedbackQuantity sensor input corresponding to `nativeFeedbackUnits` value
+ *
+ * @property feedbackZero sensor position that maps to zero
+ *
+ * @property nativeTimeUnit denominator used in ESC velocity measurements
+ * @property nativeLoopTime factor used in ESC derivative and integral calculations
+ */
 class OffloadedNativeConversion<O, I, Q, D, DD>(
         private val d2: (I, T) -> Q,
         private val d1: (Q, T) -> D,

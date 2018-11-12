@@ -6,17 +6,17 @@ import info.kunalsheth.units.generated.Quan
 /**
  * Maps inputs close to zero to zero
  *
- * Often used on joystick input to prevent drifting
+ * Intended for joystick input to prevent drifting
  *
  * @author Alvyn, Kunal
- * @see [VerticalDeadband]
+ * @see VerticalDeadband
  *
- * @param[Q] the type of input and output
- * @param[xIntercept] must be greater than zero
- * @param[max] must be greater than zero
+ * @param Q type of input and output
+ * @param xIntercept must be greater than zero
+ * @param max must be greater than zero
  *
- * @property[xIntercept] the maximum input that will still be mapped to zero
- * @property[max] the value at which the input is equal to output
+ * @property xIntercept maximum input that will still be mapped to zero
+ * @property max value at which the input is equal to output
  */
 class HorizontalDeadband<Q : Quan<Q>>(val xIntercept: Q, val max: Q) : (Q) -> Q {
 

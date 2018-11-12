@@ -104,3 +104,4 @@ fabric.properties
 .idea
 *.iml
 docs
+.DS_Store

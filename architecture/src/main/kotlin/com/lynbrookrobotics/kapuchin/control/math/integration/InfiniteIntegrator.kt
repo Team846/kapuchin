@@ -4,6 +4,21 @@ import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
+/**
+ * Calculates an integral
+ *
+ * Adds up trapezoids since creation
+ *
+ * @authors Kunal
+ * @see FiniteIntegrator
+ *
+ * @param Q type of input
+ * @param SQDT integral of input
+ *
+ * @param times UOM proof (just pass in `::times`)
+ * @param x1 starting time
+ * @param y1 initial value
+ */
 open class InfiniteIntegrator<Q, SQDT>(
         private val times: (Q, T) -> SQDT,
         private var x1: Time,
