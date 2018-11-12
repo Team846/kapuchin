@@ -18,8 +18,6 @@ actual class Ticker private actual constructor(
 
     override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
 
-    private val exec = Executors.newSingleThreadScheduledExecutor()!!
-
     init {
         exec.scheduleAtFixedRate(
                 {
@@ -42,5 +40,6 @@ actual class Ticker private actual constructor(
 
     actual companion object {
         actual fun Named.ticker(priority: Priority, period: Time, name: String) = Ticker(this, priority, period, name)
+        private val exec = Executors.newSingleThreadScheduledExecutor()!!
     }
 }

@@ -15,12 +15,21 @@ abstract class TC<This, H>(hardware: H, customClock: Clock? = null) : Component<
         where This : TC<This, H>,
               H : SubsystemHardware<H, This> {
 
-    override val fallbackController: This.(Time) -> String = { "fallback controller" }
+    override val fallbackController: This.(Time) -> String = { fallbackOutput }
+
+    private var count = 0
     var out = emptyList<String>()
 
     override fun H.output(value: String) {
-        out += value
-        println("output @ ${currentTime withDecimals 2} by thread #${Thread.currentThread().id} = $value")
+        count++
+        if (value != fallbackOutput) {
+            out += value
+            println("$name output #$count @ ${currentTime withDecimals 2} by thread #${Thread.currentThread().id} = $value")
+        }
+    }
+
+    companion object {
+        const val fallbackOutput = "fallback controller"
     }
 }
 
