@@ -10,6 +10,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'info.kunalsheth.units:plugin:5.0.0'
         classpath 'gradle.plugin.jaci.openrio.gradle:GradleRIO:2018.03.06'
+        classpath 'org.jetbrains.dokka:dokka-gradle-plugin:0.9.17'
     }
 }
 
@@ -19,4 +20,12 @@ allprojects {
     group 'com.lynbrookrobotics'
     version '1.0.0'
     repositories.jcenter()
+}
+
+apply plugin: 'org.jetbrains.dokka'
+dokka { // https://github.com/Kotlin/dokka/blob/master/README.md#output_formats
+    outputFormat = 'html'
+    outputDirectory = "docs"
+    sourceDirs = files('architecture/src/main/kotlin')
+    impliedPlatforms = []
 }
