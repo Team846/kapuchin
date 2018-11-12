@@ -28,6 +28,8 @@ data class NumVector(override val x: Double, override val y: Double, override va
  *
  * Intended for representing two-sided systems like a tank drive or a two-belt shooter
  *
+ * @author Kunal
+ *
  * @param T type of each side
  * @property left value of the left side
  * @property right value of the right side

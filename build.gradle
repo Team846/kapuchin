@@ -26,10 +26,9 @@ apply plugin: 'org.jetbrains.dokka'
 dokka { // https://github.com/Kotlin/dokka/blob/master/README.md#output_formats
     outputDirectory = "docs"
     sourceDirs = files('architecture/src/main/kotlin', 'architecture/build/uom/')
-    reportUndocumented = false
     
     packageOptions {
-        prefix = 'com.lynbrookrobotics.kapuchin.control'
-        reportUndocumented = true
+        prefix = 'info.kunalsheth.units.generated'
+        suppress = true
     }
 }

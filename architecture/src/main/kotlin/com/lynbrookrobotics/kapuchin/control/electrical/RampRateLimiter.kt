@@ -14,6 +14,9 @@ import info.kunalsheth.units.generated.Time
  * @see MotorCurrentLimiter
  * @see Differentiator
  *
+ * @param Q type of input and output
+ * @param D derivative of input
+ *
  * @param div UOM proof (just pass in `::div`)
  * @param times UOM proof (just pass in `::times`)
  * @param x1 start time

@@ -11,6 +11,8 @@ import kotlin.jvm.JvmName
  *
  * Intended as a return type in functions which must return both a value and a timestamp. Other use cases are discouraged.
  *
+ * @author Kunal
+ *
  * @param T type of value
  * @property x timestamp
  * @property y value
