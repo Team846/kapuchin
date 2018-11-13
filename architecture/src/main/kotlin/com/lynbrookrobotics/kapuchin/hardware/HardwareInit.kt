@@ -11,6 +11,16 @@ import info.kunalsheth.units.generated.Time
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+/**
+ * Hardware initialization domain-specific language
+ *
+ * @author Kunal
+ * @see SubsystemHardware
+ * @see Sensor
+ * @see DelegateProvider
+ *
+ * @param Hardw type of hardware object being initialized
+ */
 class HardwareInit<Hardw> private constructor(
         private val parent: SubsystemHardware<*, *>,
         private val initialize: Named.() -> Hardw,
@@ -38,16 +48,36 @@ class HardwareInit<Hardw> private constructor(
         }
     }
 
+    /**
+     * Safely configure the hardware object
+     *
+     * @param f function to configure the hardware object
+     * @return new `HardwareInit` instance with the given configuration
+     */
     fun configure(f: Named.(Hardw) -> Unit) = HardwareInit(
             parent, initialize, { configure(it); f(it) }, validate, nameSuffix
     )
 
+    /**
+     * Verify that the configured hardware object meets a certain condition
+     *
+     * @param that description of what is being verified
+     * @param f function to validate the hardware object after configuration
+     * @return new `HardwareInit` instance with the given verification
+     */
     fun verify(that: String, f: Named.(Hardw) -> Boolean) = HardwareInit(
             parent, initialize, configure,
             { validate(it) && f(it).also { if (!it) log(Error) { that } } },
             nameSuffix
     )
 
+    /**
+     * Turns the given hardware object into a `Sensor`
+     *
+     * @param Input type of sensor data being read
+     * @param read function to read new sensor data from the hardware object
+     * @return new `HardwareInit` instance for the given sensor
+     */
     fun <Input> sensor(read: Hardw.(Time) -> TimeStamped<Input>) = HardwareInit(
             parent,
             { val hardw = initialize(); parent.sensor(hardw, read) },
@@ -55,6 +85,14 @@ class HardwareInit<Hardw> private constructor(
     )
 
     companion object {
-        fun <Value> SubsystemHardware<*, *>.hardw(nameSuffix: String = "", initialize: Named.() -> Value) = HardwareInit(this, initialize, nameSuffix = nameSuffix)
+        /**
+         * `HardwareInit` domain-specific language entry point
+         *
+         * @param Hardw type of hardware object being initialized
+         * @param nameSuffix logging name suffix
+         * @param initialize function to instantiate hardware object
+         * @return new `HardwareInit` instance for the given hardware object
+         */
+        fun <Hardw> SubsystemHardware<*, *>.hardw(nameSuffix: String = "", initialize: Named.() -> Hardw) = HardwareInit(this, initialize, nameSuffix = nameSuffix)
     }
 }

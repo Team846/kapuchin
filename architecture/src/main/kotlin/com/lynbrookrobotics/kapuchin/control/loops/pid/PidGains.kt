@@ -18,7 +18,7 @@ import info.kunalsheth.units.generated.Quan
  *
  * @property kP proportional gains
  * @property kI integral gains
- * @property kD derivative gians
+ * @property kD derivative gains
  * @property kF feed forward term
  */
 data class PidGains<Input, Integ, Deriv, Output>(
