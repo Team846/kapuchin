@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.hardware
 import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.control.TimeStamped
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
@@ -13,6 +14,8 @@ import kotlin.reflect.KProperty
 
 /**
  * Hardware initialization domain-specific language
+ *
+ * Helps avoid logging boilerplate when initializing hardware
  *
  * @author Kunal
  * @see SubsystemHardware
@@ -34,6 +37,7 @@ class HardwareInit<Hardw> private constructor(
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Hardw> {
         value = Named(prop.name + nameSuffix, parent).run {
             try {
+                log(Debug) { "Initializing hardware" }
                 initialize()
                         .also { configure(it) }
                         .also { if (!validate(it)) error("Initialized hardware is invalid.") }
@@ -88,6 +92,9 @@ class HardwareInit<Hardw> private constructor(
         /**
          * `HardwareInit` domain-specific language entry point
          *
+         * Helps avoid logging boilerplate when initializing hardware
+         *
+         * @receiver subsystem this hardware belongs to
          * @param Hardw type of hardware object being initialized
          * @param nameSuffix logging name suffix
          * @param initialize function to instantiate hardware object

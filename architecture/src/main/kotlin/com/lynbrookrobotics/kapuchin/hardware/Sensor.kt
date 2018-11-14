@@ -15,6 +15,8 @@ import kotlin.reflect.KProperty
 /**
  * Sensor initialization domain-specific language
  *
+ * Helps manage concurrent sensor use across multiple subsystems
+ *
  * @author Kunal
  * @see Grapher
  * @see SubsystemHardware
@@ -62,6 +64,9 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
         /**
          * `Sensor` domain-specific language entry point
          *
+         * Helps manage concurrent sensor use across multiple subsystems
+         *
+         * @receiver subsystem this sensor belongs to
          * @param Input type of sensor data being read
          * @param read function to read new sensor data from the hardware object
          * @return new `Sensor` instance for the given read function
@@ -71,6 +76,9 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
         /**
          * `Sensor` domain-specific language entry point
          *
+         * Helps manage concurrent sensor use across multiple subsystems
+         *
+         * @receiver subsystem this sensor belongs to
          * @param Hardw type of hardware object providing sensor data
          * @param Input type of sensor data being read
          * @param hardw hardware object providing sensor data
