@@ -26,6 +26,7 @@ expect class Grapher<Q : Quan<Q>> private constructor(parent: Named, of: String,
          * @param Q type of data being graphed
          * @param of graph title
          * @param withUnits y-axis units
+         * @return new `Grapher` instance
          */
         fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>): Grapher<Q>
     }
