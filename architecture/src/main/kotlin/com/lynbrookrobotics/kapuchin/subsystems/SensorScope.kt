@@ -24,6 +24,7 @@ class SensorScope internal constructor(private val c: Component<*, *, *>) {
      * Stop all sensors in this routine from automatically updating
      */
     fun close() = cleanup.forEach { it.cancel() }
+
     private var cleanup = emptyList<Cancel>()
 
     /**

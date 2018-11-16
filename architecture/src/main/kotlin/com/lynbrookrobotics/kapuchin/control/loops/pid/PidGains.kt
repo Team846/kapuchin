@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.control.loops.pid
 
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.VerticalDeadband
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import info.kunalsheth.units.generated.Quan
 

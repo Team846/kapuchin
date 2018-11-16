@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.control.math.integration
 
-import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Time
 

@@ -1,11 +1,12 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.VerticalDeadband
 import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Dimensionless
+import info.kunalsheth.units.generated.V
+import info.kunalsheth.units.generated.div
 
 /**
  * Converts a target voltage to a duty cycle

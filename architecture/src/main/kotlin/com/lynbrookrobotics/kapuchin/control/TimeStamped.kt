@@ -1,10 +1,8 @@
 package com.lynbrookrobotics.kapuchin.control
 
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.avg
-import kotlin.jvm.JvmName
 
 /**
  * Represents data that has a time stamp

@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
-import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import info.kunalsheth.units.generated.Dimensionless
 import info.kunalsheth.units.generated.I

@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.control.math.integration
 
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.HorizontalDeadband
 import com.lynbrookrobotics.kapuchin.control.math.Delay
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
