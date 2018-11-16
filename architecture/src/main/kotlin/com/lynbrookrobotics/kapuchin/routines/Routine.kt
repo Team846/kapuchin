@@ -6,7 +6,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Cancel
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.scope
-import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.milli
@@ -14,7 +13,7 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class Routine<C, H, Output>(
+class Routine<C, H, Output> internal constructor(
         parent: C, name: String,
         private val controller: C.(Time) -> Output?,
         cont: CancellableContinuation<Unit>
