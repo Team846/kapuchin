@@ -30,7 +30,7 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
 }
 
 class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
-    override val subsystemName = "Shooter"
+    override val name = "Shooter"
     override val priority = Priority.RealTime
     override val period = 10.milli(Second)
     override val syncThreshold = 1.milli(Second)

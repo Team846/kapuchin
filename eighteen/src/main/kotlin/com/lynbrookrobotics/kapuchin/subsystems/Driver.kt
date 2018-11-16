@@ -15,7 +15,7 @@ import info.kunalsheth.units.generated.milli
 import kotlin.math.sign
 
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
-    override val subsystemName = "Driver"
+    override val name = "Driver"
     override val priority = Priority.RealTime
     override val period = 20.milli(Second)
     override val syncThreshold = 3.milli(Second)

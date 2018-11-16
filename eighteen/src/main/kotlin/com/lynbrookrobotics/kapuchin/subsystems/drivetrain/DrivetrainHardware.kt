@@ -24,7 +24,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val priority = Priority.RealTime
     override val period = 15.milli(Second)
     override val syncThreshold = 3.milli(Second)
-    override val subsystemName = "Drivetrain"
+    override val name = "Drivetrain"
 
     val leftSlaveEscId by pref(14)
     val rightSlaveEscId by pref(13)

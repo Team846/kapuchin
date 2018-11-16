@@ -33,7 +33,7 @@ class RollersHardware : SubsystemHardware<RollersHardware, RollersComponent>() {
     override val priority get() = TODO()
     override val period get() = TODO()
     override val syncThreshold = 50.milli(Second)
-    override val subsystemName = "Collector Rollers"
+    override val name = "Collector Rollers"
 
     val leftPwmPort by pref(1)
     val leftEsc by hardw { Spark(leftPwmPort) }
