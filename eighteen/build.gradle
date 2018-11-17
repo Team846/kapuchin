@@ -10,7 +10,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.0'
 
-    expectedBy project(":architecture")
+    implementation project(":architecture:jvmfrc")
     implementation wpilib()
     implementation ctre()
     implementation 'com.github.juchong:ADIS16448-RoboRIO-Driver:2018.3'
