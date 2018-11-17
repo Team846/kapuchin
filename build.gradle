@@ -20,13 +20,17 @@ allprojects {
     group 'com.lynbrookrobotics'
     version '1.0.0'
     repositories.jcenter()
+
+    tasks.withType(Test) { // https://guides.gradle.org/performance/#parallel_test_execution
+        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    }
 }
 
 apply plugin: 'org.jetbrains.dokka'
 dokka { // https://github.com/Kotlin/dokka/blob/master/README.md#output_formats
     outputDirectory = "docs"
     sourceDirs = files('architecture/src/main/kotlin', 'architecture/build/uom/')
-    
+
     packageOptions {
         prefix = 'info.kunalsheth.units.generated'
         suppress = true
