@@ -9,6 +9,9 @@ dependencies {
     expectedBy project(":architecture")
     implementation wpilib()
     implementation ctre()
+
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 }
 
 group 'com.lynbrookrobotics'
