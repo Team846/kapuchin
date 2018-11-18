@@ -23,7 +23,7 @@ suspend fun RollersComponent.teleop(driver: DriverHardware) = startRoutine("tele
 suspend fun RollersComponent.purge() = startRoutine("purge") { controller { TwoSided(purgeStrength) } }
 suspend fun RollersComponent.collect() = startRoutine("collect") { controller { cornerAdjustingCollection(it) } }
 
-private fun RollersComponent.cornerAdjustingCollection(now: Time): TwoSided<V> {
+private fun RollersComponent.cornerAdjustingCollection(now: Time): TwoSided<DutyCycle> {
     val adjust = cubeAdjustStrength * if ((now * cubeAdjustCycle).Each.toInt() % 2 == 0) 1 else -1
     return TwoSided(-collectStrength + adjust, -collectStrength - adjust)
 }

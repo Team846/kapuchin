@@ -63,7 +63,7 @@ data class Subsystems(
             val winch = async { WinchComponent(WinchHardware()) }
             val clamp = async { ClampComponent(ClampHardware()) }
             val pivot = async { PivotComponent(PivotHardware()) }
-            val rollers = async { RollersComponent(RollersHardware(), ElectricalSystemHardware()) }
+            val rollers = async { RollersComponent(RollersHardware()) }
             val drivetrain = async { DrivetrainComponent(DrivetrainHardware()) }
             val lift = async { LiftComponent(LiftHardware()) }
             val driver = async { DriverHardware() }
@@ -88,7 +88,7 @@ data class Subsystems(
                     winch = WinchComponent(WinchHardware()),
                     clamp = ClampComponent(ClampHardware()),
                     pivot = PivotComponent(PivotHardware()),
-                    rollers = RollersComponent(RollersHardware(), ElectricalSystemHardware()),
+                    rollers = RollersComponent(RollersHardware()),
                     drivetrain = DrivetrainComponent(DrivetrainHardware()),
                     lift = LiftComponent(LiftHardware()),
                     driverHardware = DriverHardware()
