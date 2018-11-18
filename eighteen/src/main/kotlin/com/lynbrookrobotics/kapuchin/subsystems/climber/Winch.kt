@@ -27,7 +27,7 @@ class WinchHardware : SubsystemHardware<WinchHardware, WinchComponent>() {
     override val priority get() = TODO()
     override val period = 100.milli(Second)
     override val syncThreshold = 50.milli(Second)
-    override val subsystemName = "Climber Winch"
+    override val name = "Climber Winch"
 
     val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(30, Ampere)

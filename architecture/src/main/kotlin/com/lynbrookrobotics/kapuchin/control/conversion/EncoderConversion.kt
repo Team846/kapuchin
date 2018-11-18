@@ -3,6 +3,18 @@ package com.lynbrookrobotics.kapuchin.control.conversion
 import com.lynbrookrobotics.kapuchin.control.div
 import info.kunalsheth.units.generated.*
 
+/**
+ * Encoder conversion utility
+ *
+ * Utility functions for converting between encoder outputs and angles
+ *
+ * @author Kunal
+ * @see OffloadedNativeConversion
+ * @see GearTrain
+ *
+ * @param ticks number of encoder ticks in 1 `perRevolution`
+ * @param perRevolution angle corresponding `ticks` encoder ticks
+ */
 class EncoderConversion(ticks: Int, perRevolution: Angle) {
     private val anglePerTick = perRevolution / ticks.Each
 

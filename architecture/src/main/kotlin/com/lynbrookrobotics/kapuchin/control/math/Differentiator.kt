@@ -1,10 +1,25 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
-import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
+/**
+ * Calculates a derivative
+ *
+ * Takes the slope of the last two inputs
+ *
+ * @author Kunal
+ * @see RampRateLimiter
+ *
+ * @param Q type of input
+ * @param DQDT derivative of input
+ *
+ * @param div UOM proof (just pass in `::div`)
+ * @param x1 starting time
+ * @param y1 initial value
+ */
 class Differentiator<Q, DQDT>(
         private val div: (Q, T) -> DQDT,
         private var x1: Time,

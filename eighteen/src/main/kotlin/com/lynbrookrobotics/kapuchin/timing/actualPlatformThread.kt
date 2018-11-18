@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlin.concurrent.thread
 
-actual class PlatformThread actual constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
+actual class PlatformThread private actual constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
     private val thread: Thread
 
     init {
@@ -38,6 +38,10 @@ actual class PlatformThread actual constructor(parent: Named, name: String, prio
                 log(Debug) { "$formattedName Exiting" }
             }
         }
+    }
+
+    actual companion object {
+        actual fun Named.platformThread(name: String, priority: Priority, run: () -> Unit) = PlatformThread(this, name, priority, run)
     }
 }
 

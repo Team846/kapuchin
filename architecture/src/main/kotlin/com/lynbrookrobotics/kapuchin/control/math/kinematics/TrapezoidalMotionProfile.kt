@@ -5,6 +5,7 @@ import info.kunalsheth.units.generated.FootPerSecond
 import info.kunalsheth.units.generated.Length
 import info.kunalsheth.units.generated.Velocity
 
+@Deprecated("TrapezoidalMotionProfile should output current, not velocity")
 data class TrapezoidalMotionProfile(
         val distance: Length,
         val startingSpeed: Velocity,

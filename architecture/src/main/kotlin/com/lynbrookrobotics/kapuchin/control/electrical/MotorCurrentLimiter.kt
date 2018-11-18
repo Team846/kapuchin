@@ -2,9 +2,28 @@ package com.lynbrookrobotics.kapuchin.control.electrical
 
 import info.kunalsheth.units.generated.*
 
+/**
+ * Limits the current applied to a motor
+ *
+ * Prevents control code from damaging motors and/or causing brownouts. Also limits acceleration.
+ *
+ * @author Kunal
+ * @see OutsideThresholdChecker
+ * @see RampRateLimiter
+ *
+ * @param maxVoltage must be greater than zero
+ * @param freeSpeed must be greater than zero
+ * @param stall must be greater than zero
+ * @param limit must be greater than zero
+ *
+ * @property maxVoltage motor's nominal voltage, often 12V
+ * @property freeSpeed motor's top speed (look it up)
+ * @property stall motors stall current (look it up)
+ * @property limit current limit
+ */
 class MotorCurrentLimiter(
         val maxVoltage: V, val freeSpeed: AngularVelocity,
-        stall: I, val limit: I
+        val stall: I, val limit: I
 ) :
         (AngularVelocity, V) -> V,
         (V, I, V) -> V {
@@ -16,7 +35,7 @@ class MotorCurrentLimiter(
             target = target
     )
 
-    // todo this is broken
+    @Deprecated(message = "Does not work in practice")
     override operator fun invoke(applying: V, drawing: I, target: V) = limit(
             emf = applying - drawing * motorR,
             target = target

@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.timing.PlatformThread.Companion.platformThread
 import edu.wpi.first.wpilibj.hal.NotifierJNI
 import info.kunalsheth.units.generated.*
 
@@ -14,7 +15,7 @@ actual class Ticker private actual constructor(
         Clock {
 
     override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
-    private val thread = PlatformThread(parent, name, priority) {
+    private val thread = platformThread(name, priority) {
         while (true) tick(waitOnTick())
     }
 

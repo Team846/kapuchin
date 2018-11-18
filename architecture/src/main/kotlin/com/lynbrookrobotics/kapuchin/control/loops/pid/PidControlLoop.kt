@@ -9,10 +9,31 @@ import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
 
+/**
+ * Runs calculations for PID control
+ *
+ * Intended to be a quick-and-easy control implementation.
+ *
+ * @author Kunal
+ * @see PidGains
+ *
+ * @param Input type of sensor feedback
+ * @param Integ integral of sensor feedback
+ * @param Deriv derivative of sensor feedback
+ * @param Output type of output
+ * @param Gains type of PidGains to use
+ *
+ * @param div UOM proof (just pass in `::div`)
+ * @param times UOM proof (just pass in `::times`)
+ * @param integralFalloff size of integrator buffer. If less than or equal to zero, accumulates integral error forever.
+ * @param gains function returning gains
+ * @param target function returning target
+ */
 open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
-        deriv: (Input, T) -> Deriv,
-        integ: (Input, T) -> Integ,
+        div: (Input, T) -> Deriv,
+        times: (Input, T) -> Integ,
         private val gains: (Time, Input) -> Gains,
+        integralFalloff: Int = 100,
         private val target: (Time) -> Input
 ) : ControlLoop<Input, Output>
         where Input : Quan<Input>,
@@ -21,24 +42,24 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
               Output : Quan<Output>,
               Gains : PidGains<Input, Integ, Deriv, Output> {
 
-    constructor(deriv: (Input, T) -> Deriv,
-                integ: (Input, T) -> Integ,
+    constructor(div: (Input, T) -> Deriv,
+                times: (Input, T) -> Integ,
                 gains: Gains,
+                integralFalloff: Int = 100,
                 target: (Time) -> Input
-    ) : this(deriv, integ, { _, _ -> gains }, target)
+    ) : this(div, times, { _, _ -> gains }, integralFalloff, target)
 
     private val zero = target(currentTime) * 0
-    private val derivative = Differentiator(deriv, currentTime, zero)
+    private val derivative = Differentiator(div, currentTime, zero)
 
-    private val integral = (gains(currentTime, zero)).run {
-        if (integralFalloff > 0) FiniteIntegrator(integ,
-                currentTime, zero,
-                integralFalloff
-        )
-        else InfiniteIntegrator(integ,
-                currentTime, zero
-        )
-    }
+    private val integral =
+            if (integralFalloff > 0) FiniteIntegrator(times,
+                    currentTime, zero,
+                    integralFalloff
+            )
+            else InfiniteIntegrator(times,
+                    currentTime, zero
+            )
 
     override fun invoke(stamp: Time, current: Input): Output = gains(stamp, current).run {
         val target = target(stamp)

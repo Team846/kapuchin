@@ -19,7 +19,7 @@ class HooksHardware : SubsystemHardware<HooksHardware, HooksComponent>() {
     override val priority get() = TODO()
     override val period get() = TODO()
     override val syncThreshold = 50.milli(Second)
-    override val subsystemName = "Climber Hooks"
+    override val name = "Climber Hooks"
 
     val solenoidPort by pref(0)
     val solenoidValve by hardw { Solenoid(solenoidPort) }

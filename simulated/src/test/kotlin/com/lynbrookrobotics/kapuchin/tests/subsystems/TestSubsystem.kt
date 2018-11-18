@@ -42,7 +42,7 @@ fun TC<*, *>.checkCount(number: Int, times: Int, tolerance: Int = 0) {
     tolerance `is greater than or equal to?` abs(out.count { it == "countTo($number)" } - times)
 }
 
-abstract class TSH<This, C>(override val subsystemName: String) : SubsystemHardware<This, C>()
+abstract class TSH<This, C>(override val name: String) : SubsystemHardware<This, C>()
         where This : SubsystemHardware<This, C>,
               C : Component<C, This, *> {
 

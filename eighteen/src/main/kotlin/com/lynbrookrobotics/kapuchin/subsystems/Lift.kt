@@ -42,7 +42,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val priority = Priority.Low
     override val period = 20.milli(Second)
     override val syncThreshold = 5.milli(Second)
-    override val subsystemName = "Lift"
+    override val name = "Lift"
 
     val operatingVoltage by pref(12, Volt)
     val currentLimit by pref(30, Ampere)
