@@ -14,14 +14,14 @@ import info.kunalsheth.units.generated.Time
  * @see MotorCurrentLimiter
  *
  * @param Q type of input
- * @param safeRange range in which values are considered normal
- * @param forDuration grace period for values to be outside `safeRange` before the checker triggers
+ * @property safeRange range in which values are considered normal
+ * @property forDuration grace period for values to be outside `safeRange` before the checker triggers
  */
-fun <Q : Quan<Q>> outsideThresholdChecker(safeRange: ClosedRange<Q>, forDuration: Time): (Time, Q) -> Boolean {
+class OutsideThresholdChecker<Q : Quan<Q>>(val safeRange: ClosedRange<Q>, val forDuration: Time) : (Time, Q) -> Boolean {
 
-    var start: Time? = null
+    private var start: Time? = null
 
-    return fun(x: Time, y: Q) =
+    override fun invoke(x: Time, y: Q) =
             if (y !in safeRange) {
                 if (start == null) start = x
                 x - (start ?: x) > forDuration

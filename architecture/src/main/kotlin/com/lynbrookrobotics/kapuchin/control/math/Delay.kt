@@ -12,14 +12,14 @@ package com.lynbrookrobotics.kapuchin.control.math
  *
  * @property lookBack size of value queue
  */
-fun <T> delay(lookBack: Int): (T) -> T? {
+class Delay<T>(val lookBack: Int) : (T) -> T? {
 
     @Suppress("UNCHECKED_CAST") // this is a workaround
-    val buffer = arrayOfNulls<Any>(lookBack) as Array<T?>
+    private val buffer = arrayOfNulls<Any>(lookBack) as Array<T?>
 
-    var index: Int = 0
+    private var index: Int = 0
 
-    return fun(newValue: T): T? {
+    override fun invoke(newValue: T): T? {
         val oldestIndex = (index + 1) % lookBack
         return buffer[oldestIndex].also {
             buffer[index] = newValue

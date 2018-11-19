@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
 import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.Ticker
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import com.lynbrookrobotics.kapuchin.timing.scope
 import kotlinx.coroutines.launch

@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
 
-class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, Pair<DutyCycle, DutyCycle>>(hardware) {
+class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, Pair<Dimensionless, Dimensionless>>(hardware) {
 
     val topSpeed by pref(6500.0, Rpm)
     val gains by pref {
@@ -24,8 +24,8 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
     override val fallbackController: ShooterComponent.(Time) -> Pair<Dimensionless, Dimensionless> = { 0.Percent to 0.Percent }
 
     override fun ShooterHardware.output(value: Pair<Dimensionless, Dimensionless>) {
-        frontEsc.set(value.first.Each)
-        backEsc.set(value.second.Each)
+        frontEsc.set(value.first.siValue)
+        backEsc.set(value.second.siValue)
     }
 }
 
