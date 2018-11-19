@@ -1,6 +1,9 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
-import com.lynbrookrobotics.kapuchin.control.electrical.*
+import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
+import com.lynbrookrobotics.kapuchin.control.electrical.outsideThresholdChecker
+import com.lynbrookrobotics.kapuchin.control.electrical.rampRateLimiter
+import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`

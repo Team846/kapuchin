@@ -1,10 +1,11 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
 import com.lynbrookrobotics.kapuchin.control.electrical.rampRateLimiter
-import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
-import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.loops.pid.pidControlLoop
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.math.avg
+import com.lynbrookrobotics.kapuchin.control.math.infiniteIntegrator
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.trapezoidalMotionProfile
 import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
@@ -14,7 +15,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
-import com.lynbrookrobotics.kapuchin.control.math.kinematics.trapezoidalMotionProfile
 import kotlin.math.absoluteValue
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
@@ -42,7 +42,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     val turnTargetIntegrator = infiniteIntegrator(::times,
             gyro.x, gyro.y.velocity
     )
-    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) {
+    val turnControl = pidControlLoop(::div, ::times, turningPositionGains) {
         val steeringForwardBlend =
                 if (steering == 0.0) 0.0
                 else steering.absoluteValue / (steering.absoluteValue + accelerator.absoluteValue)
@@ -100,7 +100,7 @@ suspend fun DrivetrainComponent.arcTo(
     )
 
     val startingPostion = position
-    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) {
+    val turnControl = pidControlLoop(::div, ::times, turningPositionGains) {
         // θ = s ÷ r
         (position.avg - startingPostion.avg) / radius * Radian
     }
@@ -161,7 +161,7 @@ suspend fun DrivetrainComponent.driveStraight(
     )
 
     val startingPostion = position
-    val turnControl = PidControlLoop(::div, ::times, turningPositionGains) { bearing }
+    val turnControl = pidControlLoop(::div, ::times, turningPositionGains) { bearing }
 
     val distanceRange = distance `±` distanceTolerance
     val bearingRange = bearing `±` angleTolerance
