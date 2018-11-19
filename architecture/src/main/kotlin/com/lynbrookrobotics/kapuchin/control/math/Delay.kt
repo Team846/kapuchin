@@ -9,8 +9,7 @@ package com.lynbrookrobotics.kapuchin.control.math
  *
  * @param T type of delayed values
  * @param lookBack must be greater than zero
- *
- * @property lookBack size of value queue
+ * @param lookBack size of value queue
  */
 fun <T> delay(lookBack: Int): (T) -> T? {
 

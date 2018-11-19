@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.Quan
  * Stores gains for PID control
  *
  * @author Kunal
- * @see PidControlLoop
+ * @see pidControlLoop
  * @see Gain
  *
  * @param Input type of sensor feedback

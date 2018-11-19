@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
+import com.lynbrookrobotics.kapuchin.control.electrical.rampRateLimiter
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
@@ -10,7 +11,7 @@ import info.kunalsheth.units.generated.Time
  * Takes the slope of the last two inputs
  *
  * @author Kunal
- * @see RampRateLimiter
+ * @see rampRateLimiter
  *
  * @param Q type of input
  * @param DQDT derivative of input

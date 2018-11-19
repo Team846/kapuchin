@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.control.electrical
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
+import com.lynbrookrobotics.kapuchin.control.math.differentiator
 
 /**
  * Prevents values from increasing too fast
@@ -10,8 +11,8 @@ import info.kunalsheth.units.generated.Time
  * Intended to prevent excess current draw when controlling motors without feedback.
  *
  * @author Kunal
- * @see MotorCurrentLimiter
- * @see Differentiator
+ * @see motorCurrentLimiter
+ * @see differentiator
  *
  * @param Q type of input and output
  * @param D derivative of input

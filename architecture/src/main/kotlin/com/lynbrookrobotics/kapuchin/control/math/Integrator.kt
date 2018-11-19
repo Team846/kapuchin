@@ -33,7 +33,7 @@ private fun <Q, SQDT> integrator(
  * Adds up trapezoids since creation
  *
  * @author Kunal
- * @see FiniteIntegrator
+ * @see finiteIntegrator
  *
  * @param Q type of input
  * @param SQDT integral of input
@@ -64,7 +64,7 @@ fun <Q, SQDT> infiniteIntegrator(
  * Adds up the last `falloff` trapezoids
  *
  * @author Kunal
- * @see InfiniteIntegrator
+ * @see infiniteIntegrator
  *
  * @param Q type of input
  * @param SQDT integral of input
@@ -72,8 +72,7 @@ fun <Q, SQDT> infiniteIntegrator(
  * @param times UOM proof (just pass in `::times`)
  * @param x1 starting time
  * @param y1 initial value
- *
- * @property falloff number of trapezoids to look back when accumulating
+ * @param falloff number of trapezoids to look back when accumulating
  */
 fun <Q, SQDT> finiteIntegrator(
         times: (Q, T) -> SQDT,

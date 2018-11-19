@@ -11,7 +11,7 @@ import info.kunalsheth.units.generated.Time
  * Could be used to terminate autonomous routines in case the robot is stalled.
  *
  * @author Kunal
- * @see MotorCurrentLimiter
+ * @see motorCurrentLimiter
  *
  * @param Q type of input
  * @param safeRange range in which values are considered normal

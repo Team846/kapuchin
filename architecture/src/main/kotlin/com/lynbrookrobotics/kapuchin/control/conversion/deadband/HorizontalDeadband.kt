@@ -9,7 +9,7 @@ import info.kunalsheth.units.generated.Quan
  * Intended for joystick input to prevent drifting
  *
  * @author Alvyn, Kunal
- * @see VerticalDeadband
+ * @see verticalDeadband
  *
  * @param Q type of input and output
  * @param xIntercept maximum input that will still be mapped to zero. Must be greater than zero.

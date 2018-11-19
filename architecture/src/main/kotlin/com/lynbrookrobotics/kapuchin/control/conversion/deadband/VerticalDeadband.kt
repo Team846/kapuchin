@@ -9,7 +9,7 @@ import info.kunalsheth.units.generated.Quan
  * Intended for control code to overcome friction and close small errors
  *
  * @author Alvyn, Kunal
- * @see HorizontalDeadband
+ * @see horizontalDeadband
  *
  * @param Q type of input and output
  * @param yIntercept minimum output for any non-zero input. Must be greater than zero.
