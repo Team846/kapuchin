@@ -8,18 +8,19 @@ import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.*
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedGainWriter
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.lazyOffloadedGainWriter
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import info.kunalsheth.units.generated.*
 
 private val configTimeout = 5 * 1000
 private val slowStatusFrameRate = 1000
 
-fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOffloadedGainWriter {
+fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (OffloadedOutput) -> Unit {
     val gainConfigTimeout = (period / 2).milli(Second).toInt()
     fun wrap(f: (Int, Double, Int) -> ErrorCode): (Double) -> Unit = { f(idx, it, gainConfigTimeout) }
 
-    return LazyOffloadedGainWriter(
+    return lazyOffloadedGainWriter(
             writeKp = wrap(talonSRX::config_kP),
             writeKi = wrap(talonSRX::config_kI),
             writeKd = wrap(talonSRX::config_kD),
