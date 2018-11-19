@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
-import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
-import com.lynbrookrobotics.kapuchin.control.electrical.outsideThresholdChecker
-import com.lynbrookrobotics.kapuchin.control.electrical.rampRateLimiter
+import com.lynbrookrobotics.kapuchin.control.electrical.MotorCurrentLimiter
+import com.lynbrookrobotics.kapuchin.control.electrical.OutsideThresholdChecker
+import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
@@ -18,7 +18,7 @@ class ElectricalTests {
     fun `ramp rate limiting ramps up and down output`() {
         val startRampUpTime = 846.Minute
 
-        val limiter = rampRateLimiter(::div, ::times,
+        val limiter = RampRateLimiter(::div, ::times,
                 startRampUpTime, 0.Volt
         ) { 12.VoltPerSecond }
 
@@ -48,7 +48,7 @@ class ElectricalTests {
         val currentLimit = 25.Ampere
         val r = maxVoltage / stallCurrent
 
-        val limiter = motorCurrentLimiter(
+        val limiter = MotorCurrentLimiter(
                 maxVoltage, 5300.Rpm,
                 stallCurrent, currentLimit
         )
@@ -58,10 +58,12 @@ class ElectricalTests {
         repeat(100) {
             val target = incr * it
             limiter(0.Rpm, target) `is equal to?` if (target > maxStartupVoltage) maxStartupVoltage else target
+            limiter(0.Volt, 0.Ampere, target) `is equal to?` if (target > maxStartupVoltage) maxStartupVoltage else target
         }
         repeat(100) {
             val target = -incr * it
             limiter(0.Rpm, target) `is equal to?` if (target < -maxStartupVoltage) -maxStartupVoltage else target
+            limiter(0.Volt, 0.Ampere, target) `is equal to?` if (target < -maxStartupVoltage) -maxStartupVoltage else target
         }
     }
 
@@ -70,7 +72,7 @@ class ElectricalTests {
         val duration = 3.Second
         val tolerance = 25.Ampere
         val safeRange = 0.Ampere `±` tolerance
-        val checker = outsideThresholdChecker(safeRange, duration)
+        val checker = OutsideThresholdChecker(safeRange, duration)
 
         val insideStartTime = 846.Minute
         val incr = 3.milli(Second)

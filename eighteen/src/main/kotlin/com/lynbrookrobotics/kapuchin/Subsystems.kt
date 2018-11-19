@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
 import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
+import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.LiftHardware
 import com.lynbrookrobotics.kapuchin.subsystems.climber.*
@@ -62,7 +63,7 @@ data class Subsystems(
             val winch = async { WinchComponent(WinchHardware()) }
             val clamp = async { ClampComponent(ClampHardware()) }
             val pivot = async { PivotComponent(PivotHardware()) }
-            val rollers = async { RollersComponent(RollersHardware()) }
+            val rollers = async { RollersComponent(RollersHardware(), ElectricalSystemHardware()) }
             val drivetrain = async { DrivetrainComponent(DrivetrainHardware()) }
             val lift = async { LiftComponent(LiftHardware()) }
             val driver = async { DriverHardware() }
@@ -87,7 +88,7 @@ data class Subsystems(
                     winch = WinchComponent(WinchHardware()),
                     clamp = ClampComponent(ClampHardware()),
                     pivot = PivotComponent(PivotHardware()),
-                    rollers = RollersComponent(RollersHardware()),
+                    rollers = RollersComponent(RollersHardware(), ElectricalSystemHardware()),
                     drivetrain = DrivetrainComponent(DrivetrainHardware()),
                     lift = LiftComponent(LiftHardware()),
                     driverHardware = DriverHardware()

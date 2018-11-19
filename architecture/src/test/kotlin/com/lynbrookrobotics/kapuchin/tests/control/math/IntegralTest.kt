@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math
 
-import com.lynbrookrobotics.kapuchin.control.math.finiteIntegrator
-import com.lynbrookrobotics.kapuchin.control.math.infiniteIntegrator
+import com.lynbrookrobotics.kapuchin.control.math.integration.FiniteIntegrator
+import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
@@ -17,7 +17,7 @@ class IntegralTest {
     @Test
     fun `Finite integral of zero is zero`() {
         anyInt.filter { it > 0 }.forEach { falloff ->
-            val integrator = finiteIntegrator(::times,
+            val integrator = FiniteIntegrator(::times,
                     -Second, 0.FootPerSecond,
                     falloff
             )
@@ -29,7 +29,7 @@ class IntegralTest {
 
     @Test
     fun `Infinite integral of zero is zero`() {
-        val integrator = infiniteIntegrator(::times,
+        val integrator = InfiniteIntegrator(::times,
                 -Second, 0.FootPerSecond
         )
         repeat(50) { time ->
@@ -40,12 +40,12 @@ class IntegralTest {
     @Test
     fun `Finite integral is finite`() {
         anyInt.filter { it > 1 }.forEach { falloff ->
-            val integrator = finiteIntegrator(::times,
+            val integrator = FiniteIntegrator(::times,
                     -Second, 2.FootPerSecond,
                     falloff
             )
 
-            val retained = falloff - 1
+            val retained = integrator.falloff - 1
 
             repeat(retained) { time ->
                 integrator(time.Second, 0.FootPerSecond) `is equal to?` 1.Foot
@@ -56,7 +56,7 @@ class IntegralTest {
 
     @Test
     fun `Infinite integral is infinite`() {
-        val integrator = infiniteIntegrator(::times,
+        val integrator = InfiniteIntegrator(::times,
                 -Second, 2.FootPerSecond
         )
         repeat(1000) { time ->
@@ -68,7 +68,7 @@ class IntegralTest {
     @Test
     fun `Finite integral of a positive number is greater than zero`() {
         anyInt.filter { it > 0 }.forEach { falloff ->
-            val integrator = finiteIntegrator(::times,
+            val integrator = FiniteIntegrator(::times,
                     -Second, 1E-5.FootPerSecond,
                     falloff
             )
@@ -80,7 +80,7 @@ class IntegralTest {
 
     @Test
     fun `Infinite integral of a positive number is greater than zero`() {
-        val integrator = infiniteIntegrator(::times,
+        val integrator = InfiniteIntegrator(::times,
                 -Second, 1E-5.FootPerSecond
         )
         anyDouble.filter { it > 0 }.forEachIndexed { time, value ->

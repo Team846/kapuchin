@@ -5,10 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.collector.ClampComponent
 import com.lynbrookrobotics.kapuchin.subsystems.collector.PivotComponent
 import com.lynbrookrobotics.kapuchin.subsystems.collector.RollersComponent
-import info.kunalsheth.units.generated.DutyCycle
-import info.kunalsheth.units.generated.Each
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.generated.*
 
 suspend fun RollersComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val toCollect by driver.collect.readEagerly.withoutStamps
@@ -26,7 +23,7 @@ suspend fun RollersComponent.teleop(driver: DriverHardware) = startRoutine("tele
 suspend fun RollersComponent.purge() = startRoutine("purge") { controller { TwoSided(purgeStrength) } }
 suspend fun RollersComponent.collect() = startRoutine("collect") { controller { cornerAdjustingCollection(it) } }
 
-private fun RollersComponent.cornerAdjustingCollection(now: Time): TwoSided<DutyCycle> {
+private fun RollersComponent.cornerAdjustingCollection(now: Time): TwoSided<V> {
     val adjust = cubeAdjustStrength * if ((now * cubeAdjustCycle).Each.toInt() % 2 == 0) 1 else -1
     return TwoSided(-collectStrength + adjust, -collectStrength - adjust)
 }

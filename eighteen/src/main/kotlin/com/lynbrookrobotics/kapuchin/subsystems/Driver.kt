@@ -1,9 +1,11 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.control.`±`
 import com.lynbrookrobotics.kapuchin.control.stampWith
+import com.lynbrookrobotics.kapuchin.control.`±`
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.logging.Level.Debug
+import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
 import com.lynbrookrobotics.kapuchin.timing.Priority
@@ -19,13 +21,16 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val syncThreshold = 3.milli(Second)
 
     val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
-        it.name == "T.16000M"
+        log(Debug) { it.name } // TESTING
+        true
     }
     val driver by hardw { Joystick(0) }.verify("the driver joystick is connected") {
-        it.name == "T.16000M"
+        log(Debug) { it.name } // TESTING
+        true
     }
     val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
-        it.name == "FGT Rumble 3-in-1"
+        log(Debug) { it.name } // TESTING
+        true
     }
 
     enum class JoystickButton(val raw: Int) {
@@ -48,7 +53,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val manualClimb = s { operator[RightFour] }
 
     // DRIVETRAIN
-    private fun sqrWithSign(x: Double) = x * x * x.sign
+    fun sqrWithSign(x: Double) = x * x * x.sign
 
     val accelerator = s { sqrWithSign(-(driver.y.takeUnless { it in inactiveRange } ?: 0.0)) }
     val steering = s { wheel.x.takeUnless { it in inactiveRange } ?: 0.0 }

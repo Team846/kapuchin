@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.control.div
 import info.kunalsheth.units.generated.*
 
 /**
@@ -12,26 +11,42 @@ import info.kunalsheth.units.generated.*
  * @see OutsideThresholdChecker
  * @see RampRateLimiter
  *
- * @param maxVoltage motor's nominal voltage, often 12V. must be greater than zero.
- * @param freeSpeed motor's top speed. Must be greater than zero.
- * @param stall motor's stall current. Must be greater than zero.
- * @param limit current limit. Must be greater than zero.
+ * @param maxVoltage must be greater than zero
+ * @param freeSpeed must be greater than zero
+ * @param stall must be greater than zero
+ * @param limit must be greater than zero
+ *
+ * @property maxVoltage motor's nominal voltage, often 12V
+ * @property freeSpeed motor's top speed (look it up)
+ * @property stall motors stall current (look it up)
+ * @property limit current limit
  */
-fun <S : Quan<S>> motorCurrentLimiter(
-        maxVoltage: V, freeSpeed: S,
-        stall: I, limit: I
-): (S, V) -> V {
+class MotorCurrentLimiter(
+        val maxVoltage: V, val freeSpeed: AngularVelocity,
+        val stall: I, val limit: I
+) :
+        (AngularVelocity, V) -> V,
+        (V, I, V) -> V {
 
-    val windings = maxVoltage / stall
+    private val motorR: ElectricalResistance = maxVoltage / stall
 
-    return fun(speed: S, target: V): V {
-        val emf = speed / freeSpeed * maxVoltage
+    override operator fun invoke(speed: AngularVelocity, target: V) = limit(
+            emf = speed / freeSpeed * maxVoltage,
+            target = target
+    )
 
-        val expectedCurrent = (target - emf) / windings
+    @Deprecated(message = "Does not work in practice")
+    override operator fun invoke(applying: V, drawing: I, target: V) = limit(
+            emf = applying - drawing * motorR,
+            target = target
+    )
+
+    private fun limit(emf: V, target: V): V {
+        val expectedCurrent = (target - emf) / motorR
 
         return when {
-            expectedCurrent > limit -> limit * windings + emf
-            expectedCurrent < -limit -> -(limit * windings + emf)
+            expectedCurrent > limit -> limit * motorR + emf
+            expectedCurrent < -limit -> -(limit * motorR + emf)
             else -> target
         }
     }
