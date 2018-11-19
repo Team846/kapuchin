@@ -5,7 +5,9 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Each
+import info.kunalsheth.units.generated.Length
+import info.kunalsheth.units.generated.`±`
 
 suspend fun LiftComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     fun <I> r(s: Sensor<I>) = s.readWithEventLoop.withoutStamps

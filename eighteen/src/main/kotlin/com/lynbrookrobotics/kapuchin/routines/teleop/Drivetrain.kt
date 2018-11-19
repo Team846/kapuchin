@@ -1,11 +1,10 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
-import com.lynbrookrobotics.kapuchin.control.electrical.RampRateLimiter
+import com.lynbrookrobotics.kapuchin.control.electrical.rampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidControlLoop
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.math.avg
-import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
-import com.lynbrookrobotics.kapuchin.control.math.kinematics.TrapezoidalMotionProfile
 import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
@@ -15,6 +14,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.trapezoidalMotionProfile
 import kotlin.math.absoluteValue
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
@@ -30,16 +30,16 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
         else 1000.FootPerSecondSquared
     }
 
-    val leftSlew = RampRateLimiter(::div, ::times,
+    val leftSlew = rampRateLimiter(::div, ::times,
             currentTime, 0.FootPerSecond,
             limit = slewFunction
     )
-    val rightSlew = RampRateLimiter(::div, ::times,
+    val rightSlew = rampRateLimiter(::div, ::times,
             currentTime, 0.FootPerSecond,
             limit = slewFunction
     )
 
-    val turnTargetIntegrator = InfiniteIntegrator(::times,
+    val turnTargetIntegrator = infiniteIntegrator(::times,
             gyro.x, gyro.y.velocity
     )
     val turnControl = PidControlLoop(::div, ::times, turningPositionGains) {
@@ -90,7 +90,7 @@ suspend fun DrivetrainComponent.arcTo(
     val rBig = rL maxMag rR
     val rSmallBigRatio = rSmall / rBig
 
-    val profile = TrapezoidalMotionProfile(
+    val profile = trapezoidalMotionProfile(
             distance = sL maxMag sR,
             startingSpeed = kickstart maxMag velocity.avg,
             acceleration = acceleration,
@@ -151,7 +151,7 @@ suspend fun DrivetrainComponent.driveStraight(
     val velocity by hardware.velocity.readOnTick.withoutStamps
     val gyro by hardware.gyroInput.readEagerly.withStamps
 
-    val profile = TrapezoidalMotionProfile(
+    val profile = trapezoidalMotionProfile(
             distance = distance,
             startingSpeed = kickstart maxMag velocity.avg,
             acceleration = acceleration,
