@@ -7,7 +7,9 @@ import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.UomConverter
 import kotlinx.coroutines.launch
+import java.io.Closeable
 import java.io.File
+import java.io.Flushable
 
 actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
     Level.Error -> println("ERROR $formattedMessage")
@@ -17,6 +19,7 @@ actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
 
 actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: String, private val withUnits: UomConverter<Q>) :
         Named by Named("$of (${withUnits.unitName})", parent),
+        Flushable, Closeable,
         (Time, Q) -> Unit {
 
     private var running = scope.launch { }
@@ -30,6 +33,9 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
             printer.println("${x.Second},${withUnits(y)}")
         }.also { running = it }
     }
+
+    actual override fun flush() = printer.flush()
+    actual override fun close() = printer.close()
 
     actual companion object {
         actual fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>) =

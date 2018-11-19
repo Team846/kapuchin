@@ -18,6 +18,9 @@ import info.kunalsheth.units.generated.UomConverter
 expect class Grapher<Q : Quan<Q>> private constructor(parent: Named, of: String, withUnits: UomConverter<Q>) : Named, (Time, Q) -> Unit {
     override fun invoke(x: Time, y: Q)
 
+    fun flush()
+    fun close()
+
     companion object {
         /**
          * Public graph initializer
