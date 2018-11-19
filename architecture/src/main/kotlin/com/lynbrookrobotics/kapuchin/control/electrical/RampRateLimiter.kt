@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.control.math.Differentiator
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time

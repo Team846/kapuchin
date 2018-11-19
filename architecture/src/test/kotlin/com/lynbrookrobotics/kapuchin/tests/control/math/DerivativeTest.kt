@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math
 
-import com.lynbrookrobotics.kapuchin.control.math.Differentiator
+import com.lynbrookrobotics.kapuchin.control.math.differentiator
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
@@ -14,7 +14,7 @@ class DerivativeTest {
     @Test
     fun `Derivative of constant is zero`() {
         anyDouble.forEach { constant ->
-            val differentiator = Differentiator(::div,
+            val differentiator = differentiator(::div,
                     -Second, constant.Foot
             )
             repeat(50) { time ->
@@ -25,7 +25,7 @@ class DerivativeTest {
 
     @Test
     fun `Derivative of a increasing numbers is greater than zero`() {
-        val differentiator = Differentiator(::div,
+        val differentiator = differentiator(::div,
                 -Second, (anyDouble.min()!! - 1).Foot
         )
         anyDouble.sorted().forEachIndexed { time, increasingValue ->

@@ -1,9 +1,9 @@
 package com.lynbrookrobotics.kapuchin.control.loops.pid
 
 import com.lynbrookrobotics.kapuchin.control.loops.ControlLoop
-import com.lynbrookrobotics.kapuchin.control.math.Differentiator
-import com.lynbrookrobotics.kapuchin.control.math.integration.FiniteIntegrator
-import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
+import com.lynbrookrobotics.kapuchin.control.math.differentiator
+import com.lynbrookrobotics.kapuchin.control.math.finiteIntegrator
+import com.lynbrookrobotics.kapuchin.control.math.infiniteIntegrator
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
@@ -50,14 +50,14 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
     ) : this(div, times, { _, _ -> gains }, integralFalloff, target)
 
     private val zero = target(currentTime) * 0
-    private val derivative = Differentiator(div, currentTime, zero)
+    private val derivative = differentiator(div, currentTime, zero)
 
     private val integral =
-            if (integralFalloff > 0) FiniteIntegrator(times,
+            if (integralFalloff > 0) finiteIntegrator(times,
                     currentTime, zero,
                     integralFalloff
             )
-            else InfiniteIntegrator(times,
+            else infiniteIntegrator(times,
                     currentTime, zero
             )
 
