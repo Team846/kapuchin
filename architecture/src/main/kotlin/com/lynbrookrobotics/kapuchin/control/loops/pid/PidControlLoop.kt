@@ -1,9 +1,8 @@
 package com.lynbrookrobotics.kapuchin.control.loops.pid
 
-import com.lynbrookrobotics.kapuchin.control.loops.ControlLoop
-import com.lynbrookrobotics.kapuchin.control.math.Differentiator
-import com.lynbrookrobotics.kapuchin.control.math.integration.FiniteIntegrator
-import com.lynbrookrobotics.kapuchin.control.math.integration.InfiniteIntegrator
+import com.lynbrookrobotics.kapuchin.control.math.differentiator
+import com.lynbrookrobotics.kapuchin.control.math.finiteIntegrator
+import com.lynbrookrobotics.kapuchin.control.math.infiniteIntegrator
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
@@ -29,41 +28,33 @@ import info.kunalsheth.units.generated.Time
  * @param gains function returning gains
  * @param target function returning target
  */
-open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
+fun <Input, Integ, Deriv, Output> pidControlLoop(
         div: (Input, T) -> Deriv,
         times: (Input, T) -> Integ,
-        private val gains: (Time, Input) -> Gains,
+        gains: (Time, Input) -> PidGains<Input, Integ, Deriv, Output>,
         integralFalloff: Int = 100,
-        private val target: (Time) -> Input
-) : ControlLoop<Input, Output>
+        target: (Time) -> Input
+): (Time, Input) -> Output
         where Input : Quan<Input>,
               Integ : Quan<Integ>,
               Deriv : Quan<Deriv>,
-              Output : Quan<Output>,
-              Gains : PidGains<Input, Integ, Deriv, Output> {
+              Output : Quan<Output> {
 
-    constructor(div: (Input, T) -> Deriv,
-                times: (Input, T) -> Integ,
-                gains: Gains,
-                integralFalloff: Int = 100,
-                target: (Time) -> Input
-    ) : this(div, times, { _, _ -> gains }, integralFalloff, target)
+    val zero = target(currentTime) * 0
+    val derivative = differentiator(div, currentTime, zero)
 
-    private val zero = target(currentTime) * 0
-    private val derivative = Differentiator(div, currentTime, zero)
-
-    private val integral =
-            if (integralFalloff > 0) FiniteIntegrator(times,
+    val integral =
+            if (integralFalloff > 0) finiteIntegrator(times,
                     currentTime, zero,
                     integralFalloff
             )
-            else InfiniteIntegrator(times,
+            else infiniteIntegrator(times,
                     currentTime, zero
             )
 
-    override fun invoke(stamp: Time, current: Input): Output = gains(stamp, current).run {
+    return fun(stamp: Time, current: Input): Output = gains(stamp, current).run {
         val target = target(stamp)
-        val error = error(target, current)
+        val error = target - current
 
         val deriv = derivative(stamp, error)
         val integ = integral(stamp, error)
@@ -77,3 +68,17 @@ open class PidControlLoop<Input, Integ, Deriv, Output, Gains>(
                 ?: output
     }
 }
+
+fun <Input, Integ, Deriv, Output> pidControlLoop(
+        div: (Input, T) -> Deriv,
+        times: (Input, T) -> Integ,
+        gains: PidGains<Input, Integ, Deriv, Output>,
+        integralFalloff: Int = 100,
+        target: (Time) -> Input
+): (Time, Input) -> Output
+        where Input : Quan<Input>,
+              Integ : Quan<Integ>,
+              Deriv : Quan<Deriv>,
+              Output : Quan<Output> =
+
+        pidControlLoop(div, times, { _, _ -> gains }, integralFalloff, target)

@@ -12,17 +12,14 @@ import info.kunalsheth.units.generated.Quan
  * @see HorizontalDeadband
  *
  * @param Q type of input and output
- * @param yIntercept must be greater than zero
- * @param max must be greater than zero
- *
- * @property yIntercept minimum output for any non-zero input
- * @property max value at which the input is equal to output
+ * @param yIntercept minimum output for any non-zero input. Must be greater than zero.
+ * @param max value at which the input is equal to output. Must be greater than zero.
  */
-class VerticalDeadband<Q : Quan<Q>>(val yIntercept: Q, val max: Q) : (Q) -> Q {
+fun <Q : Quan<Q>> verticalDeadband(yIntercept: Q, max: Q): (Q) -> Q {
 
-    private val slope = (max - yIntercept) / max
+    val slope = (max - yIntercept) / max
 
-    override fun invoke(input: Q): Q = when {
+    return fun(input: Q): Q = when {
         input.isPositive -> input * slope + yIntercept
         input.isNegative -> input * slope - yIntercept
         else -> input * 0
