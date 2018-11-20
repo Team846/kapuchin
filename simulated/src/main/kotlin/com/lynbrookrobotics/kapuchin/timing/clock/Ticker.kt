@@ -1,6 +1,8 @@
-package com.lynbrookrobotics.kapuchin.timing
+package com.lynbrookrobotics.kapuchin.timing.clock
 
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.milli
@@ -39,7 +41,7 @@ actual class Ticker private actual constructor(
     }
 
     actual companion object {
-        actual fun Named.ticker(priority: Priority, period: Time, name: String) = Ticker(this, priority, period, name)
+        actual fun Named.ticker(priority: Priority, period: Time, name: String) = com.lynbrookrobotics.kapuchin.timing.clock.Ticker(this, priority, period, name)
         private val exec = Executors.newSingleThreadScheduledExecutor()!!
     }
 }

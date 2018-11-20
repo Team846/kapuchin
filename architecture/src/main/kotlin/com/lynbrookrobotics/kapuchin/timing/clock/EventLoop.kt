@@ -1,5 +1,6 @@
-package com.lynbrookrobotics.kapuchin.timing
+package com.lynbrookrobotics.kapuchin.timing.clock
 
+import com.lynbrookrobotics.kapuchin.timing.clock.Clock
 import info.kunalsheth.units.generated.Time
 
 /**

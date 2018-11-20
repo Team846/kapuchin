@@ -1,7 +1,8 @@
-package com.lynbrookrobotics.kapuchin.timing
+package com.lynbrookrobotics.kapuchin.timing.clock
 
-import com.lynbrookrobotics.kapuchin.timing.Clock.ExecutionOrder.First
-import com.lynbrookrobotics.kapuchin.timing.Clock.ExecutionOrder.Last
+import com.lynbrookrobotics.kapuchin.timing.blockingMutex
+import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.First
+import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.Last
 import info.kunalsheth.units.generated.Time
 
 /**

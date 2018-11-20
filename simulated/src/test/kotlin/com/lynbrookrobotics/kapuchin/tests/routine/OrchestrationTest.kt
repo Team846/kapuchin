@@ -7,7 +7,7 @@ import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
 import com.lynbrookrobotics.kapuchin.tests.subsystems.checkCount
 import com.lynbrookrobotics.kapuchin.tests.subsystems.countTo
-import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.runBlocking

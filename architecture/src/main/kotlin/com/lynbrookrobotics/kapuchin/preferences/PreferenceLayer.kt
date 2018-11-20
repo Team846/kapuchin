@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 import kotlin.properties.ReadOnlyProperty
