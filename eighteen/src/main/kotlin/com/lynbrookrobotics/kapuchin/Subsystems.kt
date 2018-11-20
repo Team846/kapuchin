@@ -36,7 +36,10 @@ data class Subsystems(
             { rollers.teleop(driverHardware) },
             { drivetrain.teleop(driverHardware, lift) },
             { lift.teleop(driverHardware) }
-    ).also { HAL.observeUserProgramTeleop() }
+    ).also {
+        HAL.observeUserProgramTeleop()
+        System.gc()
+    }
 
     fun backAndForthAuto() = scope.launch {
         drivetrain.driveStraight(
