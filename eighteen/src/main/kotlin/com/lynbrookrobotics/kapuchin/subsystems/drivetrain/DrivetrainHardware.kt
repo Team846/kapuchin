@@ -6,7 +6,6 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
-import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.math.TwoSided
 import com.lynbrookrobotics.kapuchin.control.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
@@ -17,6 +16,7 @@ import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
+import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 import kotlin.math.PI
 
@@ -35,6 +35,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(10, Ampere)
 
+    val jitterPinNumber by pref(9)
+    val jitterPin by hardw { DigitalOutput(jitterPinNumber) }
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, QuadEncoder)

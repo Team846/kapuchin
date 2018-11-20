@@ -14,6 +14,9 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
+import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
+import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
@@ -35,6 +38,10 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
 
     override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = { PercentOutput(0.Percent) }
     override fun LiftHardware.output(value: OffloadedOutput) = lazyOutput(value)
+
+    init {
+        if(clock is Ticker) clock.realtimeChecker(hardware.jitterPin::set)
+    }
 }
 
 class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
@@ -45,6 +52,9 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
 
     val operatingVoltage by pref(12, Volt)
     val currentLimit by pref(30, Ampere)
+
+    val jitterPinNumber by pref(8)
+    val jitterPin by hardw { DigitalOutput(jitterPinNumber) }
 
     // SAFETY
     val maxHeight by pref(80, Inch)

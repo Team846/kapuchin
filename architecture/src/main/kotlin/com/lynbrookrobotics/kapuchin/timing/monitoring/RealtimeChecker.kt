@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.timing.monitoring
 
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.First
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
 import info.kunalsheth.units.generated.Each
@@ -10,7 +11,7 @@ import info.kunalsheth.units.generated.Percent
 class RealtimeChecker private constructor(parent: Ticker, private val setJitterPin: (Boolean) -> Unit)
     : Named by Named("Real-time Checker", parent) {
 
-    val jitterPulse = parent.runOnTick {
+    val jitterPulse = parent.runOnTick(First) {
         setJitterPin(true)
         setJitterPin(false)
     }
