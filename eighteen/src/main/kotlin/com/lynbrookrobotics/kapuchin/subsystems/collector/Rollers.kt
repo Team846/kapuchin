@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.collector
 
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
-import com.lynbrookrobotics.kapuchin.control.math.TwoSided
+import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.Component

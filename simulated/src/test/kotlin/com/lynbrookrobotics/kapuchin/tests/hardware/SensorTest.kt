@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests.hardware
 
-import com.lynbrookrobotics.kapuchin.control.stampWith
+import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than?`

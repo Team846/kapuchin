@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
-import com.lynbrookrobotics.kapuchin.control.math.TwoSided
+import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref

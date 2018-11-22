@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.math.integration
 
-import com.lynbrookrobotics.kapuchin.control.math.Delay
+import com.lynbrookrobotics.kapuchin.control.data.Delay
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
