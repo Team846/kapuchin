@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.ctre.phoenix.ErrorCode
+import com.ctre.phoenix.ErrorCode.OK
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
 import com.ctre.phoenix.motorcontrol.ControlMode.*
@@ -12,9 +13,17 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.lazyOffloadedGainWriter
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import info.kunalsheth.units.generated.*
+import java.io.IOException
 
-private val configTimeout = 5 * 1000
+private val configTimeout = 1000
 private val slowStatusFrameRate = 1000
+
+private operator fun ErrorCode.unaryMinus() = checkOk
+val ErrorCode.checkOk: Unit
+    get() {
+        if (this != OK)
+            throw IOException("Phoenix call returned $this")
+    }
 
 fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (OffloadedOutput) -> Unit {
     val gainConfigTimeout = (period / 2).milli(Second).toInt()
@@ -34,25 +43,25 @@ fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (Offlo
 
 fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: V, currentLimit: I) {
     esc.setNeutralMode(NeutralMode.Brake)
-    esc.configOpenloopRamp(0.0, configTimeout)
-    esc.configClosedloopRamp(0.0, configTimeout)
+    -esc.configOpenloopRamp(0.0, configTimeout)
+    -esc.configClosedloopRamp(0.0, configTimeout)
 
-    esc.configPeakOutputReverse(-1.0, configTimeout)
-    esc.configNominalOutputReverse(0.0, configTimeout)
-    esc.configNominalOutputForward(0.0, configTimeout)
-    esc.configPeakOutputForward(1.0, configTimeout)
-    esc.configNeutralDeadband(0.001, configTimeout)
+    -esc.configPeakOutputReverse(-1.0, configTimeout)
+    -esc.configNominalOutputReverse(0.0, configTimeout)
+    -esc.configNominalOutputForward(0.0, configTimeout)
+    -esc.configPeakOutputForward(1.0, configTimeout)
+    -esc.configNeutralDeadband(0.001, configTimeout)
 
-    esc.configVoltageCompSaturation(voltageCompensation.Volt, configTimeout)
-    esc.configVoltageMeasurementFilter(32, configTimeout)
+    -esc.configVoltageCompSaturation(voltageCompensation.Volt, configTimeout)
+    -esc.configVoltageMeasurementFilter(32, configTimeout)
     esc.enableVoltageCompensation(true)
 
     val controlFramePeriod = syncThreshold.milli(Second).toInt()
-    esc.setControlFramePeriod(Control_3_General, controlFramePeriod)
+    -esc.setControlFramePeriod(Control_3_General, controlFramePeriod)
 
     if (esc is TalonSRX) {
-        esc.configContinuousCurrentLimit(currentLimit.Ampere.toInt(), configTimeout)
-        esc.configPeakCurrentLimit(0, configTimeout) // simpler, single-threshold limiting
+        -esc.configContinuousCurrentLimit(currentLimit.Ampere.toInt(), configTimeout)
+        -esc.configPeakCurrentLimit(0, configTimeout) // simpler, single-threshold limiting
         esc.enableCurrentLimit(true)
     }
 }
@@ -60,9 +69,9 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
 fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: V, currentLimit: I, vararg feedback: FeedbackDevice) {
     generalSetup(master, voltageCompensation, currentLimit)
 
-    feedback.forEachIndexed { i, sensor -> master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
+    feedback.forEachIndexed { i, sensor -> -master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
 
-    StatusFrameEnhanced.values().forEach { master.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
+    StatusFrameEnhanced.values().forEach { -master.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
 
     mapOf(
             Status_1_General to 5, // tells slaves what to output
@@ -73,14 +82,14 @@ fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: 
             Status_13_Base_PIDF0 to if (feedback.isNotEmpty()) 15 else slowStatusFrameRate, // current error, integral, and derivative
             Status_14_Turn_PIDF1 to if (feedback.size > 1) 15 else slowStatusFrameRate // current error, integral, and derivative
     ).forEach { frame, period ->
-        master.setStatusFramePeriod(frame, period, configTimeout)
+        -master.setStatusFramePeriod(frame, period, configTimeout)
     }
 
-    master.configVelocityMeasurementPeriod(Period_5Ms, configTimeout)
-    master.configVelocityMeasurementWindow(4, configTimeout)
+    -master.configVelocityMeasurementPeriod(Period_5Ms, configTimeout)
+    -master.configVelocityMeasurementWindow(4, configTimeout)
 }
 
 fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: V, currentLimit: I) {
     generalSetup(slave, voltageCompensation, currentLimit)
-    StatusFrame.values().forEach { slave.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
+    StatusFrame.values().forEach { -slave.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
 }
