@@ -16,6 +16,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
+import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 
@@ -40,7 +41,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     override fun LiftHardware.output(value: OffloadedOutput) = lazyOutput(value)
 
     init {
-        if(clock is Ticker) clock.realtimeChecker(hardware.jitterPin::set)
+        if(clock is Ticker) clock.realtimeChecker(100, hardware.jitterPulsePin::set, {hardware.jitterReadPin.period.Second})
     }
 }
 
@@ -53,8 +54,10 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val operatingVoltage by pref(12, Volt)
     val currentLimit by pref(30, Ampere)
 
-    val jitterPinNumber by pref(8)
-    val jitterPin by hardw { DigitalOutput(jitterPinNumber) }
+    val jitterPulsePinNumber by pref(6)
+    val jitterReadPinNumber by pref(7)
+    val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
+    val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
     // SAFETY
     val maxHeight by pref(80, Inch)
