@@ -1,12 +1,11 @@
 package com.lynbrookrobotics.kapuchin.timing.clock
 
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.timing.PlatformThread.Companion.platformThread
 import com.lynbrookrobotics.kapuchin.timing.Priority
-import com.lynbrookrobotics.kapuchin.timing.clock.Clock
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.hal.NotifierJNI
 import info.kunalsheth.units.generated.*
@@ -35,7 +34,7 @@ actual class Ticker private actual constructor(
 
     actual fun waitOnTick(): Time {
         updateAlarm()
-        // Thread.yield()
+        Thread.yield()
         return NotifierJNI.waitForNotifierAlarm(notifierHandle).micro(Second)
     }
 

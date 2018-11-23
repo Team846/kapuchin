@@ -13,14 +13,15 @@ import info.kunalsheth.units.generated.*
 import kotlin.math.sqrt
 import kotlin.random.Random
 
-class RealtimeChecker private constructor(parent: Ticker, val n: Int, private val setJitterPin: (Boolean) -> Unit, private val getPeriod: () -> Time)
+class RealtimeChecker private constructor(parent: Ticker, bufferSize: Int, private val setJitterPin: (Boolean) -> Unit, private val getPeriod: () -> Time)
     : Named by Named("Real-time Checker", parent) {
 
-    private val delay = Delay<T>(n)
+    private val delay = Delay<T>(bufferSize)
 
     private val zero = 0.Second
     private var sum = zero
     private var sqSum = zero * Second
+    private var n = 0
 
     val grapher = graph("Period Standard Deviation", Millisecond)
     val periodStdev = EventLoop.runOnTick { loopStart ->
@@ -38,7 +39,6 @@ class RealtimeChecker private constructor(parent: Ticker, val n: Int, private va
         grapher(loopStart, sigma)
     }
 
-    val rand = Random(1)
     val jitterPulse = parent.runOnTick(First) {
         setJitterPin(true)
         setJitterPin(false)
@@ -46,6 +46,8 @@ class RealtimeChecker private constructor(parent: Ticker, val n: Int, private va
         val period = getPeriod()
         if (period.siValue.isFinite()) {
             val delayed = delay(period) ?: zero
+            n += if (delayed === zero) 1 else 0
+
             sum += period - delayed
             sqSum += period * period - delayed * delayed
         }
