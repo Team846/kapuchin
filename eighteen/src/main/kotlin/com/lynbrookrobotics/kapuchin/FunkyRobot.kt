@@ -14,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-        println("Kapuchin Run ${System.currentTimeMillis() / 1000}")
+        println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")
 
         val classloading = loadClasses()
 
@@ -28,8 +28,6 @@ class FunkyRobot : RobotBase() {
 
         val doNothing = scope.launch { }
         var currentJob: Job = doNothing
-
-        System.gc()
 
         while (true) {
             m_ds.waitForData(eventLoopPeriod.Second)

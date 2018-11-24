@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
+import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
@@ -50,6 +50,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     }
 
     init {
-        if(clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, {hardware.jitterReadPin.period.Second})
+        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, { hardware.jitterReadPin.period.Second })
     }
 }

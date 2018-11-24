@@ -3,8 +3,8 @@ package com.lynbrookrobotics.kapuchin.subsystems
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.Analog
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
-import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.control.data.stampWith
+import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
@@ -12,8 +12,8 @@ import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import edu.wpi.first.wpilibj.Counter
@@ -41,7 +41,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     override fun LiftHardware.output(value: OffloadedOutput) = lazyOutput(value)
 
     init {
-        if(clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, {hardware.jitterReadPin.period.Second})
+        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, { hardware.jitterReadPin.period.Second })
     }
 }
 
@@ -69,7 +69,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
         val zeroOffset by pref(11.2, Inch)
 
         ({
-            LinearOffloadedNativeConversion(::div,::div,::times,::times,
+            LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
                     nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage,
                     nativeFeedbackUnits = nativeFeedbackUnits, perFeedbackQuantity = perFeedbackQuantity,
                     feedbackZero = zeroOffset

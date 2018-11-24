@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
-import info.kunalsheth.units.generated.Quan
 import com.lynbrookrobotics.kapuchin.logging.Named
+import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 
 private fun <X> f(x: X): (Any?, Any?) -> X = { _, _ -> x }
