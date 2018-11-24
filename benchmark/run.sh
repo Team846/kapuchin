@@ -22,9 +22,9 @@ cd "$BENCHMARKS"
 mkdir "$1"
 sleep "$SLEEP_TIME"
 scp "lvuser@roboRIO-846-FRC.local:/tmp/*.csv" "$1"
-scp "lvuser@roboRIO-846-FRC.local:~/FRC_UserProgram.log" "$1"
+scp "lvuser@roboRIO-846-FRC.local:~/FRC_UserProgram.log" "$1/FRC_UserProgram.log.csv"
 
 osascript -e 'display notification "Finished Benchmark" with title "Kapuchin Realtime Tuning"'
 
-cp GRAPHS.xlsx "$1"
+cp GRAPHS.xlsx "$1/GRAPHS_$(date +%s).xlsx"
 open "$1/*.csv"
