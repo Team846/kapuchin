@@ -41,7 +41,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     override fun LiftHardware.output(value: OffloadedOutput) = lazyOutput(value)
 
     init {
-        if(clock is Ticker) clock.realtimeChecker(100, hardware.jitterPulsePin::set, {hardware.jitterReadPin.period.Second})
+        if(clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, {hardware.jitterReadPin.period.Second})
     }
 }
 

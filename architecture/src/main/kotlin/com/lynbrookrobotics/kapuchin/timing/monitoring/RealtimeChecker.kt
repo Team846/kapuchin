@@ -10,7 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
 import info.kunalsheth.units.generated.*
 
-class RealtimeChecker private constructor(parent: Ticker, bufferSize: Int, private val setJitterPin: (Boolean) -> Unit, private val getPeriod: () -> Time)
+class RealtimeChecker private constructor(parent: Ticker, private val setJitterPin: (Boolean) -> Unit, private val getPeriod: () -> Time)
     : Named by Named("Real-time Checker", parent) {
 
     val loopPeriodGraph = graph("Loop Period", Millisecond)
@@ -40,7 +40,7 @@ class RealtimeChecker private constructor(parent: Ticker, bufferSize: Int, priva
             memoryUsageGraph(loopStart, usage)
         }
 
-        fun Ticker.realtimeChecker(bufferSize: Int, setJitterPin: (Boolean) -> Unit, getPeriod: () -> Time) = RealtimeChecker(this, bufferSize, setJitterPin, getPeriod)
+        fun Ticker.realtimeChecker(setJitterPin: (Boolean) -> Unit, getPeriod: () -> Time) = RealtimeChecker(this, setJitterPin, getPeriod)
     }
 }
 
