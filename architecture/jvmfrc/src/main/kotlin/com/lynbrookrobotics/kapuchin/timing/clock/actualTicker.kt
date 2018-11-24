@@ -19,15 +19,18 @@ actual class Ticker private actual constructor(
         Named by Named(name, parent),
         Clock {
 
+    actual var computeTime = 0.Second
+        private set
+
     override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
     private val thread = platformThread(name, priority) {
         while (true) {
             val startTime = waitOnTick()
             tick(startTime)
-            val updateTime = currentTime - startTime
+            computeTime = currentTime - startTime
 
-            if (updateTime > period) log(Warning) {
-                "$name overran its ${period withDecimals 4} loop by ${(updateTime - period) withDecimals 4}"
+            if (computeTime > period) log(Warning) {
+                "$name overran its ${period withDecimals 4} loop by ${(computeTime - period) withDecimals 4}"
             }
         }
     }
