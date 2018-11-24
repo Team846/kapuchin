@@ -57,6 +57,6 @@ actual class Ticker private actual constructor(
     }
 
     actual companion object {
-        actual fun Named.ticker(priority: Priority, period: Time, name: String) = com.lynbrookrobotics.kapuchin.timing.clock.Ticker(this, priority, period, name)
+        actual fun Named.ticker(priority: Priority, period: Time, name: String) = Ticker(this, priority, period, name)
     }
 }

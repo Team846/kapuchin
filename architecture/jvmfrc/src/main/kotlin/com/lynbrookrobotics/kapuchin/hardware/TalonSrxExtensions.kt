@@ -12,7 +12,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.LazyOffloadedGainWriter
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import info.kunalsheth.units.generated.*
 
-private val configTimeout = 0 //5 * 1000
+private val configTimeout = 5 * 1000
 private val slowStatusFrameRate = 1000
 
 fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): LazyOffloadedGainWriter {
