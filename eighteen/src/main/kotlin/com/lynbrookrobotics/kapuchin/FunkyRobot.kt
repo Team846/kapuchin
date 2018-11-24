@@ -29,6 +29,8 @@ class FunkyRobot : RobotBase() {
         val doNothing = scope.launch { }
         var currentJob: Job = doNothing
 
+        System.gc()
+
         while (true) {
             m_ds.waitForData(eventLoopPeriod.Second)
             EventLoop.tick(currentTime)

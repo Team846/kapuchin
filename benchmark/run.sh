@@ -26,5 +26,8 @@ scp "lvuser@roboRIO-846-FRC.local:~/FRC_UserProgram.log" "$1/FRC_UserProgram.log
 
 osascript -e 'display notification "Finished Benchmark" with title "Kapuchin Realtime Tuning"'
 
-cp GRAPHS.xlsx "$1/GRAPHS_$(date +%s).xlsx"
-open "$1/*.csv"
+GRAPHS="$1/GRAPHS_$(date +%s).xlsx"
+
+cp GRAPHS.xlsx "$GRAPHS"
+open "$1"/*.csv
+open "$GRAPHS"
