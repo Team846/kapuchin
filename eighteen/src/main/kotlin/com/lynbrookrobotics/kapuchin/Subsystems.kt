@@ -2,6 +2,8 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
 import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
@@ -41,21 +43,29 @@ data class Subsystems(
     }
 
     fun backAndForthAuto() = scope.launch {
-        drivetrain.driveStraight(
-                8.Foot, 0.Degree,
-                1.Inch, 2.Degree,
-                2.FootPerSecondSquared,
-                3.FootPerSecond
-        )
+        while(true) {
+            withTimeout(1.Second) {
+                drivetrain.driveStraight(
+                        8.Foot, 0.Degree,
+                        1.Inch, 2.Degree,
+                        2.FootPerSecondSquared,
+                        3.FootPerSecond
+                )
+            }
 
-//        delay(10000)
-//
-//        drivetrain.driveStraight(
-//                -10.Foot, 0.Degree,
-//                1.Inch, 2.Degree,
-//                5.FootPerSecondSquared,
-//                10.FootPerSecond
-//        )
+            delay(1.Second)
+
+            withTimeout(1.Second) {
+                drivetrain.driveStraight(
+                        -8.Foot, 0.Degree,
+                        1.Inch, 2.Degree,
+                        2.FootPerSecondSquared,
+                        3.FootPerSecond
+                )
+            }
+
+            delay(1.Second)
+        }
     }.also { HAL.observeUserProgramTeleop() }
 
     companion object : Named by Named("Subsystems Initializer") {

@@ -30,7 +30,9 @@ class FunkyRobot : RobotBase() {
         var currentJob: Job = doNothing
 
         while (true) {
+            Thread.yield()
             m_ds.waitForData(eventLoopPeriod.Second)
+
             EventLoop.tick(currentTime)
 
             if (!currentJob.isActive) {
