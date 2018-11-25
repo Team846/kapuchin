@@ -29,15 +29,18 @@ class RealtimeChecker private constructor(parent: Ticker, private val setJitterP
 
     companion object : Named by Named("Memory Checker") {
         val memoryUsageGraph = graph("Memory Usage", Percent)
+        val garbageProductionGraph = graph("Garbage Production", PercentPerSecond)
 
         val deriv = differentiator(::div, 0.Second, 0.Percent)
 
         val memoryUsage = EventLoop.runOnTick { loopStart ->
             val usage = usedMemory.Each / maxMemory
-            if (deriv(loopStart, usage).isNegative)
-                log(Debug) { "Collected Garbage" }
+            val deriv = deriv(loopStart, usage)
 
             memoryUsageGraph(loopStart, usage)
+            garbageProductionGraph(loopStart, deriv)
+
+            if (deriv.isNegative) log(Debug) { "Collected Garbage" }
         }
 
         fun Ticker.realtimeChecker(setJitterPin: (Boolean) -> Unit, getPeriod: () -> Time) = RealtimeChecker(this, setJitterPin, getPeriod)

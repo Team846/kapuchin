@@ -8,7 +8,8 @@ fi
 
 KAPUCHIN="$PWD"
 BENCHMARKS="benchmark"
-SLEEP_TIME=200
+BOOT_TIME=30
+SLEEP_TIME=150
 
 osascript -e 'display notification "Deploying Benchmark" with title "Kapuchin Realtime Tuning"'
 
@@ -20,7 +21,13 @@ osascript -e 'display notification "Running Benchmark" with title "Kapuchin Real
 
 cd "$BENCHMARKS"
 mkdir "$1"
+
+sleep "$BOOT_TIME"
+ssh -t lvuser@roboRIO-846-FRC.local tail -f FRC_UserProgram.log &
+TASK_PID=$!
 sleep "$SLEEP_TIME"
+kill "$TASK_PID"
+
 scp "lvuser@roboRIO-846-FRC.local:/tmp/*.csv" "$1"
 scp "lvuser@roboRIO-846-FRC.local:~/FRC_UserProgram.log" "$1/FRC_UserProgram.log.csv"
 
