@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.control.math
+package com.lynbrookrobotics.kapuchin.control.data
 
 /**
  * Delays values

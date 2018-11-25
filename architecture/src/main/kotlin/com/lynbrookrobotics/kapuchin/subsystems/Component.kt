@@ -7,11 +7,11 @@ import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.platformStackTrace
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.routines.Routine
-import com.lynbrookrobotics.kapuchin.timing.Clock
-import com.lynbrookrobotics.kapuchin.timing.Clock.ExecutionOrder.Last
-import com.lynbrookrobotics.kapuchin.timing.Ticker
-import com.lynbrookrobotics.kapuchin.timing.Ticker.Companion.ticker
 import com.lynbrookrobotics.kapuchin.timing.blockingMutex
+import com.lynbrookrobotics.kapuchin.timing.clock.Clock
+import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.Last
+import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
+import com.lynbrookrobotics.kapuchin.timing.clock.Ticker.Companion.ticker
 import info.kunalsheth.units.generated.Time
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine

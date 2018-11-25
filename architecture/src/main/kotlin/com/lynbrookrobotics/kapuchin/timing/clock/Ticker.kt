@@ -1,6 +1,7 @@
-package com.lynbrookrobotics.kapuchin.timing
+package com.lynbrookrobotics.kapuchin.timing.clock
 
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.timing.Priority
 import info.kunalsheth.units.generated.Time
 
 /**
@@ -15,6 +16,9 @@ import info.kunalsheth.units.generated.Time
  */
 expect class Ticker private constructor(parent: Named, priority: Priority, period: Time, name: String = "Ticker") : Named, Clock {
     fun waitOnTick(): Time
+
+    var computeTime: Time
+        private set
 
     companion object {
         /**

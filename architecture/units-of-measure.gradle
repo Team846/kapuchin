@@ -40,6 +40,7 @@ generateUnitsOfMeasure {
             u("DegreePerSecondSquared", PI / 180, d(A: 1, T: -2)),
 
             u("Minute", 60, d(T: 1)),
+            u("Millisecond", 0.001, d(T: 1)),
 
             u("Percent", 0.01, d()),
             u("Each", 1.0, d()),

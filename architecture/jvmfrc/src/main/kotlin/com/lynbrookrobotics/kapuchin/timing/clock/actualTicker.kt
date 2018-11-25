@@ -1,7 +1,12 @@
-package com.lynbrookrobotics.kapuchin.timing
+package com.lynbrookrobotics.kapuchin.timing.clock
 
+import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.timing.PlatformThread.Companion.platformThread
+import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.hal.NotifierJNI
 import info.kunalsheth.units.generated.*
 
@@ -14,14 +19,25 @@ actual class Ticker private actual constructor(
         Named by Named(name, parent),
         Clock {
 
+    actual var computeTime = 0.Second
+        private set
+
     override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
     private val thread = platformThread(name, priority) {
-        while (true) tick(waitOnTick())
+        while (true) {
+            val startTime = waitOnTick()
+            tick(startTime)
+            computeTime = currentTime - startTime
+
+            if (computeTime > period) log(Warning) {
+                "$name overran its ${period withDecimals 4} loop by ${(computeTime - period) withDecimals 4}"
+            }
+        }
     }
 
     actual fun waitOnTick(): Time {
         updateAlarm()
-        // Thread.yield()
+        Thread.yield()
         return NotifierJNI.waitForNotifierAlarm(notifierHandle).micro(Second)
     }
 
@@ -31,10 +47,6 @@ actual class Ticker private actual constructor(
     private fun updateAlarm() {
         val dt = currentTime - startTime
         val nextPeriodIndex = (dt / period).Each.toLong() + 1
-
-//        if (nextPeriodIndex > periodIndex + 1) log(Warning) {
-//            "$name overran its ${period withDecimals 4} loop by ${dt - period * periodIndex withDecimals 4}"
-//        }
 
         if (nextPeriodIndex != periodIndex) NotifierJNI.updateNotifierAlarm(
                 notifierHandle,

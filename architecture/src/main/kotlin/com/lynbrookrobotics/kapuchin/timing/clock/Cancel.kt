@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.timing
+package com.lynbrookrobotics.kapuchin.timing.clock
 
 /**
  * Stops some previously setup behavior

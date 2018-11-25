@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.control
+package com.lynbrookrobotics.kapuchin.control.data
 
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Time

@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
-import com.lynbrookrobotics.kapuchin.control.TimeStamped
+import com.lynbrookrobotics.kapuchin.control.data.TimeStamped
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.logging.Level.Error

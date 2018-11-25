@@ -1,12 +1,12 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
+import com.lynbrookrobotics.kapuchin.control.data.TwoSided
+import com.lynbrookrobotics.kapuchin.control.data.avg
+import com.lynbrookrobotics.kapuchin.control.data.minus
 import com.lynbrookrobotics.kapuchin.control.electrical.rampRateLimiter
 import com.lynbrookrobotics.kapuchin.control.loops.pid.pidControlLoop
-import com.lynbrookrobotics.kapuchin.control.math.TwoSided
-import com.lynbrookrobotics.kapuchin.control.math.avg
 import com.lynbrookrobotics.kapuchin.control.math.infiniteIntegrator
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.trapezoidalMotionProfile
-import com.lynbrookrobotics.kapuchin.control.math.minus
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput

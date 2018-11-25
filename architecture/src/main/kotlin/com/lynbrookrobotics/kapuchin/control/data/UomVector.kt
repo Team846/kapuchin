@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.control.math
+package com.lynbrookrobotics.kapuchin.control.data
 
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.avg
