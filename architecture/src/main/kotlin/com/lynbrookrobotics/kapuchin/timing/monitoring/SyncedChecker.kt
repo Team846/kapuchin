@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import com.lynbrookrobotics.kapuchin.control.TimeStamped
+import com.lynbrookrobotics.kapuchin.control.data.TimeStamped
 import com.lynbrookrobotics.kapuchin.hardware.Sensor
 import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.Named

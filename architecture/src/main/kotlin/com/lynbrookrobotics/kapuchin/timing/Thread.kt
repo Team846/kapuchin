@@ -4,6 +4,15 @@ import com.lynbrookrobotics.kapuchin.logging.Named
 import kotlinx.coroutines.CoroutineScope
 
 /**
+ * Represents the importance of something being executed
+ *
+ * Intended for specifying JVM and OS thread priorities. `RealTime` is the highest priority possible.
+ */
+enum class Priority {
+    Lowest, Low, Medium, High, Highest, RealTime
+}
+
+/**
  * Represents a thread
  *
  * All threads must belong to some parent object, have their own name, and be assigned a priority.

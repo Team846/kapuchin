@@ -1,18 +1,21 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
-import com.lynbrookrobotics.kapuchin.timing.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.milli
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import com.lynbrookrobotics.kapuchin.timing.scope
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
+        println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")
+
         val classloading = loadClasses()
 
         val subsystems = Subsystems.init()
@@ -31,8 +34,6 @@ class FunkyRobot : RobotBase() {
             EventLoop.tick(currentTime)
 
             if (!currentJob.isActive) {
-                System.gc()
-
                 currentJob =
                         subsystems::teleop runWhile { isEnabled && isOperatorControl }
                         ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
