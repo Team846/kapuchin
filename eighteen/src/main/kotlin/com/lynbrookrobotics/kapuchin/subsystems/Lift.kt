@@ -28,6 +28,8 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
         ({ PidGains(kP, kI, kD) })
     }
 
+    val cubeHeight by pref(13, Inch)
+
     val collectHeight by pref(0, Inch)
     val exchangeHeight by pref(4, Inch)
     val switchHeight by pref(25, Inch)

@@ -54,7 +54,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val steering = s { wheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
 
     // LIFT
-    val twistAdjust = s { operator.z }
+    val twistAdjust = s { sqrWithSign(operator.y) }
     val collect = s { driver[Trigger] }
     val exchange = s { operator[BottomTrigger] }
     val switch = s { operator[LeftTrigger] }
@@ -62,6 +62,9 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val highScale = s { operator[RightTrigger] }
     val maxHeight = s { operator[LeftOne] }
     val manualLift = s { operator[LeftFive] }
+
+    val upCubeStack = s { operator.getRawButtonPressed(RightTrigger.raw) }
+    val downCubeStack = s { operator.getRawButtonPressed(LeftTrigger.raw) }
 
     // COLLECTOR
     val purge = s { driver[LeftTrigger] || operator[Trigger] }

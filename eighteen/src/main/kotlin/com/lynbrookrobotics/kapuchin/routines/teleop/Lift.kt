@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
+import com.lynbrookrobotics.kapuchin.control.`±`
 import com.lynbrookrobotics.kapuchin.hardware.Sensor
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
@@ -8,6 +9,10 @@ import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import info.kunalsheth.units.generated.Each
 import info.kunalsheth.units.generated.Length
 import info.kunalsheth.units.generated.`±`
+import info.kunalsheth.units.generated.div
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.round
 
 suspend fun LiftComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     fun <I> r(s: Sensor<I>) = s.readWithEventLoop.withoutStamps
@@ -41,6 +46,61 @@ suspend fun LiftComponent.teleop(driver: DriverHardware) = startRoutine("teleop"
                     else -> currentPosition
                 } + twistAdjustRange * twistAdjust
                 ))
+    }
+}
+
+suspend fun LiftComponent.cubeStackTeleop(driver: DriverHardware) = startRoutine("cube stacking teleop") {
+    fun <I> r(s: Sensor<I>) = s.readWithEventLoop.withoutStamps
+
+    val twistAdjust by r(driver.twistAdjust)
+    val toCollect by r(driver.collect)
+    val toExchange by r(driver.exchange)
+    val toLowScale by r(driver.lowScale)
+    val toMaxHeight by r(driver.maxHeight)
+
+    val upStack by r(driver.upCubeStack)
+    val downStack by r(driver.downCubeStack)
+
+    val manualOverride by r(driver.manualOverride)
+    val overrideLift by r(driver.manualLift)
+
+    val toDeployHooks by r(driver.deployHooks)
+
+    val currentPosition by hardware.position.readOnTick.withoutStamps
+
+    var lastTarget = currentPosition
+
+    controller {
+        val downCubeHeight: Length
+        val upCubeHeight: Length
+
+        val currentCubeHeight = (currentPosition / cubeHeight).Each
+        val stackingMode = currentCubeHeight in round(currentCubeHeight) `±` (positionTolerance / cubeHeight).Each
+        if (stackingMode) {
+            val currentCubeIndex = round(currentCubeHeight)
+            downCubeHeight = cubeHeight * (currentCubeIndex - 1)
+            upCubeHeight = cubeHeight * (currentCubeIndex + 1)
+        } else {
+            downCubeHeight = cubeHeight * floor(currentCubeHeight)
+            upCubeHeight = cubeHeight * ceil(currentCubeHeight)
+        }
+
+        val target = when {
+            toCollect || toDeployHooks -> collectHeight
+            upStack -> upCubeHeight
+            downStack -> downCubeHeight
+            toExchange -> exchangeHeight
+            toLowScale -> lowScaleHeight
+            toMaxHeight -> hardware.maxHeight
+            else -> lastTarget
+        } + twistAdjustRange * twistAdjust
+        lastTarget = target
+
+        if (overrideLift) PercentOutput(manualOverride.Each).also { lastTarget = currentPosition }
+        else PositionOutput(
+                hardware.offloadedSettings.native(positionGains),
+                hardware.offloadedSettings.native(target)
+        )
     }
 }
 
