@@ -102,4 +102,8 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val lazyOutput = lazyOutput(esc, idx)
     val position = sensor { offloadedSettings.realPosition(esc.getSelectedSensorPosition(idx)) stampWith it }
             .with(graph("Height", Inch))
+
+    init {
+        EventLoop.runOnTick { position.optimizedRead(it, syncThreshold) }
+    }
 }

@@ -12,12 +12,16 @@ import info.kunalsheth.units.generated.`±`
 
 suspend fun HooksComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     var state = false
+    var lastIsTriggered = false
+
     val isTriggered by driver.deployHooks.readEagerly.withoutStamps
     val liftPosition by lift.hardware.position.readEagerly.withoutStamps
     val liftSafeThreshold = lift.collectHeight `±` lift.positionTolerance
 
     controller {
-        if (isTriggered) state = !state
+        if (isTriggered && !lastIsTriggered) state = !state
+        lastIsTriggered = isTriggered
+
         if (state && liftPosition !in liftSafeThreshold) {
             log(Warning) { "Cannot deploy hooks until lift is lowered" }
             false

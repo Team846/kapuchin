@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.`±`
+import com.lynbrookrobotics.kapuchin.control.conversion.deadband.horizontalDeadband
 import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
@@ -10,6 +11,8 @@ import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.milli
+import kotlin.math.abs
+import kotlin.math.pow
 import kotlin.math.sign
 
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
@@ -37,9 +40,18 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     operator fun Joystick.get(button: JoystickButton) = getRawButton(button.raw)
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val activationTolerance by pref(0.01)
-    val inactiveRange = 0 `±` activationTolerance
-    val manualOverride = s { -(operator.y.takeUnless { it in inactiveRange } ?: 0.0) }
+    val joystickMapping: (Double) -> Double by pref {
+        val exponent by pref(2)
+        val deadband by pref(0.02)
+        ({
+            fun powerWithSign(x: Double) = abs(x).pow(exponent) * x.sign
+            val withDeadband = horizontalDeadband(deadband, 1.0)
+
+            fun(x: Double) = powerWithSign(withDeadband(x))
+        })
+    }
+
+    val manualOverride = s { -joystickMapping(operator.y) }
 
     // CLIMBER
     val deployHooks = s { operator[RightOne] && operator[RightSix] }
@@ -48,13 +60,11 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val manualClimb = s { operator[RightFour] }
 
     // DRIVETRAIN
-    private fun sqrWithSign(x: Double) = x * x * x.sign
-
-    val accelerator = s { sqrWithSign(-(driver.y.takeUnless { it in inactiveRange } ?: 0.0)) }
-    val steering = s { wheel.x.takeUnless { it in inactiveRange } ?: 0.0 }
+    val accelerator = s { -joystickMapping(driver.y) }
+    val steering = s { joystickMapping(wheel.x) }
 
     // LIFT
-    val twistAdjust = s { sqrWithSign(operator.y) }
+    val twistAdjust = s { joystickMapping(operator.y) }
     val collect = s { driver[Trigger] }
     val exchange = s { operator[BottomTrigger] }
     val switch = s { operator[LeftTrigger] }
@@ -65,6 +75,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
 
     val upCubeStack = s { operator.getRawButtonPressed(RightTrigger.raw) }
     val downCubeStack = s { operator.getRawButtonPressed(LeftTrigger.raw) }
+    val zeroCubeStack = s { operator.getRawButtonPressed(BottomTrigger.raw) }
 
     // COLLECTOR
     val purge = s { driver[LeftTrigger] || operator[Trigger] }
