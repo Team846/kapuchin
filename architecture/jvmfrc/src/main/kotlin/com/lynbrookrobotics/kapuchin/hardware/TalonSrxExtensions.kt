@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.ctre.phoenix.ErrorCode
+import com.ctre.phoenix.ErrorCode.OK
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
 import com.ctre.phoenix.motorcontrol.ControlMode.*
@@ -12,15 +13,16 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.lazyOffloadedGainWriter
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import info.kunalsheth.units.generated.*
+import java.io.IOException
 
-private val configTimeout = 0//1000
+private val configTimeout = 1000
 private val slowStatusFrameRate = 1000
 
 private operator fun ErrorCode.unaryMinus() = checkOk
 val ErrorCode.checkOk: Unit
     get() {
-//        if (this != OK)
-//            throw IOException("Phoenix call returned $this")
+        if (this != OK)
+            throw IOException("Phoenix call returned $this")
     }
 
 fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (OffloadedOutput) -> Unit {
