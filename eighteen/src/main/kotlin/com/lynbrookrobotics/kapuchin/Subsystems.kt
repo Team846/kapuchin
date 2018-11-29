@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
 import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
@@ -43,7 +43,7 @@ data class Subsystems(
     }
 
     fun backAndForthAuto() = scope.launch {
-        while(true) {
+        while (true) {
             withTimeout(1.Second) {
                 drivetrain.driveStraight(
                         8.Foot, 0.Degree,
