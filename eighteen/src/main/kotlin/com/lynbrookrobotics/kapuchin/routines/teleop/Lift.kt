@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import info.kunalsheth.units.generated.Each
+import info.kunalsheth.units.generated.Inch
 import info.kunalsheth.units.generated.Length
 import info.kunalsheth.units.generated.`±`
 import info.kunalsheth.units.generated.div
@@ -69,8 +70,8 @@ suspend fun LiftComponent.singleStackTeleop(driver: DriverHardware) = startRouti
 
     val currentPosition by hardware.position.readOnTick.withoutStamps
 
-    var cubeZero = collectHeight
-    var cubeIndex = 0
+    var cubeZero = 23.35.Inch
+    var cubeIndex = -1
     var stackingMode = false
 
     controller {
