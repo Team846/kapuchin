@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.I
  * Represents an CAN based electronic speed controller output
  *
  * @author Kunal
- * @see LazyOffloadedGainWriter
+ * @see lazyOffloadedGainWriter
  */
 sealed class OffloadedOutput
 

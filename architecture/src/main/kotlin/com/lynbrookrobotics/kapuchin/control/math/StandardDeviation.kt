@@ -1,23 +1,68 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
-import com.lynbrookrobotics.kapuchin.control.data.Delay
+import com.lynbrookrobotics.kapuchin.control.data.delay
 import info.kunalsheth.units.generated.Quan
 import kotlin.math.absoluteValue
 import kotlin.math.sqrt
 
-class FiniteStandardDeviation<Q : Quan<Q>, Q2 : Quan<Q2>>(
-        private val times: (Q, Q) -> Q2,
-        private val init: Q,
-        bufferSize: Int
-) : (Q) -> Q {
+/**
+ * Calculates the standard deviation
+ *
+ * Calculates the standard deviation of all values since creation
+ *
+ * @author Kunal
+ * @see finiteStdev
+ *
+ * @param Q type of input
+ * @param Q2 type of input squared
+ *
+ * @param times UOM proof (just pass in `::times`)
+ * @param init first value
+ */
+fun <Q : Quan<Q>, Q2 : Quan<Q2>> infiniteStdev(
+        times: (Q, Q) -> Q2,
+        init: Q
+): (Q) -> Q {
+    var sum = init
+    var sqSum = times(init, init)
+    var n = 1
 
-    private val delay = Delay<Q>(bufferSize).also { it(init) }
+    return fun(value: Q): Q {
+        sum += value
+        sqSum += times(value, value)
+        n++
 
-    private var sum = init
-    private var sqSum = times(init, init)
-    private var n = 1
+        return stdev(times, n, sum, sqSum)
+    }
+}
 
-    override operator fun invoke(value: Q): Q {
+/**
+ * Calculates the standard deviation
+ *
+ * Calculates the standard deviation of the last `falloff` values
+ *
+ * @author Kunal
+ * @see infiniteStdev
+ *
+ * @param Q type of input
+ * @param Q2 type of input squared
+ *
+ * @param times UOM proof (just pass in `::times`)
+ * @param init first value
+ * @param falloff number of values to look back when calculating
+ */
+fun <Q : Quan<Q>, Q2 : Quan<Q2>> finiteStdev(
+        times: (Q, Q) -> Q2,
+        init: Q,
+        falloff: Int
+): (Q) -> Q {
+    val delay = delay<Q>(falloff).also { it(init) }
+
+    var sum = init
+    var sqSum = times(init, init)
+    var n = 1
+
+    return fun(value: Q): Q {
         sum += value
         sqSum += times(value, value)
 
@@ -27,24 +72,6 @@ class FiniteStandardDeviation<Q : Quan<Q>, Q2 : Quan<Q2>>(
             sum -= delayed
             sqSum -= times(delayed, delayed)
         }
-
-        return stdev(times, n, sum, sqSum)
-    }
-}
-
-class InfiniteStandardDeviation<Q : Quan<Q>, Q2 : Quan<Q2>>(
-        private val times: (Q, Q) -> Q2,
-        private val init: Q
-) : (Q) -> Q {
-
-    private var sum = init
-    private var sqSum = times(init, init)
-    private var n = 1
-
-    override operator fun invoke(value: Q): Q {
-        sum += value
-        sqSum += times(value, value)
-        n++
 
         return stdev(times, n, sum, sqSum)
     }

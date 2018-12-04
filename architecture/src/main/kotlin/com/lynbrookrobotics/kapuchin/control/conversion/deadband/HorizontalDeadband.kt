@@ -9,20 +9,17 @@ import info.kunalsheth.units.generated.Quan
  * Intended for joystick input to prevent drifting
  *
  * @author Alvyn, Kunal
- * @see VerticalDeadband
+ * @see verticalDeadband
  *
  * @param Q type of input and output
- * @param xIntercept must be greater than zero
- * @param max must be greater than zero
- *
- * @property xIntercept maximum input that will still be mapped to zero
- * @property max value at which the input is equal to output
+ * @param xIntercept maximum input that will still be mapped to zero. Must be greater than zero.
+ * @param max value at which the input is equal to output. Must be greater than zero.
  */
-class HorizontalDeadband<Q : Quan<Q>>(val xIntercept: Q, val max: Q) : (Q) -> Q {
+fun <Q : Quan<Q>> horizontalDeadband(xIntercept: Q, max: Q): (Q) -> Q {
 
-    private val slope = max / (max - xIntercept)
+    val slope = max / (max - xIntercept)
 
-    override fun invoke(input: Q): Q = when {
+    return fun(input: Q): Q = when {
         input > xIntercept -> (input - xIntercept) * slope
         input < -xIntercept -> (input + xIntercept) * slope
         else -> input * 0

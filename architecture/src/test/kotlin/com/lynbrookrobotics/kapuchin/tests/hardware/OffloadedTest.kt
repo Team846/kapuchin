@@ -8,7 +8,7 @@ import kotlin.test.Test
 
 class OffloadedTest {
     @Test
-    fun `LazyOffloadedOutputWriter should only write if it has to`() {
+    fun `lazyOffloadedOutputWriter should only write if it has to`() {
         data class State(
                 var wroteKp: Boolean = false,
                 var wroteKi: Boolean = false,
@@ -22,7 +22,7 @@ class OffloadedTest {
 
         var state = State()
 
-        val lazyWriter = LazyOffloadedGainWriter(
+        val lazyWriter = lazyOffloadedGainWriter(
                 writeKp = { state.wroteKp = true },
                 writeKi = { state.wroteKi = true },
                 writeKd = { state.wroteKd = true },

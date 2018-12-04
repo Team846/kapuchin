@@ -7,7 +7,6 @@ import info.kunalsheth.units.generated.Quan
  * Represents a control gain
  *
  * @author Kunal
- * @see ControlLoop
  *
  * @param Compensation type of output
  * @param Error type of sensor feedback

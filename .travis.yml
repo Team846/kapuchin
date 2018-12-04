@@ -7,5 +7,5 @@ script:
 after_success:
   - codecov -t 934fa7e1-6db9-4724-9e86-84736fdb299a
 cache:
-   directories:
-   - $HOME/.gradle
+  directories:
+    - $HOME/.gradle

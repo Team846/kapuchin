@@ -6,20 +6,20 @@ import info.kunalsheth.units.generated.Length
 import info.kunalsheth.units.generated.Velocity
 
 @Deprecated("TrapezoidalMotionProfile should output current, not velocity")
-data class TrapezoidalMotionProfile(
-        val distance: Length,
-        val startingSpeed: Velocity,
-        val acceleration: Acceleration,
-        val topSpeed: Velocity,
-        val deceleration: Acceleration = acceleration,
-        val endingSpeed: Velocity = 0.FootPerSecond
-) : (Length) -> Velocity {
+fun trapezoidalMotionProfile(
+        distance: Length,
+        startingSpeed: Velocity,
+        acceleration: Acceleration,
+        topSpeed: Velocity,
+        deceleration: Acceleration = acceleration,
+        endingSpeed: Velocity = 0.FootPerSecond
+): (Length) -> Velocity {
 
-    private val absDistance = distance.abs
-    private val direction = distance.signum
+    val absDistance = distance.abs
+    val direction = distance.signum
 
     // cad18/trunk/Users/Kunal Sheth/trapezoidal-motion-profile.gcx
-    override fun invoke(dx: Length): Velocity {
+    return fun(dx: Length): Velocity {
         val signedDx = dx * direction
 
         return (v(acceleration, startingSpeed, signedDx) min

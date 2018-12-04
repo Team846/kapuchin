@@ -23,20 +23,20 @@ import info.kunalsheth.units.generated.I
  * @param writePercent function to set ESC percent output
  * @param writeCurrent function to set ESC current output
  */
-class LazyOffloadedGainWriter(
-        private val writeKp: (Double) -> Unit,
-        private val writeKi: (Double) -> Unit,
-        private val writeKd: (Double) -> Unit,
-        private val writeKf: (Double) -> Unit,
-        private val writeVelocity: (Double) -> Unit,
-        private val writePosition: (Double) -> Unit,
-        private val writePercent: (Dimensionless) -> Unit,
-        private val writeCurrent: (I) -> Unit
-) : (OffloadedOutput) -> Unit {
+fun lazyOffloadedGainWriter(
+        writeKp: (Double) -> Unit,
+        writeKi: (Double) -> Unit,
+        writeKd: (Double) -> Unit,
+        writeKf: (Double) -> Unit,
+        writeVelocity: (Double) -> Unit,
+        writePosition: (Double) -> Unit,
+        writePercent: (Dimensionless) -> Unit,
+        writeCurrent: (I) -> Unit
+): (OffloadedOutput) -> Unit {
 
-    private var current: OffloadedPidGains? = null
+    var current: OffloadedPidGains? = null
 
-    override fun invoke(output: OffloadedOutput) {
+    return fun(output: OffloadedOutput) {
         if (output is OffloadedPidControlLoop) {
             val (newKp, newKi, newKd, newKf) = output.gains
             if (newKp != current?.kP) writeKp(newKp)

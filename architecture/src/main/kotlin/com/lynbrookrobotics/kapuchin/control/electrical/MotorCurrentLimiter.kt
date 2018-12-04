@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
+import com.lynbrookrobotics.kapuchin.control.div
 import info.kunalsheth.units.generated.*
 
 /**
@@ -8,45 +9,29 @@ import info.kunalsheth.units.generated.*
  * Prevents control code from damaging motors and/or causing brownouts. Also limits acceleration.
  *
  * @author Kunal
- * @see OutsideThresholdChecker
- * @see RampRateLimiter
+ * @see outsideThresholdChecker
+ * @see rampRateLimiter
  *
- * @param maxVoltage must be greater than zero
- * @param freeSpeed must be greater than zero
- * @param stall must be greater than zero
- * @param limit must be greater than zero
- *
- * @property maxVoltage motor's nominal voltage, often 12V
- * @property freeSpeed motor's top speed (look it up)
- * @property stall motors stall current (look it up)
- * @property limit current limit
+ * @param maxVoltage motor's nominal voltage, often 12V. must be greater than zero.
+ * @param freeSpeed motor's top speed. Must be greater than zero.
+ * @param stall motor's stall current. Must be greater than zero.
+ * @param limit current limit. Must be greater than zero.
  */
-class MotorCurrentLimiter(
-        val maxVoltage: V, val freeSpeed: AngularVelocity,
-        val stall: I, val limit: I
-) :
-        (AngularVelocity, V) -> V,
-        (V, I, V) -> V {
+fun <S : Quan<S>> motorCurrentLimiter(
+        maxVoltage: V, freeSpeed: S,
+        stall: I, limit: I
+): (S, V) -> V {
 
-    private val motorR: ElectricalResistance = maxVoltage / stall
+    val windings = maxVoltage / stall
 
-    override operator fun invoke(speed: AngularVelocity, target: V) = limit(
-            emf = speed / freeSpeed * maxVoltage,
-            target = target
-    )
+    return fun(speed: S, target: V): V {
+        val emf = speed / freeSpeed * maxVoltage
 
-    @Deprecated(message = "Does not work in practice")
-    override operator fun invoke(applying: V, drawing: I, target: V) = limit(
-            emf = applying - drawing * motorR,
-            target = target
-    )
-
-    private fun limit(emf: V, target: V): V {
-        val expectedCurrent = (target - emf) / motorR
+        val expectedCurrent = (target - emf) / windings
 
         return when {
-            expectedCurrent > limit -> limit * motorR + emf
-            expectedCurrent < -limit -> -(limit * motorR + emf)
+            expectedCurrent > limit -> limit * windings + emf
+            expectedCurrent < -limit -> -(limit * windings + emf)
             else -> target
         }
     }
