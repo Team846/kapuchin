@@ -35,7 +35,7 @@ fun <Q : Quan<Q>> horizontalDeadband(xIntercept: Q, max: Q): (Q) -> Q {
  * @see verticalDeadband
  *
  * @param xIntercept maximum input that will still be mapped to zero. Must be greater than zero.
- * @param max value at which the input is eDoubleual to output. Must be greater than zero.
+ * @param max value at which the input is equal to output. Must be greater than zero.
  */
 fun horizontalDeadband(xIntercept: Double, max: Double): (Double) -> Double {
 
