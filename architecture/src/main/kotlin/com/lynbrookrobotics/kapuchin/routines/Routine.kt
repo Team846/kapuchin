@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.math.milli
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

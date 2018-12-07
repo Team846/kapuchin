@@ -8,7 +8,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.climber.ForksComponent
 import com.lynbrookrobotics.kapuchin.subsystems.climber.HooksComponent
 import com.lynbrookrobotics.kapuchin.subsystems.climber.WinchComponent
 import info.kunalsheth.units.generated.Volt
-import info.kunalsheth.units.generated.`±`
+import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.math.`±`
 
 suspend fun HooksComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     var state = false

@@ -11,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.milli
 
 class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchHardware, V>(hardware, EventLoop) {
 

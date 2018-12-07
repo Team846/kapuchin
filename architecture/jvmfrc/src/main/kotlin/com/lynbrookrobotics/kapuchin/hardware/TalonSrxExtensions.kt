@@ -13,6 +13,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.lazyOffloadedGainWriter
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.milli
 import java.io.IOException
 
 private val configTimeout = 1000

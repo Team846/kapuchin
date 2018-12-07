@@ -8,6 +8,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.milli
 
 class RollersComponent(hardware: RollersHardware) : Component<RollersComponent, RollersHardware, TwoSided<DutyCycle>>(hardware, EventLoop) {
 

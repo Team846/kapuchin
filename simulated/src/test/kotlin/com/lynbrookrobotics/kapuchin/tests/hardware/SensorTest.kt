@@ -10,7 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.checkInSync
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import com.lynbrookrobotics.kapuchin.timing.scope
-import info.kunalsheth.units.generated.avg
+import info.kunalsheth.units.math.avg
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test

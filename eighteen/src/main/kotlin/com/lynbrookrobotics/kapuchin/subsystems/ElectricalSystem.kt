@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.Minute
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Volt
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.math.milli
 
 class ElectricalSystemHardware : SubsystemHardware<ElectricalSystemHardware, Nothing>() {
     override val name = "Electrical System"

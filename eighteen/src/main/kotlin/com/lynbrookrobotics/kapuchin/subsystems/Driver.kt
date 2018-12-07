@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.control.`±`
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.horizontalDeadband
 import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
@@ -9,11 +8,13 @@ import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Joystick
+import info.kunalsheth.units.generated.Dimensionless
+import info.kunalsheth.units.generated.Each
+import info.kunalsheth.units.generated.Percent
 import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.milli
-import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sign
+import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.pow
+import info.kunalsheth.units.math.withSign
 
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val name = "Driver"
@@ -40,18 +41,16 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     operator fun Joystick.get(button: JoystickButton) = getRawButton(button.raw)
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val joystickMapping: (Double) -> Double by pref {
+    val joystickMapping by pref {
         val exponent by pref(2)
-        val deadband by pref(0.02)
+        val deadband by pref(2, Percent)
         ({
-            fun powerWithSign(x: Double) = abs(x).pow(exponent) * x.sign
-            val withDeadband = horizontalDeadband(deadband, 1.0)
-
-            fun(x: Double) = powerWithSign(withDeadband(x))
+            val db = horizontalDeadband(deadband, 100.Percent)
+            fun(x: Dimensionless) = db(x).pow(exponent.Each).withSign(x)
         })
     }
 
-    val manualOverride = s { -joystickMapping(operator.y) }
+    val manualOverride = s { -joystickMapping(operator.y.Each) }
 
     // CLIMBER
     val deployHooks = s { operator[RightOne] && operator[RightSix] }
@@ -60,11 +59,11 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val manualClimb = s { operator[RightFour] }
 
     // DRIVETRAIN
-    val accelerator = s { -joystickMapping(driver.y) }
-    val steering = s { joystickMapping(wheel.x) }
+    val accelerator = s { -joystickMapping(driver.y.Each) }
+    val steering = s { joystickMapping(wheel.x.Each) }
 
     // LIFT
-    val twistAdjust = s { joystickMapping(operator.y) }
+    val twistAdjust = s { joystickMapping(operator.y.Each) }
     val collect = s { driver[Trigger] }
     val exchange = s { operator[BottomTrigger] }
     val switch = s { operator[LeftTrigger] }

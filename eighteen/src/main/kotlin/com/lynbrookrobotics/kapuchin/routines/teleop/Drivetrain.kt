@@ -15,7 +15,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
-import kotlin.math.absoluteValue
+import info.kunalsheth.units.math.`±`
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps

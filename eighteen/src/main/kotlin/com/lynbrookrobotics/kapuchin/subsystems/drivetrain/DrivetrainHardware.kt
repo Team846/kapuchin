@@ -19,6 +19,8 @@ import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.`±`
+import info.kunalsheth.units.math.milli
 import kotlin.math.PI
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {

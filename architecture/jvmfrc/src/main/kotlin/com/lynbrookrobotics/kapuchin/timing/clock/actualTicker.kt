@@ -8,7 +8,11 @@ import com.lynbrookrobotics.kapuchin.timing.PlatformThread.Companion.platformThr
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.hal.NotifierJNI
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Each
+import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.div
+import info.kunalsheth.units.math.micro
 
 actual class Ticker private actual constructor(
         parent: Named,

@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.control.conversion
 
 import com.lynbrookrobotics.kapuchin.control.div
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.times
 
 /**
  * Encoder conversion utility

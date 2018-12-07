@@ -4,7 +4,11 @@ import com.lynbrookrobotics.kapuchin.control.div
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Quan
+import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.T
+import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.math.milli
 import kotlin.jvm.JvmName
 
 /**

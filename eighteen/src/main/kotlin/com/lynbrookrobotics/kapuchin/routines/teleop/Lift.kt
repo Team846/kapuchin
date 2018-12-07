@@ -6,11 +6,8 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
-import info.kunalsheth.units.generated.Each
-import info.kunalsheth.units.generated.Inch
-import info.kunalsheth.units.generated.Length
-import info.kunalsheth.units.generated.`±`
-import info.kunalsheth.units.generated.div
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.`±`
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.round
