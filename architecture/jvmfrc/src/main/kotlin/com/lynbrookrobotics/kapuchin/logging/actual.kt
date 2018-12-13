@@ -31,6 +31,7 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
         if (running.isCompleted) scope.launch {
             SmartDashboard.putNumber(name, withUnits(y))
             printer.println("${x.Second},${withUnits(y)}")
+            printer.flush()
         }.also { running = it }
     }
 
