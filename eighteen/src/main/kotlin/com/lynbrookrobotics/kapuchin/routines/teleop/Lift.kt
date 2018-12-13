@@ -33,7 +33,7 @@ suspend fun LiftComponent.teleop(driver: DriverHardware) = startRoutine("teleop"
     controller {
         val adjust = twistAdjustRange * twistAdjust
 
-        if (overrideLift) PercentOutput(manualOverride.Each)
+        if (overrideLift) PercentOutput(manualOverride)
         else PositionOutput(hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(when {
                     toCollect || toDeployHooks -> collectHeight
@@ -106,7 +106,7 @@ suspend fun LiftComponent.singleStackTeleop(driver: DriverHardware) = startRouti
             else -> if(stackingMode) stackTarget() else currentPosition
         }
 
-        if (overrideLift) PercentOutput(manualOverride.Each)
+        if (overrideLift) PercentOutput(manualOverride)
         else PositionOutput(
                 hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(target)
@@ -165,7 +165,7 @@ suspend fun LiftComponent.cubeStackTeleop(driver: DriverHardware) = startRoutine
             else -> persistentTarget ?: currentPosition
         }
 
-        if (overrideLift) PercentOutput(manualOverride.Each).also { persistentTarget = null }
+        if (overrideLift) PercentOutput(manualOverride).also { persistentTarget = null }
         else PositionOutput(
                 hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(target)

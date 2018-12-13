@@ -44,8 +44,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftCompone
     )
     val turnControl = pidControlLoop(::div, ::times, turningPositionGains) {
         val steeringForwardBlend =
-                if (steering == 0.0) 0.0
-                else steering.absoluteValue / (steering.absoluteValue + accelerator.absoluteValue)
+                if (steering == 0.Percent) 0.Percent
+                else steering.abs / (steering.abs + accelerator.abs)
         turnTargetIntegrator(it, maxTurningSpeed * steering * steeringForwardBlend)
     }
 

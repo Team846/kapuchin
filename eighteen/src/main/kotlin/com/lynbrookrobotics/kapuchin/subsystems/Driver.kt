@@ -46,7 +46,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
         val deadband by pref(2, Percent)
         ({
             val db = horizontalDeadband(deadband, 100.Percent)
-            fun(x: Dimensionless) = db(x).pow(exponent.Each).withSign(x)
+            fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)
         })
     }
 
