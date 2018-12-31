@@ -21,18 +21,26 @@ interface Vector<T> {
 }
 
 data class UomVector<Q : Quan<Q>>(override val x: Q, override val y: Q, override val z: Q) : Vector<Q> {
-    operator fun plus(other: UomVector<Q>): UomVector<Q> {
-        return UomVector(x + other.x, y + other.y, z + other.z)
-    }
-    operator fun minus (other: UomVector<Q>): UomVector<Q> {
-        return UomVector(x - other.x, y - other.y, z - other.z)
-    }
-    operator fun times (other: UomVector<Q>): Q {
-        return x * other.x + y * other.y + z * other.z
-    }
-    operator fun times (scalar: Number): UomVector<Q> {
-        return UomVector(x * scalar, y  * scalar, z * scalar)
-    }
+    operator fun plus(other: UomVector<Q>) = UomVector(
+            x + other.x,
+            y + other.y,
+            z + other.z
+    )
+
+    operator fun minus(other: UomVector<Q>) = UomVector(
+            x - other.x,
+            y - other.y,
+            z - other.z
+    )
+
+    fun <QQ : Quan<QQ>> dot(times: (Q, Q) -> QQ, other: UomVector<Q>) =
+            times(x, other.x) + times(y, other.y) + times(z, other.z)
+
+    operator fun times(scalar: Number) = UomVector(
+            x * scalar,
+            y * scalar,
+            z * scalar
+    )
 }
 
 data class NumVector(override val x: Double, override val y: Double, override val z: Double) : Vector<Double>

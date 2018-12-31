@@ -1,16 +1,15 @@
 package com.lynbrookrobotics.kapuchin.hardware.imu
 
-import java.nio.ByteBuffer
-
-import com.lynbrookrobotics.kapuchin.hardware.SPI
 import com.lynbrookrobotics.kapuchin.control.data.UomVector
-import info.kunalsheth.units.generated.*
-import java.lang.IllegalStateException
+import com.lynbrookrobotics.kapuchin.hardware.SPI
+import info.kunalsheth.units.generated.AngularVelocity
+import info.kunalsheth.units.generated.DegreePerSecond
+import java.nio.ByteBuffer
 
 /**
  * An interface for communicating with the ADIS16448 IMU.
  */
-class ADIS16448(private val spi: SPI): DigitalGyro() {
+class ADIS16448(private val spi: SPI) : DigitalGyro() {
     // List of register addresses on the IMU
     private object Registers {
         // Sample Period
@@ -89,7 +88,7 @@ class ADIS16448(private val spi: SPI): DigitalGyro() {
      * @return IMUValue
      */
     fun currentData(): IMUValue {
-        val gyro: UomVector<AngularVelocity> = UomVector<AngularVelocity>(
+        val gyro: UomVector<AngularVelocity> = UomVector(
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.X_GYRO_REG)),
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.Y_GYRO_REG)),
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.Z_GYRO_REG))
