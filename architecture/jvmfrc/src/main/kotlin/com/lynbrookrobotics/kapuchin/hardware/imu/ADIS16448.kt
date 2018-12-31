@@ -8,7 +8,6 @@ import info.kunalsheth.units.generated.Degree
 import info.kunalsheth.units.generated.DegreePerSecond
 import java.nio.ByteBuffer
 
-const val DegreesPerSecondPerLSB: Double = 1.0 / 25.0
 
 /**
  * An interface for communicating with the ADIS16448 IMU.
@@ -34,6 +33,15 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
         const val X_DELTA_ANG: Byte = 0x42
         const val Y_DELTA_ANG: Byte = 0x46
         const val Z_DELTA_ANG: Byte = 0x4A
+    }
+
+    private object AngularVelocityConstants {
+        // |Angular velocity| <= 1000 deg/sec
+        const val DegreesPerSecondPerLSB1000: Double = 1.0 / 25.0
+        // |Angular velocity| <= 500 deg/sec
+        const val DegreesPerSecondPerLSB500: Double = 1.0 / 50.0
+        // |Angular velocity| <= 250 deg/sec
+        const val DegreesPerSecondPerLSB250: Double = 1.0 / 100.0
     }
 
     init {
@@ -88,7 +96,7 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.X_GYRO_VEL)),
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.Y_GYRO_VEL)),
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.Z_GYRO_VEL))
-        ).times(DegreesPerSecondPerLSB) // when trying other registers, remove multiplying factor
+        ).times(AngularVelocityConstants.DegreesPerSecondPerLSB1000) // when trying other registers, remove multiplying factor
         val dAngle: UomVector<Angle> = UomVector(
                 Degree(readGyroRegister(ADIS16448Protocol.X_DELTA_ANG)),
                 Degree(readGyroRegister(ADIS16448Protocol.Y_DELTA_ANG)),
