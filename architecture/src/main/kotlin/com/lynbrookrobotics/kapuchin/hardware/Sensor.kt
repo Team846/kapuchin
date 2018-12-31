@@ -28,7 +28,7 @@ import kotlin.reflect.KProperty
 class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<Input>) {
 
     internal var value: TimeStamped<Input>? = null
-    internal fun optimizedRead(atTime: Time, syncThreshold: Time) = value
+    fun optimizedRead(atTime: Time, syncThreshold: Time) = value
             ?.takeIf { it.x in atTime `±` syncThreshold }
             ?: read(atTime)
 

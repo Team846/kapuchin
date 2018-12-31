@@ -7,6 +7,8 @@ import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
+import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
 import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
@@ -27,6 +29,8 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
         val kD by pref(0, Volt, 1, FootPerSecond)
         ({ PidGains(kP, kI, kD) })
     }
+
+    val cubeHeight by pref(13, Inch)
 
     val collectHeight by pref(0, Inch)
     val exchangeHeight by pref(4, Inch)
@@ -97,4 +101,9 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     }
     val lazyOutput = lazyOutput(esc, idx)
     val position = sensor { offloadedSettings.realPosition(esc.getSelectedSensorPosition(idx)) stampWith it }
+            .with(graph("Height", Inch))
+
+    init {
+        EventLoop.runOnTick { position.optimizedRead(it, syncThreshold) }
+    }
 }
