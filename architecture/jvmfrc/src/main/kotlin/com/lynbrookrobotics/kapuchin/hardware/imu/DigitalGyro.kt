@@ -10,6 +10,10 @@ import java.util.*
 
 /**
  * Calibration, calculation for velocity
+ *
+ *  @author Nikash Walia
+ *
+ *  @param updatePeriod period at which the gyro updates
  */
 abstract class DigitalGyro(updatePeriod: Double) {
     //Tick Period of the robot
@@ -23,12 +27,14 @@ abstract class DigitalGyro(updatePeriod: Double) {
 
     /**
      * Gets the current velocity
+     *
      * @return UomVector
      */
     abstract fun retrieveVelocity(): UomVector<AngularVelocity>
 
     /**
      * Gets the current change in angle
+     *
      * @return UomVector
      */
     abstract fun retrieveDeltaAngle(): UomVector<Angle>
@@ -46,6 +52,11 @@ abstract class DigitalGyro(updatePeriod: Double) {
         }
     }
 
+    /**
+     * Calculate angular velocities by compensating for drift
+     *
+     * @return 3-dimensional angular velocities
+     */
     fun getVelocities(): UomVector<AngularVelocity> {
         if (calibrating) {
             calibrationVelocities.add(retrieveVelocity())
@@ -57,6 +68,11 @@ abstract class DigitalGyro(updatePeriod: Double) {
         }
     }
 
+    /**
+     * Obtain change in angles in 3-dimensions
+     *
+     * @return 3-dimensional change in angle
+     */
     fun getDeltaAngles(): UomVector<Angle> {
         if (calibrating) return UomVector(0.Degree, 0.Degree, 0.Degree) else return retrieveDeltaAngle()
     }

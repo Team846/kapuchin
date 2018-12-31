@@ -11,9 +11,16 @@ import java.nio.ByteBuffer
 
 /**
  * An interface for communicating with the ADIS16448 IMU.
+ *
+ * @author Nikash Walia
+ *
+ * @param spi the SPI object being used to communicate with the gyro
+ * @param updatePeriod updatePeriod of the clock
  */
 class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): DigitalGyro(updatePeriod) {
-    // List of register addresses on the IMU
+    /**
+     * List of register addresses on the IMU
+     */
     private object Registers {
         // Sample Period
         val SMPL_PRD: IMURegister = IMURegister(0x36)
@@ -25,7 +32,9 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
         val PROD_ID: IMURegister = IMURegister(0x56)
     }
 
-    // Private object used to store private variables
+    /**
+     * Registers on the IMU for angular velocity and change in angle
+     */
     private object ADIS16448Protocol {
         const val X_GYRO_VEL: Byte = 0x04 // try 0x12
         const val Y_GYRO_VEL: Byte = 0x06 // try 0x16
@@ -35,6 +44,9 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
         const val Z_DELTA_ANG: Byte = 0x4A
     }
 
+    /**
+     * Constants for manually tuning sensitivity for the gyro's angular velocity
+     */
     private object AngularVelocityConstants {
         // |Angular velocity| <= 1000 deg/sec
         const val DegreesPerSecondPerLSB1000: Double = 1.0 / 25.0
@@ -68,6 +80,7 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
 
     /**
      * Returns data from register as short (16 bit integer)
+     *
      * @param register register- hex
      * @return short
      */
@@ -92,7 +105,7 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
      * @return IMUValue
      */
     fun currentData(): IMUValue {
-        val gyro: UomVector<AngularVelocity> = UomVector(
+        val angVel: UomVector<AngularVelocity> = UomVector(
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.X_GYRO_VEL)),
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.Y_GYRO_VEL)),
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.Z_GYRO_VEL))
@@ -102,11 +115,11 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
                 Degree(readGyroRegister(ADIS16448Protocol.Y_DELTA_ANG)),
                 Degree(readGyroRegister(ADIS16448Protocol.Z_DELTA_ANG))
         )
-        return IMUValue(gyro, dAngle)
+        return IMUValue(angVel, dAngle)
     }
 
     override fun retrieveVelocity(): UomVector<AngularVelocity> {
-        return currentData().gyro!!
+        return currentData().angVel!!
     }
 
     override fun retrieveDeltaAngle(): UomVector<Angle> {

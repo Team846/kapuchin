@@ -7,6 +7,9 @@ import kotlin.experimental.or
 
 /**
  * Represents a register on the ADIS16448 IMU.
+ *
+ * @author Nikash Walia
+ *
  * @param register is ID of register on IMU
  */
 class IMURegister(register: Byte) {
@@ -23,6 +26,7 @@ class IMURegister(register: Byte) {
 
     /**
      * Reads a value from the register.
+     *
      * @param spi the interface to use for communication
      * @return a single value from the register
      */
@@ -37,11 +41,12 @@ class IMURegister(register: Byte) {
         return readBuffer.getShort(0).toInt()
     }
 
-    val valueWriter1 = ByteBuffer.allocateDirect(2)
-    val valueWriter2 = ByteBuffer.allocateDirect(2)
+    private val valueWriter1 = ByteBuffer.allocateDirect(2)
+    private val valueWriter2 = ByteBuffer.allocateDirect(2)
 
     /**
      * Writes a single value to the register
+     *
      * @param value the value to write
      * @param spi the interface to use for communication
      */

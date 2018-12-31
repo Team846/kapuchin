@@ -2,6 +2,11 @@ package com.lynbrookrobotics.kapuchin.hardware
 
 import java.nio.ByteBuffer
 
+/**
+ * Class that outlines certain methods used by WPILIB's SPI object
+ *
+ * @author Nikash Walia
+ */
 abstract class SPI {
     abstract fun setClockRate(hz: Int)
     abstract fun setMSBFirst()
