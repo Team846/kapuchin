@@ -9,9 +9,8 @@ import kotlin.collections.*
 
 /**
  * Calibration, calculation for velocity
- * @param tickPeriod tick period of robot
  */
-abstract class DigitalGyro {
+abstract class DigitalGyro(updatePeriod: Double) {
     //Tick Period of the robot
     private var currentDrift: UomVector<AngularVelocity>? = null
 
@@ -26,6 +25,12 @@ abstract class DigitalGyro {
      * @return UomVector
      */
     abstract fun retrieveVelocity(): UomVector<AngularVelocity>
+
+    /**
+     * Gets the current change in angle
+     * @return UomVector
+     */
+    abstract fun retrieveDeltaAngle(): UomVector<Angle>
 
     /**
      * End the collection of values used to calibrate
@@ -46,10 +51,14 @@ abstract class DigitalGyro {
 
             if (calibrationVelocities.size > 200) calibrationVelocities.remove()
 
-            return UomVector(DegreePerSecond(0), DegreePerSecond(0), DegreePerSecond())
+            return UomVector(DegreePerSecond(0), DegreePerSecond(0), DegreePerSecond(0))
         } else
         {
             return retrieveVelocity() - currentDrift!!
         }
+    }
+
+    fun getDeltaAngles(): UomVector<Angle> {
+        if (calibrating) return UomVector(Degree(0), Degree(0), Degree(0)) else return retrieveDeltaAngle()
     }
 }

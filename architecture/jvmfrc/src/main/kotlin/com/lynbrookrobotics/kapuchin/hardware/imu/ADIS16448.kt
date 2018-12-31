@@ -7,10 +7,13 @@ import com.lynbrookrobotics.kapuchin.control.data.UomVector
 import info.kunalsheth.units.generated.*
 import java.lang.IllegalStateException
 
+const val DegreesPerSecondPerLSB: Double = 1.0 / 25.0
+
 /**
  * An interface for communicating with the ADIS16448 IMU.
  */
-class ADIS16448(private val spi: SPI): DigitalGyro() {
+class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): DigitalGyro(updatePeriod) {
+
     // List of register addresses on the IMU
     private object Registers {
         // Sample Period
@@ -25,9 +28,12 @@ class ADIS16448(private val spi: SPI): DigitalGyro() {
 
     // Private object used to store private variables
     private object ADIS16448Protocol {
-        const val X_GYRO_REG: Byte = 0x04
-        const val Y_GYRO_REG: Byte = 0x06
-        const val Z_GYRO_REG: Byte = 0x08
+        const val X_GYRO_VEL: Byte = 0x04 // try 0x12
+        const val Y_GYRO_VEL: Byte = 0x06 // try 0x16
+        const val Z_GYRO_VEL: Byte = 0x08 // try 0x1A
+        const val X_DELTA_ANG: Byte = 0x42
+        const val Y_DELTA_ANG: Byte = 0x46
+        const val Z_DELTA_ANG: Byte = 0x4A
     }
 
     // Private object used to group related values
@@ -42,7 +48,7 @@ class ADIS16448(private val spi: SPI): DigitalGyro() {
     }
 
     init {
-        spi.setClockRate(3000000)
+        spi.setClockRate((1 / updatePeriod).toInt())
         spi.setMSBFirst()
         spi.setSampleDataOnFalling()
         spi.setClockActiveLow()
@@ -90,14 +96,23 @@ class ADIS16448(private val spi: SPI): DigitalGyro() {
      */
     fun currentData(): IMUValue {
         val gyro: UomVector<AngularVelocity> = UomVector<AngularVelocity>(
-                DegreePerSecond(readGyroRegister(ADIS16448Protocol.X_GYRO_REG)),
-                DegreePerSecond(readGyroRegister(ADIS16448Protocol.Y_GYRO_REG)),
-                DegreePerSecond(readGyroRegister(ADIS16448Protocol.Z_GYRO_REG))
-        ).times(Constants.DegreesPerSecondPerLSB)
-        return IMUValue(gyro, null, null)
+                DegreePerSecond(readGyroRegister(ADIS16448Protocol.X_GYRO_VEL)),
+                DegreePerSecond(readGyroRegister(ADIS16448Protocol.Y_GYRO_VEL)),
+                DegreePerSecond(readGyroRegister(ADIS16448Protocol.Z_GYRO_VEL))
+        ).times(DegreesPerSecondPerLSB) // when trying other registers, remove multiplying factor
+        val dAngle: UomVector<Angle> = UomVector<Angle>(
+                Degree(readGyroRegister(ADIS16448Protocol.X_DELTA_ANG)),
+                Degree(readGyroRegister(ADIS16448Protocol.Y_DELTA_ANG)),
+                Degree(readGyroRegister(ADIS16448Protocol.Z_DELTA_ANG))
+        )
+        return IMUValue(gyro, dAngle)
     }
 
     override fun retrieveVelocity(): UomVector<AngularVelocity> {
         return currentData().gyro!!
+    }
+
+    override fun retrieveDeltaAngle(): UomVector<Angle> {
+        return currentData().dAngle!!
     }
 }

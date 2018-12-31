@@ -7,8 +7,4 @@ import info.kunalsheth.units.generated.*
 /**
  * Constructs a single datapoint from the IMU.
  */
-data class IMUValue(
-                    val gyro: UomVector<AngularVelocity>?,
-                    val accel: UomVector<Acceleration>?,
-                    val magneto: UomVector<MagneticFlux>?
-                )
+data class IMUValue(val gyro: UomVector<AngularVelocity>?, val dAngle: UomVector<Angle>?)
