@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
 import com.lynbrookrobotics.kapuchin.routines.teleop.singleStackTeleop
 import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
+import com.lynbrookrobotics.kapuchin.routines.teleop.singleStackTeleop
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
 import com.lynbrookrobotics.kapuchin.subsystems.LiftHardware
