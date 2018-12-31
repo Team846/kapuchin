@@ -1,11 +1,12 @@
 package com.lynbrookrobotics.kapuchin.hardware.imu
 
 import com.lynbrookrobotics.kapuchin.control.data.UomVector
+import info.kunalsheth.units.generated.Angle
+import info.kunalsheth.units.generated.AngularVelocity
+import info.kunalsheth.units.generated.DegreePerSecond
+import info.kunalsheth.units.generated.Degree
 
-import info.kunalsheth.units.generated.*
 import java.util.*
-
-import kotlin.collections.*
 
 /**
  * Calibration, calculation for velocity
@@ -50,15 +51,13 @@ abstract class DigitalGyro(updatePeriod: Double) {
             calibrationVelocities.add(retrieveVelocity())
 
             if (calibrationVelocities.size > 200) calibrationVelocities.remove()
-
-            return UomVector(DegreePerSecond(0), DegreePerSecond(0), DegreePerSecond(0))
-        } else
-        {
+            return UomVector(0.DegreePerSecond, 0.DegreePerSecond, 0.DegreePerSecond)
+        } else {
             return retrieveVelocity() - currentDrift!!
         }
     }
 
     fun getDeltaAngles(): UomVector<Angle> {
-        if (calibrating) return UomVector(Degree(0), Degree(0), Degree(0)) else return retrieveDeltaAngle()
+        if (calibrating) return UomVector(0.Degree, 0.Degree, 0.Degree) else return retrieveDeltaAngle()
     }
 }

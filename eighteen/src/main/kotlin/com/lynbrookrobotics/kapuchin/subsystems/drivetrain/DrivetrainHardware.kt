@@ -7,7 +7,10 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
+import com.lynbrookrobotics.kapuchin.control.data.UomVector
 import com.lynbrookrobotics.kapuchin.control.data.stampWith
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
+import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
@@ -16,9 +19,12 @@ import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.`±`
+import info.kunalsheth.units.math.milli
 import kotlin.math.PI
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
@@ -90,26 +96,42 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
                 offloadedSettings.realPosition(rightMasterEsc.getSelectedSensorPosition(idx))
         ) stampWith it
     }
-//            .with(graph("Left Position", Foot)) { it.left }
-//            .with(graph("Right Position", Foot)) { it.right }
+            .with(graph("Left Position", Foot)) { it.left }
+            .with(graph("Right Position", Foot)) { it.right }
 
     val velocity = sensor {
         TwoSided(
                 offloadedSettings.realVelocity(leftMasterEsc.getSelectedSensorVelocity(idx)),
                 offloadedSettings.realVelocity(rightMasterEsc.getSelectedSensorVelocity(idx))
         ) stampWith it
-    }//.with(graph("Forward Velocity", FootPerSecond)) { it.avg }
+    }
+            .with(graph("Left Speed", FootPerSecond)) { it.left }
+            .with(graph("Right Speed", FootPerSecond)) { it.right }
 
     val driftTolerance by pref(1, DegreePerSecond)
     private lateinit var startingAngle: Angle
-    val gyro by hardw { ADIS16448_IMU() }
+    val imu by hardw { ADIS16448_IMU() }
             .configure { startingAngle = it.angle.Degree }
             .verify("Gyro should not drift after calibration") {
                 it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
             }
-    val gyroInput = sensor(gyro) {
+    val gyroInput = sensor(imu) {
         GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
     }
-//            .with(graph("Bearing", Degree)) { it.angle }
-//            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
+            .with(graph("Bearing", Degree)) { it.angle }
+            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
+
+    val accelInput = sensor(imu) {
+        UomVector(accelX.EarthGravity, accelY.EarthGravity, accelZ.EarthGravity) stampWith it // lastSampleTime returns 0 ?
+    }
+            .with(graph("Acceleration-X", FootPerSecondSquared)) { it.x }
+            .with(graph("Acceleration-Y", FootPerSecondSquared)) { it.y }
+            .with(graph("Acceleration-Z", FootPerSecondSquared)) { it.z }
+
+    init {
+        EventLoop.runOnTick { gyroInput.optimizedRead(it, syncThreshold) }
+        EventLoop.runOnTick { accelInput.optimizedRead(it, syncThreshold) }
+        EventLoop.runOnTick { position.optimizedRead(it, syncThreshold) }
+        EventLoop.runOnTick { velocity.optimizedRead(it, syncThreshold) }
+    }
 }

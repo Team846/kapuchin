@@ -6,9 +6,8 @@ import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
 import com.lynbrookrobotics.kapuchin.tests.`is within?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
 import com.lynbrookrobotics.kapuchin.tests.anyInt
-import info.kunalsheth.units.generated.Foot
-import info.kunalsheth.units.generated.`±`
-import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.`±`
 import kotlin.test.Test
 
 class StandardDeviationTest {

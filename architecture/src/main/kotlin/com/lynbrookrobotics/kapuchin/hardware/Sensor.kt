@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.`±`
+import info.kunalsheth.units.math.`±`
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -28,7 +28,7 @@ import kotlin.reflect.KProperty
 class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<Input>) {
 
     internal var value: TimeStamped<Input>? = null
-    internal fun optimizedRead(atTime: Time, syncThreshold: Time) = value
+    fun optimizedRead(atTime: Time, syncThreshold: Time) = value
             ?.takeIf { it.x in atTime `±` syncThreshold }
             ?: read(atTime)
 

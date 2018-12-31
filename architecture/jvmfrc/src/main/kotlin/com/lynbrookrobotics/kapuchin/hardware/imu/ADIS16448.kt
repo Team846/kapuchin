@@ -1,11 +1,12 @@
 package com.lynbrookrobotics.kapuchin.hardware.imu
 
-import java.nio.ByteBuffer
-
-import com.lynbrookrobotics.kapuchin.hardware.SPI
 import com.lynbrookrobotics.kapuchin.control.data.UomVector
-import info.kunalsheth.units.generated.*
-import java.lang.IllegalStateException
+import com.lynbrookrobotics.kapuchin.hardware.SPI
+import info.kunalsheth.units.generated.Angle
+import info.kunalsheth.units.generated.AngularVelocity
+import info.kunalsheth.units.generated.Degree
+import info.kunalsheth.units.generated.DegreePerSecond
+import java.nio.ByteBuffer
 
 const val DegreesPerSecondPerLSB: Double = 1.0 / 25.0
 
@@ -13,7 +14,6 @@ const val DegreesPerSecondPerLSB: Double = 1.0 / 25.0
  * An interface for communicating with the ADIS16448 IMU.
  */
 class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): DigitalGyro(updatePeriod) {
-
     // List of register addresses on the IMU
     private object Registers {
         // Sample Period
@@ -34,17 +34,6 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
         const val X_DELTA_ANG: Byte = 0x42
         const val Y_DELTA_ANG: Byte = 0x46
         const val Z_DELTA_ANG: Byte = 0x4A
-    }
-
-    // Private object used to group related values
-    // Contains gyro-specific constants, should be unchanged for new robot
-    // LSB: Least Significant Bits (smallest)
-    private object Constants {
-        // Specifies IMU sensitivity to raw sensor data
-        const val DegreesPerSecondPerLSB: Double = 1.0 / 25.0
-        const val GPerLSB: Double = 1.0 / 1200.0
-        // Gauss: unit of magnetic flux
-        const val MilligaussPerLSB: Double = 1.0 / 7.0
     }
 
     init {
@@ -95,12 +84,12 @@ class ADIS16448(private val spi: SPI, updatePeriod: Double = 1.0 / 3000000): Dig
      * @return IMUValue
      */
     fun currentData(): IMUValue {
-        val gyro: UomVector<AngularVelocity> = UomVector<AngularVelocity>(
+        val gyro: UomVector<AngularVelocity> = UomVector(
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.X_GYRO_VEL)),
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.Y_GYRO_VEL)),
                 DegreePerSecond(readGyroRegister(ADIS16448Protocol.Z_GYRO_VEL))
         ).times(DegreesPerSecondPerLSB) // when trying other registers, remove multiplying factor
-        val dAngle: UomVector<Angle> = UomVector<Angle>(
+        val dAngle: UomVector<Angle> = UomVector(
                 Degree(readGyroRegister(ADIS16448Protocol.X_DELTA_ANG)),
                 Degree(readGyroRegister(ADIS16448Protocol.Y_DELTA_ANG)),
                 Degree(readGyroRegister(ADIS16448Protocol.Z_DELTA_ANG))

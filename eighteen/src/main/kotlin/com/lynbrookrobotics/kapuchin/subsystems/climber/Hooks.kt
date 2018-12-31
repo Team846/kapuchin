@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.math.milli
 
 class HooksComponent(hardware: HooksHardware) : Component<HooksComponent, HooksHardware, Boolean>(hardware, EventLoop) {
     override val fallbackController: HooksComponent.(Time) -> Boolean = { false }

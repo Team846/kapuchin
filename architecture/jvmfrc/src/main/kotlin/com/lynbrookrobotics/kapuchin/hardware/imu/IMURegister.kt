@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware.imu
 
-import java.nio.ByteBuffer
 import com.lynbrookrobotics.kapuchin.hardware.SPI
+import java.nio.ByteBuffer
 import kotlin.experimental.or
 
 

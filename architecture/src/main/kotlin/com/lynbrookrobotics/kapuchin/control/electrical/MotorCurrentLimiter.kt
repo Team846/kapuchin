@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.control.electrical
 
 import com.lynbrookrobotics.kapuchin.control.div
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.times
 
 /**
  * Limits the current applied to a motor

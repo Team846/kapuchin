@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.loops.pid.pidControlLoop
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyInt
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.milli
 import kotlin.test.Test
 
 class PidTest {

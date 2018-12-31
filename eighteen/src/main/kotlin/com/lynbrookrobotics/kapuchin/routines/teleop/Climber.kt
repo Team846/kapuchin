@@ -8,16 +8,21 @@ import com.lynbrookrobotics.kapuchin.subsystems.climber.ForksComponent
 import com.lynbrookrobotics.kapuchin.subsystems.climber.HooksComponent
 import com.lynbrookrobotics.kapuchin.subsystems.climber.WinchComponent
 import info.kunalsheth.units.generated.Volt
-import info.kunalsheth.units.generated.`±`
+import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.math.`±`
 
 suspend fun HooksComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     var state = false
+    var lastIsTriggered = false
+
     val isTriggered by driver.deployHooks.readEagerly.withoutStamps
     val liftPosition by lift.hardware.position.readEagerly.withoutStamps
     val liftSafeThreshold = lift.collectHeight `±` lift.positionTolerance
 
     controller {
-        if (isTriggered) state = !state
+        if (isTriggered && !lastIsTriggered) state = !state
+        lastIsTriggered = isTriggered
+
         if (state && liftPosition !in liftSafeThreshold) {
             log(Warning) { "Cannot deploy hooks until lift is lowered" }
             false

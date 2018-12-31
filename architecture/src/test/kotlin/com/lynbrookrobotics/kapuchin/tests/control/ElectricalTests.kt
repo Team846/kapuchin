@@ -9,6 +9,8 @@ import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.`±`
+import info.kunalsheth.units.math.milli
 import kotlin.math.sin
 import kotlin.test.Test
 
