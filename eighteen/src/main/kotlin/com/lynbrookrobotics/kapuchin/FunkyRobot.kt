@@ -7,7 +7,7 @@ import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.hal.HAL
 import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.milli
+import info.kunalsheth.units.math.milli
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

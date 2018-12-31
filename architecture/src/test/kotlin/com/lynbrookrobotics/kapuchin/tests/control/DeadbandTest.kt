@@ -6,7 +6,7 @@ import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is within?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
 import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.`±`
+import info.kunalsheth.units.math.`±`
 import kotlin.test.Test
 
 class DeadbandTest {

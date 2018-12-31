@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.`±`
+import info.kunalsheth.units.math.`±`
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 

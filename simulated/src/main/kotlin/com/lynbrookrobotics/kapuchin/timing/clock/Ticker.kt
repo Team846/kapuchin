@@ -5,8 +5,8 @@ import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.milli
-import info.kunalsheth.units.generated.nano
+import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.nano
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.system.measureNanoTime

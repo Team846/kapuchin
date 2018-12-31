@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
 import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.avg
+import info.kunalsheth.units.math.avg
 
 /**
  * Represents a 3D vector

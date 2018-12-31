@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.milli
 
 class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, Pair<DutyCycle, DutyCycle>>(hardware) {
 

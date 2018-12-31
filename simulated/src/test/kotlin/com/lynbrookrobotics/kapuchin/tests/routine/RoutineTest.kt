@@ -43,7 +43,7 @@ class RoutineTest {
         c.check(8, 4, 6)
     }
 
-    @Test(timeout = 5 * 1000)
+    @Test(timeout = 6 * 1000)
     fun `routines can still run after one times out`() = runBlocking {
         val c = RoutineTestC()
 
@@ -65,7 +65,7 @@ class RoutineTest {
         c.check(8, 4, 6)
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `routines can be cancelled externally`() {
         val c = RoutineTestC()
 

@@ -6,11 +6,8 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
-import info.kunalsheth.units.generated.Each
-import info.kunalsheth.units.generated.Inch
-import info.kunalsheth.units.generated.Length
-import info.kunalsheth.units.generated.`±`
-import info.kunalsheth.units.generated.div
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.`±`
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.round
@@ -36,7 +33,7 @@ suspend fun LiftComponent.teleop(driver: DriverHardware) = startRoutine("teleop"
     controller {
         val adjust = twistAdjustRange * twistAdjust
 
-        if (overrideLift) PercentOutput(manualOverride.Each)
+        if (overrideLift) PercentOutput(manualOverride)
         else PositionOutput(hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(when {
                     toCollect || toDeployHooks -> collectHeight
@@ -109,7 +106,7 @@ suspend fun LiftComponent.singleStackTeleop(driver: DriverHardware) = startRouti
             else -> if(stackingMode) stackTarget() else currentPosition
         }
 
-        if (overrideLift) PercentOutput(manualOverride.Each)
+        if (overrideLift) PercentOutput(manualOverride)
         else PositionOutput(
                 hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(target)
@@ -168,7 +165,7 @@ suspend fun LiftComponent.cubeStackTeleop(driver: DriverHardware) = startRoutine
             else -> persistentTarget ?: currentPosition
         }
 
-        if (overrideLift) PercentOutput(manualOverride.Each).also { persistentTarget = null }
+        if (overrideLift) PercentOutput(manualOverride).also { persistentTarget = null }
         else PositionOutput(
                 hardware.offloadedSettings.native(positionGains),
                 hardware.offloadedSettings.native(target)
