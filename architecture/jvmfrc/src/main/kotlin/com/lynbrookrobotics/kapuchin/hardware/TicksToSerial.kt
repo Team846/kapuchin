@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
+import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.hal.SerialPortJNI
 import java.io.Closeable
@@ -11,8 +12,6 @@ class TicksToSerial(
 
     val device = SerialPort(115200, port)
 
-    data class RawTickData(val left: Int, val right: Int)
-
     operator fun invoke() = sequence {
         val buffer = ByteArray(1)
         repeat(device.bytesReceived) {
@@ -23,7 +22,7 @@ class TicksToSerial(
         }
     }
 
-    private fun parse(data: Int): RawTickData {
+    private fun parse(data: Int): TwoSided<Int> {
         val left = data shr 4 and 0x0F
         val absvl = left and 0b0111
         val signl = left and 0b1000 ushr 3
@@ -32,7 +31,7 @@ class TicksToSerial(
         val absvr = right and 0b0111
         val signr = right and 0b1000 ushr 3
 
-        return RawTickData(
+        return TwoSided(
                 left = if (signl == 1) absvl else -absvl,
                 right = if (signr == 1) absvr else -absvr
         )

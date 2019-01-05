@@ -1,5 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
+import info.kunalsheth.units.generated.Angle
+import info.kunalsheth.units.generated.Length
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.math.avg
 
@@ -48,4 +50,27 @@ operator fun <Q : Quan<Q>> TwoSided<Q>.plus(that: TwoSided<Q>) = TwoSided(
 operator fun <Q : Quan<Q>> TwoSided<Q>.minus(that: TwoSided<Q>) = TwoSided(
         this.left - that.left,
         this.right - that.right
+)
+
+/**
+ * Represents a robot location
+ *
+ * @author Kunal
+ *
+ * @property x robot cartesian coordinate
+ * @property y robot cartesian coordinate
+ * @property theta robot bearing
+ */
+data class Position(val x: Length, val y: Length, val bearing: Angle)
+
+operator fun Position.plus(that: Position) = Position(
+        this.x + that.x,
+        this.y + that.y,
+        this.bearing + that.bearing
+)
+
+operator fun Position.minus(that: Position) = Position(
+        this.x - that.x,
+        this.y - that.y,
+        this.bearing - that.bearing
 )
