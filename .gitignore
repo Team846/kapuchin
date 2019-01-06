@@ -106,3 +106,4 @@ fabric.properties
 docs
 .DS_Store
 benchmark/*/*
+local.properties

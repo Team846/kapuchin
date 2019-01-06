@@ -18,7 +18,7 @@ class FunkyRobot : RobotBase() {
 
         val classloading = loadClasses()
 
-        val subsystems = Subsystems.init()
+//        val subsystems = Subsystems.init()
 
         runBlocking { classloading.join() }
 
@@ -36,10 +36,7 @@ class FunkyRobot : RobotBase() {
             EventLoop.tick(currentTime)
 
             if (!currentJob.isActive) {
-                currentJob =
-                        subsystems::teleop runWhile { isEnabled && isOperatorControl }
-                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
-                        ?: doNothing
+                currentJob = doNothing
             }
         }
     }
