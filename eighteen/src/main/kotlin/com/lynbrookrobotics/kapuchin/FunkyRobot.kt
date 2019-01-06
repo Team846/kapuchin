@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.hal.HAL
+import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.math.milli
 import kotlinx.coroutines.Job

@@ -16,7 +16,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
 import com.lynbrookrobotics.kapuchin.timing.scope
-import edu.wpi.first.wpilibj.hal.HAL
+import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
