@@ -71,15 +71,14 @@ class HardwareInit<Hardw> private constructor(
     )
 
     /**
-     * Verify that the configured hardware object meets a certain condition
+     * Add some alternative hardware to use in-case this hardware fails to initialize
      *
-     * @param that description of what is being verified
-     * @param f function to validate the hardware object after configuration
-     * @return new `HardwareInit` delegate with the given verification
+     * @param useThis alternative hardware to initialize
+     * @return new `HardwareInit` delegate with the given alternative
      */
-    fun otherwise(that: HardwareInit<Hardw>): HardwareInit<Hardw> = HardwareInit(
+    fun otherwise(useThis: HardwareInit<Hardw>): HardwareInit<Hardw> = HardwareInit(
             parent, initialize, configure, validate,
-            alternative?.otherwise(that) ?: that,
+            alternative?.otherwise(useThis) ?: useThis,
             nameSuffix
     )
 
