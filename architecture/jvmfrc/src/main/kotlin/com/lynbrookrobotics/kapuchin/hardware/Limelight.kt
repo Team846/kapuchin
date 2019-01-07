@@ -6,10 +6,7 @@ import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.networktables.NetworkTableInstance
-import info.kunalsheth.units.generated.Angle
-import info.kunalsheth.units.generated.Degree
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.milli
 
 class LimelightSystem: SubsystemHardware<LimelightSystem, Nothing>() {
@@ -21,9 +18,8 @@ class LimelightSystem: SubsystemHardware<LimelightSystem, Nothing>() {
     private val cameraIsVertical by pref(true)
     private val cameraAngleRelativeToFront: Angle by pref(0, Degree)
 
-
-    private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
+    private fun <Input> s(f: () -> Input) = sensor { f() stampWith it - Millisecond(table.getEntry("tl").getDouble(0.0)) }
 
     private val angleToTarget = s {
         if (table.getEntry("tv").getDouble(0.0) != 1.0) {
