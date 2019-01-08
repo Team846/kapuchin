@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.control.loops.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import edu.wpi.first.wpilibj.Counter
@@ -38,12 +39,12 @@ class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
 
     val frontHallEffectPort by pref(0)
     val backHallEffectPort by pref(1)
-    val frontHallEffect by hardw { Counter(frontHallEffectPort) }.sensor {
-        180.Degree / period.Second stampWith it
-    }
-    val backHallEffect by hardw { Counter(backHallEffectPort) }.sensor {
-        180.Degree / period.Second stampWith it
-    }
+
+    val frontHallEffect by hardw { Counter(frontHallEffectPort) }
+    val backHallEffect by hardw { Counter(backHallEffectPort) }
+
+    val frontVelocity = sensor(frontHallEffect) { 180.Degree / period.Second stampWith it }
+    val backVelocity = sensor(backHallEffect) { 180.Degree / period.Second stampWith it }
 
     val frontEscPort by pref(0)
     val backEscPort by pref(1)

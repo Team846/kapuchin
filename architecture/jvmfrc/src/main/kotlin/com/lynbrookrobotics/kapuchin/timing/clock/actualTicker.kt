@@ -7,7 +7,7 @@ import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.timing.PlatformThread.Companion.platformThread
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import edu.wpi.first.wpilibj.hal.NotifierJNI
+import edu.wpi.first.hal.NotifierJNI
 import info.kunalsheth.units.generated.Each
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
