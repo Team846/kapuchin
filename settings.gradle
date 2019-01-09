@@ -1,5 +1,6 @@
 rootProject.name = 'kapuchin'
-include 'eighteen'
-include 'simulated'
 include 'architecture'
 include 'architecture:jvmfrc'
+include 'simulated'
+include 'eighteen'
+include 'nineteen'
