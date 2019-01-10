@@ -1,8 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
-import com.lynbrookrobotics.kapuchin.control.data.Position
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
-import com.lynbrookrobotics.kapuchin.control.data.plus
+import com.lynbrookrobotics.kapuchin.control.data.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.avg
 import info.kunalsheth.units.math.cos
@@ -30,6 +28,51 @@ fun simpleVectorTracking(
                     y = s * sin(acc.bearing),
                     bearing = theta
             )
+        }.copy(bearing = finalBearing)
+
+        return pos
+    }
+}
+
+class RotationMatrixTracking(
+        empiricalThetaPerTick: TwoSided<Angle>, trackLength: Length, init: Position
+) : (Sequence<RotationMatrixTracking.Ticks>, Angle) -> Position {
+
+    enum class Ticks {
+        LeftForward, RightForward,
+        LeftBackward, RightBackward
+    }
+
+    private var pos = TwoSided(
+            UomVector(-trackLength / 2, 0.Foot),
+            UomVector(trackLength / 2, 0.Foot)
+    ).run {
+        val mtrx = RotationMatrix(init.bearing)
+
+        TwoSided(
+                mtrx rz left + init.vector,
+                mtrx rz right + init.vector
+        )
+    }
+
+    private val lf = RotationMatrix(empiricalThetaPerTick.left)
+    private val lb = RotationMatrix(-empiricalThetaPerTick.left)
+    private val rf = RotationMatrix(empiricalThetaPerTick.right)
+    private val rb = RotationMatrix(-empiricalThetaPerTick.right)
+
+    fun RotationMatrix.rzAbout(that: UomVector<Length>, origin: UomVector<Length>) = (this rz (that - origin)) + origin
+
+    override operator fun invoke(
+            feedback: Sequence<Ticks>,
+            finalBearing: Angle
+    ): Position {
+        pos = feedback.fold(pos) { acc, tick ->
+            when (tick) {
+                Ticks.LeftForward -> lf.rzAbout(acc.left, acc.right)
+                Ticks.RightForward -> rf.rzAbout(acc.left, acc.right)
+                Ticks.LeftBackward -> lb.rzAbout(acc.left, acc.right)
+                Ticks.RightBackward -> lf.rzAbout(acc.left, acc.right)
+            }
         }.copy(bearing = finalBearing)
 
         return pos

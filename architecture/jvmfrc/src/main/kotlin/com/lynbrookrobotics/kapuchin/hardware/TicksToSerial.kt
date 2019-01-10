@@ -23,7 +23,7 @@ class TicksToSerial(
     }
 
     private fun parse(data: Int): TwoSided<Int> {
-        val left = data shr 4 and 0x0F
+        val left = data ushr 4 and 0x0F
         val absvl = left and 0b0111
         val signl = left and 0b1000 ushr 3
 
