@@ -1,9 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.control.loops
 
-import com.lynbrookrobotics.kapuchin.control.loops.Gain
+import com.lynbrookrobotics.kapuchin.control.data.Gain
 import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
 import com.lynbrookrobotics.kapuchin.control.loops.pid.pidControlLoop
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyInt
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.milli
