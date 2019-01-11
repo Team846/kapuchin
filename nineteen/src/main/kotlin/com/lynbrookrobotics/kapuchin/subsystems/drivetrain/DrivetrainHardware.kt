@@ -30,9 +30,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val leftEscPort by pref(2)
     val rightEscPort by pref(3)
 
-    val operatingVoltage by pref(11, Volt)
-    val currentLimit by pref(10, Ampere)
-
     val jitterPulsePinNumber by pref(8)
     val jitterReadPinNumber by pref(9)
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }

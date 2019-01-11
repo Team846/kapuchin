@@ -1,9 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.conversion
 
-import com.lynbrookrobotics.kapuchin.control.div
 import com.lynbrookrobotics.kapuchin.control.data.Gain
-import com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains
+import com.lynbrookrobotics.kapuchin.control.div
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.T
@@ -92,14 +90,4 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
 
     @JvmName("nativeAccelerationGain")
     fun native(x: Gain<O, DD>) = native(x.compensation) / native(x.forError)
-
-    @JvmName("nativePidPositionGains")
-    fun native(x: PidGains<Q, I, D, O>) = OffloadedPidGains(
-            native(x.kP), native(x.kI), native(x.kD), x.kF?.let(::native) ?: 0.0
-    )
-
-    @JvmName("nativePidVelocityGains")
-    fun native(x: PidGains<D, Q, DD, O>) = OffloadedPidGains(
-            native(x.kP), native(x.kI), native(x.kD), x.kF?.let(::native) ?: 0.0
-    )
 }
