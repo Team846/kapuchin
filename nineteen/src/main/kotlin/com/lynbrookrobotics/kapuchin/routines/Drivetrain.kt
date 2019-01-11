@@ -9,8 +9,11 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
+import info.kunalsheth.units.generated.DegreePerSecond
+import info.kunalsheth.units.generated.Percent
+import info.kunalsheth.units.generated.div
+import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.math.abs
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -28,20 +31,23 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     val absSteeringRate = differentiator(::div, currentTime, absSteering.y)
+    var absSteeringStart = absSteering.y
 
     controller {
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering
 
-        targetA =
-                when {
-                    abs(absSteeringRate(absSteering.x, absSteering.y)) > 3.DegreePerSecond ->
-                        absSteering.y
-                    steering == 0.Percent ->
-                        targetA
-                    else ->
-                        gyro.angle
-                }
+        val absSteeringMode = abs(absSteeringRate(absSteering.x, absSteering.y)) > 3.DegreePerSecond
+        absSteeringStart = when {
+            absSteeringMode -> absSteeringStart
+            else -> gyro.angle + absSteering.y
+        }
+
+        targetA = when {
+            absSteeringMode -> absSteeringStart + absSteering.y
+            steering == 0.Percent -> targetA
+            else -> gyro.angle
+        }
 
         val errorA = targetA - gyro.angle
         val pA = bearingKp * errorA

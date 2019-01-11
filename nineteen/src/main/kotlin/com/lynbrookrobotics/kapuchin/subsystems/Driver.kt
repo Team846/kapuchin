@@ -66,8 +66,8 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     val accelerator = s { -joystickMapping(driver.y.Each) }
     val steering = s { joystickMapping(wheel.x.Each) }
 
-    private val alpsRdc80PhaseShift by pref(53.583, Percent)
-    val alpsRdc80 = alpsRdc80(alpsRdc80PhaseShift)
+    private val alpsRdcPhaseShift by pref(53.583, Percent)
+    val alpsRdc80 = alpsRdc80(alpsRdcPhaseShift)
     val absSteering = s {
         alpsRdc80(
                 (absoluteWheel.x + 1).Each / 2,
