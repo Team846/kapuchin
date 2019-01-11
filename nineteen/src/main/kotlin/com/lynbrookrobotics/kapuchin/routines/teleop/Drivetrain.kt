@@ -14,7 +14,8 @@ import info.kunalsheth.units.generated.times
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
-    val gyro by hardware.gyroInput.readEagerly.withStamps
+    val gyro by hardware.gyroInput.readEagerly.withoutStamps
+    var targetA = gyro.angle
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
@@ -25,10 +26,16 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
 
     controller {
         val forwardVelocity = maxSpeed * accelerator
-        val steeringVelocity = maxSpeed * steering //+ turnControl(gyro.x, gyro.y.angle)
+        val steeringVelocity = maxSpeed * steering
 
-        val targetL = forwardVelocity + steeringVelocity
-        val targetR = forwardVelocity - steeringVelocity
+        targetA =
+                if (steering == 0.Percent) targetA
+                else gyro.angle
+        val errorA = targetA - gyro.angle
+        val pA = bearingKp * errorA
+
+        val targetL = forwardVelocity + steeringVelocity + pA
+        val targetR = forwardVelocity - steeringVelocity - pA
 
         val errorL = targetL - speedL
         val errorR = targetR - speedR
