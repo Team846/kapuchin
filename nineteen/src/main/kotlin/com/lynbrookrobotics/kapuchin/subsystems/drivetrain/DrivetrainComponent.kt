@@ -11,7 +11,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import info.kunalsheth.units.generated.*
 
-class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
+class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<DutyCycle>>(hardware) {
 
     private val maxLeftSpeed by pref(13, FootPerSecond)
     private val maxRightSpeed by pref(13.3, FootPerSecond)
@@ -35,18 +35,13 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         ({ PidGains(kP, kI, kD) })
     }
 
-    val maxAccelerationWithLiftUp by pref(3, FootPerSecondSquared)
-
-    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
-        TwoSided(VelocityOutput(
-                hardware.offloadedSettings.native(velocityGains),
-                hardware.offloadedSettings.native(0.FootPerSecond)
-        ))
+    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<DutyCycle> = {
+        TwoSided(0.Percent)
     }
 
-    override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
-        leftLazyOutput(value.left)
-        rightLazyOutput(value.right)
+    override fun DrivetrainHardware.output(value: TwoSided<DutyCycle>) {
+        leftEsc.set(value.left.Each)
+        rightEsc.set(value.right.Each)
     }
 
     init {
