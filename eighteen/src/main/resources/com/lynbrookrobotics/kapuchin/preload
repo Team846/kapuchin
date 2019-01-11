@@ -1523,7 +1523,7 @@ NT: server: client CONNECTED: 10.8.46.11 port 57161
 [Loaded com.lynbrookrobotics.kapuchin.subsystems.LiftComponent from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion from file:/home/lvuser/eighteen-1.0.0.jar]
-[Loaded com.lynbrookrobotics.kapuchin.control.data.Gain from file:/home/lvuser/eighteen-1.0.0.jar]
+[Loaded com.lynbrookrobotics.kapuchin.control.loops.Gain from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded com.lynbrookrobotics.kapuchin.control.conversion.GearTrain from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded com.lynbrookrobotics.kapuchin.control.loops.pid.PidGains from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidGains from file:/home/lvuser/eighteen-1.0.0.jar]
