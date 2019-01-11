@@ -21,7 +21,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
 
     val velocityKp by pref(10, Volt, 2, FootPerSecond)
 
-    val trackSize by pref(2, Foot)
+    private val trackSize by pref(2, Foot)
     val maxSpinSpeed get() = maxSpeed / (trackSize / 2) * Radian
     val bearingKp by pref(2, FootPerSecond, 60, Degree)
 

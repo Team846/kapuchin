@@ -4,16 +4,19 @@ import com.lynbrookrobotics.kapuchin.control.conversion.deadband.verticalDeadban
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
+import com.lynbrookrobotics.kapuchin.control.math.differentiator
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.div
-import info.kunalsheth.units.generated.times
+import com.lynbrookrobotics.kapuchin.timing.currentTime
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
-    val accelerator by driver.accelerator.readOnTick.withoutStamps
-    val steering by driver.steering.readOnTick.withoutStamps
+    val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
+    val steering by driver.steering.readWithEventLoop.withoutStamps
+    val absSteering by driver.absSteering.readWithEventLoop.withStamps
+
     val gyro by hardware.gyroInput.readEagerly.withoutStamps
     var targetA = gyro.angle
 
@@ -24,13 +27,22 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
     val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
+    val absSteeringRate = differentiator(::div, currentTime, absSteering.y)
+
     controller {
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering
 
         targetA =
-                if (steering == 0.Percent) targetA
-                else gyro.angle
+                when {
+                    abs(absSteeringRate(absSteering.x, absSteering.y)) > 3.DegreePerSecond ->
+                        absSteering.y
+                    steering == 0.Percent ->
+                        targetA
+                    else ->
+                        gyro.angle
+                }
+
         val errorA = targetA - gyro.angle
         val pA = bearingKp * errorA
 

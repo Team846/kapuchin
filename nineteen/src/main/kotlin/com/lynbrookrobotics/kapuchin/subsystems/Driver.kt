@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.conversion.deadband.horizontalDeadb
 import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.hardware.alpsRdc80
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
 import com.lynbrookrobotics.kapuchin.timing.Priority
@@ -30,6 +31,9 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     }
     val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
         it.name == "FGT Rumble 3-in-1"
+    }
+    val absoluteWheel by hardw { Joystick(3) }.verify("the driver absolute wheel is connected") {
+        it.name == "BU0836A Interface"
     }
 
     enum class JoystickButton(val raw: Int) {
@@ -61,6 +65,16 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     // DRIVETRAIN
     val accelerator = s { -joystickMapping(driver.y.Each) }
     val steering = s { joystickMapping(wheel.x.Each) }
+
+    private val alpsRdc80PhaseShift by pref(53.583, Percent)
+    val alpsRdc80 = alpsRdc80(alpsRdc80PhaseShift)
+    val absSteering = s {
+        alpsRdc80(
+                (absoluteWheel.x + 1).Each / 2,
+                (absoluteWheel.y + 1).Each / 2
+        )
+    }
+
 
     // LIFT
     val twistAdjust = s { joystickMapping(operator.y.Each) }

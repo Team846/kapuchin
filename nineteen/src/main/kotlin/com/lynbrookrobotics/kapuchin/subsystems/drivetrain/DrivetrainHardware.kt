@@ -27,11 +27,11 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val syncThreshold = 3.milli(Second)
     override val name = "Drivetrain"
 
-    val leftEscPort by pref(2)
-    val rightEscPort by pref(3)
+    private val leftEscPort by pref(2)
+    private val rightEscPort by pref(3)
 
-    val jitterPulsePinNumber by pref(8)
-    val jitterReadPinNumber by pref(9)
+    private val jitterPulsePinNumber by pref(8)
+    private val jitterReadPinNumber by pref(9)
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
@@ -39,9 +39,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val rightEsc by hardw { Spark(rightEscPort) }
             .configure { it.inverted = true }
 
-    val wheelRadius by pref(3, Inch)
+    private val wheelRadius by pref(3, Inch)
 
-    val encoderConversion by pref {
+    private val encoderConversion by pref {
         val encoderGear by pref(18)
         val wheelGear by pref(74)
         val resolution by pref(4096)
@@ -54,14 +54,14 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         })
     }
 
-    val leftEncoderA by pref(0)
-    val leftEncoderB by pref(1)
-    val rightEncoderA by pref(2)
-    val rightEncoderB by pref(2)
+    private val leftEncoderA by pref(0)
+    private val leftEncoderB by pref(1)
+    private val rightEncoderA by pref(2)
+    private val rightEncoderB by pref(3)
 
-    val leftEncoder by hardw { TimeStampedEncoder(leftEncoderA, leftEncoderB) }
+    private val leftEncoder by hardw { TimeStampedEncoder(leftEncoderA, leftEncoderB) }
             .verify("the robot should not be moved during startup") { it.stopped }
-    val rightEncoder by hardw { TimeStampedEncoder(rightEncoderA, rightEncoderB) }
+    private val rightEncoder by hardw { TimeStampedEncoder(rightEncoderA, rightEncoderB) }
             .verify("the robot should not be moved during startup") { it.stopped }
 
     val leftPosition = sensor(leftEncoder) {
@@ -80,7 +80,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         wheelRadius * encoderConversion.angle(rate) / Radian stampWith timeStamp
     }.with(graph("Right Speed", FootPerSecond))
 
-    val driftTolerance by pref(1, DegreePerSecond)
+    private val driftTolerance by pref(1, DegreePerSecond)
     private lateinit var startingAngle: Angle
     val imu by hardw { ADIS16448_IMU() }
             .configure { startingAngle = it.angle.Degree }
