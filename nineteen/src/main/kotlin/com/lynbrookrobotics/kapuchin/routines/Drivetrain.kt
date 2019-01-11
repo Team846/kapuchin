@@ -80,6 +80,57 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
     }
 }
 
+suspend fun DrivetrainComponent.noEncoderTeleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("no encoder teleop") {
+    val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
+    val steering by driver.steering.readWithEventLoop.withoutStamps
+    val absSteering by driver.absSteering.readWithEventLoop.withStamps
+
+    val gyro by hardware.gyroInput.readEagerly.withoutStamps
+    var targetA = gyro.angle
+
+    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
+    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+
+    val absSteeringRate = differentiator(::div, currentTime, absSteering.y)
+    var absSteeringStart = absSteering.y
+
+    controller {
+        val forwardVelocity = maxSpeed * accelerator
+        val steeringVelocity = maxSpeed * steering
+
+        val absSteeringMode = abs(absSteeringRate(absSteering.x, absSteering.y)) > 3.DegreePerSecond
+        absSteeringStart = when {
+            absSteeringMode -> absSteeringStart
+            else -> gyro.angle + absSteering.y
+        }
+
+        targetA = when {
+            absSteeringMode -> absSteeringStart + absSteering.y
+            steering == 0.Percent -> targetA
+            else -> gyro.angle
+        }
+
+        val errorA = targetA - gyro.angle
+        val pA = bearingKp * errorA
+
+        val targetL = forwardVelocity + steeringVelocity + pA
+        val targetR = forwardVelocity - steeringVelocity - pA
+
+        val ffL = targetL / maxLeftSpeed * operatingVoltage
+        val ffR = targetR / maxRightSpeed * operatingVoltage
+
+        val dcL = voltageToDutyCycle(
+                startupFrictionCompensation(ffL), vBat
+        )
+
+        val dcR = voltageToDutyCycle(
+                startupFrictionCompensation(ffR), vBat
+        )
+
+        TwoSided(dcL, dcR)
+    }
+}
+
 //suspend fun DrivetrainComponent.arcTo(
 //        bearing: Angle, radius: Length,
 //        angleTolerance: Angle, distanceTolerance: Length,
