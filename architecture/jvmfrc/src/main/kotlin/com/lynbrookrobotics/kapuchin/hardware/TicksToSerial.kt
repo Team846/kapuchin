@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
+import edu.wpi.first.hal.SerialPortJNI
 import edu.wpi.first.wpilibj.SerialPort
-import edu.wpi.first.wpilibj.hal.SerialPortJNI
 import java.io.Closeable
 import java.io.Flushable
 
@@ -42,6 +42,6 @@ class TicksToSerial(
     }
 
     override fun close() {
-        device.free()
+        device.close()
     }
 }
