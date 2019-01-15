@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.tests.anyInt
 import info.kunalsheth.units.generated.Degree
 import info.kunalsheth.units.generated.Radian
 import info.kunalsheth.units.generated.Turn
+import kotlin.math.absoluteValue
 import kotlin.test.Test
 
 class GeometryTest {
@@ -15,7 +16,7 @@ class GeometryTest {
     fun `coterminal difference of the same angle is zero`() {
         anyDouble.forEach { t1 ->
             anyInt.forEach { n ->
-                t1.Radian `coterminal -` t1.Radian + n.Turn `is equal to?` 0.Degree
+                t1.Radian `coterminal -` t1.Radian + (2 * n).Turn `is equal to?` 0.Turn
             }
         }
     }
@@ -24,7 +25,7 @@ class GeometryTest {
     fun `coterminal difference of the differenced angle is the difference`() {
         anyDouble.forEach { t1 ->
             anyInt.forEach { n ->
-                anyDouble.forEach { dt ->
+                anyDouble.filter { it.absoluteValue < 360 }.forEach { dt ->
                     t1.Radian + dt.Degree `coterminal -` t1.Radian + n.Turn `is equal to?` dt.Degree
                 }
             }

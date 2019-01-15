@@ -4,6 +4,7 @@ import info.kunalsheth.units.generated.Angle
 import info.kunalsheth.units.generated.Turn
 
 private val t = 1.Turn
+private val ht = 0.5.Turn
 
 /**
  * Calculates the difference between two angles
@@ -16,6 +17,11 @@ private val t = 1.Turn
  * @return the smallest difference between an element of C(θ₁) and an element of C(θ₂)
  */
 infix fun Angle.`coterminal -`(that: Angle): Angle {
-    val difference = (this % t + t) % t - (that % t + t) % t
-    return if (difference > 0.5.Turn) t - difference else difference
+    val difference = this % t - that % t
+
+    return when {
+        difference > ht -> difference - t
+        difference < -ht -> difference + t
+        else -> difference
+    }
 }
