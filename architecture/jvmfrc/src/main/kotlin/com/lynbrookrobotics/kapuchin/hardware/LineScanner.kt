@@ -26,17 +26,17 @@ class LineScanner(
                     if (bytesToDrain < receiveBuffer.size) receiveBuffer
                     else ByteArray(bytesToDrain)
             SerialPortJNI.serialRead(port.value.toByte(), drainBuffer, bytesToDrain)
-            System.err.println("device.bytesAvailable(...) returned $bytesToDrain, expected ≤ ${receiveBuffer.size}")
+            System.err.println("device.bytesReceived returned $bytesToDrain, expected ≤ ${receiveBuffer.size}")
         }
 
         val bytesToWrite = sendBuffer.size
         SerialPortJNI.serialWrite(port.value.toByte(), sendBuffer, bytesToWrite)
                 .takeIf { it != bytesToWrite }
-                ?.also { System.err.println("device.writeBytes(...) returned $it, expected $bytesToWrite") }
+                ?.also { System.err.println("SerialPortJNI.serialWrite returned $it, expected $bytesToWrite") }
 
         SerialPortJNI.serialRead(port.value.toByte(), receiveBuffer, bytesToRead)
                 .takeIf { it != bytesToRead }
-                ?.also { System.err.println("device.readBytes(...) returned $it, expected $bytesToRead") }
+                ?.also { System.err.println("SerialPortJNI.serialRead returned $it, expected $bytesToRead") }
 
         return receiveBuffer
     }
