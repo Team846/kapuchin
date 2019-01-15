@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
+import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.Quan
@@ -27,11 +28,17 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
     private val printer = File("/tmp/$safeName.csv")
             .printWriter(Charsets.US_ASCII).also { it.println("seconds,${withUnits.unitName}") }
 
+    val graphToFile by pref(false)
+    val graphToDashboard by pref(true)
+
     actual override fun invoke(x: Time, y: Q) {
         if (running.isCompleted) scope.launch {
-            SmartDashboard.putNumber(name, withUnits(y))
-            printer.println("${x.Second},${withUnits(y)}")
-            printer.flush()
+            if (graphToDashboard)
+                SmartDashboard.putNumber(name, withUnits(y))
+            if (graphToFile) {
+                printer.println("${x.Second},${withUnits(y)}")
+                printer.flush()
+            }
         }.also { running = it }
     }
 

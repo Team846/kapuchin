@@ -19,10 +19,12 @@ import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.Counter
+import edu.wpi.first.wpilibj.DigitalOutput
+import edu.wpi.first.wpilibj.SerialPort
+import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.`±`
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.*
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
@@ -30,17 +32,24 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val syncThreshold = 3.milli(Second)
     override val name = "Drivetrain"
 
-    private val leftEscPort by pref(2)
-    private val rightEscPort by pref(3)
+
 
     private val jitterPulsePinNumber by pref(8)
     private val jitterReadPinNumber by pref(9)
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
+
+
+    private val leftEscPort by pref(2)
+    private val rightEscPort by pref(3)
+    val leftEscInversion by pref(false)
+    val rightEscInversion by pref(true)
+
     val leftEsc by hardw { Spark(leftEscPort) }
+            .configure { it.inverted = leftEscInversion }
     val rightEsc by hardw { Spark(rightEscPort) }
-            .configure { it.inverted = true }
+            .configure { it.inverted = rightEscInversion }
 
     private val wheelRadius by pref(3, Inch)
 
@@ -59,30 +68,39 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     private val trackLength by pref(2, Foot)
 
+
+
     private val leftEncoderA by pref(0)
     private val rightEncoderA by pref(1)
     private val ticksToSerialPort by pref("kUSB1")
 
-    private val leftEncoder by hardw { DigitalInput(leftEncoderA) }
-    private val rightEncoder by hardw { DigitalInput(rightEncoderA) }
+    private val leftEncoder by hardw { Counter(leftEncoderA) }
+    private val rightEncoder by hardw { Counter(rightEncoderA) }
     private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
 
     data class Odometry(val left: Length, val right: Length, val xy: Position)
 
+    private var leftMovingForward = false
+    private var rightMovingForward = false
     private var leftPosition = 0.Foot
     private var rightPosition = 0.Foot
     private var xyPosition = Position(0.Foot, 0.Foot, 0.Degree)
     private val vectorTracking = simpleVectorTracking(trackLength, xyPosition)
 
+    val leftTrim by pref(1.0)
+    val rightTrim by pref(-1.0)
+
     val position = sensor {
         ticksToSerial()
                 .map { (l, r) ->
                     TwoSided(
-                            wheelRadius * encoderConversion.angle(l.toDouble()) / Radian,
-                            wheelRadius * encoderConversion.angle(r.toDouble()) / Radian
+                            wheelRadius * encoderConversion.angle(l.toDouble()) / Radian * leftTrim,
+                            wheelRadius * encoderConversion.angle(r.toDouble()) / Radian * rightTrim
                     )
                 }
                 .forEach { (l, r) ->
+                    leftMovingForward = l.isPositive
+                    rightMovingForward = r.isPositive
                     xyPosition = vectorTracking(l, r)
                     leftPosition += l
                     rightPosition += r
@@ -96,15 +114,23 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             .with(graph("Y Location", Foot)) { it.xy.y }
             .with(graph("Encoder Bearing", Degree)) { it.xy.bearing }
 
-    private val leftPositionDifferentiator = differentiator(::div, currentTime, leftPosition)
+
+
+    private fun toSpeed(period: Time) =
+            if (period == 0.Second) 0.FootPerSecond
+            else wheelRadius * encoderConversion.angle(1.0) / Radian / period
+
     val leftSpeed = sensor {
-        leftPositionDifferentiator(currentTime, leftPosition) stampWith currentTime
+        val speed = toSpeed(leftEncoder.period.Second)
+        (if(leftMovingForward) speed else -speed) stampWith currentTime
     }.with(graph("Left Speed", FootPerSecond))
 
-    private val rightPositionDifferentiator = differentiator(::div, currentTime, rightPosition)
     val rightSpeed = sensor {
-        rightPositionDifferentiator(currentTime, rightPosition) stampWith currentTime
-    }.with(graph("Left Speed", FootPerSecond))
+        val speed = toSpeed(rightEncoder.period.Second)
+        (if(rightMovingForward) speed else -speed) stampWith currentTime
+    }.with(graph("Right Speed", FootPerSecond))
+
+
 
     private val driftTolerance by pref(1, DegreePerSecond)
     private lateinit var startingAngle: Angle

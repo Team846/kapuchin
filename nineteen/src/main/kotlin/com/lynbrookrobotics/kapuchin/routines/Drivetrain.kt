@@ -52,8 +52,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
         val errorA = targetA - gyro.angle
         val pA = bearingKp * errorA
 
-        val targetL = forwardVelocity + steeringVelocity + pA
-        val targetR = forwardVelocity - steeringVelocity - pA
+        val targetL = forwardVelocity + steeringVelocity //+ pA
+        val targetR = forwardVelocity - steeringVelocity //- pA
 
         val errorL = targetL - speedL
         val errorR = targetR - speedR
