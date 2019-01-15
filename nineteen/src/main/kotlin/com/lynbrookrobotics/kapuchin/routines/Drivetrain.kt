@@ -18,21 +18,20 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.`±`
 
 suspend fun DrivetrainComponent.pointWithLimelight(driver: DriverHardware, limelight: LimelightSystem) = startRoutine("point with limelight") {
-    val gyro by hardware.gyroInput.readEagerly.withStamps
+    val gyro by hardware.gyroInput.readOnTick.withStamps
+    val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
 
-    val startingGyroAngle = gyro
-    val starting
+    val startingGyroAngle = gyro.y.angle
+    val startingLimelightAngle = limelightAngle
 
     val turnControl = pidControlLoop(::div, ::times, turningPositionGains) {
-
+        if(startingLimelightAngle == null) gyro.y.angle
+        else startingLimelightAngle - startingGyroAngle
     }
 
     controller {
-        val forwardVelocity = topSpeed * accelerator
-        val steeringVelocity = topSpeed * steering //+ turnControl(gyro.x, gyro.y.angle)
-
-        val left = forwardVelocity + steeringVelocity
-        val right = forwardVelocity - steeringVelocity
+        val left = turnControl(gyro.x, gyro.y.angle)
+        val right = -turnControl(gyro.x, gyro.y.angle)
 
         hardware.offloadedSettings.run {
             TwoSided(
