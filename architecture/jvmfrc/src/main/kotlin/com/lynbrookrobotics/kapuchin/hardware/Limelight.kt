@@ -30,21 +30,16 @@ class LimelightSystem: SubsystemHardware<LimelightSystem, Nothing>() {
      *
      * @param key the key for which the value must be retrieved
      */
-    private fun getEntry(key: String) = table.getEntry(key).getDouble(0.0).roundToInt()
+    private fun getEntry(key: String) = table.getEntry(key).getDouble(0.0)
 
     /**
      * Sensor that calculates the angle to target, taking into account camera mounting. Nullable- if there is no target
      */
     private val angletoTarget = sensor {
-        { when (getEntry("tv")) {
-            0 -> null
-            else -> { if (getEntry("ts").absoluteValue < 2) { // tolerance
-                cameraAngleRelativeToFront + getEntry("tx").Degree
-                } else {
-                cameraAngleRelativeToFront + getEntry("ty").Degree
-                }
-            }
-        }
-        } stampWith  it - getEntry("tl").milli(Second)
+        when {
+            getEntry("tv").roundToInt() == 0 -> null
+            getEntry("ts").absoluteValue < 2 -> cameraAngleRelativeToFront + getEntry("tx").Degree
+            else -> cameraAngleRelativeToFront + getEntry("ty").Degree
+        } stampWith it - getEntry("tl").milli(Second)
     }
 }
