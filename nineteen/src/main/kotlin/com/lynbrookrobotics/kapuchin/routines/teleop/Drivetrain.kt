@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.control.math.infiniteIntegrator
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.trapezoidalMotionProfile
 import com.lynbrookrobotics.kapuchin.control.maxMag
 import com.lynbrookrobotics.kapuchin.control.minMag
+import com.lynbrookrobotics.kapuchin.hardware.LimelightSystem
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
@@ -37,6 +38,31 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 
         val left = forwardVelocity + steeringVelocity
         val right = forwardVelocity - steeringVelocity
+
+        hardware.offloadedSettings.run {
+            TwoSided(
+                    VelocityOutput(native(leftVelocityGains), native(left)),
+                    VelocityOutput(native(rightVelocityGains), native(right))
+            )
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.pointWithLimelight(driver: DriverHardware, limelight: LimelightSystem) = startRoutine("point with limelight") {
+    val gyro by hardware.gyroInput.readOnTick.withStamps
+    val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
+
+    val startingGyroAngle = gyro.y.angle
+    val startingLimelightAngle = limelightAngle
+
+    val turnControl = pidControlLoop(::div, ::times, turningPositionGains) {
+        if(startingLimelightAngle == null) gyro.y.angle
+        else startingLimelightAngle - startingGyroAngle
+    }
+
+    controller {
+        val left = turnControl(gyro.x, gyro.y.angle)
+        val right = -turnControl(gyro.x, gyro.y.angle)
 
         hardware.offloadedSettings.run {
             TwoSided(

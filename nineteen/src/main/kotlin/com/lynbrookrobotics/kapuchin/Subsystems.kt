@@ -4,8 +4,8 @@ import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
-import com.lynbrookrobotics.kapuchin.routines.driveStraight
-import com.lynbrookrobotics.kapuchin.routines.teleop
+import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
+import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
