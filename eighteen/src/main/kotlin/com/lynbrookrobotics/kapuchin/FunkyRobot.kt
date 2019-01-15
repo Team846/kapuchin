@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+fun main(args: Array<String>) = RobotBase.startRobot(::FunkyRobot)
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")

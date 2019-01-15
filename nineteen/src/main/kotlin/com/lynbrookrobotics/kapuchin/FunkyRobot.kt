@@ -12,13 +12,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+fun main(args: Array<String>) = RobotBase.startRobot(::FunkyRobot)
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")
 
         val classloading = loadClasses()
 
-//        val subsystems = Subsystems.init()
+        val subsystems = Subsystems.init()
 
         runBlocking { classloading.join() }
 
@@ -36,7 +37,10 @@ class FunkyRobot : RobotBase() {
             EventLoop.tick(currentTime)
 
             if (!currentJob.isActive) {
-                currentJob = doNothing
+                currentJob =
+                        subsystems::teleop runWhile { isEnabled && isOperatorControl }
+                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
+                        ?: doNothing
             }
         }
     }
