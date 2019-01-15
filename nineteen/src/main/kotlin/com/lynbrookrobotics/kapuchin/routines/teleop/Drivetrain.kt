@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.routines
+package com.lynbrookrobotics.kapuchin.routines.teleop
 
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.control.data.avg
