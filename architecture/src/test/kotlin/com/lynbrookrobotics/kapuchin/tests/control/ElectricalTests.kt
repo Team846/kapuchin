@@ -68,6 +68,32 @@ class ElectricalTests {
     }
 
     @Test
+    fun `motor current limiting allows motors to accelerate to top speed`() {
+        val maxVoltage = 12.Volt
+        val stallCurrent = 130.Ampere
+        val currentLimit = stallCurrent / 2
+        val freeSpeed = 5300.Rpm
+
+        val limiter = motorCurrentLimiter(
+                maxVoltage, freeSpeed,
+                stallCurrent, currentLimit
+        )
+
+        for (i in -6000 until 2000) {
+            12.Volt `is greater than?` limiter(i.Rpm, 12.Volt)
+        }
+        for (i in 3000 until 6000) {
+            12.Volt `is equal to?` limiter(i.Rpm, 12.Volt)
+        }
+        for (i in 6000 downTo -2000) {
+            limiter(i.Rpm, -12.Volt) `is greater than?` -12.Volt
+        }
+        for (i in -3000 downTo -6000) {
+            limiter(i.Rpm, -12.Volt) `is equal to?` -12.Volt
+        }
+    }
+
+    @Test
     fun `threshold checker triggers after duration outside safe range`() {
         val duration = 3.Second
         val tolerance = 25.Ampere

@@ -19,10 +19,10 @@ import info.kunalsheth.units.math.abs
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
     val steering by driver.steering.readWithEventLoop.withoutStamps
-    val absSteering by driver.absSteering.readWithEventLoop.withStamps
+    val absSteering by driver.absSteering.readWithEventLoop.withoutStamps
 
-    val gyro by hardware.gyroInput.readEagerly.withoutStamps
-    var targetA = gyro.angle
+    val position by hardware.position.readOnTick.withoutStamps
+    var startingAngle = -absSteering + position.xy.bearing
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
@@ -31,26 +31,14 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
     val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
-    val absSteeringRate = differentiator(::div, currentTime, absSteering.y)
-    var absSteeringStart = absSteering.y
-
     controller {
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering
 
-        val absSteeringMode = abs(absSteeringRate(absSteering.x, absSteering.y)) > 30.DegreePerSecond
-        absSteeringStart = when {
-            absSteeringMode -> absSteeringStart
-            else -> gyro.angle + absSteering.y
-        }
+        val currentAngle = position.xy.bearing
+        if (steering != 0.Percent) startingAngle = -absSteering + currentAngle
 
-        targetA = when {
-            absSteeringMode -> absSteeringStart
-            steering == 0.Percent -> targetA
-            else -> gyro.angle
-        }
-
-        val errorA = targetA `coterminal -` gyro.angle
+        val errorA = absSteering + startingAngle `coterminal -` currentAngle
         val pA = bearingKp * errorA
 
         val targetL = forwardVelocity + steeringVelocity + pA

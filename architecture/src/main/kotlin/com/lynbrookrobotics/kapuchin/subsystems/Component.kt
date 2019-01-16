@@ -15,6 +15,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.Ticker.Companion.ticker
 import info.kunalsheth.units.generated.Time
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resumeWithException
 
 /**
  * Represents a robot subsystem's operations.
@@ -78,9 +79,9 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
                 routine = Routine(thisAsThis, name, controller, cont)
             }
         } catch (c: CancellationException) {
-            log(Debug) { "${hardware.name}'s $name routine was cancelled.\nMessage: ${c.message}" }
+            log(Debug) { "Cancelled $name routine.\nMessage: ${c.message}" }
         } catch (t: Throwable) {
-            log(Error, t.platformStackTrace) { "An exception was thrown from ${hardware.name}'s $name routine.\nMessage: ${t.message}" }
+            log(Error, t.platformStackTrace) { "Exception running $name routine.\nMessage: ${t.message}" }
         } finally {
             scope.close()
         }
@@ -108,10 +109,16 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
     init {
         @Suppress("LeakingThis")
         clock.runOnTick(Last) { tickStart ->
-            @Suppress("UNNECESSARY_SAFE_CALL")
-            (routine ?: fallbackController)
-                    ?.invoke(thisAsThis, tickStart)
-                    ?.let { hardware.output(it) }
+            try {
+                @Suppress("UNNECESSARY_SAFE_CALL")
+                (routine ?: fallbackController)
+                        ?.invoke(thisAsThis, tickStart)
+                        ?.let { hardware.output(it) }
+            } catch (t: Throwable) {
+                routine?.resumeWithException(t) ?: log(Error, t) {
+                    "Exception running default controller"
+                }
+            }
         }
     }
 

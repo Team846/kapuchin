@@ -7,7 +7,6 @@ import com.lynbrookrobotics.kapuchin.control.data.Position
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.control.data.UomVector
 import com.lynbrookrobotics.kapuchin.control.data.stampWith
-import com.lynbrookrobotics.kapuchin.control.math.differentiator
 import com.lynbrookrobotics.kapuchin.control.math.simpleVectorTracking
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
@@ -24,7 +23,8 @@ import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
+import info.kunalsheth.units.math.`±`
+import info.kunalsheth.units.math.milli
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
@@ -33,12 +33,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val name = "Drivetrain"
 
 
-
     private val jitterPulsePinNumber by pref(8)
     private val jitterReadPinNumber by pref(9)
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
-
 
 
     private val leftEscPort by pref(2)
@@ -56,7 +54,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     private val encoderConversion by pref {
         val encoderGear by pref(18)
         val wheelGear by pref(74)
-        val resolution by pref(4096)
+        val resolution by pref(1024)
 
         ({
             EncoderConversion(
@@ -67,7 +65,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     private val trackLength by pref(2, Foot)
-
 
 
     private val leftEncoderA by pref(0)
@@ -91,6 +88,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val rightTrim by pref(-1.0)
 
     val position = sensor {
+        val startingLeftPosition = leftPosition
+        val startingRightPosition = rightPosition
+
         ticksToSerial()
                 .map { (l, r) ->
                     TwoSided(
@@ -99,12 +99,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
                     )
                 }
                 .forEach { (l, r) ->
-                    leftMovingForward = l.isPositive
-                    rightMovingForward = r.isPositive
                     xyPosition = vectorTracking(l, r)
                     leftPosition += l
                     rightPosition += r
                 }
+
+        leftMovingForward = leftPosition > startingLeftPosition
+        rightMovingForward = rightPosition > startingRightPosition
 
         Odometry(leftPosition, rightPosition, xyPosition) stampWith currentTime
     }
@@ -115,21 +116,19 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             .with(graph("Encoder Bearing", Degree)) { it.xy.bearing }
 
 
-
     private fun toSpeed(period: Time) =
             if (period == 0.Second) 0.FootPerSecond
             else wheelRadius * encoderConversion.angle(1.0) / Radian / period
 
     val leftSpeed = sensor {
         val speed = toSpeed(leftEncoder.period.Second)
-        (if(leftMovingForward) speed else -speed) stampWith currentTime
+        (if (leftMovingForward) speed else -speed) stampWith currentTime
     }.with(graph("Left Speed", FootPerSecond))
 
     val rightSpeed = sensor {
         val speed = toSpeed(rightEncoder.period.Second)
-        (if(rightMovingForward) speed else -speed) stampWith currentTime
+        (if (rightMovingForward) speed else -speed) stampWith currentTime
     }.with(graph("Right Speed", FootPerSecond))
-
 
 
     private val driftTolerance by pref(1, DegreePerSecond)
@@ -155,7 +154,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     init {
         EventLoop.runOnTick { time ->
             setOf(gyroInput, position, leftSpeed, rightSpeed).forEach {
-                it.optimizedRead(time, syncThreshold)
+                it.optimizedRead(time, period)
             }
         }
     }
