@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.control.data.UomVector
 import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.control.math.simpleVectorTracking
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
+import com.lynbrookrobotics.kapuchin.hardware.LineScanner
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
 import com.lynbrookrobotics.kapuchin.hardware.TicksToSerial
@@ -17,7 +18,6 @@ import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort
@@ -107,7 +107,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         leftMovingForward = leftPosition > startingLeftPosition
         rightMovingForward = rightPosition > startingRightPosition
 
-        Odometry(leftPosition, rightPosition, xyPosition) stampWith currentTime
+        Odometry(leftPosition, rightPosition, xyPosition) stampWith it
     }
             .with(graph("Left Position", Foot)) { it.left }
             .with(graph("Right Position", Foot)) { it.right }
@@ -122,13 +122,37 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val leftSpeed = sensor {
         val speed = toSpeed(leftEncoder.period.Second)
-        (if (leftMovingForward) speed else -speed) stampWith currentTime
+        (if (leftMovingForward) speed else -speed) stampWith it
     }.with(graph("Left Speed", FootPerSecond))
 
     val rightSpeed = sensor {
         val speed = toSpeed(rightEncoder.period.Second)
-        (if (rightMovingForward) speed else -speed) stampWith currentTime
+        (if (rightMovingForward) speed else -speed) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
+
+
+    private val lineScannerPort by pref("kUSB2")
+    private val lineScanner by hardw { LineScanner(SerialPort.Port.valueOf(lineScannerPort)) }
+    private val exposure by pref(200)
+    private val triggerLevel by pref(100)
+    private val scanWidth by pref(12, Inch)
+    val scanLead by pref(20, Inch)
+    val linePosition = sensor(lineScanner) {
+        val data = lineScanner(exposure.toUByte())
+
+        val max = data.max()!!
+        val peakLocation = if (max > triggerLevel) data
+                .asSequence()
+                .mapIndexed { i, b -> i to b }
+                .filter { (_, b) -> b >= max }
+                .map { (i, _) -> i }
+                .average() - resolution / 2
+        else null
+
+        (if (peakLocation != null)
+            scanWidth * peakLocation / lineScanner.resolution
+        else null) stampWith it
+    }
 
 
     private val driftTolerance by pref(1, DegreePerSecond)

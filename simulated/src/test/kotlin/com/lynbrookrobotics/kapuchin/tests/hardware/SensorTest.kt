@@ -19,9 +19,9 @@ import org.junit.Test
 class SensorTest {
 
     private class SensorTestSH : TSH<SensorTestSH, SensorTestC>("SensorTest Hardware") {
-        val sensorA = sensor { Math.random() stampWith currentTime }
-        val sensorB = sensor { Math.random() stampWith currentTime }
-        val sensorC = sensor { Math.random() stampWith currentTime }
+        val sensorA = sensor { Math.random() stampWith it }
+        val sensorB = sensor { Math.random() stampWith it }
+        val sensorC = sensor { Math.random() stampWith it }
     }
 
     private class SensorTestC : TC<SensorTestC, SensorTestSH>(SensorTestSH())

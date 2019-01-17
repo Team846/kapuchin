@@ -10,11 +10,9 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.DegreePerSecond
-import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.div
-import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.abs
+import info.kunalsheth.units.math.atan
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -114,6 +112,51 @@ suspend fun DrivetrainComponent.noEncoderTeleop(driver: DriverHardware, electric
 
         val dcR = voltageToDutyCycle(
                 startupFrictionCompensation(ffR), vBat
+        )
+
+        TwoSided(dcL, dcR)
+    }
+}
+
+suspend fun DrivetrainComponent.followLine(speed: Velocity, electrical: ElectricalSystemHardware) = startRoutine("Follow Line") {
+    val line by hardware.linePosition.readOnTick.withoutStamps
+
+    val speedL by hardware.leftSpeed.readOnTick.withoutStamps
+    val speedR by hardware.rightSpeed.readOnTick.withoutStamps
+
+    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
+    val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
+    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+
+    controller {
+        val errorA = line?.let {
+            atan(it / hardware.scanLead)
+        } ?: throw IllegalStateException("Line not found")
+
+        val pA = bearingKp * errorA
+
+        val targetL = speed + pA
+        val targetR = speed - pA
+
+        val errorL = targetL - speedL
+        val errorR = targetR - speedR
+
+        val pL = velocityKp * errorL
+        val pR = velocityKp * errorR
+
+        val ffL = targetL / maxLeftSpeed * operatingVoltage
+        val ffR = targetR / maxRightSpeed * operatingVoltage
+
+        val dcL = voltageToDutyCycle(
+                currentLimiting(speedL,
+                        startupFrictionCompensation(pL + ffL)
+                ), vBat
+        )
+
+        val dcR = voltageToDutyCycle(
+                currentLimiting(speedR,
+                        startupFrictionCompensation(pR + ffR)
+                ), vBat
         )
 
         TwoSided(dcL, dcR)

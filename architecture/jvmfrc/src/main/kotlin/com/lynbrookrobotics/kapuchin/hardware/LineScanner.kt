@@ -8,16 +8,18 @@ class LineScanner(
         val port: SerialPort.Port
 ) : Closeable {
 
-    val device = SerialPort(115200, port)
+    val device = SerialPort(115200, port).apply {
+        setReadBufferSize(128)
+        setTimeout(0.01)
+        setWriteBufferSize(1)
+    }
 
-    private val receiveBuffer = ByteArray(128)
+    val resolution = 128
+
+    private val receiveBuffer = ByteArray(resolution)
     private val sendBuffer = byteArrayOf(100)
 
-    var exposure: UByte
-        get() = sendBuffer[0].toUByte()
-        set(value) { sendBuffer[0] = value.toByte() }
-
-    operator fun invoke(): ByteArray {
+    operator fun invoke(exposure: UByte): ByteArray {
         val bytesToRead = receiveBuffer.size
 
         if (device.bytesReceived > bytesToRead) {
@@ -28,6 +30,8 @@ class LineScanner(
             SerialPortJNI.serialRead(port.value.toByte(), drainBuffer, bytesToDrain)
             System.err.println("device.bytesReceived returned $bytesToDrain, expected ≤ ${receiveBuffer.size}")
         }
+
+        sendBuffer[0] = exposure.toByte()
 
         val bytesToWrite = sendBuffer.size
         SerialPortJNI.serialWrite(port.value.toByte(), sendBuffer, bytesToWrite)
