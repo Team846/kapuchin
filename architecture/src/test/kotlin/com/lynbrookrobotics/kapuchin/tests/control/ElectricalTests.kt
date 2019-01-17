@@ -1,9 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
-import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
-import com.lynbrookrobotics.kapuchin.control.electrical.outsideThresholdChecker
-import com.lynbrookrobotics.kapuchin.control.electrical.rampRateLimiter
-import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
+import com.lynbrookrobotics.kapuchin.control.cap
+import com.lynbrookrobotics.kapuchin.control.`±`
+import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`
@@ -94,10 +93,36 @@ class ElectricalTests {
     }
 
     @Test
+    fun `motor current applicator allows motors to accelerate to top speed`() {
+        val maxVoltage = 12.Volt
+        val stallCurrent = 130.Ampere
+        val currentLimit = stallCurrent / 2
+        val freeSpeed = 5300.Rpm
+
+        val applicator = motorCurrentApplicator(
+                maxVoltage, freeSpeed,
+                stallCurrent
+        )
+
+        for (i in -6000 until 2000) {
+            12.Volt `is greater than?` (applicator(i.Rpm, currentLimit) cap `±`(12.Volt))
+        }
+        for (i in 3000 until 6000) {
+            12.Volt `is equal to?` (applicator(i.Rpm, currentLimit) cap `±`(12.Volt))
+        }
+        for (i in 6000 downTo -2000) {
+            (applicator(i.Rpm, -currentLimit) cap `±`(12.Volt)) `is greater than?` -12.Volt
+        }
+        for (i in -3000 downTo -6000) {
+            (applicator(i.Rpm, -currentLimit) cap `±`(12.Volt)) `is equal to?` -12.Volt
+        }
+    }
+
+    @Test
     fun `threshold checker triggers after duration outside safe range`() {
         val duration = 3.Second
         val tolerance = 25.Ampere
-        val safeRange = 0.Ampere `±` tolerance
+        val safeRange = `±`(tolerance)
         val checker = outsideThresholdChecker(safeRange, duration)
 
         val insideStartTime = 846.Minute

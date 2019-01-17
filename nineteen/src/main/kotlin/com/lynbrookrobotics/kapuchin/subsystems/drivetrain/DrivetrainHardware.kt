@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.analog.adis16448.frc.ADIS16448_IMU
+import com.lynbrookrobotics.kapuchin.control.`±`
 import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.data.Position
@@ -136,7 +137,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val imu by hardw { ADIS16448_IMU() }
             .configure { startingAngle = it.angle.Degree }
             .verify("Gyro should not drift after calibration") {
-                it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
+                it.rate.DegreePerSecond in `±`(driftTolerance)
             }
     val gyroInput = sensor(imu) {
         GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?

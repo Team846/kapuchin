@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.tests.control.math
 
 import com.lynbrookrobotics.kapuchin.control.math.finiteStdev
 import com.lynbrookrobotics.kapuchin.control.math.infiniteStdev
+import com.lynbrookrobotics.kapuchin.control.`±`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
 import com.lynbrookrobotics.kapuchin.tests.`is within?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble
@@ -18,7 +19,7 @@ class StandardDeviationTest {
             val stdev = finiteStdev(::times, 0.Foot, falloff)
             anyDouble.forEach { const ->
                 repeat(falloff) { stdev(const.Foot) }
-                stdev(const.Foot) `is within?` (0.Foot `±` 0.01.Foot) // lots of floating point error
+                stdev(const.Foot) `is within?` `±`(0.01.Foot) // lots of floating point error
             }
         }
     }
@@ -28,7 +29,7 @@ class StandardDeviationTest {
         anyInt.filter { it > 0 }.forEach { falloff ->
             anyDouble.forEach { const ->
                 val stdev = infiniteStdev(::times, const.Foot)
-                repeat(falloff) { stdev(const.Foot) `is within?` (0.Foot `±` 0.01.Foot) } // lots of floating point error
+                repeat(falloff) { stdev(const.Foot) `is within?` `±`(0.01.Foot) } // lots of floating point error
             }
         }
     }
@@ -44,7 +45,7 @@ class StandardDeviationTest {
             repeat(falloff) {
                 stdev(8.46.Foot) `is greater than?` 0.Foot
             }
-            stdev(8.46.Foot) `is within?` (0.Foot `±` 0.01.Foot) // lots of floating point error
+            stdev(8.46.Foot) `is within?` `±`(0.01.Foot) // lots of floating point error
         }
     }
 
