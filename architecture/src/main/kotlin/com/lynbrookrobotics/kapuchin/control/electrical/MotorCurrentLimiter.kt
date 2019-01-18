@@ -1,8 +1,9 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
+import com.lynbrookrobotics.kapuchin.control.data.Motor
 import com.lynbrookrobotics.kapuchin.control.div
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.times
+import info.kunalsheth.units.math.*
 
 /**
  * Limits the current applied to a motor
@@ -19,18 +20,15 @@ import info.kunalsheth.units.math.times
  * @param limit current limit. Must be greater than zero.
  */
 fun <S : Quan<S>> motorCurrentLimiter(
-        maxVoltage: V, freeSpeed: S,
-        stall: I, limit: I
+        spec: Motor, freeSpeed: S, limit: I
 ): (S, V) -> V {
 
-    val windings = maxVoltage / stall
-
-    return fun(speed: S, target: V): V {
-        val emf = speed / freeSpeed * maxVoltage
+    return fun(speed: S, target: V): V = spec.run {
+        val emf = speed / freeSpeed * voltage
 
         val expectedCurrent = (target - emf) / windings
 
-        return when {
+        when {
             expectedCurrent > limit -> limit * windings + emf
             expectedCurrent < -limit -> -(limit * windings - emf)
             else -> target

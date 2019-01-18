@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
+import com.lynbrookrobotics.kapuchin.hardware.CommonMotors
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
@@ -13,13 +14,15 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val startupVoltage by pref(1.35, Volt)
 
     val motorCurrentLimit by pref(10, Ampere)
-    val motorStallCurrent by pref(131, Ampere)
+    val motorFreeCurrent by pref(4.65, Ampere)
+    private val motorType by pref("cim")
+    val motor get() = CommonMotors.valueOf(motorType).spec
 
     val maxLeftSpeed by pref(13, FootPerSecond)
     val maxRightSpeed by pref(13.3, FootPerSecond)
     val maxSpeed get() = maxLeftSpeed min maxRightSpeed
 
-    val velocityKp by pref(10, Volt, 2, FootPerSecond)
+    val velocityKp by pref(50, Ampere, 2, FootPerSecond)
 
     private val trackSize by pref(2, Foot)
     val maxSpinSpeed get() = maxSpeed / (trackSize / 2) * Radian

@@ -9,12 +9,16 @@ generateUnitsOfMeasure {
             d(M: 1, L: 2, T: -3, I: -2), // ohms
             d(I: 1), // amps
             d(T: 1), // time
+            d(),
     ) + r(
             d(), // dimensionless
             d(A: 1), // angle
             d(T: 1), d(T: 2), // time
             d(L: 1), // length
             d(L: 1, A: 1, T: -1)
+    ) + r(
+            d(L: 1, T: -2, M: 1), // force
+            d(A: 1), d(L: 1) // torque
     )
 
     quantities += [
@@ -33,6 +37,8 @@ generateUnitsOfMeasure {
             u("FootPerSecond", 0.3048, d(L: 1, T: -1)),
             u("FootPerSecondSquared", 0.3048, d(L: 1, T: -2)),
             u("EarthGravity", 9.80665, d(L: 1, T: -2)),
+
+            u("NewtonMetre", 1, d(L: 2, A: -1, M: 1, T: -2)),
 
             u("Turn", 2 * PI, d(A: 1)),
             u("Rpm", 2 * PI / 60, d(A: 1, T: -1)),

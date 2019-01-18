@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
+import com.lynbrookrobotics.kapuchin.control.data.Motor
 import com.lynbrookrobotics.kapuchin.control.div
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -17,14 +18,11 @@ import info.kunalsheth.units.math.*
  * @param stall motor's stall current. Must be greater than zero.
  */
 fun <S : Quan<S>> motorCurrentApplicator(
-        maxVoltage: V, freeSpeed: S,
-        stall: I
+        spec: Motor, freeSpeed: S
 ): (S, I) -> V {
 
-    val windings = maxVoltage / stall
-
-    return fun(speed: S, target: I): V {
-        val emf = speed / freeSpeed * maxVoltage
-        return target * windings + emf
+    return fun(speed: S, target: I): V = spec.run {
+        val emf = speed / freeSpeed * voltage
+        target * windings + emf
     }
 }

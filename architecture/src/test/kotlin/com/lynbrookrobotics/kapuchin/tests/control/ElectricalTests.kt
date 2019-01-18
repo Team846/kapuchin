@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.cap
 import com.lynbrookrobotics.kapuchin.control.`±`
+import com.lynbrookrobotics.kapuchin.control.data.Motor
 import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
@@ -50,8 +51,7 @@ class ElectricalTests {
         val r = maxVoltage / stallCurrent
 
         val limiter = motorCurrentLimiter(
-                maxVoltage, 5300.Rpm,
-                stallCurrent, currentLimit
+                Motor(maxVoltage, 5300.Rpm, stallCurrent, 2.41.NewtonMetre), 5300.Rpm, currentLimit
         )
 
         val incr = 0.2.Volt
@@ -74,8 +74,7 @@ class ElectricalTests {
         val freeSpeed = 5300.Rpm
 
         val limiter = motorCurrentLimiter(
-                maxVoltage, freeSpeed,
-                stallCurrent, currentLimit
+                Motor(maxVoltage, freeSpeed, stallCurrent, 2.41.NewtonMetre), freeSpeed, currentLimit
         )
 
         for (i in -6000 until 2000) {
@@ -100,8 +99,7 @@ class ElectricalTests {
         val freeSpeed = 5300.Rpm
 
         val applicator = motorCurrentApplicator(
-                maxVoltage, freeSpeed,
-                stallCurrent
+                Motor(maxVoltage, freeSpeed, stallCurrent, 2.41.NewtonMetre), freeSpeed
         )
 
         for (i in -6000 until 2000) {

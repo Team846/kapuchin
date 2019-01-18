@@ -2,10 +2,12 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.verticalDeadband
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
+import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentApplicator
 import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
 import com.lynbrookrobotics.kapuchin.control.math.differentiator
+import com.lynbrookrobotics.kapuchin.hardware.CommonMotors
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
@@ -27,8 +29,11 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
-    val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
+    val startupFrictionCompensation = verticalDeadband(motorFreeCurrent, motor.stallCurrent)
+    val currentApplicatorL = motorCurrentApplicator(motor, maxLeftSpeed)
+    val currentLimiterL = motorCurrentLimiter(motor, maxLeftSpeed, motorCurrentLimit)
+    val currentApplicatorR = motorCurrentApplicator(motor, maxRightSpeed)
+    val currentLimiterR = motorCurrentLimiter(motor, maxLeftSpeed, motorCurrentLimit)
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
@@ -54,14 +59,18 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
         val ffR = targetR / maxRightSpeed * operatingVoltage
 
         val dcL = voltageToDutyCycle(
-                currentLimiting(speedL,
-                        startupFrictionCompensation(pL + ffL)
+                currentLimiterL(speedL,
+                        currentApplicatorL(speedL,
+                                startupFrictionCompensation(pL)
+                        ) + ffL
                 ), vBat
         )
 
         val dcR = voltageToDutyCycle(
-                currentLimiting(speedR,
-                        startupFrictionCompensation(pR + ffR)
+                currentLimiterR(speedR,
+                        currentApplicatorR(speedR,
+                                startupFrictionCompensation(pR)
+                        ) + ffR
                 ), vBat
         )
 
