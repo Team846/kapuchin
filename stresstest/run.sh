@@ -10,7 +10,7 @@ osascript -e 'display notification "Running Stress Test" with title "Kapuchin St
 
 i="0"
 while
-$@
+$@ > /dev/null
 do :
 i=$[$i+1]
 done
