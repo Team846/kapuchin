@@ -26,7 +26,7 @@ actual class PlatformThread actual private constructor(
 
 actual inline fun <R> blockingMutex(lock: Any, block: () -> R) = kotlin.synchronized(lock, block)
 
-actual val scope = CoroutineScope(Dispatchers.Default +
+actual val scope = CoroutineScope(Dispatchers.Unconfined +
         CoroutineName("Kapuchin Coroutine Scope") +
         CoroutineExceptionHandler { _, throwable: Throwable ->
             Named("Coroutines").log(Error, throwable) { "Exception thrown from coroutine" }
