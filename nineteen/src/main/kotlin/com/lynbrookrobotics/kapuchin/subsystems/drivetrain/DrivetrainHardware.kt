@@ -64,7 +64,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         })
     }
 
-    private val trackLength by pref(2, Foot)
+    private val trackLength by pref(2.05, Foot)
 
 
     private val leftEncoderA by pref(0)
@@ -84,8 +84,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     private var xyPosition = Position(0.Foot, 0.Foot, 0.Degree)
     private val vectorTracking = simpleVectorTracking(trackLength, xyPosition)
 
-    val leftTrim by pref(1.0)
-    val rightTrim by pref(-1.0)
+    val leftTrim by pref(1.0018314)
+    val rightTrim by pref(-1.00621994)
 
     val position = sensor {
         val startingLeftPosition = leftPosition
