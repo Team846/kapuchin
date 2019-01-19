@@ -96,18 +96,22 @@ open class Preference<Value>(
         private val init: (String, Value) -> Unit,
         private val get: (String, Value) -> Value,
         private val nameSuffix: String = ""
-) : DelegateProvider<Any?, Value> {
+) : DelegateProvider<Any?, Value>, () -> Unit {
 
     private var value: Value? = null
+    private var name = ""
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        val name = Named(prop.name + nameSuffix, parent).name
+        name = Named(prop.name + nameSuffix, parent).name
 
         init(name, get(name, fallback))
-        EventLoop.runOnTick { value = get(name, fallback) }
 
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(name, fallback)
         }
+    }
+
+    override operator fun invoke() {
+        value = get(name, fallback)
     }
 }
