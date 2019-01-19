@@ -6,15 +6,16 @@ import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 
 private val impl = Preferences.getInstance()
+private fun <T> Preference<T>.f() = also { Preferences2.getInstance().registerCallback(this) }
 
-actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean)
-actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::putDouble, impl::getDouble)
-actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::putFloat, impl::getFloat)
-actual fun Named.pref(fallback: Int) = Preference(this, fallback, impl::putInt, impl::getInt)
-actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong, impl::getLong)
+actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean).f()
+actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::putDouble, impl::getDouble).f()
+actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::putFloat, impl::getFloat).f()
+actual fun Named.pref(fallback: Int) = Preference(this, fallback, impl::putInt, impl::getInt).f()
+actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong, impl::getLong).f()
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) = Preference(
         this, withUnits(fallback),
         { name, value -> impl.putDouble(name, withUnits(value)) },
         { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
         " (${withUnits.unitName})"
-)
+).f()
