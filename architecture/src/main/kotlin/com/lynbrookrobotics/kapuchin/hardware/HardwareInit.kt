@@ -1,14 +1,12 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
-import com.lynbrookrobotics.kapuchin.control.data.TimeStamped
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import info.kunalsheth.units.generated.Time
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -29,26 +27,27 @@ class HardwareInit<Hardw> private constructor(
         private val initialize: Named.() -> Hardw,
         private val configure: Named.(Hardw) -> Unit = {},
         private val validate: Named.(Hardw) -> Boolean = { true },
+        private val alternative: HardwareInit<Hardw>? = null,
         private val nameSuffix: String = ""
 ) : DelegateProvider<Any?, Hardw> {
 
-    private var value: Hardw? = null
+    override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Hardw> = Named(prop.name + nameSuffix, parent).run {
+        try {
+            log(Debug) { "Initializing hardware" }
+            val value = initialize()
+                    .also { configure(it) }
+                    .also {
+                        if (!validate(it) && crashOnFailure)
+                            error("Initialized hardware is invalid.")
+                    }
 
-    override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Hardw> {
-        value = Named(prop.name + nameSuffix, parent).run {
-            try {
-                log(Debug) { "Initializing hardware" }
-                initialize()
-                        .also { configure(it) }
-                        .also { if (!validate(it)) error("Initialized hardware is invalid.") }
-            } catch (t: Throwable) {
-                log(Error, t) { "Error during creation.\nMessage: ${t.message}\nCause: ${t.cause}" }
-                throw t
+            object : ReadOnlyProperty<Any?, Hardw> {
+                override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!
             }
-        }
 
-        return object : ReadOnlyProperty<Any?, Hardw> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!
+        } catch (t: Throwable) {
+            log(Error, t) { "Error during creation.\nMessage: ${t.message}\nCause: ${t.cause}" }
+            alternative?.provideDelegate(thisRef, prop) ?: throw t
         }
     }
 
@@ -59,7 +58,7 @@ class HardwareInit<Hardw> private constructor(
      * @return new `HardwareInit` delegate with the given configuration
      */
     fun configure(f: Named.(Hardw) -> Unit) = HardwareInit(
-            parent, initialize, { configure(it); f(it) }, validate, nameSuffix
+            parent, initialize, { configure(it); f(it) }, validate, alternative, nameSuffix
     )
 
     /**
@@ -72,23 +71,24 @@ class HardwareInit<Hardw> private constructor(
     fun verify(that: String, f: Named.(Hardw) -> Boolean) = HardwareInit(
             parent, initialize, configure,
             { validate(it) && f(it).also { if (!it) log(Error) { that } } },
-            nameSuffix
+            alternative, nameSuffix
     )
 
     /**
-     * Turns the given hardware object into a `Sensor`
+     * Add some alternative hardware to use in-case this hardware fails to initialize
      *
-     * @param Input type of sensor data being read
-     * @param read function to read new sensor data from the hardware object
-     * @return new `HardwareInit` delegate for the given sensor
+     * @param useThis alternative hardware to initialize
+     * @return new `HardwareInit` delegate with the given alternative
      */
-    fun <Input> sensor(read: Hardw.(Time) -> TimeStamped<Input>) = HardwareInit(
-            parent,
-            { val hardw = initialize(); parent.sensor(hardw, read) },
-            nameSuffix = nameSuffix
+    fun otherwise(useThis: HardwareInit<Hardw>): HardwareInit<Hardw> = HardwareInit(
+            parent, initialize, configure, validate,
+            alternative?.otherwise(useThis) ?: useThis,
+            nameSuffix
     )
 
-    companion object {
+    companion object : Named by Named("Hardware Initialization") {
+        val crashOnFailure by pref(true)
+
         /**
          * `HardwareInit` domain-specific language entry point
          *
