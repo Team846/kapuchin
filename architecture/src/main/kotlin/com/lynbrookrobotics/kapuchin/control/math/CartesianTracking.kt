@@ -9,6 +9,7 @@ import info.kunalsheth.units.math.sin
 private fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
 private fun s(sl: Length, sr: Length) = avg(sl, sr)
 
+// todo: unit test!
 fun simpleVectorTracking(
         trackLength: Length, init: Position
 ): (Length, Length) -> Position {
