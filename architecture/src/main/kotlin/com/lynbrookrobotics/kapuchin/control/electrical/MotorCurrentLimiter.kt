@@ -32,7 +32,7 @@ fun <S : Quan<S>> motorCurrentLimiter(
 
         return when {
             expectedCurrent > limit -> limit * windings + emf
-            expectedCurrent < -limit -> -(limit * windings + emf)
+            expectedCurrent < -limit -> -(limit * windings - emf)
             else -> target
         }
     }
