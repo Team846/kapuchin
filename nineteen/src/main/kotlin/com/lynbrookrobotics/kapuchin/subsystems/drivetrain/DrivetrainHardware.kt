@@ -39,16 +39,20 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
-
+  
     private val leftEscPort by pref(2)
     private val rightEscPort by pref(3)
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
 
-    val leftEsc by hardw { Spark(leftEscPort) }
-            .configure { it.inverted = leftEscInversion }
-    val rightEsc by hardw { Spark(rightEscPort) }
-            .configure { it.inverted = rightEscInversion }
+    val leftEsc by hardw { Spark(leftEscPort) }.configure {
+        it.inverted = leftEscInversion
+        it.isSafetyEnabled = false
+    }
+    val rightEsc by hardw { Spark(rightEscPort) }.configure {
+        it.inverted = rightEscInversion
+        it.isSafetyEnabled = false
+    }
 
     private val wheelRadius by pref(3, Inch)
 
@@ -65,8 +69,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         })
     }
 
-    val trackLength by pref(2.05, Foot)
 
+    val trackLength by pref(2.05, Foot)
 
     private val leftEncoderA by pref(0)
     private val rightEncoderA by pref(1)
@@ -85,8 +89,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     private var xyPosition = Position(0.Foot, 0.Foot, 0.Degree)
     private val vectorTracking = simpleVectorTracking(trackLength, xyPosition)
 
-    val leftTrim by pref(1.0)
-    val rightTrim by pref(-1.0)
+    val leftTrim by pref(1.0018314)
+    val rightTrim by pref(-1.00621994)
 
     val position = sensor {
         val startingLeftPosition = leftPosition

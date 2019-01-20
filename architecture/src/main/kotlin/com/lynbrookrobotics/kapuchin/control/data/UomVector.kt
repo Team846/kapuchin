@@ -77,6 +77,7 @@ operator fun <Q : Quan<Q>> TwoSided<Q>.minus(that: TwoSided<Q>) = TwoSided(
  * @property y robot cartesian coordinate
  * @property theta robot bearing
  */
+// todo: unit test!
 data class Position(val x: Length, val y: Length, val bearing: Angle)
 
 operator fun Position.plus(that: Position) = Position(
@@ -100,6 +101,7 @@ val Position.vector get() = UomVector(x, y)
  *
  * @property theta rotation about the origin
  */
+// todo: unit test!
 data class RotationMatrix(val theta: Angle) {
     internal val sin = sin(theta)
     internal val cos = cos(theta)

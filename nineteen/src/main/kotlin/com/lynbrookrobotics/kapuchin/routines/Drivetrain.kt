@@ -53,7 +53,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
 
         val ffL = targetL / maxLeftSpeed * operatingVoltage
         val ffR = targetR / maxRightSpeed * operatingVoltage
-
+      
         // brake mode
         if(ffL == 0.Volt && ffR == 0.Volt) TwoSided(0.Percent, 0.Percent)
         else {
