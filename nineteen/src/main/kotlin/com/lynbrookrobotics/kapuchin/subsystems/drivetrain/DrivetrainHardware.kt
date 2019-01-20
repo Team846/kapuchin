@@ -65,7 +65,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         })
     }
 
-    private val trackLength by pref(2, Foot)
+    val trackLength by pref(2.05, Foot)
 
 
     private val leftEncoderA by pref(0)

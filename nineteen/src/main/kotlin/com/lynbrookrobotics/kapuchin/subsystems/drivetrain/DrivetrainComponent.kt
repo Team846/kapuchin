@@ -18,14 +18,13 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     private val motorType by pref("cim")
     val motor get() = CommonMotors.valueOf(motorType).spec
 
-    val maxLeftSpeed by pref(13, FootPerSecond)
-    val maxRightSpeed by pref(13.3, FootPerSecond)
+    val maxLeftSpeed by pref(13.8, FootPerSecond)
+    val maxRightSpeed by pref(13.8, FootPerSecond)
     val maxSpeed get() = maxLeftSpeed min maxRightSpeed
 
     val velocityKp by pref(50, Ampere, 2, FootPerSecond)
 
-    private val trackSize by pref(2, Foot)
-    val maxSpinSpeed get() = maxSpeed / (trackSize / 2) * Radian
+    val maxSpinSpeed get() = maxSpeed / (hardware.trackLength / 2) * Radian
     val bearingKp by pref(2, FootPerSecond, 60, Degree)
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<DutyCycle> = {

@@ -7,21 +7,17 @@ import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
 import com.lynbrookrobotics.kapuchin.control.math.differentiator
-import com.lynbrookrobotics.kapuchin.hardware.CommonMotors
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.DegreePerSecond
-import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.div
-import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.abs
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
-    val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
-    val steering by driver.steering.readWithEventLoop.withoutStamps
-    val absSteering by driver.absSteering.readWithEventLoop.withoutStamps
+    val accelerator by driver.accelerator.readOnTick.withoutStamps
+    val steering by driver.steering.readOnTick.withoutStamps
+    val absSteering by driver.absSteering.readOnTick.withoutStamps
 
     val position by hardware.position.readOnTick.withoutStamps
     var startingAngle = -absSteering + position.xy.bearing
@@ -29,7 +25,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    val startupFrictionCompensation = verticalDeadband(motorFreeCurrent, motor.stallCurrent)
+    val startupFrictionCompensation = verticalDeadband(startupVoltage, motor.voltage)
     val currentApplicatorL = motorCurrentApplicator(motor, maxLeftSpeed)
     val currentLimiterL = motorCurrentLimiter(motor, maxLeftSpeed, motorCurrentLimit)
     val currentApplicatorR = motorCurrentApplicator(motor, maxRightSpeed)
@@ -41,9 +37,9 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
         val steeringVelocity = maxSpeed * steering
 
         val currentAngle = position.xy.bearing
-        if (steering != 0.Percent) startingAngle = -absSteering + currentAngle
+        if (steering != 0.Percent) startingAngle = /*-absSteering +*/ currentAngle
 
-        val errorA = absSteering + startingAngle `coterminal -` currentAngle
+        val errorA = /*absSteering +*/ startingAngle `coterminal -` currentAngle
         val pA = bearingKp * errorA
 
         val targetL = forwardVelocity + steeringVelocity + pA
@@ -58,23 +54,27 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
         val ffL = targetL / maxLeftSpeed * operatingVoltage
         val ffR = targetR / maxRightSpeed * operatingVoltage
 
-        val dcL = voltageToDutyCycle(
-                currentLimiterL(speedL,
-                        currentApplicatorL(speedL,
-                                startupFrictionCompensation(pL)
-                        ) + ffL
-                ), vBat
-        )
+        // brake mode
+        if(ffL == 0.Volt && ffR == 0.Volt) TwoSided(0.Percent, 0.Percent)
+        else {
+            val dcL = voltageToDutyCycle(
+                    currentLimiterL(speedL,
+                            startupFrictionCompensation(
+                                    currentApplicatorL(speedL, pL) + ffL
+                            )
+                    ), vBat
+            )
 
-        val dcR = voltageToDutyCycle(
-                currentLimiterR(speedR,
-                        currentApplicatorR(speedR,
-                                startupFrictionCompensation(pR)
-                        ) + ffR
-                ), vBat
-        )
+            val dcR = voltageToDutyCycle(
+                    currentLimiterR(speedR,
+                            startupFrictionCompensation(
+                                    currentApplicatorR(speedR, pR) + ffR
+                            )
+                    ), vBat
+            )
 
-        TwoSided(dcL, dcR)
+            TwoSided(dcL, dcR)
+        }
     }
 }
 
