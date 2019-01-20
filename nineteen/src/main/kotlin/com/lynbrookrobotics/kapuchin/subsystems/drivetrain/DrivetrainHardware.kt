@@ -44,10 +44,14 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
 
-    val leftEsc by hardw { Spark(leftEscPort) }
-            .configure { it.inverted = leftEscInversion }
-    val rightEsc by hardw { Spark(rightEscPort) }
-            .configure { it.inverted = rightEscInversion }
+    val leftEsc by hardw { Spark(leftEscPort) }.configure {
+        it.inverted = leftEscInversion
+        it.isSafetyEnabled = false
+    }
+    val rightEsc by hardw { Spark(rightEscPort) }.configure {
+        it.inverted = rightEscInversion
+        it.isSafetyEnabled = false
+    }
 
     private val wheelRadius by pref(3, Inch)
 
