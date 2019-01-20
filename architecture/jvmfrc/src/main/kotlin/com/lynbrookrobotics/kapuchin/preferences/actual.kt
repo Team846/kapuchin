@@ -12,6 +12,7 @@ actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::putDo
 actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::putFloat, impl::getFloat)
 actual fun Named.pref(fallback: Int) = Preference(this, fallback, impl::putInt, impl::getInt)
 actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong, impl::getLong)
+actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString)
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) = Preference(
         this, withUnits(fallback),
         { name, value -> impl.putDouble(name, withUnits(value)) },
