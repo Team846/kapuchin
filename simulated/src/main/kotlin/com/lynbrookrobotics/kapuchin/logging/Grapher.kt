@@ -6,6 +6,7 @@ import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
 import info.kunalsheth.units.generated.UomConverter
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import java.io.Closeable
 import java.io.File
@@ -21,7 +22,7 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
             .printWriter(Charsets.US_ASCII).also { it.println("seconds,${withUnits.unitName}") }
 
     actual override fun invoke(x: Time, y: Q) {
-        scope.launch { printer.println("${x.Second},${withUnits(y)}") }
+        scope.launch(IO) { printer.println("${x.Second},${withUnits(y)}") }
     }
 
     actual override fun flush() = printer.flush()
