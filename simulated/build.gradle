@@ -27,7 +27,7 @@ compileTestKotlin {
 
 test {
     // on the RoboRIO, we get ~100m of heap to run our code
-    jvmArgs '-Xms100m', '-Xmx100m'
+    jvmArgs '-Xms100m', '-Xmx100m', '-XX:+UseG1GC', '-XX:MaxGCPauseMillis=75'
 }
 
 jacocoTestReport {
