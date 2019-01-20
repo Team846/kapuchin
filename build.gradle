@@ -1,14 +1,15 @@
 buildscript {
-    ext.kotlin_version = '1.3.10'
+    ext.kotlin_version = '1.3.20-eap-100'
     repositories {
         gradlePluginPortal()
         mavenCentral()
         maven { url 'http://repo.kunalsheth.info/' }
         mavenLocal()
+        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'info.kunalsheth.units:plugin:5.1.1'
+        classpath 'info.kunalsheth.units:plugin:5.2.0'
         classpath 'edu.wpi.first:GradleRIO:2019.1.1'
         classpath 'org.jetbrains.dokka:dokka-gradle-plugin:0.9.17'
     }
@@ -19,7 +20,10 @@ apply plugin: 'idea'
 allprojects {
     group 'com.lynbrookrobotics'
     version '1.0.0'
-    repositories.jcenter()
+    repositories {
+        jcenter()
+        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+    }
 
     tasks.withType(Test) { // https://guides.gradle.org/performance/#parallel_test_execution
         maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
