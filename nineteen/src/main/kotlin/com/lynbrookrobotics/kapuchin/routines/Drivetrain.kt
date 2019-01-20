@@ -54,15 +54,15 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
         val ffR = targetR / maxRightSpeed * operatingVoltage
 
         val dcL = voltageToDutyCycle(
-                currentLimiting(speedL,
+                /*currentLimiting(speedL,
                         startupFrictionCompensation(pL + ffL)
-                ), vBat
+                )*/ ffL, vBat
         )
 
         val dcR = voltageToDutyCycle(
-                currentLimiting(speedR,
+                /*currentLimiting(speedR,
                         startupFrictionCompensation(pR + ffR)
-                ), vBat
+                )*/ ffR, vBat
         )
 
         TwoSided(dcL, dcR)
