@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
+import com.lynbrookrobotics.kapuchin.tests.`is within?`
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
 import com.lynbrookrobotics.kapuchin.timing.checkInSync
@@ -20,6 +21,7 @@ class SensorTest {
     private class SensorTestSH : TSH<SensorTestSH, SensorTestC>("SensorTest Hardware") {
         val sensorA = sensor { Math.random() stampWith currentTime }
         val sensorB = sensor { Math.random() stampWith currentTime }
+        val sensorC = sensor { Math.random() stampWith currentTime }
     }
 
     private class SensorTestC : TC<SensorTestC, SensorTestSH>(SensorTestSH())
@@ -87,6 +89,31 @@ class SensorTest {
                     a2 `is equal to?` a1
 
                     name.takeIf { runs-- > 0 }
+                }
+            }
+        }
+    }
+
+    @Test(timeout = 1 * 1000)
+    fun `sensors are updated once before controller initialization`() = runBlocking {
+        val name = "sensors are updated once before controller initialization"
+        SensorTestC().run {
+            val start = currentTime
+            startRoutine(name) {
+                val a by hardware.sensorA.readEagerly.withStamps
+                val b by hardware.sensorB.readOnTick.withStamps
+                val c by hardware.sensorC.readWithEventLoop.withStamps
+
+                val a1 = a
+                val b1 = b
+                val c1 = c
+
+                val end = currentTime
+                controller {
+                    a1.x `is within?` start..end
+                    b1.x `is within?` start..end
+                    c1.x `is within?` start..end
+                    null
                 }
             }
         }

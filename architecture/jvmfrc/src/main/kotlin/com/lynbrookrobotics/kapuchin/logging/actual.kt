@@ -35,9 +35,12 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
     actual override fun invoke(x: Time, y: Q) {
         if (running.isCompleted) scope.launch(IO) {
             delay(rateLimit)
-            SmartDashboard.putNumber(name, withUnits(y))
-            printer.println("${x.Second},${withUnits(y)}")
-            printer.flush()
+            if (graphToDashboard)
+                SmartDashboard.putNumber(name, withUnits(y))
+            if (graphToFile) {
+                printer.println("${x.Second},${withUnits(y)}")
+                printer.flush()
+            }
         }.also { running = it }
     }
 
@@ -46,6 +49,8 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
 
     actual companion object : Named by Named("graphers") {
         val rateLimit by pref(500, Millisecond)
+        val graphToFile by pref(false)
+        val graphToDashboard by pref(true)
         actual fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>) =
                 Grapher(this, of, withUnits)
     }
