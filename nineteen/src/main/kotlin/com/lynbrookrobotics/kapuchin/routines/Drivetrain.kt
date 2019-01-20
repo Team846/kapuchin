@@ -29,7 +29,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
     val currentApplicatorL = motorCurrentApplicator(motor, maxLeftSpeed)
     val currentLimiterL = motorCurrentLimiter(motor, maxLeftSpeed, motorCurrentLimit)
     val currentApplicatorR = motorCurrentApplicator(motor, maxRightSpeed)
-    val currentLimiterR = motorCurrentLimiter(motor, maxLeftSpeed, motorCurrentLimit)
+    val currentLimiterR = motorCurrentLimiter(motor, maxRightSpeed, motorCurrentLimit)
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
