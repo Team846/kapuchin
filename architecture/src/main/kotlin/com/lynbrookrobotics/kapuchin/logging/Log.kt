@@ -19,7 +19,7 @@ internal val printMutex = Mutex()
  * @param message any additional information
  * @return asynchronous logging job
  */
-fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(level, throwable.platformStackTrace, message)
+fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job = log(level, throwable.platformStackTrace, message)
 
 /**
  * Logs an exception stacktrace
