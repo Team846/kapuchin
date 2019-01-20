@@ -12,4 +12,4 @@ actual fun Named.pref(fallback: Float) = Preference(this, fallback, f(Unit), f(f
 actual fun Named.pref(fallback: Int) = Preference(this, fallback, f(Unit), f(fallback))
 actual fun Named.pref(fallback: Long) = Preference(this, fallback, f(Unit), f(fallback))
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) =
-        Preference(this, withUnits(fallback), f(Unit), f(withUnits(fallback)))
+        Preference(this, withUnits(fallback.toDouble()), f(Unit), f(withUnits(fallback.toDouble())))
