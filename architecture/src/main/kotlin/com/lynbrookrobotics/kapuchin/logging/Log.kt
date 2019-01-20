@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.logging
 
 import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Quan
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.pow
 import kotlin.math.round
@@ -17,7 +18,7 @@ import kotlin.math.round
  * @param message any additional information
  * @return asynchronous logging job
  */
-fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(level, throwable.platformStackTrace, message)
+fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job = log(level, throwable.platformStackTrace, message)
 
 /**
  * Logs an exception stacktrace
