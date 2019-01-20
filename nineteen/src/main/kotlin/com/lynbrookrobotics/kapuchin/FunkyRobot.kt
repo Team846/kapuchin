@@ -46,7 +46,7 @@ class FunkyRobot : RobotBase() {
         }
     }
 
-    private fun loadClasses() = scope.launch(IO) {
+    private fun loadClasses() = scope.launch {
         val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
         Thread.currentThread()
                 .contextClassLoader
@@ -56,7 +56,7 @@ class FunkyRobot : RobotBase() {
                 .filter { it.matches(classNameRegex) }
                 .map { it.replace(classNameRegex, "$1") }
                 .forEach {
-                    launch {
+                    launch(IO) {
                         try {
                             Class.forName(it)
                         } catch (t: Throwable) {
