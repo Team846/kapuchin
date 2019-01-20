@@ -12,7 +12,7 @@ import java.io.Closeable
 import java.io.File
 import java.io.Flushable
 
-actual suspend fun printAtLevel(level: Level, formattedMessage: String) = scope.launch(IO) {
+actual fun printAtLevel(level: Level, formattedMessage: String) = scope.launch(IO) {
     printMutex.withLock {
         when (level) {
             Level.Error -> println("ERROR $formattedMessage")
