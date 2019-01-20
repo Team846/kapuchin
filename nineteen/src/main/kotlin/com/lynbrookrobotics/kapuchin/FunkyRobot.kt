@@ -20,7 +20,7 @@ class FunkyRobot : RobotBase() {
 
         val classloading = loadClasses()
 
-        val subsystems = Subsystems.init()
+        val subsystems = Subsystems.concurrentInit()
 
         runBlocking { classloading.join() }
 
