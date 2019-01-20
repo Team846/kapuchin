@@ -141,8 +141,11 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         val data = lineScanner(exposure.toUByte())
 
         val max = data.max()!!
-        val peakLocation = if (max > triggerLevel) data
-                .asSequence()
+        val peakLocation = if (max > triggerLevel) (
+                sequenceOf(0.toByte()) +
+                        data.asSequence() +
+                        0.toByte()
+                )
                 .mapIndexed { i, b -> i to b }
                 .filter { (_, b) -> b >= max }
                 .map { (i, _) -> i }
