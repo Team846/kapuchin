@@ -66,6 +66,17 @@ expect fun Named.pref(fallback: Int): Preference<Int>
 expect fun Named.pref(fallback: Long): Preference<Long>
 
 /**
+ * Initialize a preference object for a `String`
+ *
+ * @author Kunal
+ *
+ * @receiver owner of the preference
+ * @param fallback default value
+ * @return new `Preference` delegate
+ */
+expect fun Named.pref(fallback: String): Preference<String>
+
+/**
  * Initialize a preference object for a quantity
  *
  * @author Kunal

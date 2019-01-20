@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
-import com.lynbrookrobotics.kapuchin.control.loops.Gain
+import com.lynbrookrobotics.kapuchin.control.data.Gain
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware

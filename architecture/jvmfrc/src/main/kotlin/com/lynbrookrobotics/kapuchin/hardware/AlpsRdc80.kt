@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.hardware
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.`±`
 import info.kunalsheth.units.math.abs
+import com.lynbrookrobotics.kapuchin.logging.withDecimals
 
 /**
  * Converts Alps RDC80 analog readings into angles
@@ -51,7 +52,7 @@ fun alpsRdc80(
             }
             readingA -> a
             readingB -> inPhaseB
-            else -> throw IllegalStateException("ALPS RDC80 Channels Out of Range")
+            else -> throw IllegalStateException("ALPS RDC80 Channels Out of Range. A=${a withDecimals 2}, B=${b withDecimals 2}")
         } * Turn
     }
 }
