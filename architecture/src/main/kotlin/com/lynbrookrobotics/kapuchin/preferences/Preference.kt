@@ -119,7 +119,7 @@ open class Preference<Value>(
      * @author Andy
      */
     companion object {
-        var keyMap = HashMap<String, Preference<*>>()
+        val keyMap = HashMap<String, Preference<*>>()
     }
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {

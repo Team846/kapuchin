@@ -2,12 +2,11 @@ package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.logging.Named
 import edu.wpi.first.networktables.EntryListenerFlags
-import edu.wpi.first.wpilibj.Preferences
 import edu.wpi.first.wpilibj.Preferences2
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 
-private val impl = Preferences.getInstance()
+private val impl = Preferences2.getInstance()
 private fun <T> Preference<T>.f() = also { registerCallback(this) }
 
 
@@ -37,4 +36,20 @@ private fun registerCallback(callback: (String) -> Unit) {
     Preferences2.getInstance().table.addEntryListener({ _, key, _, _, _ ->
         callback(key)
     }, EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
+}
+
+/**
+ * Trims the NetworkTable by deleting all entries that don't have a corresponding Preference instance
+ *
+ * @author Andy
+ * @see Preferences2
+ */
+private fun trim() {
+    val keys = impl.keys
+    val map = Preference.keyMap
+    for (key in keys) {
+        if (!map.containsKey(key)) {
+            impl.table.delete(key)
+        }
+    }
 }
