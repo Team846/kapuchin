@@ -14,7 +14,7 @@ SLEEP_TIME=150
 osascript -e 'display notification "Deploying Benchmark" with title "Kapuchin Realtime Tuning"'
 
 cd "$KAPUCHIN"
-./gradlew :nineteen:deploy
+./gradlew :eighteen:deploy
 ssh -t admin@roboRIO-846-FRC.local reboot
 
 osascript -e 'display notification "Running Benchmark" with title "Kapuchin Realtime Tuning"'
