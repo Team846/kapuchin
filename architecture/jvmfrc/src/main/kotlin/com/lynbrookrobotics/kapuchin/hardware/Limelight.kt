@@ -23,6 +23,7 @@ class LimelightSystem: SubsystemHardware<LimelightSystem, Nothing>() {
     override val syncThreshold: Time = 3.milli(Second)
 
     private val cameraAngleRelativeToFront: Angle by pref(0, Degree)
+    private val distanceToScreenSizeConstant: Dimensionless by pref(4.95534, Each)
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
 
     /**
@@ -41,5 +42,16 @@ class LimelightSystem: SubsystemHardware<LimelightSystem, Nothing>() {
             getEntry("ts").absoluteValue < 2 -> cameraAngleRelativeToFront + getEntry("tx").Degree
             else -> cameraAngleRelativeToFront + getEntry("ty").Degree
         } stampWith it - getEntry("tl").milli(Second)
+    }
+
+    /**
+     * Sensor that calculates the distance to target using a tuned constant. Nullable- if there is no target
+     */
+    val distanceToTarget = sensor {
+        when (getEntry("tv").roundToInt()) {
+            0 -> null
+            else -> (distanceToScreenSizeConstant / Math.sqrt(getEntry("ta")))
+        } stampWith it - getEntry("tl").milli(Second)
+
     }
 }

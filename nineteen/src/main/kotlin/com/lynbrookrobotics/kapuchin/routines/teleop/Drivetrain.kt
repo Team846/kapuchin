@@ -48,7 +48,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
     }
 }
 
-suspend fun DrivetrainComponent.pointWithLimelight(driver: DriverHardware, limelight: LimelightSystem) = startRoutine("point with limelight") {
+suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightSystem) = startRoutine("point with limelight") {
     val gyro by hardware.gyroInput.readOnTick.withStamps
     val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
 
@@ -62,7 +62,7 @@ suspend fun DrivetrainComponent.pointWithLimelight(driver: DriverHardware, limel
 
     controller {
         val left = turnControl(gyro.x, gyro.y.angle)
-        val right = -turnControl(gyro.x, gyro.y.angle)
+        val right = -left
 
         hardware.offloadedSettings.run {
             TwoSided(
@@ -72,6 +72,27 @@ suspend fun DrivetrainComponent.pointWithLimelight(driver: DriverHardware, limel
         }
     }
 }
+
+suspend fun DrivetrainComponent.driveWithLimelight(limelight: LimelightSystem) = startRoutine("drive with limelight") {
+    val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
+    val limelightDistance by limelight.distanceToTarget.readOnTick.withoutStamps
+    val gyro by hardware.gyroInput.readOnTick.withStamps
+
+    val startingGyroAngle = gyro.y.angle
+    val startingLimelightAngle = limelightAngle
+    val startingLimelightDistance = limelightDistance
+
+    val bearing = when (startingLimelightAngle) {
+        null -> gyro.y.angle
+        else -> startingLimelightAngle - startingGyroAngle
+    }
+
+    val radius = startingLimelightDistance / (2 * Math.sin(bearing / 2))
+
+    DrivetrainComponent.arcTo(bearing, radius, 2.Degree, 0.25.Foot, )
+
+}
+
 
 suspend fun DrivetrainComponent.arcTo(
         bearing: Angle, radius: Length,
