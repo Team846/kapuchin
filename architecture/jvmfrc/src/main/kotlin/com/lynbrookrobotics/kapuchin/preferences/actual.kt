@@ -1,7 +1,9 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.logging.Named
+import edu.wpi.first.networktables.EntryListenerFlags
 import edu.wpi.first.wpilibj.Preferences
+import edu.wpi.first.wpilibj.Preferences2
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 
@@ -22,3 +24,17 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
         { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
         " (${withUnits.unitName})"
 ).f()
+
+
+/**
+ * Adds an EntryListener to the NetworkTable in Preferences2
+ *
+ * @author Andy
+ * @param callback function
+ * @see edu.wpi.first.wpilibj.Preferences2
+ */
+private fun registerCallback(callback: (String) -> Unit) {
+    Preferences2.getInstance().table.addEntryListener({ _, key, _, _, _ ->
+        callback(key)
+    }, EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
+}
