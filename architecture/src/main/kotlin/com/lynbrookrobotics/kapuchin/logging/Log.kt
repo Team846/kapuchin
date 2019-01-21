@@ -1,12 +1,10 @@
 package com.lynbrookrobotics.kapuchin.logging
 
+import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Quan
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.launch
 import kotlin.math.pow
 import kotlin.math.round
-
-internal val printMutex = Mutex()
 
 /**
  * Logs an exception stacktrace
@@ -19,7 +17,7 @@ internal val printMutex = Mutex()
  * @param message any additional information
  * @return asynchronous logging job
  */
-fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job = log(level, throwable.platformStackTrace, message)
+fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(level, throwable.platformStackTrace, message)
 
 /**
  * Logs an exception stacktrace
@@ -32,8 +30,9 @@ fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job = 
  * @param message any additional information
  * @return asynchronous logging job
  */
-fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String) =
-        printAtLevel(level, messageToString(this@log, stackTrace, message))
+fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String) = scope.launch {
+    printAtLevel(level, messageToString(this@log, stackTrace, message))
+}
 
 private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?, message: () -> String): String {
     val senderHeader = "${sender.name}: "
@@ -52,7 +51,7 @@ private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?
  * @param level message importance
  * @param formattedMessage data to log
  */
-expect fun printAtLevel(level: Level, formattedMessage: String): Job
+expect fun printAtLevel(level: Level, formattedMessage: String)
 
 /**
  * Rounds a number to a fixed number of decimal places for cleaner logging

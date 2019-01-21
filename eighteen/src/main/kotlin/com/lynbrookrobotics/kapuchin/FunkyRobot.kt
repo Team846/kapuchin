@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.math.milli
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -46,7 +45,7 @@ class FunkyRobot : RobotBase() {
         }
     }
 
-    private fun loadClasses() = scope.launch(IO) {
+    private fun loadClasses() = scope.launch {
         val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
         Thread.currentThread()
                 .contextClassLoader

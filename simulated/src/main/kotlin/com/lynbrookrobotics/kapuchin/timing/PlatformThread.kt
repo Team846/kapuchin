@@ -1,15 +1,9 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import com.lynbrookrobotics.kapuchin.logging.Level
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlin.concurrent.thread
-import kotlin.coroutines.CoroutineContext
 
 actual class PlatformThread actual private constructor(
         parent: Named,
@@ -26,9 +20,4 @@ actual class PlatformThread actual private constructor(
 
 actual inline fun <R> blockingMutex(lock: Any, block: () -> R) = kotlin.synchronized(lock, block)
 
-actual val scope = CoroutineScope(Dispatchers.Unconfined +
-        CoroutineName("Kapuchin Coroutine Scope") +
-        CoroutineExceptionHandler { _, throwable: Throwable ->
-            Named("Coroutines").log(Error, throwable) { "Exception thrown from coroutine" }
-        }
-)
+actual val scope: CoroutineScope = GlobalScope
