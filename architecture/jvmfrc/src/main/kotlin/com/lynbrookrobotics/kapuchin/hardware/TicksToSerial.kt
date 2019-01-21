@@ -1,16 +1,20 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
+import edu.wpi.first.hal.SerialPortJNI
 import edu.wpi.first.wpilibj.SerialPort
-import edu.wpi.first.wpilibj.hal.SerialPortJNI
 import java.io.Closeable
 import java.io.Flushable
 
 class TicksToSerial(
         val port: SerialPort.Port
-) : Flushable, Closeable {
+) : Closeable {
 
-    val device = SerialPort(115200, port)
+    val device = SerialPort(115200, port).apply {
+        setReadBufferSize(5 * 1000)
+        setTimeout(0.01)
+        setWriteBufferSize(1)
+    }
 
     operator fun invoke() = sequence {
         val buffer = ByteArray(1)
@@ -23,7 +27,7 @@ class TicksToSerial(
     }
 
     private fun parse(data: Int): TwoSided<Int> {
-        val left = data shr 4 and 0x0F
+        val left = data ushr 4 and 0x0F
         val absvl = left and 0b0111
         val signl = left and 0b1000 ushr 3
 
@@ -36,12 +40,8 @@ class TicksToSerial(
                 right = if (signr == 1) absvr else -absvr
         )
     }
-
-    override fun flush() {
-        device.reset()
-    }
-
+  
     override fun close() {
-        device.free()
+        device.close()
     }
 }

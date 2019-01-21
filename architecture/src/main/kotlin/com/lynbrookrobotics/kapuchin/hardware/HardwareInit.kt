@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
@@ -35,7 +36,10 @@ class HardwareInit<Hardw> private constructor(
             log(Debug) { "Initializing hardware" }
             val value = initialize()
                     .also { configure(it) }
-                    .also { if (!validate(it)) error("Initialized hardware is invalid.") }
+                    .also {
+                        if (!validate(it) && crashOnFailure)
+                            error("Initialized hardware is invalid.")
+                    }
 
             object : ReadOnlyProperty<Any?, Hardw> {
                 override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!
@@ -82,7 +86,9 @@ class HardwareInit<Hardw> private constructor(
             nameSuffix
     )
 
-    companion object {
+    companion object : Named by Named("Hardware Initialization") {
+        val crashOnFailure by pref(true)
+
         /**
          * `HardwareInit` domain-specific language entry point
          *

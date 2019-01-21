@@ -8,10 +8,12 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.math.milli
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+fun main(args: Array<String>) = RobotBase.startRobot(::FunkyRobot)
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")
@@ -44,7 +46,7 @@ class FunkyRobot : RobotBase() {
         }
     }
 
-    private fun loadClasses() = scope.launch {
+    private fun loadClasses() = scope.launch(IO) {
         val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
         Thread.currentThread()
                 .contextClassLoader

@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
-import com.lynbrookrobotics.kapuchin.control.loops.Gain
+import com.lynbrookrobotics.kapuchin.control.data.Gain
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.anyDouble

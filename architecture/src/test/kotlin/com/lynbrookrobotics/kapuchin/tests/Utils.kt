@@ -19,7 +19,7 @@ private val <Q : Quan<Q>> Q.tolerance
 
 infix fun <Q : Quan<Q>> Q.`is equal to?`(that: Q) =
         assert(this in that.tolerance) {
-            "Expecting ${this withDecimals 3} ≈ ${that withDecimals 3}, however ${this withDecimals 3} ≉ ${that withDecimals 3}"
+            "Expecting ${this withDecimals 5} ≈ ${that withDecimals 5}, however ${this withDecimals 5} ≉ ${that withDecimals 5}"
         }
 
 infix fun <T : Any?> T.`is equal to?`(that: T) =
