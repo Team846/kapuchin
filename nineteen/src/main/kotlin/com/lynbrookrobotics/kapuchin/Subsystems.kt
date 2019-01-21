@@ -12,6 +12,7 @@ import edu.wpi.first.hal.HAL
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers.IO
 
 data class Subsystems(
         val drivetrain: DrivetrainComponent,
@@ -54,9 +55,9 @@ data class Subsystems(
 
     companion object : Named by Named("Subsystems Initializer") {
         fun concurrentInit() = runBlocking {
-            val drivetrain = async { DrivetrainComponent(DrivetrainHardware()) }
-            val driver = async { DriverHardware() }
-            val electrical = async { ElectricalSystemHardware() }
+            val drivetrain = async(IO) { DrivetrainComponent(DrivetrainHardware()) }
+            val driver = async(IO) { DriverHardware() }
+            val electrical = async(IO) { ElectricalSystemHardware() }
 
             Subsystems(
                     drivetrain = drivetrain.await(),

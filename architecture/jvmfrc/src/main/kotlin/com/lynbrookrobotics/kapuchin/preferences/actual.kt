@@ -17,7 +17,7 @@ actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong
 actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString).f()
 
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) = Preference(
-        this, withUnits(fallback),
+        this, withUnits(fallback.toDouble()),
         { name, value -> impl.putDouble(name, withUnits(value)) },
         { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
         " (${withUnits.unitName})"
