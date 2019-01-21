@@ -8,7 +8,7 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import java.util.*
 
 /**
- * Copy and paste of edu.wpi.first.wpilibj.Preferences but adds listener for change in NetworkTable
+ * Copy and paste of edu.wpi.first.wpilibj.Preferences but changes NetworkTable instance to public
  *
  * @author Andy
  *
@@ -19,7 +19,6 @@ import java.util.*
 class Preferences2 private constructor() {
 
     val table: NetworkTable = NetworkTableInstance.getDefault().getTable("Preferences");
-    private val callbacks = ArrayList<() -> Unit>()
 
     companion object {
         private var instance: Preferences2? = null
@@ -36,21 +35,12 @@ class Preferences2 private constructor() {
     init {
         table.getEntry(".type").setString("RobotPreferences")
         table.addEntryListener({ _, _, entry, _, _ ->
-
             entry.setPersistent()
-            for (callback in callbacks) {
-                callback()
-            }
-
-        }, EntryListenerFlags.kImmediate or EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
+        }, EntryListenerFlags.kImmediate or EntryListenerFlags.kNew)
         HAL.report(tResourceType.kResourceType_Preferences, 0)
     }
 
-    fun registerCallback(callback: () -> Unit) {
-        callbacks.add(callback)
-    }
-
-    val keys = Vector(table.keys)
+    fun getKeys(): Vector<String> = Vector(table.getKeys())
 
     fun containsKey(key: String): Boolean {
         return table.containsKey(key)

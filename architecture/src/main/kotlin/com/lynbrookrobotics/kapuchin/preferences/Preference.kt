@@ -110,7 +110,7 @@ open class Preference<Value>(
 ) : DelegateProvider<Any?, Value>, () -> Unit {
 
     private var value: Value? = null
-    private var name = ""
+    private lateinit var name: String
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         name = Named(prop.name + nameSuffix, parent).name
@@ -123,6 +123,8 @@ open class Preference<Value>(
     }
 
     override operator fun invoke() {
-        value = get(name, fallback)
+        if (::name.isInitialized) {
+            value = get(name, fallback)
+        }
     }
 }

@@ -6,7 +6,7 @@ import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 
 private val impl = Preferences.getInstance()
-private fun <T> Preference<T>.f() = also { Preferences2.getInstance().registerCallback(this) }
+private fun <T> Preference<T>.f() = also { registerCallback(this) }
 
 
 actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean).f()
