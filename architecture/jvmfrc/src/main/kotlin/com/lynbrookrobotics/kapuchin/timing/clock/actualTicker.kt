@@ -54,8 +54,10 @@ actual class Ticker private actual constructor(
             tick(startTime)
             computeTime = currentTime - startTime
 
-            if (computeTime > period + overrunLogThreshold) log(Warning) {
-                "$name overran its ${period withDecimals 4} loop by ${(computeTime - period) withDecimals 4}"
+            computeTime.takeIf { it > period + overrunLogThreshold }?.also {
+                log(Warning) {
+                    "$name overran its ${period withDecimals 4} loop by ${(it - period) withDecimals 4}"
+                }
             }
         }
     }
