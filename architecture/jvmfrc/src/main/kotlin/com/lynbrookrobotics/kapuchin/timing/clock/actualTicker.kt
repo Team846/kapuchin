@@ -4,14 +4,12 @@ import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
+import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.timing.PlatformThread.Companion.platformThread
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.hal.NotifierJNI
-import info.kunalsheth.units.generated.Each
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.div
+import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.micro
 
 actual class Ticker private actual constructor(
@@ -49,13 +47,14 @@ actual class Ticker private actual constructor(
         periodIndex = nextPeriodIndex
     }
 
+    val overrunLogThreshold by pref(100, Millisecond)
     private val thread = platformThread(name, priority) {
         while (true) {
             val startTime = waitOnTick()
             tick(startTime)
             computeTime = currentTime - startTime
 
-            if (computeTime > period) log(Warning) {
+            if (computeTime > period + overrunLogThreshold) log(Warning) {
                 "$name overran its ${period withDecimals 4} loop by ${(computeTime - period) withDecimals 4}"
             }
         }
