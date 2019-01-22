@@ -6,14 +6,12 @@ import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
 import com.lynbrookrobotics.kapuchin.control.math.differentiator
+import com.lynbrookrobotics.kapuchin.hardware.LimelightSystem
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.DegreePerSecond
-import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.div
-import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.abs
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
@@ -119,6 +117,71 @@ suspend fun DrivetrainComponent.noEncoderTeleop(driver: DriverHardware, electric
         TwoSided(dcL, dcR)
     }
 }
+
+
+suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightSystem, electrical: ElectricalSystemHardware) = startRoutine("point with limelight") {
+    val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
+
+    val speedL by hardware.leftSpeed.readOnTick.withoutStamps
+    val speedR by hardware.rightSpeed.readOnTick.withoutStamps
+
+    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+    val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
+    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
+
+    controller {
+
+        val error = if (limelightAngle == null) 0.Degree else limelightAngle!!
+
+        val pA = bearingKp * error
+
+        val targetL = -pA
+        val targetR = pA
+
+
+        val errorL = targetL - speedL
+        val errorR = targetR - speedR
+
+        val pL = velocityKp * errorL
+        val pR = velocityKp * errorR
+
+        val ffL = targetL / maxLeftSpeed * operatingVoltage
+        val ffR = targetR / maxRightSpeed * operatingVoltage
+
+
+        val dcL = voltageToDutyCycle(
+                currentLimiting(speedL,
+                        startupFrictionCompensation(pL + ffL)
+                ), vBat
+        )
+
+        val dcR = voltageToDutyCycle(
+                currentLimiting(speedR,
+                        startupFrictionCompensation(pR + ffR)
+                ), vBat
+        )
+
+        TwoSided(dcL, dcR)
+    }
+
+//    val turnControl = pidControlLoop(::div, ::times, turningPositionGains) {
+//        if(startingLimelightAngle == null) gyro.y.angle
+//        else startingLimelightAngle - startingGyroAngle
+//    }
+//
+//    controller {
+//        val left = turnControl(gyro.x, gyro.y.angle)
+//        val right = -left
+//
+//        hardware.offloadedSettings.run {
+//            TwoSided(
+//                    VelocityOutput(native(leftVelocityGains), native(left)),
+//                    VelocityOutput(native(rightVelocityGains), native(right))
+//            )
+//        }
+        TODO()
+}
+
 
 //suspend fun DrivetrainComponent.arcTo(
 //        bearing: Angle, radius: Length,
