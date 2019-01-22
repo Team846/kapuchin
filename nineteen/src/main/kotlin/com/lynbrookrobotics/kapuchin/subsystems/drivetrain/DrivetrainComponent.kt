@@ -25,6 +25,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val maxSpinSpeed get() = maxSpeed / (trackSize / 2) * Radian
     val bearingKp by pref(2, FootPerSecond, 60, Degree)
 
+    val lineScannerLead by pref(2.5, Foot)
+
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<DutyCycle> = {
         TwoSided(0.Percent)
     }

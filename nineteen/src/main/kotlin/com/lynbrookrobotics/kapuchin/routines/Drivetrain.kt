@@ -9,8 +9,10 @@ import com.lynbrookrobotics.kapuchin.control.math.differentiator
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.`±`
 import info.kunalsheth.units.math.abs
 import info.kunalsheth.units.math.atan
 
@@ -118,25 +120,28 @@ suspend fun DrivetrainComponent.noEncoderTeleop(driver: DriverHardware, electric
     }
 }
 
-suspend fun DrivetrainComponent.followLine(speed: Velocity, electrical: ElectricalSystemHardware) = startRoutine("Follow Line") {
-    val line by hardware.linePosition.readOnTick.withoutStamps
+suspend fun DrivetrainComponent.pointWithLineScanner(tolerance: Angle, lineScanner: LineScannerHardware, electrical: ElectricalSystemHardware) = startRoutine("point with line scanner") {
+    val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
+
+    val position by hardware.position.readOnTick.withoutStamps
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
-    val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+    val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
+    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
 
     controller {
-        val errorA = line?.let {
-            atan(it / hardware.scanLead)
-        } ?: throw IllegalStateException("Line not found")
+        val errorA = linePosition?.let {
+            atan(it / lineScannerLead)
+        } ?: 0.Degree
 
         val pA = bearingKp * errorA
 
-        val targetL = speed + pA
-        val targetR = speed - pA
+        val targetL = -pA
+        val targetR = pA
+
 
         val errorL = targetL - speedL
         val errorR = targetR - speedR
@@ -146,6 +151,7 @@ suspend fun DrivetrainComponent.followLine(speed: Velocity, electrical: Electric
 
         val ffL = targetL / maxLeftSpeed * operatingVoltage
         val ffR = targetR / maxRightSpeed * operatingVoltage
+
 
         val dcL = voltageToDutyCycle(
                 currentLimiting(speedL,
@@ -159,7 +165,9 @@ suspend fun DrivetrainComponent.followLine(speed: Velocity, electrical: Electric
                 ), vBat
         )
 
-        TwoSided(dcL, dcR)
+        TwoSided(dcL, dcR).takeUnless {
+            errorA in 0.Degree `±` tolerance
+        }
     }
 }
 
