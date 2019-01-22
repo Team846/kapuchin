@@ -6,7 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
 import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
 import com.lynbrookrobotics.kapuchin.control.math.differentiator
-import com.lynbrookrobotics.kapuchin.hardware.LimelightSystem
+import com.lynbrookrobotics.kapuchin.hardware.LimelightHardware
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
@@ -120,7 +120,7 @@ suspend fun DrivetrainComponent.noEncoderTeleop(driver: DriverHardware, electric
 }
 
 
-suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, limelight: LimelightSystem, electrical: ElectricalSystemHardware) = startRoutine("point with limelight") {
+suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, limelight: LimelightHardware, electrical: ElectricalSystemHardware) = startRoutine("point with limelight") {
     val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
 
     val position by hardware.position.readOnTick.withoutStamps

@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.hardware.LimelightSystem
+import com.lynbrookrobotics.kapuchin.hardware.LimelightHardware
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.pointWithLimelight
@@ -15,14 +15,13 @@ import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 
 data class Subsystems(
         val drivetrain: DrivetrainComponent,
         val driverHardware: DriverHardware,
         val electricalHardware: ElectricalSystemHardware,
-        val limelightHardware: LimelightSystem
+        val limelightHardware: LimelightHardware
 ) {
 
     fun teleop() = launchAll(
@@ -48,7 +47,7 @@ data class Subsystems(
             val drivetrain = async { DrivetrainComponent(DrivetrainHardware()) }
             val driver = async { DriverHardware() }
             val electrical = async { ElectricalSystemHardware() }
-            val limelight = async { LimelightSystem() }
+            val limelight = async { LimelightHardware() }
 
             Subsystems(
                     drivetrain = drivetrain.await(),
@@ -63,7 +62,7 @@ data class Subsystems(
                     drivetrain = DrivetrainComponent(DrivetrainHardware()),
                     driverHardware = DriverHardware(),
                     electricalHardware = ElectricalSystemHardware(),
-                    limelightHardware = LimelightSystem()
+                    limelightHardware = LimelightHardware()
             )
         }
     }

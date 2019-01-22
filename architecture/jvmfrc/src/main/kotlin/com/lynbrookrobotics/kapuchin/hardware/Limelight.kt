@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
  *
  * @author Nikash Walia
  */
-class LimelightSystem: SubsystemHardware<LimelightSystem, Nothing>() {
+class LimelightHardware: SubsystemHardware<LimelightHardware, Nothing>() {
     override val name: String = "Limelight"
     override val priority = Priority.Lowest
     override val period: Time = 20.milli(Second)
