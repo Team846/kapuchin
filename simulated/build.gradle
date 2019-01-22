@@ -21,7 +21,7 @@ compileTestKotlin { kotlinOptions.jvmTarget = "1.8" }
 
 test {
     // on the RoboRIO, we get ~100m of heap to run our code
-    jvmArgs '-Xms100m', '-Xmx100m'
+    jvmArgs '-Xms100m', '-Xmx100m', '-XX:+UseG1GC', '-XX:MaxGCPauseMillis=50'
 }
 
 jacocoTestReport {
