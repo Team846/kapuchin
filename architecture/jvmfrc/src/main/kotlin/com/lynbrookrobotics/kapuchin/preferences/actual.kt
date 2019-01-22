@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 
 private val impl = Preferences2.getInstance()
-private fun <T> Preference<T>.f() = also { registerCallback(this) }
+private fun <T> Preference<T>.f() = also { registerCallback(it) }
 
 
 actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean).f()
@@ -18,7 +18,7 @@ actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong
 actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString).f()
 
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) = Preference(
-        this, withUnits(fallback.toDouble()),
+        this, withUnits(fallback),
         { name, value -> impl.putDouble(name, withUnits(value)) },
         { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
         " (${withUnits.unitName})"
