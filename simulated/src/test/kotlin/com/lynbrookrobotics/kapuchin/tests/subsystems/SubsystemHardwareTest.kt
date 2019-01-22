@@ -34,6 +34,7 @@ class SubsystemHardwareTest {
         }
     }
 
+    @Test
     fun `initialization succeeds with otherwise on exception during hardware initialization`() {
         object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val brokenHardware by hardw { Any().also { rte() } }
@@ -43,6 +44,7 @@ class SubsystemHardwareTest {
         }
     }
 
+    @Test
     fun `initialization succeeds with otherwise on exception during hardware configuration`() {
         object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val brokenHardware by hardw { Any() }
@@ -52,6 +54,7 @@ class SubsystemHardwareTest {
         }
     }
 
+    @Test
     fun `initialization succeeds with otherwise on false hardware verification`() {
         object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val brokenHardware by hardw { Any() }
@@ -61,6 +64,7 @@ class SubsystemHardwareTest {
         }
     }
 
+    @Test
     fun `initialization succeeds with otherwise on exception during preceeding hardware initializations`() {
         object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val brokenHardware by hardw { Any().also { rte() } }
@@ -73,6 +77,7 @@ class SubsystemHardwareTest {
         }
     }
 
+    @Test
     fun `initialization succeeds with otherwise on exception during preceeding hardware configurations`() {
         object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val brokenHardware by hardw { Any() }
@@ -85,6 +90,7 @@ class SubsystemHardwareTest {
         }
     }
 
+    @Test
     fun `initialization succeeds with otherwise on preceeding false hardware verifications`() {
         object : TSH<Nothing, Nothing>("SubsystemHardwareTest Hardware") {
             val brokenHardware by hardw { Any() }
