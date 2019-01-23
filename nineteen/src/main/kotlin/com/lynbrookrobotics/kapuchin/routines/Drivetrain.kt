@@ -132,16 +132,14 @@ suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, limelight: 
     val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
     val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
 
-    val target = position.xy.bearing + (limelightAngle ?: 0.Degree)
-
     controller {
 
+        val target = position.xy.bearing + (limelightAngle ?: 0.Degree)
         val errorA = target - position.xy.bearing
         val pA = bearingKp * errorA
 
-        val targetL = -pA
-        val targetR = pA
-
+        val targetL = +pA
+        val targetR = -pA
 
         val errorL = targetL - speedL
         val errorR = targetR - speedR
