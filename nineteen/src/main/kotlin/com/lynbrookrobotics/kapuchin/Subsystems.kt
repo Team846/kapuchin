@@ -11,11 +11,10 @@ import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
 import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.hal.HAL
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.generated.Degree
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 
 data class Subsystems(
         val drivetrain: DrivetrainComponent,
@@ -32,11 +31,8 @@ data class Subsystems(
     }
 
     fun limelightTracking() = scope.launch {
-        while(true) {
-            withTimeout(1.Second) {
-                drivetrain.pointWithLimelight(5.Degree, limelightHardware, electricalHardware)
-            }
-        }
+        while (true)
+            drivetrain.pointWithLimelight(5.Degree, limelightHardware, electricalHardware)
     }.also {
         HAL.observeUserProgramAutonomous()
         System.gc()
