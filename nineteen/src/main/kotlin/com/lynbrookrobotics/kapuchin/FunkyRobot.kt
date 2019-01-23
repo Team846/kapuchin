@@ -36,11 +36,11 @@ class FunkyRobot : RobotBase() {
 
             EventLoop.tick(currentTime)
 
-            if (!currentJob.isActive) {
+            if (!currentJob.isgActive) {
                 System.gc()
 
                 currentJob =
-                        subsystems::teleop runWhile { isEnabled && isOperatorControl }
+                           subsystems::teleop runWhile { isEnabled && isOperatorControl }
                         ?: subsystems::lineTracking runWhile { isEnabled && isAutonomous }
                         ?: subsystems::teleop runWhile { isDisabled }
                         ?: doNothing
