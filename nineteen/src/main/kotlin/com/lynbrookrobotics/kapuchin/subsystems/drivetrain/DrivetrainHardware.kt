@@ -157,7 +157,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     init {
         EventLoop.runOnTick { time ->
-            setOf(gyroInput, position, leftSpeed, rightSpeed).forEach {
+            setOf(gyroInput, leftSpeed, rightSpeed).forEach {
                 it.optimizedRead(time, period)
             }
         }

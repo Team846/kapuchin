@@ -4,17 +4,21 @@ import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.LineScanner
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
+import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import edu.wpi.first.wpilibj.SerialPort
+import info.kunalsheth.units.generated.Foot
 import info.kunalsheth.units.generated.Inch
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.math.milli
 
 class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
     override val priority = Priority.Medium
-    override val period = TODO()
+    override val period = 15.milli(Second)
     override val syncThreshold = 10.milli(Second)
     override val name = "Line Scanner"
 
