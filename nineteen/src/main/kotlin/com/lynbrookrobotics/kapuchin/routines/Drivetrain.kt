@@ -139,9 +139,8 @@ suspend fun DrivetrainComponent.pointWithLineScanner(tolerance: Angle, lineScann
 
         val pA = bearingKp * errorA
 
-        val targetL = -pA
-        val targetR = pA
-
+        val targetL = +pA
+        val targetR = -pA
 
         val errorL = targetL - speedL
         val errorR = targetR - speedR

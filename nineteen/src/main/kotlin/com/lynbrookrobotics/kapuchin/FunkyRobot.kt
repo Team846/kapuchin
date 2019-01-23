@@ -36,7 +36,7 @@ class FunkyRobot : RobotBase() {
 
             EventLoop.tick(currentTime)
 
-            if (!currentJob.isgActive) {
+            if (!currentJob.isActive) {
                 System.gc()
 
                 currentJob =
