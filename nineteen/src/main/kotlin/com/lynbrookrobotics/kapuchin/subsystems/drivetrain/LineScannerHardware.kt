@@ -11,7 +11,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import edu.wpi.first.wpilibj.SerialPort
-import info.kunalsheth.units.generated.Foot
 import info.kunalsheth.units.generated.Inch
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.math.milli
@@ -46,5 +45,14 @@ class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
         (if (peakLocation != null)
             scanWidth * peakLocation / lineScanner.resolution
         else null) stampWith it
+    }
+            .with(graph("Line Position", Inch)) { it ?: 0.Inch }
+
+    init {
+        EventLoop.runOnTick { time ->
+            setOf(linePosition).forEach {
+                it.optimizedRead(time, period)
+            }
+        }
     }
 }
