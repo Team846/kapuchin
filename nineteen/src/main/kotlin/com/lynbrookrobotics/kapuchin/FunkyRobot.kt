@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.math.milli
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -20,7 +19,7 @@ class FunkyRobot : RobotBase() {
 
         val classloading = loadClasses()
 
-        val subsystems = Subsystems.concurrentInit()
+        val subsystems = Subsystems.init()
 
         runBlocking { classloading.join() }
 
@@ -58,7 +57,7 @@ class FunkyRobot : RobotBase() {
                 .filter { it.matches(classNameRegex) }
                 .map { it.replace(classNameRegex, "$1") }
                 .forEach {
-                    launch(IO) {
+                    launch {
                         try {
                             Class.forName(it)
                         } catch (t: Throwable) {
