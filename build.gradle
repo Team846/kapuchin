@@ -9,7 +9,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'info.kunalsheth.units:plugin:5.1.1'
-        classpath 'edu.wpi.first:GradleRIO:2019.1.1'
+        classpath 'edu.wpi.first:GradleRIO:2019.2.1'
         classpath 'org.jetbrains.dokka:dokka-gradle-plugin:0.9.17'
     }
 }
