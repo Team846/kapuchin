@@ -14,6 +14,7 @@ import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.`±`
 import info.kunalsheth.units.math.abs
+import java.lang.Math
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -133,9 +134,9 @@ suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, limelight: 
     val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
 
     controller {
+        if(Math.random() > 0.9) limelightAngle?.also { println(it.Degree) }
 
-        val target = position.xy.bearing + (limelightAngle ?: 0.Degree)
-        val errorA = target - position.xy.bearing
+        val errorA = limelightAngle
         val pA = bearingKp * errorA
 
         val targetL = +pA
@@ -163,9 +164,9 @@ suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, limelight: 
                 ), vBat
         )
 
-        TwoSided(dcL, dcR).takeUnless {
+        TwoSided(dcL, dcR)/*.takeUnless {
             errorA in 0.Degree `±` tolerance
-        }
+        }*/
     }
 
 //    val turnControl = pidControlLoop(::div, ::times, turningPositionGains) {

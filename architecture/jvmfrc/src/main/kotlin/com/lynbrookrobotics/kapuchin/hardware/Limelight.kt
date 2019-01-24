@@ -37,11 +37,11 @@ class LimelightHardware: SubsystemHardware<LimelightHardware, Nothing>() {
      * Sensor that calculates the angle to target, taking into account camera mounting. Nullable- if there is no target
      */
     val angleToTarget = sensor {
-        when {
+        /*when {
             getEntry("tv").roundToInt() == 0 -> null
             getEntry("ts").absoluteValue < 2 -> cameraAngleRelativeToFront + getEntry("tx").Degree
             else -> cameraAngleRelativeToFront + getEntry("ty").Degree
-        } stampWith it - getEntry("tl").milli(Second)
+        }*/ getEntry("tx").Degree stampWith it - getEntry("tl").milli(Second)
     }
 
     /**
