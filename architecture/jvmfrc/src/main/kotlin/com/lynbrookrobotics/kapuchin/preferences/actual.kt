@@ -7,49 +7,49 @@ import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
 
 private val impl = Preferences2.getInstance()
-private fun <T> Preference<T>.f() = also { registerCallback(it) }
 
-
-actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean).f()
-actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::putDouble, impl::getDouble).f()
-actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::putFloat, impl::getFloat).f()
-actual fun Named.pref(fallback: Int) = Preference(this, fallback, impl::putInt, impl::getInt).f()
-actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong, impl::getLong).f()
-actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString).f()
+actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean, ::registerCallback)
+actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::putDouble, impl::getDouble, ::registerCallback)
+actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::putFloat, impl::getFloat, ::registerCallback)
+actual fun Named.pref(fallback: Int) = Preference(this, fallback, impl::putInt, impl::getInt, ::registerCallback)
+actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong, impl::getLong, ::registerCallback)
+actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString, ::registerCallback)
 
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) = Preference(
         this, withUnits(fallback),
         { name, value -> impl.putDouble(name, withUnits(value)) },
         { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
+        ::registerCallback,
         " (${withUnits.unitName})"
-).f()
+)
 
 
 /**
  * Adds an EntryListener to the NetworkTable in Preferences2
  *
  * @author Andy
- * @param callback function
+ * @param key the name of the key to register the callback with
+ * @param callback the callback function to call
  * @see edu.wpi.first.wpilibj.Preferences2
  */
-private fun registerCallback(callback: (String) -> Unit) {
-    Preferences2.getInstance().table.addEntryListener({ _, key, _, _, _ ->
-        callback(key)
+private fun registerCallback(key: String, callback: () -> Unit) {
+    Preferences2.getInstance().table.addEntryListener(key, { _, _ , _, _, _ ->
+        callback()
     }, EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
 }
 
-/**
- * Trims the NetworkTable by deleting all entries that don't have a corresponding Preference instance
- *
- * @author Andy
- * @see Preferences2
- */
-private fun trim() {
-    val keys = impl.keys
-    val map = Preference.keyMap
-    for (key in keys) {
-        if (!map.containsKey(key)) {
-            impl.table.delete(key)
-        }
-    }
-}
+///**
+// * Trims the NetworkTable by deleting all entries that don't have a corresponding Preference instance
+// *
+// * @author Andy
+// * @see Preferences2
+// */
+//private fun trim() {
+//    val keys = impl.keys
+//    val map = Preference.keyMap
+//    for (key in keys) {
+//        if (!map.containsKey(key)) {
+//            impl.table.delete(key)
+//        }
+//    }
+//}

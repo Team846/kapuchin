@@ -106,26 +106,18 @@ open class Preference<Value>(
         private val fallback: Value,
         private val init: (String, Value) -> Unit,
         private val get: (String, Value) -> Value,
+        private val registerCallback: (String, () -> Unit) -> Unit,
         private val nameSuffix: String = ""
-) : DelegateProvider<Any?, Value>, (String) -> Unit {
+) : DelegateProvider<Any?, Value>, () -> Unit {
 
     private var value: Value? = null
     lateinit var name: String
         private set
 
-    /**
-     * HashMap of every key in the NetworkTable that corresponds to the Preference instance
-     *
-     * @author Andy
-     */
-    companion object {
-        val keyMap = HashMap<String, Preference<*>>()
-    }
-
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         name = Named(prop.name + nameSuffix, parent).name
 
-        keyMap[name] = this
+        registerCallback(name, this)
 
         init(name, get(name, fallback))
 
@@ -136,14 +128,11 @@ open class Preference<Value>(
 
     /**
      * Called whenever a change is detected in the NetworkTable
-     * Only retrieves data if the key of the Preference instance is equal to the key of the changed entry in the table
      *
      * @author Andy
-     * @param p1 is the name of the key of the entry that was changed
      */
-    override operator fun invoke(p1: String) {
-        if (::name.isInitialized && name == p1) {
-            value = get(name, fallback)
-        }
+    override operator fun invoke() {
+        println("Preference value updated: $name")
+        value = get(name, fallback)
     }
 }
