@@ -1,7 +1,9 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.timing.blockingMutex
 import edu.wpi.first.networktables.EntryListenerFlags
+import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.wpilibj.Preferences2
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.UomConverter
@@ -33,23 +35,32 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
  * @see edu.wpi.first.wpilibj.Preferences2
  */
 private fun registerCallback(key: String, callback: () -> Unit) {
-    Preferences2.getInstance().table.addEntryListener(key, { _, _ , _, _, _ ->
-        callback()
-    }, EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
+    blockingMutex(key) {
+        keys += NetworkTable.basenameKey(key)
+        Preferences2.getInstance().table.addEntryListener(key, { _, _, _, _, _ ->
+            callback()
+        }, EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
+    }
 }
 
-///**
-// * Trims the NetworkTable by deleting all entries that don't have a corresponding Preference instance
-// *
-// * @author Andy
-// * @see Preferences2
-// */
-//private fun trim() {
-//    val keys = impl.keys
-//    val map = Preference.keyMap
-//    for (key in keys) {
-//        if (!map.containsKey(key)) {
-//            impl.table.delete(key)
-//        }
-//    }
-//}
+/**
+ * Deletes all unused NetworkTable entries
+ *
+ * @author Andy
+ * @see Preferences2
+ * @see NetworkTable
+ */
+private val keys = mutableSetOf<String>()
+fun trim(table: NetworkTable = impl.table) {
+    //Gets rid of all unused keys in the current subTable
+    table.keys.forEach {
+        if (it !in keys) {
+            table.getEntry(it).clearPersistent()
+            table.getEntry(it).delete()
+        }
+    }
+    //Recurse through all subTables of the current subTable
+    table.subTables.forEach { trim(table.getSubTable(it)) }
+
+}
+

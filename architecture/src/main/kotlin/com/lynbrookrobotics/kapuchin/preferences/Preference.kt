@@ -114,6 +114,8 @@ open class Preference<Value>(
     lateinit var name: String
         private set
 
+
+
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         name = Named(prop.name + nameSuffix, parent).name
 
