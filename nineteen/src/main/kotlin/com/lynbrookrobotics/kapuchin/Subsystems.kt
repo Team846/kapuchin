@@ -1,7 +1,10 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.hardware.LimelightHardware
+import com.lynbrookrobotics.kapuchin.logging.Level
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.pointWithLimelight
 import com.lynbrookrobotics.kapuchin.routines.teleop
@@ -11,10 +14,11 @@ import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
 import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.hal.HAL
-import info.kunalsheth.units.generated.Degree
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.isActive
 
 data class Subsystems(
         val drivetrain: DrivetrainComponent,
@@ -31,8 +35,11 @@ data class Subsystems(
     }
 
     fun limelightTracking() = scope.launch {
-        while (true)
-            drivetrain.pointWithLimelight(5.Degree, limelightHardware, electricalHardware)
+        while(isActive) {
+            drivetrain.pointWithLimelight(0.Degree, limelightHardware, electricalHardware)
+            log(Level.Debug) { "Limelight Target Found!" }
+            delay(1.Second)
+        }
     }.also {
         HAL.observeUserProgramAutonomous()
         System.gc()
