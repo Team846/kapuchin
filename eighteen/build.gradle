@@ -27,7 +27,6 @@ deploy {
     artifacts {
         frcJavaArtifact(project.name) {
             targets << "roborio"
-            jvmArgs << '-XX:+UseG1GC' << '-XX:MaxGCPauseMillis=50'
 //          jvmArgs << '-verbose:class'
 //          jvmArgs << '-verbosegc'
 //          arguments << 'myCustomArgs'
@@ -37,14 +36,8 @@ deploy {
     }
 }
 
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.freeCompilerArgs += ["-XXLanguage:+InlineClasses"]
-}
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.freeCompilerArgs += ["-XXLanguage:+InlineClasses"]
-}
+compileKotlin { kotlinOptions.jvmTarget = "1.8" }
+compileTestKotlin { kotlinOptions.jvmTarget = "1.8" }
 
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
