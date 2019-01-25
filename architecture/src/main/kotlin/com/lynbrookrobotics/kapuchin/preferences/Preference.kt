@@ -122,7 +122,6 @@ open class Preference<Value>(
         registerCallback(name, this)
 
         init(name, get(name, fallback))
-
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(name, fallback)
         }
@@ -136,5 +135,10 @@ open class Preference<Value>(
     override operator fun invoke() {
         println("Preference value updated: $name")
         value = get(name, fallback)
+
+        //If the Preference is in a PreferenceLayer, update the parent too
+        if (parent is PreferenceLayer<*>) {
+            parent.invoke()
+        }
     }
 }

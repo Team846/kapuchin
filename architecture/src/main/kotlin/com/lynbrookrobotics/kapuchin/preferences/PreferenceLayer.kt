@@ -65,21 +65,30 @@ class PreferenceLayer<Value>(
         private val parent: Named,
         private val construct: Named.() -> () -> Value,
         private val nameSuffix: String = ""
-) : DelegateProvider<Any?, Value> {
+) : DelegateProvider<Any?, Value>, () -> Unit {
 
     private lateinit var get: () -> Value
     private var value: Value? = null
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         get = Named(prop.name + nameSuffix, parent).run(construct)
-        EventLoop.runOnTick {
-            if (this::get.isInitialized) {
-                value = get()
-            }
-        }
 
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get()
+        }
+    }
+
+    /**
+     * Called if a Preference value is changed and that Preference is a part of this PreferenceLayer
+     *
+     * @author Andy
+     */
+    override operator fun invoke() {
+        value = get()
+
+        //If the PreferenceLayer is in another PreferenceLayer, update the parent too
+        if (parent is PreferenceLayer<*>) {
+            parent.invoke()
         }
     }
 }
