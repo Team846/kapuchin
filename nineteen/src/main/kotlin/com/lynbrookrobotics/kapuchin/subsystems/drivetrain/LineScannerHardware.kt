@@ -10,7 +10,7 @@ import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import edu.wpi.first.wpilibj.SerialPort
+import edu.wpi.first.wpilibj.I2C
 import info.kunalsheth.units.generated.Inch
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.math.milli
@@ -21,10 +21,9 @@ class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
     override val syncThreshold = 10.milli(Second)
     override val name = "Line Scanner"
 
-    private val lineScannerPort by pref("kUSB2")
-    private val lineScanner by hardw { LineScanner(SerialPort.Port.valueOf(lineScannerPort)) }
+    private val lineScanner by hardw { LineScanner(I2C.Port.kOnboard) }
     private val exposure by pref(200)
-    private val triggerLevel by pref(100)
+    private val triggerLevel by pref(25)
     private val scanWidth by pref(12, Inch)
 
     val linePosition = sensor(lineScanner) {

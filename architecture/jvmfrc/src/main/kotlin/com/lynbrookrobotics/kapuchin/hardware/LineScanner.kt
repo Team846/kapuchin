@@ -1,17 +1,18 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
-import edu.wpi.first.hal.SerialPortJNI
-import edu.wpi.first.wpilibj.SerialPort
+import edu.wpi.first.wpilibj.I2C
 import java.io.Closeable
+import java.io.IOException
 
 class LineScanner(
-        val port: SerialPort.Port
+        port: I2C.Port = I2C.Port.kOnboard,
+        deviceAddress: Int = 10
 ) : Closeable {
 
-    val device = SerialPort(115200, port).apply {
-        setReadBufferSize(128)
-        setTimeout(0.01)
-        setWriteBufferSize(1)
+    val device = I2C(port, deviceAddress)
+
+    init {
+        if (device.addressOnly()) throw IOException("Could not connect to I2C device with address $deviceAddress on port $port")
     }
 
     val resolution = 128
@@ -19,28 +20,11 @@ class LineScanner(
     private val receiveBuffer = ByteArray(resolution)
     private val sendBuffer = byteArrayOf(100)
 
-    operator fun invoke(exposure: UByte): ByteArray {
-        val bytesToRead = receiveBuffer.size
-
-        if (device.bytesReceived > bytesToRead) {
-            val bytesToDrain = device.bytesReceived / bytesToRead * bytesToRead
-            val drainBuffer =
-                    if (bytesToDrain < receiveBuffer.size) receiveBuffer
-                    else ByteArray(bytesToDrain)
-            SerialPortJNI.serialRead(port.value.toByte(), drainBuffer, bytesToDrain)
-            System.err.println("device.bytesReceived returned $bytesToDrain, expected ≤ ${receiveBuffer.size}")
-        }
-
+    operator fun invoke(exposure: UByte = sendBuffer[0].toUByte()): ByteArray {
         sendBuffer[0] = exposure.toByte()
 
-        val bytesToWrite = sendBuffer.size
-        SerialPortJNI.serialWrite(port.value.toByte(), sendBuffer, bytesToWrite)
-                .takeIf { it != bytesToWrite }
-                ?.also { System.err.println("SerialPortJNI.serialWrite returned $it, expected $bytesToWrite") }
-
-        SerialPortJNI.serialRead(port.value.toByte(), receiveBuffer, bytesToRead)
-                .takeIf { it != bytesToRead }
-                ?.also { System.err.println("SerialPortJNI.serialRead returned $it, expected $bytesToRead") }
+        if (device.transaction(sendBuffer, 1, receiveBuffer, resolution))
+            System.err.println("I2C.transaction aborted")
 
         return receiveBuffer
     }
