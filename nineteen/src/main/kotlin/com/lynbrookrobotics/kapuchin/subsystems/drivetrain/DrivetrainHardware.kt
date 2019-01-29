@@ -1,6 +1,9 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.analog.adis16448.frc.ADIS16448_IMU
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
 import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.data.Position
@@ -12,6 +15,9 @@ import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
 import com.lynbrookrobotics.kapuchin.hardware.TicksToSerial
+import com.lynbrookrobotics.kapuchin.hardware.configMaster
+import com.lynbrookrobotics.kapuchin.hardware.configSlave
+import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
@@ -39,19 +45,34 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
 
-    private val leftEscPort by pref(2)
-    private val rightEscPort by pref(3)
+    private val leftMasterEscId by pref(10)
+    private val leftSlaveEscId by pref(11)
+    private val rightMasterEscId by pref(12)
+    private val rightSlaveEscId by pref(13)
+
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
 
-    val leftEsc by hardw { Spark(leftEscPort) }.configure {
-        it.inverted = leftEscInversion
-        it.isSafetyEnabled = false
+    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
+        configMaster(it, 12.Volt, 30.Ampere, FeedbackDevice.QuadEncoder)
     }
-    val rightEsc by hardw { Spark(rightEscPort) }.configure {
-        it.inverted = rightEscInversion
-        it.isSafetyEnabled = false
+    val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
+        configSlave(it, 12.Volt, 30.Ampere)
+        it.follow(leftMasterEsc)
     }
+    val leftLazyOutput = lazyOutput(leftMasterEsc)
+
+
+    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
+        configMaster(it, 12.Volt, 30.Ampere, FeedbackDevice.QuadEncoder)
+        it.inverted = true
+    }
+    val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
+        configSlave(it, 12.Volt, 30.Ampere)
+        it.follow(rightMasterEsc)
+        it.inverted = true
+    }
+    val rightLazyOutput = lazyOutput(rightMasterEsc)
 
     private val wheelRadius by pref(3, Inch)
 

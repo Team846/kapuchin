@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
+import com.ctre.phoenix.motorcontrol.ControlMode
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.Component
@@ -30,8 +31,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     }
 
     override fun DrivetrainHardware.output(value: TwoSided<DutyCycle>) {
-        leftEsc.set(value.left.Each)
-        rightEsc.set(value.right.Each)
+        leftMasterEsc.set(ControlMode.PercentOutput, value.left.Each)
+        leftMasterEsc.set(ControlMode.PercentOutput, value.right.Each)
     }
 
     init {
