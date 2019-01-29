@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.nameLayer
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
@@ -107,23 +108,26 @@ open class Preference<Value>(
         private val init: (String, Value) -> Unit,
         private val get: (String, Value) -> Value,
         private val registerCallback: (String, () -> Unit) -> Unit,
-        private val nameSuffix: String = ""
-) : DelegateProvider<Any?, Value>, () -> Unit {
+        private val prefNameSuffix: String = ""
+) : Named, DelegateProvider<Any?, Value>, () -> Unit {
+
+    override final lateinit var name: String
+        private set
 
     private var value: Value? = null
-    lateinit var name: String
+    lateinit var prefName: String
         private set
 
 
-
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        name = Named(prop.name + nameSuffix, parent).name
+        prefName = Named(prop.name + prefNameSuffix, parent).name
+        name = nameLayer(parent, prop.name + prefNameSuffix)
 
-        registerCallback(name, this)
+        registerCallback(prefName, this)
 
-        init(name, get(name, fallback))
+        init(prefName, get(prefName, fallback))
         return object : ReadOnlyProperty<Any?, Value> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(name, fallback)
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(prefName, fallback)
         }
     }
 
@@ -133,8 +137,8 @@ open class Preference<Value>(
      * @author Andy
      */
     override operator fun invoke() {
-        println("Preference value updated: $name")
-        value = get(name, fallback)
+        println("Preference value updated: $prefName")
+        value = get(prefName, fallback)
 
         //If the Preference is in a PreferenceLayer, update the parent too
         if (parent is PreferenceLayer<*>) {
