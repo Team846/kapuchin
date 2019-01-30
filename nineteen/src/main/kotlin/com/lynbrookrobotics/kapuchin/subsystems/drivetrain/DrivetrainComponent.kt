@@ -31,7 +31,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     }
 
     val bearingKp by pref(2, FootPerSecond, 60, Degree)
-    val bearingKd by pref(2, FootPerSecondSquared, 60, Degree)
+    val bearingKd by pref(0, FootPerSecond, 60, DegreePerSecond)
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         TwoSided(PercentOutput(0.Percent))

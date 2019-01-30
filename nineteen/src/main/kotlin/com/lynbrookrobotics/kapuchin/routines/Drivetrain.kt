@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
+import com.lynbrookrobotics.kapuchin.control.math.differentiator
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
@@ -13,7 +14,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
     val steering by driver.steering.readWithEventLoop.withoutStamps
     val absSteering by driver.absSteering.readWithEventLoop.withoutStamps
 
-    val position by hardware.position.readOnTick.withoutStamps
+    val position by hardware.position.readOnTick.withStamps
 
     val targetGraph = graph("Target Angle", Degree)
     val errorGraph = graph("Error Angle", Degree)
@@ -21,22 +22,24 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    var startingAngle = -absSteering + position.bearing
+    var startingAngle = -absSteering + position.y.bearing
+    val dadt = differentiator(::div, position.x, position.y.bearing)
 
     controller { t ->
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering
 
-        if (steering != 0.Percent) startingAngle = -absSteering + position.bearing
+        if (steering != 0.Percent) startingAngle = -absSteering + position.y.bearing
 
         if(
                 speedL == 0.FootPerSecond && speedR == 0.FootPerSecond &&
                 accelerator == 0.Percent && steering == 0.Percent
         ) System.gc()
 
+        val angularVelocity = dadt(position.x, position.y.bearing)
         val targetA = (absSteering + startingAngle).also { targetGraph(t, it) }
-        val errorA = (targetA `coterminal -` position.bearing).also { errorGraph(t, it) }
-        val pA = bearingKp * errorA
+        val errorA = (targetA `coterminal -` position.y.bearing).also { errorGraph(t, it) }
+        val pA = bearingKp * errorA - bearingKd * angularVelocity
 
         val targetL = forwardVelocity + steeringVelocity + pA
         val targetR = forwardVelocity - steeringVelocity - pA
