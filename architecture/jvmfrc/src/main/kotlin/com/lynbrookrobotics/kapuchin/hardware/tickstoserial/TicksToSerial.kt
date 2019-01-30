@@ -1,6 +1,5 @@
-package com.lynbrookrobotics.kapuchin.hardware.ticksToSerial
+package com.lynbrookrobotics.kapuchin.hardware.tickstoserial
 
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import edu.wpi.first.hal.SerialPortJNI
 import edu.wpi.first.wpilibj.SerialPort
 import java.io.Closeable

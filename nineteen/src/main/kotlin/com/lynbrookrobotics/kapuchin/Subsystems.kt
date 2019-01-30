@@ -20,7 +20,7 @@ data class Subsystems(
 ) {
 
     fun teleop() = launchAll(
-            { drivetrain.teleop(driverHardware, electricalHardware) }
+            { drivetrain.teleop(driverHardware) }
     ).also {
         HAL.observeUserProgramTeleop()
         System.gc()

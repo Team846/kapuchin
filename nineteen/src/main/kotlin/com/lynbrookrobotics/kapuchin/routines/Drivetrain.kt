@@ -5,11 +5,10 @@ import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
-suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
+suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
     val steering by driver.steering.readWithEventLoop.withoutStamps
     val absSteering by driver.absSteering.readWithEventLoop.withoutStamps

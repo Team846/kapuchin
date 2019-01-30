@@ -4,12 +4,11 @@ import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
-import com.lynbrookrobotics.kapuchin.control.data.UomVector
 import com.lynbrookrobotics.kapuchin.control.data.stampWith
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
-import com.lynbrookrobotics.kapuchin.hardware.TicksToSerial
+import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.TicksToSerial
 import com.lynbrookrobotics.kapuchin.hardware.configMaster
 import com.lynbrookrobotics.kapuchin.hardware.configSlave
 import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
@@ -18,7 +17,6 @@ import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.currentTime
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort

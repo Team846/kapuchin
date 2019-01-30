@@ -1,6 +1,7 @@
-package com.lynbrookrobotics.kapuchin.hardware.ticksToSerial
+package com.lynbrookrobotics.kapuchin.hardware.tickstoserial
 
 inline class TicksToSerialValue(private val data: Int) {
+
     val left: Int
         get() {
             val left = data ushr 4 and 0x0F
@@ -17,6 +18,6 @@ inline class TicksToSerialValue(private val data: Int) {
             return if (signr == 1) absvr else -absvr
         }
 
-    fun component1() = left
-    fun component2() = right
+    operator fun component1() = left
+    operator fun component2() = right
 }
