@@ -26,6 +26,13 @@ data class Subsystems(
         System.gc()
     }
 
+    fun warmup() = launchAll(
+            { drivetrain.warmup() }
+    ).also {
+        HAL.observeUserProgramTeleop()
+        System.gc()
+    }
+
     fun backAndForthAuto() = scope.launch {
         //        while (true) {
 //            withTimeout(1.Second) {
