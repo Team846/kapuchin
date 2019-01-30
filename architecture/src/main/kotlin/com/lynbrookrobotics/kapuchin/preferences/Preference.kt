@@ -1,7 +1,9 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
+import com.lynbrookrobotics.kapuchin.logging.Level
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.nameLayer
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
@@ -115,19 +117,15 @@ open class Preference<Value>(
         private set
 
     private var value: Value? = null
-    lateinit var prefName: String
-        private set
-
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        prefName = Named(prop.name + prefNameSuffix, parent).name
         name = nameLayer(parent, prop.name + prefNameSuffix)
 
-        registerCallback(prefName, this)
+        registerCallback(name, this)
 
-        init(prefName, get(prefName, fallback))
+        init(name, get(name, fallback))
         return object : ReadOnlyProperty<Any?, Value> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(prefName, fallback)
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(name, fallback)
         }
     }
 
@@ -137,8 +135,8 @@ open class Preference<Value>(
      * @author Andy
      */
     override operator fun invoke() {
-        println("Preference value updated: $prefName")
-        value = get(prefName, fallback)
+        log(Level.Debug) { "updated value" }
+        value = get(name, fallback)
 
         //If the Preference is in a PreferenceLayer, update the parent too
         if (parent is PreferenceLayer<*>) {

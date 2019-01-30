@@ -55,7 +55,7 @@ fun trim(table: NetworkTable = impl.table) {
     //Gets rid of all unused keys in the current subTable
     table.keys.forEach {
         if (it !in keys) {
-            println("Deleting entry: $it")
+            println("trimming $it")
             table.getEntry(it).clearPersistent()
             table.getEntry(it).delete()
         }
