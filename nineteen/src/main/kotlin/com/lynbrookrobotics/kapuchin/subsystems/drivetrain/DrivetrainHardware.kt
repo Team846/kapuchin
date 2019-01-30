@@ -98,19 +98,19 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             .with(graph("Encoder Bearing", Degree)) { it.bearing }
 
     val leftPosition = sensor {
-        conversions.toLeftPosition(leftMasterEsc.getSelectedSensorPosition(idx)) stampWith currentTime
+        conversions.toLeftPosition(leftMasterEsc.getSelectedSensorPosition(idx)) stampWith it
     }.with(graph("Left Position", Foot))
 
     val rightPosition = sensor {
-        conversions.toRightPosition(rightMasterEsc.getSelectedSensorPosition(idx)) stampWith currentTime
+        conversions.toRightPosition(rightMasterEsc.getSelectedSensorPosition(idx)) stampWith it
     }.with(graph("Right Position", Foot))
 
     val leftSpeed = sensor {
-        conversions.toLeftSpeed(leftEncoder.period.Second) stampWith currentTime
+        conversions.toLeftSpeed(leftEncoder.period.Second) stampWith it
     }.with(graph("Left Speed", FootPerSecond))
 
     val rightSpeed = sensor {
-        conversions.toRightSpeed(rightEncoder.period.Second) stampWith currentTime
+        conversions.toRightSpeed(rightEncoder.period.Second) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
 
 
