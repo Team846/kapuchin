@@ -29,7 +29,6 @@ class FunkyRobot : RobotBase() {
 
         val doNothing = scope.launch { }
         var currentJob: Job = doNothing
-
         while (true) {
             Thread.yield()
             m_ds.waitForData(eventLoopPeriod.Second)
