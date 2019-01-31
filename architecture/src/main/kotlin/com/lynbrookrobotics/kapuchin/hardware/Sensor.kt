@@ -29,11 +29,10 @@ import kotlin.reflect.KProperty
 class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<Input>) {
 
     internal var value: TimeStamped<Input>? = null
-    fun optimizedRead(atTime: Time, syncThreshold: Time) = blockingMutex(this) {
-        value
-                ?.takeIf { it.x in atTime `±` syncThreshold }
-                ?: read(atTime)
-    }
+    fun optimizedRead(atTime: Time, syncThreshold: Time) =
+            value
+                    ?.takeIf { it.x in atTime `±` syncThreshold }
+                    ?: blockingMutex(this) { read(atTime) }
 
     class UpdateSource<Input>(
             private val forSensor: Sensor<Input>,

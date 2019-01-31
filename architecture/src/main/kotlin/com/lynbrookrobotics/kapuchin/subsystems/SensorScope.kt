@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.hardware.Sensor
-import com.lynbrookrobotics.kapuchin.timing.blockingMutex
 import com.lynbrookrobotics.kapuchin.timing.clock.Cancel
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
@@ -25,16 +24,14 @@ class SensorScope internal constructor(private val c: Component<*, *, *>) {
      */
     fun close() = cleanup.forEach { it.cancel() }
 
-    private var cleanup = emptyList<Cancel>()
+    private val cleanup = mutableListOf<Cancel>()
 
     /**
      * Update this sensor's value right before every control loop update
      */
     val <Input> Sensor<Input>.readOnTick
         get() = Sensor.UpdateSource(this, startUpdates = { _ ->
-            blockingMutex(this) {
-                cleanup += c.clock.runOnTick { value = optimizedRead(it, c.hardware.syncThreshold) }
-            }
+            cleanup += c.clock.runOnTick { value = optimizedRead(it, c.hardware.syncThreshold) }
         })
 
     /**
@@ -42,9 +39,7 @@ class SensorScope internal constructor(private val c: Component<*, *, *>) {
      */
     val <Input> Sensor<Input>.readWithEventLoop
         get() = Sensor.UpdateSource(this, startUpdates = { _ ->
-            blockingMutex(this) {
-                cleanup += EventLoop.runOnTick { value = optimizedRead(it, c.hardware.syncThreshold) }
-            }
+            cleanup += EventLoop.runOnTick { value = optimizedRead(it, c.hardware.syncThreshold) }
         })
 
     /**

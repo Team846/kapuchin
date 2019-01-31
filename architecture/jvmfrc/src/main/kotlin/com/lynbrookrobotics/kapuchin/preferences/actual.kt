@@ -35,7 +35,7 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
  * @see edu.wpi.first.wpilibj.Preferences2
  */
 private fun registerCallback(key: String, callback: () -> Unit) {
-    blockingMutex(key) {
+    blockingMutex(keys) {
         keys += NetworkTable.basenameKey(key)
         Preferences2.getInstance().table.addEntryListener(key, { _, _, _, _, _ ->
             callback()
