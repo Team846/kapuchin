@@ -10,9 +10,13 @@ import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import edu.wpi.first.wpilibj.I2C
+import edu.wpi.first.wpilibj.AnalogInput
+import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.Inch
+import info.kunalsheth.units.generated.Millisecond
+import info.kunalsheth.units.generated.Percent
 import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.times
 import info.kunalsheth.units.math.milli
 
 class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
@@ -21,31 +25,26 @@ class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
     override val syncThreshold = 10.milli(Second)
     override val name = "Line Scanner"
 
-    private val lineScanner by hardw { LineScanner(I2C.Port.kOnboard) }
-    private val exposure by pref(200)
-    private val triggerLevel by pref(25)
+    val exposurePort by pref(2)
+    val thresholdPort by pref(3)
+    val feedbackPort by pref(0)
+
+    private val lineScanner by hardw {
+        LineScanner(
+                DigitalOutput(exposurePort),
+                DigitalOutput(thresholdPort),
+                AnalogInput(feedbackPort)
+        )
+    }
+
+    private val exposure by pref(10, Millisecond)
+    private val threshold by pref(25, Percent)
     private val scanWidth by pref(12, Inch)
 
     val linePosition = sensor(lineScanner) {
-        val data = lineScanner(exposure.toUByte())
-
-        val max = data.max()!!
-        val peakLocation = if (max > triggerLevel) (
-                sequenceOf(0.toByte()) +
-                        data.asSequence() +
-                        0.toByte()
-                )
-                .mapIndexed { i, b -> i to b }
-                .filter { (_, b) -> b >= max }
-                .map { (i, _) -> i }
-                .average() - resolution / 2
-        else null
-
-        (if (peakLocation != null)
-            scanWidth * peakLocation / lineScanner.resolution
-        else null) stampWith it
+        lineScanner(exposure, threshold) * scanWidth - scanWidth / 2 stampWith it
     }
-            .with(graph("Line Position", Inch)) { it ?: 0.Inch }
+            .with(graph("Line Position", Inch)) { it }
 
     init {
         EventLoop.runOnTick { time ->

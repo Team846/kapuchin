@@ -1,33 +1,32 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
-import edu.wpi.first.wpilibj.I2C
-import java.io.Closeable
-import java.io.IOException
+import edu.wpi.first.wpilibj.AnalogInput
+import edu.wpi.first.wpilibj.DigitalOutput
+import edu.wpi.first.wpilibj.RobotController
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.kilo
+import info.kunalsheth.units.math.milli
 
 class LineScanner(
-        port: I2C.Port = I2C.Port.kOnboard,
-        deviceAddress: Int = 10
-) : Closeable {
+        private val exposurePin: DigitalOutput,
+        private val thresholdPin: DigitalOutput,
+        private val feedbackPin: AnalogInput
+) {
 
-    val device = I2C(port, deviceAddress)
+    private val pwmFrequency = 1.kilo(Hertz)
 
     init {
-        if (device.addressOnly()) throw IOException("Could not connect to I2C device with address $deviceAddress on port $port")
+        thresholdPin.setPWMRate(pwmFrequency.kilo(Hertz))
+        this(10.milli(Second), 25.Percent)
     }
 
-    val resolution = 128
+    operator fun invoke(
+            exposure: Time, threshold: DutyCycle
+    ): Dimensionless {
 
-    private val receiveBuffer = ByteArray(resolution)
-    private val sendBuffer = byteArrayOf(100)
+        exposurePin.pulse(exposure.Second)
+        thresholdPin.enablePWM(threshold.Each)
 
-    operator fun invoke(exposure: UByte = sendBuffer[0].toUByte()): ByteArray {
-        sendBuffer[0] = exposure.toByte()
-
-        if (device.transaction(sendBuffer, 1, receiveBuffer, resolution))
-            System.err.println("I2C.transaction aborted")
-
-        return receiveBuffer
+        return feedbackPin.voltage.Volt / RobotController.getVoltage5V().Volt
     }
-
-    override fun close() = device.close()
 }
