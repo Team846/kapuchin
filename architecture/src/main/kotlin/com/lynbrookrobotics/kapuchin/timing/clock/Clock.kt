@@ -21,7 +21,7 @@ interface Clock {
      * collection of the functions to invoke each tick
      */
     val jobsToRun: MutableList<(tickStart: Time) -> Unit>
-    val jobsToKill: MutableList<(tickStart: Time) -> Unit>
+    val jobsToKill: MutableSet<(tickStart: Time) -> Unit>
 
     /**
      * Register a function to be run each tick
@@ -53,13 +53,12 @@ interface Clock {
      * @param atTime tick start time
      */
     fun tick(atTime: Time) = blockingMutex(jobsToRun) {
-
-        jobsToRun.forEach { it(atTime) }
-
         // avoid deadlocks
-        blockingMutex(jobsToKill) {
-            jobsToRun.removeAll(jobsToKill)
+        if (jobsToKill.isNotEmpty()) blockingMutex(jobsToKill) {
+            jobsToRun -= jobsToKill
             jobsToKill.clear()
         }
+
+        jobsToRun.forEach { it(atTime) }
     }
 }

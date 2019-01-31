@@ -13,5 +13,5 @@ import info.kunalsheth.units.generated.Time
  */
 object EventLoop : Clock {
     override val jobsToRun = mutableListOf<(tickStart: Time) -> Unit>()
-    override val jobsToKill = mutableListOf<(tickStart: Time) -> Unit>()
+    override val jobsToKill = mutableSetOf<(tickStart: Time) -> Unit>()
 }
