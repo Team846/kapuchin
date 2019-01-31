@@ -29,7 +29,6 @@ class FunkyRobot : RobotBase() {
 
         val doNothing = scope.launch { }
         var currentJob: Job = doNothing
-
         while (true) {
             Thread.yield()
             m_ds.waitForData(eventLoopPeriod.Second)
@@ -42,7 +41,7 @@ class FunkyRobot : RobotBase() {
                 currentJob =
                         subsystems::teleop runWhile { isEnabled && isOperatorControl }
                         ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
-                        ?: subsystems::teleop runWhile { isDisabled }
+                        ?: subsystems::warmup runWhile { isDisabled }
                         ?: doNothing
             }
         }
