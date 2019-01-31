@@ -136,7 +136,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
 
     private val driftTolerance by pref(1, DegreePerSecond)
-    private lateinit var startingAngle: Angle
+    private var startingAngle = 0.Degree
     val imu by hardw { ADIS16448_IMU() }
             .configure { startingAngle = it.angle.Degree }
             .verify("Gyro should not drift after calibration") {

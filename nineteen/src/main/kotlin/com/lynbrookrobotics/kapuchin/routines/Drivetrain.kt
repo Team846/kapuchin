@@ -10,10 +10,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.DegreePerSecond
-import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.div
-import info.kunalsheth.units.generated.times
+import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.abs
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
@@ -36,7 +33,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: Elect
         val steeringVelocity = maxSpeed * steering
 
         val currentAngle = position.xy.bearing
-        if (steering != 0.Percent) startingAngle = -absSteering + currentAngle
+        if (box(steering) != 0.Percent) startingAngle = -absSteering + currentAngle
 
         val errorA = absSteering + startingAngle `coterminal -` currentAngle
         val pA = bearingKp * errorA

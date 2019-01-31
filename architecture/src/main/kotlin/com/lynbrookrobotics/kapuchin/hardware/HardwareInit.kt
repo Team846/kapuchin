@@ -33,7 +33,7 @@ class HardwareInit<Hardw> private constructor(
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Hardw> = Named(prop.name + nameSuffix, parent).run {
         try {
-            log(Debug) { "Initializing hardware" }
+            log(Debug) { "Initializing" }
             val value = initialize()
                     .also { configure(it) }
                     .also {

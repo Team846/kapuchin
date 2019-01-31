@@ -58,7 +58,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
             field.takeUnless { it === value }?.cancel()
             field = value
         }
-        get() = blockingMutex(this) { field?.takeIf { it.isActive } }
+        get() = field?.takeIf { it.isActive }
 
     /**
      * Setup and run a new routine
