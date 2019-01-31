@@ -143,11 +143,14 @@ class SensorTest {
         val name = "sensor lambdas are released upon routine completion"
         SensorTestC().run {
 
-            val ogClockJobs = clock.jobs.size
-            val ogElJobs = EventLoop.jobs.size
+            val ogClockJobs = clock.jobsToRun.size
+            val ogElJobs = EventLoop.jobsToRun.size
             fun check() {
-                while (clock.jobs.size > ogClockJobs) Thread.sleep(1)
-                while (EventLoop.jobs.size > ogElJobs) Thread.sleep(1)
+                while (clock.jobsToRun.size > ogClockJobs) Thread.sleep(1)
+                while (EventLoop.jobsToRun.size > ogElJobs) {
+                    EventLoop.tick(currentTime)
+                    Thread.sleep(1)
+                }
             }
 
             suspend fun routine() = startRoutine(name) {

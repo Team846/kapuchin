@@ -1,16 +1,18 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import com.lynbrookrobotics.kapuchin.timing.scope
-import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.math.milli
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.system.measureTimeMillis
 
 fun main(args: Array<String>) = RobotBase.startRobot(::FunkyRobot)
 class FunkyRobot : RobotBase() {
@@ -19,9 +21,13 @@ class FunkyRobot : RobotBase() {
 
         val classloading = loadClasses()
 
+        println("Initializing hardware...")
         val subsystems = Subsystems.init()
 
-        runBlocking { classloading.join() }
+        runBlocking {
+            println("Loading classes...")
+            withTimeout(10.Second) { classloading.join() }
+        }
 
         HAL.observeUserProgramStarting()
 
@@ -29,17 +35,19 @@ class FunkyRobot : RobotBase() {
 
         val doNothing = scope.launch { }
         var currentJob: Job = doNothing
+
+        println("Starting event loop...")
         while (true) {
             Thread.yield()
             m_ds.waitForData(eventLoopPeriod.Second)
 
-            EventLoop.tick(currentTime)
+            val eventLoopTime = measureTimeMillis { EventLoop.tick(currentTime) }.milli(Second)
+            if (eventLoopTime > eventLoopPeriod * 2) println("Overran event loop")
 
             if (!currentJob.isActive) {
                 System.gc()
 
-                currentJob =
-                        subsystems::teleop runWhile { isEnabled && isOperatorControl }
+                currentJob = subsystems::teleop runWhile { isEnabled && isOperatorControl }
                         ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
                         ?: subsystems::warmup runWhile { isDisabled }
                         ?: doNothing

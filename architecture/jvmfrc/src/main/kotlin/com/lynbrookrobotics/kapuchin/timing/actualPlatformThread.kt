@@ -5,8 +5,12 @@ import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
 import edu.wpi.first.wpilibj.Threads
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.lang.Thread.MIN_PRIORITY
+import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
 actual class PlatformThread private actual constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
@@ -45,5 +49,18 @@ actual class PlatformThread private actual constructor(parent: Named, name: Stri
     }
 }
 
-actual val scope: CoroutineScope = GlobalScope
+val coroutineNamed = Named("Kapuchin Coroutines")
+private val pool = Executors.newFixedThreadPool(4) {
+    Thread(it).apply {
+        priority = MIN_PRIORITY
+        isDaemon = true
+    }
+}
+actual val scope = CoroutineScope(pool.asCoroutineDispatcher() +
+        CoroutineName("Kapuchin Coroutine Scope") +
+        CoroutineExceptionHandler { _, throwable: Throwable ->
+            coroutineNamed.log(Error, throwable) { "Exception thrown from coroutine" }
+        }
+)
+
 actual inline fun <R> blockingMutex(lock: Any, block: () -> R) = kotlin.synchronized(lock, block)
