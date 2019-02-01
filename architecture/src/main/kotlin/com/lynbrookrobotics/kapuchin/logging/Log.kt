@@ -2,9 +2,14 @@ package com.lynbrookrobotics.kapuchin.logging
 
 import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Quan
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.math.pow
 import kotlin.math.round
+
+private val printMutex = Mutex()
 
 /**
  * Logs an exception stacktrace
@@ -17,7 +22,7 @@ import kotlin.math.round
  * @param message any additional information
  * @return asynchronous logging job
  */
-fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(level, throwable.platformStackTrace, message)
+fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job = log(level, throwable.platformStackTrace, message)
 
 /**
  * Logs an exception stacktrace
@@ -30,8 +35,10 @@ fun Named.log(level: Level, throwable: Throwable, message: () -> String) = log(l
  * @param message any additional information
  * @return asynchronous logging job
  */
-fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String) = scope.launch {
-    printAtLevel(level, messageToString(this@log, stackTrace, message))
+fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String): Job = scope.launch {
+    printMutex.withLock {
+        printAtLevel(level, messageToString(this@log, stackTrace, message))
+    }
 }
 
 private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?, message: () -> String): String {
