@@ -20,7 +20,8 @@ interface Clock {
     /**
      * collection of the functions to invoke each tick
      */
-    var jobs: List<(tickStart: Time) -> Unit>
+    val jobsToRun: MutableList<(tickStart: Time) -> Unit>
+    val jobsToKill: MutableSet<(tickStart: Time) -> Unit>
 
     /**
      * Register a function to be run each tick
@@ -29,12 +30,14 @@ interface Clock {
      * @param run function to invoke on each tick
      * @return `Cancel` to unregister the function, stopping all future updates.
      */
-    fun runOnTick(order: ExecutionOrder = First, run: (tickStart: Time) -> Unit) = blockingMutex(this) {
-        jobs = when (order) {
-            First -> listOf(run) + jobs
-            Last -> jobs + run
+    fun runOnTick(order: ExecutionOrder = First, run: (tickStart: Time) -> Unit): Cancel {
+        blockingMutex(jobsToRun) {
+            when (order) {
+                First -> jobsToRun.add(0, run)
+                Last -> jobsToRun += run
+            }
         }
-        Cancel { blockingMutex(this) { jobs -= run } }
+        return Cancel { blockingMutex(jobsToKill) { jobsToKill += run } }
     }
 
     /**
@@ -49,5 +52,13 @@ interface Clock {
      *
      * @param atTime tick start time
      */
-    fun tick(atTime: Time) = jobs.forEach { it(atTime) }
+    fun tick(atTime: Time) = blockingMutex(jobsToRun) {
+        // avoid deadlocks
+        if (jobsToKill.isNotEmpty()) blockingMutex(jobsToKill) {
+            jobsToRun -= jobsToKill
+            jobsToKill.clear()
+        }
+
+        jobsToRun.forEach { it(atTime) }
+    }
 }

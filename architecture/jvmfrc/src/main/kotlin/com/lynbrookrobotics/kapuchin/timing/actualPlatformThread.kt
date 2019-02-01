@@ -50,7 +50,7 @@ actual class PlatformThread private actual constructor(parent: Named, name: Stri
 }
 
 val coroutineNamed = Named("Kapuchin Coroutines")
-private val pool = Executors.newFixedThreadPool(8) {
+private val pool = Executors.newFixedThreadPool(4) {
     Thread(it).apply {
         priority = MIN_PRIORITY
         isDaemon = true

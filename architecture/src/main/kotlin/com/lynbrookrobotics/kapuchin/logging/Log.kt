@@ -4,8 +4,12 @@ import com.lynbrookrobotics.kapuchin.timing.scope
 import info.kunalsheth.units.generated.Quan
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.math.pow
 import kotlin.math.round
+
+private val printMutex = Mutex()
 
 /**
  * Logs an exception stacktrace
@@ -32,7 +36,9 @@ fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job = 
  * @return asynchronous logging job
  */
 fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, message: () -> String): Job = scope.launch {
-    printAtLevel(level, messageToString(this@log, stackTrace, message))
+    printMutex.withLock {
+        printAtLevel(level, messageToString(this@log, stackTrace, message))
+    }
 }
 
 private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?, message: () -> String): String {
