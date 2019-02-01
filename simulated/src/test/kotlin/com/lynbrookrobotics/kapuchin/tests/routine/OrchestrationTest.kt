@@ -54,8 +54,6 @@ class OrchestrationTest {
                 c.checkCount(i + 1, 1, 1)
             }
 
-            Thread.sleep(2000)
-
             comps.forEach { it.out = emptyList() }
             val j2 = launchAll(
                     *comps.mapIndexed { i, c ->
