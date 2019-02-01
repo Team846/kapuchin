@@ -12,6 +12,7 @@ fun threadDumpOnFailiure(f: () -> Unit) {
             Thread.getAllStackTraces().forEach { t, u ->
                 log(Level.Error, u) { t.name }
             }
+            throw t
         }
     }
 }

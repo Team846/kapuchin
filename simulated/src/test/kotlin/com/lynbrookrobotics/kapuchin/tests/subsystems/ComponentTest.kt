@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
+import com.lynbrookrobotics.kapuchin.tests.routine.threadDumpOnFailiure
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import com.lynbrookrobotics.kapuchin.timing.scope
@@ -13,7 +14,7 @@ class ComponentTest {
     private class ComponentTestHardw : TSH<ComponentTestHardw, ComponentTestElc>("ComponentTest Hardware")
 
     @Test(timeout = 1 * 1000)
-    fun `event loop components only update on event loop ticks`() {
+    fun `event loop components only update on event loop ticks`() = threadDumpOnFailiure {
         val c = ComponentTestElc()
 
         val j = scope.launch { c.countTo(10) }

@@ -31,42 +31,46 @@ class RoutineTest {
     }
 
     @Test(timeout = 3 * 1000)
-    fun `routines run sequentially by ending themselves`() = runBlocking {
-        val c = RoutineTestC()
+    fun `routines run sequentially by ending themselves`() = threadDumpOnFailiure {
+        runBlocking {
+            val c = RoutineTestC()
 
-        c.check(0, 0, 0)
-        c.countTo(8)
-        c.check(8, 0, 0)
-        c.countTo(4)
-        c.check(8, 4, 0)
-        c.countTo(6)
-        c.check(8, 4, 6)
+            c.check(0, 0, 0)
+            c.countTo(8)
+            c.check(8, 0, 0)
+            c.countTo(4)
+            c.check(8, 4, 0)
+            c.countTo(6)
+            c.check(8, 4, 6)
+        }
     }
 
     @Test(timeout = 6 * 1000)
-    fun `routines can still run after one times out`() = runBlocking {
-        val c = RoutineTestC()
+    fun `routines can still run after one times out`() = threadDumpOnFailiure {
+        runBlocking {
+            val c = RoutineTestC()
 
-        c.countTo(8)
-        c.check(8, 0, 0)
+            c.countTo(8)
+            c.check(8, 0, 0)
 
-        withTimeout(1.Second) { c.countTo(Int.MAX_VALUE) }
-        c.checkCount(Int.MAX_VALUE, 10, 1)
+            withTimeout(1.Second) { c.countTo(Int.MAX_VALUE) }
+            c.checkCount(Int.MAX_VALUE, 10, 1)
 
-        c.countTo(4)
-        c.check(8, 4, 0)
+            c.countTo(4)
+            c.check(8, 4, 0)
 
-        val j = launch { c.countTo(Int.MAX_VALUE) }
-        delay(1.Second)
-        j.cancel()
-        c.checkCount(Int.MAX_VALUE, 20, 1)
+            val j = launch { c.countTo(Int.MAX_VALUE) }
+            delay(1.Second)
+            j.cancel()
+            c.checkCount(Int.MAX_VALUE, 20, 1)
 
-        c.countTo(6)
-        c.check(8, 4, 6)
+            c.countTo(6)
+            c.check(8, 4, 6)
+        }
     }
 
     @Test(timeout = 4 * 1000)
-    fun `routines can be cancelled externally`() {
+    fun `routines can be cancelled externally`() = threadDumpOnFailiure {
         val c = RoutineTestC()
 
         c.out = emptyList()
@@ -108,7 +112,7 @@ class RoutineTest {
     }
 
     @Test(timeout = 2 * 1000)
-    fun `routines can be cancelled internally`() {
+    fun `routines can be cancelled internally`() = threadDumpOnFailiure {
         val c = RoutineTestC()
 
         val j1 = scope.launch { c.countTo(8) }
