@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.tests.routine
+package com.lynbrookrobotics.kapuchin.tests
 
 import com.lynbrookrobotics.kapuchin.logging.Level
 import com.lynbrookrobotics.kapuchin.logging.Named

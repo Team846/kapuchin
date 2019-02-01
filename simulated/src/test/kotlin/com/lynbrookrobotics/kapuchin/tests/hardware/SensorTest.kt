@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
 import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
 import com.lynbrookrobotics.kapuchin.tests.`is within?`
-import com.lynbrookrobotics.kapuchin.tests.routine.threadDumpOnFailiure
+import com.lynbrookrobotics.kapuchin.tests.threadDumpOnFailiure
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
 import com.lynbrookrobotics.kapuchin.timing.checkInSync

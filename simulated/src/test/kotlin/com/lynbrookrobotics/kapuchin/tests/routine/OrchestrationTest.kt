@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
 import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
 import com.lynbrookrobotics.kapuchin.tests.subsystems.checkCount
 import com.lynbrookrobotics.kapuchin.tests.subsystems.countTo
+import com.lynbrookrobotics.kapuchin.tests.threadDumpOnFailiure
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import kotlinx.coroutines.cancelAndJoin
@@ -35,7 +36,7 @@ class OrchestrationTest {
         }
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `launchAll can be cancelled externally`() = threadDumpOnFailiure {
         runBlocking {
             val last = 10
@@ -54,7 +55,7 @@ class OrchestrationTest {
                 c.checkCount(i + 1, 1, 1)
             }
 
-            comps.forEach { it.out = emptyList() }
+            comps.forEach { it.out.clear() }
             val j2 = launchAll(
                     *comps.mapIndexed { i, c ->
                         suspend { c.countTo(i) }
@@ -85,7 +86,7 @@ class OrchestrationTest {
             (::doSomething runWhile { true })!!.join()
             comps.forEachIndexed { i, c -> c.checkCount(i, i) }
 
-            comps.forEach { it.out = emptyList() }
+            comps.forEach { it.out.clear() }
 
             val last = comps.size - 1
             val first = 3

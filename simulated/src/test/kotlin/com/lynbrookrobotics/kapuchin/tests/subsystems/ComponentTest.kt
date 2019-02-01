@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
-import com.lynbrookrobotics.kapuchin.tests.routine.threadDumpOnFailiure
+import com.lynbrookrobotics.kapuchin.tests.threadDumpOnFailiure
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import com.lynbrookrobotics.kapuchin.timing.scope
