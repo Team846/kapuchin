@@ -1,9 +1,7 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.hardware.Sensor
-import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.UomConverter
+import com.lynbrookrobotics.kapuchin.hardware.*
+import info.kunalsheth.units.generated.*
 
 /**
  * Graphs data over time

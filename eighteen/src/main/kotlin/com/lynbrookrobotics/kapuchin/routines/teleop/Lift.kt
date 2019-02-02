@@ -1,13 +1,11 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
-import com.lynbrookrobotics.kapuchin.control.`±`
-import com.lynbrookrobotics.kapuchin.hardware.Sensor
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
+import com.lynbrookrobotics.kapuchin.control.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.`±`
+import info.kunalsheth.units.math.*
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.round
@@ -103,7 +101,7 @@ suspend fun LiftComponent.singleStackTeleop(driver: DriverHardware) = startRouti
                 stackingMode = false
                 hardware.maxHeight + adjust
             }
-            else -> if(stackingMode) stackTarget() else currentPosition
+            else -> if (stackingMode) stackTarget() else currentPosition
         }
 
         if (overrideLift) PercentOutput(manualOverride)

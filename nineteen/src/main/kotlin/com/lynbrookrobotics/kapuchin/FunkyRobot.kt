@@ -1,16 +1,15 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.preferences.trim
+import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.currentTime
-import com.lynbrookrobotics.kapuchin.timing.scope
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.Preferences2
 import edu.wpi.first.wpilibj.RobotBase
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

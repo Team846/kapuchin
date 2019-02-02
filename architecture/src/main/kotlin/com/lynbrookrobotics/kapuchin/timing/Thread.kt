@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.*
 import kotlinx.coroutines.CoroutineScope
 
 /**

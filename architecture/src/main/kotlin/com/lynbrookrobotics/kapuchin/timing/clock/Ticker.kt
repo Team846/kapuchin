@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.timing.clock
 
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.timing.Priority
-import info.kunalsheth.units.generated.Time
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import info.kunalsheth.units.generated.*
 
 /**
  * A real-time `Clock`

@@ -1,12 +1,9 @@
 package com.lynbrookrobotics.kapuchin.timing.clock
 
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.timing.Priority
-import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.math.milli
-import info.kunalsheth.units.math.nano
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.system.measureNanoTime

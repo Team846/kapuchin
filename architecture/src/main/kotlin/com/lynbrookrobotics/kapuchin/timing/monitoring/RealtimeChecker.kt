@@ -1,14 +1,12 @@
 package com.lynbrookrobotics.kapuchin.timing.monitoring
 
-import com.lynbrookrobotics.kapuchin.control.math.differentiator
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.First
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
+import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.*
 import info.kunalsheth.units.generated.*
 
 class RealtimeChecker private constructor(parent: Ticker, private val setJitterPin: (Boolean) -> Unit, private val getPeriod: () -> Time)

@@ -2,14 +2,10 @@ package com.lynbrookrobotics.kapuchin.tests.routine
 
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
-import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
-import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
-import com.lynbrookrobotics.kapuchin.tests.subsystems.checkCount
-import com.lynbrookrobotics.kapuchin.tests.subsystems.countTo
-import com.lynbrookrobotics.kapuchin.tests.threadDumpOnFailiure
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.tests.*
+import com.lynbrookrobotics.kapuchin.tests.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.runBlocking
 import org.junit.Test

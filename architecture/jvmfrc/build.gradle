@@ -20,7 +20,7 @@ dependencies {
 group 'com.lynbrookrobotics'
 version '1.0.0'
 
-compileKotlin { 
+compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
     kotlinOptions.freeCompilerArgs += ["-XXLanguage:+InlineClasses"]
 }
