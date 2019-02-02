@@ -51,6 +51,7 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
     }
 }
 
+actual val stackTraceLimit = 10
 actual typealias StackTraceElement = java.lang.StackTraceElement
 
 actual val Throwable.platformStackTrace: Array<StackTraceElement> get() = stackTrace

@@ -1,7 +1,10 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.DelegateProvider
+import com.lynbrookrobotics.kapuchin.logging.Level
 import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.logging.nameLayer
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
@@ -106,19 +109,39 @@ open class Preference<Value>(
         private val fallback: Value,
         private val init: (String, Value) -> Unit,
         private val get: (String, Value) -> Value,
-        private val nameSuffix: String = ""
-) : DelegateProvider<Any?, Value> {
+        private val registerCallback: (String, () -> Unit) -> Unit,
+        private val prefNameSuffix: String = ""
+) : Named, DelegateProvider<Any?, Value>, () -> Unit {
+
+    override final lateinit var name: String
+        private set
 
     private var value: Value? = null
 
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
-        val name = Named(prop.name + nameSuffix, parent).name
+        name = nameLayer(parent, prop.name + prefNameSuffix)
+
+        registerCallback(name, this)
 
         init(name, get(name, fallback))
-        EventLoop.runOnTick { value = get(name, fallback) }
-
         return object : ReadOnlyProperty<Any?, Value> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get(name, fallback)
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value
+                    ?: get(name, fallback).also { value = it }
+        }
+    }
+
+    /**
+     * Called whenever a change is detected in the NetworkTable
+     *
+     * @author Andy
+     */
+    override operator fun invoke() {
+        log(Level.Debug) { "updated value" }
+        value = get(name, fallback)
+
+        //If the Preference is in a PreferenceLayer, update the parent too
+        if (parent is PreferenceLayer<*>) {
+            parent.invoke()
         }
     }
 }

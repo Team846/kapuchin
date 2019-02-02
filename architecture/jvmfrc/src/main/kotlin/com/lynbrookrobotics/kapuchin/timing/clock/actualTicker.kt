@@ -24,7 +24,8 @@ actual class Ticker private actual constructor(
     actual var computeTime = 0.Second
         private set
 
-    override var jobs: List<(tickStart: Time) -> Unit> = emptyList()
+    override val jobsToRun = mutableListOf<(tickStart: Time) -> Unit>()
+    override val jobsToKill = mutableSetOf<(tickStart: Time) -> Unit>()
 
     actual fun waitOnTick(): Time {
         updateAlarm()
