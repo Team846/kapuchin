@@ -5,3 +5,5 @@ actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
     Level.Warning -> println("WARNING $formattedMessage")
     Level.Debug -> println("DEBUG $formattedMessage")
 }
+
+actual val stackTraceLimit = 100

@@ -1,5 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
+import com.lynbrookrobotics.kapuchin.logging.Level
+import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.logging.withDecimals
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
@@ -9,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.Clock
 import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.Time
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.math.abs
 
 abstract class TC<This, H>(hardware: H, customClock: Clock? = null) : Component<This, H, String>(hardware, customClock)
@@ -18,13 +21,13 @@ abstract class TC<This, H>(hardware: H, customClock: Clock? = null) : Component<
     override val fallbackController: This.(Time) -> String = { fallbackOutput }
 
     private var count = 0
-    var out = emptyList<String>()
+    val out = ConcurrentLinkedQueue<String>()
 
     override fun H.output(value: String) {
         count++
         if (value != fallbackOutput) {
             out += value
-            println("$name output #$count @ ${currentTime withDecimals 2} by thread #${Thread.currentThread().id} = $value")
+            log(Level.Debug) { "$name output #$count @ ${currentTime withDecimals 2} by ${Thread.currentThread().name} thread = $value" }
         }
     }
 
