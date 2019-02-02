@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.timing
 
+import com.lynbrookrobotics.kapuchin.logging.Level
 import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
@@ -50,16 +51,18 @@ actual class PlatformThread private actual constructor(parent: Named, name: Stri
 }
 
 val coroutineNamed = Named("Kapuchin Coroutines")
+private var numThreads = 0
 private val pool = Executors.newFixedThreadPool(4) {
     Thread(it).apply {
-        priority = MIN_PRIORITY
+        priority = Thread.MIN_PRIORITY
         isDaemon = true
+        name = coroutineNamed.name + numThreads++
     }
 }
 actual val scope = CoroutineScope(pool.asCoroutineDispatcher() +
         CoroutineName("Kapuchin Coroutine Scope") +
         CoroutineExceptionHandler { _, throwable: Throwable ->
-            coroutineNamed.log(Error, throwable) { "Exception thrown from coroutine" }
+            coroutineNamed.log(Level.Error, throwable) { "Exception thrown from coroutine" }
         }
 )
 

@@ -23,10 +23,12 @@ actual class PlatformThread actual private constructor(
 actual inline fun <R> blockingMutex(lock: Any, block: () -> R) = kotlin.synchronized(lock, block)
 
 val coroutineNamed = Named("Kapuchin Coroutines")
+private var numThreads = 0
 private val pool = Executors.newFixedThreadPool(4) {
     Thread(it).apply {
         priority = Thread.MIN_PRIORITY
         isDaemon = true
+        name = coroutineNamed.name + numThreads++
     }
 }
 actual val scope = CoroutineScope(pool.asCoroutineDispatcher() +
