@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.pointWithLineScanner
 import com.lynbrookrobotics.kapuchin.routines.teleop
+import com.lynbrookrobotics.kapuchin.routines.warmup
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
@@ -24,7 +25,14 @@ data class Subsystems(
 ) {
 
     fun teleop() = launchAll(
-            { drivetrain.teleop(driverHardware, electricalHardware) }
+            { drivetrain.teleop(driverHardware) }
+    ).also {
+        HAL.observeUserProgramTeleop()
+        System.gc()
+    }
+
+    fun warmup() = launchAll(
+            { drivetrain.warmup() }
     ).also {
         HAL.observeUserProgramTeleop()
         System.gc()
