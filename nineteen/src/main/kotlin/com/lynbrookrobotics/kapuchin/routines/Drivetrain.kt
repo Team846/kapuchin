@@ -1,119 +1,56 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.verticalDeadband
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
-import com.lynbrookrobotics.kapuchin.control.electrical.motorCurrentLimiter
-import com.lynbrookrobotics.kapuchin.control.electrical.voltageToDutyCycle
 import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
 import com.lynbrookrobotics.kapuchin.control.math.differentiator
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
+import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.abs
 
-suspend fun DrivetrainComponent.teleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("teleop") {
+suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
     val steering by driver.steering.readWithEventLoop.withoutStamps
     val absSteering by driver.absSteering.readWithEventLoop.withoutStamps
 
-    val position by hardware.position.readOnTick.withoutStamps
-    var startingAngle = -absSteering + position.xy.bearing
+    val position by hardware.position.readOnTick.withStamps
+
+    val targetGraph = graph("Target Angle", Degree)
+    val errorGraph = graph("Error Angle", Degree)
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
-    val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
-    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+    var startingAngle = -absSteering + position.y.bearing
+    val dadt = differentiator(::div, position.x, position.y.bearing)
 
-    controller {
+    controller { t ->
+        if (
+                speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero
+        ) System.gc()
+
+
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering
 
-        val currentAngle = position.xy.bearing
-        if (box(steering) != 0.Percent) startingAngle = -absSteering + currentAngle
+        if (box(steering) != 0.Percent) startingAngle = -absSteering + position.y.bearing
 
-        val errorA = absSteering + startingAngle `coterminal -` currentAngle
-        val pA = bearingKp * errorA
+        val angularVelocity = dadt(position.x, position.y.bearing)
+        val targetA = (absSteering + startingAngle).also { targetGraph(t, it) }
+        val errorA = (targetA `coterminal -` position.y.bearing).also { errorGraph(t, it) }
+        val pA = bearingKp * errorA - bearingKd * angularVelocity
 
         val targetL = forwardVelocity + steeringVelocity + pA
         val targetR = forwardVelocity - steeringVelocity - pA
 
-        val errorL = targetL - speedL
-        val errorR = targetR - speedR
+        val nativeL = hardware.conversions.nativeConversion.native(targetL)
+        val nativeR = hardware.conversions.nativeConversion.native(targetR)
 
-        val pL = velocityKp * errorL
-        val pR = velocityKp * errorR
-
-        val ffL = targetL / maxLeftSpeed * operatingVoltage
-        val ffR = targetR / maxRightSpeed * operatingVoltage
-
-        val dcL = voltageToDutyCycle(
-                currentLimiting(speedL,
-                        startupFrictionCompensation(pL + ffL)
-                ), vBat
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
         )
-
-        val dcR = voltageToDutyCycle(
-                currentLimiting(speedR,
-                        startupFrictionCompensation(pR + ffR)
-                ), vBat
-        )
-
-        TwoSided(dcL, dcR)
-    }
-}
-
-suspend fun DrivetrainComponent.noEncoderTeleop(driver: DriverHardware, electrical: ElectricalSystemHardware) = startRoutine("no encoder teleop") {
-    val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
-    val steering by driver.steering.readWithEventLoop.withoutStamps
-    val absSteering by driver.absSteering.readWithEventLoop.withStamps
-
-    val gyro by hardware.gyroInput.readEagerly.withoutStamps
-    var targetA = gyro.angle
-
-    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
-    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
-
-    val absSteeringRate = differentiator(::div, currentTime, absSteering.y)
-    var absSteeringStart = absSteering.y
-
-    controller {
-        val forwardVelocity = maxSpeed * accelerator
-        val steeringVelocity = maxSpeed * steering
-
-        val absSteeringMode = abs(absSteeringRate(absSteering.x, absSteering.y)) > 30.DegreePerSecond
-        absSteeringStart = when {
-            absSteeringMode -> absSteeringStart
-            else -> gyro.angle + absSteering.y
-        }
-
-        targetA = when {
-            absSteeringMode -> absSteeringStart
-            steering == 0.Percent -> targetA
-            else -> gyro.angle
-        }
-
-        val errorA = targetA `coterminal -` gyro.angle
-        val pA = bearingKp * errorA
-
-        val targetL = forwardVelocity + steeringVelocity + pA
-        val targetR = forwardVelocity - steeringVelocity - pA
-
-        val ffL = targetL / maxLeftSpeed * operatingVoltage
-        val ffR = targetR / maxRightSpeed * operatingVoltage
-
-        val dcL = voltageToDutyCycle(
-                startupFrictionCompensation(ffL), vBat
-        )
-
-        val dcR = voltageToDutyCycle(
-                startupFrictionCompensation(ffR), vBat
-        )
-
-        TwoSided(dcL, dcR)
     }
 }
 
