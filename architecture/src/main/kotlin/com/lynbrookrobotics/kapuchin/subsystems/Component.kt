@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.logging.platformStackTrace
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.routines.Routine
 import com.lynbrookrobotics.kapuchin.timing.blockingMutex
@@ -78,10 +77,12 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
             suspendCancellableCoroutine<Unit> { cont ->
                 routine = Routine(thisAsThis, name, controller, cont)
             }
+            log(Debug) { "Completed $name routine." }
         } catch (c: CancellationException) {
-            log(Debug) { "Cancelled $name routine.\nMessage: ${c.message}" }
+            log(Debug) { "Cancelled $name routine.\n${c.message}" }
+            throw c
         } catch (t: Throwable) {
-            log(Error, t.platformStackTrace) { "Exception running $name routine.\nMessage: ${t.message}" }
+            log(Error, t) { "Exception running $name routine.\n${t.message}" }
         } finally {
             scope.close()
         }

@@ -41,13 +41,14 @@ fun Named.log(level: Level, stackTrace: Array<StackTraceElement>? = null, messag
     }
 }
 
+expect val stackTraceLimit: Int
 private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?, message: () -> String): String {
     val senderHeader = "${sender.name}: "
     val indent = " ".repeat(senderHeader.length)
     val newLine = "\n$indent"
     val indentedMessage = message().replace("\n", newLine)
     return "$senderHeader$indentedMessage" +
-            (stackTrace?.joinToString(prefix = newLine, postfix = newLine, separator = newLine, limit = 7) ?: "")
+            (stackTrace?.joinToString(prefix = newLine, postfix = newLine, separator = newLine, limit = stackTraceLimit) ?: "")
 }
 
 /**
