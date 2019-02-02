@@ -5,20 +5,17 @@ import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
-import info.kunalsheth.units.generated.DutyCycle
-import info.kunalsheth.units.generated.Time
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import edu.wpi.first.wpilibj.Spark
-import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.Second
+import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.milli
 
 class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, ClimberHardware, TwoSided<DutyCycle>>(hardware) {
     override val fallbackController: ClimberComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(0.Percent, 0.Percent) }
 
     override fun ClimberHardware.output(value: TwoSided<DutyCycle>) {
-        hardware.escLeft.set(value.left.siValue)
-        hardware.escRight.set(value.right.siValue)
+        hardware.escLeft.set(value.left.Each)
+        hardware.escRight.set(value.right.Each)
     }
 
 }
