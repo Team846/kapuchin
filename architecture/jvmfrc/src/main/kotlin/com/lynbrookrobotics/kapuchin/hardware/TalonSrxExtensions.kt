@@ -42,14 +42,16 @@ fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (Offlo
     )
 }
 
-fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: V, currentLimit: I) {
+fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V) {
     esc.setNeutralMode(NeutralMode.Brake)
     +esc.configOpenloopRamp(0.0, configTimeout)
     +esc.configClosedloopRamp(0.0, configTimeout)
 
     +esc.configPeakOutputReverse(-1.0, configTimeout)
-    +esc.configNominalOutputReverse(0.0, configTimeout)
-    +esc.configNominalOutputForward(0.0, configTimeout)
+
+    val minOutput = (startupFrictionCompensation / voltageCompensation).Each
+    +esc.configNominalOutputReverse(-minOutput, configTimeout)
+    +esc.configNominalOutputForward(minOutput, configTimeout)
     +esc.configPeakOutputForward(1.0, configTimeout)
     +esc.configNeutralDeadband(0.001, configTimeout)
 
@@ -67,8 +69,8 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
     }
 }
 
-fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: V, currentLimit: I, vararg feedback: FeedbackDevice) {
-    generalSetup(master, voltageCompensation, currentLimit)
+fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V, vararg feedback: FeedbackDevice) {
+    generalSetup(master, voltageCompensation, currentLimit, startupFrictionCompensation)
 
     feedback.forEachIndexed { i, sensor -> +master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
 
@@ -90,7 +92,7 @@ fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: 
     +master.configVelocityMeasurementWindow(4, configTimeout)
 }
 
-fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: V, currentLimit: I) {
-    generalSetup(slave, voltageCompensation, currentLimit)
+fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V) {
+    generalSetup(slave, voltageCompensation, currentLimit, startupFrictionCompensation)
     StatusFrame.values().forEach { +slave.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
 }
