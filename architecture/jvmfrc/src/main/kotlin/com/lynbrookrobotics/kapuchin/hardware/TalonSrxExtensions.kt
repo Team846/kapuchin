@@ -47,9 +47,9 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompen
     +esc.configOpenloopRamp(0.0, configTimeout)
     +esc.configClosedloopRamp(0.0, configTimeout)
 
-    +esc.configPeakOutputReverse(-1.0, configTimeout)
-
     val minOutput = (startupFrictionCompensation / voltageCompensation).Each
+
+    +esc.configPeakOutputReverse(-1.0, configTimeout)
     +esc.configNominalOutputReverse(-minOutput, configTimeout)
     +esc.configNominalOutputForward(minOutput, configTimeout)
     +esc.configPeakOutputForward(1.0, configTimeout)
