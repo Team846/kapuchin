@@ -1,23 +1,20 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
-import com.lynbrookrobotics.kapuchin.control.data.stampWith
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.hardware.LineScanner
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.Priority
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import edu.wpi.first.wpilibj.AnalogInput
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
+import edu.wpi.first.wpilibj.Counter
+import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DigitalOutput
-import info.kunalsheth.units.generated.Inch
-import info.kunalsheth.units.generated.Millisecond
-import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.times
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
     override val priority = Priority.Medium
@@ -27,13 +24,13 @@ class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
 
     val exposurePort by pref(2)
     val thresholdPort by pref(3)
-    val feedbackPort by pref(0)
+    val feedbackPort by pref(4)
 
     private val lineScanner by hardw {
         LineScanner(
                 DigitalOutput(exposurePort),
                 DigitalOutput(thresholdPort),
-                AnalogInput(feedbackPort)
+                DigitalInput(feedbackPort)
         )
     }
 
@@ -41,10 +38,11 @@ class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
     private val threshold by pref(25, Percent)
     private val scanWidth by pref(12, Inch)
 
-    val linePosition = sensor(lineScanner) {
-        lineScanner(exposure, threshold) * scanWidth - scanWidth / 2 stampWith it
+    val linePosition = sensor(lineScanner) { t ->
+        val (x, y) = lineScanner(exposure, threshold)
+        y?.let { it * scanWidth - scanWidth / 2 } stampWith x
     }
-            .with(graph("Line Position", Inch)) { it }
+            .with(graph("Line Position", Inch)) { it ?: 0.Inch }
 
     init {
         EventLoop.runOnTick { time ->

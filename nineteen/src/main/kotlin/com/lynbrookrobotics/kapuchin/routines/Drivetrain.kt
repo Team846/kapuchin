@@ -1,18 +1,13 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
-import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
-import com.lynbrookrobotics.kapuchin.control.math.differentiator
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware
-import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.`±`
-import info.kunalsheth.units.math.abs
-import info.kunalsheth.units.math.atan
+import info.kunalsheth.units.math.*
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -59,17 +54,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
     }
 }
 
-suspend fun DrivetrainComponent.pointWithLineScanner(tolerance: Angle, lineScanner: LineScannerHardware, electrical: ElectricalSystemHardware) = startRoutine("point with line scanner") {
+suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("point with line scanner") {
     val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
-
-    val position by hardware.position.readOnTick.withoutStamps
-
-    val speedL by hardware.leftSpeed.readOnTick.withoutStamps
-    val speedR by hardware.rightSpeed.readOnTick.withoutStamps
-
-    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
-    val currentLimiting = motorCurrentLimiter(operatingVoltage, maxSpeed, motorStallCurrent, motorCurrentLimit)
-    val startupFrictionCompensation = verticalDeadband(startupVoltage, operatingVoltage)
 
     controller {
         val errorA = linePosition?.let {
@@ -78,34 +64,16 @@ suspend fun DrivetrainComponent.pointWithLineScanner(tolerance: Angle, lineScann
 
         val pA = bearingKp * errorA
 
-        val targetL = +pA
-        val targetR = -pA
+        val targetL = +pA + speed
+        val targetR = -pA + speed
 
-        val errorL = targetL - speedL
-        val errorR = targetR - speedR
+        val nativeL = hardware.conversions.nativeConversion.native(targetL)
+        val nativeR = hardware.conversions.nativeConversion.native(targetR)
 
-        val pL = velocityKp * errorL
-        val pR = velocityKp * errorR
-
-        val ffL = targetL / maxLeftSpeed * operatingVoltage
-        val ffR = targetR / maxRightSpeed * operatingVoltage
-
-
-        val dcL = voltageToDutyCycle(
-                currentLimiting(speedL,
-                        startupFrictionCompensation(pL + ffL)
-                ), vBat
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
         )
-
-        val dcR = voltageToDutyCycle(
-                currentLimiting(speedR,
-                        startupFrictionCompensation(pR + ffR)
-                ), vBat
-        )
-
-        TwoSided(dcL, dcR).takeUnless {
-            errorA in 0.Degree `±` tolerance
-        }
     }
 }
 

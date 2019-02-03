@@ -1,18 +1,13 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.pointWithLineScanner
-import com.lynbrookrobotics.kapuchin.routines.teleop
-import com.lynbrookrobotics.kapuchin.routines.warmup
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware
-import com.lynbrookrobotics.kapuchin.timing.scope
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.HAL
-import info.kunalsheth.units.generated.Degree
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -40,7 +35,7 @@ data class Subsystems(
 
     fun lineTracking() = scope.launch {
         while (true)
-            drivetrain.pointWithLineScanner(5.Degree, lineScannerHardware, electricalHardware)
+            drivetrain.pointWithLineScanner(3.FootPerSecond, lineScannerHardware)
     }.also {
         HAL.observeUserProgramAutonomous()
         System.gc()
