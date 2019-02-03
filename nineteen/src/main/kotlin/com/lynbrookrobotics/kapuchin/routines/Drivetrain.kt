@@ -7,9 +7,7 @@ import com.lynbrookrobotics.kapuchin.hardware.LimelightHardware
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.timing.currentTime
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.`±`
 import info.kunalsheth.units.math.abs
@@ -66,6 +64,9 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightHardware) = startRoutine("point with limelight") {
     val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
 
+    val speedL by hardware.leftSpeed.readOnTick.withoutStamps
+    val speedR by hardware.rightSpeed.readOnTick.withoutStamps
+
     controller { t ->
         if(Math.random() > 0.9) limelightAngle?.also { println(it.Degree) }
 
@@ -77,6 +78,10 @@ suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightHardware)
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
+
+        if (
+                speedL == 0.FootPerSecond && speedR == 0.FootPerSecond
+        ) System.gc()
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
