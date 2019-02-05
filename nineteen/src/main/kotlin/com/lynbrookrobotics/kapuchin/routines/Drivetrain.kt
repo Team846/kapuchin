@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
@@ -56,16 +56,16 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 }
 
 
-suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightHardware) = startRoutine("point with limelight") {
+suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, limelight: LimelightHardware) = startRoutine("point with limelight") {
     val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
 
-    val speedL by hardware.leftSpeed.readOnTick.withoutStamps
-    val speedR by hardware.rightSpeed.readOnTick.withoutStamps
+    val position by hardware.position.readOnTick.withoutStamps
 
-    val target = box(limelightAngle)
+    val target = limelightAngle + position.bearing
 
     controller { t ->
-        val pA = bearingKp * target
+        val error = target - position.bearing
+        val pA = bearingKp * error
 
         val targetL = +pA
         val targetR = -pA
@@ -76,7 +76,9 @@ suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightHardware)
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
-        )
+        ).takeIf {
+            error.abs < tolerance
+        }
     }
 }
 

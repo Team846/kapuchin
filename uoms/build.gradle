@@ -1,0 +1,8 @@
+apply plugin: 'kotlin-platform-common'
+apply plugin: 'info.kunalsheth.units.gradle'
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
+}
+
+apply from: 'units-of-measure.gradle'

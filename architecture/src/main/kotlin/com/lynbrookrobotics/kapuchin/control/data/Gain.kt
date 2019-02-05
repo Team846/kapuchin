@@ -1,8 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
-import com.lynbrookrobotics.kapuchin.control.div
-import info.kunalsheth.units.generated.div
-import info.kunalsheth.units.generated.Quan
+import com.lynbrookrobotics.kapuchin.control.*
+import info.kunalsheth.units.generated.*
 import kotlin.jvm.JvmName
 
 /**

@@ -1,9 +1,8 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
+import com.lynbrookrobotics.kapuchin.logging.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.`±`
-import info.kunalsheth.units.math.abs
-import com.lynbrookrobotics.kapuchin.logging.withDecimals
+import info.kunalsheth.units.math.*
 
 /**
  * Converts Alps RDC80 analog readings into angles

@@ -1,15 +1,11 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.control.data.stampSince
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
-import com.lynbrookrobotics.kapuchin.timing.Priority
-import edu.wpi.first.wpilibj.PowerDistributionPanel
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.RobotController
-import info.kunalsheth.units.generated.Minute
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Volt
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class ElectricalSystemHardware : SubsystemHardware<ElectricalSystemHardware, Nothing>() {
     override val name = "Electrical System"

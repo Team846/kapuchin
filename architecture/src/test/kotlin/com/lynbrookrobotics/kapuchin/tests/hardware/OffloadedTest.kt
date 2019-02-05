@@ -1,9 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.hardware
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
-import info.kunalsheth.units.generated.Ampere
-import info.kunalsheth.units.generated.Percent
+import com.lynbrookrobotics.kapuchin.tests.*
+import info.kunalsheth.units.generated.*
 import kotlin.test.Test
 
 class OffloadedTest {

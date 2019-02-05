@@ -3,16 +3,14 @@ package com.lynbrookrobotics.kapuchin
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.HAL
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import info.kunalsheth.units.generated.*
 
 
 data class Subsystems(
@@ -30,7 +28,7 @@ data class Subsystems(
     }
 
     fun limelightTracking() = scope.launch {
-        drivetrain.pointWithLimelight(limelightHardware)
+        drivetrain.pointWithLimelight(3.Degree, limelightHardware)
         delay(10.Second)
     }.also {
         HAL.observeUserProgramAutonomous()

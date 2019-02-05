@@ -1,20 +1,16 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import com.lynbrookrobotics.kapuchin.logging.Level
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
-import com.lynbrookrobotics.kapuchin.logging.Level.Error
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import edu.wpi.first.wpilibj.Threads
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
-import java.lang.Thread.MIN_PRIORITY
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
-actual class PlatformThread private actual constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
+actual class PlatformThread internal actual constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
     private val thread: Thread
 
     init {
@@ -43,10 +39,6 @@ actual class PlatformThread private actual constructor(parent: Named, name: Stri
                 log(Debug) { "$formattedName Exiting" }
             }
         }
-    }
-
-    actual companion object {
-        actual fun Named.platformThread(name: String, priority: Priority, run: () -> Unit) = PlatformThread(this, name, priority, run)
     }
 }
 

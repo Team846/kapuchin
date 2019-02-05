@@ -1,17 +1,14 @@
 package com.lynbrookrobotics.kapuchin.subsystems.climber
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.hardware.configMaster
-import com.lynbrookrobotics.kapuchin.hardware.configSlave
-import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.subsystems.Component
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.*
 
 class WinchComponent(hardware: WinchHardware) : Component<WinchComponent, WinchHardware, V>(hardware, EventLoop) {
 

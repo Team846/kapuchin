@@ -1,8 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests
 
-import com.lynbrookrobotics.kapuchin.logging.Level
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
+import com.lynbrookrobotics.kapuchin.logging.*
 
 fun threadDumpOnFailiure(f: () -> Unit) {
     Named("Thread Dumper").apply {

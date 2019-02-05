@@ -1,9 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.math.kinematics
 
-import info.kunalsheth.units.generated.Acceleration
-import info.kunalsheth.units.generated.FootPerSecond
-import info.kunalsheth.units.generated.Length
-import info.kunalsheth.units.generated.Velocity
+import info.kunalsheth.units.generated.*
 
 @Deprecated("TrapezoidalMotionProfile should output current, not velocity")
 fun trapezoidalMotionProfile(

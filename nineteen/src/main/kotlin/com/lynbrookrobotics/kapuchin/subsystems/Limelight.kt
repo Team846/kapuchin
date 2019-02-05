@@ -1,17 +1,14 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
-import com.lynbrookrobotics.kapuchin.control.data.stampWith
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
-import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.milli
-import kotlin.math.absoluteValue
+import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
 
 /**
@@ -19,7 +16,7 @@ import kotlin.math.roundToInt
  *
  * @author Nikash Walia
  */
-class LimelightHardware: SubsystemHardware<LimelightHardware, Nothing>() {
+class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     override val name: String = "Limelight"
     override val priority = Priority.Lowest
     override val period: Time = 20.milli(Second)
