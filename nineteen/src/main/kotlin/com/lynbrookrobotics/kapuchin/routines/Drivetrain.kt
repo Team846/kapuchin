@@ -9,10 +9,7 @@ import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.`±`
-import info.kunalsheth.units.math.abs
-import java.lang.Math
-import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -38,8 +35,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
         if (box(steering) != 0.Percent) startingAngle = -absSteering + currentAngle
 
         if(
-                speedL == 0.FootPerSecond && speedR == 0.FootPerSecond &&
-                accelerator == 0.Percent && steering == 0.Percent
+                speedL.isZero && speedR.isZero &&
+                accelerator.isZero && steering.isZero
         ) System.gc()
 
         val angularVelocity = dadt(position.x, position.y.bearing)
@@ -67,21 +64,16 @@ suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightHardware)
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    controller { t ->
-        if(Math.random() > 0.9) limelightAngle?.also { println(it.Degree) }
+    val error: Angle = box(limelightAngle)
 
-        val errorA = limelightAngle
-        val pA = bearingKp * errorA
+    controller { t ->
+        val pA = bearingKp * error
 
         val targetL = + pA
         val targetR = - pA
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
-
-        if (
-                speedL == 0.FootPerSecond && speedR == 0.FootPerSecond
-        ) System.gc()
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
