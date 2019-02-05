@@ -59,7 +59,7 @@ suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanne
 
     controller {
         val errorA = linePosition?.let {
-            atan(it / lineScannerLead)
+            -atan(it / lineScannerLead)
         } ?: 0.Degree
 
         val pA = bearingKp * errorA

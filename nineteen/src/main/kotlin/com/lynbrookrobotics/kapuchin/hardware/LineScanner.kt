@@ -33,7 +33,7 @@ class LineScanner(
     }
 
     private fun locate(raw: Time) = lineRange.run {
-        endInclusive / (endInclusive - start + raw)
+        (raw - start) / (endInclusive - start)
     }
 
     operator fun invoke(
