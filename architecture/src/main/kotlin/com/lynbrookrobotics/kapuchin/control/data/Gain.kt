@@ -1,7 +1,9 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
 import com.lynbrookrobotics.kapuchin.control.div
+import info.kunalsheth.units.generated.div
 import info.kunalsheth.units.generated.Quan
+import kotlin.jvm.JvmName
 
 /**
  * Represents a control gain
@@ -22,4 +24,8 @@ data class Gain<Compensation, Error>(
               Error : Quan<Error> {
 
     operator fun times(input: Error) = compensation * (input / forError)
+
+    // HACK
+    @JvmName("hack_times")
+    operator fun times(input: Quan<Error>) = compensation * (input.siValue / forError.siValue)
 }

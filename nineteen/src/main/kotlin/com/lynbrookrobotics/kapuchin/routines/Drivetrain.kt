@@ -64,7 +64,7 @@ suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightHardware)
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    val error: Angle = box(limelightAngle)
+    val error = box(limelightAngle!!)
 
     controller { t ->
         val pA = bearingKp * error
