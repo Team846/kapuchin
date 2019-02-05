@@ -1,22 +1,15 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.logging.Level
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.pointWithLimelight
-import com.lynbrookrobotics.kapuchin.routines.teleop
-import com.lynbrookrobotics.kapuchin.routines.warmup
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.kapuchin.hardware.LimelightHardware
-import com.lynbrookrobotics.kapuchin.timing.scope
+import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.HAL
 import kotlinx.coroutines.async
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import info.kunalsheth.units.generated.*
@@ -37,11 +30,8 @@ data class Subsystems(
     }
 
     fun limelightTracking() = scope.launch {
-        while(isActive) {
-            drivetrain.pointWithLimelight(limelightHardware)
-            log(Level.Debug) { "Limelight Target Found!" }
-            delay(1.Second)
-        }
+        drivetrain.pointWithLimelight(limelightHardware)
+        delay(10.Second)
     }.also {
         HAL.observeUserProgramAutonomous()
         System.gc()
@@ -86,7 +76,7 @@ data class Subsystems(
             val drivetrain = async { DrivetrainComponent(DrivetrainHardware()) }
             val driver = async { DriverHardware() }
             val electrical = async { ElectricalSystemHardware() }
-            val limelight = async {LimelightHardware() }
+            val limelight = async { LimelightHardware() }
 
             Subsystems(
                     drivetrain = drivetrain.await(),

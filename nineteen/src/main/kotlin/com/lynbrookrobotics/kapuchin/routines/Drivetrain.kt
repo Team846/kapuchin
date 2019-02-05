@@ -1,15 +1,13 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
-import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
-import com.lynbrookrobotics.kapuchin.control.math.differentiator
-import com.lynbrookrobotics.kapuchin.hardware.LimelightHardware
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -34,7 +32,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
         val currentAngle = position.y.bearing
         if (box(steering) != 0.Percent) startingAngle = -absSteering + currentAngle
 
-        if(
+        if (
                 speedL.isZero && speedR.isZero &&
                 accelerator.isZero && steering.isZero
         ) System.gc()
@@ -64,13 +62,13 @@ suspend fun DrivetrainComponent.pointWithLimelight(limelight: LimelightHardware)
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    val error = box(limelightAngle!!)
+    val target = box(limelightAngle)
 
     controller { t ->
-        val pA = bearingKp * error
+        val pA = bearingKp * target
 
-        val targetL = + pA
-        val targetR = - pA
+        val targetL = +pA
+        val targetR = -pA
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
