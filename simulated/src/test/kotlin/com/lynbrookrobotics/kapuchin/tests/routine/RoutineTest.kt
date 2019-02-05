@@ -2,8 +2,7 @@ package com.lynbrookrobotics.kapuchin.tests.routine
 
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import com.lynbrookrobotics.kapuchin.tests.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*

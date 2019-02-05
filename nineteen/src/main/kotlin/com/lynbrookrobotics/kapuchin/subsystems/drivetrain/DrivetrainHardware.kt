@@ -6,11 +6,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
-import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*

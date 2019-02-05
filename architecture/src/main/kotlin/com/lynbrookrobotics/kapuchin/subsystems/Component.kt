@@ -7,7 +7,6 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.*
-import com.lynbrookrobotics.kapuchin.timing.clock.Ticker.Companion.ticker
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine

@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop // weird bug, not included with wildcard import
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*

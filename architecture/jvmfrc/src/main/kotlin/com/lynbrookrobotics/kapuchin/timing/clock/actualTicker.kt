@@ -4,12 +4,11 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.PlatformThread.Companion.platformThread
 import edu.wpi.first.hal.NotifierJNI
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-actual class Ticker private actual constructor(
+actual class Ticker internal actual constructor(
         parent: Named,
         priority: Priority,
         val period: Time,

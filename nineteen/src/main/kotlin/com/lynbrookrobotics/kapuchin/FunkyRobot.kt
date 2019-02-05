@@ -1,8 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL

@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests.routine
 
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import com.lynbrookrobotics.kapuchin.tests.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*

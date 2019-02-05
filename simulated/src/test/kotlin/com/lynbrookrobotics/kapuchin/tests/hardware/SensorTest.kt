@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.hardware
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import com.lynbrookrobotics.kapuchin.tests.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
