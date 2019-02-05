@@ -14,23 +14,20 @@ import info.kunalsheth.units.generated.*
  * @see EventLoop
  * @see Clock
  */
-expect class Ticker private constructor(parent: Named, priority: Priority, period: Time, name: String = "Ticker") : Named, Clock {
+expect class Ticker internal constructor(parent: Named, priority: Priority, period: Time, name: String = "Ticker") : Named, Clock {
     fun waitOnTick(): Time
 
     var computeTime: Time
         private set
-
-    companion object {
-        /**
-         * `Ticker` initializer
-         *
-         * @receiver owner of the ticker
-         * @param priority importance
-         * @param period time between ticks
-         * @param name logging name
-         * @return new thread running the given function
-         */
-        fun Named.ticker(priority: Priority, period: Time, name: String = "Ticker"): Ticker
-    }
 }
 
+/**
+ * `Ticker` initializer
+ *
+ * @receiver owner of the ticker
+ * @param priority importance
+ * @param period time between ticks
+ * @param name logging name
+ * @return new thread running the given function
+ */
+fun Named.ticker(priority: Priority, period: Time, name: String = "Ticker") = Ticker(this, priority, period, name)

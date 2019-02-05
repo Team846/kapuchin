@@ -20,7 +20,7 @@ import kotlin.reflect.KProperty
  *
  * @param Hardw type of hardware object being initialized
  */
-class HardwareInit<Hardw> private constructor(
+class HardwareInit<Hardw> internal constructor(
         private val parent: SubsystemHardware<*, *>,
         private val initialize: Named.() -> Hardw,
         private val configure: Named.(Hardw) -> Unit = {},
@@ -86,18 +86,18 @@ class HardwareInit<Hardw> private constructor(
 
     companion object : Named by Named("Hardware Initialization") {
         val crashOnFailure by pref(true)
-
-        /**
-         * `HardwareInit` domain-specific language entry point
-         *
-         * Helps avoid logging boilerplate when initializing hardware
-         *
-         * @receiver subsystem this hardware belongs to
-         * @param Hardw type of hardware object being initialized
-         * @param nameSuffix logging name suffix
-         * @param initialize function to instantiate hardware object
-         * @return new `HardwareInit` delegate for the given hardware object
-         */
-        fun <Hardw> SubsystemHardware<*, *>.hardw(nameSuffix: String = "", initialize: Named.() -> Hardw) = HardwareInit(this, initialize, nameSuffix = nameSuffix)
     }
 }
+
+/**
+ * `HardwareInit` domain-specific language entry point
+ *
+ * Helps avoid logging boilerplate when initializing hardware
+ *
+ * @receiver subsystem this hardware belongs to
+ * @param Hardw type of hardware object being initialized
+ * @param nameSuffix logging name suffix
+ * @param initialize function to instantiate hardware object
+ * @return new `HardwareInit` delegate for the given hardware object
+ */
+fun <Hardw> SubsystemHardware<*, *>.hardw(nameSuffix: String = "", initialize: Named.() -> Hardw) = HardwareInit(this, initialize, nameSuffix = nameSuffix)

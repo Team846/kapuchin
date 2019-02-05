@@ -8,7 +8,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.system.measureNanoTime
 
-actual class Ticker private actual constructor(
+actual class Ticker internal actual constructor(
         parent: Named,
         priority: Priority,
         val period: Time,
@@ -45,8 +45,7 @@ actual class Ticker private actual constructor(
         return currentTime
     }
 
-    actual companion object {
-        actual fun Named.ticker(priority: Priority, period: Time, name: String) = com.lynbrookrobotics.kapuchin.timing.clock.Ticker(this, priority, period, name)
+    companion object {
         private val exec = Executors.newSingleThreadScheduledExecutor()!!
     }
 }

@@ -26,20 +26,18 @@ enum class Priority {
  * @param priority importance
  * @param run function to run
  */
-expect class PlatformThread private constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
-    companion object {
-        /**
-         * Thread initializer
-         *
-         * @receiver owner of the thread
-         * @param name logging name
-         * @param priority importance
-         * @param run function to run
-         * @return new thread running the given function
-         */
-        fun Named.platformThread(name: String, priority: Priority, run: () -> Unit): PlatformThread
-    }
-}
+expect class PlatformThread internal constructor(parent: Named, name: String, priority: Priority, run: () -> Unit)
+
+/**
+ * Thread initializer
+ *
+ * @receiver owner of the thread
+ * @param name logging name
+ * @param priority importance
+ * @param run function to run
+ * @return new thread running the given function
+ */
+fun Named.platformThread(name: String, priority: Priority, run: () -> Unit) = PlatformThread(this, name, priority, run)
 
 expect inline fun <R> blockingMutex(lock: Any, block: () -> R): R
 

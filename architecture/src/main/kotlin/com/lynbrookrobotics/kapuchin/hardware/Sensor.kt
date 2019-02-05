@@ -23,7 +23,7 @@ import kotlin.reflect.KProperty
  *
  * @param Input type of sensor data being read
  */
-class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<Input>) {
+class Sensor<Input> internal constructor(internal val read: (Time) -> TimeStamped<Input>) {
 
     internal var value: TimeStamped<Input>? = null
     fun optimizedRead(atTime: Time, syncThreshold: Time) =
@@ -58,54 +58,52 @@ class Sensor<Input> private constructor(private val read: (Time) -> TimeStamped<
                 }.also { startUpdates(forSensor) }
             }
     }
-
-    companion object {
-        /**
-         * `Sensor` domain-specific language entry point
-         *
-         * Helps manage concurrent sensor use across multiple subsystems
-         *
-         * @receiver subsystem this sensor belongs to
-         * @param Input type of sensor data being read
-         * @param read function to read new sensor data from the hardware object
-         * @return new `Sensor` instance for the given read function
-         */
-        fun <Input> SubsystemHardware<*, *>.sensor(read: (Time) -> TimeStamped<Input>) = Sensor(read)
-
-        /**
-         * `Sensor` domain-specific language entry point
-         *
-         * Helps manage concurrent sensor use across multiple subsystems
-         *
-         * @receiver subsystem this sensor belongs to
-         * @param Hardw type of hardware object providing sensor data
-         * @param Input type of sensor data being read
-         * @param hardw hardware object providing sensor data
-         * @param read function to read new sensor data from the hardware object
-         * @return new `Sensor` instance for the given read function and hardware object
-         */
-        fun <Hardw, Input> SubsystemHardware<*, *>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) = Sensor { read(hardw, it) }
-
-        /**
-         * Graph new sensor data whenever it is read
-         *
-         * @param QInput type of sensor data being graphed
-         * @param graph instance to write sensor data to
-         * @return new `Sensor` instance with the given grapher
-         */
-        fun <QInput : Quan<QInput>> Sensor<QInput>.with(graph: Grapher<QInput>) =
-                Sensor { t -> read(t).also { graph(it.x, it.y) } }
-
-        /**
-         * Graph new sensor data whenever it is read
-         *
-         * @param Input type of sensor data being read
-         * @param QInput type of data being graphed
-         * @param graph instance to write sensor data to
-         * @param structure function to convert sensor data, `Input`, to graph data `QInput`
-         * @return new `Sensor` instance with the given grapher
-         */
-        fun <Input, QInput : Quan<QInput>> Sensor<Input>.with(graph: Grapher<QInput>, structure: (Input) -> QInput) =
-                Sensor { t -> read(t).also { graph(it.x, structure(it.y)) } }
-    }
 }
+
+/**
+ * `Sensor` domain-specific language entry point
+ *
+ * Helps manage concurrent sensor use across multiple subsystems
+ *
+ * @receiver subsystem this sensor belongs to
+ * @param Input type of sensor data being read
+ * @param read function to read new sensor data from the hardware object
+ * @return new `Sensor` instance for the given read function
+ */
+fun <Input> SubsystemHardware<*, *>.sensor(read: (Time) -> TimeStamped<Input>) = Sensor(read)
+
+/**
+ * `Sensor` domain-specific language entry point
+ *
+ * Helps manage concurrent sensor use across multiple subsystems
+ *
+ * @receiver subsystem this sensor belongs to
+ * @param Hardw type of hardware object providing sensor data
+ * @param Input type of sensor data being read
+ * @param hardw hardware object providing sensor data
+ * @param read function to read new sensor data from the hardware object
+ * @return new `Sensor` instance for the given read function and hardware object
+ */
+fun <Hardw, Input> SubsystemHardware<*, *>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) = Sensor { read(hardw, it) }
+
+/**
+ * Graph new sensor data whenever it is read
+ *
+ * @param QInput type of sensor data being graphed
+ * @param graph instance to write sensor data to
+ * @return new `Sensor` instance with the given grapher
+ */
+fun <QInput : Quan<QInput>> Sensor<QInput>.with(graph: Grapher<QInput>) =
+        Sensor { t -> read(t).also { graph(it.x, it.y) } }
+
+/**
+ * Graph new sensor data whenever it is read
+ *
+ * @param Input type of sensor data being read
+ * @param QInput type of data being graphed
+ * @param graph instance to write sensor data to
+ * @param structure function to convert sensor data, `Input`, to graph data `QInput`
+ * @return new `Sensor` instance with the given grapher
+ */
+fun <Input, QInput : Quan<QInput>> Sensor<Input>.with(graph: Grapher<QInput>, structure: (Input) -> QInput) =
+        Sensor { t -> read(t).also { graph(it.x, structure(it.y)) } }
