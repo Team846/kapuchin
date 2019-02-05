@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
@@ -29,6 +30,7 @@ data class Subsystems(
 
     fun limelightTracking() = scope.launch {
         drivetrain.pointWithLimelight(3.Degree, limelightHardware)
+        drivetrain.log(Debug) { "Found target" }
         delay(10.Second)
     }.also {
         HAL.observeUserProgramAutonomous()
