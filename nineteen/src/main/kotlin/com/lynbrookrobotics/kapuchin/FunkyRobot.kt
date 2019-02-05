@@ -51,7 +51,7 @@ class FunkyRobot : RobotBase() {
                 System.gc()
 
                 currentJob = subsystems::teleop runWhile { isEnabled && isOperatorControl }
-                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
+                        ?: subsystems::followWaypoints runWhile { isEnabled && isAutonomous }
                                 ?: subsystems::warmup runWhile { isDisabled }
                                 ?: doNothing
             }

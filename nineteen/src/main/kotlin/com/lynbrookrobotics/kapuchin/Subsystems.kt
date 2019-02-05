@@ -1,11 +1,13 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.HAL
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -28,6 +30,12 @@ data class Subsystems(
     ).also {
         HAL.observeUserProgramTeleop()
         System.gc()
+    }
+
+    fun followWaypoints() = scope.launch {
+        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 3.Foot), 3.Inch)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(3.Foot, 3.Foot), 3.Inch)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 0.Foot), 3.Inch)
     }
 
     fun backAndForthAuto() = scope.launch {
