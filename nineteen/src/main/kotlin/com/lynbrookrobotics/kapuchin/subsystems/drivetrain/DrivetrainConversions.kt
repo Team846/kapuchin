@@ -1,14 +1,12 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
-import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
-import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
-import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
-import com.lynbrookrobotics.kapuchin.control.data.Position
-import com.lynbrookrobotics.kapuchin.control.math.simpleVectorTracking
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.preferences.pref
+import com.lynbrookrobotics.kapuchin.control.conversion.*
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.avg
+import info.kunalsheth.units.math.*
 
 class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware) {
     private val wheelRadius by pref(3, Inch)

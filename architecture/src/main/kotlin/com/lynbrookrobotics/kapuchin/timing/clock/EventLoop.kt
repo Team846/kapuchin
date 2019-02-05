@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.timing.clock
 
-import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.*
 
 /**
  * Global instance of `Clock` which the user manually `tick`s whenever appropriate

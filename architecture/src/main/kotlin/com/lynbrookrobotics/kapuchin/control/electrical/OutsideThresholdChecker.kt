@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.Time
+import info.kunalsheth.units.generated.*
 
 /**
  * Checks if a value has been outside a range for too long

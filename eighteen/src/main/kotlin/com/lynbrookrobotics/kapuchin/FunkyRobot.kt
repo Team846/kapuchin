@@ -1,13 +1,12 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.runWhile
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.currentTime
-import com.lynbrookrobotics.kapuchin.timing.scope
-import edu.wpi.first.wpilibj.RobotBase
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.math.milli
+import edu.wpi.first.wpilibj.RobotBase
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -39,8 +38,8 @@ class FunkyRobot : RobotBase() {
             if (!currentJob.isActive) {
                 currentJob =
                         subsystems::teleop runWhile { isEnabled && isOperatorControl }
-                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
-                        ?: doNothing
+                                ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
+                                        ?: doNothing
             }
         }
     }

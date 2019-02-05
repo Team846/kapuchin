@@ -5,9 +5,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
-    
+
+    implementation project(':uoms:jvm')
     implementation project(":architecture:jvmfrc")
-    
+
     implementation wpi.deps.wpilib()
     implementation wpi.deps.vendor.java()
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
@@ -35,11 +36,11 @@ deploy {
     }
 }
 
-compileKotlin { 
+compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
     kotlinOptions.freeCompilerArgs += ["-XXLanguage:+InlineClasses"]
 }
-compileTestKotlin { 
+compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
     kotlinOptions.freeCompilerArgs += ["-XXLanguage:+InlineClasses"]
 }

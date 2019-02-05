@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.timing.scope
-import info.kunalsheth.units.generated.Quan
+import com.lynbrookrobotics.kapuchin.timing.*
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -48,7 +48,8 @@ private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?
     val newLine = "\n$indent"
     val indentedMessage = message().replace("\n", newLine)
     return "$senderHeader$indentedMessage" +
-            (stackTrace?.joinToString(prefix = newLine, postfix = newLine, separator = newLine, limit = stackTraceLimit) ?: "")
+            (stackTrace?.joinToString(prefix = newLine, postfix = newLine, separator = newLine, limit = stackTraceLimit)
+                    ?: "")
 }
 
 /**

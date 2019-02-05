@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.conversion.deadband
 
-import com.lynbrookrobotics.kapuchin.control.div
-import info.kunalsheth.units.generated.Quan
+import com.lynbrookrobotics.kapuchin.control.*
+import info.kunalsheth.units.generated.*
 
 /**
  * Maps inputs close to zero to zero

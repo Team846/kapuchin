@@ -1,16 +1,12 @@
 package com.lynbrookrobotics.kapuchin.tests.routine
 
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
-import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
-import com.lynbrookrobotics.kapuchin.tests.subsystems.TC
-import com.lynbrookrobotics.kapuchin.tests.subsystems.TSH
-import com.lynbrookrobotics.kapuchin.tests.subsystems.checkCount
-import com.lynbrookrobotics.kapuchin.tests.threadDumpOnFailiure
-import com.lynbrookrobotics.kapuchin.timing.scope
-import info.kunalsheth.units.generated.Second
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.tests.*
+import com.lynbrookrobotics.kapuchin.tests.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
