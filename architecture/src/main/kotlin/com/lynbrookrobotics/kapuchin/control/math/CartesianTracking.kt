@@ -2,7 +2,9 @@ package com.lynbrookrobotics.kapuchin.control.math
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
+import info.kunalsheth.units.math.avg
+import info.kunalsheth.units.math.cos
+import info.kunalsheth.units.math.sin
 
 private fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
 private fun s(sl: Length, sr: Length) = avg(sl, sr)
@@ -27,6 +29,39 @@ fun simpleVectorTracking(
         )
 
         return pos
+    }
+}
+
+class RotationMatrixTracking(
+        val trackLength: Length, init: Position
+) : (RotationMatrixTracking.Direction, Length) -> Position {
+
+    enum class Direction {
+        Left, Right
+    }
+
+    private val initBearing = init.bearing
+
+    private val pos = TwoSided(
+            UomVector(-trackLength / 2, 0.Foot),
+            UomVector(trackLength / 2, 0.Foot)
+    ).run {
+        val matrix = RotationMatrix(initBearing)
+        TwoSided(
+                matrix rz left + init.vector,
+                matrix rz right + init.vector
+        )
+    }
+
+    fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
+
+    override fun invoke(direction: Direction, s: Length): Position {
+        val angle = theta(0.Foot, s, trackLength)
+        val out = when (direction) {
+            Direction.Left -> RotationMatrix(angle).rzAbout(pos.left, pos.right)
+            Direction.Right -> RotationMatrix(angle).rzAbout(pos.right, pos.left)
+        }
+        return Position(out.x, out.y, initBearing + angle)
     }
 }
 

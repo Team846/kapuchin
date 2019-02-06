@@ -1,12 +1,14 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
-import com.lynbrookrobotics.kapuchin.control.conversion.*
-import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.control.conversion.EncoderConversion
+import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
+import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
+import com.lynbrookrobotics.kapuchin.control.data.Position
+import com.lynbrookrobotics.kapuchin.control.math.RotationMatrixTracking
+import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.preferences.pref
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
+import info.kunalsheth.units.math.avg
 
 class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware) {
     private val wheelRadius by pref(3, Inch)
@@ -82,14 +84,16 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
 
     private var leftMovingForward = false
     private var rightMovingForward = false
-    private val vectorTracking = simpleVectorTracking(trackLength, xyPosition)
+    private val matrixTracking = RotationMatrixTracking(trackLength, xyPosition)
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
         val posL = toLeftPosition(ticksL)
                 .let { if (flipOdometryLeft) -it else it }
-        val posR = toLeftPosition(ticksR)
+        val posR = toRightPosition(ticksR)
                 .let { if (flipOdometryRight) -it else it }
 
-        xyPosition = vectorTracking(posL, posR)
+        val left = matrixTracking(RotationMatrixTracking.Direction.Left, posL)
+        val right = matrixTracking(RotationMatrixTracking.Direction.Right, posR)
+        xyPosition = Position(left.x + right.x, left.y + right.y, left.bearing + right.bearing)
         leftMovingForward = !posL.isNegative
         rightMovingForward = !posR.isNegative
     }
