@@ -10,20 +10,20 @@ import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.milli
 
-class RollersComponent(hardware: RollersHardware) : Component<RollersComponent, RollersHardware, TwoSided<DutyCycle>>(hardware) {
+class IntakeRollersComponent(hardware: IntakeRollersHardware) : Component<IntakeRollersComponent, IntakeRollersHardware, TwoSided<DutyCycle>>(hardware) {
 
     val cargoHoldStrength by pref(33, Percent)
 
-    override val fallbackController: RollersComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(-cargoHoldStrength) }
+    override val fallbackController: IntakeRollersComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(-cargoHoldStrength) }
 
-    override fun RollersHardware.output(value: TwoSided<DutyCycle>) {
+    override fun IntakeRollersHardware.output(value: TwoSided<DutyCycle>) {
         leftEsc.set(value.left.Each)
         rightEsc.set(value.right.Each)
     }
 
 }
 
-class RollersHardware : SubsystemHardware<RollersHardware, RollersComponent>() {
+class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRollersComponent>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 100.milli(Second)
     override val syncThreshold: Time = 50.milli(Second)

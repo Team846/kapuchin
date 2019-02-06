@@ -21,12 +21,13 @@ import info.kunalsheth.units.math.milli
 
 class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val name: String = "Lift"
-    override val period: Time = 20.milli(Second)
+    override val period: Time = 30.milli(Second)
     override val priority: Priority = Priority.Low
     override val syncThreshold: Time =  5.milli(Second)
 
     val operatingVoltage by pref(12, Volt)
     val currentLimit by pref(30, Ampere)
+    val startupFrictionCompensation by pref(1.4, Volt)
 
     val jitterPulsePinNumber by pref(6)
     val jitterReadPinNumber by pref(7)
@@ -34,13 +35,13 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
     // SAFETY
-    val maxHeight by pref(80, Inch) //TODO
-    val minHeight by pref(0, Inch) //TODO
+    val maxHeight by pref(80, Inch)
+    val minHeight by pref(0, Inch)
 
     val offloadedSettings by pref {
-        val nativeFeedbackUnits by pref(615) //TODO
-        val perFeedbackQuantity by pref(80.25, Inch) //TODO
-        val zeroOffset by pref(11.2, Inch) //TODO
+        val nativeFeedbackUnits by pref(615)
+        val perFeedbackQuantity by pref(80.25, Inch)
+        val zeroOffset by pref(11.2, Inch)
 
         ({
             LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
@@ -55,7 +56,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val maxOutput by pref(70, Percent)
     val idx = 0
     val esc by hardw { TalonSRX(escCanId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, FeedbackDevice.Analog)
+        configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
 
         val t = 5000
 
