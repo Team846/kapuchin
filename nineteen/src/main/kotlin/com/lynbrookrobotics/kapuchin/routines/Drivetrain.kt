@@ -26,15 +26,15 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
     val dadt = differentiator(::div, position.x, position.y.bearing)
 
     controller { t ->
+        if (
+                speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero
+        ) System.gc()
+
+
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering
 
-        if (steering != 0.Percent) startingAngle = -absSteering + position.y.bearing
-
-        if(
-                speedL == 0.FootPerSecond && speedR == 0.FootPerSecond &&
-                accelerator == 0.Percent && steering == 0.Percent
-        ) System.gc()
+        if (box(steering) != 0.Percent) startingAngle = -absSteering + position.y.bearing
 
         val angularVelocity = dadt(position.x, position.y.bearing)
         val targetA = (absSteering + startingAngle).also { targetGraph(t, it) }

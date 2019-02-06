@@ -17,6 +17,6 @@ class ElectricalSystemHardware : SubsystemHardware<ElectricalSystemHardware, Not
     override val period = 3.Minute
     override val syncThreshold = 5.milli(Second)
 
-    val pdp by hardw { PowerDistributionPanel() }
+    // val pdp by hardw { PowerDistributionPanel() }
     val batteryVoltage = sensor { RobotController.getBatteryVoltage().Volt stampSince it }
 }

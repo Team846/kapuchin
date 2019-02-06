@@ -18,7 +18,7 @@ actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong
 actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString, ::registerCallback)
 
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) = Preference(
-        this, withUnits(fallback),
+        this, withUnits(fallback.toDouble()),
         { name, value -> impl.putDouble(name, withUnits(value)) },
         { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
         ::registerCallback,
@@ -35,7 +35,7 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
  * @see edu.wpi.first.wpilibj.Preferences2
  */
 private fun registerCallback(key: String, callback: () -> Unit) {
-    blockingMutex(key) {
+    blockingMutex(keys) {
         keys += NetworkTable.basenameKey(key)
         Preferences2.getInstance().table.addEntryListener(key, { _, _, _, _, _ ->
             callback()

@@ -79,7 +79,8 @@ class PreferenceLayer<Value>(
         get = construct()
 
         return object : ReadOnlyProperty<Any?, Value> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = value ?: get()
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = value
+                    ?: get().also { value = it }
         }
     }
 

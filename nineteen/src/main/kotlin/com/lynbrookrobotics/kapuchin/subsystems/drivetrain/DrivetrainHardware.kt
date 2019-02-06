@@ -13,6 +13,8 @@ import com.lynbrookrobotics.kapuchin.hardware.configMaster
 import com.lynbrookrobotics.kapuchin.hardware.configSlave
 import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
+import com.lynbrookrobotics.kapuchin.logging.Level
+import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
 import com.lynbrookrobotics.kapuchin.timing.Priority
@@ -40,6 +42,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(30, Ampere)
 
+    val startupFrictionCompensation by pref(1.4, Volt)
+
     val leftSlaveEscId by pref(11)
     val rightSlaveEscId by pref(13)
     val rightMasterEscId by pref(12)
@@ -49,25 +53,26 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val rightEscInversion by pref(true)
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, QuadEncoder)
+        configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
+        it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
     }
     val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit)
+        configSlave(it, operatingVoltage, currentLimit, startupFrictionCompensation)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
     }
     val leftLazyOutput = lazyOutput(leftMasterEsc)
 
     val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, QuadEncoder)
+        configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
+        it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
     }
     val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit)
+        configSlave(it, operatingVoltage, currentLimit, startupFrictionCompensation)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
-
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc)
 
@@ -113,7 +118,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
 
     private val driftTolerance by pref(1, DegreePerSecond)
-    private lateinit var startingAngle: Angle
+    private var startingAngle = 0.Degree
     val imu by hardw { ADIS16448_IMU() }
             .configure { startingAngle = it.angle.Degree }
             .verify("Gyro should not drift after calibration") {
@@ -127,7 +132,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     init {
         EventLoop.runOnTick { time ->
-            setOf(gyroInput, position, leftSpeed, rightSpeed).forEach {
+            setOf(gyroInput, position, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
                 it.optimizedRead(time, period)
             }
         }
