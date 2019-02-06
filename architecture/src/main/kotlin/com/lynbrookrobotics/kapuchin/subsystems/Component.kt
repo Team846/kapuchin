@@ -107,13 +107,12 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
         @Suppress("LeakingThis")
         clock.runOnTick(Last) { tickStart ->
             try {
-                @Suppress("UNNECESSARY_SAFE_CALL")
                 (routine ?: fallbackController)
-                        ?.invoke(thisAsThis, tickStart)
-                        ?.let { hardware.output(it) }
+                        .invoke(thisAsThis, tickStart)
+                        .let { hardware.output(it) }
             } catch (t: Throwable) {
                 routine?.resumeWithException(t) ?: log(Error, t) {
-                    "Exception running default controller"
+                    "$t Running Default Controller\nMessage:${t.message}"
                 }
             }
         }

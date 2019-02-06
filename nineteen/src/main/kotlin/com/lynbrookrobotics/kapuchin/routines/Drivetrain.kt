@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -30,7 +29,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
         val steeringVelocity = maxSpeed * steering
 
         val currentAngle = position.y.bearing
-        if (box(steering) != 0.Percent) startingAngle = -absSteering + currentAngle
+        if (!steering.isZero) startingAngle = -absSteering + currentAngle
 
         if (
                 speedL.isZero && speedR.isZero &&
@@ -56,19 +55,20 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 }
 
 
-suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, limelight: LimelightHardware) = startRoutine("point with limelight") {
+suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, speed: Velocity, limelight: LimelightHardware) = startRoutine("point with limelight") {
     val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
 
     val position by hardware.position.readOnTick.withoutStamps
-
-    val target = limelightAngle + position.bearing
+    val startingAngle = position.bearing
 
     controller { t ->
-        val error = target - position.bearing
+        val targetExists = limelightAngle != null
+
+        val error = limelightAngle ?: 0.Degree
         val pA = bearingKp * error
 
-        val targetL = +pA
-        val targetR = -pA
+        val targetL = (if(targetExists) speed else 0.FootPerSecond) + pA
+        val targetR = (if(targetExists) speed else 0.FootPerSecond) - pA
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
@@ -76,9 +76,7 @@ suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, limelight: 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
-        ).takeIf {
-            error.abs < tolerance
-        }
+        )
     }
 }
 
