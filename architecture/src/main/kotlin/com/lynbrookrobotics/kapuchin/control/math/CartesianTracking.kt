@@ -21,8 +21,9 @@ fun simpleVectorTracking(
         val theta = theta(sl, sr, trackLength)
 
         pos += Position(
-                x = s * cos(pos.bearing),
-                y = s * sin(pos.bearing),
+            //Using compass bearings not trig bearings
+                x = s * sin(pos.bearing),
+                y = s * cos(pos.bearing),
                 bearing = theta
         )
 
