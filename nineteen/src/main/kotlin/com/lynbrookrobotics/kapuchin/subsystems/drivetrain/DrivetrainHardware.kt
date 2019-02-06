@@ -4,28 +4,19 @@ import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
-import com.lynbrookrobotics.kapuchin.control.data.stampWith
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
-import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.TicksToSerial
-import com.lynbrookrobotics.kapuchin.hardware.configMaster
-import com.lynbrookrobotics.kapuchin.hardware.configSlave
-import com.lynbrookrobotics.kapuchin.hardware.lazyOutput
-import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
-import com.lynbrookrobotics.kapuchin.logging.Level
-import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.Priority
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.`±`
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.*
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
@@ -101,11 +92,17 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             .with(graph("Encoder Bearing", Degree)) { it.bearing }
 
     val leftPosition = sensor {
-        conversions.toLeftPosition(leftMasterEsc.getSelectedSensorPosition(idx)) stampWith it
+        conversions.toLeftPosition(
+            leftMasterEsc.getSelectedSensorPosition(idx) /
+            conversions.nativeEncoderCountMultiplier
+        ) stampWith it
     }.with(graph("Left Position", Foot))
 
     val rightPosition = sensor {
-        conversions.toRightPosition(rightMasterEsc.getSelectedSensorPosition(idx)) stampWith it
+        conversions.toRightPosition(
+            rightMasterEsc.getSelectedSensorPosition(idx) /
+            conversions.nativeEncoderCountMultiplier
+        ) stampWith it
     }.with(graph("Right Position", Foot))
 
     val leftSpeed = sensor {
@@ -117,22 +114,23 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }.with(graph("Right Speed", FootPerSecond))
 
 
-    private val driftTolerance by pref(1, DegreePerSecond)
-    private var startingAngle = 0.Degree
-    val imu by hardw { ADIS16448_IMU() }
-            .configure { startingAngle = it.angle.Degree }
-            .verify("Gyro should not drift after calibration") {
-                it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
-            }
-    val gyroInput = sensor(imu) {
-        GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
-    }
-            .with(graph("Bearing", Degree)) { it.angle }
-            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
+// todo: Causes major lag on the v13 RoboRIO image. DO NOT USE.
+//    private val driftTolerance by pref(1, DegreePerSecond)
+//    private var startingAngle = 0.Degree
+//    val imu by hardw { ADIS16448_IMU() }
+//            .configure { startingAngle = it.angle.Degree }
+//            .verify("Gyro should not drift after calibration") {
+//                it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
+//            }
+//    val gyroInput = sensor(imu) {
+//        GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
+//    }
+//            .with(graph("Bearing", Degree)) { it.angle }
+//            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
 
     init {
         EventLoop.runOnTick { time ->
-            setOf(gyroInput, position, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
+            setOf(position, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
                 it.optimizedRead(time, period)
             }
         }

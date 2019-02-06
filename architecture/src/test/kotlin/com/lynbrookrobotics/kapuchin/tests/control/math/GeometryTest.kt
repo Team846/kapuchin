@@ -1,12 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math
 
-import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
-import com.lynbrookrobotics.kapuchin.tests.anyDouble
-import com.lynbrookrobotics.kapuchin.tests.anyInt
-import info.kunalsheth.units.generated.Degree
-import info.kunalsheth.units.generated.Radian
-import info.kunalsheth.units.generated.Turn
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.tests.*
+import info.kunalsheth.units.generated.*
 import kotlin.math.absoluteValue
 import kotlin.test.Test
 

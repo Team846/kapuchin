@@ -1,15 +1,11 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
-import com.lynbrookrobotics.kapuchin.logging.Level.Warning
-import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
-import com.lynbrookrobotics.kapuchin.subsystems.climber.ForksComponent
-import com.lynbrookrobotics.kapuchin.subsystems.climber.HooksComponent
-import com.lynbrookrobotics.kapuchin.subsystems.climber.WinchComponent
-import info.kunalsheth.units.generated.Volt
-import info.kunalsheth.units.generated.times
-import info.kunalsheth.units.math.`±`
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.climber.*
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 suspend fun HooksComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     var state = false

@@ -1,21 +1,15 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.logging.Named
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.delay
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.withTimeout
-import com.lynbrookrobotics.kapuchin.routines.teleop.driveStraight
-import com.lynbrookrobotics.kapuchin.routines.teleop.singleStackTeleop
-import com.lynbrookrobotics.kapuchin.routines.teleop.teleop
-import com.lynbrookrobotics.kapuchin.routines.teleop.singleStackTeleop
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
-import com.lynbrookrobotics.kapuchin.subsystems.LiftHardware
+import com.lynbrookrobotics.kapuchin.routines.teleop.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.kapuchin.timing.scope
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async

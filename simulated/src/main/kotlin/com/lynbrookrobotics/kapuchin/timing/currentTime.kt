@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.math.nano
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 actual val currentTime: Time get() = System.nanoTime().nano(Second)

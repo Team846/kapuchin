@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
-import info.kunalsheth.units.generated.Angle
-import info.kunalsheth.units.generated.Turn
+import info.kunalsheth.units.generated.*
 
 private val t = 1.Turn
 private val ht = 0.5.Turn

@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
+import com.lynbrookrobotics.kapuchin.hardware.*
 import org.junit.Test
 
 class SubsystemHardwareTest {

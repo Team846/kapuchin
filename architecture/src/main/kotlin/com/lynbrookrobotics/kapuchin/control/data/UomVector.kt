@@ -1,12 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
-import info.kunalsheth.units.generated.Angle
-import info.kunalsheth.units.generated.Length
-import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.times
-import info.kunalsheth.units.math.avg
-import info.kunalsheth.units.math.cos
-import info.kunalsheth.units.math.sin
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 /**
  * Represents a 3D vector

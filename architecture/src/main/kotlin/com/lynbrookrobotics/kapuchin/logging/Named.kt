@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit
-import com.lynbrookrobotics.kapuchin.hardware.Sensor
+import com.lynbrookrobotics.kapuchin.hardware.*
 
 /**
  * Represents the context of an "important" object

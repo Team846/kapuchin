@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
-import com.lynbrookrobotics.kapuchin.timing.currentTime
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.math.avg
+import com.lynbrookrobotics.kapuchin.timing.*
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 /**
  * Represents data that has a time stamp
