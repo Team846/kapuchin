@@ -108,22 +108,23 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }.with(graph("Right Speed", FootPerSecond))
 
 
-    private val driftTolerance by pref(1, DegreePerSecond)
-    private var startingAngle = 0.Degree
-    val imu by hardw { ADIS16448_IMU() }
-            .configure { startingAngle = it.angle.Degree }
-            .verify("Gyro should not drift after calibration") {
-                it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
-            }
-    val gyroInput = sensor(imu) {
-        GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
-    }
-            .with(graph("Bearing", Degree)) { it.angle }
-            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
+// todo: Causes major lag on the v13 RoboRIO image. DO NOT USE.
+//    private val driftTolerance by pref(1, DegreePerSecond)
+//    private var startingAngle = 0.Degree
+//    val imu by hardw { ADIS16448_IMU() }
+//            .configure { startingAngle = it.angle.Degree }
+//            .verify("Gyro should not drift after calibration") {
+//                it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
+//            }
+//    val gyroInput = sensor(imu) {
+//        GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
+//    }
+//            .with(graph("Bearing", Degree)) { it.angle }
+//            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
 
     init {
         EventLoop.runOnTick { time ->
-            setOf(gyroInput, position, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
+            setOf(position, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
                 it.optimizedRead(time, period)
             }
         }
