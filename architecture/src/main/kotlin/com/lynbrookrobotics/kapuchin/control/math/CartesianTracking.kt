@@ -33,7 +33,7 @@ fun simpleVectorTracking(
 }
 
 class RotationMatrixTracking(
-        val trackLength: Length, init: Position
+        private val trackLength: Length, init: Position
 ) : (RotationMatrixTracking.Direction, Length) -> Position {
 
     enum class Direction {
@@ -56,7 +56,7 @@ class RotationMatrixTracking(
     fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
 
     override fun invoke(direction: Direction, s: Length): Position {
-        val angle = theta(0.Foot, s, trackLength)
+        val angle = theta(0.Foot, s, trackLength).let { if (direction == Direction.Left) it else -it }
         val out = when (direction) {
             Direction.Left -> RotationMatrix(angle).rzAbout(pos.left, pos.right)
             Direction.Right -> RotationMatrix(angle).rzAbout(pos.right, pos.left)

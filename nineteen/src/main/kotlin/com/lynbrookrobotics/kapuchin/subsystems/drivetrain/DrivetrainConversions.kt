@@ -91,8 +91,8 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
         val posR = toRightPosition(ticksR)
                 .let { if (flipOdometryRight) -it else it }
 
-        val left = matrixTracking(RotationMatrixTracking.Direction.Left, posL)
-        val right = matrixTracking(RotationMatrixTracking.Direction.Right, posR)
+        val left = matrixTracking(RotationMatrixTracking.Direction.Left, posR)
+        val right = matrixTracking(RotationMatrixTracking.Direction.Right, posL)
         xyPosition = Position(left.x + right.x, left.y + right.y, left.bearing + right.bearing)
         leftMovingForward = !posL.isNegative
         rightMovingForward = !posR.isNegative
