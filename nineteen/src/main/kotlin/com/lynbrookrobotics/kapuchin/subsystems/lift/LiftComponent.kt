@@ -10,7 +10,7 @@ import info.kunalsheth.units.generated.*
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware) {
 
-    val positionGains by pref { {Gain(12.Volt, 8.Inch)} }
+    val positionGains by pref (12, Volt, 8, Inch)
 
     //diameter
     val ballHeight by pref(13, Inch)

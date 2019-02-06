@@ -16,10 +16,12 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.milli
 import java.io.IOException
 
-private val configTimeout = if(HardwareInit.crashOnFailure) 1000 else 0
+
+val timeout = 1000
+private val configTimeout = if(HardwareInit.crashOnFailure) timeout else 0
 private val slowStatusFrameRate = 1000
 
-private operator fun ErrorCode.unaryPlus() = checkOk
+operator fun ErrorCode.unaryPlus() = checkOk
 val ErrorCode.checkOk: Unit
     get() {
         if (this != OK && HardwareInit.crashOnFailure)
