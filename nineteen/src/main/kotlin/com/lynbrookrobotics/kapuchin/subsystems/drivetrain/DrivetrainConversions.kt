@@ -87,7 +87,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
         val posL = toLeftPosition(ticksL)
                 .let { if (flipOdometryLeft) -it else it }
-        val posR = toLeftPosition(ticksR)
+        val posR = toRightPosition(ticksR)
                 .let { if (flipOdometryRight) -it else it }
 
         xyPosition = vectorTracking(posL, posR)
