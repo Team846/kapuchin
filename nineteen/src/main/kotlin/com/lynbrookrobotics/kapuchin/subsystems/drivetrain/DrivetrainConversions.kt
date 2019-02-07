@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.conversion.GearTrain
 import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
 import com.lynbrookrobotics.kapuchin.control.data.Position
 import com.lynbrookrobotics.kapuchin.control.math.RotationMatrixTracking
+import com.lynbrookrobotics.kapuchin.control.math.simpleVectorTracking
 import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.preferences.pref
 import info.kunalsheth.units.generated.*
@@ -86,15 +87,14 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     private var leftMovingForward = false
     private var rightMovingForward = false
     private val matrixTracking = RotationMatrixTracking(trackLength, xyPosition)
+//    private val tracking = simpleVectorTracking(trackLength, xyPosition)
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
         val posL = toLeftPosition(ticksL)
                 .let { if (flipOdometryLeft) -it else it }
         val posR = toRightPosition(ticksR)
                 .let { if (flipOdometryRight) -it else it }
 
-        val left = matrixTracking(RotationMatrixTracking.Direction.Left, posR)
-        val right = matrixTracking(RotationMatrixTracking.Direction.Right, posL)
-        xyPosition = Position(left.x + right.x, left.y + right.y, left.bearing + right.bearing)
+        xyPosition = matrixTracking(posL, posR)
         leftMovingForward = !posL.isNegative
         rightMovingForward = !posR.isNegative
     }

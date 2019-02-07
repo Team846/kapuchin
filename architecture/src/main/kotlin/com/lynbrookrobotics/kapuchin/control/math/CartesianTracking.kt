@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.avg
 import info.kunalsheth.units.math.cos
@@ -23,7 +24,7 @@ fun simpleVectorTracking(
         val theta = theta(sl, sr, trackLength)
 
         pos += Position(
-            //Using compass bearings not trig bearings
+                //Using compass bearings not trig bearings
                 x = s * sin(pos.bearing),
                 y = s * cos(pos.bearing),
                 bearing = theta
@@ -35,34 +36,25 @@ fun simpleVectorTracking(
 
 class RotationMatrixTracking(
         private val trackLength: Length, init: Position
-) : (RotationMatrixTracking.Direction, Length) -> Position {
+) : (Length, Length) -> Position {
 
-    enum class Direction {
-        Left, Right
+    var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
+        RotationMatrix(init.bearing) rz it + init.vector
+    }
+    var rightPos = UomVector(trackLength / 2, 0.Foot).let {
+        RotationMatrix(init.bearing) rz it + init.vector
     }
 
-    private val initBearing = init.bearing
-
-    private val pos = TwoSided(
-            UomVector(-trackLength / 2, 0.Foot),
-            UomVector(trackLength / 2, 0.Foot)
-    ).run {
-        val matrix = RotationMatrix(initBearing)
-        TwoSided(
-                matrix rz left + init.vector,
-                matrix rz right + init.vector
-        )
-    }
+    var lastBearing = init.bearing
 
     fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
 
-    override fun invoke(direction: Direction, s: Length): Position {
-        val angle = theta(0.Foot, s, trackLength).let { if (direction == Direction.Left) it else -it }
-        val out = when (direction) {
-            Direction.Left -> RotationMatrix(angle).rzAbout(pos.left, pos.right)
-            Direction.Right -> RotationMatrix(angle).rzAbout(pos.right, pos.left)
-        }
-        return Position(out.x, out.y, initBearing + angle)
+    override fun invoke(sl: Length, sr: Length): Position {
+        rightPos = RotationMatrix(theta(0.Foot, sr, trackLength)).rzAbout(leftPos, rightPos)
+        leftPos = RotationMatrix(theta(sl, 0.Foot, trackLength)).rzAbout(rightPos, leftPos)
+
+        lastBearing -= theta(sl, sr, trackLength)
+        return Position(avg(leftPos.x, rightPos.x), avg(leftPos.y, rightPos.y), lastBearing)
     }
 }
 
