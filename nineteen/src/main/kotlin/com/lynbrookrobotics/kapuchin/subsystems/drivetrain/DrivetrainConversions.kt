@@ -23,6 +23,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     private val rightTrim by pref(1.00621994)
     private val trackLength by pref(2.05, Foot)
 
+    val nativeEncoderCountMultiplier by pref(4)
 
     val encoder by pref {
         val encoderGear by pref(18)
@@ -30,7 +31,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
         val resolution by pref(1024)
         ({
             val gearing = GearTrain(encoderGear, wheelGear)
-            val nativeResolution = 4 * resolution
+            val nativeResolution = nativeEncoderCountMultiplier * resolution
 
             val enc = EncoderConversion(
                     resolution,
