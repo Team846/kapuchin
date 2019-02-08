@@ -10,6 +10,8 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
+import info.kunalsheth.units.math.sin
+import info.kunalsheth.units.math.abs
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     override val name: String = "Limelight"
@@ -35,14 +37,26 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         } else null) stampWith timeStamp(it)
     }
             .with(graph("Angle to Target", Degree)) { it ?: Double.NaN.Degree }
-
+    val skewAngle= sensor {
+        val dist = distanceToTarget.optimizedRead(it, syncThreshold).y
+        (if (targetExists() && dist != null) {
+            val ang = TODO()
+            val hor = l("thor")
+            val vert = l("tvert")
+            TODO()
+        } else null) stampWith timeStamp(it)
+    }
+    fun distanceToNormal(skewAngle: Angle, angleToTarget: Angle, distanceToTarget: Length){
+        distanceToTarget*sin(skewAngle-angleToTarget)/sin(skewAngle)
+    }
     val distanceToTarget = sensor {
         (if (targetExists()) {
             distanceAreaConstant / Math.sqrt(l("ta"))
         } else null) stampWith timeStamp(it)
     }
             .with(graph("Distance to Target", Foot)) { it ?: -1.Foot }
-
+    //val distanceToNormal = (distanceToTarget*(sin(abs(angleToTarget)-skewAngle))/sin(skewAngle))
+    //println ("DISTANCE TO NORMAL: $distancetoNormal")
     init {
         EventLoop.runOnTick { time ->
             setOf(angleToTarget, distanceToTarget).forEach {
