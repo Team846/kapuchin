@@ -85,10 +85,12 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     private var rightMovingForward = false
 
     private val matrixCache = (-8..8)
-            .flatMap { setOf(
-                    theta(toLeftPosition(it), 0.Foot, trackLength),
-                    theta(0.Foot, toRightPosition(it),trackLength)
-            ) }
+            .flatMap {
+                setOf(
+                        theta(toLeftPosition(it), 0.Foot, trackLength),
+                        theta(0.Foot, toRightPosition(it), trackLength)
+                )
+            }
             .map { it to RotationMatrix(it) }
             .toMap()
 

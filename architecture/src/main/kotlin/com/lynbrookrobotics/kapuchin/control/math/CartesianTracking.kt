@@ -46,22 +46,12 @@ class RotationMatrixTracking(
 
     private fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
 
-//    private fun Angle.rotationMatrix(): RotationMatrix {
-//        if (cache.contains(this)) {
-//            return cache[this]
-//        } else {
-//            val rm = RotationMatrix(this)
-//            cache.put(this, rm)
-//            return rm
-//        }
-//    }
-
     override fun invoke(sl: Length, sr: Length): Position {
         val tl = theta(sl, 0.Foot, trackLength)
-        val ml = cache[tl] ?: RotationMatrix(tl).also { println("cache miss l") }
-
         val tr = theta(0.Foot, sr, trackLength)
-        val mr = cache[tr] ?: RotationMatrix(tr).also { println("cache miss r") }
+
+        val ml = cache[tl] ?: RotationMatrix(tl).also { println("Cache miss L") }
+        val mr = cache[tr] ?: RotationMatrix(tr).also { println("Cache miss R") }
 
         leftPos = ml.rzAbout(rightPos, leftPos)
         rightPos = mr.rzAbout(leftPos, rightPos)
