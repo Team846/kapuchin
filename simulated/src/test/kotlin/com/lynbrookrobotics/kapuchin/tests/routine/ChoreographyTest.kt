@@ -10,15 +10,15 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.math.min
 
-class OrchestrationTest {
+class ChoreographyTest {
 
-    private class OrchestrationTestSH(id: Int) : TSH<OrchestrationTestSH, OrchestrationTestC>("OrchestrationTest Hardware $id")
-    private class OrchestrationTestC(id: Int) : TC<OrchestrationTestC, OrchestrationTestSH>(OrchestrationTestSH(id))
+    private class ChoreographyTestSH(id: Int) : TSH<ChoreographyTestSH, ChoreographyTestC>("ChoreographyTest Hardware $id")
+    private class ChoreographyTestC(id: Int) : TC<ChoreographyTestC, ChoreographyTestSH>(ChoreographyTestSH(id))
 
     @Test(timeout = 3 * 1000)
     fun `launchAll launches all routines`() = threadDumpOnFailiure {
         runBlocking {
-            val comps = List(15) { OrchestrationTestC(it) }
+            val comps = List(15) { ChoreographyTestC(it) }
             launchAll(
                     *comps.mapIndexed { i, c ->
                         suspend { c.countTo(i) }
@@ -35,7 +35,7 @@ class OrchestrationTest {
     fun `launchAll can be cancelled externally`() = threadDumpOnFailiure {
         runBlocking {
             val last = 10
-            val comps = List(last + 1) { OrchestrationTestC(it) }
+            val comps = List(last + 1) { ChoreographyTestC(it) }
 
             val j1 = launchAll(
                     *comps.mapIndexed { i, c ->
@@ -69,7 +69,7 @@ class OrchestrationTest {
     @Test(timeout = 3 * 1000)
     fun `runWhile runs only when its predicate is true`() = threadDumpOnFailiure {
         runBlocking {
-            val comps = List(10) { OrchestrationTestC(it) }
+            val comps = List(10) { ChoreographyTestC(it) }
             fun doSomething() = launchAll(
                     *comps.mapIndexed { i, c ->
                         suspend { c.countTo(i) }
