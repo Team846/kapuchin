@@ -67,9 +67,9 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
             name: String,
             setup: BoundSensorScope.() -> This.(Time) -> Output?
     ) {
-        val scope = BoundSensorScope(this)
+        val sensorScope = BoundSensorScope(this)
         try {
-            val controller = scope.run(setup)
+            val controller = sensorScope.run(setup)
             suspendCancellableCoroutine<Unit> { cont ->
                 routine = Routine(thisAsThis, name, controller, cont)
             }
@@ -80,7 +80,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
         } catch (t: Throwable) {
             log(Error, t) { "Exception running $name routine.\n${t.message}" }
         } finally {
-            scope.close()
+            sensorScope.close()
         }
     }
 
