@@ -1,11 +1,8 @@
 package com.lynbrookrobotics.kapuchin.control.math
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.logging.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.avg
-import info.kunalsheth.units.math.cos
-import info.kunalsheth.units.math.sin
+import info.kunalsheth.units.math.*
 
 private fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
 private fun s(sl: Length, sr: Length) = avg(sl, sr)
@@ -38,22 +35,22 @@ class RotationMatrixTracking(
         private val trackLength: Length, init: Position
 ) : (Length, Length) -> Position {
 
-    var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
+    private var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
         RotationMatrix(init.bearing) rz it + init.vector
     }
-    var rightPos = UomVector(trackLength / 2, 0.Foot).let {
+    private var rightPos = UomVector(trackLength / 2, 0.Foot).let {
         RotationMatrix(init.bearing) rz it + init.vector
     }
 
-    var lastBearing = init.bearing
+    private var lastBearing = init.bearing
 
-    fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
+    private fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
 
     override fun invoke(sl: Length, sr: Length): Position {
-        rightPos = RotationMatrix(theta(0.Foot, sr, trackLength)).rzAbout(leftPos, rightPos)
         leftPos = RotationMatrix(theta(sl, 0.Foot, trackLength)).rzAbout(rightPos, leftPos)
+        rightPos = RotationMatrix(theta(0.Foot, sr, trackLength)).rzAbout(leftPos, rightPos)
 
-        lastBearing -= theta(sl, sr, trackLength)
+        lastBearing += theta(sl, sr, trackLength)
         return Position(avg(leftPos.x, rightPos.x), avg(leftPos.y, rightPos.y), lastBearing)
     }
 }
