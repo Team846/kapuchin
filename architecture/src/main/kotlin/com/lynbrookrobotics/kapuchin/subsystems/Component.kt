@@ -65,9 +65,9 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
      */
     suspend fun startRoutine(
             name: String,
-            setup: SensorScope.() -> This.(Time) -> Output?
+            setup: BoundSensorScope.() -> This.(Time) -> Output?
     ) {
-        val scope = SensorScope(this)
+        val scope = BoundSensorScope(this)
         try {
             val controller = scope.run(setup)
             suspendCancellableCoroutine<Unit> { cont ->

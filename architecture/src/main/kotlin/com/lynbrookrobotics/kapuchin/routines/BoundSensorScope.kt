@@ -2,13 +2,11 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 
 /**
  * Utility to manage sensor use within subsystem routines
  *
- * Serves to setup and cleanup sensor update styles as needed by a subsystem routine
+ * Serves to setup and cleanup sensor strategies styles as needed by a subsystem routine
  *
  * @author Kunal
  * @see Component
@@ -17,14 +15,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
  *
  * @param c this subsystem's component
  */
-class SensorScope internal constructor(private val c: Component<*, *, *>) {
-
-    /**
-     * Stop all sensors in this routine from automatically updating
-     */
-    fun close() = cleanup.forEach { it.cancel() }
-
-    private val cleanup = mutableListOf<Cancel>()
+class BoundSensorScope internal constructor(private val c: Component<*, *, *>) : FreeSensorScope() {
 
     /**
      * Update this sensor's value right before every control loop update
@@ -38,15 +29,11 @@ class SensorScope internal constructor(private val c: Component<*, *, *>) {
      * Update this sensor's value on every `EventLoop` tick
      */
     val <Input> Sensor<Input>.readWithEventLoop
-        get() = Sensor.UpdateSource(this, startUpdates = { _ ->
-            cleanup += EventLoop.runOnTick { value = optimizedRead(it, c.hardware.syncThreshold) }
-        })
+        get() = readWithEventLoop(c.hardware.syncThreshold)
 
     /**
      * Update this sensor's value every time the property is accessed
      */
     val <Input> Sensor<Input>.readEagerly
-        get() = Sensor.UpdateSource(this, getValue = { _ ->
-            optimizedRead(currentTime, c.hardware.syncThreshold).also { value = it }
-        })
+        get() = readEagerly(c.hardware.syncThreshold)
 }
