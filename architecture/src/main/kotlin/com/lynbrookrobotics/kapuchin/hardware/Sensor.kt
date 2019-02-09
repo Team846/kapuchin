@@ -18,7 +18,7 @@ import kotlin.reflect.KProperty
  * @author Kunal
  * @see Grapher
  * @see SubsystemHardware
- * @see HardwareInit
+ * @see HardwareInitsyncThreshold
  * @see DelegateProvider
  *
  * @param Input type of sensor data being read
