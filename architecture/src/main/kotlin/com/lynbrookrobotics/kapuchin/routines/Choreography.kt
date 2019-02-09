@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.routines
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -20,9 +21,9 @@ import kotlinx.coroutines.launch
  * @param H type of this subsystem's hardware
  * @param Output type of this subsystem's output
  */
-fun CoroutineScope.coreography(
+fun CoroutineScope.startRoutine(
         name: String,
-        setup: FreeSensorScope.() -> suspend CoroutineScope.() -> Job
+        setup: FreeSensorScope.() -> suspend CoroutineScope.() -> Unit
 ) = launch {
     val named = Named(name)
     val sensorScope = FreeSensorScope()
@@ -39,3 +40,12 @@ fun CoroutineScope.coreography(
         sensorScope.close()
     }
 }
+
+/**
+ * Utility function to create a new sequence of subsystem routines
+ *
+ * @receiver this subsystem's component
+ * @param Time loop start time
+ * @return value to write to hardware or `null` to end the routine
+ */
+fun CoroutineScope.choreography(controller: suspend CoroutineScope.() -> Unit) = controller
