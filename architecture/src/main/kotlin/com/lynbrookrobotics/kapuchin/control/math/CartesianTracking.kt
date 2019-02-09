@@ -4,8 +4,8 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-private fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
-private fun s(sl: Length, sr: Length) = avg(sl, sr)
+fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
+fun s(sl: Length, sr: Length) = avg(sl, sr)
 
 // todo: unit test!
 fun simpleVectorTracking(
@@ -32,7 +32,7 @@ fun simpleVectorTracking(
 }
 
 class RotationMatrixTracking(
-        private val trackLength: Length, init: Position
+        private val trackLength: Length, init: Position, private val cache: Map<Angle, RotationMatrix> = emptyMap()
 ) : (Length, Length) -> Position {
 
     private var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
@@ -46,9 +46,25 @@ class RotationMatrixTracking(
 
     private fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
 
+//    private fun Angle.rotationMatrix(): RotationMatrix {
+//        if (cache.contains(this)) {
+//            return cache[this]
+//        } else {
+//            val rm = RotationMatrix(this)
+//            cache.put(this, rm)
+//            return rm
+//        }
+//    }
+
     override fun invoke(sl: Length, sr: Length): Position {
-        leftPos = RotationMatrix(theta(sl, 0.Foot, trackLength)).rzAbout(rightPos, leftPos)
-        rightPos = RotationMatrix(theta(0.Foot, sr, trackLength)).rzAbout(leftPos, rightPos)
+        val tl = theta(sl, 0.Foot, trackLength)
+        val ml = cache[tl] ?: RotationMatrix(tl).also { println("cache miss l") }
+
+        val tr = theta(0.Foot, sr, trackLength)
+        val mr = cache[tr] ?: RotationMatrix(tr).also { println("cache miss r") }
+
+        leftPos = ml.rzAbout(rightPos, leftPos)
+        rightPos = mr.rzAbout(leftPos, rightPos)
 
         lastBearing += theta(sl, sr, trackLength)
         return Position(avg(leftPos.x, rightPos.x), avg(leftPos.y, rightPos.y), lastBearing)

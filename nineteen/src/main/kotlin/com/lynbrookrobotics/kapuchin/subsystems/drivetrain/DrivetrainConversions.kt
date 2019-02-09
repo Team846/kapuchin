@@ -83,7 +83,16 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
 
     private var leftMovingForward = false
     private var rightMovingForward = false
-    private val matrixTracking = RotationMatrixTracking(trackLength, xyPosition)
+
+    private val matrixCache = (-8..8)
+            .flatMap { setOf(
+                    theta(toLeftPosition(it), 0.Foot, trackLength),
+                    theta(0.Foot, toRightPosition(it),trackLength)
+            ) }
+            .map { it to RotationMatrix(it) }
+            .toMap()
+
+    private val matrixTracking = RotationMatrixTracking(trackLength, xyPosition, matrixCache)
     //    private val tracking = simpleVectorTracking(trackLength, xyPosition)
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
         val posL = toLeftPosition(ticksL)
