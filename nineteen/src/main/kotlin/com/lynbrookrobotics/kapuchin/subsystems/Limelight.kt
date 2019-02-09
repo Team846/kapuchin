@@ -13,7 +13,6 @@ import kotlin.math.roundToInt
 import info.kunalsheth.units.math.sin
 import info.kunalsheth.units.math.cos
 import info.kunalsheth.units.math.tan
-import info.kunalsheth.units.generated.Angle
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     override val name: String = "Limelight"
@@ -24,6 +23,10 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     private val limelightLead by pref(16, Inch)
     private val distanceAreaConstant by pref(4.95534, Foot)
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
+    private val horshift by pref(-7.7537)
+    private val vershift by pref(29.7586, Degree)
+    private val horshift2 by pref(-27.0337, Degree)
+
 
     val distanceFromFront by pref(0, Inch)
 
@@ -44,9 +47,10 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     val skewAngle = sensor {
         val dist = distanceToTarget.optimizedRead(it, syncThreshold).y
         (if (targetExists() && dist != null) {
+
             val ts = l("ts").Degree
-            val toRadian: Double = Math.PI / 180.0
-            0.Degree
+
+            ((cos((ts * horshift)) * horshift2) + vershift)
         } else null) stampWith timeStamp(it)
     }
 
@@ -59,6 +63,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
             (distanceTo * sin(skew - angleTo) / sin(skew)) + distanceFromFront
         } else null) stampWith timeStamp(it)
     }
+
     val distanceToTarget = sensor {
         (if (targetExists()) {
             distanceAreaConstant / Math.sqrt(l("ta"))
