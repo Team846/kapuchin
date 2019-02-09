@@ -25,7 +25,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     private val distanceAreaConstant by pref(4.95534, Foot)
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
 
-    val distanceFromFront by pref(0, Inch)
+    val verticalDistanceFromCenter by pref(0, Inch)
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private fun targetExists() = l("tv").roundToInt() == 1
@@ -56,7 +56,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         val distanceTo = distanceToTarget.optimizedRead(it, syncThreshold).y
         val angleTo = angleToTarget.optimizedRead(it, syncThreshold).y
         (if (targetExists() && distanceTo != null && angleTo != null) {
-            (distanceTo * sin(skew - angleTo) / sin(skew)) + distanceFromFront
+            (distanceTo * sin(skew - angleTo) / sin(skew)) + verticalDistanceFromCenter
         } else null) stampWith timeStamp(it)
     }
     val distanceToTarget = sensor {
