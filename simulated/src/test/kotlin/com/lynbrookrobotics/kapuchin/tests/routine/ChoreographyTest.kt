@@ -53,7 +53,7 @@ class ChoreographyTest {
         }
     }
 
-    @Test(timeout = 6 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `choreographies can still run after one times out`() = threadDumpOnFailiure {
         runBlocking {
             val c = ChoreographyTestC()

@@ -57,9 +57,11 @@ fun choreography(controller: Block) = controller
  * @param blocks collection of functions to run in parallel
  * @return parent coroutine of the running routines
  */
-suspend fun runAll(vararg blocks: Block) = startRoutine("launchAll") {
+suspend fun runAll(vararg blocks: Block) = startRoutine("runAll") {
     choreography {
-        blocks.forEach { launch { it() } }
+        supervisorScope {
+            blocks.forEach { launch { it() } }
+        }
     }
 }
 

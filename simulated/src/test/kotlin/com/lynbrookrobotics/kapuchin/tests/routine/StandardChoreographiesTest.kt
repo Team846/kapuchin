@@ -18,7 +18,7 @@ class StandardChoreographiesTest {
     private class ChoreographyTestSH(id: Int) : TSH<ChoreographyTestSH, ChoreographyTestC>("StandardChoreographiesTest Hardware $id")
     private class ChoreographyTestC(id: Int) : TC<ChoreographyTestC, ChoreographyTestSH>(ChoreographyTestSH(id))
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 2 * 1000)
     fun `runAll launches all routines`() = threadDumpOnFailiure {
         runBlocking {
             val comps = List(15) { ChoreographyTestC(it) }
@@ -34,7 +34,24 @@ class StandardChoreographiesTest {
         }
     }
 
-    @Test(timeout = 5 * 1000)
+    @Test(timeout = 2 * 1000)
+    fun `runAll runs even after one job fails`() = threadDumpOnFailiure {
+        runBlocking {
+            val comps = List(15) { ChoreographyTestC(it) }
+            runAll(
+                    { error("This job intentionally fails") },
+                    *comps.mapIndexed { i, c ->
+                        choreography { c.countTo(i) }
+                    }.toTypedArray()
+            )
+
+            comps.forEachIndexed { i, c ->
+                c.checkCount(i, i)
+            }
+        }
+    }
+
+    @Test(timeout = 2 * 1000)
     fun `runAll can be cancelled externally`() = threadDumpOnFailiure {
         runBlocking {
             val last = 10
@@ -73,7 +90,7 @@ class StandardChoreographiesTest {
         }
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 2 * 1000)
     fun `runWhile runs only when its predicate is true`() = threadDumpOnFailiure {
         runBlocking {
             val comps = List(10) { ChoreographyTestC(it) }
