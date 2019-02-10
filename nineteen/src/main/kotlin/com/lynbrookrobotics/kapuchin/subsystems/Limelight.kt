@@ -13,6 +13,8 @@ import kotlin.math.roundToInt
 import info.kunalsheth.units.math.sin
 import info.kunalsheth.units.math.cos
 import info.kunalsheth.units.math.tan
+import kotlin.math.pow
+
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     override val name: String = "Limelight"
@@ -23,12 +25,14 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     private val limelightLead by pref(16, Inch)
     private val distanceAreaConstant by pref(4.95534, Foot)
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
-    private val horshift by pref(-7.7537)
-    private val vershift by pref(29.7586, Degree)
-    private val horshift2 by pref(-27.0337, Degree)
+    private val vshift1 by pref(20.141)
+    private val vshift2 by pref(0.968961)
+    private val quad1 by pref(-49.3353, Degree)
+    private val quad2 by pref(206.895, Degree)
+    private val quadTrans by pref(-147.572, Degree)
 
 
-    val distanceFromFront by pref(0, Inch)
+    private val distanceFromFront by pref(0, Inch)
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private fun targetExists() = l("tv").roundToInt() == 1
@@ -45,25 +49,28 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     }
             .with(graph("Angle to Target", Degree)) { it ?: Double.NaN.Degree }
     val skewAngle = sensor {
+        val ta = l("ta")
         val dist = distanceToTarget.optimizedRead(it, syncThreshold).y
+        val taMax = vshift1*(vshift2).pow(dist)
+        val ratio = ta/taMax
         (if (targetExists() && dist != null) {
+            ((quad1*(ratio).pow(2.0)) + (quad2*(ratio)) + quadTrans)
 
-            val ts = l("ts").Degree
-
-            ((cos((ts * horshift)) * horshift2) + vershift)
         } else null) stampWith timeStamp(it)
     }
 
     //this function is if the robot is angled toward the normal
     val distanceToNormal = sensor {
-        val skew = skewAngle.optimizedRead(it, syncThreshold).y!!
+        val skew = skewAngle.optimizedRead(it, syncThreshold).y
         val distanceTo = distanceToTarget.optimizedRead(it, syncThreshold).y
         val angleTo = angleToTarget.optimizedRead(it, syncThreshold).y
-        (if (targetExists() && distanceTo != null && angleTo != null) {
+        (if (targetExists() && distanceTo != null && angleTo != null && skew != null) {
             (distanceTo * sin(skew - angleTo) / sin(skew)) + distanceFromFront
         } else null) stampWith timeStamp(it)
     }
 
+    // This has to be fixed by accounting for skew angle
+    // Solved with the new LL update (2019.5)
     val distanceToTarget = sensor {
         (if (targetExists()) {
             distanceAreaConstant / Math.sqrt(l("ta"))
@@ -79,6 +86,8 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
             val positionOfTarget: Position = Position(distance * cos(robotAngleToTarget), distance * sin(robotAngleToTarget), skew)
         } else null) stampWith timeStamp(it)
     }
+
+
 
     init {
         EventLoop.runOnTick { time ->
