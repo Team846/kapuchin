@@ -16,8 +16,10 @@ class CartesianTrackingTest {
     @Test
     fun `Rotation`() {
         anyDouble.filter { it.absoluteValue > 1 }.map { 0.03 + 1 / it }.forEach { constant ->
-            val tracking = rotationMatrixTracking(2.Foot, Position(0.Foot, 0.Foot, 0.Degree))
-            val (x, y, _) = tracking(constant.milli(Metre), -constant.milli(Metre))
+            val tracking = RotationMatrixTracking(2.Foot, Position(0.Foot, 0.Foot, 0.Degree))
+            tracking(constant.milli(Metre), -constant.milli(Metre))
+            val x = tracking.x
+            val y = tracking.y
             x `is within?` (0.Foot `±` 0.1.Inch)
             y `is within?` (0.Foot `±` 0.1.Inch)
         }
@@ -26,22 +28,21 @@ class CartesianTrackingTest {
     @Test
     fun `Go forward 5 feet`() {
         var sum = 0.Foot
-        var pos = Position(0.Foot, 0.Foot, 0.Degree)
-        val tracking = rotationMatrixTracking(2.Foot, pos)
+        val tracking = RotationMatrixTracking(2.Foot, Position(0.Foot, 0.Foot, 0.Degree))
 
         while (sum < 5.Foot) {
             anyDouble.filter { it > 1.0 }.forEach { constant ->
                 val dist = 0.03.milli(Metre) + (0.1 / constant).milli(Metre)
-                pos = tracking(dist, dist)
+                tracking(dist, dist)
                 sum += dist
             }
         }
 
-        pos = tracking(5.Foot - sum, 5.Foot - sum)
+        tracking(5.Foot - sum, 5.Foot - sum)
 
-        pos.x `is within?` (0.Foot `±` 0.1.Inch)
-        pos.y `is within?` (5.Foot `±` 0.1.Inch)
-        pos.bearing `is equal to?` 0.Degree
+        tracking.x `is within?` (0.Foot `±` 0.1.Inch)
+        tracking.y `is within?` (5.Foot `±` 0.1.Inch)
+        tracking.bearing `is equal to?` 0.Degree
     }
 
     @Test
@@ -86,12 +87,9 @@ class CartesianTrackingTest {
     private fun arc(init: Position, radius: Length, angle: Angle, direction: Direction): Position {
         var sum = 0.Degree
 
-        val tracking = rotationMatrixTracking(2.Foot, init)
-
-        var pos = init
+        val tracking = RotationMatrixTracking(2.Foot, init)
 
         var r = radius
-        var count = 0
 
         while (sum < angle) {
             anyDouble.filter { it > 1.0 }.forEach { constant ->
@@ -108,15 +106,10 @@ class CartesianTrackingTest {
 
                 sum += theta
 
-                pos = tracking(distl, distr)
-                if (count == 100) {
-                    println("${pos.x.siValue} ${pos.y.siValue}")
-                    count = 0
-                }
-                count++
+                tracking(distl, distr)
             }
         }
 
-        return pos
+        return Position(tracking.x, tracking.y, tracking.bearing)
     }
 }

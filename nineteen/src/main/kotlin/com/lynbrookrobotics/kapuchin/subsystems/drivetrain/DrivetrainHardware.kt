@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
-import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
@@ -85,7 +84,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val position = sensor {
         ticksToSerial().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
-        conversions.xyPosition stampWith it
+        conversions.matrixTracking.run { Position(this.x, this.y, this.bearing) } stampWith it
     }
             .with(graph("X Location", Foot)) { it.x }
             .with(graph("Y Location", Foot)) { it.y }
@@ -93,15 +92,15 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val leftPosition = sensor {
         conversions.toLeftPosition(
-            leftMasterEsc.getSelectedSensorPosition(idx) /
-            conversions.nativeEncoderCountMultiplier
+                leftMasterEsc.getSelectedSensorPosition(idx) /
+                        conversions.nativeEncoderCountMultiplier
         ) stampWith it
     }.with(graph("Left Position", Foot))
 
     val rightPosition = sensor {
         conversions.toRightPosition(
-            rightMasterEsc.getSelectedSensorPosition(idx) /
-            conversions.nativeEncoderCountMultiplier
+                rightMasterEsc.getSelectedSensorPosition(idx) /
+                        conversions.nativeEncoderCountMultiplier
         ) stampWith it
     }.with(graph("Right Position", Foot))
 

@@ -31,22 +31,24 @@ fun simpleVectorTracking(
     }
 }
 
-fun rotationMatrixTracking(
-        trackLength: Length, init: Position, cache: Map<Angle, RotationMatrix> = emptyMap()
-) : (Length, Length) -> Position {
+class RotationMatrixTracking(
+        private var trackLength: Length, init: Position, private var cache: Map<Angle, RotationMatrix> = emptyMap()
+) : (Length, Length) -> Unit {
 
-    var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
+    private var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
         (RotationMatrix(init.bearing) rz it) + init.vector
     }
-    var rightPos = UomVector(trackLength / 2, 0.Foot).let {
+    private var rightPos = UomVector(trackLength / 2, 0.Foot).let {
         (RotationMatrix(init.bearing) rz it) + init.vector
     }
 
-    var lastBearing = init.bearing
+    var x = init.x
+    var y = init.y
+    var bearing = init.bearing
 
     fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
 
-    return fun(sl: Length, sr: Length): Position {
+    override fun invoke(sl: Length, sr: Length) {
         val tl = theta(sl, 0.Foot, trackLength)
         val tr = theta(0.Foot, sr, trackLength)
 
@@ -56,8 +58,9 @@ fun rotationMatrixTracking(
         leftPos = ml.rzAbout(rightPos, leftPos)
         rightPos = mr.rzAbout(leftPos, rightPos)
 
-        lastBearing += theta(sl, sr, trackLength)
-        return Position(avg(leftPos.x, rightPos.x), avg(leftPos.y, rightPos.y), lastBearing)
+        x = avg(leftPos.x, rightPos.x)
+        y = avg(leftPos.y, rightPos.y)
+        bearing += theta(sl, sr, trackLength)
     }
 }
 
