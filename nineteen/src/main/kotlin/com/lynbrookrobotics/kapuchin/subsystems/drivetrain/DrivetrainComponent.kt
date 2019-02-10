@@ -36,14 +36,23 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         TwoSided(PercentOutput(0.Percent))
     }
 
-    private val leftOutputGraph = graph("Left Output", Volt)
-    private val rightOutputGraph = graph("Right Output", Volt)
+    private val leftEscOutputGraph = graph("Left ESC Output", Volt)
+    private val rightEscOutputGraph = graph("Right ESC Output", Volt)
+
+    private val leftSoftwareOutputGraph = graph("Left Software Output", Each)
+    private val rightSoftwareOutputGraph = graph("Right Software Output", Each)
+
     override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
         leftLazyOutput(value.left)
         rightLazyOutput(value.right)
 
-        leftOutputGraph(currentTime, hardware.leftMasterEsc.motorOutputVoltage.Volt)
-        rightOutputGraph(currentTime, hardware.rightMasterEsc.motorOutputVoltage.Volt)
+        leftEscOutputGraph(currentTime, hardware.leftMasterEsc.motorOutputVoltage.Volt)
+        rightEscOutputGraph(currentTime, hardware.rightMasterEsc.motorOutputVoltage.Volt)
+
+        if(value.left is VelocityOutput && value.right is VelocityOutput) {
+            leftSoftwareOutputGraph(currentTime, (value.left as VelocityOutput).output.Each)
+            rightSoftwareOutputGraph(currentTime, (value.right as VelocityOutput).output.Each)
+        }
     }
 
     init {
