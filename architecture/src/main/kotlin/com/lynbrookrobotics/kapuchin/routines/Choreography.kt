@@ -26,24 +26,20 @@ suspend fun startRoutine(
         name: String,
         setup: FreeSensorScope.() -> Block
 ) {
-    println("1 startRoutine($name, ...)")
-
     val named = Named(name)
     val sensorScope = FreeSensorScope()
     try {
         val controller = sensorScope.run(setup)
         coroutineScope { controller() }
-        named.log(Debug) { "Completed choreography." }
-//    } catch (c: CancellationException) {
-//        named.log(Debug) { "Cancelled choreography.\n${c.message}" }
-//        throw c
-//    } catch (t: Throwable) {
-//        named.log(Error, t) { "Exception running choreography.\n${t.message}" }
+        named.log(Debug) { "Completed $name choreography." }
+    } catch (c: CancellationException) {
+        named.log(Debug) { "Cancelled $name choreography.\n${c.message}" }
+        throw c
+    } catch (t: Throwable) {
+        named.log(Error, t) { "Exception running $name routine.\n${t.message}" }
     } finally {
         sensorScope.close()
     }
-
-    println("2 startRoutine($name, ...)")
 }
 
 /**
