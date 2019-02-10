@@ -1,96 +1,152 @@
 package com.lynbrookrobotics.kapuchin.tests.routine
 
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import com.lynbrookrobotics.kapuchin.tests.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
-import kotlinx.coroutines.cancelAndJoin
+import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import kotlin.math.min
 
 class ChoreographyTest {
 
-    private class ChoreographyTestSH(id: Int) : TSH<ChoreographyTestSH, ChoreographyTestC>("ChoreographyTest Hardware $id")
-    private class ChoreographyTestC(id: Int) : TC<ChoreographyTestC, ChoreographyTestSH>(ChoreographyTestSH(id))
+    private class ChoreographyTestSH : TSH<ChoreographyTestSH, ChoreographyTestC>("ChoreographyTest Hardware")
+    private class ChoreographyTestC : TC<ChoreographyTestC, ChoreographyTestSH>(ChoreographyTestSH())
 
-    @Test(timeout = 3 * 1000)
-    fun `launchAll launches all routines`() = threadDumpOnFailiure {
-        runBlocking {
-            val comps = List(15) { ChoreographyTestC(it) }
-            launchAll(
-                    *comps.mapIndexed { i, c ->
-                        suspend { c.countTo(i) }
-                    }.toTypedArray()
-            ).join()
+    private suspend fun ChoreographyTestC.countTo(n: Int) = startRoutine("count to $n") {
+        log(Debug) { "Starting countTo($n)" }
+        var counter = 0
+        controller {
+            "countTo($n)".takeIf { counter++ < n }
+        }
+    }
 
-            comps.forEachIndexed { i, c ->
-                c.checkCount(i, i)
+    private suspend fun CoroutineScope.countTo(c: ChoreographyTestC, vararg nums: Int) = startRoutine("count to ${nums.contentToString()}") {
+        choreography {
+            nums.forEach {
+                c.countTo(it)
             }
         }
     }
 
+    private fun ChoreographyTestC.check(eight: Int, four: Int, six: Int, tolerance: Int = 0) {
+        checkCount(8, eight, tolerance)
+        checkCount(4, four, tolerance)
+        checkCount(6, six, tolerance)
+    }
+
     @Test(timeout = 3 * 1000)
-    fun `launchAll can be cancelled externally`() = threadDumpOnFailiure {
+    fun `choreographies run sequentially by ending themselves`() = threadDumpOnFailiure {
         runBlocking {
-            val last = 10
-            val comps = List(last + 1) { ChoreographyTestC(it) }
+            val c = ChoreographyTestC()
 
-            val j1 = launchAll(
-                    *comps.mapIndexed { i, c ->
-                        suspend { c.countTo(i + 1) }
-                    }.toTypedArray()
-            )
+            c.check(0, 0, 0)
+            countTo(c, 8)
+            c.check(8, 0, 0)
 
-            while (comps.all { it.out.count { it == "countTo(${last + 1})" } < 1 }) Thread.sleep(1)
-            j1.cancelAndJoin()
+            countTo(c, 4, 6)
+            c.check(8, 4, 6)
+        }
+    }
 
-            comps.forEachIndexed { i, c ->
-                c.checkCount(i + 1, 1, 1)
-            }
+    @Test(timeout = 6 * 1000)
+    fun `choreographies can still run after one times out`() = threadDumpOnFailiure {
+        runBlocking {
+            val c = ChoreographyTestC()
 
-            comps.forEach { it.out.clear() }
-            val j2 = launchAll(
-                    *comps.mapIndexed { i, c ->
-                        suspend { c.countTo(i) }
-                    }.toTypedArray()
-            )
-            while (comps[last].routine == null) Thread.sleep(1)
-            comps[last].routine!!.cancel()
-            j2.join()
-            comps.take(last).forEachIndexed { i, c ->
-                c.checkCount(i, i, 1)
-            }
-            comps[last].checkCount(last, 0, 1)
+
+            withTimeout(1.Second) { countTo(c, 8, Int.MAX_VALUE) }
+            c.checkCount(8, 8, 1)
+            c.checkCount(Int.MAX_VALUE, 2, 1)
+
+            countTo(c, 4)
+            c.check(8, 4, 0)
+
+            val j = launch { countTo(c, Int.MAX_VALUE, 6) }
+            delay(1.Second)
+            j.cancel()
+            c.checkCount(Int.MAX_VALUE, 12, 1)
+
+            countTo(c, 6)
+            c.check(8, 4, 6)
         }
     }
 
     @Test(timeout = 3 * 1000)
-    fun `runWhile runs only when its predicate is true`() = threadDumpOnFailiure {
-        runBlocking {
-            val comps = List(10) { ChoreographyTestC(it) }
-            fun doSomething() = launchAll(
-                    *comps.mapIndexed { i, c ->
-                        suspend { c.countTo(i) }
-                    }.toTypedArray()
-            )
+    fun `choreographies can be cancelled externally`() = threadDumpOnFailiure {
+        val c = ChoreographyTestC()
 
-            ::doSomething runWhile { false } `is equal to?` null
-
-            (::doSomething runWhile { true })!!.join()
-            comps.forEachIndexed { i, c -> c.checkCount(i, i) }
-
-            comps.forEach { it.out.clear() }
-
-            val last = comps.size - 1
-            val first = 3
-            val j = (::doSomething runWhile { comps[last].out.count { it == "countTo($last)" } < first })!!
-            while (j.isActive) {
-                Thread.sleep(1)
-                EventLoop.tick(currentTime)
-            }
-            comps.forEachIndexed { i, c -> c.checkCount(i, min(first, i), 1) }
+        c.out.clear()
+        val j1 = scope.launch {
+            countTo(c, 8)
         }
+        while (c.routine == null) Thread.sleep(1)
+        j1.cancel()
+        c.routine `is equal to?` null
+        c.check(0, 0, 0, 1)
+
+        c.out.clear()
+        val j2 = scope.launch {
+            countTo(c, 4)
+        }
+        while (c.routine == null) Thread.sleep(1)
+        c.routine!!.cancel()
+        c.routine `is equal to?` null
+        while (j2.isActive) Thread.sleep(1)
+        c.check(0, 0, 0, 1)
+
+        c.out.clear()
+        val j3 = scope.launch {
+            launch {
+                countTo(c, 8)
+            }.join()
+
+            launch {
+                countTo(c, 4, 6)
+            }.join()
+        }
+        while (c.routine == null) Thread.sleep(1)
+        j3.cancel()
+        c.routine `is equal to?` null
+        c.check(0, 0, 0, 1)
+
+        c.out.clear()
+        val j4 = scope.launch {
+            launch {
+                countTo(c, 8)
+            }.join()
+
+            launch {
+                countTo(c, 4, 6)
+            }.join()
+        }
+        while (c.out.count { it == "countTo(8)" } < 1) Thread.sleep(1)
+        c.routine!!.cancel()
+        while (j4.isActive) Thread.sleep(1)
+        c.check(1, 4, 6, 1)
+    }
+
+    @Test(timeout = 2 * 1000)
+    fun `choreographies can be cancelled internally`() = threadDumpOnFailiure {
+        val c = ChoreographyTestC()
+
+        val j1 = scope.launch { countTo(c, 8) }
+        while (!j1.isActive) Thread.sleep(1)
+        val j2 = scope.launch { countTo(c, 4) }
+        while (j1.isActive) Thread.sleep(1)
+        runBlocking { j2.join() }
+        c.check(0, 4, 0)
+
+        c.out.clear()
+        val j3 = scope.launch { countTo(c, 8, 6) }
+        while (!j3.isActive) Thread.sleep(1)
+        val j4 = scope.launch { c.countTo(4) }
+        while (j4.isActive) Thread.sleep(1)
+        runBlocking { j2.join() }
+        c.check(0, 4, 0)
     }
 }
