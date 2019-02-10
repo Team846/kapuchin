@@ -16,18 +16,19 @@ data class Subsystems(
         val electricalHardware: ElectricalSystemHardware
 ) {
 
-    fun teleop() = launchAll(
-            { drivetrain.teleop(driverHardware) }
-    ).also {
+    fun teleop() = scope.launch {
         HAL.observeUserProgramTeleop()
         System.gc()
+
+        runAll(
+                { drivetrain.teleop(driverHardware) }
+        )
     }
 
-    fun warmup() = launchAll(
-            { drivetrain.warmup() }
-    ).also {
-        HAL.observeUserProgramTeleop()
-        System.gc()
+    fun warmup() = scope.launch {
+        runAll(
+                { drivetrain.warmup() }
+        )
     }
 
     fun backAndForthAuto() = scope.launch {
@@ -54,7 +55,7 @@ data class Subsystems(
 //
 //            delay(1.Second)
 //        }
-    }.also { HAL.observeUserProgramTeleop() }
+    }
 
     companion object : Named by Named("Subsystems Initializer") {
         fun concurrentInit() = runBlocking {

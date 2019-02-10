@@ -2,9 +2,7 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop // weird bug, not included with wildcard import
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
@@ -14,7 +12,7 @@ import kotlin.coroutines.resumeWithException
 /**
  * Represents an active subsystem routine
  *
- * Routines run until their `controller` returns null, they throw an exception, or they are cancelled.
+ * Routines run until their controller returns null, they throw an exception, or they are cancelled.
  *
  * @author Kunal
  * @see Component
@@ -50,51 +48,3 @@ class Routine<C, H, Output> internal constructor(
                 c.fallbackController(c, t)
             }
 }
-
-/**
- * Create a new coroutine running all `routines` in parallel
- *
- * @param routines collection of functions to run in parallel
- * @return parent coroutine of the running routines
- */
-fun launchAll(vararg routines: suspend () -> Unit) = scope.launch {
-    routines.forEach { launch { it() } }
-}
-
-/**
- * Create a new coroutine running the function while the predicate is met
- *
- * @receiver function returning a new coroutine
- * @param predicate function to check if the coroutine should still be running
- * @return coroutine which runs until `predicate` returns false
- */
-infix fun (() -> Job).runWhile(predicate: () -> Boolean) = if (predicate()) {
-    val job = this()
-    var runOnTick: Cancel? = null
-
-    runOnTick = EventLoop.runOnTick {
-        if (!predicate()) {
-            runOnTick?.cancel()
-            job.cancel()
-        }
-    }
-
-    job
-} else null
-
-/**
- * Pauses the coroutine for some time
- *
- * @param time period to delay for
- */
-suspend fun delay(time: Time) =
-        delay(time.milli(Second).toLong())
-
-/**
- * Cancels the given function if it takes too long
- *
- * @param time maximum time to run the function for
- * @param block function to run
- */
-suspend fun withTimeout(time: Time, block: suspend () -> Unit) =
-        withTimeoutOrNull(time.milli(Second).toLong()) { block() }
