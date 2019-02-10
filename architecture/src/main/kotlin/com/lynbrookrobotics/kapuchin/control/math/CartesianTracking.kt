@@ -31,27 +31,27 @@ fun simpleVectorTracking(
     }
 }
 
-class RotationMatrixTracking(
-        private val trackLength: Length, init: Position, private val cache: Map<Angle, RotationMatrix> = emptyMap()
+fun rotationMatrixTracking(
+        trackLength: Length, init: Position, cache: Map<Angle, RotationMatrix> = emptyMap()
 ) : (Length, Length) -> Position {
 
-    private var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
-        RotationMatrix(init.bearing) rz it + init.vector
+    var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
+        (RotationMatrix(init.bearing) rz it) + init.vector
     }
-    private var rightPos = UomVector(trackLength / 2, 0.Foot).let {
-        RotationMatrix(init.bearing) rz it + init.vector
+    var rightPos = UomVector(trackLength / 2, 0.Foot).let {
+        (RotationMatrix(init.bearing) rz it) + init.vector
     }
 
-    private var lastBearing = init.bearing
+    var lastBearing = init.bearing
 
-    private fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
+    fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
 
-    override fun invoke(sl: Length, sr: Length): Position {
+    return fun(sl: Length, sr: Length): Position {
         val tl = theta(sl, 0.Foot, trackLength)
         val tr = theta(0.Foot, sr, trackLength)
 
-        val ml = cache[tl] ?: RotationMatrix(tl).also { println("Cache miss L") }
-        val mr = cache[tr] ?: RotationMatrix(tr).also { println("Cache miss R") }
+        val ml = cache[tl] ?: RotationMatrix(tl)//.also { println("Cache miss L") }
+        val mr = cache[tr] ?: RotationMatrix(tr)//.also { println("Cache miss R") }
 
         leftPos = ml.rzAbout(rightPos, leftPos)
         rightPos = mr.rzAbout(leftPos, rightPos)
