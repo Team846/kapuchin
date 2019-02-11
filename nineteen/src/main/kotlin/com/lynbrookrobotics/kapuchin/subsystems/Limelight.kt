@@ -25,11 +25,11 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     private val limelightLead by pref(16, Inch)
     private val distanceAreaConstant by pref(4.95534, Foot)
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
-    private val vshift1 by pref(20.141)
-    private val vshift2 by pref(0.968961)
-    private val quad1 by pref(-49.3353, Degree)
-    private val quad2 by pref(206.895, Degree)
-    private val quadTrans by pref(-147.572, Degree)
+//    private val vshift1 by pref(20.141)
+////    private val vshift2 by pref(0.968961)
+////    private val quad1 by pref(-49.3353, Degree)
+////    private val quad2 by pref(206.895, Degree)
+////    private val quadTrans by pref(-147.572, Degree)
 
 
     private val distanceFromFront by pref(0, Inch)
@@ -66,7 +66,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         val distanceTo = distanceToTarget.optimizedRead(it, syncThreshold).y
         val angleTo = angleToTarget.optimizedRead(it, syncThreshold).y
         (if (targetExists() && distanceTo != null && angleTo != null && skew != null) {
-            (distanceTo * sin(skew - angleTo) / sin(skew)) + distanceFromFront
+            ((distanceTo * sin(skew - angleTo) / sin(skew)) + distanceFromFront)
         } else null) stampWith timeStamp(it)
     }
 

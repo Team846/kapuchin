@@ -52,7 +52,7 @@ class FunkyRobot : RobotBase() {
 
                 currentJob =
                            subsystems::teleop runWhile { isEnabled && isOperatorControl }
-                        ?: subsystems::limelightTracking runWhile { isEnabled && isAutonomous }
+                        ?: subsystems::LimelightMedian runWhile { isEnabled && isAutonomous }
                         ?: subsystems::warmup runWhile { isDisabled }
                         ?: doNothing
             }

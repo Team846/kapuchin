@@ -36,6 +36,12 @@ data class Subsystems(
         System.gc()
     }
 
+    fun LimelightMedian() = scope.launch {
+        drivetrain.toMedian(limelightHardware, 3.FootPerSecond)
+    }.also {
+        HAL.observeUserProgramAutonomous()
+        System.gc()
+    }
 
     fun warmup() = launchAll(
             { drivetrain.warmup() }

@@ -55,6 +55,37 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
     }
 }
 
+suspend fun DrivetrainComponent.toMedian(limelight: LimelightHardware, speed: Velocity) = startRoutine("toMedian") {
+    val distanceToNormal by limelight.distanceToNormal.readOnTick.withoutStamps
+    val leftPos by hardware.leftPosition.readOnTick.withoutStamps
+    val rightPos by hardware.rightPosition.readOnTick.withoutStamps
+    val position= (leftPos + rightPos)/2
+    val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
+    val targetExists = limelightAngle != null
+
+    val error = limelightAngle ?: 0.Degree
+    val pA = bearingKp * error
+
+    val targetL = (if(targetExists) speed else 0.FootPerSecond) + pA
+    val targetR = (if(targetExists) speed else 0.FootPerSecond) - pA
+
+    val nativeL = hardware.conversions.nativeConversion.native(targetL)
+    val nativeR = hardware.conversions.nativeConversion.native(targetR)
+    controller {
+        if (position <= distanceToNormal!!){
+            TwoSided(
+                    VelocityOutput(velocityGains, nativeL),
+                    VelocityOutput(velocityGains, nativeR)
+            )
+        } else {
+            TwoSided(
+                    VelocityOutput(velocityGains, 0.0),
+                    VelocityOutput(velocityGains, 0.0)
+            )
+        }
+    }
+}
+
 suspend fun DrivetrainComponent.pointWithLimelight(tolerance: Angle, speed: Velocity, limelight: LimelightHardware) = startRoutine("point with limelight") {
     val limelightAngle by limelight.angleToTarget.readOnTick.withoutStamps
 
