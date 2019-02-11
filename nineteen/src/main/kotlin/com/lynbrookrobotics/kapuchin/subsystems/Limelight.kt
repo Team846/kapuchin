@@ -79,7 +79,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     }
             .with(graph("Distance to Target", Foot)) { it ?: -1.Foot }
 
-//    val targetPosition = sensor {
+//    val targetPosition2 = sensor {
 //
 //        val distance = distanceToTarget.optimizedRead(100.milli(Second), 100.milli(Second)).y
 //        val skew = skewAngle.optimizedRead(100.milli(Second), 100.milli(Second)).y
@@ -90,7 +90,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
 //    }
 
     // Returns an array of x, y, and skew angle
-    val targetPosWithTheta = sensor {
+    val targetPosition = sensor {
         val camtran = l2("camtran")
         val x = camtran[0]
         val y = camtran[1]

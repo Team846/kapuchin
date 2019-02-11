@@ -72,6 +72,9 @@ suspend fun DrivetrainComponent.toMedian(limelight: LimelightHardware, speed: Ve
     val nativeL = hardware.conversions.nativeConversion.native(targetL)
     val nativeR = hardware.conversions.nativeConversion.native(targetR)
     controller {
+
+        println("Distance to normal is $distanceToNormal")
+        println("Target exists: $targetExists")
         if (position <= distanceToNormal!!){
             TwoSided(
                     VelocityOutput(velocityGains, nativeL),
