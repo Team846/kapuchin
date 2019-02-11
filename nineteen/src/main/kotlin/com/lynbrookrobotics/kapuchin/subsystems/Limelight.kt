@@ -103,7 +103,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         val skew = camtran[4]
 
         (if(targetExists()) {
-             doubleArrayOf(skew)
+             skew.Degree
         } else null) stampWith timeStamp(it)
     }
 
