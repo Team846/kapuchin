@@ -25,7 +25,7 @@ class TicksToSerial(
             yield(TicksToSerialValue(buffer[i].toInt()))
         }
 
-        if(gotten > 0.8 * buffer.size) println("TicksToSerial buffer ≥ 90% full.")
+        if(gotten > 0.8 * buffer.size) println("TicksToSerial buffer ≥ 80% full. (Received $gotten bytes)")
     }
 
     override fun close() {
