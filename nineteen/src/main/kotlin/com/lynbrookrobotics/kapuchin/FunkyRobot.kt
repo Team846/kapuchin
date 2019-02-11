@@ -50,11 +50,11 @@ class FunkyRobot : RobotBase() {
             if (!currentJob.isActive) {
                 System.gc()
 
-                currentJob =
-                           subsystems::teleop runWhile { isEnabled && isOperatorControl }
-                        ?: subsystems::LimelightMedian runWhile { isEnabled && isAutonomous }
-                        ?: subsystems::warmup runWhile { isDisabled }
-                        ?: doNothing
+                currentJob = scope.launch {
+                    runWhile({ isEnabled && isOperatorControl }, { subsystems.teleop() })
+                    runWhile({ isEnabled && isAutonomous }, { subsystems.backAndForthAuto() })
+                    runWhile({ isDisabled }, { subsystems.warmup() })
+                }
             }
         }
     }

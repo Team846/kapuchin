@@ -8,7 +8,6 @@ dependencies {
 
 //    implementation project(":architecture:jvmfrc")
     compileOnly 'com.github.Team846.2019-preseason:jvmfrc:01cffb1a47'
-    compileOnly 'com.github.juchong:ADIS16448-RoboRIO-Driver:master-SNAPSHOT'
 
     implementation wpi.deps.wpilib()
     implementation wpi.deps.vendor.java()
