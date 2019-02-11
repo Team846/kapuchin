@@ -79,6 +79,14 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     }
             .with(graph("Distance to Target", Foot)) { it ?: -1.Foot }
 
+    // Takes "z" from the camtran array (this is supposedly the distance to target)
+    val distancetoTarget2 = sensor {
+        val dist = l2("camtran")[2]
+        (if (targetExists()) {
+            dist
+        } else null) stampWith timeStamp(it)
+    }
+
 //    val targetPosition2 = sensor {
 //
 //        val distance = distanceToTarget.optimizedRead(100.milli(Second), 100.milli(Second)).y
