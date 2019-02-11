@@ -70,6 +70,15 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         } else null) stampWith timeStamp(it)
     }
 
+    val distancetoNormal2 = sensor {
+        val skew = skewAngle.optimizedRead(it, syncThreshold).y
+        val distanceTo = distancetoTarget2.optimizedRead(it, syncThreshold).y
+        val angleTo = angleToTarget.optimizedRead(it, syncThreshold).y
+        (if (targetExists() && distanceTo != null && angleTo != null && skew != null) {
+            ((distanceTo * sin(skew - angleTo) / sin(skew)) + distanceFromFront)
+        } else null) stampWith timeStamp(it)
+    }
+
     // This has to be fixed by accounting for skew angle
     // Solved with the new LL update (2019.5)
     val distanceToTarget = sensor {
@@ -83,7 +92,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     val distancetoTarget2 = sensor {
         val dist = l2("camtran")[2]
         (if (targetExists()) {
-            dist
+            dist.Inch
         } else null) stampWith timeStamp(it)
     }
 

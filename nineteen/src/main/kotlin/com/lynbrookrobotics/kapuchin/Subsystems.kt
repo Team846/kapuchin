@@ -37,7 +37,14 @@ data class Subsystems(
     }
 
     fun LimelightMedian() = scope.launch {
-        drivetrain.toMedian(limelightHardware, 1.5.FootPerSecond)
+        drivetrain.toMedian(limelightHardware, (1.5).FootPerSecond)
+    }.also {
+        HAL.observeUserProgramAutonomous()
+        System.gc()
+    }
+
+    fun LimelightMedianCam() = scope.launch {
+        drivetrain.toMedianCam(limelightHardware, (1.5).FootPerSecond)
     }.also {
         HAL.observeUserProgramAutonomous()
         System.gc()
