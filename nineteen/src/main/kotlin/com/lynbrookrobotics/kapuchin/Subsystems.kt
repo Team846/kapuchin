@@ -4,11 +4,9 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 data class Subsystems(
@@ -18,26 +16,46 @@ data class Subsystems(
         val lineScannerHardware: LineScannerHardware
 ) {
 
-    fun teleop() = launchAll(
-            { drivetrain.teleop(driverHardware) }
-    ).also {
-        HAL.observeUserProgramTeleop()
-        System.gc()
+    suspend fun teleop() {
+        runAll(
+                { drivetrain.teleop(driverHardware) },
+                {
+                    HAL.observeUserProgramTeleop()
+                    System.gc()
+                }
+        )
     }
 
-    fun warmup() = launchAll(
-            { drivetrain.warmup() }
-    ).also {
-        HAL.observeUserProgramTeleop()
-        System.gc()
+    suspend fun warmup() {
+        runAll(
+                { drivetrain.warmup() }
+        )
     }
 
-    fun lineTracking() = scope.launch {
-        while (true)
-            drivetrain.pointWithLineScanner(3.FootPerSecond, lineScannerHardware)
-    }.also {
-        HAL.observeUserProgramAutonomous()
-        System.gc()
+    suspend fun backAndForthAuto() {
+        //        while (true) {
+//            withTimeout(1.Second) {
+//                drivetrain.driveStraight(
+//                        8.Foot, 0.Degree,
+//                        1.Inch, 2.Degree,
+//                        2.FootPerSecondSquared,
+//                        3.FootPerSecond
+//                )
+//            }
+//
+//            delay(1.Second)
+//
+//            withTimeout(1.Second) {
+//                drivetrain.driveStraight(
+//                        -8.Foot, 0.Degree,
+//                        1.Inch, 2.Degree,
+//                        2.FootPerSecondSquared,
+//                        3.FootPerSecond
+//                )
+//            }
+//
+//            delay(1.Second)
+//        }
     }
 
     companion object : Named by Named("Subsystems Initializer") {

@@ -19,7 +19,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("warmup") {
             val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
             conv.accumulateOdometry(l, r)
         }
-        val (x, y, theta) = conv.xyPosition
+        val (x, y, _) = Position(conv.matrixTracking.x, conv.matrixTracking.y, conv.matrixTracking.bearing)
 
 
         val targetA = 1.Turn * r()

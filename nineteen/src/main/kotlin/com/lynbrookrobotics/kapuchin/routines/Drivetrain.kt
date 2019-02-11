@@ -18,6 +18,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 
     val targetGraph = graph("Target Angle", Degree)
     val errorGraph = graph("Error Angle", Degree)
+    val speedGraph = graph("Teleop Speed", FootPerSecond)
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
@@ -43,6 +44,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 
         val targetL = forwardVelocity + steeringVelocity + pA
         val targetR = forwardVelocity - steeringVelocity - pA
+
+        speedGraph(t, avg(targetL, targetR))
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
