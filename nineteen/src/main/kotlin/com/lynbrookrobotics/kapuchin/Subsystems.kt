@@ -5,11 +5,9 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 data class Subsystems(
@@ -18,18 +16,20 @@ data class Subsystems(
         val electricalHardware: ElectricalSystemHardware
 ) {
 
-    fun teleop() = launchAll(
-            { drivetrain.teleop(driverHardware) }
-    ).also {
-        HAL.observeUserProgramTeleop()
-        System.gc()
+    suspend fun teleop() {
+        runAll(
+                { drivetrain.teleop(driverHardware) },
+                {
+                    HAL.observeUserProgramTeleop()
+                    System.gc()
+                }
+        )
     }
 
-    fun warmup() = launchAll(
-            { drivetrain.warmup() }
-    ).also {
-        HAL.observeUserProgramTeleop()
-        System.gc()
+    suspend fun warmup() {
+        runAll(
+                { drivetrain.warmup() }
+        )
     }
 
     fun followWaypoints() = scope.launch {
@@ -43,7 +43,7 @@ data class Subsystems(
         delay(1.Second)
     }
 
-    fun backAndForthAuto() = scope.launch {
+    suspend fun backAndForthAuto() {
         //        while (true) {
 //            withTimeout(1.Second) {
 //                drivetrain.driveStraight(
@@ -67,7 +67,7 @@ data class Subsystems(
 //
 //            delay(1.Second)
 //        }
-    }.also { HAL.observeUserProgramTeleop() }
+    }
 
     companion object : Named by Named("Subsystems Initializer") {
         fun concurrentInit() = runBlocking {

@@ -9,19 +9,23 @@ class TicksToSerial(
 ) : Closeable {
 
     val device = SerialPort(115200, port).apply {
-        setReadBufferSize(5 * 1000)
+        setReadBufferSize(2000)
         setTimeout(0.01)
         setWriteBufferSize(1)
     }
 
+    private val buffer = ByteArray(2000)
+
     operator fun invoke() = sequence {
-        val buffer = ByteArray(1)
-        repeat(device.bytesReceived) {
-            // DO NOT USE WPILIB's `read(..)` FUNCTION
-            // it creates 1 or 2 new byte arrays every time you call it...
-            SerialPortJNI.serialRead(port.value.toByte(), buffer, 1)
-            yield(TicksToSerialValue(buffer[0].toInt()))
+        val recieved = device.bytesReceived
+
+        val gotten = SerialPortJNI.serialRead(port.value.toByte(), buffer, recieved)
+
+        repeat(gotten) { i ->
+            yield(TicksToSerialValue(buffer[i].toInt()))
         }
+
+        if(gotten > 0.8 * buffer.size) println("TicksToSerial buffer ≥ 90% full.")
     }
 
     override fun close() {

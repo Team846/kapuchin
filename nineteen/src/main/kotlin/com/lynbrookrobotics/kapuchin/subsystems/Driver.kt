@@ -6,7 +6,9 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Joystick
+import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -15,6 +17,8 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val priority = Priority.RealTime
     override val period = 20.milli(Second)
     override val syncThreshold = 3.milli(Second)
+
+    val station by hardw { DriverStation.getInstance() }
 
     val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
         it.name == "T.16000M"
