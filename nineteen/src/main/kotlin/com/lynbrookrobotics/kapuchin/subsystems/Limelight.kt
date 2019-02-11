@@ -37,6 +37,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private fun targetExists() = l("tv").roundToInt() == 1
     private fun timeStamp(t: Time) = t - l("tl").milli(Second)
+    private fun l2(key: String) = table.getEntry(key).getDoubleArray(doubleArrayOf(0.0))
 
     val angleToTarget = sensor {
         val dist = distanceToTarget.optimizedRead(it, syncThreshold).y
@@ -48,16 +49,16 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         } else null) stampWith timeStamp(it)
     }
             .with(graph("Angle to Target", Degree)) { it ?: Double.NaN.Degree }
-    val skewAngle = sensor {
-        val ta = l("ta")
-        val dist = distanceToTarget.optimizedRead(it, syncThreshold).y
-        val taMax = vshift1*(vshift2).pow(dist)
-        val ratio = ta/taMax
-        (if (targetExists() && dist != null) {
-            ((quad1*(ratio).pow(2.0)) + (quad2*(ratio)) + quadTrans)
-
-        } else null) stampWith timeStamp(it)
-    }
+//    val skewAngle = sensor {
+//        val ta = l("ta")
+//        val dist = distanceToTarget.optimizedRead(it, syncThreshold).y
+//        val taMax = vshift1*(vshift2).pow(dist)
+//        val ratio = ta/taMax
+//        (if (targetExists() && dist != null) {
+//            ((quad1*(ratio).pow(2.0)) + (quad2*(ratio)) + quadTrans)
+//
+//        } else null) stampWith timeStamp(it)
+//    }
 
     //this function is if the robot is angled toward the normal
     val distanceToNormal = sensor {
@@ -84,6 +85,25 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         val robotAngleToTarget = angleToTarget.optimizedRead(100.milli(Second), 100.milli(Second)).y
         (if (targetExists() && distance != null && robotAngleToTarget != null && skew != null) {
             val positionOfTarget: Position = Position(distance * cos(robotAngleToTarget), distance * sin(robotAngleToTarget), skew)
+        } else null) stampWith timeStamp(it)
+    }
+
+    val targetPos = sensor {
+        val camtran = l2("camtran")
+        val x = camtran[0]
+        val y = camtran[1]
+
+        (if(targetExists()) {
+            doubleArrayOf(x, y)
+        } else null) stampWith timeStamp(it)
+    }
+
+    val skewAngle = sensor{
+        val camtran = l2("camtran")
+        val skew = camtran[4]
+
+        (if(targetExists()) {
+             doubleArrayOf(skew)
         } else null) stampWith timeStamp(it)
     }
 
