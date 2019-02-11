@@ -35,18 +35,30 @@ class RotationMatrixTracking(
         private var trackLength: Length, init: Position, private var cache: Map<Angle, RotationMatrix> = emptyMap()
 ) : (Length, Length) -> Unit {
 
-    private var leftPos = UomVector(-trackLength / 2, 0.Foot).let {
-        (RotationMatrix(init.bearing) rz it) + init.vector
-    }
-    private var rightPos = UomVector(trackLength / 2, 0.Foot).let {
-        (RotationMatrix(init.bearing) rz it) + init.vector
+    private var lpx: Length
+    private var lpy: Length
+    private var rpx: Length
+    private var rpy: Length
+
+    init {
+        UomVector(-trackLength / 2, 0.Foot).let {
+            (RotationMatrix(init.bearing) rz it) + init.vector
+        }.let { (lpx, lpy) ->
+            this.lpx = lpx
+            this.lpy = lpy
+        }
+
+        UomVector(trackLength / 2, 0.Foot).let {
+            (RotationMatrix(init.bearing) rz it) + init.vector
+        }.let { (rpx, rpy) ->
+            this.rpx = rpx
+            this.rpy = rpy
+        }
     }
 
     var x = init.x
     var y = init.y
     var bearing = init.bearing
-
-    fun RotationMatrix.rzAbout(origin: UomVector<Length>, that: UomVector<Length>) = (this rz (that - origin)) + origin
 
     override fun invoke(sl: Length, sr: Length) {
         val tl = theta(sl, 0.Foot, trackLength)
@@ -55,56 +67,24 @@ class RotationMatrixTracking(
         val ml = cache[tl] ?: RotationMatrix(tl)//.also { println("Cache miss L") }
         val mr = cache[tr] ?: RotationMatrix(tr)//.also { println("Cache miss R") }
 
-        leftPos = ml.rzAbout(rightPos, leftPos)
-        rightPos = mr.rzAbout(leftPos, rightPos)
+        // copy of previous state
+        val olpx = lpx
+        val olpy = lpy
+        val orpx = rpx
+        val orpy = rpy
 
-        x = avg(leftPos.x, rightPos.x)
-        y = avg(leftPos.y, rightPos.y)
+        // do matrix operations without creating new objects
+        val olpxMorpx = olpx - orpx
+        val olpyMorpy = olpy - orpy
+
+        lpx = ml.rzComponentX(olpxMorpx, olpyMorpy) + orpx
+        lpy = ml.rzComponentY(olpxMorpx, olpyMorpy) + orpy
+
+        rpx = mr.rzComponentX(-olpxMorpx, -olpyMorpy) + olpx
+        rpy = mr.rzComponentY(-olpxMorpx, -olpyMorpy) + olpy
+
+        x = avg(lpx, rpx)
+        y = avg(lpy, lpy)
         bearing += theta(sl, sr, trackLength)
     }
 }
-
-//class RotationMatrixTracking(
-//        empiricalThetaPerTick: TwoSided<Angle>, trackLength: Length, init: Position
-//) : (Sequence<RotationMatrixTracking.Ticks>, Angle) -> Position {
-//
-//    enum class Ticks {
-//        LeftForward, RightForward,
-//        LeftBackward, RightBackward
-//    }
-//
-//    private var pos = TwoSided(
-//            UomVector(-trackLength / 2, 0.Foot),
-//            UomVector(trackLength / 2, 0.Foot)
-//    ).run {
-//        val mtrx = RotationMatrix(init.bearing)
-//
-//        TwoSided(
-//                mtrx rz left + init.vector,
-//                mtrx rz right + init.vector
-//        )
-//    }
-//
-//    private val lf = RotationMatrix(empiricalThetaPerTick.left)
-//    private val lb = RotationMatrix(-empiricalThetaPerTick.left)
-//    private val rf = RotationMatrix(empiricalThetaPerTick.right)
-//    private val rb = RotationMatrix(-empiricalThetaPerTick.right)
-//
-//    fun RotationMatrix.rzAbout(that: UomVector<Length>, origin: UomVector<Length>) = (this rz (that - origin)) + origin
-//
-//    override operator fun invoke(
-//            feedback: Sequence<Ticks>,
-//            finalBearing: Angle
-//    ): Position {
-//        pos = feedback.fold(pos) { acc, tick ->
-//            when (tick) {
-//                Ticks.LeftForward -> lf.rzAbout(acc.left, acc.right)
-//                Ticks.RightForward -> rf.rzAbout(acc.left, acc.right)
-//                Ticks.LeftBackward -> lb.rzAbout(acc.left, acc.right)
-//                Ticks.RightBackward -> lf.rzAbout(acc.left, acc.right)
-//            }
-//        }.copy(bearing = finalBearing)
-//
-//        return pos
-//    }
-//}

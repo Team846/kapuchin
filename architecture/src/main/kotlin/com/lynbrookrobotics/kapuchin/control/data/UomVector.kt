@@ -109,3 +109,14 @@ infix fun RotationMatrix.rz(that: UomVector<Length>) = that.run {
             z
     )
 }
+
+fun RotationMatrix.rzComponentX(x: Length, y: Length) =
+        x * cos + y * sin
+
+
+fun RotationMatrix.rzComponentY(x: Length, y: Length) =
+        -x * sin + cos * y
+
+
+fun RotationMatrix.rzComponentZ(x: Length, y: Length, z: Length) =
+        z
