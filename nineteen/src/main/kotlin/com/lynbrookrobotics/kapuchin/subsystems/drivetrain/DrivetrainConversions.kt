@@ -78,19 +78,28 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
                     .let { if (flipRightSpeed) -it else it }
                     .let { if (rightMovingForward) it else -it }
 
-    var xyPosition = Position(0.Foot, 0.Foot, 0.Degree)
-        private set
-
     private var leftMovingForward = false
     private var rightMovingForward = false
-    private val vectorTracking = simpleVectorTracking(trackLength, xyPosition)
+
+    private val matrixCache = (-8..8)
+            .flatMap {
+                setOf(
+                        theta(toLeftPosition(it), 0.Foot, trackLength),
+                        theta(0.Foot, toRightPosition(it), trackLength)
+                )
+            }
+            .map { it to RotationMatrix(it) }
+            .toMap()
+
+    val matrixTracking = RotationMatrixTracking(trackLength, Position(0.Foot, 0.Foot, 0.Degree), matrixCache)
+    //    private val tracking = simpleVectorTracking(trackLength, xyPosition)
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
         val posL = toLeftPosition(ticksL)
                 .let { if (flipOdometryLeft) -it else it }
         val posR = toRightPosition(ticksR)
                 .let { if (flipOdometryRight) -it else it }
 
-        xyPosition = vectorTracking(posL, posR)
+        matrixTracking(posL, posR)
         leftMovingForward = !posL.isNegative
         rightMovingForward = !posR.isNegative
     }
