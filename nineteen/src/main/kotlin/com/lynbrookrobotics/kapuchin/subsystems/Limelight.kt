@@ -78,23 +78,26 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         } else null) stampWith timeStamp(it)
     }
             .with(graph("Distance to Target", Foot)) { it ?: -1.Foot }
-    val targetPosition = sensor {
 
-        val distance = distanceToTarget.optimizedRead(100.milli(Second), 100.milli(Second)).y
-        val skew = skewAngle.optimizedRead(100.milli(Second), 100.milli(Second)).y
-        val robotAngleToTarget = angleToTarget.optimizedRead(100.milli(Second), 100.milli(Second)).y
-        (if (targetExists() && distance != null && robotAngleToTarget != null && skew != null) {
-            val positionOfTarget: Position = Position(distance * cos(robotAngleToTarget), distance * sin(robotAngleToTarget), skew)
-        } else null) stampWith timeStamp(it)
-    }
+//    val targetPosition = sensor {
+//
+//        val distance = distanceToTarget.optimizedRead(100.milli(Second), 100.milli(Second)).y
+//        val skew = skewAngle.optimizedRead(100.milli(Second), 100.milli(Second)).y
+//        val robotAngleToTarget = angleToTarget.optimizedRead(100.milli(Second), 100.milli(Second)).y
+//        (if (targetExists() && distance != null && robotAngleToTarget != null && skew != null) {
+//            val positionOfTarget: Position = Position(distance * cos(robotAngleToTarget), distance * sin(robotAngleToTarget), skew)
+//        } else null) stampWith timeStamp(it)
+//    }
 
-    val targetPos = sensor {
+    // Returns an array of x, y, and skew angle
+    val targetPosWithTheta = sensor {
         val camtran = l2("camtran")
         val x = camtran[0]
         val y = camtran[1]
+        val theta = camtran[4]
 
         (if(targetExists()) {
-            doubleArrayOf(x, y)
+            doubleArrayOf(x, y, theta)
         } else null) stampWith timeStamp(it)
     }
 
