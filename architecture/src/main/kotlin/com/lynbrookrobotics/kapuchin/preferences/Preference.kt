@@ -92,6 +92,7 @@ expect fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
  * Helps organize and manage hot-configurable preferences
  *
  * @author Kunal
+ * @see RobotHardware
  * @see SubsystemHardware
  * @see Component
  * @see DelegateProvider
