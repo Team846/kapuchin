@@ -58,6 +58,29 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
     }
 }
 
+suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("point with line scanner") {
+    val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
+
+    controller {
+        val errorA = linePosition?.let {
+            -atan(it / lineScannerLead)
+        } ?: 0.Degree
+
+        val pA = bearingKp * errorA
+
+        val targetL = +pA + speed
+        val targetR = -pA + speed
+      
+        val nativeL = hardware.conversions.nativeConversion.native(targetL)
+        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        )
+    }
+}
+
 suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("teleop") {
     val position by hardware.position.readOnTick.withStamps
     val dadt = differentiator(::div, position.x, position.y.bearing)
@@ -81,6 +104,7 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
 
         val targetL = speed + pA
         val targetR = speed - pA
+                
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
