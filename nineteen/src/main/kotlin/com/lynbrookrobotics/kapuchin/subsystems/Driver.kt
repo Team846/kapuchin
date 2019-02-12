@@ -53,12 +53,6 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
 
     val manualOverride = s { -joystickMapping(operator.y.Each) }
 
-    // CLIMBER
-    val deployHooks = s { operator[RightOne] && operator[RightSix] }
-    val deployForks = s { operator[RightThree] }
-    val climb = s { driver[LeftOne] }
-    val manualClimb = s { operator[RightFour] }
-
     // DRIVETRAIN
     val accelerator = s { -joystickMapping(driver.y.Each) }
     val steering = s { joystickMapping(wheel.x.Each) }
