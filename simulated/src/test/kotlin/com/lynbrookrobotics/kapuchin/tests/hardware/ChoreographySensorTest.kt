@@ -7,7 +7,8 @@ import com.lynbrookrobotics.kapuchin.tests.*
 import com.lynbrookrobotics.kapuchin.tests.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import info.kunalsheth.units.math.avg
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -23,10 +24,10 @@ class ChoreographySensorTest {
 
     private class ChoreographySensorTestC : TC<ChoreographySensorTestC, ChoreographySensorTestSH>(ChoreographySensorTestSH())
 
-    @Test(timeout = 2 * 1000)
-    fun `sensors read on tick are in sync`() = threadDumpOnFailiure {
+    @Test(timeout = 8 * 1000)
+    fun `sensors getting old are in sync`() = threadDumpOnFailiure {
         runBlocking {
-            val name = "sensors read on tick are in sync"
+            val name = "sensors getting old are in sync"
             ChoreographySensorTestC().run {
                 startChoreo(name) {
                     val a by hardware.sensorA.getOld.withStamps
@@ -37,6 +38,9 @@ class ChoreographySensorTest {
 
                     choreography {
                         for (i in 1..10) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             checkInSync(hardware.syncThreshold, a, b) `is equal to?` true
                             currentTime `is greater than?` a.x
                             currentTime `is greater than?` b.x
@@ -50,10 +54,10 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 4 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `sensors read on event loop are in sync`() = threadDumpOnFailiure {
         runBlocking {
-            val name = "sensors read on tick are in sync"
+            val name = "sensors read on event loop are in sync"
             ChoreographySensorTestC().run {
                 startChoreo(name) {
                     val st = hardware.syncThreshold
@@ -62,6 +66,9 @@ class ChoreographySensorTest {
                     var lastStamp = currentTime
                     choreography {
                         for (i in 1..10) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             if (i % 2 == 0) EventLoop.tick(currentTime)
 
                             checkInSync(hardware.syncThreshold, a, b) `is equal to?` true
@@ -78,7 +85,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 8 * 1000)
     fun `sensors read eagerly are eager and efficient`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read eagerly are eager and efficient"
@@ -89,6 +96,9 @@ class ChoreographySensorTest {
                     val b by hardware.sensorB.readEagerly(st).withStamps
                     choreography {
                         for (i in 1..10) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             val a1 = a
                             val b1 = b
                             val a2 = a
@@ -145,6 +155,9 @@ class ChoreographySensorTest {
                     val b2 by hardware.sensorB.readEagerly(st).withStamps
                     choreography {
                         for (i in 1..10) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             a1 `is equal to?` a2
                             b1 `is equal to?` b2
                         }
@@ -171,7 +184,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 5 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `sensor lambdas are released upon choreography completion`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensor lambdas are released upon choreography completion"
@@ -179,11 +192,13 @@ class ChoreographySensorTest {
 
                 val ogClockJobs = clock.jobsToRun.size
                 val ogElJobs = EventLoop.jobsToRun.size
-                fun check() {
-                    while (clock.jobsToRun.size > ogClockJobs) Thread.sleep(1)
+                suspend fun check() {
+                    while (clock.jobsToRun.size > ogClockJobs) {
+                        delay(1.milli(Second))
+                    }
                     while (EventLoop.jobsToRun.size > ogElJobs) {
                         EventLoop.tick(currentTime)
-                        Thread.sleep(1)
+                        delay(1.milli(Second))
                     }
                 }
 
@@ -208,6 +223,10 @@ class ChoreographySensorTest {
 
                     choreography {
                         for (i in 1..5) {
+                            countTo(i)
+                            checkCount(i, i)
+                            EventLoop.tick(currentTime)
+
                             a1.y `is equal to?` a4
                             a2.y `is equal to?` a5
                             a3.y `is equal to?` a6
@@ -240,6 +259,10 @@ class ChoreographySensorTest {
 
                     choreography {
                         for (i in 1..5) {
+                            countTo(i)
+                            checkCount(i, i)
+                            EventLoop.tick(currentTime)
+
                             a1.y `is equal to?` a4
                             a2.y `is equal to?` a5
                             a3.y `is equal to?` a6
@@ -255,8 +278,11 @@ class ChoreographySensorTest {
                 choreography()
                 check()
 
-                val j2 = scope.launch { choreography() }
-                while (!j2.isActive) Thread.sleep(1)
+                val j2 = scope.launch {
+                    delay(10.milli(Second))
+                    choreography()
+                }
+                while (!j2.isActive) delay(1.milli(Second))
                 j2.cancel()
                 check()
 
@@ -267,11 +293,12 @@ class ChoreographySensorTest {
                 check()
 
                 val j5 = scope.launch {
+                    delay(10.milli(Second))
                     choreography()
                     choreography()
                     choreography()
                 }
-                while (!j5.isActive) Thread.sleep(1)
+                while (!j5.isActive) delay(1.milli(Second))
                 j5.cancel()
                 check()
 

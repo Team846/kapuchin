@@ -2,11 +2,13 @@ package com.lynbrookrobotics.kapuchin.tests.hardware
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import com.lynbrookrobotics.kapuchin.tests.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import info.kunalsheth.units.math.avg
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -152,11 +154,13 @@ class RoutineSensorTest {
 
                 val ogClockJobs = clock.jobsToRun.size
                 val ogElJobs = EventLoop.jobsToRun.size
-                fun check() {
-                    while (clock.jobsToRun.size > ogClockJobs) Thread.sleep(1)
+                suspend fun check() {
+                    while (clock.jobsToRun.size > ogClockJobs) {
+                        delay(1.milli(Second))
+                    }
                     while (EventLoop.jobsToRun.size > ogElJobs) {
                         EventLoop.tick(currentTime)
-                        Thread.sleep(1)
+                        delay(1.milli(Second))
                     }
                 }
 
@@ -179,6 +183,8 @@ class RoutineSensorTest {
 
                     var runs = 5
                     controller {
+                        if(runs % 3 == 0) EventLoop.tick(currentTime)
+
                         a1.y `is equal to?` a4
                         a2.y `is equal to?` a5
                         a3.y `is equal to?` a6
@@ -209,6 +215,8 @@ class RoutineSensorTest {
 
                     var runs = 5
                     controller {
+                        if(runs % 3 == 0) EventLoop.tick(currentTime)
+
                         a1.y `is equal to?` a4
                         a2.y `is equal to?` a5
                         a3.y `is equal to?` a6
@@ -224,20 +232,20 @@ class RoutineSensorTest {
                 routine()
                 check()
 
-                val j1 = scope.launch { routine() }
-                while (routine == null) Thread.sleep(1)
+                scope.launch { routine() }
+                while (routine == null) delay(1.milli(Second))
                 routine!!.cancel()
                 check()
 
                 val j2 = scope.launch { routine() }
-                while (!j2.isActive) Thread.sleep(1)
+                while (!j2.isActive) delay(1.milli(Second))
                 j2.cancel()
                 check()
 
-                val j3 = badRoutine()
+                badRoutine()
                 check()
 
-                val j4 = scope.launch { badRoutine() }
+                scope.launch { badRoutine() }
                 check()
 
                 val j5 = scope.launch {
@@ -245,7 +253,7 @@ class RoutineSensorTest {
                     routine()
                     routine()
                 }
-                while (routine == null) Thread.sleep(1)
+                while (routine == null) delay(1.milli(Second))
                 j5.cancel()
                 check()
 
@@ -255,7 +263,7 @@ class RoutineSensorTest {
                     routine()
                     routine()
                 }
-                while (routine == null) Thread.sleep(1)
+                while (routine == null) delay(1.milli(Second))
                 routine!!.cancel()
                 j6.join()
                 check()
