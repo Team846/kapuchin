@@ -7,7 +7,8 @@ import com.lynbrookrobotics.kapuchin.tests.*
 import com.lynbrookrobotics.kapuchin.tests.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import info.kunalsheth.units.math.avg
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -23,7 +24,7 @@ class ChoreographySensorTest {
 
     private class ChoreographySensorTestC : TC<ChoreographySensorTestC, ChoreographySensorTestSH>(ChoreographySensorTestSH())
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 1 * 1000)
     fun `sensors read on tick are in sync`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read on tick are in sync"
@@ -78,7 +79,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 1 * 1000)
     fun `sensors read eagerly are eager and efficient`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read eagerly are eager and efficient"
@@ -131,7 +132,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 1 * 1000)
     fun `sensors are read efficiently`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors are read efficiently"
@@ -171,7 +172,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 5 * 1000)
+    @Test(timeout = 1 * 1000)
     fun `sensor lambdas are released upon choreography completion`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensor lambdas are released upon choreography completion"
@@ -179,11 +180,13 @@ class ChoreographySensorTest {
 
                 val ogClockJobs = clock.jobsToRun.size
                 val ogElJobs = EventLoop.jobsToRun.size
-                fun check() {
-                    while (clock.jobsToRun.size > ogClockJobs) Thread.sleep(1)
+                suspend fun check() {
+                    while (clock.jobsToRun.size > ogClockJobs) {
+                        delay(1.milli(Second))
+                    }
                     while (EventLoop.jobsToRun.size > ogElJobs) {
                         EventLoop.tick(currentTime)
-                        Thread.sleep(1)
+                        delay(1.milli(Second))
                     }
                 }
 
@@ -255,8 +258,11 @@ class ChoreographySensorTest {
                 choreography()
                 check()
 
-                val j2 = scope.launch { choreography() }
-                while (!j2.isActive) Thread.sleep(1)
+                val j2 = scope.launch {
+                    delay(10.milli(Second))
+                    choreography()
+                }
+                while (!j2.isActive) delay(1.milli(Second))
                 j2.cancel()
                 check()
 
@@ -267,11 +273,12 @@ class ChoreographySensorTest {
                 check()
 
                 val j5 = scope.launch {
+                    delay(10.milli(Second))
                     choreography()
                     choreography()
                     choreography()
                 }
-                while (!j5.isActive) Thread.sleep(1)
+                while (!j5.isActive) delay(1.milli(Second))
                 j5.cancel()
                 check()
 
