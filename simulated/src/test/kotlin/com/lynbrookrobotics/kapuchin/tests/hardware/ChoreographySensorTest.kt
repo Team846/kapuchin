@@ -24,7 +24,7 @@ class ChoreographySensorTest {
 
     private class ChoreographySensorTestC : TC<ChoreographySensorTestC, ChoreographySensorTestSH>(ChoreographySensorTestSH())
 
-    @Test(timeout = 1 * 1000)
+    @Test(timeout = 10 * 1000)
     fun `sensors read on tick are in sync`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read on tick are in sync"
@@ -38,6 +38,9 @@ class ChoreographySensorTest {
 
                     choreography {
                         for (i in 1..10) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             checkInSync(hardware.syncThreshold, a, b) `is equal to?` true
                             currentTime `is greater than?` a.x
                             currentTime `is greater than?` b.x
@@ -63,6 +66,9 @@ class ChoreographySensorTest {
                     var lastStamp = currentTime
                     choreography {
                         for (i in 1..10) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             if (i % 2 == 0) EventLoop.tick(currentTime)
 
                             checkInSync(hardware.syncThreshold, a, b) `is equal to?` true
@@ -79,7 +85,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 1 * 1000)
+    @Test(timeout = 10 * 1000)
     fun `sensors read eagerly are eager and efficient`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read eagerly are eager and efficient"
@@ -90,6 +96,9 @@ class ChoreographySensorTest {
                     val b by hardware.sensorB.readEagerly(st).withStamps
                     choreography {
                         for (i in 1..10) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             val a1 = a
                             val b1 = b
                             val a2 = a
@@ -105,7 +114,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 1 * 1000)
+    @Test(timeout = 10 * 1000)
     fun `sensors are updated once before controller initialization`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors are updated once before controller initialization"
@@ -132,7 +141,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 1 * 1000)
+    @Test(timeout = 10 * 1000)
     fun `sensors are read efficiently`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors are read efficiently"
@@ -146,6 +155,9 @@ class ChoreographySensorTest {
                     val b2 by hardware.sensorB.readEagerly(st).withStamps
                     choreography {
                         for (i in 1..10) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             a1 `is equal to?` a2
                             b1 `is equal to?` b2
                         }
@@ -172,7 +184,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 1 * 1000)
+    @Test(timeout = 10 * 1000)
     fun `sensor lambdas are released upon choreography completion`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensor lambdas are released upon choreography completion"
@@ -211,6 +223,9 @@ class ChoreographySensorTest {
 
                     choreography {
                         for (i in 1..5) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             a1.y `is equal to?` a4
                             a2.y `is equal to?` a5
                             a3.y `is equal to?` a6
@@ -243,6 +258,9 @@ class ChoreographySensorTest {
 
                     choreography {
                         for (i in 1..5) {
+                            countTo(i)
+                            checkCount(i, i)
+
                             a1.y `is equal to?` a4
                             a2.y `is equal to?` a5
                             a3.y `is equal to?` a6
