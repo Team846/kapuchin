@@ -32,7 +32,7 @@ data class Subsystems(
         )
     }
 
-    fun followWaypoints() = scope.launch {
+    suspend fun followWaypoints() {
         drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 5.Foot), 2.Inch)
         delay(1.Second)
         drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 5.Foot), 2.Inch)

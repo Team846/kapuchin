@@ -72,7 +72,7 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
         val (pt, p) = position
 
         val angularVelocity = dadt(position.x, position.y.bearing)
-        val targetA = atan2(target.y - p.y, target.x - p.x)
+        val targetA = atan2(target.x - p.x, target.y - p.y)
         val errorA = targetA `coterminal -` p.bearing
         val pA = bearingKp * errorA - bearingKd * angularVelocity
 
