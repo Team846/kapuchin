@@ -171,7 +171,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 4 * 1000)
+    @Test(timeout = 5 * 1000)
     fun `sensor lambdas are released upon choreography completion`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensor lambdas are released upon choreography completion"
