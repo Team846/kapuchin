@@ -11,11 +11,9 @@ import edu.wpi.first.wpilibj.Joystick
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
+class DriverHardware : RobotHardware<DriverHardware>() {
     override val name = "Driver"
     override val priority = Priority.RealTime
-    override val period = 20.milli(Second)
-    override val syncThreshold = 3.milli(Second)
 
     val station by hardw { DriverStation.getInstance() }
 

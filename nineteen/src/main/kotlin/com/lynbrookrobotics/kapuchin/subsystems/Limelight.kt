@@ -12,11 +12,9 @@ import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
 
 
-class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
+class LimelightHardware : RobotHardware<LimelightHardware>() {
     override val name = "Limelight"
     override val priority = Priority.Lowest
-    override val period = 20.milli(Second)
-    override val syncThreshold = 3.milli(Second)
 
     private val limelightLead by pref(16, Inch)
     private val distanceAreaConstant by pref(4.95534, Foot)
@@ -63,7 +61,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     init {
         EventLoop.runOnTick { time ->
             setOf(roughAngleToTarget, roughDistanceToTarget, camtranTargetPosition).forEach {
-                it.optimizedRead(time, period)
+                it.optimizedRead(time, 1.Second)
             }
         }
     }
