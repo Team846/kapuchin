@@ -76,7 +76,7 @@ class ChoreographyTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `choreographies can be cancelled externally`() = threadDumpOnFailiure {
         val c = ChoreographyTestC()
 
@@ -86,6 +86,7 @@ class ChoreographyTest {
         }
         while (c.routine == null) Thread.sleep(1)
         j1.cancel()
+        while (c.routine != null) Thread.sleep(1)
         c.routine `is equal to?` null
         c.check(0, 0, 0, 1)
 
