@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import info.kunalsheth.units.generated.*
 
 /**
  * Represents a robot subsystem's hardware.
@@ -20,17 +19,16 @@ import info.kunalsheth.units.generated.*
  * @param This type of child class
  * @param C type of this subsystem's component
  */
-abstract class SubsystemHardware<This, C> : RobotHardware<This>()
-        where This : SubsystemHardware<This, C>,
-              C : Component<C, This, *> {
+abstract class RobotHardware<This> : Named by Named("override val name = ...")
+        where This : RobotHardware<This> {
 
     /**
-     * time between control loop updates
+     * this subsystem's importance
      */
-    abstract val period: Time
+    abstract val priority: Priority
 
     /**
-     * sensor data timestamp jitter tolerance
+     * this subsystem's name
      */
-    abstract val syncThreshold: Time
+    abstract override val name: String
 }

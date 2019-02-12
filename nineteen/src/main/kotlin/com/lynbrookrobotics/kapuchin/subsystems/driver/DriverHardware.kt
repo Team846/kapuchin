@@ -1,14 +1,13 @@
-package com.lynbrookrobotics.kapuchin.subsystems
+package com.lynbrookrobotics.kapuchin.subsystems.driver
 
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Joystick
-import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -44,7 +43,7 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
 
     val joystickMapping by pref {
         val exponent by pref(2)
-        val deadband by pref(2, Percent)
+        val deadband by pref(5, Percent)
         ({
             val db = horizontalDeadband(deadband, 100.Percent)
             fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)
@@ -65,24 +64,4 @@ class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
                 (absoluteWheel.y + 1).Each / 2
         )
     }
-
-
-    // LIFT
-    val twistAdjust = s { joystickMapping(operator.y.Each) }
-    val collect = s { driver[Trigger] }
-    val exchange = s { operator[BottomTrigger] }
-    val switch = s { operator[LeftTrigger] }
-    val lowScale = s { operator[LeftFour] }
-    val highScale = s { operator[RightTrigger] }
-    val maxHeight = s { operator[LeftOne] }
-    val manualLift = s { operator[LeftFive] }
-
-    val upCubeStack = s { operator.getRawButtonPressed(RightTrigger.raw) }
-    val downCubeStack = s { operator.getRawButtonPressed(LeftTrigger.raw) }
-    val zeroCubeStack = s { operator.getRawButtonPressed(BottomTrigger.raw) }
-
-    // COLLECTOR
-    val purge = s { driver[LeftTrigger] || operator[Trigger] }
-    val pivotDown = s { driver[Trigger] || driver[BottomTrigger] || operator[LeftTwo] }
-    val openClamp = s { driver[BottomTrigger] || operator[LeftThree] }
 }
