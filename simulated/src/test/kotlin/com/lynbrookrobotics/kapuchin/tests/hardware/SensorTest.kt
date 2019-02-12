@@ -42,7 +42,7 @@ class SensorTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `sensors read on event loop are in sync`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read on tick are in sync"

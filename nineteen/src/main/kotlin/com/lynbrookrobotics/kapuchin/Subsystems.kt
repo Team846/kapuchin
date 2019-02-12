@@ -13,7 +13,8 @@ import kotlinx.coroutines.runBlocking
 data class Subsystems(
         val drivetrain: DrivetrainComponent,
         val driverHardware: DriverHardware,
-        val electricalHardware: ElectricalSystemHardware
+        val electricalHardware: ElectricalSystemHardware,
+        val limelightHardware: LimelightHardware
 ) {
 
     suspend fun teleop() {
@@ -74,11 +75,13 @@ data class Subsystems(
             val drivetrain = async { DrivetrainComponent(DrivetrainHardware()) }
             val driver = async { DriverHardware() }
             val electrical = async { ElectricalSystemHardware() }
+            val limelight = async { LimelightHardware() }
 
             Subsystems(
                     drivetrain = drivetrain.await(),
                     driverHardware = driver.await(),
-                    electricalHardware = electrical.await()
+                    electricalHardware = electrical.await(),
+                    limelightHardware = limelight.await()
             )
         }
 
@@ -86,7 +89,8 @@ data class Subsystems(
             return Subsystems(
                     drivetrain = DrivetrainComponent(DrivetrainHardware()),
                     driverHardware = DriverHardware(),
-                    electricalHardware = ElectricalSystemHardware()
+                    electricalHardware = ElectricalSystemHardware(),
+                    limelightHardware = LimelightHardware()
             )
         }
     }
