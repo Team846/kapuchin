@@ -18,7 +18,7 @@ class StandardChoreographiesTest {
     private class ChoreographyTestSH(id: Int) : TSH<ChoreographyTestSH, ChoreographyTestC>("StandardChoreographiesTest Hardware $id")
     private class ChoreographyTestC(id: Int) : TC<ChoreographyTestC, ChoreographyTestSH>(ChoreographyTestSH(id))
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `runAll launches all routines`() = threadDumpOnFailiure {
         runBlocking {
             val comps = List(15) { ChoreographyTestC(it) }
