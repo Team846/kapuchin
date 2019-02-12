@@ -1,65 +1,48 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.Joystick
+import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
+import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
+import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"
     override val priority = Priority.RealTime
 
-    val station by hardw { DriverStation.getInstance() }
-
-    val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
-        it.name == "T.16000M"
-    }
-    val driver by hardw { Joystick(0) }.verify("the driver joystick is connected") {
-        it.name == "T.16000M"
-    }
-    val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
-        it.name == "FGT Rumble 3-in-1"
-    }
-    val absoluteWheel by hardw { Joystick(3) }.verify("the driver absolute wheel is connected") {
-        it.name == "BU0836A Interface"
+    val xbox by hardw { XboxController(1) }.verify("the operator controller is connected") {
+        //        it.name == "T.16000M" TODO: Get Controller Device Name
+        true
     }
 
-    enum class JoystickButton(val raw: Int) {
-        Trigger(1), BottomTrigger(2), LeftTrigger(3), RightTrigger(4),
-        LeftOne(5), LeftTwo(6), LeftThree(7), LeftFour(10), LeftFive(9), LeftSix(8),
-        RightOne(11), RightTwo(12), RightThree(13), RightFour(16), RightFive(15), RightSix(14),
-    }
+    private fun <Input> s(f: XboxController.() -> Input) = sensor { f(xbox) stampWith it }
 
-    operator fun Joystick.get(button: JoystickButton) = getRawButton(button.raw)
-    private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
+    private val triggerPressure by pref(50, Percent)
+    private val lt get() = xbox.getTriggerAxis(kLeft) > triggerPressure.Each
+    private val rt get() = xbox.getTriggerAxis(kLeft) > triggerPressure.Each
 
-    val joystickMapping by pref {
-        val exponent by pref(2)
-        val deadband by pref(5, Percent)
-        ({
-            val db = horizontalDeadband(deadband, 100.Percent)
-            fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)
-        })
-    }
+    val groundHeight = s { aButton }
+    val collectGroundPanel = s { aButton && lt }
 
-    val manualOverride = s { -joystickMapping(operator.y.Each) }
+    val lowPanelHeight = s { yButton }
+    val lowCargoHeight = s { yButton && lt }
 
-    // DRIVETRAIN
-    val accelerator = s { -joystickMapping(driver.y.Each) }
-    val steering = s { joystickMapping(wheel.x.Each) }
+    val midPanelHeight = s { xButton }
+    val midCargoHeight = s { xButton && lt }
 
-    private val alpsRdcPhaseShift by pref(53.583, Percent)
-    val alpsRdc80 = alpsRdc80(alpsRdcPhaseShift)
-    val absSteering = s {
-        alpsRdc80(
-                (absoluteWheel.x + 1).Each / 2,
-                (absoluteWheel.y + 1).Each / 2
-        )
-    }
+    val highPanelHeight = s { aButton }
+    val highCargoHeight = s { aButton && lt }
+
+    val liftPrecision = s { 0.0.Each.takeIf { false } } // todo: Figure out d-pad
+    val sliderPrecision = s { 0.0.Each.takeIf { false } } // todo: Figure out d-pad
+
+    val deployPanel = s { rt }
+    val deployCargo = s { lt && rt }
+
+    val pushPanel = s { getBumper(kLeft) }
+    val unleashTheCobra = s { lt && getBumper(kLeft) && getBumper(kRight) }
 }
