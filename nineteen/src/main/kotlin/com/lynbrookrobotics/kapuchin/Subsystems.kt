@@ -44,6 +44,10 @@ data class Subsystems(
         delay(1.Second)
     }
 
+    suspend fun llAlign() {
+        llAlign(drivetrain, limelightHardware)
+    }
+
     suspend fun backAndForthAuto() {
         //        while (true) {
 //            withTimeout(1.Second) {

@@ -98,6 +98,33 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
     }
 }
 
+suspend fun llAlign(
+        drivetrain: DrivetrainComponent,
+        limelight: LimelightHardware
+) = startRoutine("ll align") {
+    val visionTarget by limelight.camtranTargetPosition.readWithEventLoop(10.milli(Second)).withoutStamps
+    val robotPosition by drivetrain.hardware.position.readWithEventLoop(10.milli(Second)).withoutStamps
+    val line = 20.Inch
+
+    choreography {
+        val snapshot = visionTarget
+        if (snapshot != null) {
+            val target = snapshot.run { UomVector(x, y) } // relative
+            val current = robotPosition.run { UomVector(x, y) } // absolute
+
+            /*- UomVector(
+                    line * cos(snapshot.bearing),
+                    line * sin(snapshot.bearing)
+            )*/
+
+
+            drivetrain.waypoint(3.FootPerSecond, target, 1.Inch)
+
+            delay(10.Second)
+        }
+    }
+}
+
 //suspend fun DrivetrainComponent.arcTo(
 //        bearing: Angle, radius: Length,
 //        angleTolerance: Angle, distanceTolerance: Length,
