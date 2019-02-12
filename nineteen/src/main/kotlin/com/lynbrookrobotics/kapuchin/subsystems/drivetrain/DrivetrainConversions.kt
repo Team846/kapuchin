@@ -92,7 +92,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
             .toMap()
 
     val matrixTracking = RotationMatrixTracking(trackLength, Position(0.Foot, 0.Foot, 0.Degree), matrixCache)
-//        private val tracking = simpleVectorTracking(trackLength, xyPosition)
+  
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
         val posL = toLeftPosition(ticksL)
                 .let { if (flipOdometryLeft) -it else it }

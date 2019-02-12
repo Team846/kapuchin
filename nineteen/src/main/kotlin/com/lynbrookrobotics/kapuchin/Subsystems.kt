@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -13,7 +14,8 @@ data class Subsystems(
         val drivetrain: DrivetrainComponent,
         val driverHardware: DriverHardware,
         val electricalHardware: ElectricalSystemHardware,
-        val lineScannerHardware: LineScannerHardware
+        val lineScannerHardware: LineScannerHardware,
+        val limelightHardware: LimelightHardware
 ) {
 
     suspend fun teleop() {
@@ -30,6 +32,17 @@ data class Subsystems(
         runAll(
                 { drivetrain.warmup() }
         )
+    }
+
+    suspend fun followWaypoints() {
+        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 5.Foot), 2.Inch)
+        delay(1.Second)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 5.Foot), 2.Inch)
+        delay(1.Second)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 0.Foot), 2.Inch)
+        delay(1.Second)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 0.Foot), 2.Inch)
+        delay(1.Second)
     }
 
     suspend fun backAndForthAuto() {
@@ -64,12 +77,14 @@ data class Subsystems(
             val driver = async { DriverHardware() }
             val electrical = async { ElectricalSystemHardware() }
             val lineScannerHardware = async { LineScannerHardware() }
+            val limelight = async { LimelightHardware() }
 
             Subsystems(
                     drivetrain = drivetrain.await(),
                     driverHardware = driver.await(),
                     electricalHardware = electrical.await(),
-                    lineScannerHardware = lineScannerHardware.await()
+                    lineScannerHardware = lineScannerHardware.await(),
+                    limelightHardware = limelight.await()
             )
         }
 
@@ -78,7 +93,8 @@ data class Subsystems(
                     drivetrain = DrivetrainComponent(DrivetrainHardware()),
                     driverHardware = DriverHardware(),
                     electricalHardware = ElectricalSystemHardware(),
-                    lineScannerHardware = LineScannerHardware()
+                    lineScannerHardware = LineScannerHardware(),
+                    limelightHardware = LimelightHardware()
             )
         }
     }

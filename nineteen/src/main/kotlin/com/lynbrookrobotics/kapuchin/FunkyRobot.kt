@@ -52,7 +52,7 @@ class FunkyRobot : RobotBase() {
 
                 currentJob = scope.launch {
                     runWhile({ isEnabled && isOperatorControl }, { subsystems.teleop() })
-                    runWhile({ isEnabled && isAutonomous }, { subsystems.backAndForthAuto() })
+                    runWhile({ isEnabled && isAutonomous }, { subsystems.followWaypoints() })
                     runWhile({ isDisabled }, { subsystems.warmup() })
                 }
             }

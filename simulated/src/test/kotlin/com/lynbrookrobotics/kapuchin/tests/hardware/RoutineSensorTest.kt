@@ -12,21 +12,21 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.ranges.rangeTo
 
-class SensorTest {
+class RoutineSensorTest {
 
-    private class SensorTestSH : TSH<SensorTestSH, SensorTestC>("SensorTest Hardware") {
+    private class RoutineSensorTestSH : TSH<RoutineSensorTestSH, RoutineSensorTestC>("RoutineSensorTest Hardware") {
         val sensorA = sensor { Math.random() stampWith currentTime }
         val sensorB = sensor { Math.random() stampWith currentTime }
         val sensorC = sensor { Math.random() stampWith currentTime }
     }
 
-    private class SensorTestC : TC<SensorTestC, SensorTestSH>(SensorTestSH())
+    private class RoutineSensorTestC : TC<RoutineSensorTestC, RoutineSensorTestSH>(RoutineSensorTestSH())
 
     @Test(timeout = 2 * 1000)
     fun `sensors read on tick are in sync`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read on tick are in sync"
-            SensorTestC().run {
+            RoutineSensorTestC().run {
                 startRoutine(name) {
                     val a by hardware.sensorA.readOnTick.withStamps
                     val b by hardware.sensorB.readOnTick.withStamps
@@ -42,11 +42,11 @@ class SensorTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `sensors read on event loop are in sync`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read on tick are in sync"
-            SensorTestC().run {
+            RoutineSensorTestC().run {
                 startRoutine(name) {
                     val a by hardware.sensorA.readWithEventLoop.withStamps
                     val b by hardware.sensorB.readWithEventLoop.withStamps
@@ -74,7 +74,7 @@ class SensorTest {
     fun `sensors read eagerly are eager and efficient`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors read eagerly are eager and efficient"
-            SensorTestC().run {
+            RoutineSensorTestC().run {
                 startRoutine(name) {
                     val a by hardware.sensorA.readEagerly.withStamps
                     val b by hardware.sensorB.readEagerly.withStamps
@@ -100,7 +100,7 @@ class SensorTest {
     fun `sensors are updated once before controller initialization`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors are updated once before controller initialization"
-            SensorTestC().run {
+            RoutineSensorTestC().run {
                 val start = currentTime
                 startRoutine(name) {
                     val a by hardware.sensorA.readEagerly.withStamps
@@ -127,7 +127,7 @@ class SensorTest {
     fun `sensors are read efficiently`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensors are read efficiently"
-            SensorTestC().run {
+            RoutineSensorTestC().run {
                 startRoutine(name) {
                     val a1 by hardware.sensorA.readOnTick.withStamps
                     val a2 by hardware.sensorA.readEagerly.withStamps
@@ -148,7 +148,7 @@ class SensorTest {
     fun `sensor lambdas are released upon routine completion`() = threadDumpOnFailiure {
         runBlocking {
             val name = "sensor lambdas are released upon routine completion"
-            SensorTestC().run {
+            RoutineSensorTestC().run {
 
                 val ogClockJobs = clock.jobsToRun.size
                 val ogElJobs = EventLoop.jobsToRun.size
