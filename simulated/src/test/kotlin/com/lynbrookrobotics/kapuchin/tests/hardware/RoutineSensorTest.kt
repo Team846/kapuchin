@@ -183,6 +183,8 @@ class RoutineSensorTest {
 
                     var runs = 5
                     controller {
+                        if(runs % 3 == 0) EventLoop.tick(currentTime)
+
                         a1.y `is equal to?` a4
                         a2.y `is equal to?` a5
                         a3.y `is equal to?` a6
@@ -213,6 +215,8 @@ class RoutineSensorTest {
 
                     var runs = 5
                     controller {
+                        if(runs % 3 == 0) EventLoop.tick(currentTime)
+
                         a1.y `is equal to?` a4
                         a2.y `is equal to?` a5
                         a3.y `is equal to?` a6

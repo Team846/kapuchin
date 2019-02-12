@@ -225,6 +225,7 @@ class ChoreographySensorTest {
                         for (i in 1..5) {
                             countTo(i)
                             checkCount(i, i)
+                            EventLoop.tick(currentTime)
 
                             a1.y `is equal to?` a4
                             a2.y `is equal to?` a5
@@ -260,6 +261,7 @@ class ChoreographySensorTest {
                         for (i in 1..5) {
                             countTo(i)
                             checkCount(i, i)
+                            EventLoop.tick(currentTime)
 
                             a1.y `is equal to?` a4
                             a2.y `is equal to?` a5
