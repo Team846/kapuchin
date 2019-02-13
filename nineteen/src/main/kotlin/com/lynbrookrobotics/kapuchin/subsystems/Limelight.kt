@@ -18,83 +18,76 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     override val period = 20.milli(Second)
     override val syncThreshold = 3.milli(Second)
 
-    private val limelightLead by pref(16, Inch)
+    private val mounting by pref {
+        val x by pref(-6, Inch)
+        val y by pref(16, Inch)
+        ({ UomVector(x, y) })
+    }
     private val distanceAreaConstant by pref(4.95534, Foot)
-    private val skewConstant by pref(-37.33, Degree)
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private fun targetExists() = l("tv").roundToInt() == 1
     private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
 
-    val roughDistanceToTarget = sensor {
-        (if (targetExists()) {
-            val camtran = table.getEntry("camtran").getDoubleArray(
-                    doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-            )
-
-            -camtran[2].Inch
-
-//            distanceAreaConstant / Math.sqrt(l("ta"))
-        } else null) stampWith timeStamp(it)
-    }
-            .with(graph("Rough Distance to Target", Foot)) { it ?: Double.NaN.Foot }
-
-    val roughAngleToTarget = sensor {
-        (if (targetExists()) {
-            l("tx").Degree
-        } else null) stampWith timeStamp(it)
-    }
-            .with(graph("Rough Angle to Target", Degree)) { it ?: Double.NaN.Degree }
-
-    val roughSkewOfTarget = sensor {
-        (if (targetExists()) {
-            val camtran = table.getEntry("camtran").getDoubleArray(
-                    doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-            )
-
-            camtran[4].Degree
-//            (skewConstant * l("thor") / l("tvert") + 90.Degree) * abs(l("tx").Degree) / l("tx").Degree
-        } else null) stampWith(it)
-    }
-            .with(graph("Rough Skew of Target", Degree)) { it ?: Double.NaN.Degree }
-
-//    val camtranTargetPosition = sensor {
+//    val roughDistanceToTarget = sensor {
 //        (if (targetExists()) {
-//            val camtran = table.getEntry("camtran").getDoubleArray(
-//                    doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-//            )
-//
-//            Position(
-//                    camtran[0].Inch,
-//                    -camtran[2].Inch,
-//                    camtran[4].Degree
-//            )
+//            distanceAreaConstant / Math.sqrt(l("ta"))
 //        } else null) stampWith timeStamp(it)
 //    }
-//            .with(graph("Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
-//            .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
-//            .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
-
-//    val targetPosition = sensor {
-//        (if (targetExists()) {
-//            val skewAngle = (skewConstant * l("thor") / l("tvert") + 90.Degree) * abs(l("tx").Degree) / l("tx").Degree
+//            .with(graph("Rough Distance to Target", Foot)) { it ?: Double.NaN.Foot }
 //
-//            val distanceToTarget = roughDistanceToTarget.optimizedRead(it, 10.milli(Second)).y
-//            val angleToTarget = roughAngleToTarget.optimizedRead(it, 10.milli(Second)).y
-//            if (distanceToTarget != null && angleToTarget != null) {
-//                val x = distanceToTarget * sin(angleToTarget)
-//                val y = distanceToTarget * cos(angleToTarget)
-//                Position (x, y, skewAngle)
-//            } else null
+//    val directionOfTarget = sensor {
+//        (if (targetExists()) {
+//            l("tx").Degree
 //        } else null) stampWith timeStamp(it)
-//    }       .with(graph("Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
-//            .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
-//            .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
+//    }
+//            .with(graph("Direction to Target", Degree)) { it ?: Double.NaN.Degree }
+//
+//    fun targetDirectionToRobotTurn(direction: Angle, distance: Length) = atan(
+//            distance * tan(direction) / (distance + mounting.y)
+//    )
+
+    val precisePositioningRange by pref(5, Foot)
+
+    val roughTargetLocation = sensor {
+        (if (targetExists()) {
+            val distance = distanceAreaConstant / Math.sqrt(l("ta"))
+            val direction = l("tx").Degree
+
+            UomVector(
+                    distance * sin(direction),
+                    distance * cos(direction)
+            ) + mounting
+        } else null) stampWith timeStamp(it)
+    }
+            .with(graph("Rough Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
+            .with(graph("Rough Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
+
+    val targetPosition = sensor {
+        (if (targetExists()) {
+            val camtran = table.getEntry("camtran").getDoubleArray(
+                    doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            )
+
+            val distance = -camtran[2].Inch
+            val skew = camtran[4].Degree
+            val direction = l("tx").Degree
+
+            Position(
+                    distance * sin(direction) + mounting.x,
+                    distance * cos(direction) + mounting.y,
+                    skew
+            )
+        } else null) stampWith (it)
+    }
+            .with(graph("Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
+            .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
+            .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
 
     init {
         EventLoop.runOnTick { time ->
-            setOf(roughAngleToTarget, roughDistanceToTarget, roughSkewOfTarget).forEach {
+            setOf(roughTargetLocation, targetPosition).forEach {
                 it.optimizedRead(time, period)
             }
         }

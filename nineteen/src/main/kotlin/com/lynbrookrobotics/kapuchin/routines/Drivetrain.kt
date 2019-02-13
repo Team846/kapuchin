@@ -8,7 +8,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.sqrt
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -85,8 +84,6 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
     val position by hardware.position.readOnTick.withStamps
     val dadt = differentiator(::div, position.x, position.y.bearing)
 
-    val tolSq = tolerance * tolerance
-
     val targetGraph = graph("Target Angle", Degree)
     val errorGraph = graph("Error Angle", Degree)
     val waypointDistance = graph("Distance to Waypoint", Foot)
@@ -94,7 +91,7 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
     controller { t ->
         val (pt, p) = position
 
-        val angularVelocity = dadt(position.x, position.y.bearing)
+        val angularVelocity = dadt(pt, p.bearing)
         val targetA = atan2(target.x - p.x, target.y - p.y)
         val errorA = targetA `coterminal -` p.bearing
         val pA = bearingKp * errorA - bearingKd * angularVelocity
@@ -113,11 +110,9 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
         ).takeIf {
-            val dx = p.x - target.x
-            val dy = p.y - target.y
-            val distSq = dx * dx + dy * dy
-            waypointDistance(t, Length(sqrt(distSq.siValue)))
-            distSq > tolSq
+            val distance = distance(p.vector, target)
+            waypointDistance(t, distance)
+            distance > tolerance
         }
     }
 }
@@ -126,36 +121,29 @@ suspend fun llAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware
 ) = startChoreo("ll align") {
-    val distance by limelight.roughDistanceToTarget.readWithEventLoop().withoutStamps
-    val angle by limelight.roughAngleToTarget.readWithEventLoop().withoutStamps
-    val skew by limelight.roughSkewOfTarget.readWithEventLoop().withoutStamps
+    val roughLocation by limelight.roughTargetLocation.readWithEventLoop().withoutStamps
+    val precisePosition by limelight.targetPosition.readWithEventLoop().withoutStamps
 
     val robotPosition by drivetrain.hardware.position.readWithEventLoop().withoutStamps
-    val line = 25.Inch
 
     choreography {
-        val sDist = distance
-        val tx = angle
-        val skw = skew
+        val rng = limelight.precisePositioningRange
 
-        if (sDist != null && tx != null && skw != null) {
-            val target = UomVector(
-                    sDist * sin(tx),
-                    sDist * cos(tx)
+        roughLocation?.let { snapshot ->
+            drivetrain.waypoint(3.FootPerSecond, robotPosition.vector + snapshot, rng)
+        }
+
+        precisePosition?.let { snapshot ->
+            val current = robotPosition.vector
+
+            val target = snapshot.vector
+
+            val perpStart = UomVector(
+                    (rng / 2) * sin(snapshot.bearing),
+                    (rng / 2) * cos(snapshot.bearing)
             )
-            val lineStart = UomVector(
-                    line * sin(skw),
-                    line * cos(skw)
-            )
-            val current = robotPosition.vector // absolute
 
-            /*- UomVector(
-                    line * cos(snapshot.bearing),
-                    line * sin(snapshot.bearing)
-            )*/
-
-
-            drivetrain.waypoint(3.FootPerSecond, current + target - lineStart, 4.Inch)
+            drivetrain.waypoint(3.FootPerSecond, current + target - perpStart, 4.Inch)
             drivetrain.waypoint(3.FootPerSecond, current + target, 6.Inch)
         }
     }
