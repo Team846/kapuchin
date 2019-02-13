@@ -54,6 +54,8 @@ class FunkyRobot : RobotBase() {
                     runWhile({ isEnabled && isOperatorControl }, { subsystems.teleop() })
                     runWhile({ isEnabled && isAutonomous }, { subsystems.llAlign() })
                     runWhile({ isDisabled }, { subsystems.warmup() })
+
+                    delay(1.Second)
                 }
             }
         }

@@ -27,12 +27,15 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     private fun targetExists() = l("tv").roundToInt() == 1
     private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
 
-    fun limelightAngleToRobotTurnAngle(distance: Length, angle: Angle) =
-            distance * tan(angle) / (distance + limelightLead)
-
     val roughDistanceToTarget = sensor {
         (if (targetExists()) {
-            distanceAreaConstant / Math.sqrt(l("ta"))
+            val camtran = table.getEntry("camtran").getDoubleArray(
+                    doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            )
+
+            -camtran[2].Inch
+
+//            distanceAreaConstant / Math.sqrt(l("ta"))
         } else null) stampWith timeStamp(it)
     }
             .with(graph("Rough Distance to Target", Foot)) { it ?: Double.NaN.Foot }
@@ -46,7 +49,12 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
 
     val roughSkewOfTarget = sensor {
         (if (targetExists()) {
-            (skewConstant * l("thor") / l("tvert") + 90.Degree) * abs(l("tx").Degree) / l("tx").Degree
+            val camtran = table.getEntry("camtran").getDoubleArray(
+                    doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            )
+
+            camtran[4].Degree
+//            (skewConstant * l("thor") / l("tvert") + 90.Degree) * abs(l("tx").Degree) / l("tx").Degree
         } else null) stampWith(it)
     }
             .with(graph("Rough Skew of Target", Degree)) { it ?: Double.NaN.Degree }
@@ -68,25 +76,25 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
 //            .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
 //            .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
 
-    val targetPosition = sensor {
-        (if (targetExists()) {
-            val skewAngle = (skewConstant * l("thor") / l("tvert") + 90.Degree) * abs(l("tx").Degree) / l("tx").Degree
-
-            val distanceToTarget = roughDistanceToTarget.optimizedRead(it, 10.milli(Second)).y
-            val angleToTarget = roughAngleToTarget.optimizedRead(it, 10.milli(Second)).y
-            if (distanceToTarget != null && angleToTarget != null) {
-                val x = distanceToTarget * sin(angleToTarget)
-                val y = distanceToTarget * cos(angleToTarget)
-                Position (x, y, skewAngle)
-            } else null
-        } else null) stampWith timeStamp(it)
-    }       .with(graph("Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
-            .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
-            .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
+//    val targetPosition = sensor {
+//        (if (targetExists()) {
+//            val skewAngle = (skewConstant * l("thor") / l("tvert") + 90.Degree) * abs(l("tx").Degree) / l("tx").Degree
+//
+//            val distanceToTarget = roughDistanceToTarget.optimizedRead(it, 10.milli(Second)).y
+//            val angleToTarget = roughAngleToTarget.optimizedRead(it, 10.milli(Second)).y
+//            if (distanceToTarget != null && angleToTarget != null) {
+//                val x = distanceToTarget * sin(angleToTarget)
+//                val y = distanceToTarget * cos(angleToTarget)
+//                Position (x, y, skewAngle)
+//            } else null
+//        } else null) stampWith timeStamp(it)
+//    }       .with(graph("Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
+//            .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
+//            .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
 
     init {
         EventLoop.runOnTick { time ->
-            setOf(roughAngleToTarget, roughDistanceToTarget, roughSkewOfTarget, targetPosition).forEach {
+            setOf(roughAngleToTarget, roughDistanceToTarget, roughSkewOfTarget).forEach {
                 it.optimizedRead(time, period)
             }
         }

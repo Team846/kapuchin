@@ -102,14 +102,18 @@ suspend fun llAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware
 ) = startRoutine("ll align") {
-    val visionTarget by limelight.targetPosition.readWithEventLoop(10.milli(Second)).withoutStamps
+    val distance by limelight.roughDistanceToTarget.readWithEventLoop(10.milli(Second)).withoutStamps
+    val angle by limelight.roughAngleToTarget.readWithEventLoop(10.milli(Second)).withoutStamps
+
     val robotPosition by drivetrain.hardware.position.readWithEventLoop(10.milli(Second)).withoutStamps
     val line = 20.Inch
 
     choreography {
-        val snapshot = visionTarget
-        if (snapshot != null) {
-            val target = snapshot.run { UomVector(x, y) } // relative
+        val sDist = distance
+        val sAng = angle
+
+        if (sDist!=null && sAng != null) {
+            val target = UomVector(sDist * sin(sAng), sDist * cos(sAng)) // relative
             val current = robotPosition.run { UomVector(x, y) } // absolute
 
             /*- UomVector(
@@ -118,9 +122,7 @@ suspend fun llAlign(
             )*/
 
 
-            drivetrain.waypoint(3.FootPerSecond, target, 1.Inch)
-
-            delay(10.Second)
+            drivetrain.waypoint(3.FootPerSecond, current + target, 1.Inch)
         }
     }
 }
