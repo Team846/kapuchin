@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.routines.FreeSensorScope
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -71,7 +70,7 @@ suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanne
 
         val targetL = +pA + speed
         val targetR = -pA + speed
-      
+
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
 
@@ -105,7 +104,7 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
 
         val targetL = speed + pA
         val targetR = speed - pA
-                
+
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
@@ -139,10 +138,16 @@ suspend fun llAlign(
         val tx = angle
         val skw = skew
 
-        if (sDist!=null && tx != null && skw != null) {
-            val target = UomVector(sDist * sin(tx), sDist * cos(tx)) // relative
-            val offset = UomVector(line * sin(skw), line * cos(skw))
-            val current = robotPosition.run { UomVector(x, y) } // absolute
+        if (sDist != null && tx != null && skw != null) {
+            val target = UomVector(
+                    sDist * sin(tx),
+                    sDist * cos(tx)
+            )
+            val lineStart = UomVector(
+                    line * sin(skw),
+                    line * cos(skw)
+            )
+            val current = robotPosition.vector // absolute
 
             /*- UomVector(
                     line * cos(snapshot.bearing),
@@ -150,7 +155,7 @@ suspend fun llAlign(
             )*/
 
 
-            drivetrain.waypoint(3.FootPerSecond, current + target - offset, 4.Inch)
+            drivetrain.waypoint(3.FootPerSecond, current + target - lineStart, 4.Inch)
             drivetrain.waypoint(3.FootPerSecond, current + target, 6.Inch)
         }
     }
