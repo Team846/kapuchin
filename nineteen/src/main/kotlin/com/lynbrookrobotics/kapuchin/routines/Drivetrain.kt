@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.routines.FreeSensorScope
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -125,19 +126,22 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
 suspend fun llAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware
-) = startRoutine("ll align") {
-    val distance by limelight.roughDistanceToTarget.readWithEventLoop(10.milli(Second)).withoutStamps
-    val angle by limelight.roughAngleToTarget.readWithEventLoop(10.milli(Second)).withoutStamps
+) = startChoreo("ll align") {
+    val distance by limelight.roughDistanceToTarget.readWithEventLoop().withoutStamps
+    val angle by limelight.roughAngleToTarget.readWithEventLoop().withoutStamps
+    val skew by limelight.roughSkewOfTarget.readWithEventLoop().withoutStamps
 
-    val robotPosition by drivetrain.hardware.position.readWithEventLoop(10.milli(Second)).withoutStamps
-    val line = 20.Inch
+    val robotPosition by drivetrain.hardware.position.readWithEventLoop().withoutStamps
+    val line = 25.Inch
 
     choreography {
         val sDist = distance
-        val sAng = angle
+        val tx = angle
+        val skw = skew
 
-        if (sDist!=null && sAng != null) {
-            val target = UomVector(sDist * sin(sAng), sDist * cos(sAng)) // relative
+        if (sDist!=null && tx != null && skw != null) {
+            val target = UomVector(sDist * sin(tx), sDist * cos(tx)) // relative
+            val offset = UomVector(line * sin(skw), line * cos(skw))
             val current = robotPosition.run { UomVector(x, y) } // absolute
 
             /*- UomVector(
@@ -146,7 +150,8 @@ suspend fun llAlign(
             )*/
 
 
-            drivetrain.waypoint(3.FootPerSecond, current + target, 1.Inch)
+            drivetrain.waypoint(3.FootPerSecond, current + target - offset, 4.Inch)
+            drivetrain.waypoint(3.FootPerSecond, current + target, 6.Inch)
         }
     }
 }
