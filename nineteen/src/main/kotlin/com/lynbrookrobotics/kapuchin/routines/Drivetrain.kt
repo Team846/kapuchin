@@ -102,7 +102,7 @@ suspend fun llAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware
 ) = startRoutine("ll align") {
-    val visionTarget by limelight.camtranTargetPosition.readWithEventLoop(10.milli(Second)).withoutStamps
+    val visionTarget by limelight.targetPosition.readWithEventLoop(10.milli(Second)).withoutStamps
     val robotPosition by drivetrain.hardware.position.readWithEventLoop(10.milli(Second)).withoutStamps
     val line = 20.Inch
 
