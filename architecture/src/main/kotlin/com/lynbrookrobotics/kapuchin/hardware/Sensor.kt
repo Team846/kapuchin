@@ -29,7 +29,9 @@ class Sensor<Input> internal constructor(internal val read: (Time) -> TimeStampe
     fun optimizedRead(atTime: Time, syncThreshold: Time) =
             value
                     ?.takeIf { it.x in atTime `±` syncThreshold }
-                    ?: blockingMutex(this) { read(atTime) }
+                    ?: blockingMutex(this) {
+                        read(atTime).also { value = it }
+                    }
 
     class UpdateSource<Input>(
             private val forSensor: Sensor<Input>,

@@ -14,6 +14,7 @@ data class Subsystems(
         val drivetrain: DrivetrainComponent,
         val driverHardware: DriverHardware,
         val electricalHardware: ElectricalSystemHardware,
+        val lineScannerHardware: LineScannerHardware,
         val limelightHardware: LimelightHardware
 ) {
 
@@ -79,12 +80,14 @@ data class Subsystems(
             val drivetrain = async { DrivetrainComponent(DrivetrainHardware()) }
             val driver = async { DriverHardware() }
             val electrical = async { ElectricalSystemHardware() }
+            val lineScannerHardware = async { LineScannerHardware() }
             val limelight = async { LimelightHardware() }
 
             Subsystems(
                     drivetrain = drivetrain.await(),
                     driverHardware = driver.await(),
                     electricalHardware = electrical.await(),
+                    lineScannerHardware = lineScannerHardware.await(),
                     limelightHardware = limelight.await()
             )
         }
@@ -94,6 +97,7 @@ data class Subsystems(
                     drivetrain = DrivetrainComponent(DrivetrainHardware()),
                     driverHardware = DriverHardware(),
                     electricalHardware = ElectricalSystemHardware(),
+                    lineScannerHardware = LineScannerHardware(),
                     limelightHardware = LimelightHardware()
             )
         }

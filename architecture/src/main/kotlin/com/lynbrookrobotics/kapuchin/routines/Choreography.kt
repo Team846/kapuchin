@@ -22,7 +22,7 @@ private typealias Block = suspend CoroutineScope.() -> Unit
  * @param name type of this choreography
  * @param setup function returning a choreography
  */
-suspend fun startRoutine(
+suspend fun startChoreo(
         name: String,
         setup: FreeSensorScope.() -> Block
 ) {
@@ -57,7 +57,7 @@ fun choreography(controller: Block) = controller
  * @param blocks collection of functions to run in parallel
  * @return parent coroutine of the running routines
  */
-suspend fun runAll(vararg blocks: Block) = startRoutine("runAll") {
+suspend fun runAll(vararg blocks: Block) = startChoreo("runAll") {
     choreography {
         supervisorScope {
             blocks.forEach { launch { it() } }
@@ -73,7 +73,7 @@ suspend fun runAll(vararg blocks: Block) = startRoutine("runAll") {
  * @param block function to run
  * @return coroutine which runs until `predicate` returns false
  */
-suspend fun runWhile(predicate: () -> Boolean, block: Block) = startRoutine("runWhile") {
+suspend fun runWhile(predicate: () -> Boolean, block: Block) = startChoreo("runWhile") {
     choreography {
         if (predicate()) {
             val job = launch { block() }

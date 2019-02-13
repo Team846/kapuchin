@@ -25,7 +25,7 @@ class ChoreographyTest {
         }
     }
 
-    private suspend fun CoroutineScope.countTo(c: ChoreographyTestC, vararg nums: Int) = startRoutine("count to ${nums.contentToString()}") {
+    private suspend fun CoroutineScope.countTo(c: ChoreographyTestC, vararg nums: Int) = startChoreo("count to ${nums.contentToString()}") {
         choreography {
             nums.forEach {
                 c.countTo(it)

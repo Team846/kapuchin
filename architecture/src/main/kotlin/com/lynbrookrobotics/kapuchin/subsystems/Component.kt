@@ -113,7 +113,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
                         ?.let { hardware.output(it) }
             } catch (t: Throwable) {
                 routine?.resumeWithException(t) ?: log(Error, t) {
-                    "Exception running default controller"
+                    "Exception running default controller\n${t.message}"
                 }
             }
         }
