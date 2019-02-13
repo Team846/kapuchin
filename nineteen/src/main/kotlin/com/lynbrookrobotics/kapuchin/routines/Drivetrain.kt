@@ -99,6 +99,7 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
         targetGraph(pt, targetA)
         errorGraph(pt, errorA)
 
+        // todo: Add PD position control
         val targetL = speed + pA
         val targetR = speed - pA
 
