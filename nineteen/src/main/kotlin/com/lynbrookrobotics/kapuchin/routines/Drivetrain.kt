@@ -2,12 +2,35 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+
+class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
+    val position by with(scope) { c.hardware.position.readOnTick.withStamps }
+    val dadt = differentiator(::div, position.x, position.y.bearing)
+
+    val errorGraph = c.graph("Error Angle", Degree)
+    val speedGraph = c.graph("Target Speed", FootPerSecond)
+
+    operator fun invoke(speed: Velocity, angle: Angle) = with(c) {
+        val (t, p) = position
+
+        val angularVelocity = dadt(t, p.bearing)
+
+        val errorA = (angle `coterminal -` position.y.bearing).also { errorGraph(t, it) }
+        val pA = bearingKp * errorA - bearingKd * angularVelocity
+
+        val targetL = speed + pA
+        val targetR = speed - pA
+
+        TwoSided(targetL, targetR).also { speedGraph(t, it.avg) }
+    }
+}
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -16,15 +39,12 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 
     val position by hardware.position.readOnTick.withStamps
 
-    val targetGraph = graph("Target Angle", Degree)
-    val errorGraph = graph("Error Angle", Degree)
-    val speedGraph = graph("Teleop Speed", FootPerSecond)
+    val uni = UnicycleDrive(this@teleop, this@startRoutine)
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
     var startingAngle = -absSteering + position.y.bearing
-    val dadt = differentiator(::div, position.x, position.y.bearing)
 
     controller { t ->
         if (
@@ -37,18 +57,14 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 
         if (box(steering) != 0.Percent) startingAngle = -absSteering + position.y.bearing
 
-        val angularVelocity = dadt(position.x, position.y.bearing)
-        val targetA = (absSteering + startingAngle).also { targetGraph(t, it) }
-        val errorA = (targetA `coterminal -` position.y.bearing).also { errorGraph(t, it) }
-        val pA = bearingKp * errorA - bearingKd * angularVelocity
+        val (targetL, targetR) = uni(forwardVelocity, absSteering + startingAngle)
 
-        val targetL = forwardVelocity + steeringVelocity + pA
-        val targetR = forwardVelocity - steeringVelocity - pA
-
-        speedGraph(t, avg(targetL, targetR))
-
-        val nativeL = hardware.conversions.nativeConversion.native(targetL)
-        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+        val nativeL = hardware.conversions.nativeConversion.native(
+                targetL + steeringVelocity
+        )
+        val nativeR = hardware.conversions.nativeConversion.native(
+                targetR - steeringVelocity
+        )
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
@@ -80,9 +96,10 @@ suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanne
     }
 }
 
-suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("teleop") {
+suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("teleop") {
     val position by hardware.position.readOnTick.withStamps
     val dadt = differentiator(::div, position.x, position.y.bearing)
+    val totalDistance = distance(position.y.vector, target)
 
     val targetGraph = graph("Target Angle", Degree)
     val errorGraph = graph("Error Angle", Degree)
@@ -90,6 +107,7 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
 
     controller { t ->
         val (pt, p) = position
+        val distance = distance(p.vector, target)
 
         val angularVelocity = dadt(pt, p.bearing)
         val targetA = atan2(target.x - p.x, target.y - p.y)
@@ -99,10 +117,9 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
         targetGraph(pt, targetA)
         errorGraph(pt, errorA)
 
-        // todo: Add PD position control
+        val speed = motionProfile(totalDistance - distance)
         val targetL = speed + pA
         val targetR = speed - pA
-
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
@@ -111,9 +128,38 @@ suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Leng
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
         ).takeIf {
-            val distance = distance(p.vector, target)
             waypointDistance(t, distance)
             distance > tolerance
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRoutine("turn") {
+    val position by hardware.position.readOnTick.withStamps
+    val dadt = differentiator(::div, position.x, position.y.bearing)
+
+    val errorGraph = graph("Error Angle", Degree)
+
+    controller { t ->
+        val (pt, p) = position
+
+        val angularVelocity = dadt(pt, p.bearing)
+        val error = target `coterminal -` p.bearing
+        val pA = bearingKp * error - bearingKd * angularVelocity
+
+        errorGraph(pt, error)
+
+        val targetL = +pA
+        val targetR = -pA
+
+        val nativeL = hardware.conversions.nativeConversion.native(targetL)
+        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        ).takeIf {
+            error.abs > tolerance
         }
     }
 }
@@ -122,30 +168,54 @@ suspend fun llAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware
 ) = startChoreo("ll align") {
-    val roughLocation by limelight.roughTargetLocation.readWithEventLoop().withoutStamps
-    val precisePosition by limelight.targetPosition.readWithEventLoop().withoutStamps
+    val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
 
-    val robotPosition by drivetrain.hardware.position.readWithEventLoop().withoutStamps
+    val roughLocation by limelight.roughTargetLocation.readEagerly().withoutStamps
+    val precisePosition by limelight.targetPosition.readEagerly().withoutStamps
+
+    fun motionProfile(dist: Length) = trapezoidalMotionProfile(
+            dist,
+            3.FootPerSecond,
+            5.FootPerSecondSquared,
+            10.FootPerSecond
+    )
 
     choreography {
         val rng = limelight.precisePositioningRange
 
         roughLocation?.let { snapshot ->
-            drivetrain.waypoint(3.FootPerSecond, robotPosition.vector + snapshot, rng)
+            val mtrx = RotationMatrix(robotPosition.bearing)
+            val target = mtrx rz snapshot
+
+            drivetrain.waypoint(
+                    motionProfile(snapshot.abs - rng),
+                    robotPosition.vector + target,
+                    rng + 6.Inch
+            )
         }
 
         precisePosition?.let { snapshot ->
-            val current = robotPosition.vector
+            val mtrx = RotationMatrix(robotPosition.bearing)
 
-            val target = snapshot.vector
+            val target = mtrx rz snapshot.vector
 
-            val perpStart = UomVector(
-                    (rng / 2) * sin(snapshot.bearing),
-                    (rng / 2) * cos(snapshot.bearing)
+            val perpAlignPt = target.abs / 2
+            val perpStart = mtrx rz UomVector(
+                    perpAlignPt * sin(snapshot.bearing),
+                    perpAlignPt * cos(snapshot.bearing)
             )
 
-            drivetrain.waypoint(3.FootPerSecond, current + target - perpStart, 4.Inch)
-            drivetrain.waypoint(3.FootPerSecond, current + target, 6.Inch)
+            drivetrain.waypoint(
+                    motionProfile((target - perpStart).abs),
+                    robotPosition.vector + target - perpStart, 3.Inch
+            )
+
+            drivetrain.turn(
+                    snapshot.bearing + mtrx.theta,
+                    2.Degree
+            )
+
+            delay(10.Second)
         }
     }
 }
