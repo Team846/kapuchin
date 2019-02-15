@@ -1,26 +1,50 @@
-package com.lynbrookrobotics.kapuchin.subsystems.slider
+package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.lynbrookrobotics.kapuchin.control.conversion.LinearOffloadedNativeConversion
-import com.lynbrookrobotics.kapuchin.control.data.stampWith
+import com.lynbrookrobotics.kapuchin.control.conversion.*
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
+import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.Priority
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.*
 
-class SliderHardware : SubsystemHardware<SliderHardware, SliderComponent>() {
+class  CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<CollectorSliderComponent, CollectorSliderHardware, OffloadedOutput>(hardware, EventLoop) {
+
+    //positive is to the robot's right
+    //negative is to the robot's left
+
+    val middle by pref(0, Inch)
+
+    val positionGains by pref {
+        val kP by pref(12, Volt, 8, Inch)
+        ({ OffloadedPidGains(
+                hardware.offloadedSettings.native(kP),
+                0.0, 0.0, 0.0
+        )})
+    }
+
+    override val fallbackController: CollectorSliderComponent.(Time) -> OffloadedOutput = {
+        PositionOutput(positionGains, hardware.offloadedSettings.native(middle))
+    }
+
+    override fun CollectorSliderHardware.output(value: OffloadedOutput) = lazyOutput(value)
+
+}
+
+class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, CollectorSliderComponent>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 30.milli(Second)
     override val syncThreshold: Time = 5.milli(Second)
-    override val name: String = "Slider"
+    override val name: String = "Collector Slider"
 
     val operatingVoltage by pref(12, Volt)
     val currentLimit by pref(30, Ampere)
@@ -64,7 +88,7 @@ class SliderHardware : SubsystemHardware<SliderHardware, SliderComponent>() {
     val lazyOutput = lazyOutput(esc, idx)
 
     val position = sensor { offloadedSettings.realPosition(esc.getSelectedSensorPosition(idx)) stampWith it }
-            .with(graph("Location", Inch))
+            .with(graph("Collector Slider", Inch))
 
     init {
         EventLoop.runOnTick { position.optimizedRead(it, syncThreshold) }

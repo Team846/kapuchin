@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake
+package com.lynbrookrobotics.kapuchin.subsystems.Handoff.handoff
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
@@ -19,7 +19,7 @@ import com.lynbrookrobotics.kapuchin.hardware.unaryPlus
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.milli
 
-class IntakePivotComponent(hardware: IntakePivotHardware) : Component<IntakePivotComponent, IntakePivotHardware, OffloadedOutput>(hardware) {
+class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffPivotComponent, HandoffPivotHardware, OffloadedOutput>(hardware) {
 
 
     //The `up` position is 90 Degrees. You can only be in [0 Degrees, 90 Degrees].
@@ -39,13 +39,13 @@ class IntakePivotComponent(hardware: IntakePivotHardware) : Component<IntakePivo
         ) })
     }
 
-    override val fallbackController: IntakePivotComponent.(Time) -> OffloadedOutput = { PercentOutput(0.Percent) }
+    override val fallbackController: HandoffPivotComponent.(Time) -> OffloadedOutput = { PercentOutput(0.Percent) }
 
-    override fun IntakePivotHardware.output(value: OffloadedOutput)  = lazyOutput(value)
+    override fun HandoffPivotHardware.output(value: OffloadedOutput)  = lazyOutput(value)
 
 }
 
-class IntakePivotHardware : SubsystemHardware<IntakePivotHardware, IntakePivotComponent>() {
+class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivotComponent>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 30.milli(Second)
     override val syncThreshold: Time = 5.milli(Second)

@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake
+package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff
 
 import com.lynbrookrobotics.kapuchin.control.data.TwoSided
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw

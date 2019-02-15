@@ -1,8 +1,8 @@
-package com.lynbrookrobotics.kapuchin.subsystems.hook
+package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.hook.HookSliderPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookSliderPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Solenoid

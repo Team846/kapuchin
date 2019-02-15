@@ -1,8 +1,8 @@
-package com.lynbrookrobotics.kapuchin.subsystems.hook
+package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.hook.HookPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Solenoid
@@ -28,7 +28,7 @@ class HookHardware : SubsystemHardware<HookHardware, HookComponent>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 30.milli(Second)
     override val syncThreshold: Time = 5.milli(Second)
-    override val name: String = "Hook Slider"
+    override val name: String = "Hook"
 
     val solenoidPort by pref(0)
     val solenoid = Solenoid(solenoidPort)

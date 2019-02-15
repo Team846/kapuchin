@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.logging.Named
 import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
 import com.lynbrookrobotics.kapuchin.routines.teleop
 import com.lynbrookrobotics.kapuchin.routines.warmup
@@ -8,17 +7,34 @@ import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
 import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
+import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.hal.HAL
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-data class Subsystems(
-        val drivetrain: DrivetrainComponent,
-        val driverHardware: DriverHardware,
-        val electricalHardware: ElectricalSystemHardware
-) {
+object Subsystems {
+
+    lateinit var drivetrain: DrivetrainComponent
+    lateinit var driverHardware: DriverHardware
+    lateinit var electricalHardware: ElectricalSystemHardware
+
+    fun concurrentInit() = runBlocking {
+        val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
+        val driverAsync = async { DriverHardware() }
+        val electricalAsync = async { ElectricalSystemHardware() }
+
+        drivetrain = drivetrainAsync.await()
+        driverHardware = driverAsync.await()
+        electricalHardware = electricalAsync.await()
+    }
+
+    fun init() {
+        drivetrain = DrivetrainComponent(DrivetrainHardware())
+        driverHardware = DriverHardware()
+        electricalHardware = ElectricalSystemHardware()
+    }
 
     fun teleop() = launchAll(
             { drivetrain.teleop(driverHardware) }
@@ -60,25 +76,4 @@ data class Subsystems(
 //        }
     }.also { HAL.observeUserProgramTeleop() }
 
-    companion object : Named by Named("Subsystems Initializer") {
-        fun concurrentInit() = runBlocking {
-            val drivetrain = async { DrivetrainComponent(DrivetrainHardware()) }
-            val driver = async { DriverHardware() }
-            val electrical = async { ElectricalSystemHardware() }
-
-            Subsystems(
-                    drivetrain = drivetrain.await(),
-                    driverHardware = driver.await(),
-                    electricalHardware = electrical.await()
-            )
-        }
-
-        fun init(): Subsystems {
-            return Subsystems(
-                    drivetrain = DrivetrainComponent(DrivetrainHardware()),
-                    driverHardware = DriverHardware(),
-                    electricalHardware = ElectricalSystemHardware()
-            )
-        }
-    }
 }
