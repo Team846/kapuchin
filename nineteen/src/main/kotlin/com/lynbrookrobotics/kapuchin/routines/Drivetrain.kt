@@ -17,18 +17,25 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
     val errorGraph = c.graph("Error Angle", Degree)
     val speedGraph = c.graph("Target Speed", FootPerSecond)
 
-    operator fun invoke(speed: Velocity, angle: Angle) = with(c) {
+    fun speedAngleTarget(speed: Velocity, angle: Angle): Pair<TwoSided<Velocity>, Angle> {
+        val error = (angle `coterminal -` position.y.bearing)
+        return speedTargetAngleError(speed, error) to error
+    }
+
+    fun speedTargetAngleError(speed: Velocity, error: Angle) = with(c) {
         val (t, p) = position
 
         val angularVelocity = dadt(t, p.bearing)
 
-        val errorA = (angle `coterminal -` position.y.bearing).also { errorGraph(t, it) }
-        val pA = bearingKp * errorA - bearingKd * angularVelocity
+        val pA = bearingKp * error - bearingKd * angularVelocity
 
         val targetL = speed + pA
         val targetR = speed - pA
 
-        TwoSided(targetL, targetR).also { speedGraph(t, it.avg) }
+        TwoSided(targetL, targetR).also {
+            speedGraph(t, it.avg)
+            errorGraph(t, error)
+        }
     }
 }
 
@@ -57,13 +64,13 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 
         if (box(steering) != 0.Percent) startingAngle = -absSteering + position.y.bearing
 
-        val (targetL, targetR) = uni(forwardVelocity, absSteering + startingAngle)
+        val (target, _) = uni.speedAngleTarget(forwardVelocity, absSteering + startingAngle)
 
         val nativeL = hardware.conversions.nativeConversion.native(
-                targetL + steeringVelocity
+                target.left + steeringVelocity
         )
         val nativeR = hardware.conversions.nativeConversion.native(
-                targetR - steeringVelocity
+                target.right - steeringVelocity
         )
 
         TwoSided(
@@ -75,16 +82,14 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 
 suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("point with line scanner") {
     val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
+    val uni = UnicycleDrive(this@pointWithLineScanner, this@startRoutine)
 
     controller {
         val errorA = linePosition?.let {
             -atan(it / lineScannerLead)
         } ?: 0.Degree
 
-        val pA = bearingKp * errorA
-
-        val targetL = +pA + speed
-        val targetR = -pA + speed
+        val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
@@ -98,68 +103,45 @@ suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanne
 
 suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("teleop") {
     val position by hardware.position.readOnTick.withStamps
-    val dadt = differentiator(::div, position.x, position.y.bearing)
     val totalDistance = distance(position.y.vector, target)
+    val uni = UnicycleDrive(this@waypoint, this@startRoutine)
 
-    val targetGraph = graph("Target Angle", Degree)
-    val errorGraph = graph("Error Angle", Degree)
     val waypointDistance = graph("Distance to Waypoint", Foot)
 
     controller { t ->
-        val (pt, p) = position
-        val distance = distance(p.vector, target)
+        val (_, p) = position
+        val distance = distance(p.vector, target).also { waypointDistance(t, it) }
 
-        val angularVelocity = dadt(pt, p.bearing)
         val targetA = atan2(target.x - p.x, target.y - p.y)
-        val errorA = targetA `coterminal -` p.bearing
-        val pA = bearingKp * errorA - bearingKd * angularVelocity
-
-        targetGraph(pt, targetA)
-        errorGraph(pt, errorA)
-
         val speed = motionProfile(totalDistance - distance)
-        val targetL = speed + pA
-        val targetR = speed - pA
+        val (targVels, _) = uni.speedAngleTarget(speed, targetA)
 
-        val nativeL = hardware.conversions.nativeConversion.native(targetL)
-        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
+        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
         ).takeIf {
-            waypointDistance(t, distance)
             distance > tolerance
         }
     }
 }
 
 suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRoutine("turn") {
-    val position by hardware.position.readOnTick.withStamps
-    val dadt = differentiator(::div, position.x, position.y.bearing)
+    val uni = UnicycleDrive(this@turn, this@startRoutine)
 
-    val errorGraph = graph("Error Angle", Degree)
+    controller {
+        val (targVels, error) = uni.speedAngleTarget(0.FootPerSecond, target)
 
-    controller { t ->
-        val (pt, p) = position
-
-        val angularVelocity = dadt(pt, p.bearing)
-        val error = target `coterminal -` p.bearing
-        val pA = bearingKp * error - bearingKd * angularVelocity
-
-        errorGraph(pt, error)
-
-        val targetL = +pA
-        val targetR = -pA
-
-        val nativeL = hardware.conversions.nativeConversion.native(targetL)
-        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
+        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
         ).takeIf {
-            error.abs > tolerance
+            error !in `±`(tolerance)
         }
     }
 }
