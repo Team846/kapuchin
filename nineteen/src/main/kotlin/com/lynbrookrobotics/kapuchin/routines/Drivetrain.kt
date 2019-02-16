@@ -5,10 +5,14 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
     val position by with(scope) { c.hardware.position.readOnTick.withStamps }
@@ -148,57 +152,78 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
 
 suspend fun llAlign(
         drivetrain: DrivetrainComponent,
-        limelight: LimelightHardware
+        limelight: LimelightHardware,
+        tolerance: Angle = 10.Degree
 ) = startChoreo("ll align") {
     val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
-
-    val roughLocation by limelight.roughTargetLocation.readEagerly().withoutStamps
-    val precisePosition by limelight.targetPosition.readEagerly().withoutStamps
+    val targetPosition by limelight.targetPosition.readEagerly().withoutStamps
 
     fun motionProfile(dist: Length) = trapezoidalMotionProfile(
             dist,
             3.FootPerSecond,
             5.FootPerSecondSquared,
-            10.FootPerSecond
+            5.FootPerSecond
     )
 
+    var job = scope.launch { }
+
     choreography {
-        val rng = limelight.precisePositioningRange
+        do {
+            val visionSnapshot = targetPosition
 
-        roughLocation?.let { snapshot ->
-            val mtrx = RotationMatrix(robotPosition.bearing)
-            val target = mtrx rz snapshot
+            if (visionSnapshot != null) {
+                val robotSnapshot = robotPosition
+                val mtrx = RotationMatrix(robotSnapshot.bearing)
+                val targetLoc = mtrx rz visionSnapshot.vector
 
-            drivetrain.waypoint(
-                    motionProfile(snapshot.abs - rng),
-                    robotPosition.vector + target,
-                    rng + 6.Inch
-            )
-        }
+                job.cancel()
 
-        precisePosition?.let { snapshot ->
-            val mtrx = RotationMatrix(robotPosition.bearing)
+                job = if (visionSnapshot.bearing in `±`(tolerance)) {
+                    drivetrain.log(Debug) { "Target skew within alignment tolerance" }
 
-            val target = mtrx rz snapshot.vector
+                    val waypt1 = robotSnapshot.vector + targetLoc
 
-            val perpAlignPt = target.abs / 2
-            val perpStart = mtrx rz UomVector(
-                    perpAlignPt * sin(snapshot.bearing),
-                    perpAlignPt * cos(snapshot.bearing)
-            )
+                    launch {
+                        drivetrain.waypoint(
+                                motionProfile(distance(robotPosition.vector, waypt1)),
+                                waypt1, 3.Inch
+                        )
+                    }
+                } else {
+                    drivetrain.log(Debug) { "Target skewed" }
 
-            drivetrain.waypoint(
-                    motionProfile((target - perpStart).abs),
-                    robotPosition.vector + target - perpStart, 3.Inch
-            )
+                    val targetDist = targetLoc.abs
+                    val perpAlignPt = targetDist / 2
 
-            drivetrain.turn(
-                    snapshot.bearing + mtrx.theta,
-                    2.Degree
-            )
+                    val perpStart = mtrx rz UomVector(
+                            perpAlignPt * sin(visionSnapshot.bearing),
+                            perpAlignPt * cos(visionSnapshot.bearing)
+                    )
 
-            delay(10.Second)
-        }
+                    val waypt1 = robotSnapshot.vector + targetLoc - perpStart
+
+                    launch {
+                        drivetrain.waypoint(
+                                { 5.FootPerSecond },
+                                waypt1, 4.Inch
+                        )
+
+                        drivetrain.turn(
+                                robotSnapshot.bearing + visionSnapshot.bearing,
+                                tolerance
+                        )
+                    }
+                }
+            } else if (job.isActive) {
+                drivetrain.log(Debug) { "No target found" }
+                job.join()
+            }
+
+        } while (isActive && (visionSnapshot != null || job.isActive))
+
+        drivetrain.log(Debug) { "Alignment finished" }
+
+        delay(10.Second)
     }
 }
 

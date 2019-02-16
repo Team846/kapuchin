@@ -9,8 +9,8 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.acos
 import kotlin.math.roundToInt
-
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     override val name = "Limelight"
@@ -23,63 +23,57 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
         val y by pref(16, Inch)
         ({ UomVector(x, y) })
     }
-    private val distanceAreaConstant by pref(4.95534, Foot)
+    private val distanceVerticalConstant by pref(472, Foot)
+    private val distanceHorizontalConstant by pref {
+        val thor by pref(226)
+        val forDistance by pref(5, Foot)
+        ({ forDistance * thor })
+    }
+
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private fun targetExists() = l("tv").roundToInt() == 1
     private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
 
-//    val roughDistanceToTarget = sensor {
+    private fun distanceToTarget(tvert: Double) = distanceVerticalConstant / tvert
+    private fun thorMax(distance: Length) = distanceHorizontalConstant / distance
+    private fun skew(thor: Dimensionless, thorMax: Dimensionless) = acos(
+            if(thor > thorMax) 1.Each else thor / thorMax
+    )
+    fun turn(tx: Angle, distance: Length) = atan(distance * tan(tx) / (distance + mounting.y))
+
+//    val roughTargetLocation = sensor {
 //        (if (targetExists()) {
-//            distanceAreaConstant / Math.sqrt(l("ta"))
+//            val tx = l("tx").Degree
+//            val
+//
+//
+//            UomVector(
+//                    distance * sin(direction),
+//                    distance * cos(direction)
+//            ) + mounting
 //        } else null) stampWith timeStamp(it)
 //    }
-//            .with(graph("Rough Distance to Target", Foot)) { it ?: Double.NaN.Foot }
-//
-//    val directionOfTarget = sensor {
-//        (if (targetExists()) {
-//            l("tx").Degree
-//        } else null) stampWith timeStamp(it)
-//    }
-//            .with(graph("Direction to Target", Degree)) { it ?: Double.NaN.Degree }
-//
-//    fun targetDirectionToRobotTurn(direction: Angle, distance: Length) = atan(
-//            distance * tan(direction) / (distance + mounting.y)
-//    )
-
-    val precisePositioningRange by pref(5, Foot)
-
-    val roughTargetLocation = sensor {
-        (if (targetExists()) {
-            val distance = distanceAreaConstant / Math.sqrt(l("ta"))
-            val direction = l("tx").Degree
-
-            UomVector(
-                    distance * sin(direction),
-                    distance * cos(direction)
-            ) + mounting
-        } else null) stampWith timeStamp(it)
-    }
-            .with(graph("Rough Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
-            .with(graph("Rough Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
+//            .with(graph("Rough Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
+//            .with(graph("Rough Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
 
     val targetPosition = sensor {
         (if (targetExists()) {
-            val camtran = table.getEntry("camtran").getDoubleArray(
-                    doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-            )
-
-            val distance = -camtran[2].Inch
-            val skew = camtran[4].Degree
-            val direction = l("tx").Degree
+            val tvert = l("tvert")
+            val distance = distanceToTarget(tvert)
+            val tx = l("tx").Degree
+            val turn = turn(tx, distance)
+            val thor = l("thor")
+            val thorMax = thorMax(distance)
+            val targetBearing = skew(thor.Each, thorMax)
 
             Position(
-                    distance * sin(direction) + mounting.x,
-                    distance * cos(direction) + mounting.y,
-                    skew
+                    distance * sin(turn) + mounting.x,
+                    distance * cos(turn) + mounting.y,
+                    targetBearing * tx.signum
             )
-        } else null) stampWith (it)
+        } else null) stampWith timeStamp(it)
     }
             .with(graph("Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
             .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
@@ -87,7 +81,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
 
     init {
         EventLoop.runOnTick { time ->
-            setOf(roughTargetLocation, targetPosition).forEach {
+            setOf(targetPosition).forEach {
                 it.optimizedRead(time, period)
             }
         }
