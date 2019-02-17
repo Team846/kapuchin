@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.hardware.tickstoserial
 import edu.wpi.first.hal.SerialPortJNI
 import edu.wpi.first.wpilibj.SerialPort
 import java.io.Closeable
+import kotlin.math.min
 
 class TicksToSerial(
         val port: SerialPort.Port
@@ -21,11 +22,11 @@ class TicksToSerial(
 
         val gotten = SerialPortJNI.serialRead(port.value.toByte(), buffer, recieved)
 
-        repeat(gotten) { i ->
+        repeat(min(gotten, buffer.size)) { i ->
             yield(TicksToSerialValue(buffer[i].toInt()))
         }
 
-        if(gotten > 0.8 * buffer.size) println("TicksToSerial buffer ≥ 80% full. (Received $gotten bytes)")
+        if (gotten > 0.8 * buffer.size) println("TicksToSerial buffer ≥ 80% full. (Received $gotten bytes)")
     }
 
     override fun close() {

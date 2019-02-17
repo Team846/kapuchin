@@ -1,27 +1,15 @@
 package com.lynbrookrobotics.kapuchin.control.math.kinematics
 
+import com.lynbrookrobotics.kapuchin.control.*
 import info.kunalsheth.units.generated.*
 
-@Deprecated("TrapezoidalMotionProfile should output current, not velocity")
 fun trapezoidalMotionProfile(
-        distance: Length,
-        startingSpeed: Velocity,
-        acceleration: Acceleration,
-        topSpeed: Velocity,
-        deceleration: Acceleration = acceleration,
-        endingSpeed: Velocity = 0.FootPerSecond
+        deceleration: Acceleration,
+        topSpeed: Velocity
 ): (Length) -> Velocity {
 
-    val absDistance = distance.abs
-    val direction = distance.signum
-
     // cad18/trunk/Users/Kunal Sheth/trapezoidal-motion-profile.gcx
-    return fun(dx: Length): Velocity {
-        val signedDx = dx * direction
-
-        return (v(acceleration, startingSpeed, signedDx) min
-                topSpeed min
-                v(deceleration, endingSpeed, absDistance - signedDx)
-                ) * direction
-    }
+    return fun(error: Length) = (
+            topSpeed.abs min v(deceleration, 0.FootPerSecond, error).abs
+            ) * error.signum
 }

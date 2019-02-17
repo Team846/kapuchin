@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
+import com.lynbrookrobotics.kapuchin.control.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
@@ -9,7 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.acos
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
@@ -19,15 +20,15 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     override val syncThreshold = 3.milli(Second)
 
     private val mounting by pref {
-        val x by pref(-6, Inch)
-        val y by pref(16, Inch)
+        val x by pref(-4.5, Inch)
+        val y by pref(9, Inch)
         ({ UomVector(x, y) })
     }
     private val distanceVerticalConstant by pref(472, Foot)
-    private val distanceHorizontalConstant by pref {
+    private val aspect0 by pref {
         val thor by pref(226)
-        val forDistance by pref(5, Foot)
-        ({ forDistance * thor })
+        val tvert by pref(94)
+        ({ thor / tvert.toDouble() })
     }
 
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
@@ -37,41 +38,24 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
     private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
 
     private fun distanceToTarget(tvert: Double) = distanceVerticalConstant / tvert
-    private fun thorMax(distance: Length) = distanceHorizontalConstant / distance
-    private fun skew(thor: Dimensionless, thorMax: Dimensionless) = acos(
-            if(thor > thorMax) 1.Each else thor / thorMax
-    )
-    fun turn(tx: Angle, distance: Length) = atan(distance * tan(tx) / (distance + mounting.y))
-
-//    val roughTargetLocation = sensor {
-//        (if (targetExists()) {
-//            val tx = l("tx").Degree
-//            val
-//
-//
-//            UomVector(
-//                    distance * sin(direction),
-//                    distance * cos(direction)
-//            ) + mounting
-//        } else null) stampWith timeStamp(it)
-//    }
-//            .with(graph("Rough Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
-//            .with(graph("Rough Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
+    private fun turn(tx: Angle, distance: Length) = atan(distance * tan(tx) / (distance + mounting.y))
+    private fun aspect(thor: Double, tvert: Double) = thor / tvert
+    private fun skew(aspect: Double) = acos(aspect.Each / aspect0 minMag 1.Each)
 
     val targetPosition = sensor {
         (if (targetExists()) {
             val tvert = l("tvert")
-            val distance = distanceToTarget(tvert)
             val tx = l("tx").Degree
-            val turn = turn(tx, distance)
             val thor = l("thor")
-            val thorMax = thorMax(distance)
-            val targetBearing = skew(thor.Each, thorMax)
+
+            val distance = distanceToTarget(tvert)
+            val turn = turn(tx, distance)
+            val skew = skew(aspect(thor, tvert))
 
             Position(
                     distance * sin(turn) + mounting.x,
                     distance * cos(turn) + mounting.y,
-                    targetBearing * tx.signum
+                    skew * tx.signum
             )
         } else null) stampWith timeStamp(it)
     }

@@ -5,14 +5,10 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
     val position by with(scope) { c.hardware.position.readOnTick.withStamps }
@@ -66,7 +62,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering
 
-        if (box(steering) != 0.Percent) startingAngle = -absSteering + position.y.bearing
+        if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
 
         val (target, _) = uni.speedAngleTarget(forwardVelocity, absSteering + startingAngle)
 
@@ -107,7 +103,6 @@ suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanne
 
 suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("teleop") {
     val position by hardware.position.readOnTick.withStamps
-    val totalDistance = distance(position.y.vector, target)
     val uni = UnicycleDrive(this@waypoint, this@startRoutine)
 
     val waypointDistance = graph("Distance to Waypoint", Foot)
@@ -117,7 +112,7 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
         val distance = distance(p.vector, target).also { waypointDistance(t, it) }
 
         val targetA = atan2(target.x - p.x, target.y - p.y)
-        val speed = motionProfile(totalDistance - distance)
+        val speed = motionProfile(distance)
         val (targVels, _) = uni.speedAngleTarget(speed, targetA)
 
         val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
@@ -153,77 +148,55 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
 suspend fun llAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware,
-        tolerance: Angle = 10.Degree
+        tolerance: Angle = 15.Degree
 ) = startChoreo("ll align") {
     val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
     val targetPosition by limelight.targetPosition.readEagerly().withoutStamps
 
-    fun motionProfile(dist: Length) = trapezoidalMotionProfile(
-            dist,
-            3.FootPerSecond,
-            5.FootPerSecondSquared,
-            5.FootPerSecond
-    )
-
-    var job = scope.launch { }
+    val endPt = if(targetPosition?.run { vector.abs > 5.Foot } == true) {
+        6.Foot
+    } else {
+        3.Foot
+    }
 
     choreography {
-        do {
-            val visionSnapshot = targetPosition
+        fun calculateWaypt() = targetPosition?.let { visionSnapshot ->
+            val robotSnapshot = robotPosition
+            val mtrx = RotationMatrix(robotSnapshot.bearing)
+            val targetLoc = mtrx rz visionSnapshot.vector
 
-            if (visionSnapshot != null) {
-                val robotSnapshot = robotPosition
-                val mtrx = RotationMatrix(robotSnapshot.bearing)
-                val targetLoc = mtrx rz visionSnapshot.vector
-
-                job.cancel()
-
-                job = if (visionSnapshot.bearing in `±`(tolerance)) {
-                    drivetrain.log(Debug) { "Target skew within alignment tolerance" }
-
-                    val waypt1 = robotSnapshot.vector + targetLoc
-
-                    launch {
-                        drivetrain.waypoint(
-                                motionProfile(distance(robotPosition.vector, waypt1)),
-                                waypt1, 3.Inch
-                        )
-                    }
-                } else {
-                    drivetrain.log(Debug) { "Target skewed" }
-
-                    val targetDist = targetLoc.abs
-                    val perpAlignPt = targetDist / 2
-
-                    val perpStart = mtrx rz UomVector(
-                            perpAlignPt * sin(visionSnapshot.bearing),
-                            perpAlignPt * cos(visionSnapshot.bearing)
+            when {
+                visionSnapshot.bearing in `±`(tolerance) -> {
+                    val perpPt = mtrx rz UomVector(
+                            endPt * sin(0.Degree),
+                            endPt * cos(0.Degree)
                     )
 
-                    val waypt1 = robotSnapshot.vector + targetLoc - perpStart
-
-                    launch {
-                        drivetrain.waypoint(
-                                { 5.FootPerSecond },
-                                waypt1, 4.Inch
-                        )
-
-                        drivetrain.turn(
-                                robotSnapshot.bearing + visionSnapshot.bearing,
-                                tolerance
-                        )
-                    }
+                    robotSnapshot.vector + targetLoc - perpPt to robotSnapshot.bearing
                 }
-            } else if (job.isActive) {
-                drivetrain.log(Debug) { "No target found" }
-                job.join()
+
+                else -> {
+                    val perpPt = mtrx rz UomVector(
+                            endPt * sin(visionSnapshot.bearing),
+                            endPt * cos(visionSnapshot.bearing)
+                    )
+
+                    robotSnapshot.vector + targetLoc - perpPt to robotSnapshot.bearing + visionSnapshot.bearing
+                }
             }
+        }
 
-        } while (isActive && (visionSnapshot != null || job.isActive))
+        calculateWaypt()?.let { (waypt, bearing) ->
+            drivetrain.waypoint(
+                    trapezoidalMotionProfile(
+                            1.FootPerSecondSquared,
+                            3.FootPerSecond
+                    ), waypt, 4.Inch
+            )
+            drivetrain.turn(bearing, tolerance)
+        }
 
-        drivetrain.log(Debug) { "Alignment finished" }
-
-        delay(10.Second)
+        delay(1.Second)
     }
 }
 
