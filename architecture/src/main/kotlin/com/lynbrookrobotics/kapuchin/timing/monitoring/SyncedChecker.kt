@@ -1,12 +1,10 @@
 package com.lynbrookrobotics.kapuchin.timing
 
-import com.lynbrookrobotics.kapuchin.control.data.TimeStamped
-import com.lynbrookrobotics.kapuchin.hardware.Sensor
-import com.lynbrookrobotics.kapuchin.logging.Level.Warning
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Time
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
+import info.kunalsheth.units.generated.*
 
 /**
  * Checks if the domain of `TimeStamped` values is small enough

@@ -1,8 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math
 
-import com.lynbrookrobotics.kapuchin.control.data.delay
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
-import com.lynbrookrobotics.kapuchin.tests.anyInt
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.tests.*
 import kotlin.test.Test
 
 class DelayTest {

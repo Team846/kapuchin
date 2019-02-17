@@ -101,7 +101,10 @@ crashlytics-build.properties
 fabric.properties
 
 ### Custom
-.idea
+!.idea/
+.idea/*
+!.idea/codeStyles/
+
 *.iml
 docs
 .DS_Store

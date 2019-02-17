@@ -1,12 +1,11 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
-import com.lynbrookrobotics.kapuchin.control.math.`coterminal -`
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
-import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.TicksToSerialValue
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainConversions
-import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
 suspend fun DrivetrainComponent.warmup() = startRoutine("warmup") {
@@ -20,7 +19,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("warmup") {
             val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
             conv.accumulateOdometry(l, r)
         }
-        val (x, y, theta) = conv.xyPosition
+        val (x, y, _) = Position(conv.matrixTracking.x, conv.matrixTracking.y, conv.matrixTracking.bearing)
 
 
         val targetA = 1.Turn * r()
@@ -30,8 +29,8 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("warmup") {
         val targetL = maxSpeed * r() + pA + x / Second
         val targetR = maxSpeed * r() - pA + y / Second
 
-        val nativeL = hardware.conversions.nativeConversion.native(targetL)
-        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+        val nativeL = hardware.conversions.nativeConversion.native(targetL) * 0.01
+        val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.01
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),

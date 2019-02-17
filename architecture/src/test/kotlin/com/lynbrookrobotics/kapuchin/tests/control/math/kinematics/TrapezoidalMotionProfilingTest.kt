@@ -1,13 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math.kinematics
 
-import com.lynbrookrobotics.kapuchin.control.math.kinematics.trapezoidalMotionProfile
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
-import com.lynbrookrobotics.kapuchin.tests.`is greater than or equal to?`
-import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
-import info.kunalsheth.units.generated.Foot
-import info.kunalsheth.units.generated.FootPerSecond
-import info.kunalsheth.units.generated.FootPerSecondSquared
-import info.kunalsheth.units.generated.Inch
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
+import com.lynbrookrobotics.kapuchin.tests.*
+import info.kunalsheth.units.generated.*
 import kotlin.math.absoluteValue
 import kotlin.test.Test
 

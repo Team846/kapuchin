@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
-import info.kunalsheth.units.generated.Dimensionless
-import info.kunalsheth.units.generated.I
+import info.kunalsheth.units.generated.*
 
 /**
  * Represents an CAN based electronic speed controller output

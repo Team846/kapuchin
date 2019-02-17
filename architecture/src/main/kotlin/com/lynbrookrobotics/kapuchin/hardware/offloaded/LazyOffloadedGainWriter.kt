@@ -1,8 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
-import com.lynbrookrobotics.kapuchin.control.conversion.OffloadedNativeConversion
-import info.kunalsheth.units.generated.Dimensionless
-import info.kunalsheth.units.generated.I
+import com.lynbrookrobotics.kapuchin.control.conversion.*
+import info.kunalsheth.units.generated.*
 
 /**
  * CAN electronic speed controller output utility

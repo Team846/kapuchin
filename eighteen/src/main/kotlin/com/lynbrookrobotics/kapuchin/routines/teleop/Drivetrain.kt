@@ -1,21 +1,17 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
-import com.lynbrookrobotics.kapuchin.control.data.avg
-import com.lynbrookrobotics.kapuchin.control.data.minus
-import com.lynbrookrobotics.kapuchin.control.electrical.rampRateLimiter
-import com.lynbrookrobotics.kapuchin.control.loops.pid.pidControlLoop
-import com.lynbrookrobotics.kapuchin.control.math.infiniteIntegrator
-import com.lynbrookrobotics.kapuchin.control.math.kinematics.trapezoidalMotionProfile
-import com.lynbrookrobotics.kapuchin.control.maxMag
-import com.lynbrookrobotics.kapuchin.control.minMag
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.LiftComponent
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.control.*
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.electrical.*
+import com.lynbrookrobotics.kapuchin.control.loops.pid.*
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.`±`
+import info.kunalsheth.units.math.*
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware, lift: LiftComponent) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps

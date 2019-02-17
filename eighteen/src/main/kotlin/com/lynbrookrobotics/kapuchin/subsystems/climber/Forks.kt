@@ -1,14 +1,12 @@
 package com.lynbrookrobotics.kapuchin.subsystems.climber
 
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.subsystems.Component
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Solenoid
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class ForksComponent(hardware: ForksHardware) : Component<ForksComponent, ForksHardware, Boolean>(hardware, EventLoop) {
     override val fallbackController: ForksComponent.(Time) -> Boolean = { false }

@@ -9,12 +9,8 @@ package edu.wpi.first.wpilibj;
 
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
-import edu.wpi.first.networktables.EntryListenerFlags;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.*;
 
-import java.util.Set;
 import java.util.Vector;
 
 import static java.util.Objects.requireNonNull;

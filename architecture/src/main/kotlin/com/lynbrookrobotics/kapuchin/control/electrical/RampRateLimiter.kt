@@ -1,9 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.control.math.differentiator
-import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.T
-import info.kunalsheth.units.generated.Time
+import com.lynbrookrobotics.kapuchin.control.math.*
+import info.kunalsheth.units.generated.*
 
 /**
  * Prevents values from increasing too fast

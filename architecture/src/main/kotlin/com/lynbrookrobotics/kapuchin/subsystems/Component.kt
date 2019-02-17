@@ -1,17 +1,13 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
-import com.lynbrookrobotics.kapuchin.logging.Level.Error
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.routines.Routine
-import com.lynbrookrobotics.kapuchin.timing.blockingMutex
-import com.lynbrookrobotics.kapuchin.timing.clock.Clock
-import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.Last
-import com.lynbrookrobotics.kapuchin.timing.clock.Ticker
-import com.lynbrookrobotics.kapuchin.timing.clock.Ticker.Companion.ticker
-import info.kunalsheth.units.generated.Time
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.*
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resumeWithException
@@ -69,11 +65,11 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
      */
     suspend fun startRoutine(
             name: String,
-            setup: SensorScope.() -> This.(Time) -> Output?
+            setup: BoundSensorScope.() -> This.(Time) -> Output?
     ) {
-        val scope = SensorScope(this)
+        val sensorScope = BoundSensorScope(this)
         try {
-            val controller = scope.run(setup)
+            val controller = sensorScope.run(setup)
             suspendCancellableCoroutine<Unit> { cont ->
                 routine = Routine(thisAsThis, name, controller, cont)
             }
@@ -84,7 +80,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
         } catch (t: Throwable) {
             log(Error, t) { "Exception running $name routine.\n${t.message}" }
         } finally {
-            scope.close()
+            sensorScope.close()
         }
     }
 
@@ -117,7 +113,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
                         ?.let { hardware.output(it) }
             } catch (t: Throwable) {
                 routine?.resumeWithException(t) ?: log(Error, t) {
-                    "Exception running default controller"
+                    "Exception running default controller\n${t.message}"
                 }
             }
         }

@@ -1,18 +1,14 @@
 package com.lynbrookrobotics.kapuchin.timing.clock
 
-import com.lynbrookrobotics.kapuchin.logging.Level.Warning
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.logging.withDecimals
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.timing.PlatformThread.Companion.platformThread
-import com.lynbrookrobotics.kapuchin.timing.Priority
-import com.lynbrookrobotics.kapuchin.timing.currentTime
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.NotifierJNI
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.micro
+import info.kunalsheth.units.math.*
 
-actual class Ticker private actual constructor(
+actual class Ticker internal actual constructor(
         parent: Named,
         priority: Priority,
         val period: Time,
@@ -61,9 +57,5 @@ actual class Ticker private actual constructor(
                 }
             }
         }
-    }
-
-    actual companion object {
-        actual fun Named.ticker(priority: Priority, period: Time, name: String) = Ticker(this, priority, period, name)
     }
 }

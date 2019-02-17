@@ -1,14 +1,9 @@
 package com.lynbrookrobotics.kapuchin.routines.teleop
 
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.collector.ClampComponent
-import com.lynbrookrobotics.kapuchin.subsystems.collector.PivotComponent
-import com.lynbrookrobotics.kapuchin.subsystems.collector.RollersComponent
-import info.kunalsheth.units.generated.DutyCycle
-import info.kunalsheth.units.generated.Each
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.times
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import info.kunalsheth.units.generated.*
 
 suspend fun RollersComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val toCollect by driver.collect.readEagerly.withoutStamps

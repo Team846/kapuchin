@@ -1,17 +1,13 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.routines.Routine.Companion.launchAll
-import com.lynbrookrobotics.kapuchin.routines.teleop
-import com.lynbrookrobotics.kapuchin.routines.warmup
-import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware
-import com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.kapuchin.subsystems.lift.*
-import com.lynbrookrobotics.kapuchin.timing.scope
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import edu.wpi.first.hal.HAL
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 object Subsystems {
@@ -36,21 +32,34 @@ object Subsystems {
         electricalHardware = ElectricalSystemHardware()
     }
 
-    fun teleop() = launchAll(
-            { drivetrain.teleop(driverHardware) }
-    ).also {
-        HAL.observeUserProgramTeleop()
-        System.gc()
+    suspend fun teleop() {
+        runAll(
+                { drivetrain.teleop(driverHardware) },
+                {
+                    HAL.observeUserProgramTeleop()
+                    System.gc()
+                }
+        )
     }
 
-    fun warmup() = launchAll(
-            { drivetrain.warmup() }
-    ).also {
-        HAL.observeUserProgramTeleop()
-        System.gc()
+    suspend fun warmup() {
+        runAll(
+                { drivetrain.warmup() }
+        )
     }
 
-    fun backAndForthAuto() = scope.launch {
+    suspend fun followWaypoints() {
+        drivetrain.waypoint(3.ΩFootPerSecond, UomVector(0.Foot, 5.Foot), 2.Inch)
+        delay(1.Second)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 5.Foot), 2.Inch)
+        delay(1.Second)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 0.Foot), 2.Inch)
+        delay(1.Second)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 0.Foot), 2.Inch)
+        delay(1.Second)
+    }
+
+    suspend fun backAndForthAuto() {
         //        while (true) {
 //            withTimeout(1.Second) {
 //                drivetrain.driveStraight(
@@ -74,6 +83,5 @@ object Subsystems {
 //
 //            delay(1.Second)
 //        }
-    }.also { HAL.observeUserProgramTeleop() }
-
+    }
 }

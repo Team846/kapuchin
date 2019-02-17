@@ -5,20 +5,19 @@ import com.ctre.phoenix.ErrorCode.OK
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
 import com.ctre.phoenix.motorcontrol.ControlMode.*
+import com.ctre.phoenix.motorcontrol.ControlMode.PercentOutput
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.*
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.lazyOffloadedGainWriter
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.*
 import java.io.IOException
 
 
-val timeout = 1000
-private val configTimeout = if(HardwareInit.crashOnFailure) timeout else 0
+val configTimeout = if(HardwareInit.crashOnFailure) 1000 else 0
 private val slowStatusFrameRate = 1000
 
 operator fun ErrorCode.unaryPlus() = checkOk

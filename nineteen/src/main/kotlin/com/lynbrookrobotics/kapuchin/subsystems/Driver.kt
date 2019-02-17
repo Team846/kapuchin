@@ -1,27 +1,24 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.horizontalDeadband
-import com.lynbrookrobotics.kapuchin.control.data.stampWith
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
-import com.lynbrookrobotics.kapuchin.hardware.alpsRdc80
-import com.lynbrookrobotics.kapuchin.preferences.pref
+import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.DriverHardware.JoystickButton.*
-import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.timing.*
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Joystick
-import info.kunalsheth.units.generated.Dimensionless
-import info.kunalsheth.units.generated.Each
-import info.kunalsheth.units.generated.Percent
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.math.milli
-import info.kunalsheth.units.math.pow
-import info.kunalsheth.units.math.withSign
+import edu.wpi.first.wpilibj.XboxController
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class DriverHardware : SubsystemHardware<DriverHardware, Nothing>() {
     override val name = "Driver"
     override val priority = Priority.RealTime
     override val period = 20.milli(Second)
     override val syncThreshold = 3.milli(Second)
+
+    val station by hardw { DriverStation.getInstance() }
 
     val operator by hardw { Joystick(1) }.verify("the operator joystick is connected") {
         it.name == "T.16000M"

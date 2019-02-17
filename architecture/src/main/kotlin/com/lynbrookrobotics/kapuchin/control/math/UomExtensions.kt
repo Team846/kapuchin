@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control
 
-import info.kunalsheth.units.generated.Quan
+import info.kunalsheth.units.generated.*
 
 operator fun <Q : Quan<Q>> Q.div(that: Q): Double = this.siValue / that.siValue
 

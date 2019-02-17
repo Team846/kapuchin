@@ -1,13 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math
 
-import com.lynbrookrobotics.kapuchin.control.math.differentiator
-import com.lynbrookrobotics.kapuchin.tests.`is equal to?`
-import com.lynbrookrobotics.kapuchin.tests.`is greater than?`
-import com.lynbrookrobotics.kapuchin.tests.anyDouble
-import info.kunalsheth.units.generated.Foot
-import info.kunalsheth.units.generated.FootPerSecond
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.div
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.tests.*
+import info.kunalsheth.units.generated.*
 import kotlin.test.Test
 
 class DerivativeTest {

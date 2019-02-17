@@ -1,12 +1,9 @@
 package com.lynbrookrobotics.kapuchin.logging
 
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.timing.scope
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.Second
-import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.generated.UomConverter
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 import java.io.Closeable
 import java.io.File
@@ -18,7 +15,7 @@ actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
     Level.Debug -> println("DEBUG $formattedMessage")
 }
 
-actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: String, private val withUnits: UomConverter<Q>) :
+actual class Grapher<Q : Quan<Q>> internal actual constructor(parent: Named, of: String, private val withUnits: UomConverter<Q>) :
         Named by Named("$of (${withUnits.unitName})", parent),
         Flushable, Closeable,
         (Time, Q) -> Unit {
@@ -42,12 +39,9 @@ actual class Grapher<Q : Quan<Q>> private actual constructor(parent: Named, of: 
     actual override fun flush() = printer.flush()
     actual override fun close() = printer.close()
 
-    actual companion object : Named by Named("graphers") {
+    companion object : Named by Named("graphers") {
         val graphToFile by pref(false)
         val graphToDashboard by pref(true)
-
-        actual fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>) =
-                Grapher(this, of, withUnits)
     }
 }
 

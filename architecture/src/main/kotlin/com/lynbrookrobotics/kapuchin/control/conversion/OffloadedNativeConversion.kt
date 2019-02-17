@@ -1,12 +1,12 @@
 package com.lynbrookrobotics.kapuchin.control.conversion
 
-import com.lynbrookrobotics.kapuchin.control.data.Gain
-import com.lynbrookrobotics.kapuchin.control.div
+import com.lynbrookrobotics.kapuchin.control.*
+import com.lynbrookrobotics.kapuchin.control.data.*
 import info.kunalsheth.units.generated.Quan
 import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.*
 import kotlin.jvm.JvmName
 
 /**

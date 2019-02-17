@@ -1,9 +1,8 @@
 package com.lynbrookrobotics.kapuchin.tests.subsystems
 
-import com.lynbrookrobotics.kapuchin.tests.threadDumpOnFailiure
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
-import com.lynbrookrobotics.kapuchin.timing.currentTime
-import com.lynbrookrobotics.kapuchin.timing.scope
+import com.lynbrookrobotics.kapuchin.tests.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test

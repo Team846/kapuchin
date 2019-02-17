@@ -1,12 +1,11 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
-import com.lynbrookrobotics.kapuchin.logging.Named
-import com.lynbrookrobotics.kapuchin.timing.blockingMutex
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.EntryListenerFlags
 import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.wpilibj.Preferences2
-import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.UomConverter
+import info.kunalsheth.units.generated.*
 
 private val impl = Preferences2.getInstance()
 
@@ -51,6 +50,7 @@ private fun registerCallback(key: String, callback: () -> Unit) {
  * @see NetworkTable
  */
 private val keys = mutableSetOf<String>()
+
 fun trim(table: NetworkTable = impl.table) {
     //Gets rid of all unused keys in the current subTable
     table.keys.forEach {
