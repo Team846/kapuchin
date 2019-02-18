@@ -17,7 +17,7 @@ class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, Tel
     }
 
     override fun TeleopHardware.output(value: Pair<Rumble, Color>) {
-        ledHardware.ledChannels(value.second)
+        ledHardware.channels(value.second)
 
         with(operatorHardware.xbox) {
             value.first.let { (l, r) ->

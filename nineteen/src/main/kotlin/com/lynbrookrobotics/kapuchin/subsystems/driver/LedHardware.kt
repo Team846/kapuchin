@@ -14,7 +14,7 @@ class LedHardware : RobotHardware<LedHardware>() {
     val canifierDeviceID by pref(50)
     val canifier by hardw { CANifier(canifierDeviceID) }
 
-    val ledChannels by pref {
+    val channels by pref {
         val red by pref("LEDChannelA")
         val green by pref("LEDChannelB")
         val blue by pref("LEDChannelC")
