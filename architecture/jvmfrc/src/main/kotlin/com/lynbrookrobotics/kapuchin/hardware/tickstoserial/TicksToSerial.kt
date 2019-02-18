@@ -19,14 +19,15 @@ class TicksToSerial(
 
     operator fun invoke() = sequence {
         val recieved = device.bytesReceived
+        val toRead = min(recieved, buffer.size)
 
-        val gotten = SerialPortJNI.serialRead(port.value.toByte(), buffer, recieved)
+        val gotten = SerialPortJNI.serialRead(port.value.toByte(), buffer, toRead)
 
-        repeat(min(gotten, buffer.size)) { i ->
+        repeat(gotten) { i ->
             yield(TicksToSerialValue(buffer[i].toInt()))
         }
 
-        if (gotten > 0.8 * buffer.size) println("TicksToSerial buffer ≥ 80% full. (Received $gotten bytes)")
+        if (recieved > 0.8 * buffer.size) println("TicksToSerial buffer ≥ 80% full. (Received $gotten bytes)")
     }
 
     override fun close() {

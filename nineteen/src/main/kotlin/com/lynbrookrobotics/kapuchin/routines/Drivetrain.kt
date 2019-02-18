@@ -145,58 +145,82 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     }
 }
 
+suspend fun DrivetrainComponent.llTrack(speed: Velocity, limelight: LimelightHardware) = startRoutine("ll track") {
+    val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
+    val robotPosition by hardware.position.readOnTick.withoutStamps
+    val uni = UnicycleDrive(this@llTrack, this@startRoutine)
+
+    val target = targetAngle?.let { it + robotPosition.bearing }
+
+    controller {
+        if (target != null) {
+            val (targs, _) = uni.speedAngleTarget(speed, target)
+
+            val nativeL = hardware.conversions.nativeConversion.native(targs.left)
+            val nativeR = hardware.conversions.nativeConversion.native(targs.right)
+
+            TwoSided(
+                    VelocityOutput(velocityGains, nativeL),
+                    VelocityOutput(velocityGains, nativeR)
+            )
+        } else null
+    }
+}
+
 suspend fun llAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware,
-        tolerance: Angle = 15.Degree
+        tolerance: Angle = 10.Degree
 ) = startChoreo("ll align") {
     val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
     val targetPosition by limelight.targetPosition.readEagerly().withoutStamps
 
-    val endPt = if(targetPosition?.run { vector.abs > 5.Foot } == true) {
-        6.Foot
-    } else {
-        3.Foot
-    }
+    val farEndPt = 3.Foot
+    val closeEndPt = 2.Foot
 
     choreography {
-        fun calculateWaypt() = targetPosition?.let { visionSnapshot ->
-            val robotSnapshot = robotPosition
-            val mtrx = RotationMatrix(robotSnapshot.bearing)
-            val targetLoc = mtrx rz visionSnapshot.vector
+        targetPosition?.let { visionSnapshot1 ->
+            val robotSnapshot1 = robotPosition
+            val mtrx = RotationMatrix(robotSnapshot1.bearing)
+            val targetLoc = mtrx rz visionSnapshot1.vector
 
-            when {
-                visionSnapshot.bearing in `±`(tolerance) -> {
-                    val perpPt = mtrx rz UomVector(
-                            endPt * sin(0.Degree),
-                            endPt * cos(0.Degree)
-                    )
+            if (visionSnapshot1.bearing in `±`(tolerance)) {
+                val perpPt = mtrx rz UomVector(
+                        closeEndPt * sin(0.Degree),
+                        closeEndPt * cos(0.Degree)
+                )
 
-                    robotSnapshot.vector + targetLoc - perpPt to robotSnapshot.bearing
-                }
+                val waypt = robotSnapshot1.vector + targetLoc - perpPt
 
-                else -> {
-                    val perpPt = mtrx rz UomVector(
-                            endPt * sin(visionSnapshot.bearing),
-                            endPt * cos(visionSnapshot.bearing)
-                    )
+                drivetrain.waypoint(
+                        trapezoidalMotionProfile(
+                                0.5.FootPerSecondSquared,
+                                3.FootPerSecond
+                        ), waypt, 4.Inch
+                )
+            } else {
+                val farPerpPt = mtrx rz UomVector(
+                        farEndPt * sin(visionSnapshot1.bearing),
+                        farEndPt * cos(visionSnapshot1.bearing)
+                )
 
-                    robotSnapshot.vector + targetLoc - perpPt to robotSnapshot.bearing + visionSnapshot.bearing
-                }
+                val waypt = robotSnapshot1.vector + targetLoc - farPerpPt
+
+                drivetrain.waypoint(
+                        trapezoidalMotionProfile(
+                                0.5.FootPerSecondSquared,
+                                3.FootPerSecond
+                        ), waypt, 4.Inch
+                )
+
+                drivetrain.turn(
+                        robotSnapshot1.bearing + visionSnapshot1.bearing,
+                        tolerance / 2
+                )
             }
         }
 
-        calculateWaypt()?.let { (waypt, bearing) ->
-            drivetrain.waypoint(
-                    trapezoidalMotionProfile(
-                            1.FootPerSecondSquared,
-                            3.FootPerSecond
-                    ), waypt, 4.Inch
-            )
-            drivetrain.turn(bearing, tolerance)
-        }
-
-        delay(1.Second)
+        drivetrain.llTrack(1.FootPerSecond, limelight)
     }
 }
 

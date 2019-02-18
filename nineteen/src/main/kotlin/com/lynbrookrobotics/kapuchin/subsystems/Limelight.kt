@@ -63,6 +63,15 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
             .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
             .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
 
+    val targetAngle = sensor {
+        (if (targetExists()) {
+            val tvert = l("tvert")
+            val distance = distanceToTarget(tvert)
+            val tx = l("tx").Degree
+            turn(tx, distance)
+        } else null) stampWith timeStamp(it)
+    }
+
     init {
         EventLoop.runOnTick { time ->
             setOf(targetPosition).forEach {
