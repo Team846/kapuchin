@@ -55,7 +55,7 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     }
 
     val position = sensor(encoder) { conversion(position) stampWith it }
-    val outOfRange = sensor { limitSwitch.get() stampWith it }
+    val limitSwitchStatus = sensor(limitSwitch) { get() stampWith it }
 
     private var zeroOffset = 0.0
     fun zero() { zeroOffset = encoder.position }
