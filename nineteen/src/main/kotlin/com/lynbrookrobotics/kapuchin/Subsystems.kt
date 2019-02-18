@@ -10,13 +10,15 @@ import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
+import java.awt.Color
 
 data class Subsystems(
         val drivetrain: DrivetrainComponent,
         val driverHardware: DriverHardware,
         val electricalHardware: ElectricalSystemHardware,
         val lineScannerHardware: LineScannerHardware,
-        val limelightHardware: LimelightHardware
+        val limelightHardware: LimelightHardware,
+        val leds: LEDLightsComponent
 ) {
 
     suspend fun teleop() {
@@ -58,6 +60,20 @@ data class Subsystems(
     suspend fun llAlign() {
         llAlign(drivetrain, limelightHardware)
     }
+  
+    suspend fun rainbowLEDs() {
+        leds.rainbow(5.Second)
+        delay(30.Second)
+    }
+
+    suspend fun cycleLEDs() {
+        leds.cycle(50, 1.Second, Color.RED, Color.YELLOW)
+        delay(30.Second)
+    }
+
+    suspend fun fadeLEDs() {
+        leds.fade(2.Second, Color.RED)
+    }
 
     suspend fun backAndForthAuto() {
         //        while (true) {
@@ -92,13 +108,15 @@ data class Subsystems(
             val electrical = async { ElectricalSystemHardware() }
             val lineScannerHardware = async { LineScannerHardware() }
             val limelight = async { LimelightHardware() }
+            val leds = async { LEDLightsComponent(LEDLightsHardware()) }
 
             Subsystems(
                     drivetrain = drivetrain.await(),
                     driverHardware = driver.await(),
                     electricalHardware = electrical.await(),
                     lineScannerHardware = lineScannerHardware.await(),
-                    limelightHardware = limelight.await()
+                    limelightHardware = limelight.await(),
+                    leds = leds.await()
             )
         }
 
@@ -108,7 +126,8 @@ data class Subsystems(
                     driverHardware = DriverHardware(),
                     electricalHardware = ElectricalSystemHardware(),
                     lineScannerHardware = LineScannerHardware(),
-                    limelightHardware = LimelightHardware()
+                    limelightHardware = LimelightHardware(),
+                    leds = LEDLightsComponent(LEDLightsHardware())
             )
         }
     }
