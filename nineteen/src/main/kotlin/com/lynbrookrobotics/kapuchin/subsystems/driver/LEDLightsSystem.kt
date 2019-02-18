@@ -1,8 +1,9 @@
-package com.lynbrookrobotics.kapuchin.subsystems
+package com.lynbrookrobotics.kapuchin.subsystems.driver
 
 import com.ctre.phoenix.CANifier
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
