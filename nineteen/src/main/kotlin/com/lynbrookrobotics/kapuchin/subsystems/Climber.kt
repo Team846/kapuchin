@@ -1,19 +1,23 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, ClimberHardware, TwoSided<DutyCycle>>(hardware) {
-    override val fallbackController: ClimberComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(0.Percent, 0.Percent) }
+class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, ClimberHardware, DutyCycle>(hardware, EventLoop) {
+    override val fallbackController: ClimberComponent.(Time) -> DutyCycle = { 0.Percent }
 
-    override fun ClimberHardware.output(value: TwoSided<DutyCycle>) {
-        hardware.escLeft.set(value.left.Each)
-        hardware.escRight.set(value.right.Each)
+    val maxOutput by pref(20, Percent)
+
+    override fun ClimberHardware.output(value: DutyCycle) {
+        val safeOutput = value minMag maxOutput
+        hardware.leftEsc.set(safeOutput.Each)
+        hardware.rightEsc.set(safeOutput.Each)
     }
 
 }
@@ -21,12 +25,12 @@ class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, 
 class ClimberHardware : SubsystemHardware<ClimberHardware, ClimberComponent>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 250.milli(Second)
-    override val syncThreshold: Time = 10.milli(Second)
+    override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Climber"
 
-    val leftEscChannel by pref(1)
-    val escLeft by hardw { Spark(leftEscChannel) }
+    val leftEscPort by pref(1)
+    val leftEsc by hardw { Spark(leftEscPort) }
 
-    val rightEscChannel by pref(2)
-    val escRight by hardw { Spark(rightEscChannel) }
+    val rightEscPort by pref(2)
+    val rightEsc by hardw { Spark(rightEscPort) }
 }
