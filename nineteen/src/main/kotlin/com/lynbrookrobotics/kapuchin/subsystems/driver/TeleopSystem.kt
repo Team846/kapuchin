@@ -10,13 +10,14 @@ import info.kunalsheth.units.math.*
 import java.awt.Color
 
 typealias Rumble = TwoSided<DutyCycle>
+
 class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, TeleopHardware, Pair<Rumble, Color>>(hardware, EventLoop) {
     override val fallbackController: TeleopComponent.(Time) -> Pair<Rumble, Color> = {
-        TwoSided(0.Percent) to Color.ORANGE
+        TwoSided(0.Percent) to Color(Color.HSBtoRGB(((currentTime.Second / 3 % 1.0)).toFloat(), 1f, 1f))
     }
 
     override fun TeleopHardware.output(value: Pair<Rumble, Color>) {
-        // TODO: Output to LEDs
+        ledHardware.ledChannels(value.second)
 
         with(operatorHardware.xbox) {
             value.first.let { (l, r) ->
@@ -28,9 +29,9 @@ class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, Tel
 }
 
 class TeleopHardware(
-//      private val ledHardware: LedHardware,
         val driverHardware: DriverHardware,
-        val operatorHardware: OperatorHardware
+        val operatorHardware: OperatorHardware,
+        val ledHardware: LedHardware
 ) : SubsystemHardware<TeleopHardware, TeleopComponent>() {
     override val period = 20.milli(Second)
     override val syncThreshold = 10.milli(Second)

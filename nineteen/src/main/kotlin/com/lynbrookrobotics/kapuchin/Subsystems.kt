@@ -95,7 +95,7 @@ data class Subsystems(
             val electrical = async { ElectricalSystemHardware() }
             val lineScannerHardware = async { LineScannerHardware() }
             val limelight = async { LimelightHardware() }
-            val leds = async { LEDLightsComponent(LEDLightsHardware()) }
+            val leds = async { LEDLightsComponent(LedHardware()) }
 
             Subsystems(
                     drivetrain = drivetrain.await(),
@@ -114,7 +114,7 @@ data class Subsystems(
                     electricalHardware = ElectricalSystemHardware(),
                     lineScannerHardware = LineScannerHardware(),
                     limelightHardware = LimelightHardware(),
-                    leds = LEDLightsComponent(LEDLightsHardware())
+                    leds = LEDLightsComponent(LedHardware())
             )
         }
     }
