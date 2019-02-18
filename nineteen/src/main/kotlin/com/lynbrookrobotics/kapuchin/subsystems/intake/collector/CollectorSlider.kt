@@ -46,11 +46,14 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
         val resolution by pref(42)
         ({
             val enc = EncoderConversion(resolution, 1.Turn)
-            fun(ticks: Double) = enc.angle(ticks) / encoderRotations * perSliderDistance
+            fun(ticks: Double) = enc.angle(ticks - zeroOffset) / encoderRotations * perSliderDistance
         })
     }
 
     val position = sensor(encoder) { conversion(position) stampWith it }
+
+    private var zeroOffset = 0.0
+    fun zero() { zeroOffset = encoder.position }
 
     init {
         uiBaselineTicker.runOnTick { position.optimizedRead(it, 1.Second) }
