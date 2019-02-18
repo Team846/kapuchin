@@ -4,11 +4,13 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import java.awt.Color
 
 object Subsystems {
 
@@ -69,6 +71,20 @@ object Subsystems {
         delay(1.Second)
         drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 0.Foot), 2.Inch)
         delay(1.Second)
+    }
+
+    suspend fun rainbowLEDs() {
+        leds.rainbow(5.Second)
+        delay(30.Second)
+    }
+
+    suspend fun cycleLEDs() {
+        leds.cycle(50, 1.Second, Color.RED, Color.YELLOW)
+        delay(30.Second)
+    }
+
+    suspend fun fadeLEDs() {
+        leds.fade(2.Second, Color.RED)
     }
 
     suspend fun backAndForthAuto() {
