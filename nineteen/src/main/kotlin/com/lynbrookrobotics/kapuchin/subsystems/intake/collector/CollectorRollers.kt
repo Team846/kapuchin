@@ -25,8 +25,8 @@ class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<
 
 class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, CollectorRollersComponent>() {
     override val priority: Priority = Priority.Low
-    override val period: Time = 100.milli(Second)
-    override val syncThreshold: Time = 50.milli(Second)
+    override val period: Time = 50.milli(Second)
+    override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Collector Rollers"
 
     val topPwmPort by pref(0)
