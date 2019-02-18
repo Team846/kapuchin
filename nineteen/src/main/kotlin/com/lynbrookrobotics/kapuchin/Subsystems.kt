@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
@@ -11,24 +12,36 @@ import kotlinx.coroutines.runBlocking
 
 object Subsystems {
 
-    lateinit var drivetrain: DrivetrainComponent
-    lateinit var driverHardware: DriverHardware
-    lateinit var electricalHardware: ElectricalSystemHardware
+    lateinit var drivetrain: DrivetrainComponent private set
+    lateinit var driverHardware: DriverHardware private set
+    lateinit var electricalHardware: ElectricalSystemHardware private set
 
     fun concurrentInit() = runBlocking {
         val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
         val driverAsync = async { DriverHardware() }
         val electricalAsync = async { ElectricalSystemHardware() }
 
-        drivetrain = drivetrainAsync.await()
-        driverHardware = driverAsync.await()
-        electricalHardware = electricalAsync.await()
+        suspend fun t(f: suspend () -> Unit) = try {
+            f()
+        } catch (t: Throwable) {
+            if (crashOnFailure) throw t else Unit
+        }
+
+        t { drivetrain = drivetrainAsync.await() }
+        t { driverHardware = driverAsync.await() }
+        t { electricalHardware = electricalAsync.await() }
     }
 
     fun init() {
-        drivetrain = DrivetrainComponent(DrivetrainHardware())
-        driverHardware = DriverHardware()
-        electricalHardware = ElectricalSystemHardware()
+        fun t(f: () -> Unit) = try {
+            f()
+        } catch (t: Throwable) {
+            if (crashOnFailure) throw t else Unit
+        }
+
+        t { drivetrain = DrivetrainComponent(DrivetrainHardware()) }
+        t { driverHardware = DriverHardware() }
+        t { electricalHardware = ElectricalSystemHardware() }
     }
 
     suspend fun teleop() {
