@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"
@@ -37,8 +38,24 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val highPanelHeight = s { aButton }
     val highCargoHeight = s { aButton && lt }
 
-    val liftPrecision = s { 0.0.Each.takeIf { false } } // todo: Figure out d-pad
-    val sliderPrecision = s { 0.0.Each.takeIf { false } } // todo: Figure out d-pad
+    private val povMush by pref(15, Degree)
+    val liftPrecision = s {
+        val pov = xbox.pov.Degree
+        (when (pov) {
+            in 0.Turn `±` povMush,
+            in 1.Turn `±` povMush -> 1
+            in 0.5.Turn `±` povMush -> -1
+            else -> 0
+        }).Each
+    }
+    val sliderPrecision = s {
+        val pov = xbox.pov.Degree
+        (when (pov) {
+            in 0.25.Turn `±` povMush -> 1
+            in 0.75.Turn `±` povMush -> -1
+            else -> 0
+        }).Each
+    }
 
     val deployPanel = s { rt }
     val deployCargo = s { lt && rt }
