@@ -7,8 +7,12 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
+import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -27,6 +31,18 @@ object Subsystems : Named by Named("subsystems") {
     lateinit var operator: OperatorHardware private set
     lateinit var leds: LedHardware private set
 
+    lateinit var lineScanner: LineScannerHardware private set
+    lateinit var collectorPivot: CollectorPivotComponent private set
+    lateinit var collectorRollers: CollectorRollersComponent private set
+    lateinit var collectorSlider: CollectorSliderComponent private set
+    lateinit var hook: HookComponent private set
+    lateinit var hookSlider: HookSliderComponent private set
+    lateinit var handoffPivot: HandoffPivotComponent private set
+    lateinit var handoffRollers: HandoffRollersComponent private set
+    lateinit var panelEjector: HatchPanelEjectorComponent private set
+    lateinit var lift: LiftComponent private set
+    lateinit var climber: ClimberComponent private set
+    lateinit var limelight: LimelightHardware private set
     lateinit var electrical: ElectricalSystemHardware private set
 
     fun concurrentInit() = runBlocking {
@@ -41,7 +57,18 @@ object Subsystems : Named by Named("subsystems") {
             ))
         }
 
-
+        val lineScannerAsync = async { LineScannerHardware() }
+        val collectorPivotAsync = async { CollectorPivotComponent(CollectorPivotHardware()) }
+        val collectorRollersAsync = async { CollectorRollersComponent(CollectorRollersHardware()) }
+        val collectorSliderAsync = async { CollectorSliderComponent(CollectorSliderHardware()) }
+        val hookAsync = async { HookComponent(HookHardware()) }
+        val hookSliderAsync = async { HookSliderComponent(HookSliderHardware()) }
+        val handoffPivotAsync = async { HandoffPivotComponent(HandoffPivotHardware()) }
+        val handoffRollersAsync = async { HandoffRollersComponent(HandoffRollersHardware()) }
+        val panelEjectorAsync = async { HatchPanelEjectorComponent(HatchPanelEjectorHardware()) }
+        val liftAsync = async { LiftComponent(LiftHardware()) }
+        val climberAsync = async { ClimberComponent(ClimberHardware()) }
+        val limelightAsync = async { LimelightHardware() }
         val electricalAsync = async { ElectricalSystemHardware() }
 
         suspend fun t(f: suspend () -> Unit) = try {
@@ -57,10 +84,22 @@ object Subsystems : Named by Named("subsystems") {
         t { operator = operatorAsync.await() }
         t { leds = ledsAsync.await() }
 
+        t { lineScanner = lineScannerAsync.await() }
+        t { collectorPivot = collectorPivotAsync.await() }
+        t { collectorRollers = collectorRollersAsync.await() }
+        t { collectorSlider = collectorSliderAsync.await() }
+        t { hook = hookAsync.await() }
+        t { hookSlider = hookSliderAsync.await() }
+        t { handoffPivot = handoffPivotAsync.await() }
+        t { handoffRollers = handoffRollersAsync.await() }
+        t { panelEjector = panelEjectorAsync.await() }
+        t { lift = liftAsync.await() }
+        t { climber = climberAsync.await() }
+        t { limelight = limelightAsync.await() }
         t { electrical = electricalAsync.await() }
     }
 
-    fun init() {
+    fun sequentialInit() {
         fun t(f: () -> Unit) = try {
             f()
         } catch (t: Throwable) {
@@ -74,6 +113,18 @@ object Subsystems : Named by Named("subsystems") {
         t { leds = LedHardware() }
         t { teleop = TeleopComponent(TeleopHardware(driver, operator, leds)) }
 
+        t { lineScanner = LineScannerHardware() }
+        t { collectorPivot = CollectorPivotComponent(CollectorPivotHardware()) }
+        t { collectorRollers = CollectorRollersComponent(CollectorRollersHardware()) }
+        t { collectorSlider = CollectorSliderComponent(CollectorSliderHardware()) }
+        t { hook = HookComponent(HookHardware()) }
+        t { hookSlider = HookSliderComponent(HookSliderHardware()) }
+        t { handoffPivot = HandoffPivotComponent(HandoffPivotHardware()) }
+        t { handoffRollers = HandoffRollersComponent(HandoffRollersHardware()) }
+        t { panelEjector = HatchPanelEjectorComponent(HatchPanelEjectorHardware()) }
+        t { lift = LiftComponent(LiftHardware()) }
+        t { climber = ClimberComponent(ClimberHardware()) }
+        t { limelight = LimelightHardware() }
         t { electrical = ElectricalSystemHardware() }
     }
 
