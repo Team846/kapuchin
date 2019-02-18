@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
+import edu.wpi.first.wpilibj.DigitalInput
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -34,10 +35,13 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     val startupFrictionCompensation by pref(0.5, Volt)
 
     val escCanId by pref(20)
+    val limitSwitchChannel by pref(3)
+
     val esc by hardw { CANSparkMax(escCanId, MotorType.kBrushless) }.configure {
         it.setSmartCurrentLimit(currentLimit.Ampere.toInt())
     }
     val encoder by hardw { esc.encoder }
+    val limitSwitch by hardw { DigitalInput(limitSwitchChannel) }
 
     val conversion by pref {
         val encoderRotations by pref(10, Turn)
@@ -51,6 +55,7 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     }
 
     val position = sensor(encoder) { conversion(position) stampWith it }
+    val outOfRange = sensor { limitSwitch.get() stampWith it }
 
     private var zeroOffset = 0.0
     fun zero() { zeroOffset = encoder.position }
