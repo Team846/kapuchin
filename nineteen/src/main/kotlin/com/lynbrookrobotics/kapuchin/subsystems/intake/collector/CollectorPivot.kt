@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorPivotPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -13,7 +14,7 @@ enum class CollectorPivotPosition {
     Up, Down
 }
 
-class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<CollectorPivotComponent, CollectorPivotHardware, CollectorPivotPosition>(hardware) {
+class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<CollectorPivotComponent, CollectorPivotHardware, CollectorPivotPosition>(hardware, EventLoop) {
 
     override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotPosition = { CollectorPivotPosition.Up }
 
@@ -29,7 +30,7 @@ class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<Coll
 class CollectorPivotHardware : SubsystemHardware<CollectorPivotHardware, CollectorPivotComponent>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 100.milli(Second)
-    override val syncThreshold: Time = 50.milli(Second)
+    override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Collector Pivot"
 
     val leftSolenoidPort by pref(0)

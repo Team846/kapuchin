@@ -10,6 +10,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, ClimberHardware, DutyCycle>(hardware, EventLoop) {
+
     override val fallbackController: ClimberComponent.(Time) -> DutyCycle = { 0.Percent }
 
     val maxOutput by pref(20, Percent)
