@@ -9,19 +9,15 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class EjectorState {
-    In, Out
+enum class EjectorState(val output: Boolean) {
+    In(false), Out(true)
 }
 
 class HatchPanelEjectorComponent(hardware: HatchPanelEjectorHardware) : Component<HatchPanelEjectorComponent, HatchPanelEjectorHardware, EjectorState>(hardware, Subsystems.pneumaticTicker) {
     override val fallbackController: HatchPanelEjectorComponent.(Time) -> EjectorState = { In }
     override fun HatchPanelEjectorHardware.output(value: EjectorState) {
-        when (value) {
-            In -> hardware.solenoid.set(false)
-            Out -> hardware.solenoid.set(true)
-        }
+        solenoid.set(value.output)
     }
-
 }
 
 class HatchPanelEjectorHardware : SubsystemHardware<HatchPanelEjectorHardware, HatchPanelEjectorComponent>() {

@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class HookPosition {
-    Up, Down
+enum class HookPosition(val output: Boolean) {
+    Up(false), Down(true)
 }
 
 class HookComponent(hardware: HookHardware) : Component<HookComponent, HookHardware, HookPosition>(hardware, Subsystems.pneumaticTicker) {
@@ -18,12 +18,8 @@ class HookComponent(hardware: HookHardware) : Component<HookComponent, HookHardw
     override val fallbackController: HookComponent.(Time) -> HookPosition = { Up }
 
     override fun HookHardware.output(value: HookPosition) {
-        when (value) {
-            Up -> solenoid.set(false)
-            Down -> solenoid.set(true)
-        }
+        solenoid.set(value.output)
     }
-
 }
 
 class HookHardware : SubsystemHardware<HookHardware, HookComponent>() {

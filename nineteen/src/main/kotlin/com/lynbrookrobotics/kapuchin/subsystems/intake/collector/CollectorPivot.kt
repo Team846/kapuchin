@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class CollectorPivotPosition {
-    Up, Down
+enum class CollectorPivotPosition(val output: Boolean) {
+    Up(false), Down(true)
 }
 
 class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<CollectorPivotComponent, CollectorPivotHardware, CollectorPivotPosition>(hardware, Subsystems.pneumaticTicker) {
@@ -19,12 +19,8 @@ class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<Coll
     override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotPosition = { Up }
 
     override fun CollectorPivotHardware.output(value: CollectorPivotPosition) {
-        when (value) {
-            Up -> hardware.leftSolenoid.set(false)
-            Down -> hardware.rightSolenoid.set(true)
-        }
+        solenoid.set(value.output)
     }
-
 }
 
 class CollectorPivotHardware : SubsystemHardware<CollectorPivotHardware, CollectorPivotComponent>() {
@@ -33,9 +29,6 @@ class CollectorPivotHardware : SubsystemHardware<CollectorPivotHardware, Collect
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Collector Pivot"
 
-    val leftSolenoidPort by pref(0)
-    val leftSolenoid by hardw { Solenoid(leftSolenoidPort) }
-
-    val rightSolenoidPort by pref(1)
-    val rightSolenoid by hardw { Solenoid(rightSolenoidPort) }
+    val solenoidPort by pref(0)
+    val solenoid by hardw { Solenoid(solenoidPort) }
 }
