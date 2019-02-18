@@ -5,8 +5,11 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
+import kotlin.math.sqrt
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
@@ -17,6 +20,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
 
     val targetGraph = graph("Target Angle", Degree)
     val errorGraph = graph("Error Angle", Degree)
+    val speedGraph = graph("Teleop Speed", FootPerSecond)
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
@@ -43,6 +47,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
         val targetL = forwardVelocity + steeringVelocity + pA
         val targetR = forwardVelocity - steeringVelocity - pA
 
+        speedGraph(t, avg(targetL, targetR))
+
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
 
@@ -50,6 +56,70 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
         )
+    }
+}
+
+suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("point with line scanner") {
+    val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
+
+    controller {
+        val errorA = linePosition?.let {
+            -atan(it / lineScannerLead)
+        } ?: 0.Degree
+
+        val pA = bearingKp * errorA
+
+        val targetL = +pA + speed
+        val targetR = -pA + speed
+      
+        val nativeL = hardware.conversions.nativeConversion.native(targetL)
+        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        )
+    }
+}
+
+suspend fun DrivetrainComponent.waypoint(speed: Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("teleop") {
+    val position by hardware.position.readOnTick.withStamps
+    val dadt = differentiator(::div, position.x, position.y.bearing)
+
+    val tolSq = tolerance * tolerance
+
+    val targetGraph = graph("Target Angle", Degree)
+    val errorGraph = graph("Error Angle", Degree)
+    val waypointDistance = graph("Distance to Waypoint", Foot)
+
+    controller { t ->
+        val (pt, p) = position
+
+        val angularVelocity = dadt(position.x, position.y.bearing)
+        val targetA = atan2(target.x - p.x, target.y - p.y)
+        val errorA = targetA `coterminal -` p.bearing
+        val pA = bearingKp * errorA - bearingKd * angularVelocity
+
+        targetGraph(pt, targetA)
+        errorGraph(pt, errorA)
+
+        val targetL = speed + pA
+        val targetR = speed - pA
+                
+
+        val nativeL = hardware.conversions.nativeConversion.native(targetL)
+        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        ).takeIf {
+            val dx = p.x - target.x
+            val dy = p.y - target.y
+            val distSq = dx * dx + dy * dy
+            waypointDistance(t, Length(sqrt(distSq.siValue)))
+            distSq > tolSq
+        }
     }
 }
 

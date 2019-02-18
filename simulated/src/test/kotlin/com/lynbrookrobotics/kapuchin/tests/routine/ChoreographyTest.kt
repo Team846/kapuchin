@@ -25,7 +25,7 @@ class ChoreographyTest {
         }
     }
 
-    private suspend fun CoroutineScope.countTo(c: ChoreographyTestC, vararg nums: Int) = startRoutine("count to ${nums.contentToString()}") {
+    private suspend fun CoroutineScope.countTo(c: ChoreographyTestC, vararg nums: Int) = startChoreo("count to ${nums.contentToString()}") {
         choreography {
             nums.forEach {
                 c.countTo(it)
@@ -53,7 +53,7 @@ class ChoreographyTest {
         }
     }
 
-    @Test(timeout = 6 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `choreographies can still run after one times out`() = threadDumpOnFailiure {
         runBlocking {
             val c = ChoreographyTestC()
@@ -76,7 +76,7 @@ class ChoreographyTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `choreographies can be cancelled externally`() = threadDumpOnFailiure {
         val c = ChoreographyTestC()
 
@@ -86,6 +86,7 @@ class ChoreographyTest {
         }
         while (c.routine == null) Thread.sleep(1)
         j1.cancel()
+        while (c.routine != null) Thread.sleep(1)
         c.routine `is equal to?` null
         c.check(0, 0, 0, 1)
 

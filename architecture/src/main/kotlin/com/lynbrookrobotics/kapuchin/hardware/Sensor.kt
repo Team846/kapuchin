@@ -17,6 +17,7 @@ import kotlin.reflect.KProperty
  *
  * @author Kunal
  * @see Grapher
+ * @see RobotHardware
  * @see SubsystemHardware
  * @see HardwareInit
  * @see DelegateProvider
@@ -29,7 +30,9 @@ class Sensor<Input> internal constructor(internal val read: (Time) -> TimeStampe
     fun optimizedRead(atTime: Time, syncThreshold: Time) =
             value
                     ?.takeIf { it.x in atTime `±` syncThreshold }
-                    ?: blockingMutex(this) { read(atTime) }
+                    ?: blockingMutex(this) {
+                        read(atTime).also { value = it }
+                    }
 
     class UpdateSource<Input>(
             private val forSensor: Sensor<Input>,
@@ -70,7 +73,7 @@ class Sensor<Input> internal constructor(internal val read: (Time) -> TimeStampe
  * @param read function to read new sensor data from the hardware object
  * @return new `Sensor` instance for the given read function
  */
-fun <Input> SubsystemHardware<*, *>.sensor(read: (Time) -> TimeStamped<Input>) = Sensor(read)
+fun <Input> RobotHardware<*>.sensor(read: (Time) -> TimeStamped<Input>) = Sensor(read)
 
 /**
  * `Sensor` domain-specific language entry point
@@ -84,7 +87,7 @@ fun <Input> SubsystemHardware<*, *>.sensor(read: (Time) -> TimeStamped<Input>) =
  * @param read function to read new sensor data from the hardware object
  * @return new `Sensor` instance for the given read function and hardware object
  */
-fun <Hardw, Input> SubsystemHardware<*, *>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) = Sensor { read(hardw, it) }
+fun <Hardw, Input> RobotHardware<*>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) = Sensor { read(hardw, it) }
 
 /**
  * Graph new sensor data whenever it is read

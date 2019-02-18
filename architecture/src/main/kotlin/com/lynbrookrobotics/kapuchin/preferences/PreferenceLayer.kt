@@ -52,6 +52,7 @@ fun <C, E> Named.pref(comp: Number, compUnits: UomConverter<C>, err: Number, err
  * Helps organize and manage hot-configurable preference values that are composed of several sub-preferences
  *
  * @author Kunal
+ * @see RobotHardware
  * @see SubsystemHardware
  * @see Component
  * @see DelegateProvider
