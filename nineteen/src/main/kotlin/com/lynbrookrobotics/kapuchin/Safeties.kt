@@ -58,21 +58,19 @@ object Safeties {
         }
     }
 
-    val collectorPivotState
-        get() = collectorPivot.hardware.solenoid.get().let {
-            when (it) {
-                CollectorPivotPosition.Up.output -> CollectorPivotPosition.Up
-                CollectorPivotPosition.Down.output -> CollectorPivotPosition.Down
-                else -> null
-            }
+    fun CollectorPivotState() = collectorPivot.hardware.solenoid.get().let {
+        when (it) {
+            CollectorPivotPosition.Up.output -> CollectorPivotPosition.Up
+            CollectorPivotPosition.Down.output -> CollectorPivotPosition.Down
+            else -> null
         }
+    }
 
-    val hookSliderState
-        get() = hookSlider.hardware.solenoid.get().let {
-            when (it) {
-                HookSliderPosition.In.output -> HookSliderPosition.In
-                HookSliderPosition.Out.output -> HookSliderPosition.Out
-                else -> null
-            }
+    fun HookSliderState() = hookSlider.hardware.solenoid.get().let {
+        when (it) {
+            HookSliderPosition.In.output -> HookSliderPosition.In
+            HookSliderPosition.Out.output -> HookSliderPosition.Out
+            else -> null
         }
+    }
 }
