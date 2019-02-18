@@ -13,11 +13,9 @@ import info.kunalsheth.units.math.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
-class LimelightHardware : SubsystemHardware<LimelightHardware, Nothing>() {
+class LimelightHardware : RobotHardware<LimelightHardware>() {
     override val name = "Limelight"
     override val priority = Priority.Lowest
-    override val period = 20.milli(Second)
-    override val syncThreshold = 3.milli(Second)
 
     private val mounting by pref {
         val x by pref(-4.5, Inch)

@@ -12,10 +12,8 @@ import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
+class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     override val priority = Priority.Medium
-    override val period = 15.milli(Second)
-    override val syncThreshold = 10.milli(Second)
     override val name = "Line Scanner"
 
     val exposurePort by pref(2)
@@ -43,7 +41,7 @@ class LineScannerHardware : SubsystemHardware<LineScannerHardware, Nothing>() {
     init {
         EventLoop.runOnTick { time ->
             setOf(linePosition).forEach {
-                it.optimizedRead(time, period)
+                it.optimizedRead(time, 200.milli(Second))
             }
         }
     }
