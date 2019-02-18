@@ -22,7 +22,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val currentLimit by pref(30, Ampere)
     val startupFrictionCompensation by pref(1.4, Volt)
 
-    val escCanId by pref(30)
+    val escCanId by pref(40)
     val maxOutput by pref(30, Percent)
     val idx = 0
 

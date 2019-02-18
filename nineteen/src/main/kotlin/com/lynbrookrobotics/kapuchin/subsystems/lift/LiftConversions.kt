@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import info.kunalsheth.units.generated.*
 
-class LiftConversions(val hardware: LiftHardware): Named by Named("Conversions", hardware) {
+class LiftConversions(val hardware: LiftHardware) : Named by Named("Conversions", hardware) {
 
     private val conversions by pref {
         val min by pref {

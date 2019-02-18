@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.kapuchin.Subsystems
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*

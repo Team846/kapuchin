@@ -43,7 +43,7 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
 
     val conversions = HandoffPivotConversions(this)
 
-    val escCanId by pref(20)
+    val escCanId by pref(30)
     val esc by hardw { TalonSRX(escCanId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
 

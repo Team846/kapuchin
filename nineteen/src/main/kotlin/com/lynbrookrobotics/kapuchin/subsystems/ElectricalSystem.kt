@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class ElectricalSystemHardware : RobotHardware<ElectricalSystemHardware>() {
     override val name = "Electrical System"

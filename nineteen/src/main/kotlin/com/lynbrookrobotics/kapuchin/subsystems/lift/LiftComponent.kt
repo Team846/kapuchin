@@ -1,10 +1,9 @@
 package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.kapuchin.Subsystems
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {

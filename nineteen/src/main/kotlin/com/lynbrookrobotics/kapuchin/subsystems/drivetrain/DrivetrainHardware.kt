@@ -3,8 +3,8 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
