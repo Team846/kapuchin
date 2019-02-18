@@ -14,6 +14,7 @@ import kotlin.reflect.KProperty
  * Helps avoid logging boilerplate when initializing hardware
  *
  * @author Kunal
+ * @see RobotHardware
  * @see SubsystemHardware
  * @see Sensor
  * @see DelegateProvider
@@ -21,7 +22,7 @@ import kotlin.reflect.KProperty
  * @param Hardw type of hardware object being initialized
  */
 class HardwareInit<Hardw> internal constructor(
-        private val parent: SubsystemHardware<*, *>,
+        private val parent: RobotHardware<*>,
         private val initialize: Named.() -> Hardw,
         private val configure: Named.(Hardw) -> Unit = {},
         private val validate: Named.(Hardw) -> Boolean = { true },
@@ -100,4 +101,4 @@ class HardwareInit<Hardw> internal constructor(
  * @param initialize function to instantiate hardware object
  * @return new `HardwareInit` delegate for the given hardware object
  */
-fun <Hardw> SubsystemHardware<*, *>.hardw(nameSuffix: String = "", initialize: Named.() -> Hardw) = HardwareInit(this, initialize, nameSuffix = nameSuffix)
+fun <Hardw> RobotHardware<*>.hardw(nameSuffix: String = "", initialize: Named.() -> Hardw) = HardwareInit(this, initialize, nameSuffix = nameSuffix)

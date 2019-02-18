@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
@@ -94,7 +95,7 @@ data class Subsystems(
             val electrical = async { ElectricalSystemHardware() }
             val lineScannerHardware = async { LineScannerHardware() }
             val limelight = async { LimelightHardware() }
-            val leds = async { LEDLightsComponent(LEDLightsHardware()) }
+            val leds = async { LEDLightsComponent(LedHardware()) }
 
             Subsystems(
                     drivetrain = drivetrain.await(),
@@ -113,7 +114,7 @@ data class Subsystems(
                     electricalHardware = ElectricalSystemHardware(),
                     lineScannerHardware = LineScannerHardware(),
                     limelightHardware = LimelightHardware(),
-                    leds = LEDLightsComponent(LEDLightsHardware())
+                    leds = LEDLightsComponent(LedHardware())
             )
         }
     }
