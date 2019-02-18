@@ -15,7 +15,7 @@ enum class HookSliderPosition {
 
 class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderComponent, HookSliderHardware, HookSliderPosition>(hardware, EventLoop) {
 
-    override val fallbackController: HookSliderComponent.(Time) -> HookSliderPosition = { HookSliderPosition.In }
+    override val fallbackController: HookSliderComponent.(Time) -> HookSliderPosition = { In }
 
     override fun HookSliderHardware.output(value: HookSliderPosition) {
         when (value) {

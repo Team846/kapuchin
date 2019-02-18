@@ -1,32 +1,32 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot
+package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import info.kunalsheth.units.generated.*
 
-class HandoffPivotConversions(val hardware: HandoffPivotHardware): Named by Named("Conversions", hardware) {
+class LiftConversions(val hardware: LiftHardware): Named by Named("Conversions", hardware) {
 
     private val conversions by pref {
         val min by pref {
-            val real by pref(0, Degree)
+            val real by pref(0, Inch)
             val native by pref(0)
-            ({ real to native })
+            ({ Pair(real, native) })
         }
 
         val max by pref {
-            val real by pref(90, Degree)
-            val native by pref(1023)
-            ({ real to native })
+            val real by pref(80, Inch)
+            val native by pref(625)
+            ({ Pair(real, native) })
         }
 
-        val zeroOffset by pref(30, Degree)
+        val zeroOffset by pref(12, Inch)
 
         ({
             val nfu = max.second - min.second
             val pfq = max.first - min.first
 
-            AngularOffloadedNativeConversion(::div, ::div, ::times, ::times,
+            LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
                     nativeOutputUnits = 1023, perOutputQuantity = hardware.operatingVoltage,
                     nativeFeedbackUnits = nfu, perFeedbackQuantity = pfq,
                     feedbackZero = zeroOffset

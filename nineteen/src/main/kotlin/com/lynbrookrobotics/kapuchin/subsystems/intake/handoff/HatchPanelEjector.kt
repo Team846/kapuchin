@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.EjectorState.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -13,7 +14,7 @@ enum class EjectorState {
     In, Out
 }
 
-class HatchPanelEjectorComponent(hardware: HatchPanelEjectorHardware) : Component<HatchPanelEjectorComponent, HatchPanelEjectorHardware, EjectorState>(hardware) {
+class HatchPanelEjectorComponent(hardware: HatchPanelEjectorHardware) : Component<HatchPanelEjectorComponent, HatchPanelEjectorHardware, EjectorState>(hardware, EventLoop) {
     override val fallbackController: HatchPanelEjectorComponent.(Time) -> EjectorState = { In }
     override fun HatchPanelEjectorHardware.output(value: EjectorState) {
         when(value) {
@@ -26,8 +27,8 @@ class HatchPanelEjectorComponent(hardware: HatchPanelEjectorHardware) : Componen
 
 class HatchPanelEjectorHardware : SubsystemHardware<HatchPanelEjectorHardware, HatchPanelEjectorComponent>() {
     override val priority: Priority  = Priority.Low
-    override val period: Time = 30.milli(Second)
-    override val syncThreshold: Time = 5.milli(Second)
+    override val period: Time = 100.milli(Second)
+    override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Hatch Panel Ejector"
 
     val solenoidPort by pref(1)

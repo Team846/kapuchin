@@ -16,12 +16,12 @@ enum class CollectorPivotPosition {
 
 class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<CollectorPivotComponent, CollectorPivotHardware, CollectorPivotPosition>(hardware, EventLoop) {
 
-    override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotPosition = { CollectorPivotPosition.Up }
+    override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotPosition = { Up }
 
     override fun CollectorPivotHardware.output(value: CollectorPivotPosition) {
         when (value) {
-            Up -> hardware.leftSolenoid.set(true)
-            Down -> hardware.rightSolenoid.set(false)
+            Up -> hardware.leftSolenoid.set(false)
+            Down -> hardware.rightSolenoid.set(true)
         }
     }
 

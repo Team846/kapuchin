@@ -15,7 +15,7 @@ enum class HookPosition {
 
 class HookComponent(hardware: HookHardware) : Component<HookComponent, HookHardware, HookPosition>(hardware, EventLoop) {
 
-    override val fallbackController: HookComponent.(Time) -> HookPosition = { HookPosition.Up }
+    override val fallbackController: HookComponent.(Time) -> HookPosition = { Up }
 
     override fun HookHardware.output(value: HookPosition) {
         when (value) {
@@ -34,5 +34,4 @@ class HookHardware : SubsystemHardware<HookHardware, HookComponent>() {
 
     val solenoidPort by pref(0)
     val solenoid = Solenoid(solenoidPort)
-
 }
