@@ -22,7 +22,7 @@ class FunkyRobot : RobotBase() {
         val classloading = loadClasses()
 
         println("Initializing hardware...")
-        val subsystems = Subsystems.concurrentInit()
+        Subsystems.concurrentInit()
 
         println("Trimming preferences...")
         trim(Preferences2.getInstance().table)
@@ -51,9 +51,9 @@ class FunkyRobot : RobotBase() {
                 System.gc()
 
                 currentJob = scope.launch {
-                    runWhile({ isEnabled && isOperatorControl }, { subsystems.teleop() })
-                    runWhile({ isEnabled && isAutonomous }, { subsystems.followWaypoints() })
-                    runWhile({ isDisabled }, { subsystems.warmup() })
+                    runWhile({ isEnabled && isOperatorControl }, { Subsystems.teleop() })
+                    runWhile({ isEnabled && isAutonomous }, { Subsystems.followWaypoints() })
+                    runWhile({ isDisabled }, { Subsystems.warmup() })
                 }
             }
         }

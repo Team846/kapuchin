@@ -1,14 +1,13 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff
 
-import com.lynbrookrobotics.kapuchin.control.data.TwoSided
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.preferences.pref
-import com.lynbrookrobotics.kapuchin.subsystems.Component
-import com.lynbrookrobotics.kapuchin.subsystems.SubsystemHardware
-import com.lynbrookrobotics.kapuchin.timing.Priority
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.milli
+import info.kunalsheth.units.math.*
 
 class IntakeRollersComponent(hardware: IntakeRollersHardware) : Component<IntakeRollersComponent, IntakeRollersHardware, TwoSided<DutyCycle>>(hardware) {
 
@@ -27,7 +26,7 @@ class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRol
     override val priority: Priority = Priority.Low
     override val period: Time = 100.milli(Second)
     override val syncThreshold: Time = 50.milli(Second)
-    override val name: String = "Rollers"
+    override val name: String = "Handoff Rollers"
 
     val leftPwmPort by pref(0)
     val leftEsc by hardw { Spark(leftPwmPort) }

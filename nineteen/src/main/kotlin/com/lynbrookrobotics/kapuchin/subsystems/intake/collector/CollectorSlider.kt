@@ -1,42 +1,34 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
-import com.ctre.phoenix.motorcontrol.FeedbackDevice
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.with
-import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.logging.Grapher.Companion.graph
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMaxLowLevel.MotorType
+import edu.wpi.first.wpilibj.Encoder
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class  CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<CollectorSliderComponent, CollectorSliderHardware, OffloadedOutput>(hardware, EventLoop) {
+class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<CollectorSliderComponent, CollectorSliderHardware, DutyCycle>(hardware, EventLoop) {
 
     //positive is to the robot's right
     //negative is to the robot's left
 
-    val middle by pref(0, Inch)
+    val defaultPosition by pref(0, Inch)
 
-    val positionGains by pref {
-        val kP by pref(12, Volt, 8, Inch)
-        ({ OffloadedPidGains(
-                hardware.offloadedSettings.native(kP),
-                0.0, 0.0, 0.0
-        )})
+    val kP = 10.Percent / 2.Inch
+
+    override val fallbackController: CollectorSliderComponent.(Time) -> DutyCycle = {
+        kP * (defaultPosition - hardware.position.optimizedRead(it, 5.milli(Second)).y)
     }
 
-    override val fallbackController: CollectorSliderComponent.(Time) -> OffloadedOutput = {
-        PositionOutput(positionGains, hardware.offloadedSettings.native(middle))
+    override fun CollectorSliderHardware.output(value: DutyCycle) {
+        hardware.esc.set(value.Each)
     }
-
-    override fun CollectorSliderHardware.output(value: OffloadedOutput) = lazyOutput(value)
 
 }
 
@@ -50,49 +42,25 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     val currentLimit by pref(30, Ampere)
     val startupFrictionCompensation by pref(1.4, Volt)
 
-    // SAFETY
-    val leftLimit by pref(-3, Inch)
-    val rightLimit by pref(3, Inch)
-
-    val offloadedSettings by pref {
-        val nativeFeedbackUnits by pref(615)
-        val perFeedbackQuantity by pref(80.25, Inch)
-        val zeroOffset by pref(0, Inch)
-
-        ({
-            LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
-                    nativeOutputUnits = 1023, perOutputQuantity = operatingVoltage,
-                    nativeFeedbackUnits = nativeFeedbackUnits, perFeedbackQuantity = perFeedbackQuantity,
-                    feedbackZero = zeroOffset
-            )
-        })
-    }
+    val range by pref(3)
 
     val escCanId by pref(20)
-    val maxOutput by pref(30, Percent)
-    val idx = 0
-    val esc by hardw { TalonSRX(escCanId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
+    val esc by hardw { CANSparkMax(escCanId, MotorType.kBrushless) }
 
-        // SAFETY
-        +it.configPeakOutputForward(maxOutput.siValue, timeout)
-        +it.configPeakOutputReverse(-maxOutput.siValue, timeout)
+    val chA by pref(10)
+    val chB by pref(11)
+    val resolution by pref(42)
 
-        +it.configReverseSoftLimitThreshold(offloadedSettings.native(leftLimit).toInt(), timeout)
-        +it.configReverseSoftLimitEnable(true, timeout)
+    val distance by pref(16, Inch)
+    val perDegree by pref(1080, Degree)
 
-        +it.configForwardSoftLimitThreshold(offloadedSettings.native(rightLimit).toInt(), timeout)
-        +it.configForwardSoftLimitEnable(true, timeout)
+    val encoder = Encoder(chA, chB)
+
+    val position = sensor {
+        distance * (EncoderConversion(resolution, 360.Degree).angle(encoder.raw.toDouble()) / perDegree) stampWith it
     }
-
-    val lazyOutput = lazyOutput(esc, idx)
-
-    val position = sensor { offloadedSettings.realPosition(esc.getSelectedSensorPosition(idx)) stampWith it }
-            .with(graph("Collector Slider", Inch))
 
     init {
         EventLoop.runOnTick { position.optimizedRead(it, syncThreshold) }
     }
-
-
 }

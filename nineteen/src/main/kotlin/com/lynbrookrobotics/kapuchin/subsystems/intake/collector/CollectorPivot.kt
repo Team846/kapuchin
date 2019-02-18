@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
-import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorPivotPosition.*
@@ -18,7 +18,7 @@ class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<Coll
     override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotPosition = { CollectorPivotPosition.Up }
 
     override fun CollectorPivotHardware.output(value: CollectorPivotPosition) {
-        when(value) {
+        when (value) {
             Up -> hardware.leftSolenoid.set(true)
             Down -> hardware.rightSolenoid.set(false)
         }
@@ -30,7 +30,7 @@ class CollectorPivotHardware : SubsystemHardware<CollectorPivotHardware, Collect
     override val priority: Priority = Priority.Low
     override val period: Time = 100.milli(Second)
     override val syncThreshold: Time = 50.milli(Second)
-    override val name: String = "Rollers"
+    override val name: String = "Collector Pivot"
 
     val leftSolenoidPort by pref(0)
     val leftSolenoid by hardw { Solenoid(leftSolenoidPort) }

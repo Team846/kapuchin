@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
@@ -49,7 +48,7 @@ object Subsystems {
     }
 
     suspend fun followWaypoints() {
-        drivetrain.waypoint(3.ΩFootPerSecond, UomVector(0.Foot, 5.Foot), 2.Inch)
+        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 5.Foot), 2.Inch)
         delay(1.Second)
         drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 5.Foot), 2.Inch)
         delay(1.Second)
