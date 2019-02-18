@@ -10,17 +10,31 @@ import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import java.awt.Color
 
 object Subsystems {
 
     lateinit var drivetrain: DrivetrainComponent private set
-    lateinit var driverHardware: DriverHardware private set
-    lateinit var electricalHardware: ElectricalSystemHardware private set
+
+    lateinit var teleop: TeleopComponent private set
+    lateinit var driver: DriverHardware private set
+    lateinit var operator: OperatorHardware private set
+    lateinit var leds: LedHardware private set
+
+    lateinit var electrical: ElectricalSystemHardware private set
 
     fun concurrentInit() = runBlocking {
         val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
+
         val driverAsync = async { DriverHardware() }
+        val operatorAsync = async { OperatorHardware() }
+        val ledsAsync = async { LedHardware() }
+        val teleopAsync = async {
+            TeleopComponent(TeleopHardware(
+                    driverAsync.await(), operatorAsync.await(), ledsAsync.await()
+            ))
+        }
+
+
         val electricalAsync = async { ElectricalSystemHardware() }
 
         suspend fun t(f: suspend () -> Unit) = try {
@@ -30,8 +44,13 @@ object Subsystems {
         }
 
         t { drivetrain = drivetrainAsync.await() }
-        t { driverHardware = driverAsync.await() }
-        t { electricalHardware = electricalAsync.await() }
+
+        t { teleop = teleopAsync.await() }
+        t { driver = driverAsync.await() }
+        t { operator = operatorAsync.await() }
+        t { leds = ledsAsync.await() }
+
+        t { electrical = electricalAsync.await() }
     }
 
     fun init() {
@@ -42,13 +61,18 @@ object Subsystems {
         }
 
         t { drivetrain = DrivetrainComponent(DrivetrainHardware()) }
-        t { driverHardware = DriverHardware() }
-        t { electricalHardware = ElectricalSystemHardware() }
+
+        t { driver = DriverHardware() }
+        t { operator = OperatorHardware() }
+        t { leds = LedHardware() }
+        t { teleop = TeleopComponent(TeleopHardware(driver, operator, leds)) }
+
+        t { electrical = ElectricalSystemHardware() }
     }
 
     suspend fun teleop() {
         runAll(
-                { drivetrain.teleop(driverHardware) },
+                { drivetrain.teleop(driver) },
                 {
                     HAL.observeUserProgramTeleop()
                     System.gc()
@@ -71,20 +95,6 @@ object Subsystems {
         delay(1.Second)
         drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 0.Foot), 2.Inch)
         delay(1.Second)
-    }
-
-    suspend fun rainbowLEDs() {
-        leds.rainbow(5.Second)
-        delay(30.Second)
-    }
-
-    suspend fun cycleLEDs() {
-        leds.cycle(50, 1.Second, Color.RED, Color.YELLOW)
-        delay(30.Second)
-    }
-
-    suspend fun fadeLEDs() {
-        leds.fade(2.Second, Color.RED)
     }
 
     suspend fun backAndForthAuto() {
