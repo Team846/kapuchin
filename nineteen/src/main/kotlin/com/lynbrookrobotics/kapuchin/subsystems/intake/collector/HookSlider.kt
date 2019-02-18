@@ -2,9 +2,9 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.Subsystems
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookSliderPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -13,7 +13,7 @@ enum class HookSliderPosition {
     In, Out
 }
 
-class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderComponent, HookSliderHardware, HookSliderPosition>(hardware, EventLoop) {
+class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderComponent, HookSliderHardware, HookSliderPosition>(hardware, Subsystems.pneumaticTicker) {
 
     override val fallbackController: HookSliderComponent.(Time) -> HookSliderPosition = { In }
 

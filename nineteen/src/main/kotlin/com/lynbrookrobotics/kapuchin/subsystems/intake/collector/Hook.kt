@@ -1,10 +1,10 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
 import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.Subsystems
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -13,7 +13,7 @@ enum class HookPosition {
     Up, Down
 }
 
-class HookComponent(hardware: HookHardware) : Component<HookComponent, HookHardware, HookPosition>(hardware, EventLoop) {
+class HookComponent(hardware: HookHardware) : Component<HookComponent, HookHardware, HookPosition>(hardware, Subsystems.pneumaticTicker) {
 
     override val fallbackController: HookComponent.(Time) -> HookPosition = { Up }
 

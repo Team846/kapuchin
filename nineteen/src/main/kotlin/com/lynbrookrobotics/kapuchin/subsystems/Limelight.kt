@@ -1,11 +1,11 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
+import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -59,7 +59,7 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
             .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
 
     init {
-        EventLoop.runOnTick { time ->
+        uiBaselineTicker.runOnTick { time ->
             setOf(roughAngleToTarget, roughDistanceToTarget, camtranTargetPosition).forEach {
                 it.optimizedRead(time, 1.Second)
             }

@@ -2,16 +2,23 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
-object Subsystems {
+object Subsystems : Named by Named("subsystems") {
+
+    val pneumaticTicker = ticker(Low, 100.milli(Second), "Stupid Ticker")
+    val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "Stupidest Ticker")
 
     lateinit var drivetrain: DrivetrainComponent private set
 

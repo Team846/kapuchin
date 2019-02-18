@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration
+import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -14,7 +15,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffPivotComponent, HandoffPivotHardware, OffloadedOutput>(hardware) {
+class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffPivotComponent, HandoffPivotHardware, OffloadedOutput>(hardware, EventLoop) {
 
     val collectPosition by pref(10, Degree)
     val plateHandoffPosition by pref(60, Degree)
@@ -73,7 +74,7 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
             .with(graph("Angle", Degree))
 
     init {
-        EventLoop.runOnTick { position.optimizedRead(it, syncThreshold) }
+        uiBaselineTicker.runOnTick { position.optimizedRead(it, 1.Second) }
     }
 }
 

@@ -1,18 +1,19 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
+import com.lynbrookrobotics.kapuchin.Subsystems
+import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<CollectorSliderComponent, CollectorSliderHardware, DutyCycle>(hardware, EventLoop) {
+class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<CollectorSliderComponent, CollectorSliderHardware, DutyCycle>(hardware) {
 
     val kP by pref(3, Volt, 1, Inch)
 
@@ -24,9 +25,9 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
 }
 
 class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, CollectorSliderComponent>() {
-    override val priority: Priority = Priority.Low
+    override val priority: Priority = Priority.Medium
     override val period: Time = 30.milli(Second)
-    override val syncThreshold: Time = 5.milli(Second)
+    override val syncThreshold: Time = 15.milli(Second)
     override val name: String = "Collector Slider"
 
     val operatingVoltage by pref(11, Volt)
@@ -53,6 +54,6 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     val position = sensor(encoder) { conversion(position) stampWith it }
 
     init {
-        EventLoop.runOnTick { position.optimizedRead(it, syncThreshold) }
+        uiBaselineTicker.runOnTick { position.optimizedRead(it, 1.Second) }
     }
 }

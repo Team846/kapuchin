@@ -1,16 +1,15 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
+import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     override val priority = Priority.Medium
@@ -39,9 +38,9 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
             .with(graph("Line Position", Inch)) { it ?: 0.Inch }
 
     init {
-        EventLoop.runOnTick { time ->
+        uiBaselineTicker.runOnTick { time ->
             setOf(linePosition).forEach {
-                it.optimizedRead(time, 200.milli(Second))
+                it.optimizedRead(time, 1.Second)
             }
         }
     }

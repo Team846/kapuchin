@@ -2,10 +2,10 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff
 
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.Subsystems
 import com.lynbrookrobotics.kapuchin.subsystems.Component
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.EjectorState.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -14,7 +14,7 @@ enum class EjectorState {
     In, Out
 }
 
-class HatchPanelEjectorComponent(hardware: HatchPanelEjectorHardware) : Component<HatchPanelEjectorComponent, HatchPanelEjectorHardware, EjectorState>(hardware, EventLoop) {
+class HatchPanelEjectorComponent(hardware: HatchPanelEjectorHardware) : Component<HatchPanelEjectorComponent, HatchPanelEjectorHardware, EjectorState>(hardware, Subsystems.pneumaticTicker) {
     override val fallbackController: HatchPanelEjectorComponent.(Time) -> EjectorState = { In }
     override fun HatchPanelEjectorHardware.output(value: EjectorState) {
         when(value) {

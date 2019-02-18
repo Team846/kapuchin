@@ -1,9 +1,10 @@
 package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.Subsystems
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import info.kunalsheth.units.generated.*
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
@@ -14,7 +15,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     val panelMidRocket by pref(47, Inch)
     val panelHighRocket by pref(75, Inch)
 
-    private val panelCargoOffset by pref(6, Inch)
+    private val panelCargoOffset by pref(-6, Inch)
     val cargoLowRocket get() = panelLowRocket + panelCargoOffset
     val cargoMidRocket get() = panelMidRocket + panelCargoOffset
     val cargoHighRocket get() = panelHighRocket + panelCargoOffset
