@@ -10,8 +10,9 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class CollectorPivotPosition(val output: Boolean) {
-    Up(false), Down(true)
+sealed class CollectorPivotPosition(val output: Boolean) {
+    object Up : CollectorPivotPosition(false)
+    object Down : CollectorPivotPosition(true)
 }
 
 class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<CollectorPivotComponent, CollectorPivotHardware, CollectorPivotPosition>(hardware, Subsystems.pneumaticTicker) {

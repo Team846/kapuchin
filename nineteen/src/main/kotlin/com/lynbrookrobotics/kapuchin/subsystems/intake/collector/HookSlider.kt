@@ -9,8 +9,9 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class HookSliderPosition(val output: Boolean) {
-    In(false), Out(true)
+sealed class HookSliderPosition(val output: Boolean) {
+    object In : HookSliderPosition(false)
+    object Out : HookSliderPosition(true)
 }
 
 class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderComponent, HookSliderHardware, HookSliderPosition>(hardware, Subsystems.pneumaticTicker) {
