@@ -3,13 +3,12 @@ package com.lynbrookrobotics.kapuchin.subsystems.lift
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Safeties.legalRanges
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.kapuchin.logging.log
-import com.lynbrookrobotics.kapuchin.logging.Level.Warning
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -48,7 +47,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
             if (reverseSoftLimit != lastReverseSoftLimit) esc.configReverseSoftLimitThreshold(reverseSoftLimit)
 
             val forwardSoftLimit = conversions.native.native(closest.endInclusive).toInt()
-            if (forwardSoftLimit != lastForwardSoftLimit) esc.configReverseSoftLimitThreshold(reverseSoftLimit)
+            if (forwardSoftLimit != lastForwardSoftLimit) esc.configForwardSoftLimitThreshold(forwardSoftLimit)
         } else if (Safeties.log)
             log(Warning) { "No legal states found" }
 

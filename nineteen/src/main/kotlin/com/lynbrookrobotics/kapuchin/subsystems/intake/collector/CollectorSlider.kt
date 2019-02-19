@@ -1,9 +1,13 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
+import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.Safeties.legalRanges
 import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -12,6 +16,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import edu.wpi.first.wpilibj.DigitalInput
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.max
+import kotlin.math.min
 
 class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<CollectorSliderComponent, CollectorSliderHardware, DutyCycle>(hardware) {
 
@@ -20,7 +26,21 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     override val fallbackController: CollectorSliderComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun CollectorSliderHardware.output(value: DutyCycle) {
-        hardware.esc.set(value.Each)
+        val legal = legalRanges()
+        val current = position.optimizedRead(currentTime, 0.Second).y
+
+        val closest = legal.firstOrNull { current in it } ?: legal.minBy {
+            val center = avg(it.start, it.endInclusive)
+            (current - center).abs
+        }
+
+        if (closest != null) {
+            if (current > closest.endInclusive) hardware.esc.set(min(0.0, value.Each))
+            if (current < closest.start) hardware.esc.set(max(0.0, value.Each))
+            else hardware.esc.set(value.Each)
+        } else if (Safeties.log) {
+            log(Warning) { "No legal states found" }
+        }
     }
 }
 
