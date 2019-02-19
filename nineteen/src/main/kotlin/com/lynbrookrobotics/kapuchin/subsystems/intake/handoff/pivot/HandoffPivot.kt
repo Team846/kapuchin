@@ -77,4 +77,3 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
         uiBaselineTicker.runOnTick { position.optimizedRead(it, 1.Second) }
     }
 }
-

@@ -13,6 +13,7 @@ import info.kunalsheth.units.math.*
 class HandoffRollersComponent(hardware: HandoffRollersHardware) : Component<HandoffRollersComponent, HandoffRollersHardware, TwoSided<DutyCycle>>(hardware, Subsystems.pneumaticTicker) {
 
     val cargoHoldStrength by pref(33, Percent)
+    val cargoCollectSpeed by pref(50, Percent)
 
     override val fallbackController: HandoffRollersComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(-cargoHoldStrength) }
 
