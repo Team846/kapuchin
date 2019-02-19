@@ -131,16 +131,7 @@ object Subsystems : Named by Named("subsystems") {
 
     suspend fun teleop() {
         runAll(
-                {
-                    while (isActive) {
-                        runWhile({ !driver.stick.trigger }) {
-                            drivetrain.teleop(driver)
-                        }
-                        runWhile({ driver.stick.trigger }) {
-                            llAlign(drivetrain, limelight)
-                        }
-                    }
-                },
+                { drivetrainTeleop(drivetrain, driver, limelight) },
                 {
                     HAL.observeUserProgramTeleop()
                     System.gc()

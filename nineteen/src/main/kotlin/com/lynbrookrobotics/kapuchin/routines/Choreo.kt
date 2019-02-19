@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines
 
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
@@ -12,7 +13,7 @@ suspend fun collectCargo(
         collectorPivot: CollectorPivotComponent,
         handoffRollers: HandoffRollersComponent,
         collectorRollers: CollectorRollersComponent
-        ) = startChoreo("Collect Cargo") {
+) = startChoreo("Collect Cargo") {
     // elevator to coll pos
 // IH_pivot down
 // IC_pivotSol down
@@ -28,8 +29,8 @@ suspend fun collectCargo(
 
 suspend fun collectWallPanel(
         hook: HookComponent,
-        hookSlider: HookSliderComponent,
-        ) = startChoreo("Collect Wall Panel") {
+        hookSlider: HookSliderComponent
+) = startChoreo("Collect Wall Panel") {
     // IC_hookSol down
 // *vision tracking slider moves*
 // IC_hookSliderSol out
@@ -48,11 +49,10 @@ suspend fun collectWallPanel(
 }
 
 suspend fun collectGroundPanel(
-    lift: LiftComponent
-    handoffPivot: HandoffPivotComponent
-    hook: HookComponent
-    handoffPivot: HandoffPivotComponent
-    ) = startChoreo("Collect Ground Panel") {
+        lift: LiftComponent,
+        hook: HookComponent,
+        handoffPivot: HandoffPivotComponent
+) = startChoreo("Collect Ground Panel") {
     //elevator handoff pos
 //IH_pivot *down* (not coll) pos
 //_wait for driver input_
@@ -69,9 +69,9 @@ suspend fun collectGroundPanel(
 }
 
 suspend fun deployCargo(
-    lift: LiftComponent
-    collectorRollers: CollectorRollersComponent
-    ) = startChoreo("Deploy Cargo") {
+        lift: LiftComponent,
+        collectorRollers: CollectorRollersComponent
+) = startChoreo("Deploy Cargo") {
     //elevator to scoring pos (seperately input by driver)
 //_auto find target_
 //IC_rollerB and IC_rollerT out
@@ -83,11 +83,9 @@ suspend fun deployCargo(
 }
 
 suspend fun deployPanel(
-    collectorSlider: CollectorSliderComponent
-    drivetrain: DrivetrainComponent
-    hookSlider: HookSliderComponent
-    hook: HookComponent
-    ) = startChoreo("Deploy Panel") {
+        hookSlider: HookSliderComponent,
+        hook: HookComponent
+) = startChoreo("Deploy Panel") {
     //_slider / drivetrain auto align_
 //IC_hookSliderSol out
 //_driver input, prob letting go of a button they hold to start this action_
@@ -103,8 +101,9 @@ suspend fun deployPanel(
 }
 
 suspend fun pushPanel(
-
-    ) = startChoreo("Push Panel") {
+        hookSlider: HookSliderComponent,
+        hook: HookComponent
+) = startChoreo("Push Panel") {
     //deployPanel without autoalign
     choreography {
         hookSlider.to(HookSliderPosition.Out)
@@ -115,8 +114,8 @@ suspend fun pushPanel(
 }
 
 suspend fun unleashTheCobra(
-    climber: ClimberComponent
-    ) = startChoreo("Unleash the Cobra") {
+        climber: ClimberComponent
+) = startChoreo("Unleash the Cobra") {
     //just goo 2 motors until some sort of sensor
     choreography {
         climber.to(climber.maxOutput)
