@@ -3,11 +3,14 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration
+import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.Safeties.legalRanges
 import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -25,7 +28,28 @@ class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffP
 
     override val fallbackController: HandoffPivotComponent.(Time) -> OffloadedOutput = { PercentOutput(0.Percent) }
 
-    override fun HandoffPivotHardware.output(value: OffloadedOutput) = lazyOutput(value)
+    private var lastReverseSoftLimit = Integer.MAX_VALUE
+    private var lastForwardSoftLimit = Integer.MIN_VALUE
+    override fun HandoffPivotHardware.output(value: OffloadedOutput) {
+        val legal = legalRanges()
+        val current = position.optimizedRead(currentTime, 0.Second).y
+
+        val closest = legal.firstOrNull { current in it } ?: legal.minBy {
+            val center = avg(it.start, it.endInclusive)
+            (current - center).abs
+        }
+
+        if (closest != null) {
+            val reverseSoftLimit = conversions.native.native(closest.start).toInt()
+            if (reverseSoftLimit != lastReverseSoftLimit) esc.configReverseSoftLimitThreshold(reverseSoftLimit)
+
+            val forwardSoftLimit = conversions.native.native(closest.endInclusive).toInt()
+            if (forwardSoftLimit != lastForwardSoftLimit) esc.configForwardSoftLimitThreshold(forwardSoftLimit)
+        } else if (Safeties.log)
+            log(Warning) { "No legal states found" }
+
+        lazyOutput(value)
+    }
 }
 
 class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivotComponent>() {

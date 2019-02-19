@@ -5,15 +5,15 @@ import com.lynbrookrobotics.kapuchin.Subsystems.collectorSlider
 import com.lynbrookrobotics.kapuchin.Subsystems.handoffPivot
 import com.lynbrookrobotics.kapuchin.Subsystems.hookSlider
 import com.lynbrookrobotics.kapuchin.Subsystems.lift
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
-object Safeties: Named by Named("safeties") {
+object Safeties : Named by Named("safeties") {
 
     val log by pref(true)
 
@@ -77,6 +77,7 @@ object Safeties: Named by Named("safeties") {
             .filter { it is LiftState }
             .map { it as LiftState }
             .map { it.rng }
+            .toSet()
 
     sealed class HandoffPivotState(val rng: ClosedRange<Angle>) {
         object High : HandoffPivotState(30.Degree..0.Degree)
@@ -105,6 +106,7 @@ object Safeties: Named by Named("safeties") {
             .filter { it is HandoffPivotState }
             .map { it as HandoffPivotState }
             .map { it.rng }
+            .toSet()
 
     sealed class CollectorSliderState(vararg val rng: ClosedRange<Length>) {
         object Wide : CollectorSliderState(-16.Inch..-3.Inch, 3.Inch..16.Inch)
@@ -135,6 +137,7 @@ object Safeties: Named by Named("safeties") {
             .filter { it is CollectorSliderState }
             .map { it as CollectorSliderState }
             .flatMap { it.rng.asSequence() }
+            .toSet()
 
     val collectorPivotStates = setOf(CollectorPivotPosition.Up, CollectorPivotPosition.Down)
     fun CollectorPivotState() = collectorPivot.hardware.solenoid.get().let {
@@ -153,6 +156,7 @@ object Safeties: Named by Named("safeties") {
             }
             .filter { it is CollectorPivotPosition }
             .map { it as CollectorPivotPosition }
+            .toSet()
 
     val hookSliderStates = setOf(HookSliderPosition.In, HookSliderPosition.Out)
     fun HookSliderState() = hookSlider.hardware.solenoid.get().let {
@@ -171,4 +175,5 @@ object Safeties: Named by Named("safeties") {
             }
             .filter { it is HookSliderPosition }
             .map { it as HookSliderPosition }
+            .toSet()
 }
