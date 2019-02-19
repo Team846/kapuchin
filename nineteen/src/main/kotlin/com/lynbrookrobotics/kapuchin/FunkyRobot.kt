@@ -29,7 +29,7 @@ class FunkyRobot : RobotBase() {
 
         runBlocking {
             println("Loading classes...")
-            withTimeout(5.Second) { classloading.join() }
+            withTimeout(.5.Second) { classloading.join() }
         }
 
         HAL.observeUserProgramStarting()

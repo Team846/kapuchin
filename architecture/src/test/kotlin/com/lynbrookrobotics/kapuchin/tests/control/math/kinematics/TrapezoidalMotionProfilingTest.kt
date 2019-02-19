@@ -3,77 +3,62 @@ package com.lynbrookrobotics.kapuchin.tests.control.math.kinematics
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
-import kotlin.math.absoluteValue
+import info.kunalsheth.units.math.*
 import kotlin.test.Test
 
 class TrapezoidalMotionProfilingTest {
 
-    val dist = 20.Foot
+    val target = 20.Foot
     val speed = 10.FootPerSecond
 
-    private val basicProfile = trapezoidalMotionProfile(
-            distance = dist,
-            startingSpeed = 0.FootPerSecond,
-            acceleration = 5.FootPerSecondSquared,
-            topSpeed = speed
-    )
-
-    private val backwardsProfile = trapezoidalMotionProfile(
-            distance = -dist,
-            startingSpeed = 0.FootPerSecond,
-            acceleration = 5.FootPerSecondSquared,
+    private val trap = trapezoidalMotionProfile(
+            deceleration = 5.FootPerSecondSquared,
             topSpeed = speed
     )
 
     @Test
     fun `the robot should go backwards if it overshoots its stopping point`() {
-        val target = dist
-
-        0.FootPerSecond `is equal to?` basicProfile(target)
+        0.FootPerSecond `is equal to?` trap(/*error = */0.Foot)
         repeat(20) {
-            val profileInput = target + 1.Inch + it.Foot
-            val profile = basicProfile(profileInput)
+            val current = target + 1.Inch + it.Foot
+            val profile = trap(target - current)
 
-            0.FootPerSecond `is greater than?` profile
-            profile `is greater than?` basicProfile(profileInput + 1.Foot)
+            profile `is within?` 0.FootPerSecond..-speed
         }
     }
 
     @Test
     fun `the robot should go forwards if it undershoots its stopping point`() {
-        val target = dist
         repeat(target.Foot.toInt() - 1) {
-            val profileInput = it.Foot + 1.Inch
-            val profile = basicProfile(profileInput)
+            val current = it.Foot + 1.Inch
+            val profile = trap(target - current)
 
-            profile `is greater than?` 0.FootPerSecond
-            speed `is greater than or equal to?` profile
+            profile `is within?` 0.FootPerSecond..speed
         }
     }
 
     @Test
     fun `the robot should go forwards if it overshoots its stopping point in reverse`() {
-        val target = -dist
+        val target = -target
 
-        0.FootPerSecond `is equal to?` backwardsProfile(target)
+        0.FootPerSecond `is equal to?` trap(/*error = */0.Foot)
         repeat(20) {
-            val profileInput = target - 1.Inch - it.Foot
-            val profile = backwardsProfile(profileInput)
+            val current = target - 1.Inch - it.Foot
+            val profile = trap(target - current)
 
-            profile `is greater than?` 0.FootPerSecond
-            backwardsProfile(profileInput - 1.Foot) `is greater than?` profile
+            profile `is within?` 0.FootPerSecond..speed
         }
     }
 
     @Test
     fun `the robot should go backwards if it undershoots its stopping point in reverse`() {
-        val target = -dist
-        repeat(target.Foot.toInt().absoluteValue - 1) {
-            val profileInput = -it.Foot - 1.Inch
-            val profile = backwardsProfile(profileInput)
+        val target = -target
 
-            0.FootPerSecond `is greater than?` profile
-            profile `is greater than or equal to?` -speed
+        repeat(target.Foot.toInt() + 1) {
+            val current = it.Foot - 1.Inch
+            val profile = trap(target - current)
+
+            profile `is within?` 0.FootPerSecond..-speed
         }
     }
 }

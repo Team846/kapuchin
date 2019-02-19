@@ -42,6 +42,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
 
+    val conversions = DrivetrainConversions(this)
+
     val leftMasterEsc by hardw { WPI_TalonSRX(leftMasterEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
         it.selectedSensorPosition = 0
@@ -82,8 +84,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.setMaxPeriod(0.1)
     }
     private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
-
-    val conversions = DrivetrainConversions(this)
 
     val position = sensor {
         ticksToSerial().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }

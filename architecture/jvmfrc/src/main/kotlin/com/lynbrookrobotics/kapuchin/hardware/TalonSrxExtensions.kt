@@ -7,7 +7,7 @@ import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
 import com.ctre.phoenix.motorcontrol.ControlMode.*
 import com.ctre.phoenix.motorcontrol.ControlMode.PercentOutput
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.*
-import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
+import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_10Ms
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -44,6 +44,8 @@ fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (Offlo
 }
 
 fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V) {
+    +esc.configFactoryDefault(configTimeout)
+
     esc.setNeutralMode(NeutralMode.Brake)
     +esc.configOpenloopRamp(0.0, configTimeout)
     +esc.configClosedloopRamp(0.0, configTimeout)
@@ -89,8 +91,8 @@ fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: 
         +master.setStatusFramePeriod(frame, period, configTimeout)
     }
 
-    +master.configVelocityMeasurementPeriod(Period_5Ms, configTimeout)
-    +master.configVelocityMeasurementWindow(4, configTimeout)
+    +master.configVelocityMeasurementPeriod(Period_10Ms, configTimeout)
+    +master.configVelocityMeasurementWindow(5, configTimeout)
 }
 
 fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V) {

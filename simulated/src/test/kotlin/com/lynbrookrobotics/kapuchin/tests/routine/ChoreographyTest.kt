@@ -140,14 +140,14 @@ class ChoreographyTest {
         val j2 = scope.launch { countTo(c, 4) }
         while (j1.isActive) Thread.sleep(1)
         runBlocking { j2.join() }
-        c.check(0, 4, 0)
+        c.check(0, 4, 0, 1)
 
         c.out.clear()
         val j3 = scope.launch { countTo(c, 8, 6) }
         while (!j3.isActive) Thread.sleep(1)
         val j4 = scope.launch { c.countTo(4) }
         while (j4.isActive) Thread.sleep(1)
-        runBlocking { j2.join() }
-        c.check(0, 4, 0)
+        runBlocking { j3.join() }
+        c.check(0, 4, 0, 1)
     }
 }

@@ -17,6 +17,7 @@ import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 
 object Subsystems : Named by Named("subsystems") {
@@ -130,7 +131,16 @@ object Subsystems : Named by Named("subsystems") {
 
     suspend fun teleop() {
         runAll(
-                { drivetrain.teleop(driver) },
+                {
+                    while (isActive) {
+                        runWhile({ !driver.stick.trigger }) {
+                            drivetrain.teleop(driver)
+                        }
+                        runWhile({ driver.stick.trigger }) {
+                            llAlign(drivetrain, limelight)
+                        }
+                    }
+                },
                 {
                     HAL.observeUserProgramTeleop()
                     System.gc()
@@ -145,14 +155,18 @@ object Subsystems : Named by Named("subsystems") {
     }
 
     suspend fun followWaypoints() {
-        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 5.Foot), 2.Inch)
+        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 5.Foot), 2.Inch)
         delay(1.Second)
-        drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 5.Foot), 2.Inch)
+        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 5.Foot), 2.Inch)
         delay(1.Second)
-        drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 0.Foot), 2.Inch)
+        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 0.Foot), 2.Inch)
         delay(1.Second)
-        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 0.Foot), 2.Inch)
+        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 0.Foot), 2.Inch)
         delay(1.Second)
+    }
+
+    suspend fun llAlign() {
+        llAlign(drivetrain, limelight)
     }
 
     suspend fun backAndForthAuto() {

@@ -39,7 +39,7 @@ import kotlin.jvm.JvmName
  * @property feedbackZero sensor position that maps to zero
  *
  * @property nativeTimeUnit denominator used in ESC velocity measurements
- * @property nativeLoopTime factor used in ESC derivative and integral calculations
+ * @property nativeRateUnit factor used in ESC derivative and integral calculations
  */
 class OffloadedNativeConversion<O, I, Q, D, DD>(
         private val d2: (I, T) -> Q,
@@ -50,7 +50,7 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
         val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
         val feedbackZero: Q = perFeedbackQuantity * 0,
         val nativeTimeUnit: Time = 100.milli(Second),
-        val nativeLoopTime: Time = 1.milli(Second)
+        val nativeRateUnit: Time = 1.Second
 )
         where O : Quan<O>,
               Q : Quan<Q>,
@@ -65,7 +65,7 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
     fun native(x: O) = x * nativeOutputUnits / perOutputQuantity
 
     @JvmName("nativeAbsement")
-    fun native(x: I) = convert(d2(x, nativeLoopTime))
+    fun native(x: I) = convert(d2(x, nativeRateUnit))
 
     @JvmName("nativePosition")
     fun native(x: Q) = convert(x + feedbackZero)
@@ -74,7 +74,7 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
     fun native(x: D) = convert(t1(x, nativeTimeUnit))
 
     @JvmName("nativeAcceleration")
-    fun native(x: DD) = native(t2(x, nativeLoopTime))
+    fun native(x: DD) = native(t2(x, nativeRateUnit))
 
     fun realPosition(x: Number) = convert(x) - feedbackZero
     fun realVelocity(x: Number) = d1(convert(x), nativeTimeUnit)
