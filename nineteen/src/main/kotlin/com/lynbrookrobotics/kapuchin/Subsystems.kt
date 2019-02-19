@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.async
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import java.awt.Color
 
@@ -23,7 +24,16 @@ data class Subsystems(
 
     suspend fun teleop() {
         runAll(
-                { drivetrain.teleop(driverHardware) },
+                {
+                    while (isActive) {
+                        runWhile({ !driverHardware.driver.trigger }) {
+                            drivetrain.teleop(driverHardware)
+                        }
+                        runWhile({ driverHardware.driver.trigger }) {
+                            llAlign(drivetrain, limelightHardware)
+                        }
+                    }
+                },
                 {
                     HAL.observeUserProgramTeleop()
                     System.gc()
@@ -38,16 +48,20 @@ data class Subsystems(
     }
 
     suspend fun followWaypoints() {
-        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 5.Foot), 2.Inch)
+        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 5.Foot), 2.Inch)
         delay(1.Second)
-        drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 5.Foot), 2.Inch)
+        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 5.Foot), 2.Inch)
         delay(1.Second)
-        drivetrain.waypoint(3.FootPerSecond, UomVector(5.Foot, 0.Foot), 2.Inch)
+        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 0.Foot), 2.Inch)
         delay(1.Second)
-        drivetrain.waypoint(3.FootPerSecond, UomVector(0.Foot, 0.Foot), 2.Inch)
+        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 0.Foot), 2.Inch)
         delay(1.Second)
     }
 
+    suspend fun llAlign() {
+        llAlign(drivetrain, limelightHardware)
+    }
+  
     suspend fun rainbowLEDs() {
         leds.rainbow(5.Second)
         delay(30.Second)

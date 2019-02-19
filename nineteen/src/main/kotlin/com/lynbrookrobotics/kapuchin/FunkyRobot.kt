@@ -29,7 +29,7 @@ class FunkyRobot : RobotBase() {
 
         runBlocking {
             println("Loading classes...")
-            withTimeout(5.Second) { classloading.join() }
+            withTimeout(.5.Second) { classloading.join() }
         }
 
         HAL.observeUserProgramStarting()
@@ -52,8 +52,10 @@ class FunkyRobot : RobotBase() {
 
                 currentJob = scope.launch {
                     runWhile({ isEnabled && isOperatorControl }, { subsystems.teleop() })
-                    runWhile({ isEnabled && isAutonomous }, { subsystems.followWaypoints() })
+                    runWhile({ isEnabled && isAutonomous }, { subsystems.llAlign() })
                     runWhile({ isDisabled }, { subsystems.warmup() })
+
+                    delay(1.Second)
                 }
             }
         }
