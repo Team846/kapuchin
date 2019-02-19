@@ -8,10 +8,14 @@ import com.lynbrookrobotics.kapuchin.Subsystems.lift
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
-object Safeties {
+object Safeties: Named by Named("safeties") {
+
+    val log by pref(true)
 
     fun compositeState(
             lift: LiftState? = null,
