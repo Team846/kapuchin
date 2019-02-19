@@ -55,12 +55,19 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     }
 
     val position = sensor(encoder) { conversion(position) stampWith it }
+    val velocity = sensor(encoder) { velocity.Rpm stampWith it }
     val limitSwitchStatus = sensor(limitSwitch) { get() stampWith it }
 
     private var zeroOffset = 0.0
-    fun zero() { zeroOffset = encoder.position }
+    fun zero() {
+        zeroOffset = encoder.position
+    }
 
     init {
-        uiBaselineTicker.runOnTick { position.optimizedRead(it, 1.Second) }
+        uiBaselineTicker.runOnTick { t ->
+            setOf(position, velocity, limitSwitchStatus).forEach {
+                it.optimizedRead(t, 1.Second)
+            }
+        }
     }
 }

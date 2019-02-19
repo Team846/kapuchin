@@ -15,10 +15,10 @@ import info.kunalsheth.units.math.*
  * @property x timestamp
  * @property y value
  */
-@Deprecated(
-        message = "Try to use two separate parameters wherever possible",
-        replaceWith = ReplaceWith("x: Time, y: Q")
-)
+//@Deprecated(
+//        message = "Try to use two separate parameters wherever possible",
+//        replaceWith = ReplaceWith("x: Time, y: Q")
+//)
 data class TimeStamped<out T>(val x: Time, val y: T)
 
 infix fun <Q> Q.stampWith(withTime: Time) = TimeStamped(withTime, this)
