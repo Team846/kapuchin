@@ -22,8 +22,8 @@ import kotlinx.coroutines.runBlocking
 
 object Subsystems : Named by Named("subsystems") {
 
-    val pneumaticTicker = ticker(Low, 100.milli(Second), "Stupid Ticker")
-    val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "Stupidest Ticker")
+    val pneumaticTicker = ticker(Low, 100.milli(Second), "Pneumatic System Ticker")
+    val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
     lateinit var drivetrain: DrivetrainComponent private set
 
