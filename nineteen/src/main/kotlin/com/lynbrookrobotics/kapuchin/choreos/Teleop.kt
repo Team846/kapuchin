@@ -8,7 +8,11 @@ import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.isActive
 
-suspend fun drivetrainTeleop(drivetrain: DrivetrainComponent, driver: DriverHardware, limelight: LimelightHardware) = startChoreo("Teleop") {
+suspend fun drivetrainTeleop(
+        drivetrain: DrivetrainComponent,
+        driver: DriverHardware,
+        limelight: LimelightHardware
+) = startChoreo("Teleop") {
 
     val visionAlign by driver.visionAlign.readEagerly().withoutStamps
 
@@ -18,13 +22,16 @@ suspend fun drivetrainTeleop(drivetrain: DrivetrainComponent, driver: DriverHard
                 drivetrain.teleop(driver)
             }
             runWhile({ visionAlign }) {
-                llAlign(drivetrain, limelight)
+                limelightAlign(drivetrain, limelight)
             }
         }
     }
 }
 
-suspend fun liftTeleop(lift: LiftComponent, oper: OperatorHardware) = startChoreo("Teleop") {
+suspend fun liftTeleop(
+        lift: LiftComponent,
+        oper: OperatorHardware
+) = startChoreo("Teleop") {
 
     val groundHeight by oper.groundHeight.readEagerly().withoutStamps
     val collectGroundPanel by oper.collectGroundPanel.readEagerly().withoutStamps

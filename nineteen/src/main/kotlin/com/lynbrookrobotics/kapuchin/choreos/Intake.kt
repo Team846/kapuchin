@@ -16,7 +16,7 @@ suspend fun collectCargo(
         collectorPivot: CollectorPivotComponent,
         handoffRollers: HandoffRollersComponent,
         collectorRollers: CollectorRollersComponent
-) = startChoreo("Collect Cargo") {
+) = startChoreo("Collect cargo") {
     // elevator to coll pos
 // IH_pivot down
 // IC_pivotSol down
@@ -33,7 +33,7 @@ suspend fun collectCargo(
 suspend fun collectWallPanel(
         hook: HookComponent,
         hookSlider: HookSliderComponent
-) = startChoreo("Collect Wall Panel") {
+) = startChoreo("Collect wall panel") {
     // IC_hookSol down
 // *vision tracking slider moves*
 // IC_hookSliderSol out
@@ -55,7 +55,7 @@ suspend fun collectGroundPanel(
         lift: LiftComponent,
         hook: HookComponent,
         handoffPivot: HandoffPivotComponent
-) = startChoreo("Collect Ground Panel") {
+) = startChoreo("Collect ground panel") {
     //elevator handoff pos
 //IH_pivot *down* (not coll) pos
 //_wait for driver input_
@@ -74,7 +74,7 @@ suspend fun collectGroundPanel(
 suspend fun deployCargo(
         lift: LiftComponent,
         collectorRollers: CollectorRollersComponent
-) = startChoreo("Deploy Cargo") {
+) = startChoreo("Deploy cargo") {
     //elevator to scoring pos (seperately input by driver)
 //_auto find target_
 //IC_rollerB and IC_rollerT out
@@ -88,7 +88,7 @@ suspend fun deployCargo(
 suspend fun deployPanel(
         hookSlider: HookSliderComponent,
         hook: HookComponent
-) = startChoreo("Deploy Panel") {
+) = startChoreo("Deploy panel") {
     //_slider / drivetrain auto align_
 //IC_hookSliderSol out
 //_driver input, prob letting go of a button they hold to start this action_
@@ -106,7 +106,7 @@ suspend fun deployPanel(
 suspend fun pushPanel(
         hookSlider: HookSliderComponent,
         hook: HookComponent
-) = startChoreo("Push Panel") {
+) = startChoreo("Push panel") {
     //deployPanel without autoalign
     choreography {
         hookSlider.to(Out)
@@ -118,7 +118,7 @@ suspend fun pushPanel(
 
 suspend fun unleashTheCobra(
         climber: ClimberComponent
-) = startChoreo("Unleash the Cobra") {
+) = startChoreo("Unleash the cobra") {
     //just goo 2 motors until some sort of sensor
     choreography {
         climber.to(climber.maxOutput)
