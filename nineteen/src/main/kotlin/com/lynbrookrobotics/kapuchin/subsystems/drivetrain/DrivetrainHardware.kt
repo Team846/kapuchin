@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX
+import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
@@ -10,7 +11,6 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort
@@ -72,17 +72,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc)
 
-
-    private val leftEncoderA by pref(0)
-    private val rightEncoderA by pref(1)
     private val ticksToSerialPort by pref("kUSB1")
-
-    private val leftEncoder by hardw { Counter(leftEncoderA) }.configure {
-        it.setMaxPeriod(0.1)
-    }
-    private val rightEncoder by hardw { Counter(rightEncoderA) }.configure {
-        it.setMaxPeriod(0.1)
-    }
     private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
 
     val position = sensor {
@@ -108,11 +98,15 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }.with(graph("Right Position", Foot))
 
     val leftSpeed = sensor {
-        conversions.toLeftSpeed(leftEncoder.period.Second) stampWith it
+        conversions.nativeConversion.realVelocity(
+                leftMasterEsc.getSelectedSensorVelocity(idx)
+        ) stampWith it
     }.with(graph("Left Speed", FootPerSecond))
 
     val rightSpeed = sensor {
-        conversions.toRightSpeed(rightEncoder.period.Second) stampWith it
+        conversions.nativeConversion.realVelocity(
+                rightMasterEsc.getSelectedSensorVelocity(idx)
+        ) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
 
 
@@ -131,9 +125,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 //            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
 
     init {
-        EventLoop.runOnTick { time ->
+        uiBaselineTicker.runOnTick { time ->
             setOf(position, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
-                it.optimizedRead(time, period)
+                it.optimizedRead(time, 1.Second)
             }
         }
     }
