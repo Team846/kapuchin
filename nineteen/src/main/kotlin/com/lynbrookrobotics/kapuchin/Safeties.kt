@@ -23,7 +23,7 @@ object Safeties : Named by Named("safeties") {
                           val collectorPivot: CollectorPivotPosition,
                           val hookSlider: HookSliderPosition)
 
-    fun permuteState(
+    private fun permuteState(
             lift: LiftState? = null,
             handoffPivot: HandoffPivotState? = null,
             collectorSlider: CollectorSliderState? = null,
@@ -93,7 +93,7 @@ object Safeties : Named by Named("safeties") {
     fun LiftComponent.legalRanges() = currentState(lift = null).asSequence()
             .filter { curr ->
                 illegalStates.none { ill ->
-                    curr.equals(ill)
+                    curr == ill
                 }
             }
             .map { it.lift }
@@ -167,7 +167,7 @@ object Safeties : Named by Named("safeties") {
     fun CollectorPivotComponent.legalRanges() = currentState(collectorPivot = null).asSequence()
             .filter { curr ->
                 illegalStates.none { ill ->
-                    curr.equals(ill)
+                    curr == ill
                 }
             }
             .map { it.collectorPivot }.toSet()
@@ -184,7 +184,7 @@ object Safeties : Named by Named("safeties") {
     fun HookSliderComponent.legalRanges() = currentState(hookSlider = null).asSequence()
             .filter { curr ->
                 illegalStates.none { ill ->
-                    curr.equals(ill)
+                    curr == ill
                 }
             }
             .map { it.hookSlider }.toSet()
