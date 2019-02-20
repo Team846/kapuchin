@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
@@ -17,7 +18,6 @@ import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 
 object Subsystems : Named by Named("subsystems") {
@@ -156,8 +156,8 @@ object Subsystems : Named by Named("subsystems") {
         delay(1.Second)
     }
 
-    suspend fun llAlign() {
-        llAlign(drivetrain, limelight)
+    suspend fun limelightAlign() {
+        limelightAlign(drivetrain, limelight)
     }
 
     suspend fun backAndForthAuto() {
