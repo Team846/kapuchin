@@ -118,6 +118,6 @@ suspend fun unleashTheCobra(
 ) = startChoreo("Unleash the Cobra") {
     //just goo 2 motors until some sort of sensor
     choreography {
-        climber.to(climber.maxOutput)
+        climber.spin(climber.maxOutput)
     }
 }
