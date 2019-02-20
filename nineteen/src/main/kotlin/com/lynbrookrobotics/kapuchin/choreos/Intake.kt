@@ -1,7 +1,10 @@
-package com.lynbrookrobotics.kapuchin.routines
+package com.lynbrookrobotics.kapuchin.choreos
 
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookSliderPosition.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
@@ -39,12 +42,12 @@ suspend fun collectWallPanel(
 // *pause*
 // IC_hookSliderSol in
     choreography {
-        hook.to(HookPosition.Down)
+        hook.to(Down)
         //visiontracking
-        hookSlider.to(HookSliderPosition.Out)
+        hookSlider.to(Out)
         //driver input
-        hook.to(HookPosition.Up)
-        hookSlider.to(HookSliderPosition.In)
+        hook.to(Up)
+        hookSlider.to(In)
     }
 }
 
@@ -63,7 +66,7 @@ suspend fun collectGroundPanel(
         lift.to(lift.collectHeight)
         //handoffPivot.to(handoffPivot.plateHandoffPosition)
         //driver input
-        hook.to(HookPosition.Down)
+        hook.to(Down)
         handoffPivot.to(handoffPivot.plateHandoffPosition)
     }
 }
@@ -93,10 +96,10 @@ suspend fun deployPanel(
 //IC_hookSliderSol in
     choreography {
         //autoalign
-        hookSlider.to(HookSliderPosition.Out)
+        hookSlider.to(Out)
         //let go of button
-        hook.to(HookPosition.Down)
-        hookSlider.to(HookSliderPosition.In)
+        hook.to(Down)
+        hookSlider.to(In)
     }
 }
 
@@ -106,10 +109,10 @@ suspend fun pushPanel(
 ) = startChoreo("Push Panel") {
     //deployPanel without autoalign
     choreography {
-        hookSlider.to(HookSliderPosition.Out)
+        hookSlider.to(Out)
         //let go of button
-        hook.to(HookPosition.Down)
-        hookSlider.to(HookSliderPosition.In)
+        hook.to(Down)
+        hookSlider.to(In)
     }
 }
 

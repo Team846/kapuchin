@@ -1,12 +1,12 @@
-package com.lynbrookrobotics.kapuchin.routines
+package com.lynbrookrobotics.kapuchin.choreos
 
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
-import com.lynbrookrobotics.kapuchin.preferences.*
-import kotlinx.coroutines.isActive
 import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.isActive
 
 suspend fun drivetrainTeleop(drivetrain: DrivetrainComponent, driver: DriverHardware, limelight: LimelightHardware) = startChoreo("Teleop") {
 
