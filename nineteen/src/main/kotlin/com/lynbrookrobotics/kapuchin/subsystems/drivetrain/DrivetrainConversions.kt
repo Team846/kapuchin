@@ -14,8 +14,6 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     private val leftTrim by pref(1.0018314)
     private val flipLeftPosition by pref(false)
     private val flipRightPosition by pref(false)
-    private val flipLeftSpeed by pref(false)
-    private val flipRightSpeed by pref(true)
     private val flipOdometryLeft by pref(false)
     private val flipOdometryRight by pref(true)
     private val rightTrim by pref(1.00621994)
@@ -24,9 +22,9 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     val nativeEncoderCountMultiplier by pref(4)
 
     val encoder by pref {
-        val encoderGear by pref(18)
-        val wheelGear by pref(74)
-        val resolution by pref(1024)
+        val encoderGear by pref(22)
+        val wheelGear by pref(72)
+        val resolution by pref(1000)
         ({
             val gearing = GearTrain(encoderGear, wheelGear)
             val nativeResolution = nativeEncoderCountMultiplier * resolution
@@ -51,7 +49,6 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     val encoderConversion get() = encoder.first
     val nativeConversion get() = encoder.second
 
-
     fun toLeftPosition(
             ticks: Int, conv: EncoderConversion = encoderConversion
     ): Length = wheelRadius * conv.angle(ticks.toDouble()) * leftTrim / Radian
@@ -61,25 +58,6 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
             ticks: Int, conv: EncoderConversion = encoderConversion
     ): Length = wheelRadius * conv.angle(ticks.toDouble()) * rightTrim / Radian
             .let { if (flipRightPosition) -it else it }
-
-    fun toLeftSpeed(
-            period: Time, conv: EncoderConversion = encoderConversion
-    ): Velocity =
-            if (period.isZero) 0.FootPerSecond
-            else wheelRadius * conv.angle(1.0) / period * leftTrim / Radian
-                    .let { if (flipLeftSpeed) -it else it }
-                    .let { if (leftMovingForward) it else -it }
-
-    fun toRightSpeed(
-            period: Time, conv: EncoderConversion = encoderConversion
-    ): Velocity =
-            if (period.isZero) 0.FootPerSecond
-            else wheelRadius * conv.angle(1.0) / period * rightTrim / Radian
-                    .let { if (flipRightSpeed) -it else it }
-                    .let { if (rightMovingForward) it else -it }
-
-    private var leftMovingForward = false
-    private var rightMovingForward = false
 
     private val matrixCache = (-8..8)
             .flatMap {
@@ -100,7 +78,5 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
                 .let { if (flipOdometryRight) -it else it }
 
         matrixTracking(posL, posR)
-        leftMovingForward = !posL.isNegative
-        rightMovingForward = !posR.isNegative
     }
 }

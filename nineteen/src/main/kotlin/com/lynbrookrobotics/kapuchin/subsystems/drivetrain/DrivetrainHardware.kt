@@ -72,17 +72,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc)
 
-
-    private val leftEncoderA by pref(0)
-    private val rightEncoderA by pref(1)
     private val ticksToSerialPort by pref("kUSB1")
-
-    private val leftEncoder by hardw { Counter(leftEncoderA) }.configure {
-        it.setMaxPeriod(0.1)
-    }
-    private val rightEncoder by hardw { Counter(rightEncoderA) }.configure {
-        it.setMaxPeriod(0.1)
-    }
     private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
 
     val position = sensor {
@@ -108,11 +98,15 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }.with(graph("Right Position", Foot))
 
     val leftSpeed = sensor {
-        conversions.toLeftSpeed(leftEncoder.period.Second) stampWith it
+        conversions.nativeConversion.realVelocity(
+                leftMasterEsc.getSelectedSensorVelocity(idx)
+        ) stampWith it
     }.with(graph("Left Speed", FootPerSecond))
 
     val rightSpeed = sensor {
-        conversions.toRightSpeed(rightEncoder.period.Second) stampWith it
+        conversions.nativeConversion.realVelocity(
+                rightMasterEsc.getSelectedSensorVelocity(idx)
+        ) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
 
 
