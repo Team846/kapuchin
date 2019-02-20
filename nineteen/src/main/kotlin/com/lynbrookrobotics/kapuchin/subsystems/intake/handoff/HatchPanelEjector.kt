@@ -28,6 +28,5 @@ class HatchPanelEjectorHardware : SubsystemHardware<HatchPanelEjectorHardware, H
 
     val solenoidPort by pref(1)
     val solenoid = Solenoid(solenoidPort)
-
 }
 
