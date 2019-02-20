@@ -29,30 +29,34 @@ object Safeties : Named by Named("safeties") {
             collectorSlider: CollectorSliderState? = null,
             collectorPivot: CollectorPivotPosition? = null,
             hookSlider: HookSliderPosition? = null
-    ): Set<RobotState> {
-
+    ) = sequence {
         val ls = if (lift == null) liftStates else setOf(lift)
         val hps = if (handoffPivot == null) handoffPivotStates else setOf(handoffPivot)
         val css = if (collectorSlider == null) collectorSliderStates else setOf(collectorSlider)
         val cps = if (collectorPivot == null) collectorPivotStates else setOf(collectorPivot)
         val hss = if (hookSlider == null) hookSliderStates else setOf(hookSlider)
 
-        val out = mutableSetOf<RobotState>()
-
         for (l in ls) {
             for (hp in hps) {
                 for (cs in css) {
                     for (cp in cps) {
                         for (hs in hss) {
-                            out.add(RobotState(l, hp, cs, cp, hs))
+                            yield(RobotState(l, hp, cs, cp, hs))
                         }
                     }
                 }
             }
         }
-
-        return out
     }
+
+    val illegalStates = setOf(
+            permuteState(lift = LiftState.Low, collectorPivot = CollectorPivotPosition.Down, hookSlider = HookSliderPosition.Out),
+            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.High, collectorSlider = CollectorSliderState.Wide),
+            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Low, collectorSlider = CollectorSliderState.Wide),
+            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.Wide),
+            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.Narrow),
+            permuteState(lift = LiftState.Bottom, collectorSlider = CollectorSliderState.Wide)
+    ).flatMap { it.asIterable() }
 
     fun currentState(
             lift: LiftState? = LiftState(),
@@ -60,17 +64,7 @@ object Safeties : Named by Named("safeties") {
             collectorSlider: CollectorSliderState? = CollectorSliderState(),
             collectorPivot: CollectorPivotPosition? = CollectorPivotState(),
             hookSlider: HookSliderPosition? = HookSliderState()
-    ): Set<RobotState> = permuteState(lift, handoffPivot, collectorSlider, collectorPivot, hookSlider)
-
-
-    val illegalStates = setOf(
-            permuteState(lift = LiftState.Low, handoffPivot = null, collectorSlider = null, collectorPivot = CollectorPivotPosition.Down, hookSlider = HookSliderPosition.Out),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.High, collectorSlider = CollectorSliderState.Wide, collectorPivot = null, hookSlider = null),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Low, collectorSlider = CollectorSliderState.Wide, collectorPivot = null, hookSlider = null),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.Wide, collectorPivot = null, hookSlider = null),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.Narrow, collectorPivot = null, hookSlider = null),
-            permuteState(lift = LiftState.Bottom, handoffPivot = null, collectorSlider = CollectorSliderState.Wide, collectorPivot = null, hookSlider = null)
-    ).flatten()
+    ) = permuteState(lift, handoffPivot, collectorSlider, collectorPivot, hookSlider)
 
     sealed class LiftState(val rng: ClosedRange<Length>) {
         object High : LiftState(30.Inch..80.Inch)
@@ -90,14 +84,10 @@ object Safeties : Named by Named("safeties") {
     }
 
     val liftStates = setOf(LiftState.High, LiftState.Low, LiftState.Bottom)
-    fun LiftComponent.legalRanges() = currentState(lift = null).asSequence()
-            .filter { curr ->
-                illegalStates.none { ill ->
-                    curr == ill
-                }
-            }
-            .map { it.lift }
-            .map { it.rng }.toSet()
+    fun LiftComponent.legalRanges() = currentState(lift = null)
+            .filter { it !in illegalStates }
+            .map { it.lift.rng }
+            .toSet()
 
     sealed class HandoffPivotState(val rng: ClosedRange<Angle>) {
         object High : HandoffPivotState(30.Degree..0.Degree)
@@ -117,14 +107,10 @@ object Safeties : Named by Named("safeties") {
     }
 
     val handoffPivotStates = setOf(HandoffPivotState.High, HandoffPivotState.Mid, HandoffPivotState.Low)
-    fun HandoffPivotComponent.legalRanges() = currentState(handoffPivot = null).asSequence()
-            .filter { curr ->
-                illegalStates.none { ill ->
-                    curr == ill
-                }
-            }
-            .map { it.handoffPivot }
-            .map { it.rng }.toSet()
+    fun HandoffPivotComponent.legalRanges() = currentState(handoffPivot = null)
+            .filter { it !in illegalStates }
+            .map { it.handoffPivot.rng }
+            .toSet()
 
     sealed class CollectorSliderState(vararg val rng: ClosedRange<Length>) {
         object Wide : CollectorSliderState(-16.Inch..-3.Inch, 3.Inch..16.Inch)
@@ -146,14 +132,10 @@ object Safeties : Named by Named("safeties") {
     }
 
     val collectorSliderStates = setOf(CollectorSliderState.Wide, CollectorSliderState.Narrow, CollectorSliderState.Center)
-    fun CollectorSliderComponent.legalRanges() = currentState(collectorSlider = null).asSequence()
-            .filter { curr ->
-                illegalStates.none { ill ->
-                    curr == ill
-                }
-            }
-            .map { it.collectorSlider }
-            .map { it.rng.toSet() }.flatten().toSet()
+    fun CollectorSliderComponent.legalRanges() = currentState(collectorSlider = null)
+            .filter { it !in illegalStates }
+            .flatMap { it.collectorSlider.rng.asSequence() }
+            .toSet()
 
     val collectorPivotStates = setOf(CollectorPivotPosition.Up, CollectorPivotPosition.Down)
     fun CollectorPivotState() = collectorPivot.hardware.solenoid.get().let {
@@ -164,13 +146,10 @@ object Safeties : Named by Named("safeties") {
         }
     }
 
-    fun CollectorPivotComponent.legalRanges() = currentState(collectorPivot = null).asSequence()
-            .filter { curr ->
-                illegalStates.none { ill ->
-                    curr == ill
-                }
-            }
-            .map { it.collectorPivot }.toSet()
+    fun CollectorPivotComponent.legalRanges() = currentState(collectorPivot = null)
+            .filter { it !in illegalStates }
+            .map { it.collectorPivot }
+            .toSet()
 
     val hookSliderStates = setOf(HookSliderPosition.In, HookSliderPosition.Out)
     fun HookSliderState() = hookSlider.hardware.solenoid.get().let {
@@ -181,11 +160,8 @@ object Safeties : Named by Named("safeties") {
         }
     }
 
-    fun HookSliderComponent.legalRanges() = currentState(hookSlider = null).asSequence()
-            .filter { curr ->
-                illegalStates.none { ill ->
-                    curr == ill
-                }
-            }
-            .map { it.hookSlider }.toSet()
+    fun HookSliderComponent.legalRanges() = currentState(hookSlider = null)
+            .filter { it !in illegalStates }
+            .map { it.hookSlider }
+            .toSet()
 }
