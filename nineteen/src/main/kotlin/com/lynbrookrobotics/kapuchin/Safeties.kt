@@ -149,11 +149,11 @@ object Safeties : Named by Named("safeties") {
     fun CollectorSliderComponent.legalRanges() = currentState(collectorSlider = null).asSequence()
             .filter { curr ->
                 illegalStates.none { ill ->
-                    curr.equals(ill)
+                    curr == ill
                 }
             }
             .map { it.collectorSlider }
-            .map { it.rng }.toSet()
+            .map { it.rng.toSet() }.flatten().toSet()
 
     val collectorPivotStates = setOf(CollectorPivotPosition.Up, CollectorPivotPosition.Down)
     fun CollectorPivotState() = collectorPivot.hardware.solenoid.get().let {
@@ -164,7 +164,7 @@ object Safeties : Named by Named("safeties") {
         }
     }
 
-    fun CollectorPivotComponent.legalRanges() = currentState(handoffPivot = null).asSequence()
+    fun CollectorPivotComponent.legalRanges() = currentState(collectorPivot = null).asSequence()
             .filter { curr ->
                 illegalStates.none { ill ->
                     curr.equals(ill)
@@ -181,7 +181,7 @@ object Safeties : Named by Named("safeties") {
         }
     }
 
-    fun HookSliderComponent.legalRanges() = currentState(lift = null).asSequence()
+    fun HookSliderComponent.legalRanges() = currentState(hookSlider = null).asSequence()
             .filter { curr ->
                 illegalStates.none { ill ->
                     curr.equals(ill)
