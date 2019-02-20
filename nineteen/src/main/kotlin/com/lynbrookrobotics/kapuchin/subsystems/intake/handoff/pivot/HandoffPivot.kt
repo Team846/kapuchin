@@ -31,24 +31,41 @@ class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffP
     private var lastReverseSoftLimit = Integer.MAX_VALUE
     private var lastForwardSoftLimit = Integer.MIN_VALUE
     override fun HandoffPivotHardware.output(value: OffloadedOutput) {
-        val legal = legalRanges()
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val closest = legal.firstOrNull { current in it } ?: legal.minBy {
-            val center = avg(it.start, it.endInclusive)
-            (current - center).abs
+        var currLeft = (Int.MIN_VALUE + 1).Degree
+        var currRight = (Int.MIN_VALUE + 1).Degree
+
+        legalRanges().sortedBy {
+            it.start.Degree
+        }.forEach {
+            when {
+                it.start <= currRight -> currRight = max(currRight, it.endInclusive)
+                currLeft <= current && current <= currRight -> return
+                (it.start - current).abs < (currRight - current).abs -> {
+                    currLeft = it.start
+                    currRight = it.endInclusive
+                }
+                else -> return
+            }
         }
 
-        if (closest != null) {
-            val reverseSoftLimit = conversions.native.native(closest.start).toInt()
-            if (reverseSoftLimit != lastReverseSoftLimit) esc.configReverseSoftLimitThreshold(reverseSoftLimit)
+        if (currLeft - currRight != 0.Degree) {
+            val reverseSoftLimit = conversions.native.native(currLeft).toInt()
+            if (reverseSoftLimit != lastReverseSoftLimit) {
+                lastReverseSoftLimit = reverseSoftLimit
+                esc.configReverseSoftLimitThreshold(reverseSoftLimit)
+            }
 
-            val forwardSoftLimit = conversions.native.native(closest.endInclusive).toInt()
-            if (forwardSoftLimit != lastForwardSoftLimit) esc.configForwardSoftLimitThreshold(forwardSoftLimit)
-        } else if (Safeties.log)
+            val forwardSoftLimit = conversions.native.native(currRight).toInt()
+            if (forwardSoftLimit != lastForwardSoftLimit) {
+                lastForwardSoftLimit = forwardSoftLimit
+                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
+            }
+            lazyOutput(value)
+        } else if (Safeties.log) {
             log(Warning) { "No legal states found" }
-
-        lazyOutput(value)
+        }
     }
 }
 

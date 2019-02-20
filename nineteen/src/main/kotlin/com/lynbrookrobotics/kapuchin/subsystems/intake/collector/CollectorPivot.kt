@@ -27,7 +27,7 @@ class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<Coll
         val legal = legalRanges()
 
         when {
-            legal.isEmpty() -> log(Warning) { "No legal states found" }
+            !legal.any() -> log(Warning) { "No legal states found" }
             value in legal -> solenoid.set(value.output)
             else -> solenoid.set(legal.first().output)
         }

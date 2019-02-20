@@ -35,41 +35,41 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     private var lastReverseSoftLimit = Integer.MAX_VALUE
     private var lastForwardSoftLimit = Integer.MIN_VALUE
     override fun LiftHardware.output(value: OffloadedOutput) {
-        val legal = legalRanges()
+
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val sortedLegal: TreeSet<ClosedRange<Length>> = TreeSet<ClosedRange<Length>> { o1, o2 ->
-            (o1.start - o2.start).signum as Int
-        }
+        var currLeft: Length = (Int.MIN_VALUE + 1).Inch
+        var currRight: Length = (Int.MIN_VALUE + 1).Inch
 
-        legal.forEach {
-            sortedLegal.add(it)
-        }
-
-        var currLeft: Length = Int.MIN_VALUE.Inch
-        var currRight: Length = Int.MIN_VALUE.Inch
-
-        sortedLegal.forEach {
-          when {
-            it.start <= currRight -> currRight = max(currRight, it.endInclusive)
-            currLeft <= current && current <= currRight -> return
-            (it.start - current).abs < (currRight - current).abs -> {
-              currLeft = it.start
-              currRight = it.endInclusive
+        legalRanges().sortedBy {
+            it.start.Inch
+        }.forEach {
+            when {
+                it.start <= currRight -> currRight = max(currRight, it.endInclusive)
+                currLeft <= current && current <= currRight -> return
+                (it.start - current).abs < (currRight - current).abs -> {
+                    currLeft = it.start
+                    currRight = it.endInclusive
+                }
+                else -> return
             }
-            else -> return
-          }
         }
 
         if (currLeft - currRight != 0.Inch) {
             val reverseSoftLimit = conversions.native.native(currLeft).toInt()
-            if (reverseSoftLimit != lastReverseSoftLimit) esc.configReverseSoftLimitThreshold(reverseSoftLimit)
+            if (reverseSoftLimit != lastReverseSoftLimit) {
+                lastReverseSoftLimit = reverseSoftLimit
+                esc.configReverseSoftLimitThreshold(reverseSoftLimit)
+            }
 
             val forwardSoftLimit = conversions.native.native(currRight).toInt()
-            if (forwardSoftLimit != lastForwardSoftLimit) esc.configForwardSoftLimitThreshold(forwardSoftLimit)
+            if (forwardSoftLimit != lastForwardSoftLimit) {
+                lastForwardSoftLimit = forwardSoftLimit
+                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
+            }
             lazyOutput(value)
-        } else (Safeties.log)
+        } else if (Safeties.log) {
             log(Warning) { "No legal states found" }
-
+        }
     }
 }
