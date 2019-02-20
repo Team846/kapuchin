@@ -11,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import java.util.TreeSet
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
 
@@ -37,20 +38,38 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
         val legal = legalRanges()
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val closest = legal.firstOrNull { current in it } ?: legal.minBy {
-            val center = avg(it.start, it.endInclusive)
-            (current - center).abs
+        val sortedLegal: TreeSet<ClosedRange<Length>> = TreeSet<ClosedRange<Length>> { o1, o2 ->
+            (o1.start - o2.start).signum as Int
         }
 
-        if (closest != null) {
-            val reverseSoftLimit = conversions.native.native(closest.start).toInt()
+        legal.forEach {
+            sortedLegal.add(it)
+        }
+
+        var currLeft: Length = Int.MIN_VALUE.Inch
+        var currRight: Length = Int.MIN_VALUE.Inch
+
+        sortedLegal.forEach {
+          when {
+            it.start <= currRight -> currRight = max(currRight, it.endInclusive)
+            currLeft <= current && current <= currRight -> return
+            (it.start - current).abs < (currRight - current).abs -> {
+              currLeft = it.start
+              currRight = it.endInclusive
+            }
+            else -> return
+          }
+        }
+
+        if (currLeft - currRight != 0.Inch) {
+            val reverseSoftLimit = conversions.native.native(currLeft).toInt()
             if (reverseSoftLimit != lastReverseSoftLimit) esc.configReverseSoftLimitThreshold(reverseSoftLimit)
 
-            val forwardSoftLimit = conversions.native.native(closest.endInclusive).toInt()
+            val forwardSoftLimit = conversions.native.native(currRight).toInt()
             if (forwardSoftLimit != lastForwardSoftLimit) esc.configForwardSoftLimitThreshold(forwardSoftLimit)
-        } else if (Safeties.log)
+            lazyOutput(value)
+        } else (Safeties.log)
             log(Warning) { "No legal states found" }
 
-        lazyOutput(value)
     }
 }
