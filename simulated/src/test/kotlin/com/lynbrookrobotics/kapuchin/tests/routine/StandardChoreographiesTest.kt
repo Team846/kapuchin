@@ -122,4 +122,37 @@ class StandardChoreographiesTest {
             comps.forEachIndexed { i, c -> c.checkCount(i, min(first, i), 1) }
         }
     }
+
+    @Test(timeout = 2 * 1000)
+    fun `whenever starts only when its predicate is true`() = threadDumpOnFailure {
+        runBlocking {
+            val comps = List(10) { ChoreographyTestC(it) }
+            suspend fun doSomething() = runAll(
+                    *comps.mapIndexed { i, c ->
+                        choreography { c.countTo(i) }
+                    }.toTypedArray()
+            )
+
+            runWhile({ false }, { doSomething() })
+            comps.forEachIndexed { i, c -> c.checkCount(i, 0) }
+
+            runWhile({ true }, { doSomething() })
+            comps.forEachIndexed { i, c -> c.checkCount(i, i) }
+
+            comps.forEach { it.out.clear() }
+
+            val last = comps.size - 1
+            val first = 3
+
+            val j = launch {
+                runWhile({ comps[last].out.count { it == "countTo($last)" } < first }, { doSomething() })
+            }
+
+            while (j.isActive) {
+                EventLoop.tick(currentTime)
+                delay(1.milli(Second))
+            }
+            comps.forEachIndexed { i, c -> c.checkCount(i, min(first, i), 1) }
+        }
+    }
 }
