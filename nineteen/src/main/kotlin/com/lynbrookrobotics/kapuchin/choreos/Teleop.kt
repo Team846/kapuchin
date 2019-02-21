@@ -48,28 +48,28 @@ suspend fun liftTeleop(
     choreography {
         while (isActive) {
             runWhile({ groundHeight }) {
-                lift.to(lift.collectHeight, 0.Inch)
+                lift.set(lift.collectHeight, 0.Inch)
             }
             runWhile({ collectGroundPanel }) {
-                lift.to(lift.collectGroundPanel, 0.Inch)
+                lift.set(lift.collectGroundPanel, 0.Inch)
             }
             runWhile({ lowPanelHeight }) {
-                lift.to(lift.panelLowRocket, 0.Inch)
+                lift.set(lift.panelLowRocket, 0.Inch)
             }
             runWhile({ lowCargoHeight }) {
-                lift.to(lift.cargoLowRocket, 0.Inch)
+                lift.set(lift.cargoLowRocket, 0.Inch)
             }
             runWhile({ midPanelHeight }) {
-                lift.to(lift.panelMidRocket, 0.Inch)
+                lift.set(lift.panelMidRocket, 0.Inch)
             }
             runWhile({ midCargoHeight }) {
-                lift.to(lift.cargoMidRocket, 0.Inch)
+                lift.set(lift.cargoMidRocket, 0.Inch)
             }
             runWhile({ highPanelHeight }) {
-                lift.to(lift.panelHighRocket, 0.Inch)
+                lift.set(lift.panelHighRocket, 0.Inch)
             }
             runWhile({ highCargoHeight }) {
-                lift.to(lift.cargoHighRocket, 0.Inch)
+                lift.set(lift.cargoHighRocket, 0.Inch)
             }
         }
     }

@@ -11,7 +11,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-suspend fun CollectorPivotComponent.to(target: CollectorPivotPosition) = startRoutine("To") {
+suspend fun CollectorPivotComponent.set(target: CollectorPivotPosition) = startRoutine("Set") {
     controller { target }
 }
 
@@ -19,7 +19,7 @@ suspend fun CollectorRollersComponent.spin(target: DutyCycle) = startRoutine("Sp
     controller { TwoSided(target) }
 }
 
-suspend fun CollectorSliderComponent.to(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 0.2.Inch) = startRoutine("To") {
+suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 0.2.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
@@ -52,15 +52,15 @@ suspend fun CollectorSliderComponent.trackLine(tolerance: Length, lineScanner: L
     }
 }
 
-suspend fun HookComponent.to(target: HookPosition) = startRoutine("To") {
+suspend fun HookComponent.set(target: HookPosition) = startRoutine("Set") {
     controller { target }
 }
 
-suspend fun HookSliderComponent.to(target: HookSliderPosition) = startRoutine("To") {
+suspend fun HookSliderComponent.set(target: HookSliderPosition) = startRoutine("Set") {
     controller { target }
 }
 
-suspend fun HandoffPivotComponent.to(target: Angle, tolerance: Angle = 5.Degree) = startRoutine("To") {
+suspend fun HandoffPivotComponent.set(target: Angle, tolerance: Angle = 5.Degree) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
 
@@ -81,4 +81,8 @@ suspend fun HandoffPivotComponent.to(target: Angle, tolerance: Angle = 5.Degree)
 
 suspend fun HandoffRollersComponent.spin(target: DutyCycle) = startRoutine("Spin") {
     controller { TwoSided(target) }
+}
+
+suspend fun HatchPanelEjectorComponent.set(target: EjectorState) = startRoutine("Set") {
+    controller { target }
 }
