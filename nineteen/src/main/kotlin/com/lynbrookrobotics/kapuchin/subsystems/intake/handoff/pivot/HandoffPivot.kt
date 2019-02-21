@@ -18,7 +18,7 @@ import info.kunalsheth.units.math.*
 class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffPivotComponent, HandoffPivotHardware, OffloadedOutput>(hardware, EventLoop) {
 
     val collectPosition by pref(10, Degree)
-    val plateHandoffPosition by pref(60, Degree)
+    val handoffPosition by pref(60, Degree)
 
     val kP by pref(5, Volt, 30, Degree)
     val kD by pref(0, Volt, 360, DegreePerSecond)

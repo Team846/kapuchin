@@ -2,125 +2,208 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookSliderPosition.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 
+/**
+ * Collect cargo from loading station
+ *
+ * Ends with:
+ * Ball in collector
+ * CollectorPivot - Up
+ * HandoffPivot - Collect position
+ * Lift - Collect cargo height
+ */
 suspend fun collectCargo(
-        lift: LiftComponent,
-        handoffPivot: HandoffPivotComponent,
         collectorPivot: CollectorPivotComponent,
+        collectorRollers: CollectorRollersComponent,
+        handoffPivot: HandoffPivotComponent,
         handoffRollers: HandoffRollersComponent,
-        collectorRollers: CollectorRollersComponent
+        lift: LiftComponent
 ) = startChoreo("Collect cargo") {
-    // elevator to coll pos
-// IH_pivot down
-// IC_pivotSol down
-// (meanwhile turn on IH_rollerL, IH_rollerR, IC_rollerB, IC_rollerT)
+
     choreography {
-        launch { handoffRollers.spin(handoffRollers.cargoCollectSpeed) }
+        //Start collector/handoff rollers
+        val hr = launch { handoffRollers.spin(handoffRollers.cargoCollectSpeed) }
         launch { collectorRollers.spin(collectorRollers.cargoCollectSpeed) }
-        lift.to(lift.collectHeight)
-        handoffPivot.to(handoffPivot.collectPosition)
-        collectorPivot.to(CollectorPivotPosition.Down)
+
+        //Set up pivots and lift
+        launch {
+            collectorPivot.set(CollectorPivotPosition.Up)
+            handoffPivot.set(handoffPivot.collectPosition)
+            lift.set(lift.collectCargo)
+        }
+
+        //Wait (for cargo to be collected) then stop handoff rollers
+        delay(0.5.Second)
+        hr.cancel()
+
+        //Handoff cargo to collector
+        launch {
+            handoffPivot.set(handoffPivot.handoffPosition)
+            collectorPivot.set(CollectorPivotPosition.Down)
+        }
+
+        //Wait (for handoff to be complete) then reset pivots
+        delay(0.3.Second)
+        launch {
+            handoffPivot.set(handoffPivot.collectPosition)
+            collectorPivot.set(CollectorPivotPosition.Up)
+        }
     }
 }
 
+
+/**
+ * Collect panel from loading station
+ *
+ * End with:
+ * Panel on hook
+ * Hook - Up
+ * HookSlider - In
+ * Lift - collectPanelHeight
+ */
 suspend fun collectWallPanel(
+        lineScanner: LineScannerHardware,
+        collectorSlider: CollectorSliderComponent,
         hook: HookComponent,
-        hookSlider: HookSliderComponent
+        hookSlider: HookSliderComponent,
+        lift: LiftComponent,
+        electricalSystem: ElectricalSystemHardware
 ) = startChoreo("Collect wall panel") {
-    // IC_hookSol down
-// *vision tracking slider moves*
-// IC_hookSliderSol out
-// *probably need to wait for driver input*
-// IC_hookSol up
-// *pause*
-// IC_hookSliderSol in
+
     choreography {
-        hook.to(Down)
-        //visiontracking
-        hookSlider.to(Out)
-        //driver input
-        hook.to(Up)
-        hookSlider.to(In)
+        //Start moving slider, set lift height, and hook/hook slider
+        launch {
+            collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
+            lift.set(lift.collectPanel)
+            hook.set(HookPosition.Down)
+            hookSlider.set(HookSliderPosition.Out)
+        }
+
+        //Collect panel and bring slider in
+        hook.set(HookPosition.Up)
+        hookSlider.set(HookSliderPosition.In)
     }
 }
 
+
+/**
+ * Collect panel from the ground
+ */
 suspend fun collectGroundPanel(
-        lift: LiftComponent,
+        collectorSlider: CollectorSliderComponent,
+        handoffPivot: HandoffPivotComponent,
         hook: HookComponent,
-        handoffPivot: HandoffPivotComponent
+        hookSlider: HookSliderComponent,
+        lift: LiftComponent,
+        electricalSystem: ElectricalSystemHardware
 ) = startChoreo("Collect ground panel") {
     //elevator handoff pos
-//IH_pivot *down* (not coll) pos
-//_wait for driver input_
-//IH_velcroSol out (and stay out)
-//IH_hookSol down
-//IH_pivot *handoffpos*
+////IH_pivot *down* (not coll) pos
+////_wait for driver input_
+////IH_velcroSol out (and stay out)
+////IH_hookSol down
+////IH_pivot *handoffpos*
     choreography {
-        lift.to(lift.collectHeight)
-        //handoffPivot.to(handoffPivot.plateHandoffPosition)
-        //driver input
-        hook.to(Down)
-        handoffPivot.to(handoffPivot.plateHandoffPosition)
+        //TODO finish collect ground panel
     }
 }
 
+
+/**
+ * Deploy cargo with slider autoalign
+ */
 suspend fun deployCargo(
-        lift: LiftComponent,
-        collectorRollers: CollectorRollersComponent
+        lineScanner: LineScannerHardware,
+        collectorRollers: CollectorRollersComponent,
+        collectorSlider: CollectorSliderComponent,
+        electricalSystem: ElectricalSystemHardware
 ) = startChoreo("Deploy cargo") {
-    //elevator to scoring pos (seperately input by driver)
-//_auto find target_
-//IC_rollerB and IC_rollerT out
+
     choreography {
-        //lift
-        //find target
+        //Move slider then release
+        collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
         collectorRollers.spin(collectorRollers.cargoReleaseSpeed)
     }
 }
 
+
+/**
+ * Deploy panel with slider autoalign
+ *
+ * Ends with:
+ * Hook - Up
+ * HookSlider - In
+ * HatchPanelEjector - In
+ */
 suspend fun deployPanel(
+        lineScanner: LineScannerHardware,
+        collectorSlider: CollectorSliderComponent,
+        hook: HookComponent,
         hookSlider: HookSliderComponent,
-        hook: HookComponent
+        hatchPanelEjector: HatchPanelEjectorComponent,
+        electricalSystem: ElectricalSystemHardware
 ) = startChoreo("Deploy panel") {
-    //_slider / drivetrain auto align_
-//IC_hookSliderSol out
-//_driver input, prob letting go of a button they hold to start this action_
-//IC_hookSol down
-//IC_hookSliderSol in
+
     choreography {
-        //autoalign
-        hookSlider.to(Out)
-        //let go of button
-        hook.to(Down)
-        hookSlider.to(In)
+        //Move slider
+        collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
+
+        //Set hook, hook slider
+        launch {
+            hookSlider.set(HookSliderPosition.Out)
+            hook.set(HookPosition.Down)
+        }
+
+        //Eject panel
+        hatchPanelEjector.set(EjectorState.Out)
+
+        //Reset hook, hook slider, ejector
+        launch {
+            hook.set(HookPosition.Up)
+            hookSlider.set(HookSliderPosition.In)
+            hatchPanelEjector.set(EjectorState.In)
+        }
     }
 }
 
+
+/**
+ * Deploy panel WITHOUT slider autoalign
+ *
+ * Deploy p
+ * Ends with:
+ * Hook - Down
+ * HookSlider - In
+ * Lift - collectCargoHeight
+ */
 suspend fun pushPanel(
+        hook: HookComponent,
         hookSlider: HookSliderComponent,
-        hook: HookComponent
-) = startChoreo("Push panel") {
-    //deployPanel without autoalign
-    choreography {
-        hookSlider.to(Out)
-        //let go of button
-        hook.to(Down)
-        hookSlider.to(In)
-    }
-}
+        hatchPanelEjector: HatchPanelEjectorComponent,
+        ) = startChoreo("Push panel") {
 
-suspend fun unleashTheCobra(
-        climber: ClimberComponent
-) = startChoreo("Unleash the cobra") {
-    //just goo 2 motors until some sort of sensor
     choreography {
-        climber.to(climber.maxOutput)
+        //Set hook, hook slider
+        launch {
+            hookSlider.set(HookSliderPosition.Out)
+            hook.set(HookPosition.Down)
+        }
+
+        //Eject panel
+        hatchPanelEjector.set(EjectorState.Out)
+
+        //Reset hook, hook slider, ejector
+        launch {
+            hook.set(HookPosition.Up)
+            hookSlider.set(HookSliderPosition.In)
+            hatchPanelEjector.set(EjectorState.In)
+        }
     }
 }
