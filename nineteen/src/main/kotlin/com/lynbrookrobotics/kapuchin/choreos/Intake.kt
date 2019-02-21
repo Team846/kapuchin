@@ -1,7 +1,10 @@
-package com.lynbrookrobotics.kapuchin.routines
+package com.lynbrookrobotics.kapuchin.choreos
 
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookSliderPosition.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
@@ -13,7 +16,7 @@ suspend fun collectCargo(
         collectorPivot: CollectorPivotComponent,
         handoffRollers: HandoffRollersComponent,
         collectorRollers: CollectorRollersComponent
-) = startChoreo("Collect Cargo") {
+) = startChoreo("Collect cargo") {
     // elevator to coll pos
 // IH_pivot down
 // IC_pivotSol down
@@ -30,7 +33,7 @@ suspend fun collectCargo(
 suspend fun collectWallPanel(
         hook: HookComponent,
         hookSlider: HookSliderComponent
-) = startChoreo("Collect Wall Panel") {
+) = startChoreo("Collect wall panel") {
     // IC_hookSol down
 // *vision tracking slider moves*
 // IC_hookSliderSol out
@@ -39,12 +42,12 @@ suspend fun collectWallPanel(
 // *pause*
 // IC_hookSliderSol in
     choreography {
-        hook.to(HookPosition.Down)
+        hook.to(Down)
         //visiontracking
-        hookSlider.to(HookSliderPosition.Out)
+        hookSlider.to(Out)
         //driver input
-        hook.to(HookPosition.Up)
-        hookSlider.to(HookSliderPosition.In)
+        hook.to(Up)
+        hookSlider.to(In)
     }
 }
 
@@ -52,7 +55,7 @@ suspend fun collectGroundPanel(
         lift: LiftComponent,
         hook: HookComponent,
         handoffPivot: HandoffPivotComponent
-) = startChoreo("Collect Ground Panel") {
+) = startChoreo("Collect ground panel") {
     //elevator handoff pos
 //IH_pivot *down* (not coll) pos
 //_wait for driver input_
@@ -63,7 +66,7 @@ suspend fun collectGroundPanel(
         lift.to(lift.collectHeight)
         //handoffPivot.to(handoffPivot.plateHandoffPosition)
         //driver input
-        hook.to(HookPosition.Down)
+        hook.to(Down)
         handoffPivot.to(handoffPivot.plateHandoffPosition)
     }
 }
@@ -71,7 +74,7 @@ suspend fun collectGroundPanel(
 suspend fun deployCargo(
         lift: LiftComponent,
         collectorRollers: CollectorRollersComponent
-) = startChoreo("Deploy Cargo") {
+) = startChoreo("Deploy cargo") {
     //elevator to scoring pos (seperately input by driver)
 //_auto find target_
 //IC_rollerB and IC_rollerT out
@@ -85,7 +88,7 @@ suspend fun deployCargo(
 suspend fun deployPanel(
         hookSlider: HookSliderComponent,
         hook: HookComponent
-) = startChoreo("Deploy Panel") {
+) = startChoreo("Deploy panel") {
     //_slider / drivetrain auto align_
 //IC_hookSliderSol out
 //_driver input, prob letting go of a button they hold to start this action_
@@ -93,29 +96,29 @@ suspend fun deployPanel(
 //IC_hookSliderSol in
     choreography {
         //autoalign
-        hookSlider.to(HookSliderPosition.Out)
+        hookSlider.to(Out)
         //let go of button
-        hook.to(HookPosition.Down)
-        hookSlider.to(HookSliderPosition.In)
+        hook.to(Down)
+        hookSlider.to(In)
     }
 }
 
 suspend fun pushPanel(
         hookSlider: HookSliderComponent,
         hook: HookComponent
-) = startChoreo("Push Panel") {
+) = startChoreo("Push panel") {
     //deployPanel without autoalign
     choreography {
-        hookSlider.to(HookSliderPosition.Out)
+        hookSlider.to(Out)
         //let go of button
-        hook.to(HookPosition.Down)
-        hookSlider.to(HookSliderPosition.In)
+        hook.to(Down)
+        hookSlider.to(In)
     }
 }
 
 suspend fun unleashTheCobra(
         climber: ClimberComponent
-) = startChoreo("Unleash the Cobra") {
+) = startChoreo("Unleash the cobra") {
     //just goo 2 motors until some sort of sensor
     choreography {
         climber.to(climber.maxOutput)
