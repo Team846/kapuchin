@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
@@ -29,6 +30,24 @@ suspend fun CollectorSliderComponent.to(target: Length, electrical: ElectricalSy
 
         voltageToDutyCycle(voltage, vBat).takeIf {
             current in target `±` tolerance
+        }
+    }
+}
+
+suspend fun CollectorSliderComponent.trackLine(tolerance: Length, lineScanner: LineScannerHardware, electrical: ElectricalSystemHardware) = startRoutine("Track line") {
+
+    val target by lineScanner.linePosition.readOnTick.withoutStamps
+    val current by hardware.position.readOnTick.withoutStamps
+    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+
+    controller {
+        target?.let { t ->
+            val error = t - current
+            val voltage = kP * error
+
+            voltageToDutyCycle(voltage, vBat).takeIf {
+                current in t `±` tolerance
+            }
         }
     }
 }
