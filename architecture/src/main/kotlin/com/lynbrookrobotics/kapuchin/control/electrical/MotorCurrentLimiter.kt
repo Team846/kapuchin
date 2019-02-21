@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
-import com.lynbrookrobotics.kapuchin.control.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Safeties.legalRanges
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
@@ -38,31 +39,16 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
 
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        var currLeft: Length = (Int.MIN_VALUE + 1).Inch
-        var currRight: Length = (Int.MIN_VALUE + 1).Inch
+        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE +1).Inch)
 
-        legalRanges().sortedBy {
-            it.start.Inch
-        }.forEach {
-            when {
-                it.start <= currRight -> currRight = max(currRight, it.endInclusive)
-                currLeft <= current && current <= currRight -> return
-                (it.start - current).abs < (currRight - current).abs -> {
-                    currLeft = it.start
-                    currRight = it.endInclusive
-                }
-                else -> return
-            }
-        }
-
-        if (currLeft - currRight != 0.Inch) {
-            val reverseSoftLimit = conversions.native.native(currLeft).toInt()
+        if (range.start - range.endInclusive != 0.Inch) {
+            val reverseSoftLimit = conversions.native.native(range.start).toInt()
             if (reverseSoftLimit != lastReverseSoftLimit) {
                 lastReverseSoftLimit = reverseSoftLimit
                 esc.configReverseSoftLimitThreshold(reverseSoftLimit)
             }
 
-            val forwardSoftLimit = conversions.native.native(currRight).toInt()
+            val forwardSoftLimit = conversions.native.native(range.endInclusive).toInt()
             if (forwardSoftLimit != lastForwardSoftLimit) {
                 lastForwardSoftLimit = forwardSoftLimit
                 esc.configForwardSoftLimitThreshold(forwardSoftLimit)

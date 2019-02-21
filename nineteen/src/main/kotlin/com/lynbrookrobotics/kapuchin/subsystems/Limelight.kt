@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
-import com.lynbrookrobotics.kapuchin.control.*
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -10,7 +10,6 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class LimelightHardware : RobotHardware<LimelightHardware>() {

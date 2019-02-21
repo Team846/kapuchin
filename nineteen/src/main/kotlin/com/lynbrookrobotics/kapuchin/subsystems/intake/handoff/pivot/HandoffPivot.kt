@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Safeties.legalRanges
 import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
@@ -33,31 +34,16 @@ class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffP
     override fun HandoffPivotHardware.output(value: OffloadedOutput) {
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        var currLeft = (Int.MIN_VALUE + 1).Degree
-        var currRight = (Int.MIN_VALUE + 1).Degree
+        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE + 1).Degree)
 
-        legalRanges().sortedBy {
-            it.start.Degree
-        }.forEach {
-            when {
-                it.start <= currRight -> currRight = max(currRight, it.endInclusive)
-                currLeft <= current && current <= currRight -> return
-                (it.start - current).abs < (currRight - current).abs -> {
-                    currLeft = it.start
-                    currRight = it.endInclusive
-                }
-                else -> return
-            }
-        }
-
-        if (currLeft - currRight != 0.Degree) {
-            val reverseSoftLimit = conversions.native.native(currLeft).toInt()
+        if (range.start - range.endInclusive != 0.Degree) {
+            val reverseSoftLimit = conversions.native.native(range.start).toInt()
             if (reverseSoftLimit != lastReverseSoftLimit) {
                 lastReverseSoftLimit = reverseSoftLimit
                 esc.configReverseSoftLimitThreshold(reverseSoftLimit)
             }
 
-            val forwardSoftLimit = conversions.native.native(currRight).toInt()
+            val forwardSoftLimit = conversions.native.native(range.endInclusive).toInt()
             if (forwardSoftLimit != lastForwardSoftLimit) {
                 lastForwardSoftLimit = forwardSoftLimit
                 esc.configForwardSoftLimitThreshold(forwardSoftLimit)
