@@ -123,7 +123,7 @@ class StandardChoreographiesTest {
         }
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `whenever starts only when its predicate is true`() = threadDumpOnFailure {
         runBlocking {
             val comps = List(10) { ChoreographyTestC(it) }
@@ -133,11 +133,14 @@ class StandardChoreographiesTest {
                     }.toTypedArray()
             )
 
-            runWhile({ false }, { doSomething() })
-            comps.forEachIndexed { i, c -> c.checkCount(i, 0) }
-
-            runWhile({ true }, { doSomething() })
-            comps.forEachIndexed { i, c -> c.checkCount(i, i) }
+            var pred = false
+            scope.launch {
+                whenever({ pred }, { doSomething() })
+                comps.forEachIndexed { i, c -> c.checkCount(i, 0) }
+                pred = true
+                delay(1.Second)
+                comps.forEachIndexed { i, c -> c.checkCount(i, i) }
+            }
 
             comps.forEach { it.out.clear() }
 

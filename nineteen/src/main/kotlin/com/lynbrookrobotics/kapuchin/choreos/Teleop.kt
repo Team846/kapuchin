@@ -17,7 +17,7 @@ suspend fun drivetrainTeleop(
     val visionAlign by driver.visionAlign.readEagerly().withoutStamps
 
     choreography {
-        while (isActive) {
+        whenever({ isActive }) {
             runWhile({ !visionAlign }) {
                 drivetrain.teleop(driver)
             }
@@ -45,7 +45,7 @@ suspend fun liftTeleop(
     val highCargoHeight by oper.highCargoHeight.readEagerly().withoutStamps
 
     choreography {
-        while (isActive) {
+        whenever({ isActive }) {
             runWhile({ groundHeight }) {
                 lift.set(lift.groundHeight, 0.Inch)
             }
