@@ -17,6 +17,9 @@ import info.kunalsheth.units.math.*
 sealed class CollectorPivotPosition(val output: Boolean) {
     object Up : CollectorPivotPosition(false)
     object Down : CollectorPivotPosition(true)
+    companion object {
+        val collectorPivotQueryCode = 0b00_00_000_1_0
+    }
 }
 
 class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<CollectorPivotComponent, CollectorPivotHardware, CollectorPivotPosition>(hardware, Subsystems.pneumaticTicker) {

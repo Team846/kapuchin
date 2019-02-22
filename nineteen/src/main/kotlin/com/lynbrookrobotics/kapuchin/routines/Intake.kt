@@ -55,7 +55,7 @@ suspend fun HandoffPivotComponent.to(target: Angle, tolerance: Angle = 5.Degree)
                             kI = 0.0,
                             kD = native(kD)
                     ), native(target)
-            ).takeIf {
+            ).takeUnless {
                 current in target `±` tolerance
             }
         }

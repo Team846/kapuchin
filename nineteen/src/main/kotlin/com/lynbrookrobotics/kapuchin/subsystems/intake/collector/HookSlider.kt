@@ -15,6 +15,9 @@ import info.kunalsheth.units.math.*
 sealed class HookSliderPosition(val output: Boolean) {
     object In : HookSliderPosition(false)
     object Out : HookSliderPosition(true)
+    companion object {
+      val hookSliderQueryCode = 0b00_00_000_0_1
+    }
 }
 
 class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderComponent, HookSliderHardware, HookSliderPosition>(hardware, Subsystems.pneumaticTicker) {
