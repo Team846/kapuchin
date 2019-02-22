@@ -3,8 +3,10 @@ package com.lynbrookrobotics.kapuchin.choreos
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookSliderPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderPosition.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
@@ -121,6 +123,6 @@ suspend fun unleashTheCobra(
 ) = startChoreo("Unleash the cobra") {
     //just goo 2 motors until some sort of sensor
     choreography {
-        climber.to(climber.maxOutput)
+        climber.spin(climber.maxOutput)
     }
 }

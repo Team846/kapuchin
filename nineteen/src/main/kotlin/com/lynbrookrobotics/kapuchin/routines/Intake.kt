@@ -8,6 +8,11 @@ import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
+import com.lynbrookrobotics.kapuchin.control.electrical.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
+import info.kunalsheth.units.math.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -72,7 +77,7 @@ suspend fun HandoffPivotComponent.to(target: Angle, tolerance: Angle = 5.Degree)
                             kI = 0.0,
                             kD = native(kD)
                     ), native(target)
-            ).takeIf {
+            ).takeUnless {
                 current in target `±` tolerance
             }
         }

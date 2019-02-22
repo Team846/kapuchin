@@ -1,9 +1,13 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
+package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -20,7 +24,20 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     override val fallbackController: CollectorSliderComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun CollectorSliderHardware.output(value: DutyCycle) {
-        hardware.esc.set(value.Each)
+        val current = position.optimizedRead(currentTime, 0.Second).y
+
+        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
+
+        if (range.start - range.endInclusive != 0.Inch) {
+            when {
+                value.isPositive && range.endInclusive > current ||
+                        value.isNegative && range.start < current
+                    -> esc.set(value.Percent)
+                else -> esc.set(0.0)
+            }
+        } else if (Safeties.log) {
+            log(Warning) { "No legal states found" }
+        }
     }
 }
 
