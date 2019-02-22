@@ -2,14 +2,62 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+suspend fun intakeTeleop(
+        driver: DriverHardware,
+        oper: OperatorHardware,
+        lineScanner: LineScannerHardware,
+        collectorPivot: CollectorPivotComponent,
+        collectorRollers: CollectorRollersComponent,
+        collectorSlider: CollectorSliderComponent,
+        hook: HookComponent,
+        hookSlider: HookSliderComponent,
+        handoffPivot: HandoffPivotComponent,
+        handoffRollers: HandoffRollersComponent,
+        velcroPivot: VelcroPivotComponent,
+        lift: LiftComponent,
+        electricalSystem: ElectricalSystemHardware
+) = startChoreo("Intake teleop") {
+
+    val collectCargo by driver.collectCargo.readEagerly().withoutStamps
+    val collectWallPanel by driver.collectWallPanel.readEagerly().withoutStamps
+    val collectGroundPanel by driver.collectGroundPanel.readEagerly().withoutStamps
+    val deployCargo by oper.deployCargo.readEagerly().withoutStamps
+    val deployPanel by oper.deployPanel.readEagerly().withoutStamps
+    val pushPanel by oper.pushPanel.readEagerly().withoutStamps
+
+    choreography {
+        whenever({isActive}) {
+            runWhile({collectCargo}) {
+                collectCargo(collectorPivot, collectorRollers, collectorSlider, handoffPivot, handoffRollers, lift, electricalSystem)
+            }
+            runWhile({collectWallPanel}) {
+                collectWallPanel(lineScanner, collectorPivot, collectorSlider, handoffPivot, hook, hookSlider, lift, electricalSystem)
+            }
+            runWhile({collectGroundPanel}) {
+                collectGroundPanel(collectorPivot, collectorSlider, handoffPivot, velcroPivot, hook, lift, electricalSystem)
+            }
+            runWhile({deployCargo}) {
+                deployCargo(lineScanner, collectorPivot, collectorRollers, collectorSlider, electricalSystem)
+            }
+            runWhile({deployPanel}) {
+                deployPanel(lineScanner, collectorPivot, collectorSlider, hook, hookSlider, electricalSystem)
+            }
+            runWhile({pushPanel}) {
+                pushPanel(collectorPivot, hook, hookSlider)
+            }
+        }
+    }
+}
 /**
  * Collect cargo from loading station
  *
