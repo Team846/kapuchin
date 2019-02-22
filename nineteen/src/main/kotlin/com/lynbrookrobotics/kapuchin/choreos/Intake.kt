@@ -16,45 +16,39 @@ import kotlinx.coroutines.launch
  * Ends with:
  * Ball in collector
  * CollectorPivot - Up
+ * CollectorSlider - Center
  * HandoffPivot - Collect position
  * Lift - Collect cargo height
  */
 suspend fun collectCargo(
         collectorPivot: CollectorPivotComponent,
         collectorRollers: CollectorRollersComponent,
+        collectorSlider: CollectorSliderComponent,
         handoffPivot: HandoffPivotComponent,
         handoffRollers: HandoffRollersComponent,
-        lift: LiftComponent
+        lift: LiftComponent,
+        electricalSystem: ElectricalSystemHardware
 ) = startChoreo("Collect cargo") {
 
     choreography {
         //Start collector/handoff rollers
-        val hr = launch { handoffRollers.spin(handoffRollers.cargoCollectSpeed) }
+        launch { handoffRollers.spin(handoffRollers.cargoCollectSpeed) }
         launch { collectorRollers.spin(collectorRollers.cargoCollectSpeed) }
 
-        //Set up pivots and lift
-        launch {
-            collectorPivot.set(CollectorPivotPosition.Up)
-            handoffPivot.set(handoffPivot.collectPosition)
-            lift.set(lift.collectCargo)
-        }
+        //Center slider
+        collectorSlider.set(0.Inch, electricalSystem)
 
-        //Wait (for cargo to be collected) then stop handoff rollers
+        //lift, handoff, collector down
+        lift.set(lift.collectCargo)
+        collectorPivot.set(CollectorPivotPosition.Down)
+        handoffPivot.set(handoffPivot.collectPosition)
+
+        //Wait (for cargo to be collected)
         delay(0.5.Second)
-        hr.cancel()
 
-        //Handoff cargo to collector
-        launch {
-            handoffPivot.set(handoffPivot.handoffPosition)
-            collectorPivot.set(CollectorPivotPosition.Down)
-        }
-
-        //Wait (for handoff to be complete) then reset pivots
-        delay(0.3.Second)
-        launch {
-            handoffPivot.set(handoffPivot.collectPosition)
-            collectorPivot.set(CollectorPivotPosition.Up)
-        }
+        //Collector, handoff up
+        collectorPivot.set(CollectorPivotPosition.Up)
+        handoffPivot.set(handoffPivot.collectPosition)
     }
 }
 
@@ -64,13 +58,18 @@ suspend fun collectCargo(
  *
  * End with:
  * Panel on hook
+ * CollectorPivot - Up
+ * CollectorSlider - Random
+ * HandoffPivot - Handoff Position
  * Hook - Up
  * HookSlider - In
- * Lift - collectPanelHeight
+ * Lift - Collect panel height
  */
 suspend fun collectWallPanel(
         lineScanner: LineScannerHardware,
+        collectorPivot: CollectorPivotComponent,
         collectorSlider: CollectorSliderComponent,
+        handoffPivot: HandoffPivotComponent,
         hook: HookComponent,
         hookSlider: HookSliderComponent,
         lift: LiftComponent,
@@ -78,15 +77,21 @@ suspend fun collectWallPanel(
 ) = startChoreo("Collect wall panel") {
 
     choreography {
-        //Start moving slider, set lift height, and hook/hook slider
-        launch {
-            collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
-            lift.set(lift.collectPanel)
-            hook.set(HookPosition.Down)
-            hookSlider.set(HookSliderPosition.Out)
-        }
+        //Track line with slider
+        collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
 
-        //Collect panel and bring slider in
+        //Lift down
+        lift.set(lift.collectPanel)
+
+        //Handoff, collector up
+        handoffPivot.set(handoffPivot.handoffPosition)
+        collectorPivot.set(CollectorPivotPosition.Up)
+
+        //Hook down, slider out
+        hook.set(HookPosition.Down)
+        hookSlider.set(HookSliderPosition.Out)
+
+        //Hook up, slider in
         hook.set(HookPosition.Up)
         hookSlider.set(HookSliderPosition.In)
     }
@@ -95,40 +100,70 @@ suspend fun collectWallPanel(
 
 /**
  * Collect panel from the ground
+ *
+ * Ends with:
+ * CollectorPivot - Up
+ * CollectorSlider - Center
+ * HandoffPivot - Handoff position
+ * VelcroPivot - Down
+ * Hook - Up
+ * Lift - Collect ground panel height
  */
 suspend fun collectGroundPanel(
+        collectorPivot: CollectorPivotComponent,
         collectorSlider: CollectorSliderComponent,
         handoffPivot: HandoffPivotComponent,
+        velcroPivot: VelcroPivotComponent,
         hook: HookComponent,
-        hookSlider: HookSliderComponent,
         lift: LiftComponent,
         electricalSystem: ElectricalSystemHardware
 ) = startChoreo("Collect ground panel") {
-    //elevator handoff pos
-////IH_pivot *down* (not coll) pos
-////_wait for driver input_
-////IH_velcroSol out (and stay out)
-////IH_hookSol down
-////IH_pivot *handoffpos*
+
     choreography {
-        //TODO finish collect ground panel
+        //Center slider
+        collectorSlider.set(0.Inch, electricalSystem)
+
+        //Lift down
+        lift.set(lift.collectGroundPanel)
+
+        //Collector up
+        collectorPivot.set(CollectorPivotPosition.Up)
+
+        //Handoff, velcro, hook down
+        handoffPivot.set(handoffPivot.collectPosition)
+        velcroPivot.set(VelcroPivotPosition.Down)
+        hook.set(HookPosition.Down)
+
+        //Handoff, hook up
+        handoffPivot.set(handoffPivot.handoffPosition)
+        hook.set(HookPosition.Up)
     }
 }
 
 
 /**
  * Deploy cargo with slider autoalign
+ *
+ * Ends with:
+ * CollectorPivot - Up
+ * CollectorSlider - Random
  */
 suspend fun deployCargo(
         lineScanner: LineScannerHardware,
+        collectorPivot: CollectorPivotComponent,
         collectorRollers: CollectorRollersComponent,
         collectorSlider: CollectorSliderComponent,
         electricalSystem: ElectricalSystemHardware
 ) = startChoreo("Deploy cargo") {
 
     choreography {
-        //Move slider then release
+        //Collector up
+        collectorPivot.set(CollectorPivotPosition.Up)
+
+        //Track line with slider
         collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
+
+        //Spin rollers
         collectorRollers.spin(collectorRollers.cargoReleaseSpeed)
     }
 }
@@ -138,38 +173,34 @@ suspend fun deployCargo(
  * Deploy panel with slider autoalign
  *
  * Ends with:
+ * CollectorPivot - Up
+ * CollectorSlider - Random
  * Hook - Up
  * HookSlider - In
- * HatchPanelEjector - In
  */
 suspend fun deployPanel(
         lineScanner: LineScannerHardware,
+        collectorPivot: CollectorPivotComponent,
         collectorSlider: CollectorSliderComponent,
         hook: HookComponent,
         hookSlider: HookSliderComponent,
-        hatchPanelEjector: HatchPanelEjectorComponent,
         electricalSystem: ElectricalSystemHardware
 ) = startChoreo("Deploy panel") {
 
     choreography {
-        //Move slider
+        //Collector up
+        collectorPivot.set(CollectorPivotPosition.Up)
+
+        //Track line with slider
         collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
 
-        //Set hook, hook slider
-        launch {
-            hookSlider.set(HookSliderPosition.Out)
-            hook.set(HookPosition.Down)
-        }
-
         //Eject panel
-        hatchPanelEjector.set(EjectorState.Out)
+        hookSlider.set(HookSliderPosition.Out)
+        hook.set(HookPosition.Down)
 
-        //Reset hook, hook slider, ejector
-        launch {
-            hook.set(HookPosition.Up)
-            hookSlider.set(HookSliderPosition.In)
-            hatchPanelEjector.set(EjectorState.In)
-        }
+        //Reset hook, hook slider
+        hookSlider.set(HookSliderPosition.In)
+        hook.set(HookPosition.Up)
     }
 }
 
@@ -178,31 +209,26 @@ suspend fun deployPanel(
  * Deploy panel WITHOUT slider autoalign
  *
  * Ends with:
+ * CollectorPivot - Up
  * Hook - Down
  * HookSlider - In
- * Lift - collectCargoHeight
  */
 suspend fun pushPanel(
+        collectorPivot: CollectorPivotComponent,
         hook: HookComponent,
-        hookSlider: HookSliderComponent,
-        hatchPanelEjector: HatchPanelEjectorComponent
+        hookSlider: HookSliderComponent
 ) = startChoreo("Push panel") {
 
     choreography {
-        //Set hook, hook slider
-        launch {
-            hookSlider.set(HookSliderPosition.Out)
-            hook.set(HookPosition.Down)
-        }
+        //Collector up
+        collectorPivot.set(CollectorPivotPosition.Up)
 
         //Eject panel
-        hatchPanelEjector.set(EjectorState.Out)
+        hookSlider.set(HookSliderPosition.Out)
+        hook.set(HookPosition.Down)
 
-        //Reset hook, hook slider, ejector
-        launch {
-            hook.set(HookPosition.Up)
-            hookSlider.set(HookSliderPosition.In)
-            hatchPanelEjector.set(EjectorState.In)
-        }
+        //Reset hook, hook slider
+        hookSlider.set(HookSliderPosition.In)
+        hook.set(HookPosition.Up)
     }
 }
