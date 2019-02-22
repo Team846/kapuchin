@@ -40,7 +40,7 @@ object Subsystems : Named by Named("subsystems") {
     lateinit var hookSlider: HookSliderComponent private set
     lateinit var handoffPivot: HandoffPivotComponent private set
     lateinit var handoffRollers: HandoffRollersComponent private set
-    lateinit var panelEjector: HatchPanelEjectorComponent private set
+    lateinit var velcroPivot: VelcroPivotComponent private set
     lateinit var lift: LiftComponent private set
     lateinit var climber: ClimberComponent private set
     lateinit var limelight: LimelightHardware private set
@@ -66,7 +66,7 @@ object Subsystems : Named by Named("subsystems") {
         val hookSliderAsync = async { HookSliderComponent(HookSliderHardware()) }
         val handoffPivotAsync = async { HandoffPivotComponent(HandoffPivotHardware()) }
         val handoffRollersAsync = async { HandoffRollersComponent(HandoffRollersHardware()) }
-        val panelEjectorAsync = async { HatchPanelEjectorComponent(HatchPanelEjectorHardware()) }
+        val velcroPivotAsync = async { VelcroPivotComponent(VelcroPivotHardware()) }
         val liftAsync = async { LiftComponent(LiftHardware()) }
         val climberAsync = async { ClimberComponent(ClimberHardware()) }
         val limelightAsync = async { LimelightHardware() }
@@ -93,7 +93,7 @@ object Subsystems : Named by Named("subsystems") {
         t { hookSlider = hookSliderAsync.await() }
         t { handoffPivot = handoffPivotAsync.await() }
         t { handoffRollers = handoffRollersAsync.await() }
-        t { panelEjector = panelEjectorAsync.await() }
+        t { velcroPivot = velcroPivotAsync.await() }
         t { lift = liftAsync.await() }
         t { climber = climberAsync.await() }
         t { limelight = limelightAsync.await() }
@@ -122,7 +122,7 @@ object Subsystems : Named by Named("subsystems") {
         t { hookSlider = HookSliderComponent(HookSliderHardware()) }
         t { handoffPivot = HandoffPivotComponent(HandoffPivotHardware()) }
         t { handoffRollers = HandoffRollersComponent(HandoffRollersHardware()) }
-        t { panelEjector = HatchPanelEjectorComponent(HatchPanelEjectorHardware()) }
+        t { velcroPivot = VelcroPivotComponent(VelcroPivotHardware()) }
         t { lift = LiftComponent(LiftHardware()) }
         t { climber = ClimberComponent(ClimberHardware()) }
         t { limelight = LimelightHardware() }

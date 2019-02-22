@@ -83,6 +83,6 @@ suspend fun HandoffRollersComponent.spin(target: DutyCycle) = startRoutine("Spin
     controller { TwoSided(target) }
 }
 
-suspend fun HatchPanelEjectorComponent.set(target: EjectorState) = startRoutine("Set") {
+suspend fun VelcroPivotComponent.set(target: VelcroPivotPosition) = startRoutine("Set") {
     controller { target }
 }
