@@ -25,7 +25,7 @@ class ChoreographySensorTest {
     private class ChoreographySensorTestC : TC<ChoreographySensorTestC, ChoreographySensorTestSH>(ChoreographySensorTestSH())
 
     @Test(timeout = 8 * 1000)
-    fun `sensors getting old are in sync`() = threadDumpOnFailiure {
+    fun `sensors getting old are in sync`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors getting old are in sync"
             ChoreographySensorTestC().run {
@@ -55,7 +55,7 @@ class ChoreographySensorTest {
     }
 
     @Test(timeout = 3 * 1000)
-    fun `sensors read on event loop are in sync`() = threadDumpOnFailiure {
+    fun `sensors read on event loop are in sync`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors read on event loop are in sync"
             ChoreographySensorTestC().run {
@@ -86,7 +86,7 @@ class ChoreographySensorTest {
     }
 
     @Test(timeout = 8 * 1000)
-    fun `sensors read eagerly are eager and efficient`() = threadDumpOnFailiure {
+    fun `sensors read eagerly are eager and efficient`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors read eagerly are eager and efficient"
             ChoreographySensorTestC().run {
@@ -115,7 +115,7 @@ class ChoreographySensorTest {
     }
 
     @Test(timeout = 1 * 1000)
-    fun `sensors are updated once before controller initialization`() = threadDumpOnFailiure {
+    fun `sensors are updated once before controller initialization`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors are updated once before controller initialization"
             ChoreographySensorTestC().run {
@@ -142,7 +142,7 @@ class ChoreographySensorTest {
     }
 
     @Test(timeout = 2 * 1000)
-    fun `sensors are read efficiently`() = threadDumpOnFailiure {
+    fun `sensors are read efficiently`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors are read efficiently"
             ChoreographySensorTestC().run {
@@ -185,7 +185,7 @@ class ChoreographySensorTest {
     }
 
     @Test(timeout = 4 * 1000)
-    fun `sensor lambdas are released upon choreography completion`() = threadDumpOnFailiure {
+    fun `sensor lambdas are released upon choreography completion`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensor lambdas are released upon choreography completion"
             ChoreographySensorTestC().run {

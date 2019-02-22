@@ -186,8 +186,8 @@ suspend fun deployPanel(
 suspend fun pushPanel(
         hook: HookComponent,
         hookSlider: HookSliderComponent,
-        hatchPanelEjector: HatchPanelEjectorComponent,
-        ) = startChoreo("Push panel") {
+        hatchPanelEjector: HatchPanelEjectorComponent
+) = startChoreo("Push panel") {
 
     choreography {
         //Set hook, hook slider
