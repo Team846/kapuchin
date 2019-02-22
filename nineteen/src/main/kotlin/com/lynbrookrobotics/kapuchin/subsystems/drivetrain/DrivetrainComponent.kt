@@ -17,8 +17,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val maxSpeed get() = maxLeftSpeed min maxRightSpeed
 
     val velocityGains by pref {
-        val kP by pref(10, Volt, 2, FootPerSecond)
-        val kF by pref(130, Percent)
+        val kP by pref(5, Volt, 2, FootPerSecond)
+        val kF by pref(110, Percent)
         ({
             OffloadedPidGains(
                     hardware.conversions.nativeConversion.native(kP),
@@ -30,8 +30,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         })
     }
 
-    val bearingKp by pref(2, FootPerSecond, 60, Degree)
-    val bearingKd by pref(0, FootPerSecond, 60, DegreePerSecond)
+    val bearingKp by pref(5, FootPerSecond, 45, Degree)
+    val bearingKd by pref(3, FootPerSecond, 360, DegreePerSecond)
 
     val lineScannerLead by pref(2.5, Foot)
 
