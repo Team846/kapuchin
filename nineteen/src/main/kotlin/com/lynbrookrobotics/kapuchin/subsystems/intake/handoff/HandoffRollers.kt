@@ -30,9 +30,9 @@ class HandoffRollersHardware : SubsystemHardware<HandoffRollersHardware, Handoff
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Handoff Rollers"
 
-    val leftPwmPort by pref(0)
+    val leftPwmPort by pref(2)
     val leftEsc by hardw { Spark(leftPwmPort) }
 
-    val rightPwmPort by pref(1)
+    val rightPwmPort by pref(3)
     val rightEsc by hardw { Spark(rightPwmPort) }.configure { it.inverted = true }
 }

@@ -5,6 +5,9 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
@@ -36,28 +39,29 @@ suspend fun intakeTeleop(
     val pushPanel by oper.pushPanel.readEagerly().withoutStamps
 
     choreography {
-        whenever({isActive}) {
-            runWhile({collectCargo}) {
+        whenever({ isActive }) {
+            runWhile({ collectCargo }) {
                 collectCargo(collectorPivot, collectorRollers, collectorSlider, handoffPivot, handoffRollers, lift, electricalSystem)
             }
-            runWhile({collectWallPanel}) {
+            runWhile({ collectWallPanel }) {
                 collectWallPanel(lineScanner, collectorPivot, collectorSlider, handoffPivot, hook, hookSlider, lift, electricalSystem)
             }
-            runWhile({collectGroundPanel}) {
+            runWhile({ collectGroundPanel }) {
                 collectGroundPanel(collectorPivot, collectorSlider, handoffPivot, velcroPivot, hook, lift, electricalSystem)
             }
-            runWhile({deployCargo}) {
+            runWhile({ deployCargo }) {
                 deployCargo(lineScanner, collectorPivot, collectorRollers, collectorSlider, electricalSystem)
             }
-            runWhile({deployPanel}) {
+            runWhile({ deployPanel }) {
                 deployPanel(lineScanner, collectorPivot, collectorSlider, hook, hookSlider, electricalSystem)
             }
-            runWhile({pushPanel}) {
+            runWhile({ pushPanel }) {
                 pushPanel(collectorPivot, hook, hookSlider)
             }
         }
     }
 }
+
 /**
  * Collect cargo from loading station
  *
