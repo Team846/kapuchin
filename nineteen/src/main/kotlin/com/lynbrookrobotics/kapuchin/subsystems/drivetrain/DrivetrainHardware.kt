@@ -1,9 +1,9 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
-import com.analog.adis16448.frc.ADIS16448_IMU
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX
+import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
@@ -11,7 +11,6 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort
@@ -20,7 +19,7 @@ import info.kunalsheth.units.math.*
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
-    override val period = 15.milli(Second)
+    override val period = 30.milli(Second)
     override val syncThreshold = 3.milli(Second)
     override val name = "Drivetrain"
 
@@ -43,49 +42,42 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
 
-    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
+    val conversions = DrivetrainConversions(this)
+
+    val leftMasterEsc by hardw { WPI_TalonSRX(leftMasterEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
+        it.isSafetyEnabled = false
     }
-    val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
+    val leftSlaveEsc by hardw { WPI_VictorSPX(leftSlaveEscId) }.configure {
         configSlave(it, operatingVoltage, currentLimit, startupFrictionCompensation)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
+        it.isSafetyEnabled = false
     }
     val leftLazyOutput = lazyOutput(leftMasterEsc)
 
-    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
+    val rightMasterEsc by hardw { WPI_TalonSRX(rightMasterEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
+        it.isSafetyEnabled = false
     }
-    val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
+    val rightSlaveEsc by hardw { WPI_VictorSPX(rightSlaveEscId) }.configure {
         configSlave(it, operatingVoltage, currentLimit, startupFrictionCompensation)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
+        it.isSafetyEnabled = false
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc)
 
-
-    private val leftEncoderA by pref(0)
-    private val rightEncoderA by pref(1)
     private val ticksToSerialPort by pref("kUSB1")
-
-    private val leftEncoder by hardw { Counter(leftEncoderA) }.configure {
-        it.setMaxPeriod(0.1)
-    }
-    private val rightEncoder by hardw { Counter(rightEncoderA) }.configure {
-        it.setMaxPeriod(0.1)
-    }
     private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
-
-    val conversions = DrivetrainConversions(this)
-
 
     val position = sensor {
         ticksToSerial().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
-        conversions.xyPosition stampWith it
+        conversions.matrixTracking.run { Position(x, y, bearing) } stampWith it
     }
             .with(graph("X Location", Foot)) { it.x }
             .with(graph("Y Location", Foot)) { it.y }
@@ -93,24 +85,28 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val leftPosition = sensor {
         conversions.toLeftPosition(
-            leftMasterEsc.getSelectedSensorPosition(idx) /
-            conversions.nativeEncoderCountMultiplier
+                leftMasterEsc.getSelectedSensorPosition(idx) /
+                        conversions.nativeEncoderCountMultiplier
         ) stampWith it
     }.with(graph("Left Position", Foot))
 
     val rightPosition = sensor {
         conversions.toRightPosition(
-            rightMasterEsc.getSelectedSensorPosition(idx) /
-            conversions.nativeEncoderCountMultiplier
+                rightMasterEsc.getSelectedSensorPosition(idx) /
+                        conversions.nativeEncoderCountMultiplier
         ) stampWith it
     }.with(graph("Right Position", Foot))
 
     val leftSpeed = sensor {
-        conversions.toLeftSpeed(leftEncoder.period.Second) stampWith it
+        conversions.nativeConversion.realVelocity(
+                leftMasterEsc.getSelectedSensorVelocity(idx)
+        ) stampWith it
     }.with(graph("Left Speed", FootPerSecond))
 
     val rightSpeed = sensor {
-        conversions.toRightSpeed(rightEncoder.period.Second) stampWith it
+        conversions.nativeConversion.realVelocity(
+                rightMasterEsc.getSelectedSensorVelocity(idx)
+        ) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
 
 
@@ -129,9 +125,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 //            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
 
     init {
-        EventLoop.runOnTick { time ->
+        uiBaselineTicker.runOnTick { time ->
             setOf(position, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
-                it.optimizedRead(time, period)
+                it.optimizedRead(time, 1.Second)
             }
         }
     }

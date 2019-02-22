@@ -3,26 +3,57 @@ package com.lynbrookrobotics.kapuchin.routines
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
-suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {
+class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
+    val position by with(scope) { c.hardware.position.readOnTick.withStamps }
+    val dadt = differentiator(::div, position.x, position.y.bearing)
+
+    val errorGraph = c.graph("Error Angle", Degree)
+    val speedGraph = c.graph("Target Speed", FootPerSecond)
+
+    fun speedAngleTarget(speed: Velocity, angle: Angle): Pair<TwoSided<Velocity>, Angle> {
+        val error = (angle `coterminal -` position.y.bearing)
+        return speedTargetAngleError(speed, error) to error
+    }
+
+    fun speedTargetAngleError(speed: Velocity, error: Angle) = with(c) {
+        val (t, p) = position
+
+        val angularVelocity = dadt(t, p.bearing)
+
+        val pA = bearingKp * error - bearingKd * angularVelocity
+
+        val targetL = speed + pA
+        val targetR = speed - pA
+
+        TwoSided(targetL, targetR).also {
+            speedGraph(t, it.avg)
+            errorGraph(t, error)
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
     val steering by driver.steering.readWithEventLoop.withoutStamps
     val absSteering by driver.absSteering.readWithEventLoop.withoutStamps
 
     val position by hardware.position.readOnTick.withStamps
 
-    val targetGraph = graph("Target Angle", Degree)
-    val errorGraph = graph("Error Angle", Degree)
+    val uni = UnicycleDrive(this@teleop, this@startRoutine)
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
     var startingAngle = -absSteering + position.y.bearing
-    val dadt = differentiator(::div, position.x, position.y.bearing)
 
     controller { t ->
         if (
@@ -33,18 +64,134 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("t
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering
 
-        if (box(steering) != 0.Percent) startingAngle = -absSteering + position.y.bearing
+        if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
 
-        val angularVelocity = dadt(position.x, position.y.bearing)
-        val targetA = (absSteering + startingAngle).also { targetGraph(t, it) }
-        val errorA = (targetA `coterminal -` position.y.bearing).also { errorGraph(t, it) }
-        val pA = bearingKp * errorA - bearingKd * angularVelocity
+        val (target, _) = uni.speedAngleTarget(forwardVelocity, absSteering + startingAngle)
 
-        val targetL = forwardVelocity + steeringVelocity + pA
-        val targetR = forwardVelocity - steeringVelocity - pA
+        val nativeL = hardware.conversions.nativeConversion.native(
+                target.left + steeringVelocity
+        )
+        val nativeR = hardware.conversions.nativeConversion.native(
+                target.right - steeringVelocity
+        )
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        )
+    }
+}
+
+suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("Point with line scanner") {
+    val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
+    val uni = UnicycleDrive(this@pointWithLineScanner, this@startRoutine)
+
+    controller {
+        val errorA = linePosition?.let {
+            -atan(it / lineScannerLead)
+        } ?: 0.Degree
+
+        val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        )
+    }
+}
+
+suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("Waypoint") {
+    val position by hardware.position.readOnTick.withStamps
+    val uni = UnicycleDrive(this@waypoint, this@startRoutine)
+
+    val waypointDistance = graph("Distance to Waypoint", Foot)
+
+    controller { t ->
+        val (_, p) = position
+        val distance = distance(p.vector, target).also { waypointDistance(t, it) }
+
+        val targetA = atan2(target.x - p.x, target.y - p.y)
+        val speed = motionProfile(distance)
+        val (targVels, _) = uni.speedAngleTarget(speed, targetA)
+
+        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
+        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        ).takeIf {
+            distance > tolerance
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRoutine("Turn") {
+    val uni = UnicycleDrive(this@turn, this@startRoutine)
+
+    controller {
+        val (targVels, error) = uni.speedAngleTarget(0.FootPerSecond, target)
+
+        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
+        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        ).takeIf {
+            error !in 0.Degree `±` tolerance
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Limelight tracking") {
+    val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
+    val robotPosition by hardware.position.readOnTick.withoutStamps
+    val uni = UnicycleDrive(this@limelightTracking, this@startRoutine)
+
+    val target = targetAngle?.let { it + robotPosition.bearing }
+
+    controller {
+        if (target != null) {
+            val (targs, _) = uni.speedAngleTarget(speed, target)
+
+            val nativeL = hardware.conversions.nativeConversion.native(targs.left)
+            val nativeR = hardware.conversions.nativeConversion.native(targs.right)
+
+            TwoSided(
+                    VelocityOutput(velocityGains, nativeL),
+                    VelocityOutput(velocityGains, nativeR)
+            )
+        } else null
+    }
+}
+
+suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
+
+    fun r() = Math.random()
+    val conv = DrivetrainConversions(hardware)
+
+    controller {
+        val startTime = currentTime
+        while (currentTime - startTime < hardware.period * 90.Percent) {
+            val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
+            conv.accumulateOdometry(l, r)
+        }
+        val (x, y, _) = Position(conv.matrixTracking.x, conv.matrixTracking.y, conv.matrixTracking.bearing)
+
+
+        val targetA = 1.Turn * r()
+        val errorA = targetA `coterminal -` 1.Turn * r()
+        val pA = bearingKp * errorA
+
+        val targetL = maxSpeed * r() + pA + x / Second
+        val targetR = maxSpeed * r() - pA + y / Second
+
+        val nativeL = hardware.conversions.nativeConversion.native(targetL) * 0.01
+        val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.01
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),

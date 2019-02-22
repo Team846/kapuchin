@@ -22,14 +22,14 @@ class FunkyRobot : RobotBase() {
         val classloading = loadClasses()
 
         println("Initializing hardware...")
-        val subsystems = Subsystems.concurrentInit()
+        Subsystems.concurrentInit()
 
         println("Trimming preferences...")
         trim(Preferences2.getInstance().table)
 
         runBlocking {
             println("Loading classes...")
-            withTimeout(5.Second) { classloading.join() }
+            withTimeout(.5.Second) { classloading.join() }
         }
 
         HAL.observeUserProgramStarting()
@@ -50,10 +50,11 @@ class FunkyRobot : RobotBase() {
             if (!currentJob.isActive) {
                 System.gc()
 
-                currentJob = subsystems::teleop runWhile { isEnabled && isOperatorControl }
-                        ?: subsystems::backAndForthAuto runWhile { isEnabled && isAutonomous }
-                                ?: subsystems::warmup runWhile { isDisabled }
-                                ?: doNothing
+                currentJob = scope.launch {
+                    runWhile({ isEnabled && isOperatorControl }, { Subsystems.teleop() })
+                    runWhile({ isEnabled && isAutonomous }, { Subsystems.followWaypoints() })
+                    runWhile({ isDisabled }, { Subsystems.warmup() })
+                }
             }
         }
     }

@@ -18,13 +18,14 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
 
     val velocityGains by pref {
         val kP by pref(10, Volt, 2, FootPerSecond)
+        val kF by pref(130, Percent)
         ({
             OffloadedPidGains(
                     hardware.conversions.nativeConversion.native(kP),
                     0.0, 0.0,
                     hardware.conversions.nativeConversion.native(
                             Gain(hardware.operatingVoltage, maxSpeed)
-                    )
+                    ) * kF.Each
             )
         })
     }
@@ -32,18 +33,27 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val bearingKp by pref(2, FootPerSecond, 60, Degree)
     val bearingKd by pref(0, FootPerSecond, 60, DegreePerSecond)
 
+    val lineScannerLead by pref(2.5, Foot)
+
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         TwoSided(PercentOutput(0.Percent))
     }
 
-    private val leftOutputGraph = graph("Left Output", Volt)
-    private val rightOutputGraph = graph("Right Output", Volt)
+    private val leftEscOutputGraph = graph("Left ESC Output", Volt)
+    private val rightEscOutputGraph = graph("Right ESC Output", Volt)
+
+    private val leftEscErrorGraph = graph("Left ESC Error", Each)
+    private val rightEscErrorGraph = graph("Right ESC Error", Each)
+
     override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
         leftLazyOutput(value.left)
         rightLazyOutput(value.right)
 
-        leftOutputGraph(currentTime, hardware.leftMasterEsc.motorOutputVoltage.Volt)
-        rightOutputGraph(currentTime, hardware.rightMasterEsc.motorOutputVoltage.Volt)
+        leftEscOutputGraph(currentTime, leftMasterEsc.motorOutputVoltage.Volt)
+        rightEscOutputGraph(currentTime, rightMasterEsc.motorOutputVoltage.Volt)
+
+        leftEscErrorGraph(currentTime, leftMasterEsc.closedLoopError.Each)
+        rightEscErrorGraph(currentTime, rightMasterEsc.closedLoopError.Each)
     }
 
     init {

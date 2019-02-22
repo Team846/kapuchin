@@ -34,6 +34,18 @@ operator fun <Q : Quan<Q>> UomVector<Q>.minus(that: UomVector<Q>) = UomVector(
         this.z - that.z
 )
 
+operator fun <Q : Quan<Q>> UomVector<Q>.times(that: Double) = UomVector(
+        this.x * that,
+        this.y * that,
+        this.z * that
+)
+
+operator fun <Q : Quan<Q>> UomVector<Q>.div(that: Double) = UomVector(
+        this.x / that,
+        this.y / that,
+        this.z / that
+)
+
 data class NumVector(override val x: Double, override val y: Double, override val z: Double) : Vector<Double>
 
 /**
@@ -104,8 +116,19 @@ data class RotationMatrix(val theta: Angle) {
 
 infix fun RotationMatrix.rz(that: UomVector<Length>) = that.run {
     UomVector(
-            x * cos - y * sin,
-            x * sin + cos * y,
+            x * cos + y * sin,
+            -x * sin + cos * y,
             z
     )
 }
+
+fun RotationMatrix.rzComponentX(x: Length, y: Length) =
+        x * cos + y * sin
+
+
+fun RotationMatrix.rzComponentY(x: Length, y: Length) =
+        -x * sin + cos * y
+
+
+fun RotationMatrix.rzComponentZ(x: Length, y: Length, z: Length) =
+        z

@@ -20,14 +20,9 @@ import info.kunalsheth.units.generated.*
  * @param This type of child class
  * @param C type of this subsystem's component
  */
-abstract class SubsystemHardware<This, C> : Named by Named("override val name = ...")
+abstract class SubsystemHardware<This, C> : RobotHardware<This>()
         where This : SubsystemHardware<This, C>,
               C : Component<C, This, *> {
-
-    /**
-     * this subsystem's importance
-     */
-    abstract val priority: Priority
 
     /**
      * time between control loop updates
@@ -38,9 +33,4 @@ abstract class SubsystemHardware<This, C> : Named by Named("override val name = 
      * sensor data timestamp jitter tolerance
      */
     abstract val syncThreshold: Time
-
-    /**
-     * this subsystem's name
-     */
-    abstract override val name: String
 }
