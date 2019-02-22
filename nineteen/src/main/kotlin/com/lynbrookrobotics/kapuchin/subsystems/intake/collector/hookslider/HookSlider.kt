@@ -1,12 +1,11 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
+package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.Safeties.legalRanges
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookSliderPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*

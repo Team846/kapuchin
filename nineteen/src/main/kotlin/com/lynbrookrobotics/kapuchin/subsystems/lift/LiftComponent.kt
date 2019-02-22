@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.Safeties.legalRanges
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
@@ -11,8 +10,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
-import java.util.TreeSet
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
 
@@ -39,7 +36,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
 
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE +1).Inch)
+        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
 
         if (range.start - range.endInclusive != 0.Inch) {
             val reverseSoftLimit = conversions.native.native(range.start).toInt()

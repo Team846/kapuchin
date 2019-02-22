@@ -3,7 +3,7 @@ package com.lynbrookrobotics.kapuchin.routines
 import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

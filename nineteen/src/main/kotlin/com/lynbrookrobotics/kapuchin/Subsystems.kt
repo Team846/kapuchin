@@ -8,6 +8,9 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
@@ -17,7 +20,6 @@ import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 
 object Subsystems : Named by Named("subsystems") {

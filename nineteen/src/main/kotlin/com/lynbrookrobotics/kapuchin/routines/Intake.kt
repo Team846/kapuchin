@@ -1,14 +1,15 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.control.electrical.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import info.kunalsheth.units.math.*
 import info.kunalsheth.units.generated.*
 
