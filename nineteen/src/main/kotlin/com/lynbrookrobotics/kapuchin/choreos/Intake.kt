@@ -177,7 +177,6 @@ suspend fun deployPanel(
 /**
  * Deploy panel WITHOUT slider autoalign
  *
- * Deploy p
  * Ends with:
  * Hook - Down
  * HookSlider - In

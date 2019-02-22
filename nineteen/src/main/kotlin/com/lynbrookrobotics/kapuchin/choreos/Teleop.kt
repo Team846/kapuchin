@@ -34,7 +34,6 @@ suspend fun liftTeleop(
 ) = startChoreo("Teleop") {
 
     val groundHeight by oper.groundHeight.readEagerly().withoutStamps
-    val collectGroundPanel by oper.collectGroundPanel.readEagerly().withoutStamps
 
     val lowPanelHeight by oper.lowPanelHeight.readEagerly().withoutStamps
     val lowCargoHeight by oper.lowCargoHeight.readEagerly().withoutStamps
@@ -48,10 +47,7 @@ suspend fun liftTeleop(
     choreography {
         while (isActive) {
             runWhile({ groundHeight }) {
-                lift.set(lift.collectHeight, 0.Inch)
-            }
-            runWhile({ collectGroundPanel }) {
-                lift.set(lift.collectGroundPanel, 0.Inch)
+                lift.set(lift.groundHeight, 0.Inch)
             }
             runWhile({ lowPanelHeight }) {
                 lift.set(lift.panelLowRocket, 0.Inch)
