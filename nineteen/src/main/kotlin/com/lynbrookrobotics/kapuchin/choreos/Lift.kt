@@ -1,37 +1,15 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.isActive
 
-suspend fun drivetrainTeleop(
-        drivetrain: DrivetrainComponent,
-        driver: DriverHardware,
-        limelight: LimelightHardware
-) = startChoreo("Teleop") {
-
-    val visionAlign by driver.visionAlign.readEagerly().withoutStamps
-
-    choreography {
-        whenever({ isActive }) {
-            runWhile({ !visionAlign }) {
-                drivetrain.teleop(driver)
-            }
-            runWhile({ visionAlign }) {
-                limelightAlign(drivetrain, limelight)
-            }
-        }
-    }
-}
-
 suspend fun liftTeleop(
         lift: LiftComponent,
         oper: OperatorHardware
-) = startChoreo("Teleop") {
+) = startChoreo("Lift teleop") {
 
     val groundHeight by oper.groundHeight.readEagerly().withoutStamps
 
