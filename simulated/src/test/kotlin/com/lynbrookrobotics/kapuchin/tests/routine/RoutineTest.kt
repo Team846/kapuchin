@@ -31,7 +31,7 @@ class RoutineTest {
     }
 
     @Test(timeout = 3 * 1000)
-    fun `routines run sequentially by ending themselves`() = threadDumpOnFailiure {
+    fun `routines run sequentially by ending themselves`() = threadDumpOnFailure {
         runBlocking {
             val c = RoutineTestC()
 
@@ -46,7 +46,7 @@ class RoutineTest {
     }
 
     @Test(timeout = 6 * 1000)
-    fun `routines can still run after one times out`() = threadDumpOnFailiure {
+    fun `routines can still run after one times out`() = threadDumpOnFailure {
         runBlocking {
             val c = RoutineTestC()
 
@@ -70,7 +70,7 @@ class RoutineTest {
     }
 
     @Test(timeout = 2 * 1000)
-    fun `routines can be cancelled externally`() = threadDumpOnFailiure {
+    fun `routines can be cancelled externally`() = threadDumpOnFailure {
         val c = RoutineTestC()
 
         c.out.clear()
@@ -132,7 +132,7 @@ class RoutineTest {
     }
 
     @Test(timeout = 2 * 1000)
-    fun `routines can be cancelled internally`() = threadDumpOnFailiure {
+    fun `routines can be cancelled internally`() = threadDumpOnFailure {
         val c = RoutineTestC()
 
         val j1 = scope.launch { c.countTo(8) }

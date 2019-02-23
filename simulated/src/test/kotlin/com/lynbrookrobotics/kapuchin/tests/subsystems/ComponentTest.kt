@@ -13,7 +13,7 @@ class ComponentTest {
     private class ComponentTestHardw : TSH<ComponentTestHardw, ComponentTestElc>("ComponentTest Hardware")
 
     @Test(timeout = 1 * 1000)
-    fun `event loop components only update on event loop ticks`() = threadDumpOnFailiure {
+    fun `event loop components only update on event loop ticks`() = threadDumpOnFailure {
         val c = ComponentTestElc()
 
         val j = scope.launch { c.countTo(10) }

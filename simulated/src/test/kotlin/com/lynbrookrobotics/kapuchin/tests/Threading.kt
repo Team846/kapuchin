@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin.tests
 
 import com.lynbrookrobotics.kapuchin.logging.*
 
-fun threadDumpOnFailiure(f: () -> Unit) {
+fun threadDumpOnFailure(f: () -> Unit) {
     Named("Thread Dumper").apply {
         try {
             f()
