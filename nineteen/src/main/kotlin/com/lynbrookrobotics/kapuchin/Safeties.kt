@@ -19,17 +19,13 @@ inline class RobotState(val code: Int) {
         operator fun invoke(lift: LiftState,
                             handoffPivot: HandoffPivotState,
                             collectorSlider: CollectorSliderState,
-                            collectorPivot: CollectorPivotPosition,
-                            hookSlider: HookSliderPosition): RobotState {
-            var code: Int = 0b00_00_000_0_0
-            code = lift.code or handoffPivot.code or collectorSlider.code
-            if (collectorPivot == CollectorPivotPosition.Up) {
-                code = code or 0b00_000_00_1_0
-            }
-            if (hookSlider == HookSliderPosition.Out) {
-                code = code or 0b00_00_000_0_1
-            }
-            return RobotState(code)
+                            collectorPivot: CollectorPivotState,
+                            hookSlider: HookSliderState): RobotState {
+            return RobotState(lift.encode() +
+                    handoffPivot.encode() +
+                    collectorSlider.encode() +
+                    collectorPivot.encode() +
+                    hookSlider.encode())
         }
     }
 }
@@ -42,14 +38,14 @@ object Safeties : Named by Named("safeties") {
             lift: LiftState? = null,
             handoffPivot: HandoffPivotState? = null,
             collectorSlider: CollectorSliderState? = null,
-            collectorPivot: CollectorPivotPosition? = null,
-            hookSlider: HookSliderPosition? = null
+            collectorPivot: CollectorPivotState? = null,
+            hookSlider: HookSliderState? = null
     ) = sequence {
-        val ls = if (lift == null) liftStates else arrayOf(lift)
-        val hps = if (handoffPivot == null) handoffPivotStates else arrayOf(handoffPivot)
-        val css = if (collectorSlider == null) collectorSliderStates else arrayOf(collectorSlider)
-        val cps = if (collectorPivot == null) collectorPivotStates else arrayOf(collectorPivot)
-        val hss = if (hookSlider == null) hookSliderStates else arrayOf(hookSlider)
+        val ls = if (lift == null) LiftState.states else arrayOf(lift)
+        val hps = if (handoffPivot == null) HandoffPivotState.states else arrayOf(handoffPivot)
+        val css = if (collectorSlider == null) CollectorSliderState.states else arrayOf(collectorSlider)
+        val cps = if (collectorPivot == null) CollectorPivotState.states else arrayOf(collectorPivot)
+        val hss = if (hookSlider == null) HookSliderState.states else arrayOf(hookSlider)
 
         for (l in ls) {
             for (hp in hps) {
@@ -65,7 +61,7 @@ object Safeties : Named by Named("safeties") {
     }
 
     val illegalStates = setOf(
-            permuteState(lift = LiftState.Low, collectorPivot = CollectorPivotPosition.Down, hookSlider = HookSliderPosition.Out),
+            permuteState(lift = LiftState.Low, collectorPivot = CollectorPivotState.Down, hookSlider = HookSliderState.Out),
             permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.High, collectorSlider = CollectorSliderState.WideLeft),
             permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.High, collectorSlider = CollectorSliderState.WideRight),
             permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Low, collectorSlider = CollectorSliderState.WideLeft),
@@ -82,7 +78,7 @@ object Safeties : Named by Named("safeties") {
             lift: LiftState? = LiftState(),
             handoffPivot: HandoffPivotState? = HandoffPivotState(),
             collectorSlider: CollectorSliderState? = CollectorSliderState(),
-            collectorPivot: CollectorPivotPosition? = CollectorPivotState(),
-            hookSlider: HookSliderPosition? = HookSliderState()
+            collectorPivot: CollectorPivotState? = CollectorPivotState(),
+            hookSlider: HookSliderState? = HookSliderState()
     ) = permuteState(lift, handoffPivot, collectorSlider, collectorPivot, hookSlider)
 }

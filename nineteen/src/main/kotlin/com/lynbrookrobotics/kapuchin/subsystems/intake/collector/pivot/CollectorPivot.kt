@@ -6,25 +6,17 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-sealed class CollectorPivotPosition(val output: Boolean) {
-    object Up : CollectorPivotPosition(false)
-    object Down : CollectorPivotPosition(true)
-    companion object {
-        val collectorPivotQueryCode = 0b00_00_000_1_0
-    }
-}
+class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<CollectorPivotComponent, CollectorPivotHardware, CollectorPivotState>(hardware, Subsystems.pneumaticTicker) {
 
-class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<CollectorPivotComponent, CollectorPivotHardware, CollectorPivotPosition>(hardware, Subsystems.pneumaticTicker) {
+    override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotState = { Up }
 
-    override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotPosition = { Up }
-
-    override fun CollectorPivotHardware.output(value: CollectorPivotPosition) {
+    override fun CollectorPivotHardware.output(value: CollectorPivotState) {
         val legal = legalRanges()
 
         when {

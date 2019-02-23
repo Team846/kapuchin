@@ -1,24 +1,37 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotState.Companion.states
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotState.Companion.pos
+import kotlin.math.pow
 
-val collectorPivotStates = arrayOf(CollectorPivotPosition.Up, CollectorPivotPosition.Down)
-fun CollectorPivotState() = Subsystems.collectorPivot.hardware.solenoid.get().let {
-    when (it) {
-        CollectorPivotPosition.Up.output -> CollectorPivotPosition.Up
-        CollectorPivotPosition.Down.output -> CollectorPivotPosition.Down
-        else -> null
+sealed class CollectorPivotState(val output: Boolean) {
+    object Up : CollectorPivotState(false)
+    object Down : CollectorPivotState(true)
+    companion object {
+        val states = arrayOf(CollectorPivotState.Up, CollectorPivotState.Down)
+        val pos = 2
+        operator fun invoke() = Subsystems.collectorPivot.hardware.solenoid.get().let {
+            when (it) {
+                CollectorPivotState.Up.output -> CollectorPivotState.Up
+                CollectorPivotState.Down.output -> CollectorPivotState.Down
+                else -> null
+            }
+        }
+
     }
 }
 
-private fun CollectorPivotComponent.decode(state: RobotState): CollectorPivotPosition? {
-    val collectorSliderCode = state.code and CollectorPivotPosition.collectorPivotQueryCode
-    return when (collectorSliderCode) {
-        0b00_000_00_1_0 -> CollectorPivotPosition.Up
-        0b00_00_000_0_0 -> CollectorPivotPosition.Down
-        else -> null
-    }
+fun CollectorPivotState.encode(): Int {
+    val index = states.indexOf(this)
+    return if (index >= 0) index * 10.0.pow(pos - 1) as Int else throw Throwable("Unknown state encountered")
 }
+
+private fun CollectorPivotComponent.decode(state: RobotState): CollectorPivotState? {
+    val index = state.code % (10.0.pow(pos) as Int)
+    return states[index]
+}
+
 
 fun CollectorPivotComponent.legalRanges() = Safeties.currentState(collectorPivot = null)
         .filter { it !in Safeties.illegalStates }

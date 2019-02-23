@@ -5,25 +5,17 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-sealed class HookSliderPosition(val output: Boolean) {
-    object In : HookSliderPosition(false)
-    object Out : HookSliderPosition(true)
-    companion object {
-      val hookSliderQueryCode = 0b00_00_000_0_1
-    }
-}
+class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderComponent, HookSliderHardware, HookSliderState>(hardware, Subsystems.pneumaticTicker) {
 
-class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderComponent, HookSliderHardware, HookSliderPosition>(hardware, Subsystems.pneumaticTicker) {
+    override val fallbackController: HookSliderComponent.(Time) -> HookSliderState = { In }
 
-    override val fallbackController: HookSliderComponent.(Time) -> HookSliderPosition = { In }
-
-    override fun HookSliderHardware.output(value: HookSliderPosition) {
+    override fun HookSliderHardware.output(value: HookSliderState) {
         val legal = legalRanges()
 
         when {

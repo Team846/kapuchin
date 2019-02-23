@@ -1,23 +1,36 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.pos
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.states
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
+import kotlin.math.pow
 
-val hookSliderStates = arrayOf(HookSliderPosition.In, HookSliderPosition.Out)
-fun HookSliderState() = Subsystems.hookSlider.hardware.solenoid.get().let {
-    when (it) {
-        HookSliderPosition.In.output -> HookSliderPosition.In
-        HookSliderPosition.Out.output -> HookSliderPosition.Out
-        else -> null
+sealed class HookSliderState(val output: Boolean) {
+    object In : HookSliderState(false)
+    object Out : HookSliderState(true)
+
+    companion object {
+        val states = arrayOf(HookSliderState.In, HookSliderState.Out)
+        val pos = 1
+        operator fun invoke() = Subsystems.hookSlider.hardware.solenoid.get().let {
+            when (it) {
+                HookSliderState.In.output -> HookSliderState.In
+                HookSliderState.Out.output -> HookSliderState.Out
+                else -> null
+            }
+        }
     }
 }
 
-private fun HookSliderComponent.decode(state: RobotState): HookSliderPosition? {
-    val hookSliderCode = state.code and HookSliderPosition.hookSliderQueryCode
-    return when (hookSliderCode) {
-        0b00_00_000_0_1 -> HookSliderPosition.In
-        0b00_00_000_0_0 -> HookSliderPosition.Out
-        else -> null
-    }
+fun HookSliderState.encode(): Int {
+    val index = states.indexOf(this)
+    return if (index >= 0) index * 10.0.pow(pos - 1) as Int else throw Throwable("Unknown state encountered")
+}
+
+private fun HookSliderComponent.decode(state: RobotState): HookSliderState? {
+    val index = state.code % (10.0.pow(CollectorPivotState.pos) as Int)
+    return states[index]
 }
 
 fun HookSliderComponent.legalRanges() = Safeties.currentState(hookSlider = null)

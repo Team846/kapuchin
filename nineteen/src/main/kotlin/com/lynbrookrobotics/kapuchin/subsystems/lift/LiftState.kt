@@ -1,16 +1,20 @@
 package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.subsystems.lift.LiftState.Companion.pos
+import com.lynbrookrobotics.kapuchin.subsystems.lift.LiftState.Companion.states
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
+import kotlin.math.pow
 
-sealed class LiftState(val rng: ClosedRange<Length>, val code: Int) {
-    object High : LiftState(30.Inch..80.Inch, 0b00_00_000_0_0)
-    object Low : LiftState(3.Inch..16.Inch, 0b01_00_000_0_0)
-    object Bottom : LiftState(-1.Inch..3.Inch, 0b10_00_000_0_0)
+sealed class LiftState(val rng: ClosedRange<Length>) {
+    object High : LiftState(30.Inch..80.Inch)
+    object Low : LiftState(3.Inch..16.Inch)
+    object Bottom : LiftState(-1.Inch..3.Inch)
 
     companion object {
-        val liftQueryCode = 0b11_000_00_0_0
+        val pos = 5
+        val states = arrayOf(LiftState.High, LiftState.Low, LiftState.Bottom)
         operator fun invoke() = Subsystems.lift.hardware.position.optimizedRead(currentTime, 0.Second).y.let {
             when (it) {
                 in LiftState.Bottom.rng -> LiftState.Bottom
@@ -19,14 +23,21 @@ sealed class LiftState(val rng: ClosedRange<Length>, val code: Int) {
                 else -> null
             }
         }
+
     }
 }
 
-val liftStates = arrayOf(LiftState.High, LiftState.Low, LiftState.Bottom)
-private fun LiftComponent.decode(state: RobotState): LiftState? {
-    val liftCode = state.code and LiftState.liftQueryCode
-    return liftStates.find {it.code == liftCode }
+
+fun LiftState.encode(): Int {
+    val index = states.indexOf(this)
+    return if (index >= 0) index * 10.0.pow(pos - 1) as Int else throw Throwable("Unknown lift state encountered")
 }
+
+private fun LiftComponent.decode(state: RobotState): LiftState? {
+    val index = state.code % (10.0.pow(pos) as Int)
+    return states[index]
+}
+
 fun LiftComponent.legalRanges() = Safeties.currentState(lift = null)
         .filter { it !in Safeties.illegalStates }
         .mapNotNull { decode(it)?.rng }
