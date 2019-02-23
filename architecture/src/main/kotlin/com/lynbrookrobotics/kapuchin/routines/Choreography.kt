@@ -103,8 +103,11 @@ suspend fun whenever(predicate: () -> Boolean, block: Block) = startChoreo("when
         var cont: CancellableContinuation<Unit>? = null
 
         val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-            if (predicate()) {
-                cont?.resume(Unit)
+            if (predicate() && cont?.isActive == true) {
+                try {
+                    cont?.resume(Unit)
+                } catch (e: IllegalStateException) {
+                }
             }
         }
 

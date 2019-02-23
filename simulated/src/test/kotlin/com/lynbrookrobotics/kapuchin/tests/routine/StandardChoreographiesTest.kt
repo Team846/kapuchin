@@ -125,7 +125,7 @@ class StandardChoreographiesTest {
         }
     }
 
-    @Test(timeout = 4 * 1000)
+    @Test(timeout = 5 * 1000)
     fun `whenever starts only when its predicate is true`() = threadDumpOnFailure {
         runBlocking {
             var didSomething: Boolean
