@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math
 
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
