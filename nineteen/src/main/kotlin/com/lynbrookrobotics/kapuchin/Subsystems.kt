@@ -178,7 +178,7 @@ object Subsystems : Named by Named("subsystems") {
                 drivetrain.maxOmega
         )
 
-        drivetrain.readJournal(2.Foot, 6.Inch, 5.FootPerSecondSquared, true, traj)
+        drivetrain.readJournal(2.Foot, 8.Inch, 5.FootPerSecondSquared, true, traj)
 
         freeze()
     }

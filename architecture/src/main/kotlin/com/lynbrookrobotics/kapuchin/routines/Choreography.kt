@@ -101,17 +101,19 @@ suspend fun runWhile(predicate: () -> Boolean, block: Block) = startChoreo("runW
 suspend fun whenever(predicate: () -> Boolean, block: Block) = startChoreo("whenever") {
     choreography {
         var runOnTick: Cancel? = null
-        while (isActive) {
-            suspendCancellableCoroutine<Unit> { cont ->
-                runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-                    if (predicate()) cont.resume(Unit)
+        try {
+            while (isActive) {
+                suspendCancellableCoroutine<Unit> { cont ->
+                    runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
+                        if (predicate() && cont.isActive) cont.resume(Unit)
+                    }
                 }
+
+                block()
             }
-
-            block()
+        } finally {
+            runOnTick?.cancel()
         }
-
-        runOnTick?.cancel()
     }
 }
 
@@ -128,7 +130,7 @@ suspend fun delay(time: Time) =
  *
  * @param time period to delay for
  */
-suspend fun freeze() = suspendCancellableCoroutine<Unit> {  }
+suspend fun freeze() = suspendCancellableCoroutine<Unit> { }
 
 /**
  * Cancels the given function if it takes too long

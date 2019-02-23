@@ -80,14 +80,16 @@ suspend fun DrivetrainComponent.readJournal(tolerance: Length, endTolerance: Len
             val dist = distance(newTarget.y, target.y)
             speed = avg(
                     speed, dist / (newTarget.x - target.x)
-            ) min v(deceleration, 0.FootPerSecond, remainingDistance)
-
+            )
             remainingDistance -= dist
             target = newTarget
         }
 
         val targetA = target(location, target.y)
-        val (targVels, _) = uni.speedAngleTarget(speed, targetA)
+        val (targVels, _) = uni.speedAngleTarget(
+                speed min v(deceleration, 0.FootPerSecond, remainingDistance + distanceToNext),
+                targetA
+        )
 
         val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
