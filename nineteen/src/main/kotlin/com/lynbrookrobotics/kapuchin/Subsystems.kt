@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin
 import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -177,7 +178,7 @@ object Subsystems : Named by Named("subsystems") {
                 drivetrain.maxOmega
         )
 
-        drivetrain.readJournal(2.Foot, 3.FootPerSecondSquared, true, traj)
+        drivetrain.readJournal(2.Foot, 6.Inch, 5.FootPerSecondSquared, true, traj)
 
         freeze()
     }

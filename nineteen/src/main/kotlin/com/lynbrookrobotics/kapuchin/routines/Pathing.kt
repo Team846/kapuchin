@@ -43,7 +43,7 @@ suspend fun journal(dt: DrivetrainHardware) = startChoreo("Journal") {
     }
 }
 
-suspend fun DrivetrainComponent.readJournal(tolerance: Length, deceleration: Acceleration, relative: Boolean, waypts: List<TimeStamped<Waypt>>) = startRoutine("Read Journal") {
+suspend fun DrivetrainComponent.readJournal(tolerance: Length, endTolerance: Length, deceleration: Acceleration, relative: Boolean, waypts: List<TimeStamped<Waypt>>) = startRoutine("Read Journal") {
     val position by hardware.position.readOnTick.withStamps
     val uni = UnicycleDrive(this@readJournal, this@startRoutine)
 
@@ -71,7 +71,7 @@ suspend fun DrivetrainComponent.readJournal(tolerance: Length, deceleration: Acc
         val location = p.vector
 
         val distanceToNext = distance(location, target.y).also { waypointDistance(t, it) }
-        if (!targIter.hasNext() && distanceToNext < tolerance) {
+        if (!targIter.hasNext() && distanceToNext < endTolerance) {
             isDone = true
             speed = 0.FootPerSecond
         } else if (targIter.hasNext() && distanceToNext < tolerance) {
