@@ -93,14 +93,14 @@ suspend fun collectCargo(
 
         //lift, handoff, collector down
         lift.set(lift.collectCargo)
-        collectorPivot.set(CollectorPivotPosition.Down)
+        collectorPivot.set(CollectorPivotState.Down)
         handoffPivot.set(handoffPivot.collectPosition)
 
         //Wait (for cargo to be collected)
         delay(0.5.Second)
 
         //Collector, handoff up
-        collectorPivot.set(CollectorPivotPosition.Up)
+        collectorPivot.set(CollectorPivotState.Up)
         handoffPivot.set(handoffPivot.collectPosition)
     }
 }
@@ -138,15 +138,15 @@ suspend fun collectWallPanel(
 
         //Handoff, collector up
         handoffPivot.set(handoffPivot.handoffPosition)
-        collectorPivot.set(CollectorPivotPosition.Up)
+        collectorPivot.set(CollectorPivotState.Up)
 
         //Hook down, slider out
         hook.set(HookPosition.Down)
-        hookSlider.set(HookSliderPosition.Out)
+        hookSlider.set(HookSliderState.Out)
 
         //Hook up, slider in
         hook.set(HookPosition.Up)
-        hookSlider.set(HookSliderPosition.In)
+        hookSlider.set(HookSliderState.In)
     }
 }
 
@@ -180,7 +180,7 @@ suspend fun collectGroundPanel(
         lift.set(lift.collectGroundPanel)
 
         //Collector up
-        collectorPivot.set(CollectorPivotPosition.Up)
+        collectorPivot.set(CollectorPivotState.Up)
 
         //Handoff, velcro, hook down
         handoffPivot.set(handoffPivot.collectPosition)
@@ -211,7 +211,7 @@ suspend fun deployCargo(
 
     choreography {
         //Collector up
-        collectorPivot.set(CollectorPivotPosition.Up)
+        collectorPivot.set(CollectorPivotState.Up)
 
         //Track line with slider
         collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
@@ -242,17 +242,17 @@ suspend fun deployPanel(
 
     choreography {
         //Collector up
-        collectorPivot.set(CollectorPivotPosition.Up)
+        collectorPivot.set(CollectorPivotState.Up)
 
         //Track line with slider
         collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
 
         //Eject panel
-        hookSlider.set(HookSliderPosition.Out)
+        hookSlider.set(HookSliderState.Out)
         hook.set(HookPosition.Down)
 
         //Reset hook, hook slider
-        hookSlider.set(HookSliderPosition.In)
+        hookSlider.set(HookSliderState.In)
         hook.set(HookPosition.Up)
     }
 }
@@ -274,14 +274,14 @@ suspend fun pushPanel(
 
     choreography {
         //Collector up
-        collectorPivot.set(CollectorPivotPosition.Up)
+        collectorPivot.set(CollectorPivotState.Up)
 
         //Eject panel
-        hookSlider.set(HookSliderPosition.Out)
+        hookSlider.set(HookSliderState.Out)
         hook.set(HookPosition.Down)
 
         //Reset hook, hook slider
-        hookSlider.set(HookSliderPosition.In)
+        hookSlider.set(HookSliderState.In)
         hook.set(HookPosition.Up)
     }
 }

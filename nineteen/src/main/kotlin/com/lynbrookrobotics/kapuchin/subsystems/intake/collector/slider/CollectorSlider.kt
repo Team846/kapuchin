@@ -26,7 +26,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     override fun CollectorSliderHardware.output(value: DutyCycle) {
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
+        val range = unionizeAndFindClosestRange(CollectorSliderState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
 
         if (range.start - range.endInclusive != 0.Inch) {
             when {

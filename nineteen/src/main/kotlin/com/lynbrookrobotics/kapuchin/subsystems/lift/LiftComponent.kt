@@ -39,7 +39,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
 
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
+        val range = unionizeAndFindClosestRange(LiftState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
 
         if (range.start - range.endInclusive != 0.Inch) {
             val reverseSoftLimit = conversions.native.native(range.start).toInt()

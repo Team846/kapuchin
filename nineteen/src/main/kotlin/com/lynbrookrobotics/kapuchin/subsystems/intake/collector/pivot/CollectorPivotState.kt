@@ -1,25 +1,28 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
 
-val collectorPivotStates = arrayOf(CollectorPivotPosition.Up, CollectorPivotPosition.Down)
-fun CollectorPivotState() = Subsystems.collectorPivot.hardware.solenoid.get().let {
-    when (it) {
-        CollectorPivotPosition.Up.output -> CollectorPivotPosition.Up
-        CollectorPivotPosition.Down.output -> CollectorPivotPosition.Down
-        else -> null
+
+sealed class CollectorPivotState(val output: Boolean) {
+    object Up : CollectorPivotState(false)
+    object Down : CollectorPivotState(true)
+    companion object {
+        val states = arrayOf(CollectorPivotState.Up, CollectorPivotState.Down)
+        val pos = 4
+        operator fun invoke() = Subsystems.collectorPivot.hardware.solenoid.get().let {
+            when (it) {
+                CollectorPivotState.Up.output -> CollectorPivotState.Up
+                CollectorPivotState.Down.output -> CollectorPivotState.Down
+                else -> null
+            }
+        }
+
+        fun legalRanges() = Safeties.currentState(collectorPivot = null)
+                .filter { it !in Safeties.illegalStates }
+                .mapNotNull { decode(it) }
+
     }
 }
 
-private fun CollectorPivotComponent.decode(state: RobotState): CollectorPivotPosition? {
-    val collectorSliderCode = state.code and CollectorPivotPosition.collectorPivotQueryCode
-    return when (collectorSliderCode) {
-        0b00_000_00_1_0 -> CollectorPivotPosition.Up
-        0b00_00_000_0_0 -> CollectorPivotPosition.Down
-        else -> null
-    }
-}
 
-fun CollectorPivotComponent.legalRanges() = Safeties.currentState(collectorPivot = null)
-        .filter { it !in Safeties.illegalStates }
-        .mapNotNull { decode(it) }
