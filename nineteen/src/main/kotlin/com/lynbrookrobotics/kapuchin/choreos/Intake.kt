@@ -12,7 +12,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 suspend fun intakeTeleop(
@@ -39,7 +38,7 @@ suspend fun intakeTeleop(
     val pushPanel by oper.pushPanel.readEagerly().withoutStamps
 
     choreography {
-        whenever({ isActive }) {
+        whenever({ collectCargo || collectWallPanel || collectGroundPanel || deployCargo || deployPanel || pushPanel }) {
             runWhile({ collectCargo }) {
                 collectCargo(collectorPivot, collectorRollers, collectorSlider, handoffPivot, handoffRollers, lift, electricalSystem)
             }

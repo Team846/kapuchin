@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.isActive
 
 suspend fun liftTeleop(
         lift: LiftComponent,
@@ -23,7 +22,7 @@ suspend fun liftTeleop(
     val highCargoHeight by oper.highCargoHeight.readEagerly().withoutStamps
 
     choreography {
-        whenever({ isActive }) {
+        whenever({ groundHeight || lowPanelHeight || lowCargoHeight || midPanelHeight || midCargoHeight || highPanelHeight || highCargoHeight }) {
             runWhile({ groundHeight }) {
                 lift.set(lift.groundHeight, 0.Inch)
             }

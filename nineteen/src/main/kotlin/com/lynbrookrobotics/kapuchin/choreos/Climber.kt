@@ -16,7 +16,7 @@ suspend fun unleashTheCobra(
     val unleashTheCobra by oper.unleashTheCobra.readEagerly().withoutStamps
 
     choreography {
-        whenever({ isActive }) {
+        whenever({ unleashTheCobra }) {
             runWhile({ unleashTheCobra }) {
                 climber.spin(climber.maxOutput)
             }
