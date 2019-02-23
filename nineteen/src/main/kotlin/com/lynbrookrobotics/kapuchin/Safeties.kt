@@ -115,7 +115,7 @@ object Safeties : Named by Named("safeties") {
             permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowRight),
             permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowLeft, collectorPivot = CollectorPivotState.Down),
             permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowRight, collectorPivot = CollectorPivotState.Down),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Vertical)
+            permuteState(lift = LiftState.Mid, handoffPivot = HandoffPivotState.Vertical)
     ).flatMap { it.asIterable() }
 
     fun currentState(
