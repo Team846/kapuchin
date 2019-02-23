@@ -19,7 +19,7 @@ class StandardChoreographiesTest {
     private class ChoreographyTestC(id: Int) : TC<ChoreographyTestC, ChoreographyTestSH>(ChoreographyTestSH(id))
 
     @Test(timeout = 5 * 1000)
-    fun `runAll launches all routines`() = threadDumpOnFailiure {
+    fun `runAll launches all routines`() = threadDumpOnFailure {
         runBlocking {
             val comps = List(15) { ChoreographyTestC(it) }
             runAll(
@@ -35,7 +35,7 @@ class StandardChoreographiesTest {
     }
 
     @Test(timeout = 2 * 1000)
-    fun `runAll runs even after one job fails`() = threadDumpOnFailiure {
+    fun `runAll runs even after one job fails`() = threadDumpOnFailure {
         runBlocking {
             val comps = List(15) { ChoreographyTestC(it) }
             runAll(
@@ -52,7 +52,7 @@ class StandardChoreographiesTest {
     }
 
     @Test(timeout = 2 * 1000)
-    fun `runAll can be cancelled externally`() = threadDumpOnFailiure {
+    fun `runAll can be cancelled externally`() = threadDumpOnFailure {
         runBlocking {
             val last = 10
             val comps = List(last + 1) { ChoreographyTestC(it) }
@@ -91,7 +91,7 @@ class StandardChoreographiesTest {
     }
 
     @Test(timeout = 2 * 1000)
-    fun `runWhile runs only when its predicate is true`() = threadDumpOnFailiure {
+    fun `runWhile runs only when its predicate is true`() = threadDumpOnFailure {
         runBlocking {
             val comps = List(10) { ChoreographyTestC(it) }
             suspend fun doSomething() = runAll(
@@ -105,6 +105,42 @@ class StandardChoreographiesTest {
 
             runWhile({ true }, { doSomething() })
             comps.forEachIndexed { i, c -> c.checkCount(i, i) }
+
+            comps.forEach { it.out.clear() }
+
+            val last = comps.size - 1
+            val first = 3
+
+            val j = launch {
+                runWhile({ comps[last].out.count { it == "countTo($last)" } < first }, { doSomething() })
+            }
+
+            while (j.isActive) {
+                EventLoop.tick(currentTime)
+                delay(1.milli(Second))
+            }
+            comps.forEachIndexed { i, c -> c.checkCount(i, min(first, i), 1) }
+        }
+    }
+
+    @Test(timeout = 4 * 1000)
+    fun `whenever starts only when its predicate is true`() = threadDumpOnFailure {
+        runBlocking {
+            val comps = List(10) { ChoreographyTestC(it) }
+            suspend fun doSomething() = runAll(
+                    *comps.mapIndexed { i, c ->
+                        choreography { c.countTo(i) }
+                    }.toTypedArray()
+            )
+
+            var pred = false
+            scope.launch {
+                whenever({ pred }, { doSomething() })
+                comps.forEachIndexed { i, c -> c.checkCount(i, 0) }
+                pred = true
+                delay(1.Second)
+                comps.forEachIndexed { i, c -> c.checkCount(i, i) }
+            }
 
             comps.forEach { it.out.clear() }
 

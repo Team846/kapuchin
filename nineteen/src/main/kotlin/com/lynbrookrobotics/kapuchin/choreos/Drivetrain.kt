@@ -4,9 +4,31 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.isActive
+
+suspend fun drivetrainTeleop(
+        drivetrain: DrivetrainComponent,
+        driver: DriverHardware,
+        limelight: LimelightHardware
+) = startChoreo("Drivetrain teleop") {
+
+    val visionAlign by driver.visionAlign.readEagerly().withoutStamps
+
+    choreography {
+        whenever({ isActive }) {
+            runWhile({ !visionAlign }) {
+                drivetrain.teleop(driver)
+            }
+            runWhile({ visionAlign }) {
+                limelightAlign(drivetrain, limelight)
+            }
+        }
+    }
+}
 
 suspend fun limelightAlign(
         drivetrain: DrivetrainComponent,

@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
+import kotlin.coroutines.resume
 
 private typealias Block = suspend CoroutineScope.() -> Unit
 
@@ -68,7 +69,6 @@ suspend fun runAll(vararg blocks: Block) = startChoreo("runAll") {
 /**
  * Create a new coroutine running the function while the predicate is met
  *
- * @param sensor data source for predicate
  * @param predicate function to check if the coroutine should still be running
  * @param block function to run
  * @return coroutine which runs until `predicate` returns false
@@ -88,6 +88,30 @@ suspend fun runWhile(predicate: () -> Boolean, block: Block) = startChoreo("runW
 
             job.join()
         }
+    }
+}
+
+/**
+ * Run the given block whenever the predicate is met
+ *
+ * @param predicate function to check if the block should be run
+ * @param block function to run
+ * @return coroutine which runs code whenever `predicate` returns false
+ */
+suspend fun whenever(predicate: () -> Boolean, block: Block) = startChoreo("whenever") {
+    choreography {
+        var runOnTick: Cancel? = null
+        while (isActive) {
+            suspendCancellableCoroutine<Unit> { cont ->
+                runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
+                    if (predicate()) cont.resume(Unit)
+                }
+            }
+
+            block()
+        }
+
+        runOnTick?.cancel()
     }
 }
 

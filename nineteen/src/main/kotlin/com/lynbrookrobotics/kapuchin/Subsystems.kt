@@ -46,7 +46,7 @@ object Subsystems : Named by Named("subsystems") {
     lateinit var hookSlider: HookSliderComponent private set
     lateinit var handoffPivot: HandoffPivotComponent private set
     lateinit var handoffRollers: HandoffRollersComponent private set
-    lateinit var panelEjector: HatchPanelEjectorComponent private set
+    lateinit var velcroPivot: VelcroPivotComponent private set
     lateinit var lift: LiftComponent private set
     lateinit var climber: ClimberComponent private set
     lateinit var limelight: LimelightHardware private set
@@ -64,19 +64,19 @@ object Subsystems : Named by Named("subsystems") {
             ))
         }
 
-//        val lineScannerAsync = async { LineScannerHardware() }
-//        val collectorPivotAsync = async { CollectorPivotComponent(CollectorPivotHardware()) }
-//        val collectorRollersAsync = async { CollectorRollersComponent(CollectorRollersHardware()) }
-//        val collectorSliderAsync = async { CollectorSliderComponent(CollectorSliderHardware()) }
-//        val hookAsync = async { HookComponent(HookHardware()) }
-//        val hookSliderAsync = async { HookSliderComponent(HookSliderHardware()) }
-//        val handoffPivotAsync = async { HandoffPivotComponent(HandoffPivotHardware()) }
-//        val handoffRollersAsync = async { HandoffRollersComponent(HandoffRollersHardware()) }
-//        val panelEjectorAsync = async { HatchPanelEjectorComponent(HatchPanelEjectorHardware()) }
-//        val liftAsync = async { LiftComponent(LiftHardware()) }
-//        val climberAsync = async { ClimberComponent(ClimberHardware()) }
+        val lineScannerAsync = async { LineScannerHardware() }
+        val collectorPivotAsync = async { CollectorPivotComponent(CollectorPivotHardware()) }
+        val collectorRollersAsync = async { CollectorRollersComponent(CollectorRollersHardware()) }
+        val collectorSliderAsync = async { CollectorSliderComponent(CollectorSliderHardware()) }
+        val hookAsync = async { HookComponent(HookHardware()) }
+        val hookSliderAsync = async { HookSliderComponent(HookSliderHardware()) }
+        val handoffPivotAsync = async { HandoffPivotComponent(HandoffPivotHardware()) }
+        val handoffRollersAsync = async { HandoffRollersComponent(HandoffRollersHardware()) }
+        val velcroPivotAsync = async { VelcroPivotComponent(VelcroPivotHardware()) }
+        val liftAsync = async { LiftComponent(LiftHardware()) }
+        val climberAsync = async { ClimberComponent(ClimberHardware()) }
         val limelightAsync = async { LimelightHardware() }
-//        val electricalAsync = async { ElectricalSystemHardware() }
+        val electricalAsync = async { ElectricalSystemHardware() }
 
         suspend fun t(f: suspend () -> Unit) = try {
             f()
@@ -91,19 +91,19 @@ object Subsystems : Named by Named("subsystems") {
         t { operator = operatorAsync.await() }
         t { leds = ledsAsync.await() }
 
-//        t { lineScanner = lineScannerAsync.await() }
-//        t { collectorPivot = collectorPivotAsync.await() }
-//        t { collectorRollers = collectorRollersAsync.await() }
-//        t { collectorSlider = collectorSliderAsync.await() }
-//        t { hook = hookAsync.await() }
-//        t { hookSlider = hookSliderAsync.await() }
-//        t { handoffPivot = handoffPivotAsync.await() }
-//        t { handoffRollers = handoffRollersAsync.await() }
-//        t { panelEjector = panelEjectorAsync.await() }
-//        t { lift = liftAsync.await() }
-//        t { climber = climberAsync.await() }
+        t { lineScanner = lineScannerAsync.await() }
+        t { collectorPivot = collectorPivotAsync.await() }
+        t { collectorRollers = collectorRollersAsync.await() }
+        t { collectorSlider = collectorSliderAsync.await() }
+        t { hook = hookAsync.await() }
+        t { hookSlider = hookSliderAsync.await() }
+        t { handoffPivot = handoffPivotAsync.await() }
+        t { handoffRollers = handoffRollersAsync.await() }
+        t { velcroPivot = velcroPivotAsync.await() }
+        t { lift = liftAsync.await() }
+        t { climber = climberAsync.await() }
         t { limelight = limelightAsync.await() }
-//        t { electrical = electricalAsync.await() }
+        t { electrical = electricalAsync.await() }
     }
 
     fun sequentialInit() {
@@ -128,7 +128,7 @@ object Subsystems : Named by Named("subsystems") {
         t { hookSlider = HookSliderComponent(HookSliderHardware()) }
         t { handoffPivot = HandoffPivotComponent(HandoffPivotHardware()) }
         t { handoffRollers = HandoffRollersComponent(HandoffRollersHardware()) }
-        t { panelEjector = HatchPanelEjectorComponent(HatchPanelEjectorHardware()) }
+        t { velcroPivot = VelcroPivotComponent(VelcroPivotHardware()) }
         t { lift = LiftComponent(LiftHardware()) }
         t { climber = ClimberComponent(ClimberHardware()) }
         t { limelight = LimelightHardware() }

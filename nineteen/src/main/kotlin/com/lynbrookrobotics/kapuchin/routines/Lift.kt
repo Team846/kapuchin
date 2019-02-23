@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-suspend fun LiftComponent.to(target: Length, tolerance: Length = 2.Inch) = startRoutine("To") {
+suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
 
