@@ -103,32 +103,6 @@ suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanne
     }
 }
 
-suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("Waypoint") {
-    val position by hardware.position.readOnTick.withStamps
-    val uni = UnicycleDrive(this@waypoint, this@startRoutine)
-
-    val waypointDistance = graph("Distance to Waypoint", Foot)
-
-    controller { t ->
-        val (_, p) = position
-        val distance = distance(p.vector, target).also { waypointDistance(t, it) }
-
-        val targetA = atan2(target.x - p.x, target.y - p.y)
-        val speed = motionProfile(distance)
-        val (targVels, _) = uni.speedAngleTarget(speed, targetA)
-
-        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
-        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
-
-        TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
-        ).takeIf {
-            distance > tolerance
-        }
-    }
-}
-
 suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRoutine("Turn") {
     val uni = UnicycleDrive(this@turn, this@startRoutine)
 

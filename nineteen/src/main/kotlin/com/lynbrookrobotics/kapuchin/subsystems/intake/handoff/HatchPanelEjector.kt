@@ -26,7 +26,7 @@ class HatchPanelEjectorHardware : SubsystemHardware<HatchPanelEjectorHardware, H
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Hatch Panel Ejector"
 
-    val solenoidPort by pref(3)
+    val solenoidPort by pref(4)
     val solenoid = Solenoid(solenoidPort)
 }
 

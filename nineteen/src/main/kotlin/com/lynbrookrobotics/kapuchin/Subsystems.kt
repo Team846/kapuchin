@@ -2,8 +2,10 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
@@ -22,6 +24,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import java.io.File
 
 object Subsystems : Named by Named("subsystems") {
 
@@ -61,19 +64,19 @@ object Subsystems : Named by Named("subsystems") {
             ))
         }
 
-        val lineScannerAsync = async { LineScannerHardware() }
-        val collectorPivotAsync = async { CollectorPivotComponent(CollectorPivotHardware()) }
-        val collectorRollersAsync = async { CollectorRollersComponent(CollectorRollersHardware()) }
-        val collectorSliderAsync = async { CollectorSliderComponent(CollectorSliderHardware()) }
-        val hookAsync = async { HookComponent(HookHardware()) }
-        val hookSliderAsync = async { HookSliderComponent(HookSliderHardware()) }
-        val handoffPivotAsync = async { HandoffPivotComponent(HandoffPivotHardware()) }
-        val handoffRollersAsync = async { HandoffRollersComponent(HandoffRollersHardware()) }
-        val panelEjectorAsync = async { HatchPanelEjectorComponent(HatchPanelEjectorHardware()) }
-        val liftAsync = async { LiftComponent(LiftHardware()) }
-        val climberAsync = async { ClimberComponent(ClimberHardware()) }
+//        val lineScannerAsync = async { LineScannerHardware() }
+//        val collectorPivotAsync = async { CollectorPivotComponent(CollectorPivotHardware()) }
+//        val collectorRollersAsync = async { CollectorRollersComponent(CollectorRollersHardware()) }
+//        val collectorSliderAsync = async { CollectorSliderComponent(CollectorSliderHardware()) }
+//        val hookAsync = async { HookComponent(HookHardware()) }
+//        val hookSliderAsync = async { HookSliderComponent(HookSliderHardware()) }
+//        val handoffPivotAsync = async { HandoffPivotComponent(HandoffPivotHardware()) }
+//        val handoffRollersAsync = async { HandoffRollersComponent(HandoffRollersHardware()) }
+//        val panelEjectorAsync = async { HatchPanelEjectorComponent(HatchPanelEjectorHardware()) }
+//        val liftAsync = async { LiftComponent(LiftHardware()) }
+//        val climberAsync = async { ClimberComponent(ClimberHardware()) }
         val limelightAsync = async { LimelightHardware() }
-        val electricalAsync = async { ElectricalSystemHardware() }
+//        val electricalAsync = async { ElectricalSystemHardware() }
 
         suspend fun t(f: suspend () -> Unit) = try {
             f()
@@ -88,19 +91,19 @@ object Subsystems : Named by Named("subsystems") {
         t { operator = operatorAsync.await() }
         t { leds = ledsAsync.await() }
 
-        t { lineScanner = lineScannerAsync.await() }
-        t { collectorPivot = collectorPivotAsync.await() }
-        t { collectorRollers = collectorRollersAsync.await() }
-        t { collectorSlider = collectorSliderAsync.await() }
-        t { hook = hookAsync.await() }
-        t { hookSlider = hookSliderAsync.await() }
-        t { handoffPivot = handoffPivotAsync.await() }
-        t { handoffRollers = handoffRollersAsync.await() }
-        t { panelEjector = panelEjectorAsync.await() }
-        t { lift = liftAsync.await() }
-        t { climber = climberAsync.await() }
+//        t { lineScanner = lineScannerAsync.await() }
+//        t { collectorPivot = collectorPivotAsync.await() }
+//        t { collectorRollers = collectorRollersAsync.await() }
+//        t { collectorSlider = collectorSliderAsync.await() }
+//        t { hook = hookAsync.await() }
+//        t { hookSlider = hookSliderAsync.await() }
+//        t { handoffPivot = handoffPivotAsync.await() }
+//        t { handoffRollers = handoffRollersAsync.await() }
+//        t { panelEjector = panelEjectorAsync.await() }
+//        t { lift = liftAsync.await() }
+//        t { climber = climberAsync.await() }
         t { limelight = limelightAsync.await() }
-        t { electrical = electricalAsync.await() }
+//        t { electrical = electricalAsync.await() }
     }
 
     fun sequentialInit() {
@@ -148,15 +151,35 @@ object Subsystems : Named by Named("subsystems") {
         )
     }
 
+    val performance by pref(40, Percent)
     suspend fun followWaypoints() {
-        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 5.Foot), 2.Inch)
-        delay(1.Second)
-        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 5.Foot), 2.Inch)
-        delay(1.Second)
-        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 0.Foot), 2.Inch)
-        delay(1.Second)
-        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 0.Foot), 2.Inch)
-        delay(1.Second)
+//        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 5.Foot), 2.Inch)
+//        delay(1.Second)
+//        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 5.Foot), 2.Inch)
+//        delay(1.Second)
+//        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 0.Foot), 2.Inch)
+//        delay(1.Second)
+//        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 0.Foot), 2.Inch)
+//        delay(1.Second)
+
+        val waypts = File("/tmp/journal.tsv").useLines { lns -> lns
+                .drop(1)
+                .map { it.split('\t') }
+                .map { it.map { tkn -> tkn.trim() } }
+                .map { Waypt(it[1].toDouble().Foot, it[2].toDouble().Foot) stampWith it[0].toDouble().Second }
+                .toList()
+        }
+
+        val traj = pathToTrajectory(
+                waypts.map { (_, pt) -> pt },
+                performance,
+                drivetrain.maxSpeed,
+                drivetrain.maxOmega
+        )
+
+        drivetrain.readJournal(2.Foot, 3.FootPerSecondSquared, true, traj)
+
+        freeze()
     }
 
     suspend fun limelightAlign() {

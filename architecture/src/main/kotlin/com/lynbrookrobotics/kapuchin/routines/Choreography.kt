@@ -100,6 +100,13 @@ suspend fun delay(time: Time) =
         delay(time.milli(Second).toLong())
 
 /**
+ * Pauses the coroutine until cancelled
+ *
+ * @param time period to delay for
+ */
+suspend fun freeze() = suspendCancellableCoroutine<Unit> {  }
+
+/**
  * Cancels the given function if it takes too long
  *
  * @param time maximum time to run the function for
