@@ -152,15 +152,16 @@ class StandardChoreographiesTest {
                         EventLoop.tick(currentTime)
                     }
 
-                    didSomething = false
-                    pred = false
-                    EventLoop.tick(currentTime)
-                    didSomething `is equal to?` false
+                    while (didSomething) {
+                        didSomething = false
+                        pred = false
+                        EventLoop.tick(currentTime)
+                    }
                 }
             } finally {
                 j?.cancel()
             }
-            while(originalRunning != EventLoop.jobsToRun.size) EventLoop.tick(currentTime)
+            while (originalRunning != EventLoop.jobsToRun.size) EventLoop.tick(currentTime)
         }
     }
 }
