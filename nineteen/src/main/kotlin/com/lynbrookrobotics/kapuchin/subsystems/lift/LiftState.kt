@@ -13,7 +13,7 @@ sealed class LiftState(val rng: ClosedRange<Length>) {
     object Bottom : LiftState(-1.Inch..3.Inch)
 
     companion object {
-        val pos = 5
+        val pos = 1
         val states = arrayOf(LiftState.High, LiftState.Low, LiftState.Bottom)
         operator fun invoke() = Subsystems.lift.hardware.position.optimizedRead(currentTime, 0.Second).y.let {
             when (it) {
@@ -34,7 +34,7 @@ fun LiftState.encode(): Int {
 }
 
 private fun LiftComponent.decode(state: RobotState): LiftState? {
-    val index = state.code % (10.0.pow(pos) as Int)
+    val index = state.code / (10.0.pow(pos) as Int) % 10
     return states[index]
 }
 

@@ -13,7 +13,7 @@ sealed class HandoffPivotState(val rng: ClosedRange<Angle>, val code: Int) {
     object Low : HandoffPivotState(90.Degree..60.Degree, 0b00_10_000_0_0)
 
     companion object {
-        val pos = 4
+        val pos = 2
         val states = arrayOf(HandoffPivotState.High, HandoffPivotState.Mid, HandoffPivotState.Low)
         operator fun invoke() = Subsystems.handoffPivot.hardware.position.optimizedRead(currentTime, 0.Second).y.let {
             when (it) {
@@ -33,7 +33,7 @@ fun HandoffPivotState.encode(): Int {
 }
 
 private fun HandoffPivotComponent.decode(state: RobotState): HandoffPivotState? {
-    val index = state.code % (10.0.pow(pos) as Int)
+    val index = state.code / (10.0.pow(pos) as Int) % 10
     return states[index]
 }
 fun HandoffPivotComponent.legalRanges() = Safeties.currentState(handoffPivot = null)

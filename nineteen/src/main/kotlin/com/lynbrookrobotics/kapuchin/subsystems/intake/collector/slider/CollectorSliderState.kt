@@ -15,7 +15,7 @@ sealed class CollectorSliderState(val rng: ClosedRange<Length>) {
     object WideRight : CollectorSliderState(3.Inch..16.Inch)
 
     companion object {
-        val pos = 2
+        val pos = 3
         val states = arrayOf(CollectorSliderState.WideLeft,
                 CollectorSliderState.WideRight,
                 CollectorSliderState.NarrowLeft,
@@ -44,7 +44,7 @@ fun CollectorSliderState.encode(): Int {
 }
 
 private fun CollectorSliderComponent.decode(state: RobotState): CollectorSliderState? {
-    val index = state.code % (10.0.pow(pos) as Int)
+    val index = state.code / (10.0.pow(pos) as Int) % 10
     return states[index]
 }
 

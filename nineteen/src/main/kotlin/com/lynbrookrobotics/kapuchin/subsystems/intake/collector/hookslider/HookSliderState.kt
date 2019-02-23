@@ -12,7 +12,7 @@ sealed class HookSliderState(val output: Boolean) {
 
     companion object {
         val states = arrayOf(HookSliderState.In, HookSliderState.Out)
-        val pos = 1
+        val pos = 5
         operator fun invoke() = Subsystems.hookSlider.hardware.solenoid.get().let {
             when (it) {
                 HookSliderState.In.output -> HookSliderState.In
@@ -29,7 +29,7 @@ fun HookSliderState.encode(): Int {
 }
 
 private fun HookSliderComponent.decode(state: RobotState): HookSliderState? {
-    val index = state.code % (10.0.pow(CollectorPivotState.pos) as Int)
+    val index = state.code / (10.0.pow(CollectorPivotState.pos) as Int) % 10
     return states[index]
 }
 

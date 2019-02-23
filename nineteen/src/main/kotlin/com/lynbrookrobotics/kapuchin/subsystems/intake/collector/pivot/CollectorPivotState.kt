@@ -10,7 +10,7 @@ sealed class CollectorPivotState(val output: Boolean) {
     object Down : CollectorPivotState(true)
     companion object {
         val states = arrayOf(CollectorPivotState.Up, CollectorPivotState.Down)
-        val pos = 2
+        val pos = 4
         operator fun invoke() = Subsystems.collectorPivot.hardware.solenoid.get().let {
             when (it) {
                 CollectorPivotState.Up.output -> CollectorPivotState.Up
@@ -28,7 +28,7 @@ fun CollectorPivotState.encode(): Int {
 }
 
 private fun CollectorPivotComponent.decode(state: RobotState): CollectorPivotState? {
-    val index = state.code % (10.0.pow(pos) as Int)
+    val index = state.code / (10.0.pow(pos) as Int) % 10
     return states[index]
 }
 

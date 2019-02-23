@@ -10,11 +10,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 
 inline class RobotState(val code: Int) {
 
-
-    //lower bit value is towards the right
-    //8-9     6-7      3-5       2        1        10-32
-    //lift    hPivot   cSlider   cPivot   hSlider  free bits
-
     companion object {
         operator fun invoke(lift: LiftState,
                             handoffPivot: HandoffPivotState,
