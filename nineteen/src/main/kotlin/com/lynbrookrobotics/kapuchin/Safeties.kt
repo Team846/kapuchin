@@ -109,16 +109,13 @@ object Safeties : Named by Named("safeties") {
 
     val illegalStates = setOf(
             permuteState(lift = LiftState.Low, collectorPivot = CollectorPivotState.Down, hookSlider = HookSliderState.Out),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.High, collectorSlider = CollectorSliderState.WideLeft),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.High, collectorSlider = CollectorSliderState.WideRight),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Low, collectorSlider = CollectorSliderState.WideLeft),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Low, collectorSlider = CollectorSliderState.WideRight),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.WideLeft),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.WideRight),
+            permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.WideLeft),
+            permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.WideRight),
             permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowLeft),
             permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowRight),
-            permuteState(lift = LiftState.Bottom, collectorSlider = CollectorSliderState.WideLeft),
-            permuteState(lift = LiftState.Bottom, collectorSlider = CollectorSliderState.WideRight)
+            permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowLeft, collectorPivot = CollectorPivotState.Down),
+            permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowRight, collectorPivot = CollectorPivotState.Down),
+            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Vertical)
     ).flatMap { it.asIterable() }
 
     fun currentState(
