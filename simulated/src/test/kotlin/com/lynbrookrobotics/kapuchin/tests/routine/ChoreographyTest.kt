@@ -40,7 +40,7 @@ class ChoreographyTest {
     }
 
     @Test(timeout = 3 * 1000)
-    fun `choreographies run sequentially by ending themselves`() = threadDumpOnFailiure {
+    fun `choreographies run sequentially by ending themselves`() = threadDumpOnFailure {
         runBlocking {
             val c = ChoreographyTestC()
 
@@ -54,7 +54,7 @@ class ChoreographyTest {
     }
 
     @Test(timeout = 4 * 1000)
-    fun `choreographies can still run after one times out`() = threadDumpOnFailiure {
+    fun `choreographies can still run after one times out`() = threadDumpOnFailure {
         runBlocking {
             val c = ChoreographyTestC()
 
@@ -77,7 +77,7 @@ class ChoreographyTest {
     }
 
     @Test(timeout = 4 * 1000)
-    fun `choreographies can be cancelled externally`() = threadDumpOnFailiure {
+    fun `choreographies can be cancelled externally`() = threadDumpOnFailure {
         val c = ChoreographyTestC()
 
         c.out.clear()
@@ -132,7 +132,7 @@ class ChoreographyTest {
     }
 
     @Test(timeout = 2 * 1000)
-    fun `choreographies can be cancelled internally`() = threadDumpOnFailiure {
+    fun `choreographies can be cancelled internally`() = threadDumpOnFailure {
         val c = ChoreographyTestC()
 
         val j1 = scope.launch { countTo(c, 8) }
