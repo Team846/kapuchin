@@ -16,7 +16,7 @@ class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderCo
     override val fallbackController: HookSliderComponent.(Time) -> HookSliderState = { In }
 
     override fun HookSliderHardware.output(value: HookSliderState) {
-        val legal = legalRanges()
+        val legal = HookSliderState.legalRanges()
 
         when {
             !legal.any() -> log(Warning) { "No legal states found" }

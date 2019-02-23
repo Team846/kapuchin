@@ -17,7 +17,7 @@ class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<Coll
     override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotState = { Up }
 
     override fun CollectorPivotHardware.output(value: CollectorPivotState) {
-        val legal = legalRanges()
+        val legal = CollectorPivotState.legalRanges()
 
         when {
             !legal.any() -> log(Warning) { "No legal states found" }

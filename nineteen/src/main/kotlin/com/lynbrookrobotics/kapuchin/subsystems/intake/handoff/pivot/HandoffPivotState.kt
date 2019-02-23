@@ -24,9 +24,10 @@ sealed class HandoffPivotState(val rng: ClosedRange<Angle>, val code: Int) {
                 else -> null
             }
         }
+        fun legalRanges() = Safeties.currentState(handoffPivot = null)
+                .filter { it !in Safeties.illegalStates }
+                .mapNotNull { decode(it)?.rng }
     }
 }
 
-fun HandoffPivotComponent.legalRanges() = Safeties.currentState(handoffPivot = null)
-        .filter { it !in Safeties.illegalStates }
-        .mapNotNull { decode(it)?.rng }
+

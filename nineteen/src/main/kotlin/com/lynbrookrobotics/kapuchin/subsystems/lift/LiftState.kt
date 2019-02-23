@@ -22,9 +22,10 @@ sealed class LiftState(val rng: ClosedRange<Length>) {
             }
         }
 
+        fun legalRanges() = Safeties.currentState(lift = null)
+                .filter { it !in Safeties.illegalStates }
+                .mapNotNull { decode(it)?.rng }
     }
 }
 
-fun LiftComponent.legalRanges() = Safeties.currentState(lift = null)
-        .filter { it !in Safeties.illegalStates }
-        .mapNotNull { decode(it)?.rng }
+

@@ -32,9 +32,9 @@ sealed class CollectorSliderState(val rng: ClosedRange<Length>) {
                 else -> null
             }
         }
+
+        fun legalRanges() = Safeties.currentState(collectorSlider = null)
+                .filter { it !in Safeties.illegalStates }
+                .mapNotNull { decode(it)?.rng }
     }
 }
-
-fun CollectorSliderComponent.legalRanges() = Safeties.currentState(collectorSlider = null)
-        .filter { it !in Safeties.illegalStates }
-        .mapNotNull { decode(it)?.rng }

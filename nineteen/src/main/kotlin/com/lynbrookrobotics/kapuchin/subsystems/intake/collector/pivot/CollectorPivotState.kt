@@ -2,9 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotState.Companion.states
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotState.Companion.pos
-import kotlin.math.pow
+
 
 sealed class CollectorPivotState(val output: Boolean) {
     object Up : CollectorPivotState(false)
@@ -20,9 +18,11 @@ sealed class CollectorPivotState(val output: Boolean) {
             }
         }
 
+        fun legalRanges() = Safeties.currentState(collectorPivot = null)
+                .filter { it !in Safeties.illegalStates }
+                .mapNotNull { decode(it) }
+
     }
 }
 
-fun CollectorPivotComponent.legalRanges() = Safeties.currentState(collectorPivot = null)
-        .filter { it !in Safeties.illegalStates }
-        .mapNotNull { decode(it) }
+

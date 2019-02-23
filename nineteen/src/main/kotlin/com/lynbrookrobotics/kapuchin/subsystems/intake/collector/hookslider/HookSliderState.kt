@@ -21,9 +21,10 @@ sealed class HookSliderState(val output: Boolean) {
                 else -> null
             }
         }
+
+        fun legalRanges() = Safeties.currentState(hookSlider = null)
+                .filter { it !in Safeties.illegalStates }
+                .mapNotNull { decode(it) }
     }
 }
 
-fun HookSliderComponent.legalRanges() = Safeties.currentState(hookSlider = null)
-        .filter { it !in Safeties.illegalStates }
-        .mapNotNull { decode(it) }
