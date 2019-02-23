@@ -62,17 +62,10 @@ class PathingTest {
                 Waypt(-1.Metre, 0.Metre),
                 Waypt(1.Metre, 0.Metre),
                 Waypt(1.Metre, 1.Metre)
-        ).also {
-            println(it.joinToString("\n") { (x, y) -> "${x.Metre}\t${y.Metre}" })
-        }
-
-        println()
+        )
 
         val len = 0.1.Metre
         val path = toPath(waypts, len)
-                .also {
-                    println(it.joinToString("\n") { (x, y) -> "${x.Metre}\t${y.Metre}" })
-                }
         val segs = path.zipWithNext()
 
         segs
