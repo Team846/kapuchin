@@ -34,6 +34,9 @@ infix fun <T : Comparable<T>> T.`is within?`(range: ClosedRange<T>) =
 infix fun <T : Comparable<T>> T.`is greater than?`(that: T) =
         assert(this > that) { "Expecting $this > $that, however $this ≤ $that" }
 
+infix fun <T : Quan<T>> T.`is greater than or equal to?`(that: T) =
+        assert(this >= that || this in that.tolerance) { "Expecting $this >= $that, however $this < $that" }
+
 infix fun <T : Comparable<T>> T.`is greater than or equal to?`(that: T) =
         assert(this >= that) { "Expecting $this >= $that, however $this < $that" }
 

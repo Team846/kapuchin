@@ -78,7 +78,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
             log(Debug) { "Cancelled $name routine.\n${c.message}" }
             throw c
         } catch (t: Throwable) {
-            log(Error, t) { "Exception running $name routine.\n${t.message}" }
+            log(Error, t) { "$t running $name routine.\n${t.message}" }
         } finally {
             sensorScope.close()
         }
@@ -110,10 +110,10 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
                 @Suppress("UNNECESSARY_SAFE_CALL")
                 (routine ?: fallbackController)
                         ?.invoke(thisAsThis, tickStart)
-                        ?.let { hardware.output(it) }
+                        ?.let { hardware?.output(it) }
             } catch (t: Throwable) {
                 routine?.resumeWithException(t) ?: log(Error, t) {
-                    "Exception running default controller\n${t.message}"
+                    "$t running default controller\n${t.message}"
                 }
             }
         }
