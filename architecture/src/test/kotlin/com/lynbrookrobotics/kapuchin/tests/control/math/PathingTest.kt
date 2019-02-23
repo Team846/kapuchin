@@ -126,17 +126,21 @@ class PathingTest {
                     maxV `is greater than or equal to?` vel1
                     maxV `is greater than or equal to?` vel2
 
-                    val m1 = (p2.y.y - p1.y.y) / (p2.y.x - p1.y.x)
-                    val m2 = (p3.y.y - p2.y.y) / (p3.y.x - p2.y.x)
-                    val deltaTheta = atan(m2) - atan(m1)
-                    val omega = deltaTheta / (p3.x - p1.x)
+                    val deltaTheta = (atan2(
+                            p2.y.x - p1.y.x, p2.y.y - p1.y.y
+                    ) - atan2(
+                            p3.y.x - p2.y.x, p3.y.y - p2.y.y
+                    )) `coterminal -` 0.Degree
 
-                    maxOmega `is greater than or equal to?` omega
+                    val omega2 = deltaTheta / (p3.x - p2.x)
 
-                    abs(vel1 / maxV) + abs(omega / maxOmega)
+                    maxOmega `is greater than or equal to?` omega2
+
+                    abs(vel2 / maxV) + abs(omega2 / maxOmega)
                 }
+                .dropLast(1)
                 .forEach {
-                    it `is within?` (performance `±` 3.Percent)
+                    it `is within?` (performance `±` 15.Percent)
                 }
     }
 }

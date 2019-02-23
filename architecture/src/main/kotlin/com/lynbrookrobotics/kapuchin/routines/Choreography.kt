@@ -100,19 +100,21 @@ suspend fun runWhile(predicate: () -> Boolean, block: Block) = startChoreo("runW
  */
 suspend fun whenever(predicate: () -> Boolean, block: Block) = startChoreo("whenever") {
     choreography {
-        var runOnTick: Cancel? = null
+        var cont: CancellableContinuation<Unit>? = null
+
+        val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
+            if (predicate()) {
+                cont?.resume(Unit)
+            }
+        }
+
         try {
             while (isActive) {
-                suspendCancellableCoroutine<Unit> { cont ->
-                    runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-                        if (predicate() && cont.isActive) cont.resume(Unit)
-                    }
-                }
-
+                suspendCancellableCoroutine<Unit> { cont = it }
                 block()
             }
         } finally {
-            runOnTick?.cancel()
+            runOnTick.cancel()
         }
     }
 }
