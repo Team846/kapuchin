@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderState.Companion.pos
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderState.Companion.states
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -32,20 +33,6 @@ sealed class CollectorSliderState(val rng: ClosedRange<Length>) {
             }
         }
     }
-}
-
-
-fun CollectorSliderState.encode(): Int {
-    val index = states.indexOf(this)
-    return if (index >= 0) index * 10.0.pow(pos - 1) as Int else {
-      
-      throw Throwable("Unknown state encountered")
-    }
-}
-
-private fun CollectorSliderComponent.decode(state: RobotState): CollectorSliderState? {
-    val index = state.code / (10.0.pow(pos) as Int) % 10
-    return states[index]
 }
 
 fun CollectorSliderComponent.legalRanges() = Safeties.currentState(collectorSlider = null)

@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.pos
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.states
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
@@ -21,16 +22,6 @@ sealed class HookSliderState(val output: Boolean) {
             }
         }
     }
-}
-
-fun HookSliderState.encode(): Int {
-    val index = states.indexOf(this)
-    return if (index >= 0) index * 10.0.pow(pos - 1) as Int else throw Throwable("Unknown state encountered")
-}
-
-private fun HookSliderComponent.decode(state: RobotState): HookSliderState? {
-    val index = state.code / (10.0.pow(CollectorPivotState.pos) as Int) % 10
-    return states[index]
 }
 
 fun HookSliderComponent.legalRanges() = Safeties.currentState(hookSlider = null)

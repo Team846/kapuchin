@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.HandoffPivotState.Companion.pos
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.HandoffPivotState.Companion.states
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -26,16 +27,6 @@ sealed class HandoffPivotState(val rng: ClosedRange<Angle>, val code: Int) {
     }
 }
 
-
-fun HandoffPivotState.encode(): Int {
-    val index = states.indexOf(this)
-    return if (index >= 0) index * 10.0.pow(pos - 1) as Int else throw Throwable("Unknown state encountered")
-}
-
-private fun HandoffPivotComponent.decode(state: RobotState): HandoffPivotState? {
-    val index = state.code / (10.0.pow(pos) as Int) % 10
-    return states[index]
-}
 fun HandoffPivotComponent.legalRanges() = Safeties.currentState(handoffPivot = null)
         .filter { it !in Safeties.illegalStates }
         .mapNotNull { decode(it)?.rng }

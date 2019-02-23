@@ -6,7 +6,10 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.HandoffPivotState.Companion
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import com.lynbrookrobotics.kapuchin.subsystems.lift.LiftState.*
+import kotlin.math.pow
 
 inline class RobotState(val code: Int) {
 
@@ -22,6 +25,52 @@ inline class RobotState(val code: Int) {
                     collectorPivot.encode() +
                     hookSlider.encode())
         }
+        fun LiftState.encode(): Int {
+            val index = LiftState.states.indexOf(this)
+            return if (index >= 0) index * 10.0.pow(LiftState.pos - 1).toInt() else throw Throwable("Unknown lift state encountered")
+        }
+
+        fun LiftComponent.decode(state: RobotState): LiftState? {
+            val index = state.code / (10.0.pow(LiftState.pos).toInt()) % 10
+            return LiftState.states[index]
+        }
+        fun HandoffPivotState.encode(): Int {
+            val index = HandoffPivotState.states.indexOf(this)
+            return if (index >= 0) index * 10.0.pow(HandoffPivotState.pos - 1).toInt() else throw Throwable("Unknown handoff pivotstate encountered")
+        }
+
+        fun HandoffPivotComponent.decode(state: RobotState): HandoffPivotState? {
+            val index = state.code / (10.0.pow(HandoffPivotState.pos).toInt()) % 10
+            return HandoffPivotState.states[index]
+        }
+        fun CollectorSliderState.encode(): Int {
+            val index = CollectorSliderState.states.indexOf(this)
+            return if (index >= 0) index * 10.0.pow(CollectorSliderState.pos - 1).toInt() else throw Throwable("Unknown collector slider state encountered")
+        }
+
+        fun CollectorSliderComponent.decode(state: RobotState): CollectorSliderState? {
+            val index = state.code / (10.0.pow(CollectorSliderState.pos).toInt()) % 10
+            return CollectorSliderState.states[index]
+        }
+        fun CollectorPivotState.encode(): Int {
+            val index = CollectorPivotState.states.indexOf(this)
+            return if (index >= 0) index * 10.0.pow(CollectorPivotState.pos - 1).toInt() else throw Throwable("Unknown collector pivot state encountered")
+        }
+
+        fun CollectorPivotComponent.decode(state: RobotState): CollectorPivotState? {
+            val index = state.code / (10.0.pow(CollectorPivotState.pos).toInt()) % 10
+            return CollectorPivotState.states[index]
+        }
+        fun HookSliderState.encode(): Int {
+            val index = HookSliderState.states.indexOf(this)
+            return if (index >= 0) index * 10.0.pow(HookSliderState.pos - 1).toInt() else throw Throwable("Unknown hook slider state encountered")
+        }
+
+        fun HookSliderComponent.decode(state: RobotState): HookSliderState? {
+            val index = state.code / (10.0.pow(CollectorPivotState.pos).toInt()) % 10
+            return HookSliderState.states[index]
+        }
+
     }
 }
 

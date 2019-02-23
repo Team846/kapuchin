@@ -1,11 +1,9 @@
 package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.subsystems.lift.LiftState.Companion.pos
-import com.lynbrookrobotics.kapuchin.subsystems.lift.LiftState.Companion.states
+import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import kotlin.math.pow
 
 sealed class LiftState(val rng: ClosedRange<Length>) {
     object High : LiftState(30.Inch..80.Inch)
@@ -25,17 +23,6 @@ sealed class LiftState(val rng: ClosedRange<Length>) {
         }
 
     }
-}
-
-
-fun LiftState.encode(): Int {
-    val index = states.indexOf(this)
-    return if (index >= 0) index * 10.0.pow(pos - 1) as Int else throw Throwable("Unknown lift state encountered")
-}
-
-private fun LiftComponent.decode(state: RobotState): LiftState? {
-    val index = state.code / (10.0.pow(pos) as Int) % 10
-    return states[index]
 }
 
 fun LiftComponent.legalRanges() = Safeties.currentState(lift = null)
