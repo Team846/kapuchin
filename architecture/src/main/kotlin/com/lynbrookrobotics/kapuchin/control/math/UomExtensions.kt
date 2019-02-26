@@ -41,7 +41,10 @@ fun <Q: Quan<Q>> unionizeAndFindClosestRange(sequence: Sequence<ClosedRange<Q>>,
                 currLeft = it.start
                 currRight = it.endInclusive
             }
-            else -> return@forEach
+            else -> {
+                println("in illegal state")
+                return@forEach
+            }
         }
     }
 

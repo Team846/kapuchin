@@ -99,12 +99,12 @@ object Subsystems : Named by Named("subsystems") {
         t { hook = hookAsync.await() }
         t { hookSlider = hookSliderAsync.await() }
         t { handoffPivot = handoffPivotAsync.await() }
-        t { handoffRollers = handoffRollersAsync.await() }
-        t { velcroPivot = velcroPivotAsync.await() }
-        t { lift = liftAsync.await() }
-        t { climber = climberAsync.await() }
-        t { limelight = limelightAsync.await() }
-        t { electrical = electricalAsync.await() }
+//        t { handoffRollers = handoffRollersAsync.await() }
+//        t { velcroPivot = velcroPivotAsync.await() }
+//        t { lift = liftAsync.await() }
+//        t { climber = climberAsync.await() }
+//        t { limelight = limelightAsync.await() }
+//        t { electrical = electricalAsync.await() }
     }
 
     fun sequentialInit() {
