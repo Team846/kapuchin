@@ -10,17 +10,17 @@ class HandoffPivotConversions(val hardware: HandoffPivotHardware) : Named by Nam
     private val conversions by pref {
         val min by pref {
             val real by pref(0, Degree)
-            val native by pref(0)
+            val native by pref(26)
             ({ real to native })
         }
 
         val max by pref {
             val real by pref(90, Degree)
-            val native by pref(1023)
+            val native by pref(194)
             ({ real to native })
         }
 
-        val zeroOffset by pref(30, Degree)
+        val zeroOffset by pref(13.928, Degree)
 
         ({
             val nfu = max.second - min.second

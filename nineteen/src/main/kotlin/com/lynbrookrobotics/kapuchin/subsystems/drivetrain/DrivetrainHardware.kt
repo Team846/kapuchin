@@ -11,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort
@@ -126,9 +127,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     init {
         uiBaselineTicker.runOnTick { time ->
-            setOf(position, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
+            setOf(leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
                 it.optimizedRead(time, 1.Second)
             }
+        }
+
+        EventLoop.runOnTick { time ->
+            position.optimizedRead(time, period)
         }
     }
 }

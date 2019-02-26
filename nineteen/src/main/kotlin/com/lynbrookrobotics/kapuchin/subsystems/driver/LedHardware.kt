@@ -11,7 +11,7 @@ class LedHardware : RobotHardware<LedHardware>() {
     override val priority: Priority = Priority.Low
     override val name: String = "LED Lights"
 
-    val canifierDeviceID by pref(50)
+    val canifierDeviceID by pref(60)
     val canifier by hardw { CANifier(canifierDeviceID) }
 
     val channels by pref {

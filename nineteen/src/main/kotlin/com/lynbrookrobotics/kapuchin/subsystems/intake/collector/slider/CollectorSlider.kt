@@ -52,7 +52,7 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     val startupFrictionCompensation by pref(0.5, Volt)
 
     val escCanId by pref(20)
-    val limitSwitchChannel by pref(3)
+    val limitSwitchChannel by pref(5)
 
     val esc by hardw { CANSparkMax(escCanId, MotorType.kBrushless) }.configure {
         it.setSmartCurrentLimit(currentLimit.Ampere.toInt())

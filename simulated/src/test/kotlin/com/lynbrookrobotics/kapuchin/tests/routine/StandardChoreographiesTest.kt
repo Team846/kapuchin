@@ -7,8 +7,10 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.math.min
@@ -123,39 +125,43 @@ class StandardChoreographiesTest {
         }
     }
 
-    @Test(timeout = 4 * 1000)
+    @Test(timeout = 5 * 1000)
     fun `whenever starts only when its predicate is true`() = threadDumpOnFailure {
         runBlocking {
-            val comps = List(10) { ChoreographyTestC(it) }
-            suspend fun doSomething() = runAll(
-                    *comps.mapIndexed { i, c ->
-                        choreography { c.countTo(i) }
-                    }.toTypedArray()
-            )
+            var didSomething: Boolean
+            fun doSomething() {
+                didSomething = true
+            }
 
             var pred = false
-            scope.launch {
-                whenever({ pred }, { doSomething() })
-                comps.forEachIndexed { i, c -> c.checkCount(i, 0) }
-                pred = true
-                delay(1.Second)
-                comps.forEachIndexed { i, c -> c.checkCount(i, i) }
+            var j: Job? = null
+
+            val originalRunning = EventLoop.jobsToRun.size
+            try {
+                j = scope.launch {
+                    whenever({ pred }) {
+                        doSomething()
+                    }
+                }
+                repeat(3) {
+                    didSomething = false
+                    pred = true
+                    EventLoop.tick(currentTime)
+                    while (!didSomething) {
+                        delay(1)
+                        EventLoop.tick(currentTime)
+                    }
+
+                    while (didSomething) {
+                        didSomething = false
+                        pred = false
+                        EventLoop.tick(currentTime)
+                    }
+                }
+            } finally {
+                j?.cancel()
             }
-
-            comps.forEach { it.out.clear() }
-
-            val last = comps.size - 1
-            val first = 3
-
-            val j = launch {
-                runWhile({ comps[last].out.count { it == "countTo($last)" } < first }, { doSomething() })
-            }
-
-            while (j.isActive) {
-                EventLoop.tick(currentTime)
-                delay(1.milli(Second))
-            }
-            comps.forEachIndexed { i, c -> c.checkCount(i, min(first, i), 1) }
+            while (originalRunning != EventLoop.jobsToRun.size) EventLoop.tick(currentTime)
         }
     }
 }
