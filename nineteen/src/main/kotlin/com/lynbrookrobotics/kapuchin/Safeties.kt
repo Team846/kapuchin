@@ -81,6 +81,16 @@ object Safeties : Named by Named("safeties") {
 
     val log by pref(true)
 
+    fun init() {
+//        LiftState.init()
+//        HandoffPivotState.init()
+//        CollectorSliderState.init()
+//        CollectorPivotState.init()
+//        HookSliderState.init()
+        initIllegalStates()
+    }
+
+
     private fun permuteState(
             lift: LiftState? = null,
             handoffPivot: HandoffPivotState? = null,
@@ -107,16 +117,7 @@ object Safeties : Named by Named("safeties") {
         }
     }
 
-    val illegalStates = setOf(
-            permuteState(lift = LiftState.Low, collectorPivot = CollectorPivotState.Down, hookSlider = HookSliderState.Out),
-            permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.WideLeft),
-            permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.WideRight),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowLeft),
-            permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowRight),
-            permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowLeft, collectorPivot = CollectorPivotState.Down),
-            permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowRight, collectorPivot = CollectorPivotState.Down),
-            permuteState(lift = LiftState.Mid, handoffPivot = HandoffPivotState.Vertical)
-    ).flatMap { it.asIterable() }
+    lateinit var illegalStates: List<RobotState>
 
     fun currentState(
             lift: LiftState? = LiftState(),
@@ -125,4 +126,17 @@ object Safeties : Named by Named("safeties") {
             collectorPivot: CollectorPivotState? = CollectorPivotState(),
             hookSlider: HookSliderState? = HookSliderState()
     ) = permuteState(lift, handoffPivot, collectorSlider, collectorPivot, hookSlider)
+
+     private fun initIllegalStates() {
+        illegalStates = setOf(
+                permuteState(lift = LiftState.Low, collectorPivot = CollectorPivotState.Down, hookSlider = HookSliderState.Out),
+                permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.WideLeft),
+                permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.WideRight),
+                permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowLeft),
+                permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowRight),
+                permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowLeft, collectorPivot = CollectorPivotState.Down),
+                permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowRight, collectorPivot = CollectorPivotState.Down),
+                permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Vertical)
+        ).flatMap { it.asIterable() }
+    }
 }

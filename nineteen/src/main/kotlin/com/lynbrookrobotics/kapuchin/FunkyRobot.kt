@@ -22,7 +22,12 @@ class FunkyRobot : RobotBase() {
         val classloading = loadClasses()
 
         println("Initializing hardware...")
+
+        Safeties.init()
+
         Subsystems.concurrentInit()
+
+
 
         println("Trimming preferences...")
         trim(Preferences2.getInstance().table)

@@ -73,11 +73,11 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc)
 
-    private val ticksToSerialPort by pref("kUSB1")
-    private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
+//    private val ticksToSerialPort by pref("kUSB1")
+//    private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
 
     val position = sensor {
-        ticksToSerial().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
+//        ticksToSerial().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
         conversions.matrixTracking.run { Position(x, y, bearing) } stampWith it
     }
             .with(graph("X Location", Foot)) { it.x }
