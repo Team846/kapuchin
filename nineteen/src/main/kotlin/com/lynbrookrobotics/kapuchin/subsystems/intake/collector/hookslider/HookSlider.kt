@@ -20,7 +20,8 @@ class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderCo
 
         when {
             !legal.any() -> log(Warning) { "No legal states found" }
-            value in legal -> solenoid.set(value.output)
+            value == HookSliderState.Undetermined -> log(Warning) { "Illegal hook slider state inputted" }
+            value in legal || HookSliderState.Undetermined in legal -> solenoid.set(value.output)
             else -> solenoid.set(legal.first().output)
         }
     }

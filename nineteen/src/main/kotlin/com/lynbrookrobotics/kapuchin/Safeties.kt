@@ -14,6 +14,9 @@ import kotlin.math.pow
 inline class RobotState(val code: Int) {
 
     companion object {
+
+        //9 always represents `Undetermined`
+
         operator fun invoke(lift: LiftState,
                             handoffPivot: HandoffPivotState,
                             collectorSlider: CollectorSliderState,
@@ -27,52 +30,52 @@ inline class RobotState(val code: Int) {
         }
         fun LiftState.encode(): Int {
             val index = LiftState.states.indexOf(this)
-            return if (index >= 0) index * 10.0.pow(LiftState.pos - 1).toInt() else throw Throwable("Unknown lift state encountered")
+            return (if (index >= 0) index else 9) * 10.0.pow(LiftState.pos - 1).toInt()
         }
 
         fun HandoffPivotState.encode(): Int {
             val index = HandoffPivotState.states.indexOf(this)
-            return if (index >= 0) index * 10.0.pow(HandoffPivotState.pos - 1).toInt() else throw Throwable("Unknown handoff pivotstate encountered")
+            return (if (index >= 0) index else 9) * 10.0.pow(HandoffPivotState.pos - 1).toInt()
         }
 
         fun CollectorSliderState.encode(): Int {
             val index = CollectorSliderState.states.indexOf(this)
-            return if (index >= 0) index * 10.0.pow(CollectorSliderState.pos - 1).toInt() else throw Throwable("Unknown collector slider state encountered")
+            return (if (index >= 0) index else 9) * 10.0.pow(CollectorSliderState.pos - 1).toInt()
         }
 
         fun CollectorPivotState.encode(): Int {
             val index = CollectorPivotState.states.indexOf(this)
-            return if (index >= 0) index * 10.0.pow(CollectorPivotState.pos - 1).toInt() else throw Throwable("Unknown collector pivot state encountered")
+            return (if (index >= 0) index else 9) * 10.0.pow(CollectorPivotState.pos - 1).toInt()
         }
 
         fun HookSliderState.encode(): Int {
             val index = HookSliderState.states.indexOf(this)
-            return if (index >= 0) index * 10.0.pow(HookSliderState.pos - 1).toInt() else throw Throwable("Unknown hook slider state encountered")
+            return (if (index >= 0) index else 9) * 10.0.pow(HookSliderState.pos - 1).toInt()
         }
 
         fun LiftState.Companion.decode(state: RobotState): LiftState? {
             val index = state.code / (10.0.pow(LiftState.pos).toInt()) % 10
-            return LiftState.states[index]
+            return LiftState.Undetermined.takeIf { it -> index == 9 } ?: LiftState.states[index]
         }
 
         fun HandoffPivotState.Companion.decode(state: RobotState): HandoffPivotState? {
             val index = state.code / (10.0.pow(HandoffPivotState.pos).toInt()) % 10
-            return HandoffPivotState.states[index]
+            return HandoffPivotState.Undetermined.takeIf { it -> index == 9 } ?:HandoffPivotState.states[index]
         }
 
         fun CollectorSliderState.Companion.decode(state: RobotState): CollectorSliderState? {
             val index = state.code / (10.0.pow(CollectorSliderState.pos).toInt()) % 10
-            return CollectorSliderState.states[index]
+            return CollectorSliderState.Undetermined.takeIf { it -> index == 9 } ?:CollectorSliderState.states[index]
         }
 
         fun CollectorPivotState.Companion.decode(state: RobotState): CollectorPivotState? {
             val index = state.code / (10.0.pow(CollectorPivotState.pos).toInt()) % 10
-            return CollectorPivotState.states[index]
+            return CollectorPivotState.Undetermined.takeIf { it -> index == 9 } ?:CollectorPivotState.states[index]
         }
 
         fun HookSliderState.Companion.decode(state: RobotState): HookSliderState? {
             val index = state.code / (10.0.pow(CollectorPivotState.pos).toInt()) % 10
-            return HookSliderState.states[index]
+            return HookSliderState.Undetermined.takeIf { it -> index == 9 } ?: HookSliderState.states[index]
         }
     }
 }

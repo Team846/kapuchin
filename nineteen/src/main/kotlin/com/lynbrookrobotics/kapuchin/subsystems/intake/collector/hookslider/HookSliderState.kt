@@ -10,25 +10,26 @@ import kotlin.math.pow
 enum class HookSliderState(val output: Boolean) {
 
     In(false),
-    Out(true);
+    Out(true),
+    Undetermined(true);
 
     companion object {
         val states = arrayOf(HookSliderState.In, HookSliderState.Out)
         val pos = 5
-        operator fun invoke() = Subsystems.hookSlider.hardware.solenoid.get().let {
-            when (it) {
-                HookSliderState.In.output -> HookSliderState.In.also { println("HookSliderState: In") }
-                HookSliderState.Out.output -> HookSliderState.Out.also { println("HookSliderState: Out") }
-                else -> null.also { println("HookSliderState: Unknown") }
+        operator fun invoke() = Subsystems.instance.hookSlider?.hardware?.solenoid?.get().let {
+            if (it == null) {
+                HookSliderState.Undetermined
+            } else {
+                when (it) {
+                    HookSliderState.In.output -> HookSliderState.In.also { println("HookSliderState: In") }
+                    HookSliderState.Out.output -> HookSliderState.Out.also { println("HookSliderState: Out") }
+                    else -> HookSliderState.Undetermined
+                }
             }
         }
 
-        fun legalRanges() = if (Subsystems.finishedInitialization) {
-            Safeties.currentState(hookSlider = null)
+        fun legalRanges() = Safeties.currentState(hookSlider = HookSliderState().takeIf { it == Undetermined })
                     .filter { it !in Safeties.illegalStates }
                     .mapNotNull { decode(it) }
-        } else {
-            sequence { }
-        }
     }
 }

@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
@@ -27,123 +26,36 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
-object Subsystems : Named by Named("subsystems") {
+class Subsystems(val drivetrain: DrivetrainComponent?,
 
-    var finishedInitialization = false
+                 val teleop: TeleopComponent?,
+                 val driver: DriverHardware?,
+                 val operator: OperatorHardware?,
+                 val leds: LedHardware?,
 
-    val pneumaticTicker = ticker(Low, 100.milli(Second), "Pneumatic System Ticker")
-    val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
-
-    lateinit var drivetrain: DrivetrainComponent private set
-
-    lateinit var teleop: TeleopComponent private set
-    lateinit var driver: DriverHardware private set
-    lateinit var operator: OperatorHardware private set
-    lateinit var leds: LedHardware private set
-
-    lateinit var lineScanner: LineScannerHardware private set
-    lateinit var collectorPivot: CollectorPivotComponent private set
-    lateinit var collectorRollers: CollectorRollersComponent private set
-    lateinit var collectorSlider: CollectorSliderComponent private set
-    lateinit var hook: HookComponent private set
-    lateinit var hookSlider: HookSliderComponent private set
-    lateinit var handoffPivot: HandoffPivotComponent private set
-    lateinit var handoffRollers: HandoffRollersComponent private set
-    lateinit var velcroPivot: VelcroPivotComponent private set
-    lateinit var lift: LiftComponent private set
-    lateinit var climber: ClimberComponent private set
-    lateinit var limelight: LimelightHardware private set
-    lateinit var electrical: ElectricalSystemHardware private set
-
-    fun concurrentInit() = runBlocking {
-        val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
-
-        val driverAsync = async { DriverHardware() }
-        val operatorAsync = async { OperatorHardware() }
-        val ledsAsync = async { LedHardware() }
-        val teleopAsync = async {
-            TeleopComponent(TeleopHardware(
-                    driverAsync.await(), operatorAsync.await(), ledsAsync.await()
-            ))
-        }
-
-        val lineScannerAsync = async { LineScannerHardware() }
-        val collectorPivotAsync = async { CollectorPivotComponent(CollectorPivotHardware()) }
-        val collectorRollersAsync = async { CollectorRollersComponent(CollectorRollersHardware()) }
-        val collectorSliderAsync = async { CollectorSliderComponent(CollectorSliderHardware()) }
-        val hookAsync = async { HookComponent(HookHardware()) }
-        val hookSliderAsync = async { HookSliderComponent(HookSliderHardware()) }
-        val handoffPivotAsync = async { HandoffPivotComponent(HandoffPivotHardware()) }
-        val handoffRollersAsync = async { HandoffRollersComponent(HandoffRollersHardware()) }
-        val velcroPivotAsync = async { VelcroPivotComponent(VelcroPivotHardware()) }
-        val liftAsync = async { LiftComponent(LiftHardware()) }
-        val climberAsync = async { ClimberComponent(ClimberHardware()) }
-        val limelightAsync = async { LimelightHardware() }
-        val electricalAsync = async { ElectricalSystemHardware() }
-
-        suspend fun t(f: suspend () -> Unit) = try {
-            f()
-        } catch (t: Throwable) {
-            if (crashOnFailure) throw t else Unit
-        }
-
-        t { drivetrain = drivetrainAsync.await() }
-
-        t { teleop = teleopAsync.await() }
-        t { driver = driverAsync.await() }
-        t { operator = operatorAsync.await() }
-        t { leds = ledsAsync.await() }
-
-        t { lineScanner = lineScannerAsync.await() }
-        t { collectorPivot = collectorPivotAsync.await() }
-        t { collectorRollers = collectorRollersAsync.await() }
-        t { collectorSlider = collectorSliderAsync.await() }
-        t { hook = hookAsync.await() }
-        t { hookSlider = hookSliderAsync.await() }
-        t { handoffPivot = handoffPivotAsync.await() }
-        t { handoffRollers = handoffRollersAsync.await() }
-        t { velcroPivot = velcroPivotAsync.await() }
-        t { lift = liftAsync.await() }
-        t { climber = climberAsync.await() }
-        t { limelight = limelightAsync.await() }
-        t { electrical = electricalAsync.await() }
-        finishedInitialization = true
-    }
-
-    fun sequentialInit() {
-        fun t(f: () -> Unit) = try {
-            f()
-        } catch (t: Throwable) {
-            if (crashOnFailure) throw t else Unit
-        }
-
-        t { drivetrain = DrivetrainComponent(DrivetrainHardware()) }
-
-        t { driver = DriverHardware() }
-        t { operator = OperatorHardware() }
-        t { leds = LedHardware() }
-        t { teleop = TeleopComponent(TeleopHardware(driver, operator, leds)) }
-
-        t { lineScanner = LineScannerHardware() }
-        t { collectorPivot = CollectorPivotComponent(CollectorPivotHardware()) }
-        t { collectorRollers = CollectorRollersComponent(CollectorRollersHardware()) }
-        t { collectorSlider = CollectorSliderComponent(CollectorSliderHardware()) }
-        t { hook = HookComponent(HookHardware()) }
-        t { hookSlider = HookSliderComponent(HookSliderHardware()) }
-        t { handoffPivot = HandoffPivotComponent(HandoffPivotHardware()) }
-        t { handoffRollers = HandoffRollersComponent(HandoffRollersHardware()) }
-        t { velcroPivot = VelcroPivotComponent(VelcroPivotHardware()) }
-        t { lift = LiftComponent(LiftHardware()) }
-        t { climber = ClimberComponent(ClimberHardware()) }
-        t { limelight = LimelightHardware() }
-        t { electrical = ElectricalSystemHardware() }
-
-        finishedInitialization = true
-    }
+                 val lineScanner: LineScannerHardware?,
+                 val collectorPivot: CollectorPivotComponent?,
+                 val collectorRollers: CollectorRollersComponent?,
+                 val collectorSlider: CollectorSliderComponent?,
+                 val hook: HookComponent?,
+                 val hookSlider: HookSliderComponent?,
+                 val handoffPivot: HandoffPivotComponent?,
+                 val handoffRollers: HandoffRollersComponent?,
+                 val velcroPivot: VelcroPivotComponent?,
+                 val lift: LiftComponent?,
+                 val climber: ClimberComponent?,
+                 val limelight: LimelightHardware?,
+                 val electrical: ElectricalSystemHardware?
+) : Named by Named("subsystems") {
 
     suspend fun teleop() {
         runAll(
-                { drivetrainTeleop(drivetrain, driver, limelight) },
+                {
+                    if (drivetrain != null && driver != null && limelight != null) {
+                        drivetrainTeleop(drivetrain, driver, limelight)
+                    }
+                },
+
                 {
                     HAL.observeUserProgramTeleop()
                     System.gc()
@@ -153,68 +65,145 @@ object Subsystems : Named by Named("subsystems") {
 
     suspend fun warmup() {
         runAll(
-                { drivetrain.warmup() }
+                { drivetrain?.warmup() }
         )
     }
 
     val performance by pref(40, Percent)
     suspend fun followWaypoints() {
-//        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 5.Foot), 2.Inch)
-//        delay(1.Second)
-//        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 5.Foot), 2.Inch)
-//        delay(1.Second)
-//        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(5.Foot, 0.Foot), 2.Inch)
-//        delay(1.Second)
-//        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 0.Foot), 2.Inch)
-//        delay(1.Second)
 
-        val waypts = File("/tmp/journal.tsv").useLines { lns -> lns
-                .drop(1)
-                .map { it.split('\t') }
-                .map { it.map { tkn -> tkn.trim() } }
-                .map { Waypt(it[1].toDouble().Foot, it[2].toDouble().Foot) stampWith it[0].toDouble().Second }
-                .toList()
+        if (drivetrain != null) {
+
+            val waypts = File("/tmp/journal.tsv").useLines { lns ->
+                lns
+                        .drop(1)
+                        .map { it.split('\t') }
+                        .map { it.map { tkn -> tkn.trim() } }
+                        .map { Waypt(it[1].toDouble().Foot, it[2].toDouble().Foot) stampWith it[0].toDouble().Second }
+                        .toList()
+            }
+
+            val traj = pathToTrajectory(
+                    waypts.map { (_, pt) -> pt },
+                    performance,
+                    drivetrain.maxSpeed,
+                    drivetrain.maxOmega
+            )
+
+            drivetrain.readJournal(2.Foot, 8.Inch, 5.FootPerSecondSquared, true, traj)
+
+            freeze()
         }
-
-        val traj = pathToTrajectory(
-                waypts.map { (_, pt) -> pt },
-                performance,
-                drivetrain.maxSpeed,
-                drivetrain.maxOmega
-        )
-
-        drivetrain.readJournal(2.Foot, 8.Inch, 5.FootPerSecondSquared, true, traj)
-
-        freeze()
     }
 
     suspend fun limelightAlign() {
-        limelightAlign(drivetrain, limelight)
+        if (drivetrain != null && limelight != null) {
+            limelightAlign(drivetrain, limelight)
+        }
     }
 
-    suspend fun backAndForthAuto() {
-        //        while (true) {
-//            withTimeout(1.Second) {
-//                drivetrain.driveStraight(
-//                        8.Foot, 0.Degree,
-//                        1.Inch, 2.Degree,
-//                        2.FootPerSecondSquared,
-//                        3.FootPerSecond
-//                )
-//            }
-//
-//            delay(1.Second)
-//
-//            withTimeout(1.Second) {
-//                drivetrain.driveStraight(
-//                        -8.Foot, 0.Degree,
-//                        1.Inch, 2.Degree,
-//                        2.FootPerSecondSquared,
-//                        3.FootPerSecond
-//                )
-//            }
-//
-//            delay(1.Second)
-//        }
+    companion object : Named by Named("subsystems") {
+
+        lateinit var instance: Subsystems
+
+        val pneumaticTicker = ticker(Low, 100.milli(Second), "Pneumatic System Ticker")
+        val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
+
+        fun concurrentInit() = runBlocking {
+            val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
+
+            val driverAsync = async { DriverHardware() }
+            val operatorAsync = async { OperatorHardware() }
+            val ledsAsync = async { LedHardware() }
+            val teleopAsync = async {
+                TeleopComponent(TeleopHardware(
+                        driverAsync.await(), operatorAsync.await(), ledsAsync.await()
+                ))
+            }
+
+            val lineScannerAsync = async { LineScannerHardware() }
+            val collectorPivotAsync = async { CollectorPivotComponent(CollectorPivotHardware()) }
+            val collectorRollersAsync = async { CollectorRollersComponent(CollectorRollersHardware()) }
+            val collectorSliderAsync = async { CollectorSliderComponent(CollectorSliderHardware()) }
+            val hookAsync = async { HookComponent(HookHardware()) }
+            val hookSliderAsync = async { HookSliderComponent(HookSliderHardware()) }
+            val handoffPivotAsync = async { HandoffPivotComponent(HandoffPivotHardware()) }
+            val handoffRollersAsync = async { HandoffRollersComponent(HandoffRollersHardware()) }
+            val velcroPivotAsync = async { VelcroPivotComponent(VelcroPivotHardware()) }
+            val liftAsync = async { LiftComponent(LiftHardware()) }
+            val climberAsync = async { ClimberComponent(ClimberHardware()) }
+            val limelightAsync = async { LimelightHardware() }
+            val electricalAsync = async { ElectricalSystemHardware() }
+
+            suspend fun <T> t(f: suspend () -> T): T? = try {
+                f()
+            } catch (t: Throwable) {
+                if (crashOnFailure) throw t else null
+            }
+
+
+            instance = Subsystems(
+                    t { drivetrainAsync.await() },
+
+                    t { teleopAsync.await() },
+                    t { driverAsync.await() },
+                    t { operatorAsync.await() },
+                    t { ledsAsync.await() },
+
+                    t { lineScannerAsync.await() },
+                    t { collectorPivotAsync.await() },
+                    t { collectorRollersAsync.await() },
+                    t { collectorSliderAsync.await() },
+                    t { hookAsync.await() },
+                    t { hookSliderAsync.await() },
+                    t { handoffPivotAsync.await() },
+                    t { handoffRollersAsync.await() },
+                    t { velcroPivotAsync.await() },
+                    t { liftAsync.await() },
+                    t { climberAsync.await() },
+                    t { limelightAsync.await() },
+                    t { electricalAsync.await() }
+            )
+        }
+
+        fun sequentialInit() {
+            fun <T> t(f: () -> T): T? = try {
+                f()
+            } catch (t: Throwable) {
+                if (crashOnFailure) throw t else null
+            }
+
+            val driver = t { DriverHardware() }
+            val operator = t { OperatorHardware() }
+            val leds = t { LedHardware() }
+            val teleop = t {
+                if (driver != null && operator != null && leds != null) {
+                    TeleopComponent(TeleopHardware(driver, operator, leds))
+                } else {
+                    null
+                }
+            }
+
+            instance = Subsystems(
+                    t { DrivetrainComponent(DrivetrainHardware()) },
+                    teleop,
+                    driver,
+                    operator,
+                    leds,
+                    t { LineScannerHardware() },
+                    t { CollectorPivotComponent(CollectorPivotHardware()) },
+                    t { CollectorRollersComponent(CollectorRollersHardware()) },
+                    t { CollectorSliderComponent(CollectorSliderHardware()) },
+                    t { HookComponent(HookHardware()) },
+                    t { HookSliderComponent(HookSliderHardware()) },
+                    t { HandoffPivotComponent(HandoffPivotHardware()) },
+                    t { HandoffRollersComponent(HandoffRollersHardware()) },
+                    t { VelcroPivotComponent(VelcroPivotHardware()) },
+                    t { LiftComponent(LiftHardware()) },
+                    t { ClimberComponent(ClimberHardware()) },
+                    t { LimelightHardware() },
+                    t { ElectricalSystemHardware() }
+            )
+        }
     }
 }

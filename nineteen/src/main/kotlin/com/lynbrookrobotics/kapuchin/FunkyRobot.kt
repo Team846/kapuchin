@@ -1,5 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -26,6 +28,8 @@ class FunkyRobot : RobotBase() {
         Safeties.init()
 
         Subsystems.concurrentInit()
+
+        val subsystems = Subsystems.instance
 
 
 
@@ -56,18 +60,26 @@ class FunkyRobot : RobotBase() {
                 System.gc()
 
                 currentJob = scope.launch {
-                    runWhile({ isEnabled && isOperatorControl }, { Subsystems.teleop() })
+                    runWhile({ isEnabled && isOperatorControl }, { subsystems.teleop() })
                     System.gc()
 
-                    runWhile({ isEnabled && isAutonomous }, { Subsystems.followWaypoints() })
+                    runWhile({ isEnabled && isAutonomous }, { subsystems.followWaypoints() })
                     System.gc()
 
-                    runWhile({ isDisabled && !isTest }, { Subsystems.warmup() })
+                    runWhile({ isDisabled && !isTest }, { subsystems.warmup() })
                     System.gc()
 
                     runWhile({ isTest }, {
-                        launch { journal(Subsystems.drivetrain.hardware) }
-                        Subsystems.teleop()
+                        launch {
+                            if (subsystems.drivetrain != null) {
+                                journal(subsystems.drivetrain.hardware)
+                            } else {
+                                subsystems.log(Error) {
+                                    "Drivetrain not initialized"
+                                }
+                            }
+                        }
+                        subsystems.teleop()
                     })
                     System.gc()
                 }
