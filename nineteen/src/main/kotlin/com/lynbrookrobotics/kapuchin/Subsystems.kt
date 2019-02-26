@@ -29,6 +29,8 @@ import java.io.File
 
 object Subsystems : Named by Named("subsystems") {
 
+    var finishedInitialization = false
+
     val pneumaticTicker = ticker(Low, 100.milli(Second), "Pneumatic System Ticker")
     val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
@@ -105,6 +107,7 @@ object Subsystems : Named by Named("subsystems") {
         t { climber = climberAsync.await() }
         t { limelight = limelightAsync.await() }
         t { electrical = electricalAsync.await() }
+        finishedInitialization = true
     }
 
     fun sequentialInit() {
@@ -134,6 +137,8 @@ object Subsystems : Named by Named("subsystems") {
         t { climber = ClimberComponent(ClimberHardware()) }
         t { limelight = LimelightHardware() }
         t { electrical = ElectricalSystemHardware() }
+
+        finishedInitialization = true
     }
 
     suspend fun teleop() {

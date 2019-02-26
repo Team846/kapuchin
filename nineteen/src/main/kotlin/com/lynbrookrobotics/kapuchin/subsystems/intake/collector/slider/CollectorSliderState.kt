@@ -34,12 +34,12 @@ enum class CollectorSliderState(val rng: ClosedRange<Length>) {
             }
         }
 
-        fun legalRanges() = Safeties.currentState(collectorSlider = null)
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it)?.rng }
-
-        fun init() {
-            CollectorSliderState.Companion
+        fun legalRanges() = if (Subsystems.finishedInitialization) {
+            Safeties.currentState(collectorSlider = null)
+                    .filter { it !in Safeties.illegalStates }
+                    .mapNotNull { decode(it)?.rng }
+        } else {
+            sequence { }
         }
     }
 }

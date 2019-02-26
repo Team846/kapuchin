@@ -20,9 +20,13 @@ enum class CollectorPivotState(val output: Boolean) {
             }
         }
 
-        fun legalRanges() = Safeties.currentState(collectorPivot = null)
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it) }
+        fun legalRanges() = if (Subsystems.finishedInitialization) {
+            Safeties.currentState(collectorPivot = null)
+                    .filter { it !in Safeties.illegalStates }
+                    .mapNotNull { decode(it) }
+        } else {
+            sequence { }
+        }
 
         fun init() {
             CollectorPivotState.Companion

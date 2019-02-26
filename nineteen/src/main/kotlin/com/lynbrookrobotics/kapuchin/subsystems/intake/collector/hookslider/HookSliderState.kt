@@ -23,12 +23,12 @@ enum class HookSliderState(val output: Boolean) {
             }
         }
 
-        fun legalRanges() = Safeties.currentState(hookSlider = null)
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it) }
-
-        fun init() {
-            HookSliderState.Companion
+        fun legalRanges() = if (Subsystems.finishedInitialization) {
+            Safeties.currentState(hookSlider = null)
+                    .filter { it !in Safeties.illegalStates }
+                    .mapNotNull { decode(it) }
+        } else {
+            sequence { }
         }
     }
 }

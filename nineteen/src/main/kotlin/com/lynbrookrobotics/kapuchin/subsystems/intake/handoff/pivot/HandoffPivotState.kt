@@ -23,12 +23,13 @@ enum class HandoffPivotState(val rng: ClosedRange<Angle>) {
                 else -> null.also { println("HandoffPivotState: Unknown") }
             }
         }
-        fun legalRanges() = Safeties.currentState(handoffPivot = null)
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it)?.rng }
 
-        fun init() {
-            HandoffPivotState.Companion
+        fun legalRanges() = if (Subsystems.finishedInitialization) {
+            Safeties.currentState(handoffPivot = null)
+                    .filter { it !in Safeties.illegalStates }
+                    .mapNotNull { decode(it)?.rng }
+        } else {
+            sequence { }
         }
     }
 }

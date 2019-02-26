@@ -23,12 +23,12 @@ enum class LiftState(val rng: ClosedRange<Length>) {
             }
         }
 
-        fun legalRanges() = Safeties.currentState(lift = null)
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it)?.rng }
-
-        fun init() {
-            LiftState.Companion
+        fun legalRanges() = if (Subsystems.finishedInitialization) {
+            Safeties.currentState(lift = null)
+                    .filter { it !in Safeties.illegalStates }
+                    .mapNotNull { decode(it)?.rng }
+        } else {
+            sequence { }
         }
     }
 }
