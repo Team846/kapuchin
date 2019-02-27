@@ -82,6 +82,14 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     }
 }
 
+suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open loop") {
+    controller {
+        TwoSided(
+                PercentOutput(power)
+        )
+    }
+}
+
 suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("Point with line scanner") {
     val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
     val uni = UnicycleDrive(this@pointWithLineScanner, this@startRoutine)

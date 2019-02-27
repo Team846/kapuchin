@@ -36,7 +36,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
                 else -> esc.set(0.0)
             }
         } else if (Safeties.log) {
-            log(Warning) { "No legal states found" }
+            //log(Warning) { "No legal states found" }
         }
     }
 }

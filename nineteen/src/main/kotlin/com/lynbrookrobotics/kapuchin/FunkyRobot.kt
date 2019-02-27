@@ -31,6 +31,8 @@ class FunkyRobot : RobotBase() {
 
         val subsystems = Subsystems.instance
 
+        Subsystems.uiBaselineTicker.runOnTick { Safeties.currentState().forEach { println(it) } }
+
 
 
         println("Trimming preferences...")
@@ -54,32 +56,34 @@ class FunkyRobot : RobotBase() {
             m_ds.waitForData(eventLoopPeriod.Second)
 
             val eventLoopTime = measureTimeMillis { EventLoop.tick(currentTime) }.milli(Second)
-            if (eventLoopTime > eventLoopPeriod * 2) println("Overran event loop")
+            if (eventLoopTime > eventLoopPeriod * 5) println("Overran event loop by ${eventLoopTime - eventLoopPeriod}")
 
             if (!currentJob.isActive) {
                 System.gc()
 
                 currentJob = scope.launch {
-                    runWhile({ isEnabled && isOperatorControl }, { subsystems.teleop() })
+                    runWhile({ isEnabled && isOperatorControl }, { subsystems?.teleop() })
                     System.gc()
 
-                    runWhile({ isEnabled && isAutonomous }, { subsystems.followWaypoints() })
+                    runWhile({ isEnabled && isAutonomous }, {
+                        subsystems?.drivetrain?.openLoop(30.Percent)
+                    })
                     System.gc()
 
-                    runWhile({ isDisabled && !isTest }, { subsystems.warmup() })
+                    runWhile({ isDisabled && !isTest }, { subsystems?.warmup() })
                     System.gc()
 
                     runWhile({ isTest }, {
                         launch {
-                            if (subsystems.drivetrain != null) {
-                                journal(subsystems.drivetrain.hardware)
+                            if (subsystems?.drivetrain != null) {
+                                journal(subsystems?.drivetrain.hardware)
                             } else {
-                                subsystems.log(Error) {
+                                subsystems?.log(Error) {
                                     "Drivetrain not initialized"
                                 }
                             }
                         }
-                        subsystems.teleop()
+                        subsystems?.teleop()
                     })
                     System.gc()
                 }

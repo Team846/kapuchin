@@ -7,24 +7,28 @@ import info.kunalsheth.units.generated.*
 
 enum class HandoffPivotState(val rng: ClosedRange<Angle>) {
 
-    Vertical(70.Degree..90.Degree),
-    High(30.Degree..0.Degree),
-    Mid(60.Degree..30.Degree),
-    Low(60.Degree..70.Degree),
-    Undetermined(0.Degree..70.Degree);
+    Vertical(45.Degree..90.Degree),
+    High(40.Degree..45.Degree),
+    Mid(30.Degree..40.Degree),
+    Low(-5.Degree..30.Degree),
+    Undetermined(-5.Degree..90.Degree);
 
     companion object {
         val pos = 2
         val states = arrayOf(HandoffPivotState.High, HandoffPivotState.Mid, HandoffPivotState.Low)
-        operator fun invoke() = Subsystems.instance.handoffPivot?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
-            if (it == null) {
-                HandoffPivotState.Undetermined
-            } else {
+        operator fun invoke() = Subsystems.instance?.let {
+            it.handoffPivot?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
+                if (it == null) {
+                    println("is null")
+                    HandoffPivotState.Undetermined
+                } else {
                     when (it) {
-                        in HandoffPivotState.High.rng -> HandoffPivotState.High.also { println("HandoffPivotState: High") }
-                        in HandoffPivotState.Mid.rng -> HandoffPivotState.Mid.also { println("HandoffPivotState: Mid") }
-                        in HandoffPivotState.Low.rng -> HandoffPivotState.Low.also { println("HandoffPivotState: Low") }
+                        in HandoffPivotState.High.rng -> HandoffPivotState.High
+                        in HandoffPivotState.Mid.rng -> HandoffPivotState.Mid
+                        in HandoffPivotState.Low.rng -> HandoffPivotState.Low
+                        in HandoffPivotState.Vertical.rng -> HandoffPivotState.Vertical
                         else -> HandoffPivotState.Undetermined
+                    }
                 }
             }
         }

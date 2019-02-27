@@ -15,21 +15,24 @@ enum class LiftState(val rng: ClosedRange<Length>) {
     companion object {
         val pos = 1
         val states = arrayOf(LiftState.High, LiftState.Low, LiftState.Bottom)
-        operator fun invoke() = Subsystems.instance.lift?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
-            if (it == null) {
-                LiftState.Undetermined
-            } else {
-                when (it) {
-                    in LiftState.Bottom.rng -> LiftState.Bottom.also { println("LiftState: Bottom") }
-                    in LiftState.Low.rng -> LiftState.Low.also { println("LiftState: Low") }
-                    in LiftState.High.rng -> LiftState.High.also { println("LiftState: High") }
-                    else -> LiftState.Undetermined
+        operator fun invoke() = Subsystems.instance?.let {
+            it.lift?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
+                if (it == null) {
+                    LiftState.Undetermined
+                } else {
+                    when (it) {
+                        in LiftState.Bottom.rng -> LiftState.Bottom
+                        in LiftState.Low.rng -> LiftState.Low
+                        in LiftState.High.rng -> LiftState.High
+                        else -> LiftState.Undetermined
+                    }
                 }
             }
         }
 
         fun legalRanges() = Safeties.currentState(lift = LiftState().takeIf { it == LiftState.Undetermined })
-                    .filter { it !in Safeties.illegalStates }
-                    .mapNotNull { decode(it)?.rng }
+                .filter { it !in Safeties.illegalStates }
+                .mapNotNull { decode(it)?.rng }
     }
 }
+

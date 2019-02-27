@@ -21,7 +21,7 @@ class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<Coll
         val legal = CollectorPivotState.legalRanges()
 
         when {
-            !legal.any() -> log(Warning) { "No legal states found" }
+            !legal.any() -> Unit //log(Warning) { "No legal states found" }
             value == CollectorPivotState.Undetermined -> log(Warning) { "Illegal collector pivot state inputted" }
             value in legal || CollectorPivotState.Undetermined in legal -> solenoid.set(value.output)
             else -> solenoid.set(legal.first().output)

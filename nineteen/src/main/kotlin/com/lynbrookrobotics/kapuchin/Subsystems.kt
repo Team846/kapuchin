@@ -51,8 +51,9 @@ class Subsystems(val drivetrain: DrivetrainComponent?,
     suspend fun teleop() {
         runAll(
                 {
-                    if (drivetrain != null && driver != null && limelight != null) {
-                        drivetrainTeleop(drivetrain, driver, limelight)
+                    println("running teleop")
+                    if (drivetrain != null && driver != null) {
+                        drivetrain.teleop(driver)
                     }
                 },
 
@@ -104,7 +105,8 @@ class Subsystems(val drivetrain: DrivetrainComponent?,
 
     companion object : Named by Named("subsystems") {
 
-        lateinit var instance: Subsystems
+        var instance: Subsystems? = null
+            private set
 
         val pneumaticTicker = ticker(Low, 100.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")

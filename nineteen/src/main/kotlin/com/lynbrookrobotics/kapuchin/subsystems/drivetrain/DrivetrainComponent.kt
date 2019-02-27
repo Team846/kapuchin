@@ -55,6 +55,10 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
 
         leftEscErrorGraph(currentTime, leftMasterEsc.closedLoopError.Each)
         rightEscErrorGraph(currentTime, rightMasterEsc.closedLoopError.Each)
+
+        if (Math.random() > 0.9) {
+            println(value)
+        }
     }
 
     init {

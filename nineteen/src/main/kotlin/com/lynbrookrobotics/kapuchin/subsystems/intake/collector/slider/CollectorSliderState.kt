@@ -24,23 +24,27 @@ enum class CollectorSliderState(val rng: ClosedRange<Length>) {
                 CollectorSliderState.NarrowLeft,
                 CollectorSliderState.NarrowRight,
                 CollectorSliderState.Center)
-        operator fun invoke() = Subsystems.instance.collectorSlider?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
-            if (it == null) {
-                CollectorSliderState.Undetermined
-            } else {
-                when (it) {
-                    in CollectorSliderState.WideLeft.rng -> CollectorSliderState.WideLeft.also { println("CollectorSliderState: WideLeft") }
-                    in CollectorSliderState.WideRight.rng -> CollectorSliderState.WideRight.also { println("CollectorSliderState: WideRight") }
-                    in CollectorSliderState.NarrowLeft.rng -> CollectorSliderState.NarrowLeft.also { println("CollectorSliderState: NarrowLeft") }
-                    in CollectorSliderState.NarrowRight.rng -> CollectorSliderState.NarrowRight.also { println("CollectorSliderState: NarrowRight") }
-                    in CollectorSliderState.Center.rng -> CollectorSliderState.Center.also { println("CollectorSliderState: Center") }
-                    else -> CollectorSliderState.Undetermined
-                }
-            }
-        }
+
+     operator fun invoke() = CollectorSliderState.Center
+//        Subsystems.instance?.let {
+//            it.collectorSlider?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
+//                if (it == null) {
+//                    CollectorSliderState.Undetermined
+//                } else {
+//                    when (it) {
+//                        in CollectorSliderState.WideLeft.rng -> CollectorSliderState.WideLeft
+//                        in CollectorSliderState.WideRight.rng -> CollectorSliderState.WideRight
+//                        in CollectorSliderState.NarrowLeft.rng -> CollectorSliderState.NarrowLeft
+//                        in CollectorSliderState.NarrowRight.rng -> CollectorSliderState.NarrowRight
+//                        in CollectorSliderState.Center.rng -> CollectorSliderState.Center
+//                        else -> CollectorSliderState.Undetermined
+//                    }
+//                }
+//            }
+//        }
 
         fun legalRanges() = Safeties.currentState(collectorSlider = CollectorSliderState().takeIf { it == CollectorSliderState.Undetermined })
-                    .filter { it !in Safeties.illegalStates }
-                    .mapNotNull { decode(it)?.rng }
+                .filter { it !in Safeties.illegalStates }
+                .mapNotNull { decode(it)?.rng }
     }
 }
