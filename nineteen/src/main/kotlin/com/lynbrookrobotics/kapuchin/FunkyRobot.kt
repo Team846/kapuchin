@@ -17,13 +17,13 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-fun main(args: Array<String>) = RobotBase.startRobot(::FunkyRobot)
+fun main(args: Array<String>) {
+    println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")
+    RobotBase.startRobot(::FunkyRobot)
+}
+
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-        println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")
-
-        val classloading = loadClasses()
-
         println("Initializing hardware...")
 
         Safeties.init()
@@ -32,15 +32,12 @@ class FunkyRobot : RobotBase() {
         Subsystems.uiBaselineTicker.runOnTick { Safeties.currentState().forEach { println(it) } }
 
         println("Trimming preferences...")
-        trim(Preferences2.getInstance().table)
+        trim()
 
-        runBlocking {
-            println("Loading classes...")
-            withTimeout(.5.Second) { classloading.join() }
-        }
+        runBlocking { withTimeout(.5.Second) { classPreloading.join() } }
 
         scope.launch {
-            while(isActive) {
+            while (isActive) {
                 runWhile({ isEnabled && isOperatorControl }) {
                     subsystems.teleop()
                 }
@@ -75,23 +72,24 @@ class FunkyRobot : RobotBase() {
             if (eventLoopTime > eventLoopPeriod * 5) println("Overran event loop by ${eventLoopTime - eventLoopPeriod}")
         }
     }
+}
 
-    private fun loadClasses() = scope.launch {
-        val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
-        Thread.currentThread()
-                .contextClassLoader
-                .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
-                .bufferedReader()
-                .lineSequence()
-                .filter { it.matches(classNameRegex) }
-                .map { it.replace(classNameRegex, "$1") }
-                .forEach {
-                    launch {
-                        try {
-                            Class.forName(it)
-                        } catch (t: Throwable) {
-                        }
+val classPreloading = scope.launch {
+    println("Loading classes...")
+    val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
+    Thread.currentThread()
+            .contextClassLoader
+            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
+            .bufferedReader()
+            .lineSequence()
+            .filter { it.matches(classNameRegex) }
+            .map { it.replace(classNameRegex, "$1") }
+            .forEach {
+                launch {
+                    try {
+                        Class.forName(it)
+                    } catch (t: Throwable) {
                     }
                 }
-    }
+            }
 }

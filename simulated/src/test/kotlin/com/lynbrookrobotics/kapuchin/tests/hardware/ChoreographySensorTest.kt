@@ -54,7 +54,7 @@ class ChoreographySensorTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `sensors read on event loop are in sync`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors read on event loop are in sync"

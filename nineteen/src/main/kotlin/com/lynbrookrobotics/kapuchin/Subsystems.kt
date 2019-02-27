@@ -51,7 +51,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         System.gc()
         HAL.observeUserProgramTeleop()
         runAll(
-                { drivetrainTeleop(drivetrain, driver, limelight) },
+                { drivetrainTeleop(drivetrain, driver, limelight) }
         )
         System.gc()
     }
