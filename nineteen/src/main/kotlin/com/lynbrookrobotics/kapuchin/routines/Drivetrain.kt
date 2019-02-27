@@ -143,18 +143,18 @@ suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: Li
         } else null
     }
 }
-/*suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limelight: LimelightHardware)=startRoutine("Optimized Limelight Tracking"){
-    val distToNorm = distanceToNormal.optimizedRead(it,it).y
-    val distanceToTarget = targetPosition.optimizedRead(it, it).y
-    val txValue = angleToTarget.optimizedRead(it,it).y
-    val sideAcrossTX = sqrt((distanceToTarget*distanceToTarget)+(distToNorm*distToNorm)-(2*distToNorm*distanceToTarget*cos(tx)))
-    val isosAngle = acos(((distanceToTarget*distanceToTarget)+(sideAcrossTX*sideAcrossTX)-(distToNorm*distToNorm))/(2*distanceToTarget*distToNorm))
-    val turnAngle = isosAngle-txValue
-    controller{
-        TODO()
-    }
-
-}*/
+//suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limelight: LimelightHardware)=startRoutine("Optimized Limelight Tracking"){
+//    val distToNorm by limelight.distanceToNormal.readOnTick.withoutStamps
+//    val distanceToTarget by limelight.targetPosition.readOnTick.withoutStamps
+//    val txValue by limelight.targetAngle.readOnTick.withoutStamps
+//    val sideAcrossTX = sqrt((distanceToTarget*distanceToTarget)+(distToNorm*distToNorm)-(2*distToNorm*distanceToTarget*cos(txValue)))
+//    val isosAngle = acos(((distanceToTarget*distanceToTarget)+(sideAcrossTX*sideAcrossTX)-(distToNorm*distToNorm))/(2*distanceToTarget*distToNorm))
+//    val turnAngle = isosAngle-txValue!!
+//    controller{
+//        TODO()
+//    }
+//
+//}
 suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 
     fun r() = Math.random()
