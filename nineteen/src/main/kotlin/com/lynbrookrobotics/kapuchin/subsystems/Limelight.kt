@@ -15,7 +15,6 @@ import kotlin.math.roundToInt
 class LimelightHardware : RobotHardware<LimelightHardware>() {
     override val name = "Limelight"
     override val priority = Priority.Lowest
-
     private val mounting by pref {
         val x by pref(-4.5, Inch)
         val y by pref(9, Inch)
@@ -38,7 +37,6 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     private fun turn(tx: Angle, distance: Length) = atan(distance * tan(tx) / (distance + mounting.y))
     private fun aspect(thor: Double, tvert: Double) = thor / tvert
     private fun skew(aspect: Double) = acos(aspect.Each / aspect0 minMag 1.Each)
-
     val targetPosition = sensor {
         (if (targetExists()) {
             val tvert = l("tvert")
@@ -59,13 +57,37 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
             .with(graph("Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
             .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
             .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
+    val targetSkew = sensor{
+        (if(targetExists()){
+            val tvert = l("tvert")
+            val tx = l("tx").Degree
+            val thor = l("thor")
 
+            Angle((skew(aspect(thor, tvert))).Degree)
+        }else null) stampWith timeStamp(it)
+    }
     val targetAngle = sensor {
         (if (targetExists()) {
             val tvert = l("tvert")
             val distance = distanceToTarget(tvert)
             val tx = l("tx").Degree
             turn(tx, distance)
+        } else null) stampWith timeStamp(it)
+    }
+    val angleToTarget = sensor{
+        val tx = l("tx").Degree
+        (if (targetExists()){
+            tx
+        }else null)stampWith timeStamp(it)
+    }
+    val distanceToNormal = sensor {
+
+        val tvert = l("tvert")
+        val tx = l("tx").Degree
+        val skew = targetSkew.optimizedRead(it, it).y
+        val distanceTo = distanceToTarget(tvert)
+        (if (targetExists() && skew != null) {
+            ((distanceTo * sin(skew - tx) / sin(skew)) + mounting.y)
         } else null) stampWith timeStamp(it)
     }
 

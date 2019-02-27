@@ -29,7 +29,17 @@ suspend fun drivetrainTeleop(
         }
     }
 }
+suspend fun optimizedLimelightTracking(
+        drivetrain: DrivetrainComponent,
+        limelight: LimelightHardware,
+        driver: DriverHardware
+) = startChoreo("Optimized Limelight Tracking"){
 
+    choreography{
+        TODO()
+    }
+
+}
 suspend fun limelightAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware,
