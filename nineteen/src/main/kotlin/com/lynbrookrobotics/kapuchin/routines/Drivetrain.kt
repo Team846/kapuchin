@@ -155,6 +155,61 @@ suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: Li
 //    }
 //
 //}
+/*
+suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limelight: LimelightHardware) = startRoutine("Turn to Median") {
+    val distToNorm by limelight.distanceToNormal.readOnTick.withoutStamps
+    val targetX by limelight.targetPosition.x.readOnTick.withoutStamps
+    val targetY by limelight.targetPosition.y.readOnTick.withoutStamps
+    val txValue by limelight.angleToTarget.readOnTick.withoutStamps
+    val distanceToTarget = sqrt((targetX * targetX) + (targetY * targetY))
+
+    if (distToNorm != null && txValue != null) {
+        val sideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm) * Dimensionless(distToNorm)) - (2 * distToNorm * distanceToTarget * cos(txValue)))
+        val isosAngle = acos(((1.Foot*distanceToTarget * distanceToTarget) + (1.Foot*sideAcrossTX * sideAcrossTX) - (distToNorm * distToNorm)) / (Dimensionless(2.0) * distanceToTarget * distToNorm))
+        val turnAngle = isosAngle - txValue!!
+    }
+    controller {
+        TODO()
+    }
+
+}
+
+suspend fun DrivetrainComponent.limelightCurveDrive(speed: Velocity, limelight: LimelightHardware) = startRoutine("Curve Drive to Target") {
+    val trackLength = TODO()
+    val targetX by limelight.targetPosition.x.readOnTick.withoutStamps
+    val targetY by limelight.targetPosition.y.readOnTick.withoutStamps
+    val txValue by limelight.angleToTarget.readOnTick.withoutStamps
+    val distanceToTarget = sqrt((targetX * targetX) + (targetY * targetY))
+
+    val aTT by limelight.angleToTarget.readOnTick.withoutStamps
+    val angleToTarget = aTT
+
+    fun toRadians(angle: Angle?) {
+        angle!!.Radian * kotlin.math.PI / 180.0
+    }
+        val aTTinRadians = toRadians(angleToTarget)
+    if(angleToTarget!=null){
+        val innerLength = (distanceToTarget * (aTTinRadians/1.Radian) / sin(angleToTarget)) - trackLength * toRadians(angleToTarget)
+        val outerLength = (distanceToTarget * (aTTinRadians/1.Radian) / sin(angleToTarget)) + trackLength * toRadians(angleToTarget)
+    }
+
+    val outerVelocity = 100.Percent
+    val innerVelocity: DutyCycle = (outerVelocity * innerLength / outerLength)
+    controller {
+        if (targetExists()) {
+
+            val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
+            val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
+
+            TwoSided(
+                    VelocityOutput(velocityGains, nativeL),
+                    VelocityOutput(velocityGains, nativeR)
+            )
+        } else null
+    }
+}
+*/
+
 suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 
     fun r() = Math.random()
