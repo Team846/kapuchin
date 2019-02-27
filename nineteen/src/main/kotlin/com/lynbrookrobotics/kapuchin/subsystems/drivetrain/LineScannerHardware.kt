@@ -40,7 +40,7 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     init {
         uiBaselineTicker.runOnTick { time ->
             setOf(linePosition).forEach {
-                it.optimizedRead(time, 1.Second)
+                it.optimizedRead(time, .5.Second)
             }
         }
     }

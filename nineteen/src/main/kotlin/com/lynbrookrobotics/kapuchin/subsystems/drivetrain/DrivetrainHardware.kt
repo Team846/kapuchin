@@ -42,6 +42,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
+    val leftSensorInversion by pref(false)
+    val rightSensorInversion by pref(false)
 
     val conversions = DrivetrainConversions(this)
 
@@ -49,6 +51,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
+        it.setSensorPhase(leftSensorInversion)
         it.isSafetyEnabled = false
     }
     val leftSlaveEsc by hardw { WPI_VictorSPX(leftSlaveEscId) }.configure {
@@ -63,6 +66,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
+        it.setSensorPhase(rightSensorInversion)
         it.isSafetyEnabled = false
     }
     val rightSlaveEsc by hardw { WPI_VictorSPX(rightSlaveEscId) }.configure {
@@ -128,7 +132,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     init {
         uiBaselineTicker.runOnTick { time ->
             setOf(leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
-                it.optimizedRead(time, 1.Second)
+                it.optimizedRead(time, .5.Second)
             }
         }
 

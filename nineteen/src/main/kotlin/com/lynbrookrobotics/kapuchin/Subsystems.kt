@@ -26,11 +26,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
-class Subsystems(val drivetrain: DrivetrainComponent?,
-
-                 val teleop: TeleopComponent?,
-                 val driver: DriverHardware?,
-                 val operator: OperatorHardware?,
+class Subsystems(val drivetrain: DrivetrainComponent,
+                 val teleop: TeleopComponent,
+                 val driver: DriverHardware,
+                 val operator: OperatorHardware,
                  val leds: LedHardware?,
 
                  val lineScanner: LineScannerHardware?,
@@ -49,56 +48,47 @@ class Subsystems(val drivetrain: DrivetrainComponent?,
 ) : Named by Named("subsystems") {
 
     suspend fun teleop() {
+        System.gc()
+        HAL.observeUserProgramTeleop()
         runAll(
-                {
-                    println("running teleop")
-                    if (drivetrain != null && driver != null) {
-                        drivetrain.teleop(driver)
-                    }
-                },
-
-                {
-                    HAL.observeUserProgramTeleop()
-                    System.gc()
-                }
+                { drivetrainTeleop(drivetrain, driver, limelight) },
         )
+        System.gc()
     }
 
     suspend fun warmup() {
+        System.gc()
         runAll(
-                { drivetrain?.warmup() }
+                { drivetrain.warmup() }
         )
+        System.gc()
     }
 
     val performance by pref(40, Percent)
     suspend fun followWaypoints() {
-
-        if (drivetrain != null) {
-
-            val waypts = File("/tmp/journal.tsv").useLines { lns ->
-                lns
-                        .drop(1)
-                        .map { it.split('\t') }
-                        .map { it.map { tkn -> tkn.trim() } }
-                        .map { Waypt(it[1].toDouble().Foot, it[2].toDouble().Foot) stampWith it[0].toDouble().Second }
-                        .toList()
-            }
-
-            val traj = pathToTrajectory(
-                    waypts.map { (_, pt) -> pt },
-                    performance,
-                    drivetrain.maxSpeed,
-                    drivetrain.maxOmega
-            )
-
-            drivetrain.readJournal(2.Foot, 8.Inch, 5.FootPerSecondSquared, true, traj)
-
-            freeze()
+        val waypts = File("/tmp/journal.tsv").useLines { lns ->
+            lns
+                    .drop(1)
+                    .map { it.split('\t') }
+                    .map { it.map { tkn -> tkn.trim() } }
+                    .map { Waypt(it[1].toDouble().Foot, it[2].toDouble().Foot) stampWith it[0].toDouble().Second }
+                    .toList()
         }
+
+        val traj = pathToTrajectory(
+                waypts.map { (_, pt) -> pt },
+                performance,
+                drivetrain.maxSpeed,
+                drivetrain.maxOmega
+        )
+
+        drivetrain.readJournal(2.Foot, 8.Inch, 5.FootPerSecondSquared, true, traj)
+
+        freeze()
     }
 
     suspend fun limelightAlign() {
-        if (drivetrain != null && limelight != null) {
+        if (limelight != null) {
             limelightAlign(drivetrain, limelight)
         }
     }
@@ -145,11 +135,11 @@ class Subsystems(val drivetrain: DrivetrainComponent?,
 
 
             instance = Subsystems(
-                    t { drivetrainAsync.await() },
+                    t { drivetrainAsync.await() }!!,
 
-                    t { teleopAsync.await() },
-                    t { driverAsync.await() },
-                    t { operatorAsync.await() },
+                    t { teleopAsync.await() }!!,
+                    t { driverAsync.await() }!!,
+                    t { operatorAsync.await() }!!,
                     t { ledsAsync.await() },
 
                     t { lineScannerAsync.await() },
@@ -175,19 +165,13 @@ class Subsystems(val drivetrain: DrivetrainComponent?,
                 if (crashOnFailure) throw t else null
             }
 
-            val driver = t { DriverHardware() }
-            val operator = t { OperatorHardware() }
+            val driver = t { DriverHardware() }!!
+            val operator = t { OperatorHardware() }!!
             val leds = t { LedHardware() }
-            val teleop = t {
-                if (driver != null && operator != null && leds != null) {
-                    TeleopComponent(TeleopHardware(driver, operator, leds))
-                } else {
-                    null
-                }
-            }
+            val teleop = t { TeleopComponent(TeleopHardware(driver, operator, leds)) }!!
 
             instance = Subsystems(
-                    t { DrivetrainComponent(DrivetrainHardware()) },
+                    t { DrivetrainComponent(DrivetrainHardware()) }!!,
                     teleop,
                     driver,
                     operator,

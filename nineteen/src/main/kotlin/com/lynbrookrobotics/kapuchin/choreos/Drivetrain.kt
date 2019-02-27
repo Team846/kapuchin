@@ -1,10 +1,9 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.Warning
+import com.lynbrookrobotics.kapuchin.logging.log
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
@@ -16,7 +15,7 @@ import kotlinx.coroutines.isActive
 suspend fun drivetrainTeleop(
         drivetrain: DrivetrainComponent,
         driver: DriverHardware,
-        limelight: LimelightHardware
+        limelight: LimelightHardware?
 ) = startChoreo("Drivetrain teleop") {
 
     val visionAlign by driver.visionAlign.readEagerly().withoutStamps
@@ -27,7 +26,14 @@ suspend fun drivetrainTeleop(
                 drivetrain.teleop(driver)
             }
             runWhile({ visionAlign }) {
-                limelightAlign(drivetrain, limelight)
+                if(limelight!=null) {
+                    limelightAlign(drivetrain, limelight)
+                    freeze()
+                }
+                else {
+                    driver.log(Warning) { "Cannot run limelightAlign. No limelight initialized." }
+                    freeze()
+                }
             }
         }
     }
@@ -86,6 +92,6 @@ suspend fun limelightAlign(
             }
         }
 
-        drivetrain.limelightTracking(1.FootPerSecond, limelight)
+        drivetrain.limelightSnapshotTracking(1.FootPerSecond, limelight)
     }
 }

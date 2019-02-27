@@ -72,7 +72,7 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     init {
         uiBaselineTicker.runOnTick { time ->
             setOf(targetPosition, targetAngle).forEach {
-                it.optimizedRead(time, 1.Second)
+                it.optimizedRead(time, .5.Second)
             }
         }
     }

@@ -12,8 +12,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     private val wheelRadius by pref(3, Inch)
 
     private val leftTrim by pref(1.0)
-    private val flipLeftPosition by pref(false)
-    private val flipRightPosition by pref(false)
+
     private val flipOdometryLeft by pref(false)
     private val flipOdometryRight by pref(false)
     private val flipOdometrySides by pref(false)
@@ -39,8 +38,8 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
                     nativeOutputUnits = 1023, perOutputQuantity = hardware.operatingVoltage,
                     nativeFeedbackUnits = nativeResolution,
                     perFeedbackQuantity = avg(
-                            toLeftPosition(resolution, enc),
-                            toRightPosition(resolution, enc)
+                            toLeftPosition(resolution, enc).abs,
+                            toRightPosition(resolution, enc).abs
                     )
             )
 
@@ -53,12 +52,10 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     fun toLeftPosition(
             ticks: Int, conv: EncoderConversion = encoderConversion
     ): Length = wheelRadius * conv.angle(ticks.toDouble()) * leftTrim / Radian
-            .let { if (flipLeftPosition) -it else it }
 
     fun toRightPosition(
             ticks: Int, conv: EncoderConversion = encoderConversion
     ): Length = wheelRadius * conv.angle(ticks.toDouble()) * rightTrim / Radian
-            .let { if (flipRightPosition) -it else it }
 
     private val matrixCache = (-8..8)
             .flatMap {

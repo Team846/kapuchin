@@ -83,7 +83,7 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     init {
         uiBaselineTicker.runOnTick { t ->
             setOf(position, velocity, limitSwitchStatus).forEach {
-                it.optimizedRead(t, 1.Second)
+                it.optimizedRead(t, .5.Second)
             }
         }
     }

@@ -51,7 +51,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
             .with(graph("Height", Inch))
 
     init {
-        uiBaselineTicker.runOnTick { position.optimizedRead(it, 1.Second) }
+        uiBaselineTicker.runOnTick { position.optimizedRead(it, .5.Second) }
     }
 
 }

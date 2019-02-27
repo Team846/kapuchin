@@ -101,6 +101,6 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
             .with(graph("Angle", Degree))
 
     init {
-        uiBaselineTicker.runOnTick { position.optimizedRead(it, 1.Second) }
+        uiBaselineTicker.runOnTick { position.optimizedRead(it, .5.Second) }
     }
 }

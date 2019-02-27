@@ -129,10 +129,10 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     }
 }
 
-suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Limelight tracking") {
+suspend fun DrivetrainComponent.limelightSnapshotTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Limelight tracking") {
     val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
     val robotPosition by hardware.position.readOnTick.withoutStamps
-    val uni = UnicycleDrive(this@limelightTracking, this@startRoutine)
+    val uni = UnicycleDrive(this@limelightSnapshotTracking, this@startRoutine)
 
     val target = targetAngle?.let { it + robotPosition.bearing }
 

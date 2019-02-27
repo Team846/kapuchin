@@ -13,6 +13,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
@@ -26,14 +27,9 @@ class FunkyRobot : RobotBase() {
         println("Initializing hardware...")
 
         Safeties.init()
-
         Subsystems.concurrentInit()
-
-        val subsystems = Subsystems.instance
-
+        val subsystems = Subsystems.instance!!
         Subsystems.uiBaselineTicker.runOnTick { Safeties.currentState().forEach { println(it) } }
-
-
 
         println("Trimming preferences...")
         trim(Preferences2.getInstance().table)
@@ -43,51 +39,40 @@ class FunkyRobot : RobotBase() {
             withTimeout(.5.Second) { classloading.join() }
         }
 
+        scope.launch {
+            while(isActive) {
+                runWhile({ isEnabled && isOperatorControl }) {
+                    subsystems.teleop()
+                }
+
+                runWhile({ isEnabled && isAutonomous }) {
+                    subsystems.drivetrain.openLoop(30.Percent)
+                }
+
+                runWhile({ isDisabled && !isTest }) {
+                    subsystems.warmup()
+                }
+
+                runWhile({ isTest }) {
+                    launch { journal(subsystems.drivetrain.hardware) }
+                    subsystems.teleop()
+                }
+            }
+        }
+
+        System.gc()
         HAL.observeUserProgramStarting()
 
         val eventLoopPeriod = 20.milli(Second)
-
-        val doNothing = scope.launch { }
-        var currentJob: Job = doNothing
-
         println("Starting event loop...")
         while (true) {
             Thread.yield()
             m_ds.waitForData(eventLoopPeriod.Second)
 
-            val eventLoopTime = measureTimeMillis { EventLoop.tick(currentTime) }.milli(Second)
+            val eventLoopTime = measureTimeMillis {
+                EventLoop.tick(currentTime)
+            }.milli(Second)
             if (eventLoopTime > eventLoopPeriod * 5) println("Overran event loop by ${eventLoopTime - eventLoopPeriod}")
-
-            if (!currentJob.isActive) {
-                System.gc()
-
-                currentJob = scope.launch {
-                    runWhile({ isEnabled && isOperatorControl }, { subsystems?.teleop() })
-                    System.gc()
-
-                    runWhile({ isEnabled && isAutonomous }, {
-                        subsystems?.drivetrain?.openLoop(30.Percent)
-                    })
-                    System.gc()
-
-                    runWhile({ isDisabled && !isTest }, { subsystems?.warmup() })
-                    System.gc()
-
-                    runWhile({ isTest }, {
-                        launch {
-                            if (subsystems?.drivetrain != null) {
-                                journal(subsystems?.drivetrain.hardware)
-                            } else {
-                                subsystems?.log(Error) {
-                                    "Drivetrain not initialized"
-                                }
-                            }
-                        }
-                        subsystems?.teleop()
-                    })
-                    System.gc()
-                }
-            }
         }
     }
 
