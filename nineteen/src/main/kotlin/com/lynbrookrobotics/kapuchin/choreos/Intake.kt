@@ -118,7 +118,7 @@ suspend fun Subsystems.collectWallPanel() = coroutineScope {
  * Hook - Up
  * Lift - Collect ground panel height
  */
-suspend fun Subsystems.collectGroundPanel() {
+suspend fun Subsystems.collectGroundPanel() = coroutineScope {
     try {
         //Center slider
         collectorSlider?.set(0.Inch, electrical)

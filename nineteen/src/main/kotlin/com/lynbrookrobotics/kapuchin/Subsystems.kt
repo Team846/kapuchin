@@ -93,12 +93,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         freeze()
     }
 
-    suspend fun limelightAlign() {
-        if (limelight != null) {
-            limelightAlign(drivetrain, limelight)
-        }
-    }
-
     companion object : Named by Named("Subsystems") {
 
         val initLeds by pref(true)
