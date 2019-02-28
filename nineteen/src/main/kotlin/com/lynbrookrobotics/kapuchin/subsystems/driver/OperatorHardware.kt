@@ -67,9 +67,9 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val collectPanel = s { lb && !lt}
     val collectCargo = s { lb && lt }
 
-    val visionAlign = s { rt && !lt && !start}
+    val lineTracking = s { rt && !lt && !start}
     val centerSlider = s { xButton && lt}
-    
+
     val centerCargo = s { xButton && !lt}
 
     val unleashTheCobra = s { start && lt && rt }
