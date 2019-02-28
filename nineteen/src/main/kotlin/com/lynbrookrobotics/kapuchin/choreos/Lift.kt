@@ -8,8 +8,6 @@ import info.kunalsheth.units.generated.*
 
 suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
 
-    val groundHeight by operator.groundHeight.readEagerly().withoutStamps
-
     val lowPanelHeight by operator.lowPanelHeight.readEagerly().withoutStamps
     val lowCargoHeight by operator.lowCargoHeight.readEagerly().withoutStamps
 
@@ -20,10 +18,7 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
     val highCargoHeight by operator.highCargoHeight.readEagerly().withoutStamps
 
     choreography {
-        whenever({ groundHeight || lowPanelHeight || lowCargoHeight || midPanelHeight || midCargoHeight || highPanelHeight || highCargoHeight }) {
-            runWhile({ groundHeight }) {
-                lift?.set(lift.groundHeight, 0.Inch)
-            }
+        whenever({ lowPanelHeight || lowCargoHeight || midPanelHeight || midCargoHeight || highPanelHeight || highCargoHeight }) {
             runWhile({ lowPanelHeight }) {
                 lift?.set(lift.panelLowRocket, 0.Inch)
             }
