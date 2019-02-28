@@ -31,6 +31,9 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     private val start get() = xbox.startButton
 
+
+    //TODO collector slider right joystick
+    //TODO lift left joystick
     private val povMush by pref(15, Degree)
     val liftPrecision = s {
         val pov = xbox.pov.Degree
@@ -65,8 +68,11 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val collectPanel = s { lb && !lt}
     val collectCargo = s { lb && lt }
 
-    val visionAlign = s { xButton && !lt}
-    val centerCargo = s { xButton && lt}
+    val visionAlign = s { rt && !lt && !start}
+    val centerSlider = s { xButton && lt}
+    
+    val centerCargo = s { xButton && !lt}
 
     val unleashTheCobra = s { start && lt && rt }
+    val waitNoPutTheCobraBack = s { back && lt && rt }
 }
