@@ -54,7 +54,7 @@ class FunkyRobot : RobotBase() {
                     runWhile({ isEnabled && isOperatorControl }, { Subsystems.teleop() })
                     System.gc()
 
-                    runWhile({ isEnabled && isAutonomous }, { Subsystems.followWaypoints() })
+                    runWhile({ isEnabled && isAutonomous }, { Subsystems.limelightCurve() })
                     System.gc()
 
                     runWhile({ isDisabled && !isTest }, { Subsystems.warmup() })

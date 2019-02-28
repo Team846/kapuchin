@@ -31,12 +31,11 @@ suspend fun drivetrainTeleop(
 }
 suspend fun optimizedLimelightTracking(
         drivetrain: DrivetrainComponent,
-        limelight: LimelightHardware,
-        driver: DriverHardware
+        limelight: LimelightHardware
 ) = startChoreo("Optimized Limelight Tracking"){
 
     choreography{
-        TODO()
+        drivetrain.limelightCurveDrive(limelight, 2.Foot, 0.5)
     }
 
 }

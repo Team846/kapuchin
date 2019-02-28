@@ -152,6 +152,10 @@ object Subsystems : Named by Named("subsystems") {
         )
     }
 
+    suspend fun limelightCurve() {
+        optimizedLimelightTracking(drivetrain, limelight)
+    }
+
     val performance by pref(40, Percent)
     suspend fun followWaypoints() {
 //        drivetrain.waypoint({ 3.FootPerSecond }, UomVector(0.Foot, 5.Foot), 2.Inch)

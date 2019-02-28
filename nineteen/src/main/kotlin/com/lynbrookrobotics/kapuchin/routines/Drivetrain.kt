@@ -5,13 +5,13 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.sin
 
 class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
     val position by with(scope) { c.hardware.position.readOnTick.withStamps }
@@ -172,31 +172,30 @@ suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limel
         TODO()
     }
 
-}
+} */
 
-suspend fun DrivetrainComponent.limelightCurveDrive(speed: Velocity, limelight: LimelightHardware) = startRoutine("Curve Drive to Target") {
-    val trackLength = TODO()
-    val targetX by limelight.targetPosition.x.readOnTick.withoutStamps
-    val targetY by limelight.targetPosition.y.readOnTick.withoutStamps
+suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware,
+                                                    trackLength: Length,
+                                                    speedMultiplier: Double
+                                                    ) = startRoutine("Curve Drive to Target") {
+    val target by limelight.targetPosition.readOnTick.withoutStamps
     val txValue by limelight.angleToTarget.readOnTick.withoutStamps
-    val distanceToTarget = sqrt((targetX * targetX) + (targetY * targetY))
+    val distanceToTarget = sqrt(((target!!.x / 1.Foot) * (target!!.x / 1.Foot))  + ((target!!.y / 1.Foot) * (target!!.y / 1.Foot)))
+    val targetStatus by limelight.targetStatus.readOnTick.withoutStamps
 
     val aTT by limelight.angleToTarget.readOnTick.withoutStamps
-    val angleToTarget = aTT
+    val converter = kotlin.math.PI / 180.0
 
-    fun toRadians(angle: Angle?) {
-        angle!!.Radian * kotlin.math.PI / 180.0
-    }
-        val aTTinRadians = toRadians(angleToTarget)
-    if(angleToTarget!=null){
-        val innerLength = (distanceToTarget * (aTTinRadians/1.Radian) / sin(angleToTarget)) - trackLength * toRadians(angleToTarget)
-        val outerLength = (distanceToTarget * (aTTinRadians/1.Radian) / sin(angleToTarget)) + trackLength * toRadians(angleToTarget)
-    }
+        val aTTinRadians = aTT!!.Radian * converter.Radian
 
-    val outerVelocity = 100.Percent
-    val innerVelocity: DutyCycle = (outerVelocity * innerLength / outerLength)
+        val innerLength = ((distanceToTarget * (aTTinRadians/1.Radian) / sin(aTTinRadians / converter)) - (trackLength / 1.Foot) * (aTTinRadians / 1.Radian))
+        val outerLength = ((distanceToTarget * (aTTinRadians/1.Radian) / sin(aTTinRadians / converter)) + (trackLength / 1.Foot) * (aTTinRadians / 1.Radian))
+
+
+    val outerVelocity = maxSpeed * speedMultiplier
+    val innerVelocity = (outerVelocity * innerLength / outerLength)
     controller {
-        if (targetExists()) {
+        if (targetStatus != null && targetStatus == true) {
 
             val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
             val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
@@ -208,7 +207,7 @@ suspend fun DrivetrainComponent.limelightCurveDrive(speed: Velocity, limelight: 
         } else null
     }
 }
-*/
+
 
 suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 

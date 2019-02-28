@@ -80,6 +80,11 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
             tx
         }else null)stampWith timeStamp(it)
     }
+    val targetStatus = sensor {
+        (if (targetExists()) {
+            (true)
+        } else null) stampWith timeStamp(it)
+    }
     val distanceToNormal = sensor {
 
         val tvert = l("tvert")
