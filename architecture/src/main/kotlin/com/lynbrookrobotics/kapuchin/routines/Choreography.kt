@@ -37,7 +37,7 @@ suspend fun startChoreo(
         named.log(Debug) { "Cancelled $name choreography.\n${c.message}" }
         throw c
     } catch (t: Throwable) {
-        named.log(Error, t) { "Exception running $name routine.\n${t.message}" }
+        named.log(Error, t)
     } finally {
         sensorScope.close()
     }
