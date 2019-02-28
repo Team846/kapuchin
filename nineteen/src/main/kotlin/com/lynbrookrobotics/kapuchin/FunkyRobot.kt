@@ -27,7 +27,7 @@ class FunkyRobot : RobotBase() {
         println("Initializing hardware...")
 
         Safeties.init()
-        Subsystems.concurrentInit()
+        runBlocking { Subsystems.concurrentInit().join() }
         val subsystems = Subsystems.instance!!
         Subsystems.uiBaselineTicker.runOnTick { Safeties.currentState().forEach { println(it) } }
 

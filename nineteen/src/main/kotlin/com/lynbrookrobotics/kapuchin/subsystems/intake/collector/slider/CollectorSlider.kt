@@ -12,6 +12,8 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
+import com.revrobotics.CANDigitalInput.LimitSwitchPolarity.kNormallyClosed
+import com.revrobotics.CANDigitalInput.LimitSwitch.kForward
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import edu.wpi.first.wpilibj.DigitalInput
 import info.kunalsheth.units.generated.*
@@ -32,7 +34,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
             when {
                 value.isPositive && range.endInclusive > current ||
                         value.isNegative && range.start < current
-                    -> esc.set(value.Percent)
+                -> esc.set(value.Percent)
                 else -> esc.set(0.0)
             }
         } else if (Safeties.log) {
@@ -44,7 +46,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
 class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, CollectorSliderComponent>() {
     override val priority: Priority = Priority.Medium
     override val period: Time = 30.milli(Second)
-    override val syncThreshold: Time = 15.milli(Second)
+    override val syncThreshold: Time = 5.milli(Second)
     override val name: String = "Collector Slider"
 
     val operatingVoltage by pref(11, Volt)
@@ -52,13 +54,12 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     val startupFrictionCompensation by pref(0.5, Volt)
 
     val escCanId by pref(20)
-    val limitSwitchChannel by pref(5)
 
     val esc by hardw { CANSparkMax(escCanId, MotorType.kBrushless) }.configure {
         it.setSmartCurrentLimit(currentLimit.Ampere.toInt())
+        it.getReverseLimitSwitch(kNormallyClosed).enableLimitSwitch(true)
     }
     val encoder by hardw { esc.encoder }
-    val limitSwitch by hardw { DigitalInput(limitSwitchChannel) }
 
     val conversion by pref {
         val encoderRotations by pref(10, Turn)
@@ -71,9 +72,12 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
         })
     }
 
-    val position = sensor(encoder) { conversion(position) stampWith it }
+    val position = sensor(encoder) { conversion(position - zeroOffset) stampWith it }
+            .with(graph("Position", Inch))
     val velocity = sensor(encoder) { velocity.Rpm stampWith it }
-    val limitSwitchStatus = sensor(limitSwitch) { get() stampWith it }
+            .with(graph("Velocity", Rpm))
+    val atZero = sensor(esc) { getReverseLimitSwitch(kNormallyClosed).get() stampWith it }
+            .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
 
     private var zeroOffset = 0.0
     fun zero() {
@@ -82,7 +86,7 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
 
     init {
         uiBaselineTicker.runOnTick { t ->
-            setOf(position, velocity, limitSwitchStatus).forEach {
+            setOf(position, velocity, atZero).forEach {
                 it.optimizedRead(t, .5.Second)
             }
         }

@@ -46,14 +46,26 @@ suspend fun CollectorSliderComponent.trackLine(tolerance: Length, lineScanner: L
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
-        target?.let { t ->
-            val error = t - current
-            val voltage = kP * error
+        val error = (target ?: 0.Inch) - current
+        val voltage = kP * error
 
-            voltageToDutyCycle(voltage, vBat).takeIf {
-                current in t `±` tolerance
-            }
+        voltageToDutyCycle(voltage, vBat).takeIf {
+            error in 0.Inch `±` tolerance
         }
+    }
+}
+
+suspend fun CollectorSliderComponent.set(target: DutyCycle) = startRoutine("Zero") {
+    controller { target }
+}
+
+suspend fun CollectorSliderComponent.zero() = startChoreo("Zero") {
+
+    val atZero by hardware.atZero.readEagerly().withoutStamps
+
+    choreography {
+        runWhile({ !atZero }) { set(-20.Percent) }
+        hardware.zero()
     }
 }
 

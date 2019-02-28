@@ -17,13 +17,15 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import java.io.File
 
 class Subsystems(val drivetrain: DrivetrainComponent,
@@ -101,17 +103,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         val pneumaticTicker = ticker(Low, 100.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
-        fun concurrentInit() = runBlocking {
+        fun concurrentInit() = scope.launch {
             val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
 
             val driverAsync = async { DriverHardware() }
             val operatorAsync = async { OperatorHardware() }
             val ledsAsync = async { LedHardware() }
-            val teleopAsync = async {
-                TeleopComponent(TeleopHardware(
-                        driverAsync.await(), operatorAsync.await(), ledsAsync.await()
-                ))
-            }
 
             val lineScannerAsync = async { LineScannerHardware() }
             val collectorPivotAsync = async { CollectorPivotComponent(CollectorPivotHardware()) }
@@ -133,6 +130,13 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 if (crashOnFailure) throw t else null
             }
 
+            val teleopAsync = async {
+                TeleopComponent(TeleopHardware(
+                        t { driverAsync.await() }!!,
+                        t { operatorAsync.await() }!!,
+                        t { ledsAsync.await() }
+                ))
+            }
 
             instance = Subsystems(
                     t { drivetrainAsync.await() }!!,
