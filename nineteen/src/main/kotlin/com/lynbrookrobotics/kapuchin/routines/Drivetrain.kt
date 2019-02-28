@@ -144,19 +144,33 @@ suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: Li
     }
 }
 
-suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limelight: LimelightHardware) = startRoutine("Turn to Median") {
+suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limelight: LimelightHardware, c:UnicycleDrive, speedMultiplier: Percent) = startRoutine("Turn to Median") {
     val distToNorm by limelight.distanceToNormal.readOnTick.withoutStamps
     val targetLocation by limelight.targetPosition.readOnTick.withoutStamps
-    val txValue by limelight.angleToTarget.readOnTick.withoutStamps
     val distanceToTarget = sqrt(Dimensionless((targetLocation!!.x.siValue * targetLocation!!.x.siValue) + (targetLocation!!.y.siValue * targetLocation!!.y.siValue)))
+    val targetStatus by limelight.targetStatus.readOnTick.withoutStamps
+    val outerVelocity = -maxSpeed * speedMultiplier
+    val innerVelocity = maxSpeed * speedMultiplier
+    val angularVelocity = maxOmega*speedMultiplier
+    val startingTXValue by limelight.angleToTarget.readOnTick.withoutStamps
+    val startingSideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget.siValue * cos(startingTXValue!!)))
+    val startingIsosAngle = acos(((distanceToTarget * distanceToTarget) + (startingSideAcrossTX * startingSideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
+    val startingTurnAngle = startingIsosAngle - startingTXValue!!
 
-    if (distToNorm != null && txValue != null) {
-        val sideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget!!.siValue * cos(txValue!!)))
-        val isosAngle = acos(((distanceToTarget * distanceToTarget) + (sideAcrossTX * sideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
-        val turnAngle = isosAngle - txValue!!
-    }
     controller {
-        TODO()
+        if (targetStatus != null && targetStatus == true) {
+            val txValue by limelight.angleToTarget.readOnTick.withoutStamps
+            val sideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget!!.siValue * cos(txValue!!)))
+            val isosAngle = acos(((distanceToTarget * distanceToTarget) + (sideAcrossTX * sideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
+            val currentTurnAngle = isosAngle - txValue!!
+            val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
+            val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
+
+            TwoSided(
+                    VelocityOutput(velocityGains, nativeL*(currentTurnAngle/startingTurnAngle).siValue),
+                    VelocityOutput(velocityGains, nativeR*(currentTurnAngle/startingTurnAngle).siValue)
+            )
+        } else null
     }
 
 }
