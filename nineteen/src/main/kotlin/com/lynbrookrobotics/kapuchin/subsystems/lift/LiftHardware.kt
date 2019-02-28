@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.ctre.phoenix.motorcontrol.NeutralMode.Brake
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -45,8 +46,11 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
 
     val lazyOutput = lazyOutput(esc, idx)
 
-    val position = sensor {
-        conversions.native.realPosition(esc.getSelectedSensorPosition(idx)) stampWith it
+    val nativeGrapher = graph("Native", Each)
+    val position = sensor { t ->
+        conversions.native.realPosition(
+                esc.getSelectedSensorPosition(idx).also { nativeGrapher(t, it.Each) }
+        ) stampWith t
     }
             .with(graph("Height", Inch))
 

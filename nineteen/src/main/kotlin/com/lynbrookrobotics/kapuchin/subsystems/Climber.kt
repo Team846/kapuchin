@@ -16,7 +16,7 @@ class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, 
     val maxOutput by pref(20, Percent)
 
     override fun ClimberHardware.output(value: DutyCycle) {
-        val safeOutput = value minMag maxOutput
+        val safeOutput = value minMag (maxOutput * value.signum)
         hardware.leftEsc.set(safeOutput.Each)
         hardware.rightEsc.set(safeOutput.Each)
     }

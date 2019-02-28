@@ -90,27 +90,6 @@ suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open 
     }
 }
 
-suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("Point with line scanner") {
-    val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
-    val uni = UnicycleDrive(this@pointWithLineScanner, this@startRoutine)
-
-    controller {
-        val errorA = linePosition?.let {
-            -atan(it / lineScannerLead)
-        } ?: 0.Degree
-
-        val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
-
-        val nativeL = hardware.conversions.nativeConversion.native(targetL)
-        val nativeR = hardware.conversions.nativeConversion.native(targetR)
-
-        TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
-        )
-    }
-}
-
 suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRoutine("Turn") {
     val uni = UnicycleDrive(this@turn, this@startRoutine)
 
@@ -129,27 +108,6 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     }
 }
 
-suspend fun DrivetrainComponent.limelightSnapshotTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Limelight tracking") {
-    val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
-    val robotPosition by hardware.position.readOnTick.withoutStamps
-    val uni = UnicycleDrive(this@limelightSnapshotTracking, this@startRoutine)
-
-    val target = targetAngle?.let { it + robotPosition.bearing }
-
-    controller {
-        if (target != null) {
-            val (targs, _) = uni.speedAngleTarget(speed, target)
-
-            val nativeL = hardware.conversions.nativeConversion.native(targs.left)
-            val nativeR = hardware.conversions.nativeConversion.native(targs.right)
-
-            TwoSided(
-                    VelocityOutput(velocityGains, nativeL),
-                    VelocityOutput(velocityGains, nativeR)
-            )
-        } else null
-    }
-}
 
 suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 

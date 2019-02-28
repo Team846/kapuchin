@@ -35,8 +35,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val midPanelHeight = s { xButton }
     val midCargoHeight = s { xButton && lt }
 
-    val highPanelHeight = s { aButton }
-    val highCargoHeight = s { aButton && lt }
+    val highPanelHeight = s { bButton }
+    val highCargoHeight = s { bButton && lt }
 
     private val povMush by pref(15, Degree)
     val liftPrecision = s {
@@ -58,6 +58,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     }
 
     val deployPanel = s { rt }
+    val centerCargo = s { startButton }
     val deployCargo = s { lt && rt }
 
     val pushPanel = s { getBumper(kLeft) }

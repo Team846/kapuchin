@@ -8,7 +8,7 @@ import info.kunalsheth.units.generated.*
 enum class LiftState(val rng: ClosedRange<Length>) {
 
     High(30.Inch..80.Inch),
-    Low(3.Inch..16.Inch),
+    Low(3.Inch..30.Inch),
     Bottom(-1.Inch..3.Inch),
     Undetermined(-1.Inch..80.Inch);
 

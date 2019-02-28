@@ -55,21 +55,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         System.gc()
         HAL.observeUserProgramTeleop()
         runAll(
-                { drivetrainTeleop(drivetrain, driver, limelight) },
-                { intakeTeleop(
-                        driver, operator, electrical,
-                        lineScanner,
-                        collectorPivot,
-                        collectorRollers,
-                        collectorSlider,
-                        hook,
-                        hookSlider,
-                        handoffPivot,
-                        handoffRollers,
-                        velcroPivot,
-                        lift
-
-                ) }
+                { drivetrainTeleop() },
+                { intakeTeleop() },
+                { liftTeleop() }
         )
         System.gc()
     }

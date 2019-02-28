@@ -14,17 +14,19 @@ import info.kunalsheth.units.math.*
 
 class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<CollectorRollersComponent, CollectorRollersHardware, TwoSided<DutyCycle>>(hardware, Subsystems.pneumaticTicker) {
 
-    val cargoHoldStrength by pref(1, Volt)
-    val cargoCollectSpeed by pref(8.5, Volt)
+    val cargoHoldStrength by pref(20, Percent)
+    val cargoCollectSpeed by pref(11, Volt)
+    val cargoCenterSpeed by pref(8.5, Volt)
     val cargoReleaseSpeed by pref(-6, Volt)
 
-    override val fallbackController: CollectorRollersComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(0.Percent) }
-
-    override fun CollectorRollersHardware.output(value: TwoSided<DutyCycle>) {
-        topEsc.set(value.left.Each)
-        botEsc.set(ControlMode.PercentOutput, value.right.Each)
+    override val fallbackController: CollectorRollersComponent.(Time) -> TwoSided<DutyCycle> = {
+        TwoSided(cargoHoldStrength)
     }
 
+    override fun CollectorRollersHardware.output(value: TwoSided<DutyCycle>) {
+        topEsc.set(ControlMode.PercentOutput, value.left.Each)
+        bottomEsc.set(value.right.Each)
+    }
 }
 
 class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, CollectorRollersComponent>() {
@@ -36,13 +38,14 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
     private val invertTop by pref(false)
     private val invertBottom by pref(false)
 
-    val topPwmPort by pref(0)
-    val topEsc by hardw { Spark(topPwmPort) }.configure {
+    val bottomPwmPort by pref(0)
+    val bottomEsc by hardw { Spark(bottomPwmPort) }.configure {
         it.inverted = invertTop
     }
 
-    val botCanID by pref(50)
-    val botEsc by hardw { VictorSPX(botCanID) }.configure {
+    val topCanId by pref(50)
+    val topEsc by hardw { VictorSPX(topCanId) }.configure {
+        generalSetup(it, 12.Volt, 20.Ampere, 0.Volt)
         it.inverted = invertBottom
     }
 }

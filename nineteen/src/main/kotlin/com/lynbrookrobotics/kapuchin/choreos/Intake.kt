@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
@@ -15,51 +16,27 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.coroutineScope
 
-suspend fun intakeTeleop(
-        driver: DriverHardware,
-        oper: OperatorHardware,
-        electricalSystem: ElectricalSystemHardware,
-        lineScanner: LineScannerHardware?,
-        collectorPivot: CollectorPivotComponent?,
-        collectorRollers: CollectorRollersComponent?,
-        collectorSlider: CollectorSliderComponent?,
-        hook: HookComponent?,
-        hookSlider: HookSliderComponent?,
-        handoffPivot: HandoffPivotComponent?,
-        handoffRollers: HandoffRollersComponent?,
-        velcroPivot: VelcroPivotComponent?,
-        lift: LiftComponent?
-
-) = startChoreo("Intake teleop") {
+suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
     val collectCargo by driver.collectCargo.readEagerly().withoutStamps
+    val centerCargo by operator.centerCargo.readEagerly().withoutStamps
     val collectWallPanel by driver.collectWallPanel.readEagerly().withoutStamps
     val collectGroundPanel by driver.collectGroundPanel.readEagerly().withoutStamps
-    val deployCargo by oper.deployCargo.readEagerly().withoutStamps
-    val deployPanel by oper.deployPanel.readEagerly().withoutStamps
-    val pushPanel by oper.pushPanel.readEagerly().withoutStamps
+    val deployCargo by operator.deployCargo.readEagerly().withoutStamps
+    val deployPanel by operator.deployPanel.readEagerly().withoutStamps
+    val pushPanel by operator.pushPanel.readEagerly().withoutStamps
 
     choreography {
-        whenever({ collectCargo || collectWallPanel || collectGroundPanel || deployCargo || deployPanel || pushPanel }) {
-            runWhile({ collectCargo }) {
-                collectCargo(collectorPivot, collectorRollers, collectorSlider, handoffPivot, handoffRollers, lift, electricalSystem)
-            }
-            runWhile({ collectWallPanel }) {
-                collectWallPanel(lineScanner, collectorPivot, collectorSlider, handoffPivot, hook, hookSlider, lift, electricalSystem)
-            }
-            runWhile({ collectGroundPanel }) {
-                collectGroundPanel(collectorPivot, collectorSlider, handoffPivot, velcroPivot, hook, lift, electricalSystem)
-            }
-            runWhile({ deployCargo }) {
-                deployCargo(lineScanner, collectorPivot, collectorRollers, collectorSlider, electricalSystem)
-            }
-            runWhile({ deployPanel }) {
-                deployPanel(lineScanner, collectorPivot, collectorSlider, hook, hookSlider, electricalSystem)
-            }
-            runWhile({ pushPanel }) {
-                pushPanel(collectorPivot, hook, hookSlider)
-            }
+        whenever({ collectCargo || centerCargo || collectWallPanel || collectGroundPanel || deployCargo || deployPanel || pushPanel }) {
+            runWhile({ collectCargo }) { collectCargo() }
+            runWhile({ centerCargo }) { centerCargo() }
+            runWhile({ collectWallPanel }) { collectWallPanel() }
+            runWhile({ collectGroundPanel }) { collectGroundPanel() }
+            runWhile({ deployCargo }) { deployCargo() }
+            runWhile({ deployPanel }) { deployPanel() }
+            runWhile({ pushPanel }) { pushPanel() }
         }
     }
 }
@@ -74,38 +51,32 @@ suspend fun intakeTeleop(
  * HandoffPivot - Collect position
  * Lift - Collect cargo height
  */
-suspend fun collectCargo(
-        collectorPivot: CollectorPivotComponent?,
-        collectorRollers: CollectorRollersComponent?,
-        collectorSlider: CollectorSliderComponent?,
-        handoffPivot: HandoffPivotComponent?,
-        handoffRollers: HandoffRollersComponent?,
-        lift: LiftComponent?,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Collect cargo") {
-
-    choreography {
-        //Start collector/handoff rollers
+suspend fun Subsystems.collectCargo() = coroutineScope {
+    //Start collector/handoff rollers
+    try {
         launch { handoffRollers?.spin(handoffRollers.cargoCollectSpeed) }
-        launch { collectorRollers?.spin(electricalSystem, collectorRollers.cargoCollectSpeed) }
+        launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
 
         //Center slider
-        collectorSlider?.set(0.Inch, electricalSystem)
+        collectorSlider?.set(0.Inch, electrical)
 
         //lift, handoff, collector down
-        lift?.set(lift.collectCargo)
+        launch { lift?.set(lift.collectCargo, 0.Inch) }
         launch { collectorPivot?.set(CollectorPivotState.Down) }
-        handoffPivot?.set(handoffPivot.collectPosition)
 
-        //Wait (for cargo to be collected)
-        delay(0.5.Second)
-
-        //Collector, handoff up
-        collectorPivot?.set(CollectorPivotState.Up)
+        freeze()
+    } finally {
         handoffPivot?.set(handoffPivot.collectPosition)
     }
 }
 
+/**
+ * Center cargo with rollers
+ */
+suspend fun Subsystems.centerCargo() = collectorRollers?.spin(electrical,
+        collectorRollers.cargoCenterSpeed, // bottom out
+        -collectorRollers.cargoCenterSpeed // top in
+) ?: freeze()
 
 /**
  * Collect panel from loading station
@@ -119,40 +90,22 @@ suspend fun collectCargo(
  * HookSlider - In
  * Lift - Collect panel height
  */
-suspend fun collectWallPanel(
-        lineScanner: LineScannerHardware?,
-        collectorPivot: CollectorPivotComponent?,
-        collectorSlider: CollectorSliderComponent?,
-        handoffPivot: HandoffPivotComponent?,
-        hook: HookComponent?,
-        hookSlider: HookSliderComponent?,
-        lift: LiftComponent?,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Collect wall panel") {
-
-    choreography {
-        //Track line with slider
-        if (lineScanner != null) {
-            collectorSlider?.trackLine(0.5.Inch, lineScanner, electricalSystem)
-        }
-
-        //Lift down
-        lift?.set(lift.collectPanel)
-
-        //Handoff, collector up
-        handoffPivot?.set(handoffPivot.handoffPosition)
-        collectorPivot?.set(CollectorPivotState.Up)
-
-        //Hook down, slider out
-        hook?.set(HookPosition.Down)
-        hookSlider?.set(HookSliderState.Out)
-
-        //Hook up, slider in
-        hook?.set(HookPosition.Up)
-        hookSlider?.set(HookSliderState.In)
+suspend fun Subsystems.collectWallPanel() = coroutineScope {
+    //Track line with slider
+    if (lineScanner != null) {
+        collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
     }
-}
 
+    //Lift down
+    launch { lift?.set(lift.collectPanel, 0.Inch) }
+
+    //Handoff, collector up
+    handoffPivot?.set(handoffPivot.handoffPosition)
+
+    //Hook down, slider out
+    launch { hook?.set(HookPosition.Down) }
+    launch { hookSlider?.set(HookSliderState.Out) }
+}
 
 /**
  * Collect panel from the ground
@@ -165,37 +118,25 @@ suspend fun collectWallPanel(
  * Hook - Up
  * Lift - Collect ground panel height
  */
-suspend fun collectGroundPanel(
-        collectorPivot: CollectorPivotComponent?,
-        collectorSlider: CollectorSliderComponent?,
-        handoffPivot: HandoffPivotComponent?,
-        velcroPivot: VelcroPivotComponent?,
-        hook: HookComponent?,
-        lift: LiftComponent?,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Collect ground panel") {
-
-    choreography {
+suspend fun Subsystems.collectGroundPanel() {
+    try {
         //Center slider
-        collectorSlider?.set(0.Inch, electricalSystem)
+        collectorSlider?.set(0.Inch, electrical)
 
         //Lift down
-        lift?.set(lift.collectGroundPanel)
-
-        //Collector up
-        collectorPivot?.set(CollectorPivotState.Up)
+        launch { lift?.set(lift.collectGroundPanel) }
 
         //Handoff, velcro, hook down
         handoffPivot?.set(handoffPivot.collectPosition)
         velcroPivot?.set(VelcroPivotPosition.Down)
         hook?.set(HookPosition.Down)
 
+        freeze()
+    } finally {
         //Handoff, hook up
         handoffPivot?.set(handoffPivot.handoffPosition)
-        hook?.set(HookPosition.Up)
     }
 }
-
 
 /**
  * Deploy cargo with slider autoalign
@@ -204,28 +145,15 @@ suspend fun collectGroundPanel(
  * CollectorPivot - Up
  * CollectorSlider - Random
  */
-suspend fun deployCargo(
-        lineScanner: LineScannerHardware?,
-        collectorPivot: CollectorPivotComponent?,
-        collectorRollers: CollectorRollersComponent?,
-        collectorSlider: CollectorSliderComponent?,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Deploy cargo") {
-
-    choreography {
-        //Collector up
-        collectorPivot?.set(CollectorPivotState.Up)
-
-        //Track line with slider
-        if (lineScanner != null) {
-            collectorSlider?.trackLine(0.5.Inch, lineScanner, electricalSystem)
-        }
-
-        //Spin rollers
-        collectorRollers?.spin(electricalSystem, collectorRollers.cargoReleaseSpeed)
+suspend fun Subsystems.deployCargo() {
+    //Track line with slider
+    if (lineScanner != null) {
+        collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
     }
-}
 
+    //Spin rollers
+    collectorRollers?.spin(electrical, collectorRollers.cargoReleaseSpeed)
+}
 
 /**
  * Deploy panel with slider autoalign
@@ -236,34 +164,19 @@ suspend fun deployCargo(
  * Hook - Up
  * HookSlider - In
  */
-suspend fun deployPanel(
-        lineScanner: LineScannerHardware?,
-        collectorPivot: CollectorPivotComponent?,
-        collectorSlider: CollectorSliderComponent?,
-        hook: HookComponent?,
-        hookSlider: HookSliderComponent?,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Deploy panel") {
+suspend fun Subsystems.deployPanel() {
+    //Collector up
+    collectorPivot?.set(CollectorPivotState.Up)
 
-    choreography {
-        //Collector up
-        collectorPivot?.set(CollectorPivotState.Up)
-
-        //Track line with slider
-        if (lineScanner != null) {
-            collectorSlider?.trackLine(0.5.Inch, lineScanner, electricalSystem)
-        }
-
-        //Eject panel
-        hookSlider?.set(HookSliderState.Out)
-        hook?.set(HookPosition.Down)
-
-        //Reset hook, hook slider
-        hookSlider?.set(HookSliderState.In)
-        hook?.set(HookPosition.Up)
+    //Track line with slider
+    if (lineScanner != null) {
+        collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
     }
-}
 
+    //Eject panel
+    hookSlider?.set(HookSliderState.Out)
+    hook?.set(HookPosition.Down)
+}
 
 /**
  * Deploy panel WITHOUT slider autoalign
@@ -273,22 +186,11 @@ suspend fun deployPanel(
  * Hook - Down
  * HookSlider - In
  */
-suspend fun pushPanel(
-        collectorPivot: CollectorPivotComponent?,
-        hook: HookComponent?,
-        hookSlider: HookSliderComponent?
-) = startChoreo("Push panel") {
+suspend fun Subsystems.pushPanel() {
+    //Collector up
+    collectorPivot?.set(CollectorPivotState.Up)
 
-    choreography {
-        //Collector up
-        collectorPivot?.set(CollectorPivotState.Up)
-
-        //Eject panel
-        hookSlider?.set(HookSliderState.Out)
-        hook?.set(HookPosition.Down)
-
-        //Reset hook, hook slider
-        hookSlider?.set(HookSliderState.In)
-        hook?.set(HookPosition.Up)
-    }
+    //Eject panel
+    hookSlider?.set(HookSliderState.Out)
+    hook?.set(HookPosition.Down)
 }
