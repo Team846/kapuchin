@@ -13,8 +13,6 @@ import info.kunalsheth.units.generated.*
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
 
-    val groundHeight by pref(10, Inch)
-
     val collectCargo by pref(5, Inch)
     val collectPanel by pref(10, Inch)
     val collectGroundPanel by pref(0, Inch)

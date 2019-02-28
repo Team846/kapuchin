@@ -59,10 +59,4 @@ class DriverHardware : RobotHardware<DriverHardware>() {
                 (absoluteWheel.y + 1).Each / 2
         )
     }
-
-    // buttons
-    val collectCargo = s { stick[RightTrigger] }
-    val collectWallPanel = s { stick[BottomTrigger] }
-    val collectGroundPanel = s { stick[LeftTrigger] }
-    val visionAlign = s { stick[Trigger] }
 }

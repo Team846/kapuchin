@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.driver
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -24,19 +25,11 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     private val triggerPressure by pref(50, Percent)
     private val lt get() = xbox.getTriggerAxis(kLeft) > triggerPressure.Each
-    private val rt get() = xbox.getTriggerAxis(kLeft) > triggerPressure.Each
+    private val rt get() = xbox.getTriggerAxis(kRight) > triggerPressure.Each
+    private val lb get() = xbox.getBumper(kLeft)
+    private val rb get() = xbox.getBumper(kRight)
 
-    val groundHeight = s { aButton }
-    val collectGroundPanel = s { aButton && lt }
-
-    val lowPanelHeight = s { yButton }
-    val lowCargoHeight = s { yButton && lt }
-
-    val midPanelHeight = s { xButton }
-    val midCargoHeight = s { xButton && lt }
-
-    val highPanelHeight = s { aButton }
-    val highCargoHeight = s { aButton && lt }
+    private val start get() = xbox.startButton
 
     private val povMush by pref(15, Degree)
     val liftPrecision = s {
@@ -57,9 +50,23 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         }).Each
     }
 
-    val deployPanel = s { rt }
-    val deployCargo = s { lt && rt }
+    val lowPanelHeight = s { aButton && !lt}
+    val lowCargoHeight = s { aButton && lt }
 
-    val pushPanel = s { getBumper(kLeft) }
-    val unleashTheCobra = s { lt && getBumper(kLeft) && getBumper(kRight) }
+    val midPanelHeight = s { bButton && !lt}
+    val midCargoHeight = s { bButton && lt }
+
+    val highPanelHeight = s { yButton && !lt}
+    val highCargoHeight = s { yButton && lt }
+
+    val deployPanel = s { rb && !lt }
+    val deployCargo = s { rb && lt }
+
+    val collectPanel = s { lb && !lt}
+    val collectCargo = s { lb && lt }
+
+    val visionAlign = s { xButton && !lt}
+    val centerCargo = s { xButton && lt}
+
+    val unleashTheCobra = s { start && lt && rt }
 }
