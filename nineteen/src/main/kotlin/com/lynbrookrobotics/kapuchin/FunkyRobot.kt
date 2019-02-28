@@ -27,7 +27,7 @@ class FunkyRobot : RobotBase() {
         println("Initializing hardware...")
 
         Safeties.init()
-        runBlocking { Subsystems.concurrentInit().join() }
+        Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
         Subsystems.uiBaselineTicker.runOnTick { Safeties.currentState().forEach { println(it) } }
 
@@ -43,7 +43,7 @@ class FunkyRobot : RobotBase() {
                 }
 
                 runWhile({ isEnabled && isAutonomous }) {
-                    subsystems.drivetrain.openLoop(30.Percent)
+                    subsystems.collectorRollers?.spin(subsystems.electrical, 8.5.Volt)
                 }
 
                 runWhile({ isDisabled && !isTest }) {

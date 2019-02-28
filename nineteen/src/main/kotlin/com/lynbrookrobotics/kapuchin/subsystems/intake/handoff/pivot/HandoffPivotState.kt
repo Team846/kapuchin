@@ -19,7 +19,6 @@ enum class HandoffPivotState(val rng: ClosedRange<Angle>) {
         operator fun invoke() = Subsystems.instance?.let {
             it.handoffPivot?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
                 if (it == null) {
-                    println("is null")
                     HandoffPivotState.Undetermined
                 } else {
                     when (it) {

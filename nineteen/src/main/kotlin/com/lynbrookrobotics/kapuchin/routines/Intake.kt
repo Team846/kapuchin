@@ -20,8 +20,15 @@ suspend fun CollectorPivotComponent.set(target: CollectorPivotState) = startRout
     controller { target }
 }
 
-suspend fun CollectorRollersComponent.spin(target: DutyCycle) = startRoutine("Spin") {
-    controller { TwoSided(target) }
+suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware, bottom: V, top: V = bottom) = startRoutine("Spin") {
+    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+
+    controller {
+        TwoSided(
+                voltageToDutyCycle(bottom, vBat),
+                voltageToDutyCycle(top, vBat)
+        )
+    }
 }
 
 suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 0.2.Inch) = startRoutine("Set") {
@@ -77,7 +84,7 @@ suspend fun HookSliderComponent.set(target: HookSliderState) = startRoutine("Set
     controller { target }
 }
 
-suspend fun HandoffPivotComponent.set(target: Angle, tolerance: Angle = 5.Degree) = startRoutine("Set") {
+suspend fun HandoffPivotComponent.set(target: Angle, tolerance: Angle = 5.Degree) = startRoutine("Set Angle") {
 
     val current by hardware.position.readOnTick.withoutStamps
 
@@ -94,6 +101,10 @@ suspend fun HandoffPivotComponent.set(target: Angle, tolerance: Angle = 5.Degree
             }
         }
     }
+}
+
+suspend fun HandoffPivotComponent.set(speed: DutyCycle) = startRoutine("Set Duty Cycle") {
+    controller { PercentOutput(speed) }
 }
 
 suspend fun HandoffRollersComponent.spin(target: DutyCycle) = startRoutine("Spin") {

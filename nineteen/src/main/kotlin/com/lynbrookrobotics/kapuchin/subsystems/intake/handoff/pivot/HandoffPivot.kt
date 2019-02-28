@@ -32,26 +32,28 @@ class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffP
     private var lastReverseSoftLimit = Integer.MAX_VALUE
     private var lastForwardSoftLimit = Integer.MIN_VALUE
     override fun HandoffPivotHardware.output(value: OffloadedOutput) {
-        val current = position.optimizedRead(currentTime, 0.Second).y
-
-        val range = unionizeAndFindClosestRange(HandoffPivotState.legalRanges(), current, (Int.MIN_VALUE + 1).Degree)
-
-        if (range.start - range.endInclusive != 0.Degree) {
-            val reverseSoftLimit = conversions.native.native(range.start).toInt()
-            if (reverseSoftLimit != lastReverseSoftLimit) {
-                lastReverseSoftLimit = reverseSoftLimit
-                esc.configReverseSoftLimitThreshold(reverseSoftLimit)
-            }
-
-            val forwardSoftLimit = conversions.native.native(range.endInclusive).toInt()
-            if (forwardSoftLimit != lastForwardSoftLimit) {
-                lastForwardSoftLimit = forwardSoftLimit
-                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
-            }
+//        val current = position.optimizedRead(currentTime, 0.Second).y
+//
+//        val range = unionizeAndFindClosestRange(HandoffPivotState.legalRanges(), current, (Int.MIN_VALUE + 1).Degree)
+//
+//        if (range.start - range.endInclusive != 0.Degree) {
+//            val reverseSoftLimit = conversions.native.native(range.start).toInt()
+//            if (reverseSoftLimit != lastReverseSoftLimit) {
+//                lastReverseSoftLimit = reverseSoftLimit
+//                esc.configReverseSoftLimitThreshold(reverseSoftLimit)
+//                println("setting reverse soft limit to: ${range.start.Degree}")
+//            }
+//
+//            val forwardSoftLimit = conversions.native.native(range.endInclusive).toInt()
+//            if (forwardSoftLimit != lastForwardSoftLimit) {
+//                lastForwardSoftLimit = forwardSoftLimit
+//                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
+//                println("setting forward soft limit to: ${range.endInclusive.Degree}")
+//            }
             lazyOutput(value)
-        } else if (Safeties.log) {
-            log(Warning) { "No legal states found" }
-        }
+//        } else if (Safeties.log) {
+//            log(Warning) { "No legal states found" }
+//        }
     }
 }
 
@@ -64,7 +66,7 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
     val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(10, Ampere)
     val startupFrictionCompensation by pref(0.5, Volt)
-    val maxOutput by pref(30, Percent)
+    val maxOutput by pref(10, Percent)
 
     private val idx = 0
 
@@ -74,15 +76,17 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
     val esc by hardw { TalonSRX(escCanId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
 
+        it.inverted = true
+
         // SAFETY
         +it.configPeakOutputForward(maxOutput.siValue, configTimeout)
         +it.configPeakOutputReverse(-maxOutput.siValue, configTimeout)
 
         with(conversions) {
-            +it.configReverseSoftLimitThreshold(native.native(minPt.first).toInt(), configTimeout)
+            +it.configReverseSoftLimitThreshold(native.native(30.Degree).toInt(), configTimeout)
             +it.configReverseSoftLimitEnable(true, configTimeout)
 
-            +it.configForwardSoftLimitThreshold(native.native(maxPt.first).toInt(), configTimeout)
+            +it.configForwardSoftLimitThreshold(native.native(60.Degree).toInt(), configTimeout)
             +it.configForwardSoftLimitEnable(true, configTimeout)
         }
     }.verify("soft-limits are set correctly") {
