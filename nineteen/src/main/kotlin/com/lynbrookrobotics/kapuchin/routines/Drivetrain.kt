@@ -158,18 +158,18 @@ suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limel
     val startingTurnAngle = startingIsosAngle - startingTXValue!!
 
     controller {
-        if (targetStatus != null && targetStatus == true) {
-            val txValue by limelight.angleToTarget.readOnTick.withoutStamps
-            val sideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget!!.siValue * cos(txValue!!)))
-            val isosAngle = acos(((distanceToTarget * distanceToTarget) + (sideAcrossTX * sideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
-            val currentTurnAngle = isosAngle - txValue!!
-            val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
-            val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
+        val txValue by limelight.angleToTarget.readOnTick.withoutStamps
+        val sideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget!!.siValue * cos(txValue!!)))
+        val isosAngle = acos(((distanceToTarget * distanceToTarget) + (sideAcrossTX * sideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
+        val currentTurnAngle = isosAngle - txValue!!
+        val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
+        val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
 
-            TwoSided(
-                    VelocityOutput(velocityGains, nativeL*(currentTurnAngle/startingTurnAngle).siValue),
-                    VelocityOutput(velocityGains, nativeR*(currentTurnAngle/startingTurnAngle).siValue)
-            )
+        if (targetStatus != null && targetStatus == true && currentTurnAngle.siValue != 0.0){
+                TwoSided(
+                        VelocityOutput(velocityGains, nativeL * (currentTurnAngle / startingTurnAngle).siValue),
+                        VelocityOutput(velocityGains, nativeR * (currentTurnAngle / startingTurnAngle).siValue)
+                )
         } else null
     }
 
