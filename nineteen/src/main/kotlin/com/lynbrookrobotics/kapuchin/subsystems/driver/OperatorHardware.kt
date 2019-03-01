@@ -30,6 +30,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val rb get() = xbox.getBumper(kRight)
 
     private val start get() = xbox.startButton
+    private val back get() = xbox.backButton
 
     private val lStickY get() = xbox.getY(kLeft)
     private val rStickX get() = xbox.getX(kRight)
@@ -67,4 +68,5 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val sliderPrecision = s { joystickMapping(rStickX.Each).Each }
 
     val unleashTheCobra = s { start && lt && rt }
+    val oShitSnekGoBack = s { back && lt && rt }
 }

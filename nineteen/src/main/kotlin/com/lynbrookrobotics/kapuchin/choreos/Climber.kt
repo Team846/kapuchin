@@ -12,11 +12,15 @@ import kotlinx.coroutines.isActive
 suspend fun Subsystems.climberTeleop() = startChoreo("Unleash the cobra") {
 
     val unleashTheCobra by operator.unleashTheCobra.readEagerly().withoutStamps
+    val oShitSnekGoBack by operator.oShitSnekGoBack.readEagerly().withoutStamps
 
     choreography {
-        whenever({ unleashTheCobra }) {
+        whenever({ unleashTheCobra || oShitSnekGoBack }) {
             runWhile({ unleashTheCobra }) {
                 climber?.spin(climber.maxOutput) ?: freeze()
+            }
+            runWhile({ oShitSnekGoBack }) {
+                climber?.spin(-climber.maxOutput) ?: freeze()
             }
         }
     }
