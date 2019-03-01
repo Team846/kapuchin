@@ -22,9 +22,11 @@ import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -66,7 +68,13 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     suspend fun warmup() {
         System.gc()
         runAll(
-                { drivetrain.warmup() }
+                { drivetrain.warmup() },
+                {
+                    while(isActive) {
+                        delay(1.Second)
+                        if(RobotController.getUserButton()) System.exit(0)
+                    }
+                }
         )
         System.gc()
     }
