@@ -26,20 +26,23 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     override val fallbackController: CollectorSliderComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun CollectorSliderHardware.output(value: DutyCycle) {
-        val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val range = unionizeAndFindClosestRange(CollectorSliderState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
+        esc.set(value.Percent)
 
-        if (range.start - range.endInclusive != 0.Inch) {
-            when {
-                value.isPositive && range.endInclusive > current ||
-                        value.isNegative && range.start < current
-                -> esc.set(value.Percent)
-                else -> esc.set(0.0)
-            }
-        } else if (Safeties.log) {
-            //log(Warning) { "No legal states found" }
-        }
+//        val current = position.optimizedRead(currentTime, 0.Second).y
+//
+//        val range = unionizeAndFindClosestRange(CollectorSliderState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
+//
+//        if (range.start - range.endInclusive != 0.Inch) {
+//            when {
+//                value.isPositive && range.endInclusive > current ||
+//                        value.isNegative && range.start < current
+//                -> esc.set(value.Percent)
+//                else -> esc.set(0.0)
+//            }
+//        } else if (Safeties.log) {
+//            //log(Warning) { "No legal states found" }
+//        }
     }
 }
 

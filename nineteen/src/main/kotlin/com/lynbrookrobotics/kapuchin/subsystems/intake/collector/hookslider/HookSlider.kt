@@ -16,14 +16,17 @@ class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderCo
     override val fallbackController: HookSliderComponent.(Time) -> HookSliderState = { In }
 
     override fun HookSliderHardware.output(value: HookSliderState) {
-        val legal = HookSliderState.legalRanges()
 
-        when {
-            !legal.any() -> Unit //log(Warning) { "No legal states found" }
-            value == HookSliderState.Undetermined -> log(Warning) { "Illegal hook slider state inputted" }
-            value in legal || HookSliderState.Undetermined in legal -> solenoid.set(value.output)
-            else -> solenoid.set(legal.first().output)
-        }
+        solenoid.set(value.output)
+
+//        val legal = HookSliderState.legalRanges()
+//
+//        when {
+//            !legal.any() -> Unit //log(Warning) { "No legal states found" }
+//            value == HookSliderState.Undetermined -> log(Warning) { "Illegal hook slider state inputted" }
+//            value in legal || HookSliderState.Undetermined in legal -> solenoid.set(value.output)
+//            else -> solenoid.set(legal.first().output)
+//        }
     }
 }
 

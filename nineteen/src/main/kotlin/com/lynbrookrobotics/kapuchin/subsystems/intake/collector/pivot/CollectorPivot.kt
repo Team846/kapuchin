@@ -18,14 +18,17 @@ class CollectorPivotComponent(hardware: CollectorPivotHardware) : Component<Coll
     override val fallbackController: CollectorPivotComponent.(Time) -> CollectorPivotState = { Up }
 
     override fun CollectorPivotHardware.output(value: CollectorPivotState) {
-        val legal = CollectorPivotState.legalRanges()
 
-        when {
-            !legal.any() -> Unit //log(Warning) { "No legal states found" }
-            value == CollectorPivotState.Undetermined -> log(Warning) { "Illegal collector pivot state inputted" }
-            value in legal || CollectorPivotState.Undetermined in legal -> solenoid.set(value.output)
-            else -> solenoid.set(legal.first().output)
-        }
+        solenoid.set(value.output)
+
+//        val legal = CollectorPivotState.legalRanges()
+//
+//        when {
+//            !legal.any() -> Unit //log(Warning) { "No legal states found" }
+//            value == CollectorPivotState.Undetermined -> log(Warning) { "Illegal collector pivot state inputted" }
+//            value in legal || CollectorPivotState.Undetermined in legal -> solenoid.set(value.output)
+//            else -> solenoid.set(legal.first().output)
+//        }
     }
 }
 

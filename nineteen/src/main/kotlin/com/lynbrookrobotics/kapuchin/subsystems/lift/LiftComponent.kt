@@ -35,25 +35,27 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     private var lastForwardSoftLimit = Integer.MIN_VALUE
     override fun LiftHardware.output(value: OffloadedOutput) {
 
-        val current = position.optimizedRead(currentTime, 0.Second).y
+        lazyOutput(value)
 
-        val range = unionizeAndFindClosestRange(LiftState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
-
-        if (range.start - range.endInclusive != 0.Inch) {
-            val reverseSoftLimit = conversions.native.native(range.start).toInt()
-            if (reverseSoftLimit != lastReverseSoftLimit) {
-                lastReverseSoftLimit = reverseSoftLimit
-                esc.configReverseSoftLimitThreshold(reverseSoftLimit)
-            }
-
-            val forwardSoftLimit = conversions.native.native(range.endInclusive).toInt()
-            if (forwardSoftLimit != lastForwardSoftLimit) {
-                lastForwardSoftLimit = forwardSoftLimit
-                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
-            }
-            lazyOutput(value)
-        } else if (Safeties.log) {
-            log(Warning) { "No legal states found" }
-        }
+//        val current = position.optimizedRead(currentTime, 0.Second).y
+//
+//        val range = unionizeAndFindClosestRange(LiftState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
+//
+//        if (range.start - range.endInclusive != 0.Inch) {
+//            val reverseSoftLimit = conversions.native.native(range.start).toInt()
+//            if (reverseSoftLimit != lastReverseSoftLimit) {
+//                lastReverseSoftLimit = reverseSoftLimit
+//                esc.configReverseSoftLimitThreshold(reverseSoftLimit)
+//            }
+//
+//            val forwardSoftLimit = conversions.native.native(range.endInclusive).toInt()
+//            if (forwardSoftLimit != lastForwardSoftLimit) {
+//                lastForwardSoftLimit = forwardSoftLimit
+//                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
+//            }
+//            lazyOutput(value)
+//        } else if (Safeties.log) {
+//            log(Warning) { "No legal states found" }
+//        }
     }
 }
