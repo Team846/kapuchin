@@ -40,6 +40,7 @@ suspend fun Subsystems.deployCargo() {
 
     //Eject cargo
     collectorRollers?.spin(electrical, collectorRollers.cargoReleaseSpeed)
+    freeze()
 }
 
 suspend fun Subsystems.deployPanel() = coroutineScope {
@@ -88,6 +89,7 @@ suspend fun Subsystems.collectPanel() = coroutineScope {
     //Hook down, slider out
     launch { hook?.set(HookPosition.Down) }
     launch { hookSlider?.set(HookSliderState.Out) }
+    freeze()
 }
 
 suspend fun Subsystems.lineTracking() = coroutineScope {
@@ -95,6 +97,7 @@ suspend fun Subsystems.lineTracking() = coroutineScope {
     if (lineScanner != null) {
         collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
     }
+    freeze()
 }
 
 suspend fun Subsystems.centerSlider() = collectorSlider?.set(
@@ -102,13 +105,19 @@ suspend fun Subsystems.centerSlider() = collectorSlider?.set(
         electrical
 ) ?: freeze()
 
-suspend fun Subsystems.centerCargo() = collectorRollers?.spin(
-        electrical,
-        collectorRollers.cargoCenterSpeed, // bottom out
-        -collectorRollers.cargoCenterSpeed // top in
-) ?: freeze()
+suspend fun Subsystems.centerCargo() {
+    collectorRollers?.spin(
+            electrical,
+            collectorRollers.cargoCenterSpeed, // bottom out
+            -collectorRollers.cargoCenterSpeed // top in
+    )
+    freeze()
+}
 
-suspend fun Subsystems.sliderPrecision(target: DutyCycle) = collectorSlider?.set(target) ?: freeze()
+suspend fun Subsystems.sliderPrecision(target: DutyCycle) {
+    collectorSlider?.set(target)
+    freeze()
+}
 
 /**
  * Collect panel from the ground
