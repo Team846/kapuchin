@@ -18,13 +18,10 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val lineTracking by operator.lineTracking.readEagerly().withoutStamps
     val centerSlider by operator.centerSlider.readEagerly().withoutStamps
     val centerCargo by operator.centerCargo.readEagerly().withoutStamps
-
-    //TODO lift and slider precision
-    val liftPrecision by operator.liftPrecision.readEagerly().withoutStamps
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
-        whenever({ deployCargo || deployPanel || collectCargo || collectPanel || lineTracking || centerCargo }) {
+        whenever({ deployCargo || deployPanel || collectCargo || collectPanel || lineTracking || centerCargo || sliderPrecision != 0.0 }) {
             runWhile({ deployCargo }) { deployCargo() }
             runWhile({ deployPanel }) { deployPanel() }
             runWhile({ collectCargo }) { collectCargo() }
@@ -32,6 +29,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
             runWhile({ lineTracking }) { lineTracking() }
             runWhile({ centerSlider }) { centerSlider() }
             runWhile({ centerCargo }) { centerCargo() }
+            runWhile({ sliderPrecision != 0.0 }) { sliderPrecision(sliderPrecision.Each) }
         }
     }
 }
@@ -102,6 +100,7 @@ suspend fun Subsystems.centerCargo() = collectorRollers?.spin(
         -collectorRollers.cargoCenterSpeed // top in
 ) ?: freeze()
 
+suspend fun Subsystems.sliderPrecision(target: DutyCycle) = collectorSlider?.set(target) ?: freeze()
 
 /**
  * Collect panel from the ground

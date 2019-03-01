@@ -23,3 +23,7 @@ suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = star
         }
     }
 }
+
+suspend fun LiftComponent.set(target: DutyCycle) = startRoutine("Set") {
+    controller { PercentOutput(target) }
+}

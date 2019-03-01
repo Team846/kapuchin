@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
+import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -31,46 +31,40 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     private val start get() = xbox.startButton
 
-    //TODO collector slider right joystick
-    //TODO lift left joystick
-    private val povMush by pref(15, Degree)
-    val liftPrecision = s {
-        val pov = xbox.pov.Degree
-        (when (pov) {
-            in 0.Turn `±` povMush,
-            in 1.Turn `±` povMush -> 1
-            in 0.5.Turn `±` povMush -> -1
-            else -> 0
-        }).Each
-    }
-    val sliderPrecision = s {
-        val pov = xbox.pov.Degree
-        (when (pov) {
-            in 0.25.Turn `±` povMush -> 1
-            in 0.75.Turn `±` povMush -> -1
-            else -> 0
-        }).Each
+    private val lStickY get() = xbox.getY(kLeft)
+    private val rStickX get() = xbox.getX(kRight)
+
+    val joystickMapping by pref {
+        val exponent by pref(2)
+        val deadband by pref(10, Percent)
+        ({
+            val db = horizontalDeadband(deadband, 100.Percent)
+            fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)
+        })
     }
 
-    val lowPanelHeight = s { aButton && !lt}
+    val lowPanelHeight = s { aButton && !lt }
     val lowCargoHeight = s { aButton && lt }
 
-    val midPanelHeight = s { bButton && !lt}
+    val midPanelHeight = s { bButton && !lt }
     val midCargoHeight = s { bButton && lt }
 
-    val highPanelHeight = s { yButton && !lt}
+    val highPanelHeight = s { yButton && !lt }
     val highCargoHeight = s { yButton && lt }
 
     val deployPanel = s { rb && !lt }
     val deployCargo = s { rb && lt }
 
-    val collectPanel = s { lb && !lt}
+    val collectPanel = s { lb && !lt }
     val collectCargo = s { lb && lt }
 
-    val lineTracking = s { rt && !lt && !start}
-    val centerSlider = s { xButton && lt}
+    val lineTracking = s { rt && !lt && !start }
+    val centerSlider = s { xButton && lt }
 
-    val centerCargo = s { xButton && !lt}
+    val centerCargo = s { xButton && !lt }
+
+    val liftPrecision = s { joystickMapping(lStickY.Each).Each }
+    val sliderPrecision = s { joystickMapping(rStickX.Each).Each }
 
     val unleashTheCobra = s { start && lt && rt }
 }

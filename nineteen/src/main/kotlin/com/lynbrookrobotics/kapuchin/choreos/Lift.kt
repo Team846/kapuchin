@@ -2,8 +2,6 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.*
-import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 
 suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
@@ -17,8 +15,10 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
     val highPanelHeight by operator.highPanelHeight.readEagerly().withoutStamps
     val highCargoHeight by operator.highCargoHeight.readEagerly().withoutStamps
 
+    val liftPrecision by operator.liftPrecision.readEagerly().withoutStamps
+
     choreography {
-        whenever({ lowPanelHeight || lowCargoHeight || midPanelHeight || midCargoHeight || highPanelHeight || highCargoHeight }) {
+        whenever({ lowPanelHeight || lowCargoHeight || midPanelHeight || midCargoHeight || highPanelHeight || highCargoHeight || liftPrecision != 0.0 }) {
             runWhile({ lowPanelHeight }) {
                 lift?.set(lift.panelLowRocket, 0.Inch)
             }
@@ -36,6 +36,9 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
             }
             runWhile({ highCargoHeight }) {
                 lift?.set(lift.cargoHighRocket, 0.Inch)
+            }
+            runWhile({ liftPrecision != 0.0 }) {
+                lift?.set(liftPrecision.Each)
             }
         }
     }
