@@ -37,4 +37,6 @@ class CollectorPivotHardware : SubsystemHardware<CollectorPivotHardware, Collect
 
     val solenoidPort by pref(3)
     val solenoid by hardw { Solenoid(solenoidPort) }
+
+    val irPort by pref(0)
 }

@@ -57,7 +57,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         runAll(
                 { drivetrainTeleop() },
                 { intakeTeleop() },
-                { liftTeleop() }
+                { liftTeleop() },
+                { climberTeleop() }
         )
         System.gc()
     }

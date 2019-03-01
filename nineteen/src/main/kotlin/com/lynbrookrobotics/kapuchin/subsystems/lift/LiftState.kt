@@ -7,10 +7,10 @@ import info.kunalsheth.units.generated.*
 
 enum class LiftState(val rng: ClosedRange<Length>) {
 
-    High(30.Inch..80.Inch),
+    High(30.Inch..66.Inch),
     Low(3.Inch..30.Inch),
     Bottom(-1.Inch..3.Inch),
-    Undetermined(-1.Inch..80.Inch);
+    Undetermined(-1.Inch..66.Inch);
 
     companion object {
         val pos = 1
