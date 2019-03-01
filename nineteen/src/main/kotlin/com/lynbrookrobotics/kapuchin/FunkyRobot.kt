@@ -43,7 +43,10 @@ class FunkyRobot : RobotBase() {
                 }
 
                 runWhile({ isEnabled && isAutonomous }) {
-                    subsystems.collectorRollers?.spin(subsystems.electrical, 8.5.Volt)
+                    while(true) {
+                        subsystems.handoffPivot?.set(32.Degree)
+                        subsystems.handoffPivot?.set(58.Degree)
+                    }
                 }
 
                 runWhile({ isDisabled && !isTest }) {

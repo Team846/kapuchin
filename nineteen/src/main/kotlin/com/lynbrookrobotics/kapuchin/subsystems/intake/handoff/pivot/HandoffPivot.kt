@@ -50,7 +50,7 @@ class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffP
 //                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
 //                println("setting forward soft limit to: ${range.endInclusive.Degree}")
 //            }
-            lazyOutput(value)
+        lazyOutput(value)
 //        } else if (Safeties.log) {
 //            log(Warning) { "No legal states found" }
 //        }
@@ -87,24 +87,26 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
         +it.configPeakOutputReverse(-maxOutput.siValue, configTimeout)
 
         with(conversions) {
-            +it.configReverseSoftLimitThreshold(native.native(30.Degree).toInt(), configTimeout)
+            +it.configReverseSoftLimitThreshold(native.native(minPt.first).toInt(), configTimeout)
             +it.configReverseSoftLimitEnable(true, configTimeout)
 
-            +it.configForwardSoftLimitThreshold(native.native(60.Degree).toInt(), configTimeout)
+            +it.configForwardSoftLimitThreshold(native.native(maxPt.first).toInt(), configTimeout)
             +it.configForwardSoftLimitEnable(true, configTimeout)
         }
     }.verify("soft-limits are set correctly") {
         val configs = TalonSRXConfiguration()
         it.getAllConfigs(configs, configTimeout)
-
         configs.reverseSoftLimitThreshold == conversions.minPt.second &&
                 configs.forwardSoftLimitThreshold == conversions.maxPt.second
     }
 
     val lazyOutput = lazyOutput(esc, idx)
 
-    val position = sensor(esc) {
-        conversions.native.realPosition(getSelectedSensorPosition(idx)) stampWith it
+    val nativeGrapher = graph("Native", Each)
+    val position = sensor(esc) { t ->
+        conversions.native.realPosition(
+                getSelectedSensorPosition(idx).also { nativeGrapher(t, it.Each) }
+        ) stampWith t
     }
             .with(graph("Angle", Degree))
 
