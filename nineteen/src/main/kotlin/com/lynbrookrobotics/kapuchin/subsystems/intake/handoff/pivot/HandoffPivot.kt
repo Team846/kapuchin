@@ -68,6 +68,9 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
     val startupFrictionCompensation by pref(0.5, Volt)
     val maxOutput by pref(10, Percent)
 
+    val invert by pref(true)
+    val invertSensor by pref(false)
+
     private val idx = 0
 
     val conversions = HandoffPivotConversions(this)
@@ -76,7 +79,8 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
     val esc by hardw { TalonSRX(escCanId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
 
-        it.inverted = true
+        it.inverted = invert
+        it.setSensorPhase(invertSensor)
 
         // SAFETY
         +it.configPeakOutputForward(maxOutput.siValue, configTimeout)

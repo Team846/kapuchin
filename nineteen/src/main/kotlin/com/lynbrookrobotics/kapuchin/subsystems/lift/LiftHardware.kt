@@ -27,10 +27,16 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val maxOutput by pref(30, Percent)
     val idx = 0
 
+    val invert by pref(false)
+    val invertSensor by pref(false)
+
     val conversions = LiftConversions(this)
 
     val esc by hardw { TalonSRX(escCanId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
+
+        it.inverted = invert
+        it.setSensorPhase(invertSensor)
 
         +it.configPeakOutputForward(maxOutput.siValue, configTimeout)
         +it.configPeakOutputReverse(-maxOutput.siValue, configTimeout)
