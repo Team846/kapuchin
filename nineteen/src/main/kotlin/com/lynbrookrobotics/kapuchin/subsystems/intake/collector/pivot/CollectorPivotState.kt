@@ -12,7 +12,6 @@ enum class CollectorPivotState(val output: Boolean) {
 
     companion object {
         val states = arrayOf(CollectorPivotState.Up, CollectorPivotState.Down)
-        val pos = 4
         operator fun invoke() = CollectorPivotState.Up
 //                Subsystems.instance?.let {
 //            it.collectorPivot?.hardware?.solenoid?.get().let {

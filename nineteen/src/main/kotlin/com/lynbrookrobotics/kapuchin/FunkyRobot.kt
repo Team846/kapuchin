@@ -29,7 +29,6 @@ class FunkyRobot : RobotBase() {
         Safeties.init()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
-        Subsystems.uiBaselineTicker.runOnTick { Safeties.currentState().forEach { println(it) } }
 
         println("Trimming preferences...")
         trim()

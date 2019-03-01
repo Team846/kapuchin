@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.pos
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.states
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
 import kotlin.math.pow
@@ -15,7 +14,6 @@ enum class HookSliderState(val output: Boolean) {
 
     companion object {
         val states = arrayOf(HookSliderState.In, HookSliderState.Out)
-        val pos = 5
         operator fun invoke() = HookSliderState.In
 //                Subsystems.instance?.let {
 //            it.hookSlider?.hardware?.solenoid?.get().let {

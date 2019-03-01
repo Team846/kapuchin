@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderState.Companion.pos
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderState.Companion.states
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
@@ -18,7 +17,6 @@ enum class CollectorSliderState(val rng: ClosedRange<Length>) {
     Undetermined(-16.Inch..16.Inch);
 
     companion object {
-        val pos = 3
         val states = arrayOf(CollectorSliderState.WideLeft,
                 CollectorSliderState.WideRight,
                 CollectorSliderState.NarrowLeft,

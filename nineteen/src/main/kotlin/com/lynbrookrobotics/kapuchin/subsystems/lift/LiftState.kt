@@ -13,7 +13,6 @@ enum class LiftState(val rng: ClosedRange<Length>) {
     Undetermined(-1.Inch..66.Inch);
 
     companion object {
-        val pos = 1
         val states = arrayOf(LiftState.High, LiftState.Low, LiftState.Bottom)
         operator fun invoke() = Subsystems.instance?.let {
             it.lift?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {

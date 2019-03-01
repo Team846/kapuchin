@@ -14,6 +14,14 @@ import kotlin.math.pow
 
 inline class RobotState(val code: Int) {
 
+    override fun toString() = "RobotState(" +
+            "lift=${LiftState.decode(this)}, " +
+            "handoffPivot=${HandoffPivotState.decode(this)}, " +
+            "collectorSlider=${CollectorSliderState.decode(this)}, " +
+            "collectorPivot=${CollectorPivotState.decode(this)}, " +
+            "hookSlider=${HookSliderState.decode(this)}" +
+            ")"
+
     companion object {
 
         //9 always represents `Undetermined`
@@ -29,6 +37,13 @@ inline class RobotState(val code: Int) {
                     collectorPivot.encode() +
                     hookSlider.encode())
         }
+
+        private val LiftState.Companion.pos get() = 1
+        private val HandoffPivotState.Companion.pos get() = 2
+        private val CollectorSliderState.Companion.pos get() = 3
+        private val CollectorPivotState.Companion.pos get() = 4
+        private val HookSliderState.Companion.pos get() = 5
+
         fun LiftState.encode(): Int {
             val index = LiftState.states.indexOf(this)
             return (if (index >= 0) index else 9) * 10.0.pow(LiftState.pos - 1).toInt()
@@ -56,34 +71,34 @@ inline class RobotState(val code: Int) {
 
         fun LiftState.Companion.decode(state: RobotState): LiftState? {
             val index = state.code / (10.0.pow(LiftState.pos - 1).toInt()) % 10
-            return LiftState.Undetermined.takeIf { it -> index == 9 } ?: LiftState.states[index]
+            return LiftState.Undetermined.takeIf { index == 9 } ?: LiftState.states[index]
         }
 
         fun HandoffPivotState.Companion.decode(state: RobotState): HandoffPivotState? {
-            val index = state.code / (10.0.pow(HandoffPivotState.pos -1).toInt()) % 10
-            return HandoffPivotState.Undetermined.takeIf { it -> index == 9 } ?: HandoffPivotState.states[index]
+            val index = state.code / (10.0.pow(HandoffPivotState.pos - 1).toInt()) % 10
+            return HandoffPivotState.Undetermined.takeIf { index == 9 } ?: HandoffPivotState.states[index]
         }
 
         fun CollectorSliderState.Companion.decode(state: RobotState): CollectorSliderState? {
             val index = state.code / (10.0.pow(CollectorSliderState.pos - 1).toInt()) % 10
-            return CollectorSliderState.Undetermined.takeIf { it -> index == 9 } ?:CollectorSliderState.states[index]
+            return CollectorSliderState.Undetermined.takeIf { index == 9 } ?: CollectorSliderState.states[index]
         }
 
         fun CollectorPivotState.Companion.decode(state: RobotState): CollectorPivotState? {
             val index = state.code / (10.0.pow(CollectorPivotState.pos - 1).toInt()) % 10
-            return CollectorPivotState.Undetermined.takeIf { it -> index == 9 } ?:CollectorPivotState.states[index]
+            return CollectorPivotState.Undetermined.takeIf { index == 9 } ?: CollectorPivotState.states[index]
         }
 
         fun HookSliderState.Companion.decode(state: RobotState): HookSliderState? {
             val index = state.code / (10.0.pow(CollectorPivotState.pos - 1).toInt()) % 10
-            return HookSliderState.Undetermined.takeIf { it -> index == 9 } ?: HookSliderState.states[index]
+            return HookSliderState.Undetermined.takeIf { index == 9 } ?: HookSliderState.states[index]
         }
     }
 }
 
-object Safeties : Named by Named("safeties") {
+object Safeties : Named by Named("Safeties") {
 
-    val log by pref(true)
+    val logActive by pref(true)
 
     fun init() {
 //        LiftState.init()
@@ -92,6 +107,17 @@ object Safeties : Named by Named("safeties") {
 //        CollectorPivotState.init()
 //        HookSliderState.init()
         initIllegalStates()
+
+        var lastState = currentState().first()
+        Subsystems.uiBaselineTicker.runOnTick {
+            currentState()
+                    .first()
+                    .takeIf { it != lastState }
+                    ?.also {
+                        log(Debug) { "Transitioned from $lastState to $it" }
+                        lastState = it
+                    }
+        }
     }
 
 
@@ -131,7 +157,7 @@ object Safeties : Named by Named("safeties") {
             hookSlider: HookSliderState? = HookSliderState()
     ) = permuteState(lift, handoffPivot, collectorSlider, collectorPivot, hookSlider)
 
-     private fun initIllegalStates() {
+    private fun initIllegalStates() {
         illegalStates = setOf(
                 permuteState(lift = LiftState.Low, collectorPivot = CollectorPivotState.Down, hookSlider = HookSliderState.Out),
                 permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.WideLeft),
@@ -140,7 +166,7 @@ object Safeties : Named by Named("safeties") {
                 permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowRight),
                 permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowLeft, collectorPivot = CollectorPivotState.Down),
                 permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowRight, collectorPivot = CollectorPivotState.Down)
-                        //permuteState(lift = LiftState.Bottom, handoffPivot = HandoffPivotState.Vertical)
+                //permuteState(lift = LiftState.Bottom, handoffPivot = HandoffPivotState.Vertical)
         ).flatMap { it.asIterable() }
     }
 }

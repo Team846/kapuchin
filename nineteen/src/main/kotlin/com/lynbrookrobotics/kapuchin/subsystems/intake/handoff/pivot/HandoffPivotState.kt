@@ -14,7 +14,6 @@ enum class HandoffPivotState(val rng: ClosedRange<Angle>) {
     Undetermined(-5.Degree..90.Degree);
 
     companion object {
-        val pos = 2
         val states = arrayOf(HandoffPivotState.High, HandoffPivotState.Mid, HandoffPivotState.Low)
         operator fun invoke() = Subsystems.instance?.let {
             it.handoffPivot?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
