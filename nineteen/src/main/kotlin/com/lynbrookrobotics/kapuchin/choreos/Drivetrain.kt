@@ -29,13 +29,24 @@ suspend fun drivetrainTeleop(
         }
     }
 }
+
 suspend fun optimizedLimelightTracking(
         drivetrain: DrivetrainComponent,
-        limelight: LimelightHardware
+        limelight: LimelightHardware,
+        tolerance: Angle = 10.Degree
         ) = startChoreo("Optimized Limelight Tracking"){
 
+    val distToNorm by limelight.distanceToNormal.readEagerly().withoutStamps
+    val targetLocation by limelight.targetPosition.readEagerly().withoutStamps
+    val distanceToTarget = sqrt(Dimensionless((targetLocation!!.x.siValue * targetLocation!!.x.siValue) + (targetLocation!!.y.siValue * targetLocation!!.y.siValue)))
+    val startingTXValue by limelight.targetAngle.readEagerly().withoutStamps
+    val startingSideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget.siValue * cos(startingTXValue!!)))
+    val startingIsosAngle = acos(((distanceToTarget * distanceToTarget) + (startingSideAcrossTX * startingSideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
+    val startingTurnAngle = startingIsosAngle - startingTXValue!!
+
     choreography{
-        //drivetrain.limelightTurnToIsosceles(limelight, 0.5)
+        drivetrain.turn(startingTurnAngle, tolerance/2)
+        // Drive straight for some distance so that the robot won't crash into the vision target after it completes the curve
         drivetrain.limelightCurveDrive(limelight, 2.Foot, 0.5)
     }
 
