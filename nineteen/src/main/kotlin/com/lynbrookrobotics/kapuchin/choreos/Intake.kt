@@ -5,9 +5,13 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.NonCancellable
 
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
@@ -45,14 +49,17 @@ suspend fun Subsystems.deployCargo() {
 
 suspend fun Subsystems.deployPanel() = coroutineScope {
     //Eject panel
+    val j1 = scope.launch { hookSlider?.set(HookSliderState.Out) }
+    delay(0.5.Second)
+    val j2 = scope.launch { hook?.set(HookPosition.Down) }
+
     try {
-        launch { hookSlider?.set(HookSliderState.Out) }
-        launch { hook?.set(HookPosition.Down) }
         freeze()
-    }
-    finally {
-        withTimeout(0.5.Second) {
-            hookSlider?.set(HookSliderState.Out)
+    } finally {
+        withContext(NonCancellable) {
+            j1.cancel()
+            delay(0.5.Second)
+            j2.cancel()
         }
     }
 }
@@ -80,15 +87,27 @@ suspend fun Subsystems.collectCargo() = coroutineScope {
 }
 
 suspend fun Subsystems.collectPanel() = coroutineScope {
+    println("ASDFASDF")
+
     //Center slider
     collectorSlider?.set(0.Inch, electrical)
 
     //Lift down
-    lift?.set(lift.collectPanel, 0.Inch)
+    lift?.set(lift.collectPanel, 1.Inch)
+    launch {
+        println("Lift set")
+        lift?.set(lift.collectPanel, 0.Inch)
+    }
 
     //Hook down, slider out
-    launch { hook?.set(HookPosition.Down) }
-    launch { hookSlider?.set(HookSliderState.Out) }
+    launch {
+        println("Hook down")
+        hook?.set(HookPosition.Down)
+    }
+    launch {
+        println("Slider out")
+        hookSlider?.set(HookSliderState.Out)
+    }
     freeze()
 }
 
