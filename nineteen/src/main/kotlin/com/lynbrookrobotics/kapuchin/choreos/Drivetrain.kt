@@ -32,9 +32,10 @@ suspend fun drivetrainTeleop(
 suspend fun optimizedLimelightTracking(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware
-) = startChoreo("Optimized Limelight Tracking"){
+        ) = startChoreo("Optimized Limelight Tracking"){
 
     choreography{
+        //drivetrain.limelightTurnToIsosceles(limelight, 0.5)
         drivetrain.limelightCurveDrive(limelight, 2.Foot, 0.5)
     }
 

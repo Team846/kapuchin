@@ -143,7 +143,7 @@ suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: Li
     }
 }
 
-suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limelight: LimelightHardware, c:UnicycleDrive, speedMultiplier: Percent) = startRoutine("Turn to Median") {
+suspend fun DrivetrainComponent.limelightTurnToIsosceles(limelight: LimelightHardware, speedMultiplier: Double) = startRoutine("Turn to Median") {
     val distToNorm by limelight.distanceToNormal.readOnTick.withoutStamps
     val targetLocation by limelight.targetPosition.readOnTick.withoutStamps
     val distanceToTarget = sqrt(Dimensionless((targetLocation!!.x.siValue * targetLocation!!.x.siValue) + (targetLocation!!.y.siValue * targetLocation!!.y.siValue)))
@@ -170,7 +170,7 @@ suspend fun DrivetrainComponent.limelightTurnToIsoscleles(speed: Velocity, limel
         val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
         val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
 
-        if (targetStatus != null && targetStatus == true && currentTurnAngle.siValue != 0.0){
+        if (targetStatus != null && targetStatus == true && currentTurnAngle.siValue != 0.0 && corner1!!.abs.Foot > lastCorner!!.abs.Foot){
                 TwoSided(
                         VelocityOutput(velocityGains, nativeL * (currentTurnAngle / startingTurnAngle).siValue),
                         VelocityOutput(velocityGains, nativeR * (currentTurnAngle / startingTurnAngle).siValue)
@@ -203,7 +203,7 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
     val outerVelocity = maxSpeed * speedMultiplier
     val innerVelocity = (outerVelocity * innerLength / outerLength)
     controller {
-        if (targetStatus != null && targetStatus == true && corner1!!.Foot > lastCorner!!.Foot) {
+        if (targetStatus != null && targetStatus == true && (corner1!!.abs).Foot > (lastCorner!!.abs.Foot)) {
 
             val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
             val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
@@ -212,7 +212,7 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
                     VelocityOutput(velocityGains, nativeL),
                     VelocityOutput(velocityGains, nativeR)
             )
-        } else if (targetStatus != null && targetStatus == true && corner1!!.Foot > lastCorner!!.Foot) {
+        } else if (targetStatus != null && targetStatus == true && corner1!!.abs.Foot > lastCorner!!.abs.Foot) {
 
             val nativeL = hardware.conversions.nativeConversion.native(innerVelocity)
             val nativeR = hardware.conversions.nativeConversion.native(outerVelocity)
