@@ -42,10 +42,18 @@ suspend fun Subsystems.deployCargo() {
     collectorRollers?.spin(electrical, collectorRollers.cargoReleaseSpeed)
 }
 
-suspend fun Subsystems.deployPanel() {
+suspend fun Subsystems.deployPanel() = coroutineScope {
     //Eject panel
-    hookSlider?.set(HookSliderState.Out)
-    hook?.set(HookPosition.Down)
+    try {
+        launch { hookSlider?.set(HookSliderState.Out) }
+        launch { hook?.set(HookPosition.Down) }
+        freeze()
+    }
+    finally {
+        withTimeout(0.5.Second) {
+            hookSlider?.set(HookSliderState.Out)
+        }
+    }
 }
 
 suspend fun Subsystems.collectCargo() = coroutineScope {
