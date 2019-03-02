@@ -13,15 +13,15 @@ import info.kunalsheth.units.generated.*
 
 class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
 
-    val collectCargo by pref(5, Inch)
-    val collectPanel by pref(10, Inch)
+    val collectCargo by pref(6, Inch)
+    val collectPanel by pref(4.24, Inch)
     val collectGroundPanel by pref(0, Inch)
 
-    val panelLowRocket by pref(19, Inch)
-    val panelMidRocket by pref(47, Inch)
-    val panelHighRocket by pref(75, Inch)
+    val panelLowRocket by pref(4.24, Inch)
+    val panelMidRocket by pref(31.8, Inch)
+    val panelHighRocket by pref(59.8, Inch)
 
-    private val panelCargoOffset by pref(-6, Inch)
+    private val panelCargoOffset by pref(-2.50, Inch)
     val cargoLowRocket get() = panelLowRocket + panelCargoOffset
     val cargoMidRocket get() = panelMidRocket + panelCargoOffset
     val cargoHighRocket get() = panelHighRocket + panelCargoOffset
