@@ -57,6 +57,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val deployCargo = s { rb && lt }
 
     val collectPanel = s { lb && !lt }
+    val collectGroundPanel = s { lb && aButton }
     val collectCargo = s { lb && lt }
 
     val lineTracking = s { rt && !lt && !start }

@@ -15,9 +15,9 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     override val priority = Priority.Medium
     override val name = "Line Scanner"
 
-    val exposurePort by pref(2)
-    val thresholdPort by pref(3)
-    val feedbackPort by pref(4)
+    private val exposurePort by pref(2)
+    private val thresholdPort by pref(3)
+    private val feedbackPort by pref(4)
 
     private val lineScanner by hardw {
         LineScanner(
@@ -31,8 +31,10 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     private val threshold by pref(25, Percent)
     private val scanWidth by pref(12, Inch)
 
-    val linePosition = sensor(lineScanner) { t ->
+    val nativeGrapher = graph("Native", Each)
+    val linePosition = sensor(lineScanner) {
         val (x, y) = lineScanner(exposure, threshold)
+        nativeGrapher(x, y ?: Double.NaN.Each)
         y?.let { it * scanWidth - scanWidth / 2 } stampWith x
     }
             .with(graph("Line Position", Inch)) { it ?: 0.Inch }

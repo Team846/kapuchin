@@ -18,6 +18,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.system.measureTimeMillis
+import com.lynbrookrobotics.kapuchin.control.math.*
 
 class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffPivotComponent, HandoffPivotHardware, OffloadedOutput>(hardware, EventLoop) {
 
@@ -96,8 +97,8 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
     }.verify("soft-limits are set correctly") {
         val configs = TalonSRXConfiguration()
         it.getAllConfigs(configs, configTimeout)
-        configs.reverseSoftLimitThreshold == conversions.minPt.second &&
-                configs.forwardSoftLimitThreshold == conversions.maxPt.second
+        configs.reverseSoftLimitThreshold in conversions.minPt.second `±` 2 &&
+                configs.forwardSoftLimitThreshold in conversions.maxPt.second `±` 2
     }
 
     val lazyOutput = lazyOutput(esc, idx)

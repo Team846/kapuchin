@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -70,9 +71,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         runAll(
                 { drivetrain.warmup() },
                 {
-                    while(isActive) {
+                    while (isActive) {
                         delay(1.Second)
-                        if(RobotController.getUserButton()) System.exit(0)
+                        if (RobotController.getUserButton()) System.exit(0)
                     }
                 }
         )
@@ -104,6 +105,15 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     companion object : Named by Named("Subsystems") {
 
+        val isCorrupted by pref(true)
+
+        init {
+            if (isCorrupted) {
+                log(Error) { "The config seems to be corrupted. Blocking indefinitely." }
+                while (isCorrupted) Thread.sleep(1000)
+                System.exit(0)
+            }
+        }
 
         val initLeds by pref(true)
         val initLineScanner by pref(true)

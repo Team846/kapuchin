@@ -55,7 +55,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
     var startingAngle = -absSteering + position.y.bearing
 
-    controller { t ->
+    controller {
         if (
                 speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero
         ) System.gc()

@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -113,9 +114,34 @@ object Safeties : Named by Named("Safeties") {
             currentState()
                     .first()
                     .takeIf { it != lastState }
-                    ?.also {
-                        log(Debug) { "Transitioned from $lastState to $it" }
-                        lastState = it
+                    ?.also { state ->
+                        with(LiftState) {
+                            if (decode(lastState) != decode(state)) log(Debug) {
+                                "Lift transitioned from ${decode(lastState)} to ${decode(state)}"
+                            }
+                        }
+                        with(HandoffPivotState) {
+                            if (decode(lastState) != decode(state)) log(Debug) {
+                                "Handoff Pivot transitioned from ${decode(lastState)} to ${decode(state)}"
+                            }
+                        }
+                        with(CollectorSliderState) {
+                            if (decode(lastState) != decode(state)) log(Debug) {
+                                "Collector Slider transitioned from ${decode(lastState)} to ${decode(state)}"
+                            }
+                        }
+                        with(CollectorPivotState) {
+                            if (decode(lastState) != decode(state)) log(Debug) {
+                                "Collector Pivot transitioned from ${decode(lastState)} to ${decode(state)}"
+                            }
+                        }
+                        with(HookSliderState) {
+                            if (decode(lastState) != decode(state)) log(Debug) {
+                                "Hook Slider transitioned from ${decode(lastState)} to ${decode(state)}"
+                            }
+                        }
+
+                        lastState = state
                     }
         }
     }

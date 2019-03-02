@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.ctre.phoenix.motorcontrol.NeutralMode.Brake
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
@@ -52,8 +53,11 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     }.verify("soft-limits are set correctly") {
         val configs = TalonSRXConfiguration()
         it.getAllConfigs(configs, configTimeout)
-        configs.reverseSoftLimitThreshold == conversions.minPt.second &&
-                configs.forwardSoftLimitThreshold == conversions.maxPt.second
+
+        configs.reverseSoftLimitThreshold.toDouble() in
+                conversions.minPt.second.toDouble() `±` 2.0 &&
+                configs.forwardSoftLimitThreshold.toDouble() in
+                conversions.maxPt.second.toDouble() `±` 2.0
     }
 
     val lazyOutput = lazyOutput(esc, idx)
