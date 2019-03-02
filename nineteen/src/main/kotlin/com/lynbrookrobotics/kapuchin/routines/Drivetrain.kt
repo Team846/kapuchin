@@ -122,7 +122,7 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     }
 }
 
-suspend fun DrivetrainComponent.limelightTurn(target: Angle, tolerance: Angle, limelight: LimelightHardware) = startRoutine("Limelight Turn") {
+/*suspend fun DrivetrainComponent.limelightTurn(target: Angle, tolerance: Angle, limelight: LimelightHardware) = startRoutine("Limelight Turn") {
     val uni = UnicycleDrive(this@limelightTurn, this@startRoutine)
 
     controller {
@@ -143,7 +143,7 @@ suspend fun DrivetrainComponent.limelightTurn(target: Angle, tolerance: Angle, l
         }
     }
 }
-
+*/
 suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Limelight tracking") {
     val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
     val robotPosition by hardware.position.readOnTick.withoutStamps
@@ -229,8 +229,8 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
     controller {
         if (targetStatus != null && targetStatus == true && (corner1!!.abs.Foot - corner2!!.abs.Foot).Foot.abs > (corner6!!.abs.Foot - corner7!!.abs.Foot).Foot.abs) {
 
-                    val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
-                    val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
+                    val nativeL = hardware.conversions.nativeConversion.native(innerVelocity)
+                    val nativeR = hardware.conversions.nativeConversion.native(outerVelocity)
 
                     TwoSided(
                             VelocityOutput(velocityGains, nativeL),
@@ -238,8 +238,8 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
                     )
                 } else if (targetStatus != null && targetStatus == true && (corner1!!.abs.Foot - corner2!!.abs.Foot).Foot.abs < (corner6!!.abs.Foot - corner7!!.abs.Foot).Foot.abs) {
 
-            val nativeL = hardware.conversions.nativeConversion.native(innerVelocity)
-            val nativeR = hardware.conversions.nativeConversion.native(outerVelocity)
+            val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
+            val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
 
             TwoSided(
                     VelocityOutput(velocityGains, nativeL),
