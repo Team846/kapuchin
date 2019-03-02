@@ -73,9 +73,19 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
             Length(corners[0])
         }else null)stampWith timeStamp(it)
     }
-    val cornerLast: Sensor<Length?> =sensor{
+    val corner2=sensor{
         (if (targetExists()){
-            Length(corners[corners.size-1])
+            Length(corners[1])
+        }else null)stampWith timeStamp(it)
+    }
+    val corner6=sensor{
+        (if (targetExists()){
+            Length(corners[5])
+        }else null)stampWith timeStamp(it)
+    }
+    val corner7: Sensor<Length?> =sensor{
+        (if (targetExists() && corners.size>=7){
+            Length(corners[6])
         }else null)stampWith timeStamp(it)
     }
     val targetAngle = sensor {

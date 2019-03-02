@@ -122,6 +122,28 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     }
 }
 
+suspend fun DrivetrainComponent.limelightTurn(target: Angle, tolerance: Angle, limelight: LimelightHardware) = startRoutine("Limelight Turn") {
+    val uni = UnicycleDrive(this@limelightTurn, this@startRoutine)
+
+    controller {
+        val (targVels, error) = uni.speedAngleTarget(0.FootPerSecond, target)
+
+        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
+        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+
+        val corner1 by limelight.corner1.readOnTick.withoutStamps
+        val corner2 by limelight.corner1.readOnTick.withoutStamps
+        val corner6 by limelight.corner1.readOnTick.withoutStamps
+        val corner7 by limelight.corner1.readOnTick.withoutStamps
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        ).takeIf {
+            error !in 0.Degree `±` tolerance
+        }
+    }
+}
+
 suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Limelight tracking") {
     val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
     val robotPosition by hardware.position.readOnTick.withoutStamps
@@ -183,7 +205,7 @@ suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: Li
 suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware,
                                                     trackLength: Length,
                                                     speedMultiplier: Double
-                                                    ) = startRoutine("Curve Drive to Target") {
+) = startRoutine("Curve Drive to Target") {
     val target by limelight.targetPosition.readOnTick.withoutStamps
     val txValue by limelight.angleToTarget.readOnTick.withoutStamps
     val distanceToTarget = sqrt(((target!!.x / 1.Foot) * (target!!.x / 1.Foot)) + ((target!!.y / 1.Foot) * (target!!.y / 1.Foot)))
@@ -198,21 +220,23 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
     val outerLength = ((distanceToTarget * (aTTinRadians / 1.Radian) / sin(aTTinRadians / converter)) + (trackLength / 1.Foot) * (aTTinRadians / 1.Radian))
 
     val corner1 by limelight.corner1.readOnTick.withoutStamps
-    val lastCorner by limelight.cornerLast.readOnTick.withoutStamps
+    val corner2 by limelight.corner2.readOnTick.withoutStamps
+    val corner6 by limelight.corner6.readOnTick.withoutStamps
+    val corner7 by limelight.corner7.readOnTick.withoutStamps
 
     val outerVelocity = maxSpeed * speedMultiplier
     val innerVelocity = (outerVelocity * innerLength / outerLength)
     controller {
-        if (targetStatus != null && targetStatus == true && (corner1!!.abs).Foot > (lastCorner!!.abs.Foot)) {
+        if (targetStatus != null && targetStatus == true && (corner1!!.abs.Foot - corner2!!.abs.Foot).Foot.abs > (corner6!!.abs.Foot - corner7!!.abs.Foot).Foot.abs) {
 
-            val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
-            val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
+                    val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
+                    val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
 
-            TwoSided(
-                    VelocityOutput(velocityGains, nativeL),
-                    VelocityOutput(velocityGains, nativeR)
-            )
-        } else if (targetStatus != null && targetStatus == true && corner1!!.abs.Foot > lastCorner!!.abs.Foot) {
+                    TwoSided(
+                            VelocityOutput(velocityGains, nativeL),
+                            VelocityOutput(velocityGains, nativeR)
+                    )
+                } else if (targetStatus != null && targetStatus == true && (corner1!!.abs.Foot - corner2!!.abs.Foot).Foot.abs < (corner6!!.abs.Foot - corner7!!.abs.Foot).Foot.abs) {
 
             val nativeL = hardware.conversions.nativeConversion.native(innerVelocity)
             val nativeR = hardware.conversions.nativeConversion.native(outerVelocity)
