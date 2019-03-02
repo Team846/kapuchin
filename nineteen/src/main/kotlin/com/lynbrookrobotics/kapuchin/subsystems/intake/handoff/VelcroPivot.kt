@@ -26,7 +26,7 @@ class VelcroPivotHardware : SubsystemHardware<VelcroPivotHardware, VelcroPivotCo
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Velcro Pivot"
 
-    val solenoidPort by pref(1)
+    val solenoidPort = 1
     val solenoid = Solenoid(solenoidPort)
 
 }

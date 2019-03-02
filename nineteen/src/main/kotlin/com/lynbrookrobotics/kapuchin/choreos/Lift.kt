@@ -18,7 +18,7 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
     val liftPrecision by operator.liftPrecision.readEagerly().withoutStamps
 
     choreography {
-        whenever({ lowPanelHeight || lowCargoHeight || midPanelHeight || midCargoHeight || highPanelHeight || highCargoHeight || liftPrecision != 0.0 }) {
+        whenever({ lowPanelHeight || lowCargoHeight || midPanelHeight || midCargoHeight || highPanelHeight || highCargoHeight || !liftPrecision.isZero}) {
             runWhile({ lowPanelHeight }) {
                 lift?.set(lift.panelLowRocket, 0.Inch)
             }
@@ -37,8 +37,8 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
             runWhile({ highCargoHeight }) {
                 lift?.set(lift.cargoHighRocket, 0.Inch)
             }
-            runWhile({ liftPrecision != 0.0 }) {
-                lift?.set(liftPrecision.Each)
+            runWhile({ !liftPrecision.isZero }) {
+                lift?.manualOverride(operator)
             }
         }
     }

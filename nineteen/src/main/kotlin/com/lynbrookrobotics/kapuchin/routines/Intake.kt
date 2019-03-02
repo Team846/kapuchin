@@ -9,9 +9,11 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.control.electrical.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
+import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.math.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -62,8 +64,13 @@ suspend fun CollectorSliderComponent.trackLine(tolerance: Length, lineScanner: L
     }
 }
 
-suspend fun CollectorSliderComponent.set(target: DutyCycle) = startRoutine("Zero") {
+suspend fun CollectorSliderComponent.set(target: DutyCycle) = startRoutine("Manual Override") {
     controller { target }
+}
+
+suspend fun CollectorSliderComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
+    val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
+    controller { sliderPrecision }
 }
 
 suspend fun CollectorSliderComponent.zero() = startChoreo("Zero") {

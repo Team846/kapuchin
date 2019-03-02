@@ -38,12 +38,12 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
     private val invertTop by pref(false)
     private val invertBottom by pref(false)
 
-    val bottomPwmPort by pref(0)
+    val bottomPwmPort = 0
     val bottomEsc by hardw { Spark(bottomPwmPort) }.configure {
         it.inverted = invertTop
     }
 
-    val topCanId by pref(50)
+    val topCanId = 50
     val topEsc by hardw { VictorSPX(topCanId) }.configure {
         generalSetup(it, 12.Volt, 20.Ampere, 0.Volt)
         it.inverted = invertBottom

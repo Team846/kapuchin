@@ -26,7 +26,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
-        whenever({ deployCargo || deployPanel || collectCargo || collectGroundPanel || lineTracking || centerCargo || sliderPrecision != 0.0 }) {
+        whenever({ deployCargo || deployPanel || collectCargo || collectGroundPanel || lineTracking || centerCargo || !sliderPrecision.isZero }) {
             runWhile({ deployCargo }) { deployCargo() }
             runWhile({ deployPanel }) { deployPanel() }
             runWhile({ collectCargo }) { collectCargo() }
@@ -35,7 +35,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
             runWhile({ lineTracking }) { lineTracking() }
             runWhile({ centerSlider }) { centerSlider() }
             runWhile({ centerCargo }) { centerCargo() }
-            runWhile({ sliderPrecision != 0.0 }) { sliderPrecision(sliderPrecision.Each) }
+            runWhile({ !sliderPrecision.isZero }) { collectorSlider?.manualOverride(operator) }
         }
     }
 }
@@ -67,25 +67,27 @@ suspend fun Subsystems.deployPanel() = coroutineScope {
 }
 
 suspend fun Subsystems.collectCargo() = coroutineScope {
+    //Start rollers
+    launch { handoffRollers?.spin(handoffRollers.cargoCollectSpeed) }
+    launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
+
+    //Center slider
+    collectorSlider?.set(0.Inch, electrical)
+
+    //Set handoff pivot down
+    withTimeout(1.Second) { handoffPivot?.set(handoffPivot.collectPosition, 10.Degree) }
+    launch { handoffPivot?.set(handoffPivot.collectPosition, 0.Degree) }
+
+    //lift, collector down
+    launch { lift?.set(lift.collectCargo, 0.Inch) }
+    val j1 = scope.launch { collectorPivot?.set(CollectorPivotState.Down) }
+
     try {
-        //Start rollers
-        launch { handoffRollers?.spin(handoffRollers.cargoCollectSpeed) }
-        launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
-
-        //Center slider
-        collectorSlider?.set(0.Inch, electrical)
-
-        //Set handoff pivot down
-        handoffPivot?.set(handoffPivot.collectPosition)
-
-        //lift, collector down
-        launch { lift?.set(lift.collectCargo, 0.Inch) }
-        launch { collectorPivot?.set(CollectorPivotState.Down) }
-
         freeze()
     } finally {
         withContext(NonCancellable) {
-            handoffPivot?.set(handoffPivot.handoffPosition)
+            delay(1.Second)
+            j1.cancel()
         }
     }
 }
@@ -95,7 +97,7 @@ suspend fun Subsystems.collectPanel() = coroutineScope {
     collectorSlider?.set(0.Inch, electrical)
 
     //Lift down
-    lift?.set(lift.collectPanel, 1.Inch)
+    withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
     launch { lift?.set(lift.collectPanel, 0.Inch) }
 
     //Hook down, slider out
@@ -129,11 +131,6 @@ suspend fun Subsystems.centerCargo() {
     freeze()
 }
 
-suspend fun Subsystems.sliderPrecision(target: DutyCycle) {
-    collectorSlider?.set(target)
-    freeze()
-}
-
 /**
  * Collect panel from the ground
  *
@@ -146,24 +143,17 @@ suspend fun Subsystems.sliderPrecision(target: DutyCycle) {
  * Lift - Collect ground panel height
  */
 suspend fun Subsystems.collectGroundPanel() = coroutineScope {
-    try {
-        //Center slider
-        collectorSlider?.set(0.Inch, electrical)
+    //Center slider
+    collectorSlider?.set(0.Inch, electrical)
 
-        //Lift down
-        launch { lift?.set(lift.collectGroundPanel) }
+    //Lift down
+    launch { lift?.set(lift.collectGroundPanel) }
 
-        //Handoff, velcro, hook down
-        launch { handoffPivot?.set(handoffPivot.collectPosition) }
-        launch { velcroPivot?.set(VelcroPivotPosition.Down) }
-        launch { hook?.set(HookPosition.Down) }
+    //Handoff, velcro, hook down
+    launch { handoffPivot?.set(handoffPivot.collectPosition) }
+    launch { velcroPivot?.set(VelcroPivotPosition.Down) }
+    launch { hook?.set(HookPosition.Down) }
 
-        freeze()
-    } finally {
-        withContext(NonCancellable) {
-            //Handoff, hook up
-            handoffPivot?.set(handoffPivot.handoffPosition)
-        }
-    }
+    freeze()
 }
 

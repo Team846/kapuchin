@@ -58,7 +58,7 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
 
     val invert by pref(false)
 
-    val escCanId by pref(20)
+    val escCanId = 20
 
     val esc by hardw { CANSparkMax(escCanId, MotorType.kBrushless) }.configure {
         it.setSmartCurrentLimit(currentLimit.Ampere.toInt())

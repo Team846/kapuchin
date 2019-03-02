@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -24,6 +25,7 @@ suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = star
     }
 }
 
-suspend fun LiftComponent.set(target: DutyCycle) = startRoutine("Set") {
-    controller { PercentOutput(target) }
+suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual override") {
+    val liftPrecision by operator.liftPrecision.readEagerly().withoutStamps
+    controller { PercentOutput(liftPrecision) }
 }

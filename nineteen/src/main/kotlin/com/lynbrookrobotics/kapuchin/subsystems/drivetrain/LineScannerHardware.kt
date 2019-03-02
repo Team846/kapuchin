@@ -15,9 +15,9 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     override val priority = Priority.Medium
     override val name = "Line Scanner"
 
-    private val exposurePort by pref(2)
-    private val thresholdPort by pref(3)
-    private val feedbackPort by pref(4)
+    private val exposurePort = 2
+    private val thresholdPort = 3
+    private val feedbackPort = 4
 
     private val lineScanner by hardw {
         LineScanner(

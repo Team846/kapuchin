@@ -38,8 +38,8 @@ class CollectorPivotHardware : SubsystemHardware<CollectorPivotHardware, Collect
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Collector Pivot"
 
-    val solenoidPort by pref(3)
+    val solenoidPort = 0
     val solenoid by hardw { Solenoid(solenoidPort) }
 
-    val irPort by pref(0)
+    val irPort = 0
 }

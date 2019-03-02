@@ -35,10 +35,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val currentLimit by pref(30, Ampere)
     val startupFrictionCompensation by pref(1.4, Volt)
 
-    val leftSlaveEscId by pref(11)
-    val rightSlaveEscId by pref(13)
-    val rightMasterEscId by pref(12)
-    val leftMasterEscId by pref(10)
+    val leftSlaveEscId = 11
+    val rightSlaveEscId = 13
+    val rightMasterEscId = 12
+    val leftMasterEscId = 10
 
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
@@ -77,7 +77,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc)
 
-    private val ticksToSerialPort by pref("kUSB1")
+    private val ticksToSerialPort = "kUSB1"
     private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
 
     val position = sensor {

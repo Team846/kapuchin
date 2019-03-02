@@ -30,9 +30,9 @@ class ClimberHardware : SubsystemHardware<ClimberHardware, ClimberComponent>() {
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Climber"
 
-    val leftEscPort by pref(4)
-    val leftEsc by hardw { Spark(leftEscPort) }
+    val leftPwmPort = 8
+    val leftEsc by hardw { Spark(leftPwmPort) }
 
-    val rightEscPort by pref(5)
-    val rightEsc by hardw { Spark(rightEscPort) }
+    val rightPwmPort = 9
+    val rightEsc by hardw { Spark(rightPwmPort) }
 }

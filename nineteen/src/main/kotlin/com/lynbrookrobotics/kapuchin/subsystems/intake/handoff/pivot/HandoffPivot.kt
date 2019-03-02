@@ -28,7 +28,17 @@ class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffP
     val kP by pref(5, Volt, 30, Degree)
     val kD by pref(0, Volt, 360, DegreePerSecond)
 
-    override val fallbackController: HandoffPivotComponent.(Time) -> OffloadedOutput = { PercentOutput(0.Percent) }
+    override val fallbackController: HandoffPivotComponent.(Time) -> OffloadedOutput = {
+        with(hardware.conversions.native) {
+            PositionOutput(
+                    OffloadedPidGains(
+                            kP = native(kP),
+                            kI = 0.0,
+                            kD = native(kD)
+                    ), native(handoffPosition)
+            )
+        }
+    }
 
     private var lastReverseSoftLimit = Integer.MAX_VALUE
     private var lastForwardSoftLimit = Integer.MIN_VALUE
@@ -76,7 +86,7 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
 
     val conversions = HandoffPivotConversions(this)
 
-    val escCanId by pref(30)
+    val escCanId = 30
     val esc by hardw { TalonSRX(escCanId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
 

@@ -65,8 +65,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val centerCargo = s { xButton && !lt }
 
-    val liftPrecision = s { joystickMapping(lStickY.Each).Each }
-    val sliderPrecision = s { joystickMapping(rStickX.Each).Each }
+    val liftPrecision = s { joystickMapping(lStickY.Each) }
+    val sliderPrecision = s { joystickMapping(rStickX.Each) }
 
     val unleashTheCobra = s { start && lt && rt }
     val oShitSnekGoBack = s { back && lt && rt }

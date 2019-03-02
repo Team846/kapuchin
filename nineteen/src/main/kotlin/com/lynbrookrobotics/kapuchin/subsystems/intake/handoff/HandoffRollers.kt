@@ -33,9 +33,9 @@ class HandoffRollersHardware : SubsystemHardware<HandoffRollersHardware, Handoff
     val invertLeft by pref(false)
     val invertRight by pref(true)
 
-    val leftPwmPort by pref(2)
+    val leftPwmPort = 1
     val leftEsc by hardw { Spark(leftPwmPort) }.configure { it.inverted = invertLeft }
 
-    val rightPwmPort by pref(3)
+    val rightPwmPort = 5
     val rightEsc by hardw { Spark(rightPwmPort) }.configure { it.inverted = invertRight }
 }
