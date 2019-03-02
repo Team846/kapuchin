@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     override val priority = Priority.Medium
@@ -31,9 +32,16 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     private val threshold by pref(25, Percent)
     private val scanWidth by pref(12, Inch)
 
+    val lineScannerSideShift by pref(8, Inch)
+    val scannerRange by pref (53, Degree)
+    val scannerHeight by pref (6, Inch)
+    val scannerDistFromHeight: Length = (lineScannerSideShift.Inch-lineScanner(exposure,threshold).y!!.Each).Inch
+    val scannerAngle = atan(Dimensionless(scanWidth.Inch+scannerDistFromHeight.Inch)/scannerHeight.Inch) - scannerRange/2
+    val input:Angle = Angle(lineScanner(exposure,threshold).y!!.Each)
+
     val linePosition = sensor(lineScanner) { t ->
         val (x, y) = lineScanner(exposure, threshold)
-        y?.let { it * scanWidth - scanWidth / 2 } stampWith x
+        y?.let { (scannerHeight* sin(input))/(cos(scannerAngle)*cos(scannerAngle+input)) } stampWith x
     }
             .with(graph("Line Position", Inch)) { it ?: 0.Inch }
 
