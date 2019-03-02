@@ -16,7 +16,7 @@ import info.kunalsheth.units.math.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-suspend fun CollectorPivotComponent.set(target: CollectorPivotPosition) = startRoutine("Set") {
+suspend fun CollectorPivotComponent.set(target: CollectorPivotState) = startRoutine("Set") {
     controller { target }
 }
 
@@ -61,7 +61,7 @@ suspend fun HookComponent.set(target: HookPosition) = startRoutine("Set") {
     controller { target }
 }
 
-suspend fun HookSliderComponent.set(target: HookSliderPosition) = startRoutine("Set") {
+suspend fun HookSliderComponent.set(target: HookSliderState) = startRoutine("Set") {
     controller { target }
 }
 

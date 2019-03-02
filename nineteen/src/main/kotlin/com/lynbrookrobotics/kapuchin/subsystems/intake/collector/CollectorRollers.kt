@@ -1,5 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
+import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -20,7 +22,7 @@ class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<
 
     override fun CollectorRollersHardware.output(value: TwoSided<DutyCycle>) {
         topEsc.set(value.left.Each)
-        botEsc.set(value.right.Each)
+        botEsc.set(ControlMode.PercentOutput, value.right.Each)
     }
 
 }
@@ -34,6 +36,6 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
     val topPwmPort by pref(0)
     val topEsc by hardw { Spark(topPwmPort) }
 
-    val bottomPwmPort by pref(1)
-    val botEsc by hardw { Spark(bottomPwmPort) }.configure { it.inverted = true }
+    val botCanID by pref(50)
+    val botEsc by hardw { VictorSPX(botCanID) }.configure { it.inverted = true }
 }

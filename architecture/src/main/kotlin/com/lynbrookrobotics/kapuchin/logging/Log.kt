@@ -12,7 +12,26 @@ import kotlin.math.round
 private val printMutex = Mutex()
 
 /**
- * Logs an exception stacktrace
+ * Logs an exception
+ *
+ * @author Kunal
+ *
+ * @receiver owner of the exception
+ * @param level message importance
+ * @param throwable data to log
+ * @param message any additional information
+ * @return asynchronous logging job
+ */
+fun Named.log(level: Level, throwable: Throwable): Job = log(level, throwable) {
+    """
+    $throwable
+    Message: ${throwable.message}
+    Cause:   ${throwable.cause}
+""".trimIndent()
+}
+
+/**
+ * Logs an exception stacktrace with custom message
  *
  * @author Kunal
  *

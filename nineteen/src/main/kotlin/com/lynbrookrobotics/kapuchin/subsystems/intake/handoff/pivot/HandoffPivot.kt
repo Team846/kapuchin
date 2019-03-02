@@ -33,7 +33,7 @@ class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffP
     override fun HandoffPivotHardware.output(value: OffloadedOutput) {
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE + 1).Degree)
+        val range = unionizeAndFindClosestRange(HandoffPivotState.legalRanges(), current, (Int.MIN_VALUE + 1).Degree)
 
         if (range.start - range.endInclusive != 0.Degree) {
             val reverseSoftLimit = conversions.native.native(range.start).toInt()

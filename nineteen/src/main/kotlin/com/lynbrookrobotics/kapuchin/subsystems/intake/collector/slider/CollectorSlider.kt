@@ -26,7 +26,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     override fun CollectorSliderHardware.output(value: DutyCycle) {
         val current = position.optimizedRead(currentTime, 0.Second).y
 
-        val range = unionizeAndFindClosestRange(legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
+        val range = unionizeAndFindClosestRange(CollectorSliderState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
 
         if (range.start - range.endInclusive != 0.Inch) {
             when {
@@ -52,7 +52,7 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     val startupFrictionCompensation by pref(0.5, Volt)
 
     val escCanId by pref(20)
-    val limitSwitchChannel by pref(3)
+    val limitSwitchChannel by pref(5)
 
     val esc by hardw { CANSparkMax(escCanId, MotorType.kBrushless) }.configure {
         it.setSmartCurrentLimit(currentLimit.Ampere.toInt())

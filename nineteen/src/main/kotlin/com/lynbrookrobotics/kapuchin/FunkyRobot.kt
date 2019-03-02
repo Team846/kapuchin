@@ -52,8 +52,19 @@ class FunkyRobot : RobotBase() {
 
                 currentJob = scope.launch {
                     runWhile({ isEnabled && isOperatorControl }, { Subsystems.teleop() })
+                    System.gc()
+
                     runWhile({ isEnabled && isAutonomous }, { Subsystems.followWaypoints() })
-                    runWhile({ isDisabled }, { Subsystems.warmup() })
+                    System.gc()
+
+                    runWhile({ isDisabled && !isTest }, { Subsystems.warmup() })
+                    System.gc()
+
+                    runWhile({ isTest }, {
+                        launch { journal(Subsystems.drivetrain.hardware) }
+                        Subsystems.teleop()
+                    })
+                    System.gc()
                 }
             }
         }

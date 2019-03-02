@@ -68,17 +68,21 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
             setup: BoundSensorScope.() -> This.(Time) -> Output?
     ) {
         val sensorScope = BoundSensorScope(this)
+        var routine: Routine<This, H, Output>? = null
         try {
             val controller = sensorScope.run(setup)
             suspendCancellableCoroutine<Unit> { cont ->
-                routine = Routine(thisAsThis, name, controller, cont)
+                Routine(thisAsThis, name, controller, cont).also {
+                    routine = it
+                    this.routine = it
+                }
             }
-            log(Debug) { "Completed $name routine." }
+            routine?.log(Debug) { "Completed" }
         } catch (c: CancellationException) {
-            log(Debug) { "Cancelled $name routine.\n${c.message}" }
+            routine?.log(Debug) { "Cancelled" }
             throw c
         } catch (t: Throwable) {
-            log(Error, t) { "Exception running $name routine.\n${t.message}" }
+            routine?.log(Error, t)
         } finally {
             sensorScope.close()
         }
@@ -110,11 +114,9 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
                 @Suppress("UNNECESSARY_SAFE_CALL")
                 (routine ?: fallbackController)
                         ?.invoke(thisAsThis, tickStart)
-                        ?.let { hardware.output(it) }
+                        ?.let { hardware?.output(it) }
             } catch (t: Throwable) {
-                routine?.resumeWithException(t) ?: log(Error, t) {
-                    "Exception running default controller\n${t.message}"
-                }
+                routine?.resumeWithException(t) ?: log(Error, t)
             }
         }
     }

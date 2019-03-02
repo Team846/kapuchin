@@ -11,13 +11,14 @@ import info.kunalsheth.units.math.*
 class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware) {
     private val wheelRadius by pref(3, Inch)
 
-    private val leftTrim by pref(1.0018314)
+    private val leftTrim by pref(1.0)
     private val flipLeftPosition by pref(false)
     private val flipRightPosition by pref(false)
     private val flipOdometryLeft by pref(false)
-    private val flipOdometryRight by pref(true)
-    private val rightTrim by pref(1.00621994)
-    private val trackLength by pref(2.05, Foot)
+    private val flipOdometryRight by pref(false)
+    private val flipOdometrySides by pref(false)
+    private val rightTrim by pref(1.0)
+    val trackLength by pref(2, Foot)
 
     val nativeEncoderCountMultiplier by pref(4)
 
@@ -72,9 +73,9 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     val matrixTracking = RotationMatrixTracking(trackLength, Position(0.Foot, 0.Foot, 0.Degree), matrixCache)
 
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
-        val posL = toLeftPosition(ticksL)
+        val posL = toLeftPosition(if(!flipOdometrySides) ticksL else ticksR)
                 .let { if (flipOdometryLeft) -it else it }
-        val posR = toRightPosition(ticksR)
+        val posR = toRightPosition(if(!flipOdometrySides) ticksR else ticksL)
                 .let { if (flipOdometryRight) -it else it }
 
         matrixTracking(posL, posR)
