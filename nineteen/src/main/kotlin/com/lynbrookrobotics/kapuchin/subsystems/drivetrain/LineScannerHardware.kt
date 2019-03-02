@@ -35,11 +35,14 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     val sideShift by pref(8, Inch)
     val range by pref(53, Degree)
     val height by pref(6, Inch)
-    val distFromHeight: Length = (sideShift.Inch - lineScanner(exposure, threshold).y!!.Each).Inch
-    val angle = atan(Dimensionless(scanWidth.Inch + distFromHeight.Inch) / height.Inch) - range / 2
-    val input: Angle = Angle(lineScanner(exposure, threshold).y!!.Each)
 
-    val linePosition = sensor(lineScanner) { t ->
+    val each = lineScanner(exposure, threshold).y!!.Each
+
+    val distFromHeight = sideShift - each.Inch
+    val angle = atan((scanWidth + distFromHeight) / height) - range / 2
+    val input: Angle = Angle(each)
+
+    val linePosition = sensor(lineScanner) { _ ->
         val (x, y) = lineScanner(exposure, threshold)
         y?.let { (height * sin(input)) / (cos(angle) * cos(angle + input)) } stampWith x
     }
