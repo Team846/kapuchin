@@ -117,6 +117,21 @@ suspend fun whenever(predicate: () -> Boolean, block: Block) = coroutineScope {
 }
 
 /**
+ * Shortcut for a bunch of runWhiles in a whenever
+ *
+ * @param blocks List of pairs of a predicate and a function
+ */
+suspend fun runWhenever(vararg blocks: Pair<() -> Boolean, Block>) = coroutineScope {
+    blocks.forEach { (p, b) ->
+        whenever({ p() }) {
+            runWhile({ p() }) {
+                b()
+            }
+        }
+    }
+}
+
+/**
  * Pauses the coroutine for some time
  *
  * @param time period to delay for
