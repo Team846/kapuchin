@@ -221,13 +221,13 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
 
     val corner1 by limelight.corner1.readOnTick.withoutStamps
     val corner2 by limelight.corner2.readOnTick.withoutStamps
-    val corner6 by limelight.corner6.readOnTick.withoutStamps
     val corner7 by limelight.corner7.readOnTick.withoutStamps
+    val corner8 by limelight.corner8.readOnTick.withoutStamps
 
     val outerVelocity = maxSpeed * speedMultiplier
     val innerVelocity = (outerVelocity * innerLength / outerLength)
     controller {
-        if (targetStatus != null && targetStatus == true && (corner1!!.abs.Foot - corner2!!.abs.Foot).Foot.abs > (corner6!!.abs.Foot - corner7!!.abs.Foot).Foot.abs) {
+        if (targetStatus != null && targetStatus == true && (corner1!!.abs.Foot - corner2!!.abs.Foot).Foot.abs > (corner7!!.abs.Foot - corner8!!.abs.Foot).Foot.abs) {
 
                     val nativeL = hardware.conversions.nativeConversion.native(innerVelocity)
                     val nativeR = hardware.conversions.nativeConversion.native(outerVelocity)
