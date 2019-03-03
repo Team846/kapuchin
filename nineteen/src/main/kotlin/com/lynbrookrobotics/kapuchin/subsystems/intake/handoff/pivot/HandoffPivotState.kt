@@ -7,14 +7,14 @@ import info.kunalsheth.units.generated.*
 
 enum class HandoffPivotState(val rng: ClosedRange<Angle>) {
 
-    Vertical(45.Degree..90.Degree),
+    Vertical(45.Degree..110.Degree),
     High(40.Degree..45.Degree),
     Mid(30.Degree..40.Degree),
     Low(-5.Degree..30.Degree),
-    Undetermined(-5.Degree..90.Degree);
+    Undetermined(-5.Degree..110.Degree);
 
     companion object {
-        val states = arrayOf(HandoffPivotState.High, HandoffPivotState.Mid, HandoffPivotState.Low)
+        val states = arrayOf(HandoffPivotState.Vertical, HandoffPivotState.High, HandoffPivotState.Mid, HandoffPivotState.Low)
         operator fun invoke() = Subsystems.instance?.let {
             it.handoffPivot?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
                 if (it == null) {
@@ -31,9 +31,18 @@ enum class HandoffPivotState(val rng: ClosedRange<Angle>) {
             }
         }
 
-        fun legalRanges() = Safeties.currentState(handoffPivot = HandoffPivotState().takeIf { it == HandoffPivotState.Undetermined })
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it)?.rng }
+        fun legalRanges(): List<ClosedRange<Angle>> {
+            val (legal, illegal) = Safeties.currentState(handoffPivot = HandoffPivotState().takeIf { it == Undetermined })
+                    .partition { it !in Safeties.illegalStates }
+            val mappedLegal = legal.mapNotNull { decode(it)?.rng }
+            val mappedIllegal = illegal.mapNotNull { decode(it)?.rng }
+
+
+            return when {
+                mappedLegal.isEmpty() -> mappedIllegal
+                else -> mappedLegal
+            }
+        }
     }
 }
 

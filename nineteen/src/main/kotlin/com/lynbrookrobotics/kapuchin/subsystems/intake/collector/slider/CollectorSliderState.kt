@@ -18,10 +18,10 @@ enum class CollectorSliderState(val rng: ClosedRange<Length>) {
 
     companion object {
         val states = arrayOf(CollectorSliderState.WideLeft,
-                CollectorSliderState.WideRight,
-                CollectorSliderState.NarrowLeft,
-                CollectorSliderState.NarrowRight,
-                CollectorSliderState.Center)
+                             CollectorSliderState.NarrowLeft,
+                             CollectorSliderState.Center,
+                             CollectorSliderState.NarrowRight,
+                             CollectorSliderState.WideRight)
 
      operator fun invoke() = CollectorSliderState.Center
 //        Subsystems.instance?.let {
@@ -41,8 +41,17 @@ enum class CollectorSliderState(val rng: ClosedRange<Length>) {
 //            }
 //        }
 
-        fun legalRanges() = Safeties.currentState(collectorSlider = CollectorSliderState().takeIf { it == CollectorSliderState.Undetermined })
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it)?.rng }
+        fun legalRanges(): List<ClosedRange<Length>> {
+            val (legal, illegal) = Safeties.currentState(collectorSlider = CollectorSliderState().takeIf { it == Undetermined })
+                    .partition { it !in Safeties.illegalStates }
+            val mappedLegal = legal.mapNotNull { decode(it)?.rng }
+            val mappedIllegal = illegal.mapNotNull { decode(it)?.rng }
+
+
+            return when {
+                mappedLegal.isEmpty() -> mappedIllegal
+                else -> mappedLegal
+            }
+        }
     }
 }
