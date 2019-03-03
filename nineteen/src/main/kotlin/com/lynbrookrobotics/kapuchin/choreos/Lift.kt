@@ -18,28 +18,14 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
     val liftPrecision by operator.liftPrecision.readEagerly().withoutStamps
 
     choreography {
-        whenever({ lowPanelHeight || lowCargoHeight || midPanelHeight || midCargoHeight || highPanelHeight || highCargoHeight || !liftPrecision.isZero}) {
-            runWhile({ lowPanelHeight }) {
-                lift?.set(lift.panelLowRocket, 0.Inch)
-            }
-            runWhile({ lowCargoHeight }) {
-                lift?.set(lift.cargoLowRocket, 0.Inch)
-            }
-            runWhile({ midPanelHeight }) {
-                lift?.set(lift.panelMidRocket, 0.Inch)
-            }
-            runWhile({ midCargoHeight }) {
-                lift?.set(lift.cargoMidRocket, 0.Inch)
-            }
-            runWhile({ highPanelHeight }) {
-                lift?.set(lift.panelHighRocket, 0.Inch)
-            }
-            runWhile({ highCargoHeight }) {
-                lift?.set(lift.cargoHighRocket, 0.Inch)
-            }
-            runWhile({ !liftPrecision.isZero }) {
-                lift?.manualOverride(operator)
-            }
-        }
+        runWhenever(
+            { lowPanelHeight } to choreography { lift?.set(lift.panelLowRocket, 0.Inch) },
+            { lowCargoHeight } to choreography { lift?.set(lift.cargoLowRocket, 0.Inch) },
+            { midPanelHeight } to choreography { lift?.set(lift.panelMidRocket, 0.Inch) },
+            { midCargoHeight } to choreography { lift?.set(lift.cargoMidRocket, 0.Inch) },
+            { highPanelHeight } to choreography { lift?.set(lift.panelHighRocket, 0.Inch) },
+            { highCargoHeight } to choreography { lift?.set(lift.cargoHighRocket, 0.Inch) },
+            { !liftPrecision.isZero } to choreography { lift?.manualOverride(operator) }
+        )
     }
 }

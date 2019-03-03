@@ -15,13 +15,9 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Unleash the cobra") {
     val oShitSnekGoBack by operator.oShitSnekGoBack.readEagerly().withoutStamps
 
     choreography {
-        whenever({ unleashTheCobra || oShitSnekGoBack }) {
-            runWhile({ unleashTheCobra }) {
-                climber?.spin(climber.maxOutput) ?: freeze()
-            }
-            runWhile({ oShitSnekGoBack }) {
-                climber?.spin(-climber.maxOutput) ?: freeze()
-            }
-        }
+        runWhenever(
+            { unleashTheCobra } to choreography { climber?.spin(climber.maxOutput) ?: freeze() },
+            { oShitSnekGoBack } to choreography { climber?.spin(-climber.maxOutput) ?: freeze() }
+        )
     }
 }

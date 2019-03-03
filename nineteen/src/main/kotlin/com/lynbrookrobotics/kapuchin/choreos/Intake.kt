@@ -26,17 +26,17 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
-        whenever({ deployCargo || deployPanel || collectCargo || collectGroundPanel || lineTracking || centerCargo || !sliderPrecision.isZero }) {
-            runWhile({ deployCargo }) { deployCargo() }
-            runWhile({ deployPanel }) { deployPanel() }
-            runWhile({ collectCargo }) { collectCargo() }
-            runWhile({ collectPanel }) { collectPanel() }
-            runWhile({ collectGroundPanel }) { collectGroundPanel() }
-            runWhile({ lineTracking }) { lineTracking() }
-            runWhile({ centerSlider }) { centerSlider() }
-            runWhile({ centerCargo }) { centerCargo() }
-            runWhile({ !sliderPrecision.isZero }) { collectorSlider?.manualOverride(operator) }
-        }
+        runWhenever(
+                { deployCargo } to choreography { deployCargo() },
+                { deployPanel } to choreography { deployPanel() },
+                { collectCargo } to choreography { collectCargo() },
+                { collectPanel } to choreography { collectPanel() },
+                { collectGroundPanel } to choreography { collectGroundPanel() },
+                { lineTracking } to choreography { lineTracking() },
+                { centerSlider } to choreography { centerSlider() },
+                { centerCargo } to choreography { centerCargo() },
+                { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
+        )
     }
 }
 
