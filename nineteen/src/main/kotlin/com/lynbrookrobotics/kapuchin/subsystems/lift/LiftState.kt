@@ -20,18 +20,27 @@ enum class LiftState(val rng: ClosedRange<Length>) {
                     LiftState.Undetermined
                 } else {
                     when (it) {
-                        in LiftState.Bottom.rng -> LiftState.Bottom
-                        in LiftState.Low.rng -> LiftState.Low
                         in LiftState.High.rng -> LiftState.High
+                        in LiftState.Low.rng -> LiftState.Low
+                        in LiftState.Bottom.rng -> LiftState.Bottom
                         else -> LiftState.Undetermined
                     }
                 }
             }
         }
 
-        fun legalRanges() = Safeties.currentState(lift = LiftState().takeIf { it == LiftState.Undetermined })
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it)?.rng }
+        fun legalRanges(): List<ClosedRange<Length>> {
+            val (legal, illegal) = Safeties.currentState(lift = LiftState().takeIf { it == Undetermined })
+                    .partition { it !in Safeties.illegalStates }
+            val mappedLegal = legal.mapNotNull { decode(it)?.rng }
+            val mappedIllegal = illegal.mapNotNull { decode(it)?.rng }
+
+
+            return when {
+                mappedLegal.isEmpty() -> mappedIllegal
+                else -> mappedLegal
+            }
+        }
     }
 }
 

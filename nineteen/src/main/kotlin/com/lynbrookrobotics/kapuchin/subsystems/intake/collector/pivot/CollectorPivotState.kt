@@ -27,12 +27,17 @@ enum class CollectorPivotState(val output: Boolean) {
 //            }
 //        }
 
-        fun legalRanges() = Safeties.currentState(collectorPivot = CollectorPivotState().takeIf { it == CollectorPivotState.Undetermined })
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it) }
+        fun legalRanges(): List<CollectorPivotState> {
+            val (legal, illegal) = Safeties.currentState(collectorPivot = CollectorPivotState().takeIf { it == Undetermined })
+                    .partition { it !in Safeties.illegalStates }
+            val mappedLegal = legal.mapNotNull { decode(it) }
+            val mappedIllegal = illegal.mapNotNull { decode(it) }
 
-        fun init() {
-            CollectorPivotState.Companion
+
+            return when {
+                mappedLegal.isEmpty() -> mappedIllegal
+                else -> mappedLegal
+            }
         }
 
     }

@@ -102,11 +102,6 @@ object Safeties : Named by Named("Safeties") {
     val logActive by pref(true)
 
     fun init() {
-//        LiftState.init()
-//        HandoffPivotState.init()
-//        CollectorSliderState.init()
-//        CollectorPivotState.init()
-//        HookSliderState.init()
         initIllegalStates()
 
         var lastState = currentState().first()
@@ -192,7 +187,6 @@ object Safeties : Named by Named("Safeties") {
                 permuteState(lift = LiftState.Low, handoffPivot = HandoffPivotState.Mid, collectorSlider = CollectorSliderState.NarrowRight),
                 permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowLeft, collectorPivot = CollectorPivotState.Down),
                 permuteState(lift = LiftState.Low, collectorSlider = CollectorSliderState.NarrowRight, collectorPivot = CollectorPivotState.Down)
-                //permuteState(lift = LiftState.Bottom, handoffPivot = HandoffPivotState.Vertical)
         ).flatMap { it.asIterable() }
     }
 }

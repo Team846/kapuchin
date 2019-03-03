@@ -29,8 +29,18 @@ enum class HookSliderState(val output: Boolean) {
 //            }
 //        }
 
-            fun legalRanges() = Safeties.currentState(hookSlider = HookSliderState().takeIf { it == Undetermined })
-                    .filter { it !in Safeties.illegalStates }
-                    .mapNotNull { decode(it) }
+        fun legalRanges(): List<HookSliderState> {
+
+            val (legal, illegal) = Safeties.currentState(hookSlider = HookSliderState().takeIf { it == Undetermined })
+                    .partition { it !in Safeties.illegalStates }
+            val mappedLegal = legal.mapNotNull { decode(it) }
+            val mappedIllegal = illegal.mapNotNull { decode(it) }
+
+
+            return when {
+                mappedLegal.isEmpty() -> mappedIllegal
+                else -> mappedLegal
+            }
         }
     }
+}
