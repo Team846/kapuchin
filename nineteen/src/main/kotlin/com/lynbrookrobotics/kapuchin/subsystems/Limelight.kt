@@ -67,7 +67,7 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
         }else null) stampWith timeStamp(it)
     }
 
-    val corners = table.getEntry("tcorny").getDoubleArray(doubleArrayOf(0.0))
+    /*val corners = table.getEntry("tcorny").getDoubleArray(doubleArrayOf(0.0))
     val corner1=sensor{
         (if (targetExists()){
             Length(corners[0])
@@ -87,7 +87,7 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
         (if (targetExists()){
             Length(corners[7])
         }else null)stampWith timeStamp(it)
-    }
+    }*/
     val targetAngle = sensor {
         (if (targetExists()) {
             val tvert = l("tvert")
