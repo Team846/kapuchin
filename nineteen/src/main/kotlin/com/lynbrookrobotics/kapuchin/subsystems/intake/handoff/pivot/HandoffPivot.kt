@@ -22,7 +22,7 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 
 class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffPivotComponent, HandoffPivotHardware, OffloadedOutput>(hardware, EventLoop) {
 
-    val collectPosition by pref(10, Degree)
+    val collectPosition by pref(35, Degree)
     val handoffPosition by pref(60, Degree)
 
     val kP by pref(5, Volt, 30, Degree)
@@ -77,7 +77,7 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
     val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(10, Ampere)
     val startupFrictionCompensation by pref(0.5, Volt)
-    val maxOutput by pref(10, Percent)
+    val maxOutput by pref(30, Percent)
 
     val invert by pref(true)
     val invertSensor by pref(false)

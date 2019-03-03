@@ -33,7 +33,7 @@ suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware,
     }
 }
 
-suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 0.2.Inch) = startRoutine("Set") {
+suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 1.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
@@ -43,7 +43,7 @@ suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalS
         val voltage = kP * error
 
         voltageToDutyCycle(voltage, vBat).takeIf {
-            current in target `±` tolerance
+            current !in target `±` tolerance
         }
     }
 }
@@ -71,16 +71,6 @@ suspend fun CollectorSliderComponent.set(target: DutyCycle) = startRoutine("Manu
 suspend fun CollectorSliderComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
     controller { sliderPrecision }
-}
-
-suspend fun CollectorSliderComponent.zero() = startChoreo("Zero") {
-
-    val atZero by hardware.atZero.readEagerly().withoutStamps
-
-    choreography {
-        runWhile({ !atZero }) { set(-20.Percent) }
-        hardware.zero()
-    }
 }
 
 suspend fun HookComponent.set(target: HookPosition) = startRoutine("Set") {

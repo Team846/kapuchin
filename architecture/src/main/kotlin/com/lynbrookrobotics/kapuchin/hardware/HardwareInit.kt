@@ -86,7 +86,7 @@ class HardwareInit<Hardw> internal constructor(
     )
 
     companion object : Named by Named("Hardware Initialization") {
-        val crashOnFailure by pref(true)
+        val crashOnFailure by pref(false)
     }
 }
 

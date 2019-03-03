@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.hardware
 
 import com.ctre.phoenix.ErrorCode
 import com.ctre.phoenix.ErrorCode.OK
+import com.revrobotics.CANError
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
 import com.ctre.phoenix.motorcontrol.ControlMode.*
@@ -25,6 +26,13 @@ val ErrorCode.checkOk: Unit
     get() {
         if (this != OK && HardwareInit.crashOnFailure)
             throw IOException("Phoenix call returned $this")
+    }
+
+operator fun CANError.unaryPlus() = checkOk
+val CANError.checkOk: Unit
+    get() {
+        if (this != CANError.kOK && com.lynbrookrobotics.kapuchin.hardware.HardwareInit.crashOnFailure)
+            throw java.io.IOException("REV Spark Max call returned $this")
     }
 
 fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (OffloadedOutput) -> Unit {

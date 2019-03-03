@@ -119,7 +119,7 @@ open class Preference<Value>(
 
         registerCallback(name, this)
 
-        init(name, get(name, fallback))
+        init(name, /*get(name, */fallback/*)*/)
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value
                     ?: get(name, fallback).also { value = it }

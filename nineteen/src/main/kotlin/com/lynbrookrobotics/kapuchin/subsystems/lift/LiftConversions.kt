@@ -9,18 +9,18 @@ class LiftConversions(val hardware: LiftHardware) : Named by Named("Conversions"
 
     private val conversions by pref {
         val min by pref {
-            val real by pref(12.875, Inch)
-            val native by pref(275)
+            val real by pref(0.0, Inch)
+            val native by pref(156)
             ({ Pair(real, native) })
         }
 
         val max by pref {
-            val real by pref(24, Inch)
-            val native by pref(375)
+            val real by pref(67, Inch)
+            val native by pref(756)
             ({ Pair(real, native) })
         }
 
-        val zeroOffset by pref(17.719, Inch)
+        val zeroOffset by pref(17.42, Inch)
 
         ({
             val nfu = max.second - min.second

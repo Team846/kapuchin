@@ -26,7 +26,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
-        whenever({ deployCargo || deployPanel || collectCargo || collectGroundPanel || lineTracking || centerCargo || !sliderPrecision.isZero }) {
+        whenever({ deployCargo || deployPanel || collectCargo || collectPanel || collectGroundPanel || lineTracking || centerCargo || !sliderPrecision.isZero }) {
             runWhile({ deployCargo }) { deployCargo() }
             runWhile({ deployPanel }) { deployPanel() }
             runWhile({ collectCargo }) { collectCargo() }
@@ -34,7 +34,11 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
             runWhile({ collectGroundPanel }) { collectGroundPanel() }
             runWhile({ lineTracking }) { lineTracking() }
             runWhile({ centerSlider }) { centerSlider() }
-            runWhile({ centerCargo }) { centerCargo() }
+            runWhile({ centerCargo }) {
+                launch { centerCargo() }
+                launch { centerSlider() }
+                freeze()
+            }
             runWhile({ !sliderPrecision.isZero }) { collectorSlider?.manualOverride(operator) }
         }
     }
@@ -94,7 +98,8 @@ suspend fun Subsystems.collectCargo() = coroutineScope {
 
 suspend fun Subsystems.collectPanel() = coroutineScope {
     //Center slider
-    collectorSlider?.set(0.Inch, electrical)
+    withTimeout(1.Second) { collectorSlider?.set(0.Inch, electrical) }
+    launch { collectorSlider?.set(0.Inch, electrical) }
 
     //Lift down
     withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }

@@ -26,7 +26,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     val startupFrictionCompensation by pref(1.4, Volt)
 
     val escCanId = 40
-    val maxOutput by pref(30, Percent)
+    val maxOutput by pref(50, Percent)
     val idx = 0
 
     val invert by pref(false)

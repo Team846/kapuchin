@@ -27,11 +27,11 @@ class FunkyRobot : RobotBase() {
         println("Initializing hardware...")
 
         Safeties.init()
-        Subsystems.concurrentInit()
+        Subsystems.sequentialInit()
         val subsystems = Subsystems.instance!!
 
         println("Trimming preferences...")
-        trim()
+//        trim()
 
         runBlocking { withTimeout(.5.Second) { classPreloading.join() } }
 
@@ -42,9 +42,7 @@ class FunkyRobot : RobotBase() {
                 }
 
                 runWhile({ isEnabled && isAutonomous }) {
-                    while(true) {
-                        subsystems.collectorSlider?.set(20.Percent)
-                    }
+                    freeze()
                 }
 
                 runWhile({ isDisabled && !isTest }) {

@@ -29,7 +29,15 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
 
     private val exposure by pref(10, Millisecond)
     private val threshold by pref(25, Percent)
+
+    private val scannerFov by pref(53.8, Degree)
     private val scanWidth by pref(12, Inch)
+    private val mounting by pref {
+        val x by pref(-12, Inch)
+        val y by pref(12, Inch)
+        val z by pref(6, Inch)
+        ({ UomVector(x, y, z) })
+    }
 
     val nativeGrapher = graph("Native", Each)
     val linePosition = sensor(lineScanner) {

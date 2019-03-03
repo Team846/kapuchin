@@ -32,17 +32,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val start get() = xbox.startButton
     private val back get() = xbox.backButton
 
-    private val lStickY get() = xbox.getY(kLeft)
-    private val rStickX get() = xbox.getX(kRight)
-
-    val joystickMapping by pref {
-        val exponent by pref(2)
-        val deadband by pref(10, Percent)
-        ({
-            val db = horizontalDeadband(deadband, 100.Percent)
-            fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)
-        })
-    }
+    val liftSensitivity by pref(75, Percent)
+    val sliderSensitivity by pref(100, Percent)
 
     val lowPanelHeight = s { aButton && !lt }
     val lowCargoHeight = s { aButton && lt }
@@ -65,8 +56,20 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val centerCargo = s { xButton && !lt }
 
-    val liftPrecision = s { joystickMapping(lStickY.Each) }
-    val sliderPrecision = s { joystickMapping(rStickX.Each) }
+    val liftPrecision = s {
+        when (pov) {
+            0 -> liftSensitivity
+            180 -> -liftSensitivity
+            else -> 0.Percent
+        }
+    }
+    val sliderPrecision = s {
+        when (pov) {
+            90 -> sliderSensitivity
+            270 -> -sliderSensitivity
+            else -> 0.Percent
+        }
+    }
 
     val unleashTheCobra = s { start && lt && rt }
     val oShitSnekGoBack = s { back && lt && rt }

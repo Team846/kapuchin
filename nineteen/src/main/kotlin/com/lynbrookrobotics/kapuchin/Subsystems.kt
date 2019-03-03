@@ -105,21 +105,21 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     companion object : Named by Named("Subsystems") {
 
-        val isCorrupted by pref(true)
+//        val isCorrupted by pref(true)
+//
+//        init {
+//            if (isCorrupted) {
+//                log(Error) { "The config seems to be corrupted. Blocking indefinitely." }
+//                while (isCorrupted) Thread.sleep(1000)
+//                System.exit(0)
+//            }
+//        }
 
-        init {
-            if (isCorrupted) {
-                log(Error) { "The config seems to be corrupted. Blocking indefinitely." }
-                while (isCorrupted) Thread.sleep(1000)
-                System.exit(0)
-            }
-        }
-
-        val initLeds by pref(true)
+        val initLeds by pref(false)
         val initLineScanner by pref(true)
         val initCollectorPivot by pref(true)
         val initCollectorRollers by pref(true)
-        val initCollectorSlider by pref(true)
+        val initCollectorSlider by pref(false)
         val initHook by pref(true)
         val initHookSlider by pref(true)
         val initHandoffPivot by pref(true)

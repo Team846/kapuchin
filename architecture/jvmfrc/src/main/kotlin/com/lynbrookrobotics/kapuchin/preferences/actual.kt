@@ -62,6 +62,5 @@ fun trim(table: NetworkTable = impl.table) {
     }
     //Recurse through all subTables of the current subTable
     table.subTables.forEach { trim(table.getSubTable(it)) }
-
 }
 
