@@ -123,9 +123,11 @@ suspend fun whenever(predicate: () -> Boolean, block: Block) = coroutineScope {
  */
 suspend fun runWhenever(vararg blocks: Pair<() -> Boolean, Block>) = coroutineScope {
     blocks.forEach { (p, b) ->
-        whenever({ p() }) {
-            runWhile({ p() }) {
-                b()
+        launch {
+            whenever({ p() }) {
+                runWhile({ p() }) {
+                    b()
+                }
             }
         }
     }
