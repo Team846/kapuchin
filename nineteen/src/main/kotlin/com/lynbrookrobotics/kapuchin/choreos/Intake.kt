@@ -76,11 +76,11 @@ suspend fun Subsystems.collectCargo() = coroutineScope {
 
     //Set handoff pivot down
     withTimeout(1.Second) { handoffPivot?.set(handoffPivot.collectPosition, 10.Degree) }
-    launch { handoffPivot?.set(handoffPivot.collectPosition, 0.Degree) }
+    val j1 = scope.launch { handoffPivot?.set(handoffPivot.collectPosition, 0.Degree) }
 
     //lift, collector down
     launch { lift?.set(lift.collectCargo, 0.Inch) }
-    val j1 = scope.launch { collectorPivot?.set(CollectorPivotState.Down) }
+    launch { collectorPivot?.set(CollectorPivotState.Down) }
 
     try {
         freeze()

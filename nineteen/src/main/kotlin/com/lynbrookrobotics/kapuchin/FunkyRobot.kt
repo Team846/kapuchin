@@ -43,8 +43,7 @@ class FunkyRobot : RobotBase() {
 
                 runWhile({ isEnabled && isAutonomous }) {
                     while(true) {
-                        subsystems.handoffPivot?.set(32.Degree)
-                        subsystems.handoffPivot?.set(58.Degree)
+                        subsystems.collectorSlider?.set(20.Percent)
                     }
                 }
 

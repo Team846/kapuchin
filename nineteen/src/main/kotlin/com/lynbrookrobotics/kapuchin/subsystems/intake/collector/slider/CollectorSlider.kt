@@ -62,10 +62,11 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
 
     val esc by hardw { CANSparkMax(escCanId, MotorType.kBrushless) }.configure {
         it.setSmartCurrentLimit(currentLimit.Ampere.toInt())
-        it.getReverseLimitSwitch(kNormallyClosed).enableLimitSwitch(true)
+        it.getForwardLimitSwitch(kNormallyClosed).enableLimitSwitch(true)
         it.inverted = invert
     }
     val encoder by hardw { esc.encoder }
+    val limitSwitch by hardw { esc.getForwardLimitSwitch(kNormallyClosed) }
 
     val conversion by pref {
         val encoderRotations by pref(10, Turn)
@@ -82,13 +83,11 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
             .with(graph("Position", Inch))
     val velocity = sensor(encoder) { velocity.Rpm stampWith it }
             .with(graph("Velocity", Rpm))
-    val atZero = sensor(esc) { getReverseLimitSwitch(kNormallyClosed).get() stampWith it }
+    val atZero = sensor(limitSwitch) { get() stampWith it }
             .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
 
     private var zeroOffset = 0.0
-    fun zero() {
-        zeroOffset = encoder.position
-    }
+    fun zero() { zeroOffset = encoder.position }
 
     init {
         uiBaselineTicker.runOnTick { t ->
