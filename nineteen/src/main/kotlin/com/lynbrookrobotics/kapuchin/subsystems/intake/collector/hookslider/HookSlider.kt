@@ -17,16 +17,16 @@ class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderCo
 
     override fun HookSliderHardware.output(value: HookSliderState) {
 
-        //solenoid.set(value.output)
+        solenoid.set(value.output)
 
-        val legal = HookSliderState.legalRanges()
-
-        when {
-            !legal.any() -> log(Warning) { "No $name legal states found" }
-            value == HookSliderState.Undetermined -> log(Warning) { "Illegal $name state inputted" }
-            value in legal || HookSliderState.Undetermined in legal -> solenoid.set(value.output)
-            else -> Unit
-        }
+//        val legal = HookSliderState.legalRanges()
+//
+//        when {
+//            !legal.any() -> log(Warning) { "No $name legal states found" }
+//            value == HookSliderState.Undetermined -> log(Warning) { "Illegal $name state inputted" }
+//            value in legal || HookSliderState.Undetermined in legal -> solenoid.set(value.output)
+//            else -> Unit
+//        }
     }
 }
 
