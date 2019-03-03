@@ -32,9 +32,16 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     private val threshold by pref(25, Percent)
     private val scanWidth by pref(12, Inch)
 
-    val sideShift by pref(8, Inch)
-    val range by pref(53, Degree)
+    val sideShift by pref(8, Inch) // Should be x + l_64
+    val range by pref(53.13, Degree)
     val height by pref(6, Inch)
+    val m by pref {
+        ({atan(sideShift / height)- (range / 2)})
+    }
+    val sideShift2 by pref {
+        ({height * tan(m)})
+    }
+    val lengthArray = arrayListOf<Length>()
 
     val each = lineScanner(exposure, threshold).y!!.Each
 
@@ -47,6 +54,15 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
         y?.let { (height * sin(input)) / (cos(angle) * cos(angle + input)) } stampWith x
     }
             .with(graph("Line Position", Inch)) { it ?: 0.Inch }
+
+    fun pixDist(pix: Int): Length {
+        fun distance(pix: Int) = (height * tan(m + (pix*range)/127)) - sideShift2
+        for (n in 0..127){
+            lengthArray.add(distance(n))
+        }
+        return lengthArray[pix]
+    }
+
 
     init {
         uiBaselineTicker.runOnTick { time ->
