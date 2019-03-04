@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -10,7 +9,6 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"

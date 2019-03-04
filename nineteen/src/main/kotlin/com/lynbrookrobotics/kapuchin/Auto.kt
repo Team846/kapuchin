@@ -2,15 +2,11 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
-import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
-import java.io.File
 
 suspend fun Subsystems.rocketSandstorm() = startChoreo("Rocket Sandstorm") {
     val habToRocket = loadTrajectory("left_hab_to_rocket", 85.Percent)
@@ -21,8 +17,8 @@ suspend fun Subsystems.rocketSandstorm() = startChoreo("Rocket Sandstorm") {
     System.gc()
 
     choreography {
-//        withTimeout(5.Second) {
-            drivetrain.followTrajectory(20.Inch, 5.Inch, 5.FootPerSecondSquared, habToRocket)
+        //        withTimeout(5.Second) {
+        drivetrain.followTrajectory(20.Inch, 5.Inch, 5.FootPerSecondSquared, habToRocket)
 //        }
 
         withTimeout(2.Second) {

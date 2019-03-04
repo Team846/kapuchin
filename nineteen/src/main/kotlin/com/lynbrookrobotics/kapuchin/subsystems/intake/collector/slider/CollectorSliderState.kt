@@ -2,10 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderState.Companion.states
-import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import kotlin.math.pow
 
 enum class CollectorSliderState(val rng: ClosedRange<Length>) {
 
@@ -18,12 +15,12 @@ enum class CollectorSliderState(val rng: ClosedRange<Length>) {
 
     companion object {
         val states = arrayOf(CollectorSliderState.WideLeft,
-                             CollectorSliderState.NarrowLeft,
-                             CollectorSliderState.Center,
-                             CollectorSliderState.NarrowRight,
-                             CollectorSliderState.WideRight)
+                CollectorSliderState.NarrowLeft,
+                CollectorSliderState.Center,
+                CollectorSliderState.NarrowRight,
+                CollectorSliderState.WideRight)
 
-     operator fun invoke() = CollectorSliderState.Center
+        operator fun invoke() = CollectorSliderState.Center
 //        Subsystems.instance?.let {
 //            it.collectorSlider?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
 //                if (it == null) {

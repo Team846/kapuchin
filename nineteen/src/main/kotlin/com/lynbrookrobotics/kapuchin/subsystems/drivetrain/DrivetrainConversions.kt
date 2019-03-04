@@ -70,9 +70,9 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     val matrixTracking = RotationMatrixTracking(trackLength, Position(0.Foot, 0.Foot, 0.Degree), matrixCache)
 
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
-        val posL = toLeftPosition(if(!flipOdometrySides) ticksL else ticksR)
+        val posL = toLeftPosition(if (!flipOdometrySides) ticksL else ticksR)
                 .let { if (flipOdometryLeft) -it else it }
-        val posR = toRightPosition(if(!flipOdometrySides) ticksR else ticksL)
+        val posR = toRightPosition(if (!flipOdometrySides) ticksR else ticksL)
                 .let { if (flipOdometryRight) -it else it }
 
         matrixTracking(posL, posR)

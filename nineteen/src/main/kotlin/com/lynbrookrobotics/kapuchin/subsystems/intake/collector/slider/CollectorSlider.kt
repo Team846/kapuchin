@@ -1,28 +1,18 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider
 
-import com.ctre.phoenix.ErrorCode
-import com.ctre.phoenix.ErrorCode.OK
-import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
-import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.hardware.*
-import com.revrobotics.CANSparkMax
 import com.revrobotics.CANDigitalInput.LimitSwitchPolarity.kNormallyClosed
-import com.revrobotics.CANDigitalInput.LimitSwitch.kForward
-import com.revrobotics.CANError
+import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
-import edu.wpi.first.wpilibj.DigitalInput
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import java.io.IOException
 
 class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<CollectorSliderComponent, CollectorSliderHardware, DutyCycle>(hardware) {
 

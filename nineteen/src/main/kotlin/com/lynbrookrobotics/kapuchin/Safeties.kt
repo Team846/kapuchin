@@ -8,9 +8,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.HandoffPivotState.Companion
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
-import com.lynbrookrobotics.kapuchin.subsystems.lift.LiftState.*
 import kotlin.math.pow
 
 inline class RobotState(val code: Int) {

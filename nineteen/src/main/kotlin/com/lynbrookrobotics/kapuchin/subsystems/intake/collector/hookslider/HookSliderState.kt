@@ -2,9 +2,6 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.states
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
-import kotlin.math.pow
 
 enum class HookSliderState(val output: Boolean) {
 

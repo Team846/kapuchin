@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.VelcroPivotPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*

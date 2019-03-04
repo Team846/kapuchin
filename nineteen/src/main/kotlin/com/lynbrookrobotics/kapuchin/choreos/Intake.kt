@@ -6,13 +6,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.*
 
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 

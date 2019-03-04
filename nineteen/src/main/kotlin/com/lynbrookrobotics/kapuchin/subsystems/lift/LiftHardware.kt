@@ -2,11 +2,10 @@ package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.lynbrookrobotics.kapuchin.control.math.*
-import com.ctre.phoenix.motorcontrol.NeutralMode.Brake
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
