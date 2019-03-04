@@ -46,7 +46,6 @@ suspend fun optimizedLimelightTracking(
 
     choreography{
         drivetrain.turn(startingTurnAngle, tolerance/2)
-        // Drive straight for some distance so that the robot won't crash into the vision target after it completes the curve
         drivetrain.limelightCurveDrive(limelight, 2.Foot, 0.5)
     }
 
