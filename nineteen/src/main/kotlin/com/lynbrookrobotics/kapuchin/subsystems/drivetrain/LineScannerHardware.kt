@@ -28,9 +28,9 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
         )
     }
 
-    private val exposure by pref(10, Millisecond)
-    private val threshold by pref(25, Percent)
-    private val scanWidth by pref(12, Inch)
+//    private val exposure by pref(10, Millisecond)
+//    private val threshold by pref(25, Percent)
+//    private val scanWidth by pref(12, Inch)
 
     val sideShift by pref(8, Inch) // This is the same as x+l_64
     val range by pref(53.13, Degree) // Field of vision
@@ -43,20 +43,20 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     }
     val lengthArray = arrayListOf<Length>()
 
-    val each = lineScanner(exposure, threshold).y!!.Each
-
-    val distFromHeight = sideShift - each.Inch
-    val angle = atan((scanWidth + distFromHeight) / height) - range / 2
-    val input: Angle = Angle(each)
-
-    val linePosition = sensor(lineScanner) { _ -> // This is something old but I was told to not delete it
-        val (x, y) = lineScanner(exposure,
-                threshold)
-        y?.let {
-            (height * sin(input)) / (cos(angle) * cos(angle + input))
-        } stampWith x
-    }
-            .with(graph("Line Position", Inch)) { it ?: 0.Inch }
+//    val each = lineScanner(exposure, threshold).y!!.Each
+//
+//    val distFromHeight = sideShift - each.Inch
+//    val angle = atan((scanWidth + distFromHeight) / height) - range / 2
+//    val input: Angle = Angle(each)
+//
+//    val linePosition = sensor(lineScanner) { _ -> // This is something old but I was told to not delete it
+//        val (x, y) = lineScanner(exposure,
+//                threshold)
+//        y?.let {
+//            (height * sin(input)) / (cos(angle) * cos(angle + input))
+//        } stampWith x
+//    }
+//            .with(graph("Line Position", Inch)) { it ?: 0.Inch }
 
     fun distance(pix: Int) = (height * tan(m + (pix*range)/127)) - sideShift2 // The formula for calculating distance
 
@@ -72,11 +72,11 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     }
 
 
-    init {
-        uiBaselineTicker.runOnTick { time ->
-            setOf(linePosition).forEach {
-                it.optimizedRead(time, 1.Second)
-            }
-        }
-    }
+//    init {
+//        uiBaselineTicker.runOnTick { time ->
+//            setOf(linePosition).forEach {
+//                it.optimizedRead(time, 1.Second)
+//            }
+//        }
+//    }
 }
