@@ -11,30 +11,34 @@ import kotlinx.coroutines.launch
 suspend fun Subsystems.rocketSandstorm() = startChoreo("Rocket Sandstorm") {
     val habToRocket = loadTrajectory("left_hab_to_rocket", 85.Percent)
 
+    val interrupt by driver.visionAlign.readEagerly(0.Second).withoutStamps
+
     val currentPosition by drivetrain.hardware.position.readEagerly(0.Second).withoutStamps
     val linePosition by lineScanner.linePosition.readEagerly(0.Second).withoutStamps
 
     System.gc()
 
     choreography {
-        //        withTimeout(5.Second) {
-        drivetrain.followTrajectory(20.Inch, 5.Inch, 5.FootPerSecondSquared, habToRocket)
+        runWhile({ !interrupt }) {
+            //        withTimeout(5.Second) {
+            drivetrain.followTrajectory(20.Inch, 5.Inch, 5.FootPerSecondSquared, habToRocket)
 //        }
 
-        withTimeout(2.Second) {
-            launch { trackLine() }
-            delay(0.5.Second)
-            deployPanel()
+            withTimeout(2.Second) {
+                launch { trackLine() }
+                lift?.set(lift.panelHighRocket)
+            }
+            withTimeout(1.Second) { deployPanel() }
+
+            val mtrx = RotationMatrix(currentPosition.bearing)
+            val newLocation = currentPosition.vector + (mtrx rz UomVector(linePosition ?: 0.Foot, 0.Foot, 0.Foot))
+            val newOrigin = Position(newLocation.x, newLocation.y, currentPosition.bearing)
+            log(Level.Debug) { "new origin @ $newOrigin" }
+
+            withTimeout(0.5.Second) { drivetrain.openLoop(-80.Percent) }
+
+            freeze()
         }
-
-        val mtrx = RotationMatrix(currentPosition.bearing)
-        val newLocation = currentPosition.vector + (mtrx rz UomVector(linePosition ?: 0.Foot, 0.Foot, 0.Foot))
-        val newOrigin = Position(newLocation.x, newLocation.y, currentPosition.bearing)
-        log(Level.Debug) { "new origin @ $newOrigin" }
-
-        withTimeout(0.5.Second) { drivetrain.openLoop(-80.Percent) }
-
-        freeze()
     }
 }
 
