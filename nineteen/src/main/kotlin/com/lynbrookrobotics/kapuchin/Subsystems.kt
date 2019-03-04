@@ -18,18 +18,14 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
-import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
-import edu.wpi.first.wpilibj.Preferences2
 import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -41,7 +37,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val operator: OperatorHardware,
                  val leds: LedHardware?,
 
-                 val lineScanner: LineScannerHardware?,
+                 val lineScanner: LineScannerHardware,
                  val collectorPivot: CollectorPivotComponent?,
                  val collectorRollers: CollectorRollersComponent?,
                  val collectorSlider: CollectorSliderComponent?,
@@ -81,29 +77,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         System.gc()
     }
 
-    val performance by pref(50, Percent)
-    suspend fun followWaypoints() {
-        val waypts = File("/tmp/journal.tsv").useLines { lns ->
-            lns
-                    .drop(1)
-                    .map { it.split('\t') }
-                    .map { it.map { tkn -> tkn.trim() } }
-                    .map { Waypt(it[1].toDouble().Foot, it[2].toDouble().Foot) stampWith it[0].toDouble().Second }
-                    .toList()
-        }
-
-        val traj = pathToTrajectory(
-                waypts.map { (_, pt) -> pt },
-                performance,
-                drivetrain.maxSpeed,
-                drivetrain.maxOmega
-        )
-
-        drivetrain.readJournal(20.Inch, 4.Inch, 5.FootPerSecondSquared, true, traj)
-
-        freeze()
-    }
-
     companion object : Named by Named("Subsystems") {
 
         val isCorrupted by pref(true)
@@ -117,7 +90,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         }
 
         private val initLeds by pref(true)
-        private val initLineScanner by pref(true)
         private val initCollectorPivot by pref(false)
         private val initCollectorRollers by pref(false)
         private val initCollectorSlider by pref(false)
@@ -142,11 +114,11 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
             val driverAsync = async { DriverHardware() }
             val operatorAsync = async { OperatorHardware() }
+            val lineScannerAsync = async { LineScannerHardware() }
 
             suspend fun <R> i(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
 
             val ledsAsync = i(initLeds) { LedHardware() }
-            val lineScannerAsync = i(initLineScanner) { LineScannerHardware() }
             val collectorPivotAsync = i(initCollectorPivot) { CollectorPivotComponent(CollectorPivotHardware()) }
             val collectorRollersAsync = i(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
             val collectorSliderAsync = i(initCollectorSlider) { CollectorSliderComponent(CollectorSliderHardware()) }
@@ -182,7 +154,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     t { operatorAsync.await() }!!,
                     t { ledsAsync.await() },
 
-                    t { lineScannerAsync.await() },
+                    t { lineScannerAsync.await() }!!,
                     t { collectorPivotAsync.await() },
                     t { collectorRollersAsync.await() },
                     t { collectorSliderAsync.await() },
@@ -218,7 +190,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     driver,
                     operator,
                     leds,
-                    i(initLineScanner) { t { LineScannerHardware() } },
+                    t { LineScannerHardware() }!!,
                     i(initCollectorPivot) { t { CollectorPivotComponent(CollectorPivotHardware()) } },
                     i(initCollectorRollers) { t { CollectorRollersComponent(CollectorRollersHardware()) } },
                     i(initCollectorSlider) { t { CollectorSliderComponent(CollectorSliderHardware()) } },

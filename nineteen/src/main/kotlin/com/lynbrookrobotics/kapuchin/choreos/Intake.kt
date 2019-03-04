@@ -33,7 +33,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { collectCargo } to choreography { collectCargo() },
                 { collectPanel } to choreography { collectPanel() },
                 { collectGroundPanel } to choreography { collectGroundPanel() },
-                { lineTracking } to choreography { lineTracking() },
+                { lineTracking } to choreography { trackLine() },
                 { centerSlider } to choreography { centerSlider() },
                 { centerCargo } to choreography { centerCargo() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
@@ -108,11 +108,9 @@ suspend fun Subsystems.collectPanel() = coroutineScope {
     freeze()
 }
 
-suspend fun Subsystems.lineTracking() = coroutineScope {
+suspend fun Subsystems.trackLine() = coroutineScope {
     //Track line with slider
-    if (lineScanner != null) {
-        collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
-    }
+    collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
     freeze()
 }
 

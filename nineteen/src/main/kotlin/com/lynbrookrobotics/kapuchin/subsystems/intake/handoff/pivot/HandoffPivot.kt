@@ -107,8 +107,11 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
     }.verify("soft-limits are set correctly") {
         val configs = TalonSRXConfiguration()
         it.getAllConfigs(configs, configTimeout)
-        configs.reverseSoftLimitThreshold in conversions.minPt.second `±` 2 &&
-                configs.forwardSoftLimitThreshold in conversions.maxPt.second `±` 2
+
+        configs.reverseSoftLimitThreshold.toDouble() in
+                conversions.minPt.second.toDouble() `±` 2.0 &&
+                configs.forwardSoftLimitThreshold.toDouble() in
+                conversions.maxPt.second.toDouble() `±` 2.0
     }
 
     val lazyOutput = lazyOutput(esc, idx)

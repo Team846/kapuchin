@@ -1,12 +1,12 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
@@ -37,20 +37,24 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = start
                     last = loc
                 }
 
-                delay(30.milli(Second))
+                delay(100.milli(Second))
             }
         }
     }
 }
 
-suspend fun DrivetrainComponent.readJournal(tolerance: Length, endTolerance: Length, deceleration: Acceleration, relative: Boolean, waypts: List<TimeStamped<Waypt>>) = startRoutine("Read Journal") {
+suspend fun DrivetrainComponent.followTrajectory(
+        tolerance: Length, endTolerance: Length,
+        deceleration: Acceleration, waypts: List<TimeStamped<Waypt>>,
+        origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
+) = startRoutine("Read Journal") {
     val position by hardware.position.readOnTick.withStamps
-    val uni = UnicycleDrive(this@readJournal, this@startRoutine)
+    val uni = UnicycleDrive(this@followTrajectory, this@startRoutine)
 
     val waypointDistance = graph("Distance to Waypoint", Foot)
 
-    val startingLoc = if (relative) position.y.vector else Waypt(0.Foot, 0.Foot)
-    val mtrx = RotationMatrix(if (relative) position.y.bearing else 0.Degree)
+    val startingLoc = origin.vector
+    val mtrx = RotationMatrix(origin.bearing)
 
     var remainingDistance = waypts
             .zipWithNext { a, b -> distance(a.y, b.y) }
@@ -59,8 +63,6 @@ suspend fun DrivetrainComponent.readJournal(tolerance: Length, endTolerance: Len
     val targIter = waypts
             .map { (t, pt) -> (mtrx rz pt) + startingLoc stampWith t }
             .iterator()
-
-    System.gc()
 
     var target = targIter.next()
     var speed = 1.FootPerSecond

@@ -42,7 +42,7 @@ class FunkyRobot : RobotBase() {
                 }
 
                 runWhile({ isEnabled && isAutonomous }) {
-                    subsystems.followWaypoints()
+                    subsystems.rocketSandstorm()
                 }
 
                 runWhile({ isDisabled && !isTest }) {
