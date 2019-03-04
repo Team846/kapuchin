@@ -27,11 +27,11 @@ class FunkyRobot : RobotBase() {
         println("Initializing hardware...")
 
         Safeties.init()
-        Subsystems.sequentialInit()
+        Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
         println("Trimming preferences...")
-//        trim()
+        trim()
 
         runBlocking { withTimeout(.5.Second) { classPreloading.join() } }
 

@@ -115,24 +115,24 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 //            }
 //        }
 
-        val initLeds by pref(true)
-        val initLineScanner by pref(true)
-        val initCollectorPivot by pref(false)
-        val initCollectorRollers by pref(false)
-        val initCollectorSlider by pref(false)
-        val initHook by pref(false)
-        val initHookSlider by pref(false)
-        val initHandoffPivot by pref(false)
-        val initHandoffRollers by pref(false)
-        val initVelcroPivot by pref(false)
-        val initLift by pref(false)
-        val initClimber by pref(false)
-        val initLimelight by pref(false)
+        private val initLeds by pref(true)
+        private val initLineScanner by pref(true)
+        private val initCollectorPivot by pref(false)
+        private val initCollectorRollers by pref(false)
+        private val initCollectorSlider by pref(false)
+        private val initHook by pref(false)
+        private val initHookSlider by pref(false)
+        private val initHandoffPivot by pref(false)
+        private val initHandoffRollers by pref(false)
+        private val initVelcroPivot by pref(false)
+        private val initLift by pref(false)
+        private val initClimber by pref(false)
+        private val initLimelight by pref(false)
 
         var instance: Subsystems? = null
             private set
 
-        val pneumaticTicker = ticker(Low, 100.milli(Second), "Pneumatic System Ticker")
+        val pneumaticTicker = ticker(Medium, 50.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
         fun concurrentInit() = runBlocking {
