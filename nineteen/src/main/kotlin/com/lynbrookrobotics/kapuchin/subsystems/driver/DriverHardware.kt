@@ -62,6 +62,6 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     // buttons
     val collectCargo = s { stick[RightTrigger] }
     val collectWallPanel = s { stick[BottomTrigger] }
-//    val collectGroundPanel = s { stick[LeftTrigger] }
+    val collectGroundPanel = s { stick[LeftTrigger] }
     val visionAlign = s { stick[Trigger] }
 }
