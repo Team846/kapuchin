@@ -113,7 +113,7 @@ suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, lineScanner:
 
     controller {
         val errorA = linePosition?.let {
-            -atan(it / lineScannerLead)
+            -atan(it / lineScanner.mounting.y)
         } ?: 0.Degree
 
         val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)

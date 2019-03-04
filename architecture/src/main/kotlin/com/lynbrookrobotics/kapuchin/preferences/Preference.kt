@@ -124,7 +124,7 @@ open class Preference<Value>(
 
         if (!contains(name)) {
             log(Level.Debug) { "initializing value to fallback $fallback" }
-            init(name, get(name, fallback))
+            init(name, fallback)
             value = fallback
         }
         registerCallback(name, this)

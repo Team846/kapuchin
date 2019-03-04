@@ -34,8 +34,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val bearingKp by pref(5, FootPerSecond, 45, Degree)
     val bearingKd by pref(3, FootPerSecond, 360, DegreePerSecond)
 
-    val lineScannerLead by pref(2.5, Foot)
-
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         TwoSided(PercentOutput(0.Percent))
     }
