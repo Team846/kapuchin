@@ -19,7 +19,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val deployPanel by operator.deployPanel.readEagerly().withoutStamps
     val collectCargo by operator.collectCargo.readEagerly().withoutStamps
     val collectPanel by operator.collectPanel.readEagerly().withoutStamps
-    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
+//    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
     val lineTracking by operator.lineTracking.readEagerly().withoutStamps
     val centerSlider by operator.centerSlider.readEagerly().withoutStamps
     val centerCargo by operator.centerCargo.readEagerly().withoutStamps
@@ -31,7 +31,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { deployPanel } to choreography { deployPanel() },
                 { collectCargo } to choreography { collectCargo() },
                 { collectPanel } to choreography { collectPanel() },
-                { collectGroundPanel } to choreography { collectGroundPanel() },
+//                { collectGroundPanel } to choreography { collectGroundPanel() },
                 { lineTracking } to choreography { lineTracking() },
                 { centerSlider } to choreography { centerSlider() },
                 { centerCargo } to choreography { centerCargo() },
