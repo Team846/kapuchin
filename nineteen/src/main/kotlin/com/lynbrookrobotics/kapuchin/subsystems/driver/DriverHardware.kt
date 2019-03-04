@@ -51,7 +51,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     val accelerator = s { -joystickMapping(stick.y.Each) }
             .with(graph("Accelerator", Percent))
-    val steering = s { wheelMapping(wheel.x.Each) }
+    val steering = s { /*wheelMapping(wheel.x.Each)*/ joystickMapping(stick.x.Each) }
             .with(graph("Steering", Percent))
 
     val absSteering = s {

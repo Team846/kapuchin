@@ -30,6 +30,7 @@ suspend fun startChoreo(
     val named = Named(name)
     val sensorScope = FreeSensorScope()
     try {
+        named.log(Debug) { "Started $name choreography." }
         val controller = sensorScope.run(setup)
         coroutineScope { controller() }
         named.log(Debug) { "Completed $name choreography." }
@@ -58,10 +59,8 @@ fun choreography(controller: Block) = controller
  * @param blocks collection of functions to run in parallel
  * @return parent coroutine of the running routines
  */
-suspend fun runAll(vararg blocks: Block) = coroutineScope {
-    supervisorScope {
-        blocks.forEach { launch { it() } }
-    }
+suspend fun runAll(vararg blocks: Block) = supervisorScope {
+    blocks.forEach { launch { it() } }
 }
 
 /**
@@ -113,6 +112,21 @@ suspend fun whenever(predicate: () -> Boolean, block: Block) = coroutineScope {
         }
     } finally {
         runOnTick.cancel()
+    }
+}
+
+/**
+ * Shortcut for a bunch of runWhiles in a whenever
+ *
+ * @param blocks List of pairs of a predicate and a function
+ */
+suspend fun runWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorScope {
+    blocks.forEach { (p, b) ->
+        launch {
+            whenever(p) {
+                runWhile(p, b)
+            }
+        }
     }
 }
 

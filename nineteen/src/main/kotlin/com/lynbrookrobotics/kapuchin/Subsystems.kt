@@ -80,7 +80,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         System.gc()
     }
 
-    val performance by pref(40, Percent)
+    val performance by pref(50, Percent)
     suspend fun followWaypoints() {
         val waypts = File("/tmp/journal.tsv").useLines { lns ->
             lns
@@ -98,7 +98,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 drivetrain.maxOmega
         )
 
-        drivetrain.readJournal(2.Foot, 8.Inch, 5.FootPerSecondSquared, true, traj)
+        drivetrain.readJournal(20.Inch, 4.Inch, 5.FootPerSecondSquared, true, traj)
 
         freeze()
     }
@@ -115,19 +115,19 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 //            }
 //        }
 
-        val initLeds by pref(false)
+        val initLeds by pref(true)
         val initLineScanner by pref(true)
-        val initCollectorPivot by pref(true)
-        val initCollectorRollers by pref(true)
+        val initCollectorPivot by pref(false)
+        val initCollectorRollers by pref(false)
         val initCollectorSlider by pref(false)
-        val initHook by pref(true)
-        val initHookSlider by pref(true)
-        val initHandoffPivot by pref(true)
-        val initHandoffRollers by pref(true)
-        val initVelcroPivot by pref(true)
-        val initLift by pref(true)
-        val initClimber by pref(true)
-        val initLimelight by pref(true)
+        val initHook by pref(false)
+        val initHookSlider by pref(false)
+        val initHandoffPivot by pref(false)
+        val initHandoffRollers by pref(false)
+        val initVelcroPivot by pref(false)
+        val initLift by pref(false)
+        val initClimber by pref(false)
+        val initLimelight by pref(false)
 
         var instance: Subsystems? = null
             private set

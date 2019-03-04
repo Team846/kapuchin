@@ -13,7 +13,7 @@ class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, 
 
     override val fallbackController: ClimberComponent.(Time) -> DutyCycle = { 0.Percent }
 
-    val maxOutput by pref(20, Percent)
+    val maxOutput by pref(80, Percent)
 
     override fun ClimberHardware.output(value: DutyCycle) {
         val safeOutput =

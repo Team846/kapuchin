@@ -21,12 +21,12 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val priority: Priority = Priority.Low
     override val syncThreshold: Time = 5.milli(Second)
 
-    val operatingVoltage by pref(12, Volt)
+    val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(30, Ampere)
-    val startupFrictionCompensation by pref(1.4, Volt)
+    val startupFrictionCompensation by pref(1, Volt)
 
     val escCanId = 40
-    val maxOutput by pref(50, Percent)
+    val maxOutput by pref(100, Percent)
     val idx = 0
 
     val invert by pref(false)

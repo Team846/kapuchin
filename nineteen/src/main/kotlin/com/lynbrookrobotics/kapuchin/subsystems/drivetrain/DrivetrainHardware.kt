@@ -32,7 +32,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
     val operatingVoltage by pref(11, Volt)
-    val currentLimit by pref(30, Ampere)
+    val currentLimit by pref(20, Ampere)
     val startupFrictionCompensation by pref(0.5, Volt)
 
     val leftSlaveEscId = 11

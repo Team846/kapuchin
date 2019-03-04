@@ -77,7 +77,7 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
     val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(10, Ampere)
     val startupFrictionCompensation by pref(0.5, Volt)
-    val maxOutput by pref(30, Percent)
+    val maxOutput by pref(75, Percent)
 
     val invert by pref(true)
     val invertSensor by pref(false)
