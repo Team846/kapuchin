@@ -32,13 +32,13 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     private val threshold by pref(25, Percent)
     private val scanWidth by pref(12, Inch)
 
-    val sideShift by pref(8, Inch) // Should be x + l_64
-    val range by pref(53.13, Degree)
-    val height by pref(6, Inch)
-    val m by pref {
+    val sideShift by pref(8, Inch) // This is the same as x+l_64
+    val range by pref(53.13, Degree) // Field of vision
+    val height by pref(6, Inch) // Mounting height
+    val m by pref {// Angle between the height and the inner edge of the fov
         ({atan(sideShift / height)- (range / 2)})
     }
-    val sideShift2 by pref {
+    val sideShift2 by pref {// This is the same as x
         ({height * tan(m)})
     }
     val lengthArray = arrayListOf<Length>()
@@ -49,17 +49,25 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     val angle = atan((scanWidth + distFromHeight) / height) - range / 2
     val input: Angle = Angle(each)
 
-    val linePosition = sensor(lineScanner) { _ ->
-        val (x, y) = lineScanner(exposure, threshold)
-        y?.let { (height * sin(input)) / (cos(angle) * cos(angle + input)) } stampWith x
+    val linePosition = sensor(lineScanner) { _ -> // This is something old but I was told to not delete it
+        val (x, y) = lineScanner(exposure,
+                threshold)
+        y?.let {
+            (height * sin(input)) / (cos(angle) * cos(angle + input))
+        } stampWith x
     }
             .with(graph("Line Position", Inch)) { it ?: 0.Inch }
 
-    fun pixDist(pix: Int): Length {
-        fun distance(pix: Int) = (height * tan(m + (pix*range)/127)) - sideShift2
-        for (n in 0..127){
+    fun distance(pix: Int) = (height * tan(m + (pix*range)/127)) - sideShift2 // The formula for calculating distance
+
+    fun genDistArray(): ArrayList<Length> { // Generates an array of all possible lengths
+        for (n in 0..127) {
             lengthArray.add(distance(n))
         }
+        return lengthArray
+    }
+
+    fun getPixDist(pix: Int): Length { // Method that gets the right value from the length array
         return lengthArray[pix]
     }
 
