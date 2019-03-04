@@ -3,8 +3,12 @@ package com.lynbrookrobotics.kapuchin.preferences
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -105,11 +109,12 @@ open class Preference<Value>(
         private val fallback: Value,
         private val init: (String, Value) -> Unit,
         private val get: (String, Value) -> Value,
+        private val contains: (String) -> Boolean,
         private val registerCallback: (String, () -> Unit) -> Unit,
         private val prefNameSuffix: String = ""
 ) : Named, DelegateProvider<Any?, Value>, () -> Unit {
 
-    override final lateinit var name: String
+    final override lateinit var name: String
         private set
 
     private var value: Value? = null
@@ -117,9 +122,13 @@ open class Preference<Value>(
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Value> {
         name = nameLayer(parent, prop.name + prefNameSuffix)
 
+        if (!contains(name)) {
+            log(Level.Debug) { "initializing value to fallback $fallback" }
+            init(name, get(name, fallback))
+            value = fallback
+        }
         registerCallback(name, this)
 
-        init(name, /*get(name, */fallback/*)*/)
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value
                     ?: get(name, fallback).also { value = it }

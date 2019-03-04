@@ -23,6 +23,7 @@ import com.lynbrookrobotics.kapuchin.timing.scope
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.wpilibj.Preferences2
 import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -105,15 +106,15 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     companion object : Named by Named("Subsystems") {
 
-//        val isCorrupted by pref(true)
-//
-//        init {
-//            if (isCorrupted) {
-//                log(Error) { "The config seems to be corrupted. Blocking indefinitely." }
-//                while (isCorrupted) Thread.sleep(1000)
-//                System.exit(0)
-//            }
-//        }
+        val isCorrupted by pref(true)
+
+        init {
+            if (isCorrupted) {
+                log(Error) { "The config seems to be corrupted. Blocking indefinitely." }
+                while (isCorrupted) Thread.sleep(1000)
+                System.exit(0)
+            }
+        }
 
         private val initLeds by pref(true)
         private val initLineScanner by pref(true)
