@@ -34,7 +34,7 @@ suspend fun optimizedLimelightTracking(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware,
         tolerance: Angle = 10.Degree
-        ) = startChoreo("Optimized Limelight Tracking"){
+) = startChoreo("Optimized Limelight Tracking") {
 
     val distToNorm by limelight.distanceToNormal.readEagerly().withoutStamps
     val targetLocation by limelight.targetPosition.readEagerly().withoutStamps
@@ -44,12 +44,13 @@ suspend fun optimizedLimelightTracking(
     val startingIsosAngle = acos(((distanceToTarget * distanceToTarget) + (startingSideAcrossTX * startingSideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
     val startingTurnAngle = startingIsosAngle - startingTXValue!!
 
-    choreography{
-        drivetrain.turn(startingTurnAngle, tolerance/2)
+    choreography {
+        drivetrain.turn(startingTurnAngle, tolerance / 2)
         drivetrain.limelightCurveDrive(limelight, 2.Foot, 0.5)
     }
 
 }
+
 suspend fun limelightAlign(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware,

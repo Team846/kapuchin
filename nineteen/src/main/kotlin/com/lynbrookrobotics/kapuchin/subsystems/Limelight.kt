@@ -57,14 +57,14 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
             .with(graph("Target X Location", Foot)) { it?.x ?: Double.NaN.Foot }
             .with(graph("Target Y Location", Foot)) { it?.y ?: Double.NaN.Foot }
             .with(graph("Target Bearing", Degree)) { it?.bearing ?: Double.NaN.Degree }
-    val targetSkew = sensor{
-        (if(targetExists()){
+    val targetSkew = sensor {
+        (if (targetExists()) {
             val tvert = l("tvert")
             val tx = l("tx").Degree
             val thor = l("thor")
 
             Angle((skew(aspect(thor, tvert))).Degree)
-        }else null) stampWith timeStamp(it)
+        } else null) stampWith timeStamp(it)
     }
 
     /*val corners = table.getEntry("tcorny").getDoubleArray(doubleArrayOf(0.0))
@@ -96,11 +96,11 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
             turn(tx, distance)
         } else null) stampWith timeStamp(it)
     }
-    val angleToTarget = sensor{
+    val angleToTarget = sensor {
         val tx = l("tx").Degree
-        (if (targetExists()){
+        (if (targetExists()) {
             tx
-        }else null)stampWith timeStamp(it)
+        } else null) stampWith timeStamp(it)
     }
     val targetStatus = sensor {
         (if (targetExists()) {
