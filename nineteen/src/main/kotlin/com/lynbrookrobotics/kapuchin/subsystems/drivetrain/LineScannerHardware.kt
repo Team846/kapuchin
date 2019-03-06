@@ -49,14 +49,14 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
 //    val angle = atan((scanWidth + distFromHeight) / height) - range / 2
 //    val input: Angle = Angle(each)
 //
-//    val linePosition = sensor(lineScanner) { _ -> // This is something old but I was told to not delete it
-//        val (x, y) = lineScanner(exposure,
-//                threshold)
-//        y?.let {
-//            (height * sin(input)) / (cos(angle) * cos(angle + input))
-//        } stampWith x
-//    }
-//            .with(graph("Line Position", Inch)) { it ?: 0.Inch }
+    val linePosition = sensor(lineScanner) { _ -> // This is something old but I was told to not delete it
+        val (x, y) = lineScanner(exposure,
+                threshold)
+        y?.let {
+            (height * sin(input)) / (cos(angle) * cos(angle + input))
+        } stampWith x
+    }
+            .with(graph("Line Position", Inch)) { it ?: 0.Inch }
 
     fun distance(pix: Int) = (height * tan(m + (pix*range)/127)) - sideShift2 // The formula for calculating distance
 
