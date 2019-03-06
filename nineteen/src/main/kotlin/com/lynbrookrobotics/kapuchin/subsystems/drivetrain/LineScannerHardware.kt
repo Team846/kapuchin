@@ -28,8 +28,8 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
         )
     }
 
-//    private val exposure by pref(10, Millisecond)
-//    private val threshold by pref(25, Percent)
+    private val exposure by pref(10, Millisecond)
+    private val threshold by pref(25, Percent)
 //    private val scanWidth by pref(12, Inch)
 
     val sideShift by pref(8, Inch) // This is the same as x+l_64
@@ -46,8 +46,8 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
 //    val each = lineScanner(exposure, threshold).y!!.Each
 //
 //    val distFromHeight = sideShift - each.Inch
-//    val angle = atan((scanWidth + distFromHeight) / height) - range / 2
-//    val input: Angle = Angle(each)
+    val angle = atan((scanWidth + distFromHeight) / height) - range / 2
+    val input: Angle = Angle(each)
 //
     val linePosition = sensor(lineScanner) { _ -> // This is something old but I was told to not delete it
         val (x, y) = lineScanner(exposure,
