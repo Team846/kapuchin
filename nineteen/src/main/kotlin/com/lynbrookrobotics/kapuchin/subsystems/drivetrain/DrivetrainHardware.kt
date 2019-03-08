@@ -35,10 +35,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val currentLimit by pref(20, Ampere)
     val startupFrictionCompensation by pref(0.5, Volt)
 
-    val leftSlaveEscId = 11
-    val rightSlaveEscId = 13
-    val rightMasterEscId = 12
     val leftMasterEscId = 10
+    val leftSlaveEscId = 11
+    val rightMasterEscId = 12
+    val rightSlaveEscId = 13
 
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)

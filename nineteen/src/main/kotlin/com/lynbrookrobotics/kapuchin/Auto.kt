@@ -3,13 +3,14 @@ package com.lynbrookrobotics.kapuchin
 import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
-import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 
-suspend fun Subsystems.rocketSandstorm() = startChoreo("Rocket Sandstorm") {
-    val habToRocket = loadTrajectory("left_hab_to_rocket", 85.Percent)
+suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
+    val habToCloseCargo = loadTrajectory("hab_to_close_cargo.tsv", 60.Percent)
+    val closeCargoToLoading = loadTrajectory("close_cargo_to_loading.tsv", 60.Percent)
+    val loadingToMiddleCargo = loadTrajectory("loading_to_middle_cargo.tsv", 60.Percent)
 
     val interrupt by driver.visionAlign.readEagerly(0.Second).withoutStamps
 
@@ -21,21 +22,54 @@ suspend fun Subsystems.rocketSandstorm() = startChoreo("Rocket Sandstorm") {
     choreography {
         runWhile({ !interrupt }) {
             //        withTimeout(5.Second) {
-            drivetrain.followTrajectory(20.Inch, 5.Inch, 5.FootPerSecondSquared, habToRocket)
+            drivetrain.followTrajectory(20.Inch, 10.Inch, 5.FootPerSecondSquared, habToCloseCargo)
+            launch { trackLine() }
+            launch { drivetrain.openLoop(30.Percent) }
+            lift?.set(lift.panelMidRocket)
+            deployPanel()
+            withTimeout(0.5.Second) { drivetrain.openLoop(-30.Percent) }
+
+            val origin1 = currentPosition.vector +
+                    (RotationMatrix(currentPosition.bearing) rz UomVector(
+                            x = -(linePosition ?: 0.Inch),
+                            y = 0.Inch
+                    ))
+
+            drivetrain.followTrajectory(20.Inch, 2.Inch, 5.FootPerSecondSquared, closeCargoToLoading,
+                    Position(origin1.x, origin1.y, currentPosition.bearing)
+            )
+            launch { trackLine() }
+            launch { drivetrain.openLoop(30.Percent) }
+            lift?.set(lift.panelMidRocket)
+            deployPanel()
+            withTimeout(0.5.Second) { drivetrain.openLoop(-30.Percent) }
+
+            val origin2 = currentPosition.vector +
+                    (RotationMatrix(currentPosition.bearing) rz UomVector(
+                            x = -(linePosition ?: 0.Inch),
+                            y = 0.Inch
+                    ))
+
+            drivetrain.followTrajectory(20.Inch, 2.Inch, 5.FootPerSecondSquared, loadingToMiddleCargo,
+                    Position(origin2.x, origin2.y, currentPosition.bearing)
+            )
+
+
 //        }
 
-            withTimeout(2.Second) {
-                launch { trackLine() }
-                lift?.set(lift.panelHighRocket)
-            }
-            withTimeout(1.Second) { deployPanel() }
+//            withTimeout(2.Second) {
+//                launch { trackLine() }
+//                lift?.set(lift.panelHighRocket)
+//            }
+//            withTimeout(1.Second) { deployPanel() }
 
-            val mtrx = RotationMatrix(currentPosition.bearing)
-            val newLocation = currentPosition.vector + (mtrx rz UomVector(linePosition ?: 0.Foot, 0.Foot, 0.Foot))
-            val newOrigin = Position(newLocation.x, newLocation.y, currentPosition.bearing)
-            log(Level.Debug) { "new origin @ $newOrigin" }
+//            val mtrx = RotationMatrix(startingPosition.bearing)
+//            val newLocation = startingPosition.vector + (mtrx rz UomVector(linePosition ?: 0.Foot, 0.Foot, 0.Foot))
+//            val newOrigin = Position(newLocation.x, newLocation.y, startingPosition.bearing)
 
-            withTimeout(0.5.Second) { drivetrain.openLoop(-80.Percent) }
+//            withTimeout(1.Second) { drivetrain.openLoop(-50.Percent) }
+//
+//            drivetrain.followTrajectory(20.Inch, 4.Inch, 5.FootPerSecondSquared, rocketToLoading, newOrigin)
 
             freeze()
         }

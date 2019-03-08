@@ -39,6 +39,10 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = start
 
                 delay(100.milli(Second))
             }
+
+            val (t, loc) = pos
+            val (x, y) = startingRot rz (loc.vector - startingLoc)
+            it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
         }
     }
 }

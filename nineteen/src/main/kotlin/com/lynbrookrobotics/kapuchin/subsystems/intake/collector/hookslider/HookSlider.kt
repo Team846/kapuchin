@@ -33,6 +33,6 @@ class HookSliderHardware : SubsystemHardware<HookSliderHardware, HookSliderCompo
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Hook Slider"
 
-    val solenoidPort = 2
+    val solenoidPort = 1
     val solenoid = Solenoid(solenoidPort)
 }

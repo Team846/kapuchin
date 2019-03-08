@@ -27,6 +27,6 @@ class HookHardware : SubsystemHardware<HookHardware, HookComponent>() {
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Hook"
 
-    val solenoidPort = 3
+    val solenoidPort = 2
     val solenoid = Solenoid(solenoidPort)
 }

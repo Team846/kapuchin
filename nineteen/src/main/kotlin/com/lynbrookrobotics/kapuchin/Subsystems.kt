@@ -86,18 +86,18 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             }
         }
 
-        private val initLeds by pref(true)
-        private val initCollectorPivot by pref(false)
-        private val initCollectorRollers by pref(false)
+        private val initLeds by pref(false)
+        private val initCollectorPivot by pref(true)
+        private val initCollectorRollers by pref(true)
         private val initCollectorSlider by pref(false)
-        private val initHook by pref(false)
-        private val initHookSlider by pref(false)
+        private val initHook by pref(true)
+        private val initHookSlider by pref(true)
         private val initHandoffPivot by pref(false)
         private val initHandoffRollers by pref(false)
         private val initVelcroPivot by pref(false)
-        private val initLift by pref(false)
+        private val initLift by pref(true)
         private val initClimber by pref(false)
-        private val initLimelight by pref(false)
+        private val initLimelight by pref(true)
 
         var instance: Subsystems? = null
             private set
