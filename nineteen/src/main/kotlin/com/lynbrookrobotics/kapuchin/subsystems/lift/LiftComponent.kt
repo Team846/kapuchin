@@ -13,8 +13,9 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     val collectGroundPanel by pref(0, Inch)
 
     val panelLowRocket by pref(4.24, Inch)
-    val panelMidRocket by pref(31.8, Inch)
-    val panelHighRocket by pref(59.8, Inch)
+    val rocketLevelShift by pref(29, Inch)
+    val panelMidRocket get() = panelLowRocket + rocketLevelShift
+    val panelHighRocket get() = panelLowRocket + rocketLevelShift * 2
 
     private val panelCargoOffset by pref(-2.50, Inch)
     val cargoLowRocket get() = panelLowRocket + panelCargoOffset

@@ -84,7 +84,7 @@ class RotationMatrixTracking(
         rpy = mr.rzComponentY(-olpxMorpx, -olpyMorpy) + olpy
 
         x = avg(lpx, rpx)
-        y = avg(lpy, lpy)
+        y = avg(lpy, rpy)
         bearing += theta(sl, sr, trackLength)
     }
 }
