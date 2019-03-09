@@ -1,5 +1,4 @@
 package com.lynbrookrobotics.kapuchin.routines
-
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -19,13 +18,13 @@ suspend fun CollectorPivotComponent.set(target: CollectorPivotState) = startRout
     controller { target }
 }
 
-suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware, bottom: V, top: V = bottom) = startRoutine("Spin") {
+suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware, top: V, bottom: V = top) = startRoutine("Spin") {
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
         TwoSided(
-                voltageToDutyCycle(bottom, vBat),
-                voltageToDutyCycle(top, vBat)
+                voltageToDutyCycle(top, vBat),
+                voltageToDutyCycle(bottom, vBat)
         )
     }
 }

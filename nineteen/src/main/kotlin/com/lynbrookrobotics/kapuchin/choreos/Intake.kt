@@ -46,7 +46,7 @@ suspend fun Subsystems.deployCargo(soft: Boolean) {
     collectorSlider?.set(0.Inch, electrical)
 
     //Eject cargo
-    collectorRollers?.spin(electrical, if(soft) collectorRollers.cargoReleaseSpeed / 2 else collectorRollers.cargoReleaseSpeed)
+    collectorRollers?.spin(electrical, if (soft) collectorRollers.cargoReleaseSpeed / 2 else collectorRollers.cargoReleaseSpeed)
     freeze()
 }
 
@@ -160,7 +160,7 @@ suspend fun Subsystems.trackLine() = coroutineScope {
 
 suspend fun Subsystems.centerAll() = coroutineScope {
     launch { centerSlider() }
-    launch { centerCargo() }
+//    launch { centerCargo() }
     freeze()
 }
 
@@ -175,8 +175,8 @@ suspend fun Subsystems.centerSlider() {
 suspend fun Subsystems.centerCargo() {
     collectorRollers?.spin(
             electrical,
-            collectorRollers.cargoCenterSpeed, //+ collectorRollers.inBias, // top out
-            -collectorRollers.cargoCenterSpeed // top in
+            bottom = collectorRollers.cargoCenterSpeed, //+ collectorRollers.inBias, // top out
+            top = -collectorRollers.cargoCenterSpeed // top in
     )
     freeze()
 }
