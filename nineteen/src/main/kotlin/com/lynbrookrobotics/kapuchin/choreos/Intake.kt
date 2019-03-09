@@ -6,60 +6,97 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
     val deployCargo by operator.deployCargo.readEagerly().withoutStamps
+    val softDeployCargo by operator.softDeployCargo.readEagerly().withoutStamps
     val deployPanel by operator.deployPanel.readEagerly().withoutStamps
-    val collectCargo by operator.collectCargo.readEagerly().withoutStamps
+    val collectCargo by driver.collectCargo.readEagerly().withoutStamps
     val collectPanel by operator.collectPanel.readEagerly().withoutStamps
-    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
-    val lineTracking by operator.lineTracking.readEagerly().withoutStamps
-    val centerSlider by operator.centerSlider.readEagerly().withoutStamps
-    val centerCargo by operator.centerCargo.readEagerly().withoutStamps
+//    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
+    val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
+    val driverLineTracking by driver.lineTracking.readEagerly().withoutStamps
+    val centerAll by operator.centerAll.readEagerly().withoutStamps
+    val pivotDown by operator.pivotDown.readEagerly().withoutStamps
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
         runWhenever(
-                { deployCargo } to choreography { deployCargo() },
+                { deployCargo || softDeployCargo } to choreography { deployCargo(softDeployCargo) },
                 { deployPanel } to choreography { deployPanel() },
                 { collectCargo } to choreography { collectCargo() },
                 { collectPanel } to choreography { collectPanel() },
-                { collectGroundPanel } to choreography { collectGroundPanel() },
-                { lineTracking } to choreography { trackLine() },
-                { centerSlider } to choreography { centerSlider() },
-                { centerCargo } to choreography { centerCargo() },
+//                { collectGroundPanel } to choreography { collectGroundPanel() },
+                { operatorLineTracking || driverLineTracking } to choreography { trackLine() },
+//                { centerSlider } to choreography { centerSlider() },
+//                { centerCargo } to choreography { centerCargo() },
+                { centerAll } to choreography { centerAll() },
+                { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
     }
 }
 
-suspend fun Subsystems.deployCargo() {
+suspend fun Subsystems.deployCargo(soft: Boolean) {
     //Center collector slider
     collectorSlider?.set(0.Inch, electrical)
 
     //Eject cargo
-    collectorRollers?.spin(electrical, collectorRollers.cargoReleaseSpeed)
+    collectorRollers?.spin(electrical, if(soft) collectorRollers.cargoReleaseSpeed / 2 else collectorRollers.cargoReleaseSpeed)
+    freeze()
+}
+
+suspend fun Subsystems.pivotDown() {
+    collectorPivot?.set(CollectorPivotState.Down)
     freeze()
 }
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
     //Eject panel
-    val j1 = launch { hookSlider?.set(HookSliderState.Out) }
-    delay(0.5.Second)
-    val j2 = launch { hook?.set(HookPosition.Down) }
+    val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
 
     try {
         freeze()
     } finally {
         withContext(NonCancellable) {
-            j1.cancel()
-            delay(0.5.Second)
-            j2.cancel()
+            val hookDown = launch { hook?.set(HookPosition.Down) }
+            withTimeout(1.Second) {
+                lift?.set(lift.hardware.position.optimizedRead(
+                        currentTime, 0.Second
+                ).y - 3.5.Inch, 0.1.Inch)
+            }
+            hookSliderOut.cancel()
+            delay(0.2.Second)
+            hookDown.cancel()
+
         }
     }
+
+//    //Lift down
+//    withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
+//    launch { lift?.set(lift.collectPanel, 0.Inch) }
+//
+//    //Hook down, slider out
+//    val hookDown = launch { hook?.set(HookPosition.Down) }
+//    delay(0.5.Second)
+//    val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
+//
+//    try {
+//        freeze()
+//    } finally {
+//        withContext(NonCancellable) {
+//            lift?.set(lift.hardware.position.optimizedRead(
+//                    currentTime, 0.Second
+//            ).y + 3.Inch)
+//            hookDown.cancel()
+//            delay(0.2.Second)
+//            hookSliderOut.cancel()
+//        }
+//    }
 }
 
 suspend fun Subsystems.collectCargo() = supervisorScope {
@@ -72,7 +109,7 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
 
     //Set handoff pivot down
     withTimeout(1.Second) { handoffPivot?.set(handoffPivot.collectPosition, 10.Degree) }
-    val j1 = launch { handoffPivot?.set(handoffPivot.collectPosition, 0.Degree) }
+    val handoffPivotSet = launch { handoffPivot?.set(handoffPivot.collectPosition, 0.Degree) }
 
     //lift, collector down
     launch { lift?.set(lift.collectCargo, 0.Inch) }
@@ -82,30 +119,48 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
         freeze()
     } finally {
         withContext(NonCancellable) {
-            delay(1.Second)
-            j1.cancel()
+            withTimeout(1.Second) {
+                handoffPivotSet.join()
+            }
         }
     }
 }
 
-suspend fun Subsystems.collectPanel() = coroutineScope {
-    //Center slider
-    withTimeout(1.Second) { collectorSlider?.set(0.Inch, electrical) }
-    launch { collectorSlider?.set(0.Inch, electrical) }
-
+suspend fun Subsystems.collectPanel() = supervisorScope {
     //Lift down
     withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
     launch { lift?.set(lift.collectPanel, 0.Inch) }
 
     //Hook down, slider out
-    launch { hook?.set(HookPosition.Down) }
-    launch { hookSlider?.set(HookSliderState.Out) }
-    freeze()
+    val hookDown = launch { hook?.set(HookPosition.Down) }
+    delay(0.5.Second)
+    val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
+
+    try {
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            hookDown.cancel()
+            delay(0.3.Second)
+            withTimeout(1.2.Second) {
+                lift?.set(lift.hardware.position.optimizedRead(
+                        currentTime, 0.Second
+                ).y + 7.Inch, 0.1.Inch)
+            }
+            hookSliderOut.cancel()
+        }
+    }
 }
 
 suspend fun Subsystems.trackLine() = coroutineScope {
     //Track line with slider
     collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
+    freeze()
+}
+
+suspend fun Subsystems.centerAll() = coroutineScope {
+    launch { centerSlider() }
+    launch { centerCargo() }
     freeze()
 }
 
@@ -120,7 +175,7 @@ suspend fun Subsystems.centerSlider() {
 suspend fun Subsystems.centerCargo() {
     collectorRollers?.spin(
             electrical,
-            collectorRollers.cargoCenterSpeed, // bottom out
+            collectorRollers.cargoCenterSpeed, //+ collectorRollers.inBias, // top out
             -collectorRollers.cargoCenterSpeed // top in
     )
     freeze()

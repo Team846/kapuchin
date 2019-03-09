@@ -11,6 +11,7 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
 
     val midPanelHeight by operator.midPanelHeight.readEagerly().withoutStamps
     val midCargoHeight by operator.midCargoHeight.readEagerly().withoutStamps
+    val cargoShipCargoHeight by operator.cargoShipCargoHeight.readEagerly().withoutStamps
 
     val highPanelHeight by operator.highPanelHeight.readEagerly().withoutStamps
     val highCargoHeight by operator.highCargoHeight.readEagerly().withoutStamps
@@ -23,6 +24,7 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
                 { lowCargoHeight } to choreography { lift?.set(lift.cargoLowRocket, 0.Inch) },
                 { midPanelHeight } to choreography { lift?.set(lift.panelMidRocket, 0.Inch) },
                 { midCargoHeight } to choreography { lift?.set(lift.cargoMidRocket, 0.Inch) },
+                { cargoShipCargoHeight } to choreography { lift?.set(lift.cargoCargoShip, 0.Inch) },
                 { highPanelHeight } to choreography { lift?.set(lift.panelHighRocket, 0.Inch) },
                 { highCargoHeight } to choreography { lift?.set(lift.cargoHighRocket, 0.Inch) },
                 { !liftPrecision.isZero } to choreography { lift?.manualOverride(operator) }

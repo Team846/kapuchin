@@ -42,17 +42,23 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val highPanelHeight = s { yButton && !lt }
     val highCargoHeight = s { yButton && lt }
 
-    val deployPanel = s { rb && !lt }
     val deployCargo = s { rb && lt }
+    val softDeployCargo = s { rb && !lt }
 
+    val deployPanel = s { lb && lt }
     val collectPanel = s { lb && !lt }
-    val collectGroundPanel = s { lb && aButton }
-    val collectCargo = s { lb && lt }
+//    val collectGroundPanel = s { lb && aButton }
+//    val collectCargo = s { lb && lt }
 
-    val lineTracking = s { rt && !lt && !start }
-    val centerSlider = s { xButton && lt }
+//    val lineTracking = s { rt && !lt && !start }
+//    val centerSlider = s { xButton && lt }
 
-    val centerCargo = s { xButton && !lt }
+//    val centerCargo = s { xButton && !lt }
+
+    val cargoShipCargoHeight = s { xButton && !lt }
+    val pivotDown = s { xButton && lt }
+    val centerAll = s { rt && !lt }
+    val lineTracking = s { rt && lt }
 
     val liftPrecision = s {
         when (pov) {
@@ -69,6 +75,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         }
     }
 
-    val unleashTheCobra = s { start && lt && rt }
-    val oShitSnekGoBack = s { back && lt && rt }
+//    val unleashTheCobra = s { start && lt && rt }
+    val unleashTheCobra = s { lt && start }
+    val oShitSnekGoBack = s { lt && back }
 }

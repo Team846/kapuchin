@@ -13,13 +13,16 @@ class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, 
     override val fallbackController: ClimberComponent.(Time) -> DutyCycle = { 0.Percent }
 
     val maxOutput by pref(80, Percent)
+    val invert by pref(true)
 
     override fun ClimberHardware.output(value: DutyCycle) {
         val safeOutput =
                 if (value in `±`(maxOutput)) value
                 else maxOutput * value.signum
-        hardware.leftEsc.set(safeOutput.Each)
-        hardware.rightEsc.set(safeOutput.Each)
+        val invertedOutput = if(invert) -safeOutput else safeOutput
+
+        hardware.leftEsc.set(invertedOutput.Each)
+        hardware.rightEsc.set(invertedOutput.Each)
     }
 }
 

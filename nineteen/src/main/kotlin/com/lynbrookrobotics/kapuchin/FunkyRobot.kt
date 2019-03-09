@@ -40,7 +40,8 @@ class FunkyRobot : RobotBase() {
                 }
 
                 runWhile({ isEnabled && isAutonomous }) {
-                    subsystems.cargoShipSandstorm()
+//                    subsystems.cargoShipSandstorm()
+                    subsystems.teleop()
                 }
 
                 runWhile({ isDisabled && !isTest }) {
