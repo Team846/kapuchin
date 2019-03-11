@@ -32,7 +32,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
 
         val zeroedOutput =
                 if (!isZeroed)
-                    if (!currentAtZero) -20.Percent
+                    if (!currentAtZero) -30.Percent
                     else {
                         zero()
                         0.Percent

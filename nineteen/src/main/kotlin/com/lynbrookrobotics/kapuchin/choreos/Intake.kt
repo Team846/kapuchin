@@ -145,7 +145,7 @@ suspend fun Subsystems.collectPanel() = supervisorScope {
             withTimeout(1.2.Second) {
                 lift?.set(lift.hardware.position.optimizedRead(
                         currentTime, 0.Second
-                ).y + 7.Inch, 0.1.Inch)
+                ).y + 5.Inch, 0.1.Inch)
             }
             hookSliderOut.cancel()
         }
