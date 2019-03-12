@@ -185,7 +185,7 @@ class StandardChoreographiesTest {
                 c.checkCount(i, 0)
             }
 
-            for(i in 0 until 15) {
+            for (i in 0 until 15) {
                 predicates[i] = true
             }
 

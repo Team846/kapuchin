@@ -19,7 +19,7 @@ class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, 
         val safeOutput =
                 if (value in `±`(maxOutput)) value
                 else maxOutput * value.signum
-        val invertedOutput = if(invert) -safeOutput else safeOutput
+        val invertedOutput = if (invert) -safeOutput else safeOutput
 
         hardware.leftEsc.set(invertedOutput.Each)
         hardware.rightEsc.set(invertedOutput.Each)

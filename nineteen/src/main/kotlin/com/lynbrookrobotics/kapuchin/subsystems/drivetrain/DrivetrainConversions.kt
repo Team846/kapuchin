@@ -69,10 +69,10 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     val flipLeftOdometry by pref(false)
     val flipRightOdometry by pref(true)
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
-        val fl = if(flipLeftOdometry) -ticksL else ticksL
-        val fr = if(flipRightOdometry) -ticksR else ticksR
-        val l = if(flipOdometrySides) fr else fl
-        val r = if(flipOdometrySides) fl else fr
+        val fl = if (flipLeftOdometry) -ticksL else ticksL
+        val fr = if (flipRightOdometry) -ticksR else ticksR
+        val l = if (flipOdometrySides) fr else fl
+        val r = if (flipOdometrySides) fl else fr
 
         matrixTracking(
                 toLeftPosition(l),

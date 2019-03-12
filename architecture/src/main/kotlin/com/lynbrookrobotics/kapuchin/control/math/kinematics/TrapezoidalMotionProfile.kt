@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.control.math.kinematics
 
-import com.lynbrookrobotics.kapuchin.control.*
 import info.kunalsheth.units.generated.*
 
 fun trapezoidalMotionProfile(

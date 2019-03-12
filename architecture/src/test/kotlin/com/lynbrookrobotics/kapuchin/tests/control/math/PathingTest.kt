@@ -2,15 +2,12 @@ package com.lynbrookrobotics.kapuchin.tests.control.math
 
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
-import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.PI
-import kotlin.math.atan
-import kotlin.math.sin
 import kotlin.math.cos
-import kotlin.random.Random
+import kotlin.math.sin
 import kotlin.test.Ignore
 import kotlin.test.Test
 
