@@ -79,7 +79,7 @@ class RoutineTest {
         }
         while (c.routine == null) Thread.sleep(1)
         j1.cancel()
-        c.routine `is equal to?` null
+        while (c.routine != null) Thread.sleep(1)
         c.check(0, 0, 0, 1)
 
         c.out.clear()
@@ -88,7 +88,7 @@ class RoutineTest {
         }
         while (c.routine == null) Thread.sleep(1)
         c.routine!!.cancel()
-        c.routine `is equal to?` null
+        while (c.routine != null) Thread.sleep(1)
         while (j2.isActive) Thread.sleep(1)
         c.check(0, 0, 0, 1)
 
@@ -108,7 +108,7 @@ class RoutineTest {
         }
         while (c.routine == null) Thread.sleep(1)
         j3.cancel()
-        c.routine `is equal to?` null
+        while (c.routine != null) Thread.sleep(1)
         c.check(0, 0, 0, 1)
 
         c.out.clear()

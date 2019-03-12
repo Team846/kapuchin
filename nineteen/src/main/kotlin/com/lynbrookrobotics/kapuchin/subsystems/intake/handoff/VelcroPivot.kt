@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.handoff
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.VelcroPivotPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -26,7 +25,7 @@ class VelcroPivotHardware : SubsystemHardware<VelcroPivotHardware, VelcroPivotCo
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Velcro Pivot"
 
-    val solenoidPort by pref(1)
+    val solenoidPort = 3
     val solenoid = Solenoid(solenoidPort)
 
 }

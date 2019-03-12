@@ -1,155 +1,160 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.*
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
-import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
-suspend fun intakeTeleop(
-        driver: DriverHardware,
-        oper: OperatorHardware,
-        lineScanner: LineScannerHardware,
-        collectorPivot: CollectorPivotComponent,
-        collectorRollers: CollectorRollersComponent,
-        collectorSlider: CollectorSliderComponent,
-        hook: HookComponent,
-        hookSlider: HookSliderComponent,
-        handoffPivot: HandoffPivotComponent,
-        handoffRollers: HandoffRollersComponent,
-        velcroPivot: VelcroPivotComponent,
-        lift: LiftComponent,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Intake teleop") {
+suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
+    val deployCargo by operator.deployCargo.readEagerly().withoutStamps
+    val softDeployCargo by operator.softDeployCargo.readEagerly().withoutStamps
+    val deployPanel by operator.deployPanel.readEagerly().withoutStamps
     val collectCargo by driver.collectCargo.readEagerly().withoutStamps
-    val collectWallPanel by driver.collectWallPanel.readEagerly().withoutStamps
-    val collectGroundPanel by driver.collectGroundPanel.readEagerly().withoutStamps
-    val deployCargo by oper.deployCargo.readEagerly().withoutStamps
-    val deployPanel by oper.deployPanel.readEagerly().withoutStamps
-    val pushPanel by oper.pushPanel.readEagerly().withoutStamps
+    val collectPanel by operator.collectPanel.readEagerly().withoutStamps
+//    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
+    val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
+    val driverLineTracking by driver.lineTracking.readEagerly().withoutStamps
+    val centerAll by operator.centerAll.readEagerly().withoutStamps
+    val pivotDown by operator.pivotDown.readEagerly().withoutStamps
+    val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
-        whenever({ collectCargo || collectWallPanel || collectGroundPanel || deployCargo || deployPanel || pushPanel }) {
-            runWhile({ collectCargo }) {
-                collectCargo(collectorPivot, collectorRollers, collectorSlider, handoffPivot, handoffRollers, lift, electricalSystem)
+        runWhenever(
+                { deployCargo || softDeployCargo } to choreography { deployCargo(softDeployCargo) },
+                { deployPanel } to choreography { deployPanel() },
+                { collectCargo } to choreography { collectCargo() },
+                { collectPanel } to choreography { collectPanel() },
+                { operatorLineTracking || driverLineTracking } to choreography { trackLine() },
+                { centerAll } to choreography { centerAll() },
+                { pivotDown } to choreography { pivotDown() },
+                { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
+        )
+    }
+}
+
+suspend fun Subsystems.deployCargo(soft: Boolean) {
+    //Center collector slider
+    collectorSlider?.set(0.Inch, electrical)
+
+    //Eject cargo
+    collectorRollers?.spin(electrical, if (soft) collectorRollers.cargoReleaseSpeed / 2 else collectorRollers.cargoReleaseSpeed)
+    freeze()
+}
+
+suspend fun Subsystems.pivotDown() {
+    collectorPivot?.set(CollectorPivotState.Down)
+    freeze()
+}
+
+suspend fun Subsystems.deployPanel() = supervisorScope {
+    //Eject panel
+    val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
+
+    try {
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            val hookDown = launch { hook?.set(HookPosition.Down) }
+            withTimeout(1.Second) {
+                lift?.set(lift.hardware.position.optimizedRead(
+                        currentTime, 0.Second
+                ).y - 3.5.Inch, 0.1.Inch)
             }
-            runWhile({ collectWallPanel }) {
-                collectWallPanel(lineScanner, collectorPivot, collectorSlider, handoffPivot, hook, hookSlider, lift, electricalSystem)
-            }
-            runWhile({ collectGroundPanel }) {
-                collectGroundPanel(collectorPivot, collectorSlider, handoffPivot, velcroPivot, hook, lift, electricalSystem)
-            }
-            runWhile({ deployCargo }) {
-                deployCargo(lineScanner, collectorPivot, collectorRollers, collectorSlider, electricalSystem)
-            }
-            runWhile({ deployPanel }) {
-                deployPanel(lineScanner, collectorPivot, collectorSlider, hook, hookSlider, electricalSystem)
-            }
-            runWhile({ pushPanel }) {
-                pushPanel(collectorPivot, hook, hookSlider)
+            hookSliderOut.cancel()
+            delay(0.2.Second)
+            hookDown.cancel()
+
+        }
+    }
+}
+
+suspend fun Subsystems.collectCargo() = supervisorScope {
+    //Start rollers
+    launch { handoffRollers?.spin(handoffRollers.cargoCollectSpeed) }
+    launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
+
+    //Center slider
+    collectorSlider?.set(0.Inch, electrical)
+
+    //Set handoff pivot down
+    withTimeout(1.Second) { handoffPivot?.set(handoffPivot.collectPosition, 10.Degree) }
+    val handoffPivotSet = launch { handoffPivot?.set(handoffPivot.collectPosition, 0.Degree) }
+
+    //lift, collector down
+    launch { lift?.set(lift.collectCargo, 0.Inch) }
+    launch { collectorPivot?.set(CollectorPivotState.Down) }
+
+    try {
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            withTimeout(1.Second) {
+                handoffPivotSet.join()
             }
         }
     }
 }
 
-/**
- * Collect cargo from loading station
- *
- * Ends with:
- * Ball in collector
- * CollectorPivot - Up
- * CollectorSlider - Center
- * HandoffPivot - Collect position
- * Lift - Collect cargo height
- */
-suspend fun collectCargo(
-        collectorPivot: CollectorPivotComponent,
-        collectorRollers: CollectorRollersComponent,
-        collectorSlider: CollectorSliderComponent,
-        handoffPivot: HandoffPivotComponent,
-        handoffRollers: HandoffRollersComponent,
-        lift: LiftComponent,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Collect cargo") {
+suspend fun Subsystems.collectPanel() = supervisorScope {
+    //Lift down
+    withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
+    launch { lift?.set(lift.collectPanel, 0.Inch) }
 
-    choreography {
-        //Start collector/handoff rollers
-        launch { handoffRollers.spin(handoffRollers.cargoCollectSpeed) }
-        launch { collectorRollers.spin(collectorRollers.cargoCollectSpeed) }
+    //Hook down, slider out
+    val hookDown = launch { hook?.set(HookPosition.Down) }
+    delay(0.5.Second)
+    val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
 
-        //Center slider
-        collectorSlider.set(0.Inch, electricalSystem)
-
-        //lift, handoff, collector down
-        lift.set(lift.collectCargo)
-        collectorPivot.set(CollectorPivotState.Down)
-        handoffPivot.set(handoffPivot.collectPosition)
-
-        //Wait (for cargo to be collected)
-        delay(0.5.Second)
-
-        //Collector, handoff up
-        collectorPivot.set(CollectorPivotState.Up)
-        handoffPivot.set(handoffPivot.collectPosition)
+    try {
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            hookDown.cancel()
+            delay(0.3.Second)
+            withTimeout(1.2.Second) {
+                lift?.set(lift.hardware.position.optimizedRead(
+                        currentTime, 0.Second
+                ).y + 5.Inch, 0.1.Inch)
+            }
+            hookSliderOut.cancel()
+        }
     }
 }
 
-
-/**
- * Collect panel from loading station
- *
- * End with:
- * Panel on hook
- * CollectorPivot - Up
- * CollectorSlider - Random
- * HandoffPivot - Handoff Position
- * Hook - Up
- * HookSlider - In
- * Lift - Collect panel height
- */
-suspend fun collectWallPanel(
-        lineScanner: LineScannerHardware,
-        collectorPivot: CollectorPivotComponent,
-        collectorSlider: CollectorSliderComponent,
-        handoffPivot: HandoffPivotComponent,
-        hook: HookComponent,
-        hookSlider: HookSliderComponent,
-        lift: LiftComponent,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Collect wall panel") {
-
-    choreography {
-        //Track line with slider
-        collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
-
-        //Lift down
-        lift.set(lift.collectPanel)
-
-        //Handoff, collector up
-        handoffPivot.set(handoffPivot.handoffPosition)
-        collectorPivot.set(CollectorPivotState.Up)
-
-        //Hook down, slider out
-        hook.set(HookPosition.Down)
-        hookSlider.set(HookSliderState.Out)
-
-        //Hook up, slider in
-        hook.set(HookPosition.Up)
-        hookSlider.set(HookSliderState.In)
-    }
+suspend fun Subsystems.trackLine() = coroutineScope {
+    //Track line with slider
+    collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
+    freeze()
 }
 
+suspend fun Subsystems.centerAll() = coroutineScope {
+    launch { centerSlider() }
+//    launch { centerCargo() }
+    freeze()
+}
+
+suspend fun Subsystems.centerSlider() {
+    collectorSlider?.set(
+            0.Inch,
+            electrical
+    )
+    freeze()
+}
+
+suspend fun Subsystems.centerCargo() {
+    collectorRollers?.spin(
+            electrical,
+            bottom = collectorRollers.cargoCenterSpeed, //+ collectorRollers.inBias, // top out
+            top = -collectorRollers.cargoCenterSpeed // top in
+    )
+    freeze()
+}
 
 /**
  * Collect panel from the ground
@@ -162,126 +167,18 @@ suspend fun collectWallPanel(
  * Hook - Up
  * Lift - Collect ground panel height
  */
-suspend fun collectGroundPanel(
-        collectorPivot: CollectorPivotComponent,
-        collectorSlider: CollectorSliderComponent,
-        handoffPivot: HandoffPivotComponent,
-        velcroPivot: VelcroPivotComponent,
-        hook: HookComponent,
-        lift: LiftComponent,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Collect ground panel") {
+suspend fun Subsystems.collectGroundPanel() = coroutineScope {
+    //Center slider
+    collectorSlider?.set(0.Inch, electrical)
 
-    choreography {
-        //Center slider
-        collectorSlider.set(0.Inch, electricalSystem)
+    //Lift down
+    launch { lift?.set(lift.collectGroundPanel) }
 
-        //Lift down
-        lift.set(lift.collectGroundPanel)
+    //Handoff, velcro, hook down
+    launch { handoffPivot?.set(handoffPivot.collectPosition) }
+    launch { velcroPivot?.set(VelcroPivotPosition.Down) }
+    launch { hook?.set(HookPosition.Down) }
 
-        //Collector up
-        collectorPivot.set(CollectorPivotState.Up)
-
-        //Handoff, velcro, hook down
-        handoffPivot.set(handoffPivot.collectPosition)
-        velcroPivot.set(VelcroPivotPosition.Down)
-        hook.set(HookPosition.Down)
-
-        //Handoff, hook up
-        handoffPivot.set(handoffPivot.handoffPosition)
-        hook.set(HookPosition.Up)
-    }
+    freeze()
 }
 
-
-/**
- * Deploy cargo with slider autoalign
- *
- * Ends with:
- * CollectorPivot - Up
- * CollectorSlider - Random
- */
-suspend fun deployCargo(
-        lineScanner: LineScannerHardware,
-        collectorPivot: CollectorPivotComponent,
-        collectorRollers: CollectorRollersComponent,
-        collectorSlider: CollectorSliderComponent,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Deploy cargo") {
-
-    choreography {
-        //Collector up
-        collectorPivot.set(CollectorPivotState.Up)
-
-        //Track line with slider
-        collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
-
-        //Spin rollers
-        collectorRollers.spin(collectorRollers.cargoReleaseSpeed)
-    }
-}
-
-
-/**
- * Deploy panel with slider autoalign
- *
- * Ends with:
- * CollectorPivot - Up
- * CollectorSlider - Random
- * Hook - Up
- * HookSlider - In
- */
-suspend fun deployPanel(
-        lineScanner: LineScannerHardware,
-        collectorPivot: CollectorPivotComponent,
-        collectorSlider: CollectorSliderComponent,
-        hook: HookComponent,
-        hookSlider: HookSliderComponent,
-        electricalSystem: ElectricalSystemHardware
-) = startChoreo("Deploy panel") {
-
-    choreography {
-        //Collector up
-        collectorPivot.set(CollectorPivotState.Up)
-
-        //Track line with slider
-        collectorSlider.trackLine(0.5.Inch, lineScanner, electricalSystem)
-
-        //Eject panel
-        hookSlider.set(HookSliderState.Out)
-        hook.set(HookPosition.Down)
-
-        //Reset hook, hook slider
-        hookSlider.set(HookSliderState.In)
-        hook.set(HookPosition.Up)
-    }
-}
-
-
-/**
- * Deploy panel WITHOUT slider autoalign
- *
- * Ends with:
- * CollectorPivot - Up
- * Hook - Down
- * HookSlider - In
- */
-suspend fun pushPanel(
-        collectorPivot: CollectorPivotComponent,
-        hook: HookComponent,
-        hookSlider: HookSliderComponent
-) = startChoreo("Push panel") {
-
-    choreography {
-        //Collector up
-        collectorPivot.set(CollectorPivotState.Up)
-
-        //Eject panel
-        hookSlider.set(HookSliderState.Out)
-        hook.set(HookPosition.Down)
-
-        //Reset hook, hook slider
-        hookSlider.set(HookSliderState.In)
-        hook.set(HookPosition.Up)
-    }
-}

@@ -70,6 +70,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
         val sensorScope = BoundSensorScope(this)
         var routine: Routine<This, H, Output>? = null
         try {
+            routine?.log(Debug) { "Starting" }
             val controller = sensorScope.run(setup)
             suspendCancellableCoroutine<Unit> { cont ->
                 Routine(thisAsThis, name, controller, cont).also {

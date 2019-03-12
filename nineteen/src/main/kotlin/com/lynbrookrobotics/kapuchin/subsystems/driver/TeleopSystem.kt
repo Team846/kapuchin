@@ -17,7 +17,7 @@ class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, Tel
     }
 
     override fun TeleopHardware.output(value: Pair<Rumble, Color>) {
-        ledHardware.channels(value.second)
+        ledHardware?.channels?.invoke(value.second)
 
         with(operatorHardware.xbox) {
             value.first.let { (l, r) ->
@@ -31,7 +31,7 @@ class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, Tel
 class TeleopHardware(
         val driverHardware: DriverHardware,
         val operatorHardware: OperatorHardware,
-        val ledHardware: LedHardware
+        val ledHardware: LedHardware?
 ) : SubsystemHardware<TeleopHardware, TeleopComponent>() {
     override val period = 20.milli(Second)
     override val syncThreshold = 10.milli(Second)

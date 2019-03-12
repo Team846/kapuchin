@@ -9,17 +9,18 @@ import info.kunalsheth.units.generated.*
 
 private val impl = Preferences2.getInstance()
 
-actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean, ::registerCallback)
-actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::putDouble, impl::getDouble, ::registerCallback)
-actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::putFloat, impl::getFloat, ::registerCallback)
-actual fun Named.pref(fallback: Int) = Preference(this, fallback, impl::putInt, impl::getInt, ::registerCallback)
-actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong, impl::getLong, ::registerCallback)
-actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString, ::registerCallback)
+actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean, impl::containsKey, ::registerCallback)
+actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::putDouble, impl::getDouble, impl::containsKey, ::registerCallback)
+actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::putFloat, impl::getFloat, impl::containsKey, ::registerCallback)
+actual fun Named.pref(fallback: Int) = Preference(this, fallback, impl::putInt, impl::getInt, impl::containsKey, ::registerCallback)
+actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong, impl::getLong, impl::containsKey, ::registerCallback)
+actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString, impl::containsKey, ::registerCallback)
 
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) = Preference(
         this, withUnits(fallback.toDouble()),
         { name, value -> impl.putDouble(name, withUnits(value)) },
         { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
+        impl::containsKey,
         ::registerCallback,
         " (${withUnits.unitName})"
 )
@@ -62,6 +63,5 @@ fun trim(table: NetworkTable = impl.table) {
     }
     //Recurse through all subTables of the current subTable
     table.subTables.forEach { trim(table.getSubTable(it)) }
-
 }
 

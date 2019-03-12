@@ -8,11 +8,13 @@ operator fun <Q : Quan<Q>> Q.div(that: Q): Double = this.siValue / that.siValue
 infix fun <Q : Quan<Q>> Q.minMag(that: Q) = if (this.abs < that.abs) this else that
 infix fun <Q : Quan<Q>> Q.maxMag(that: Q) = if (this.abs > that.abs) this else that
 
-infix fun Number.`±`(of: Number): ClosedFloatingPointRange<Double> {
+inline infix fun <Q : Number> Q.`±`(radius: Q): ClosedFloatingPointRange<Double> {
     val center = toDouble()
-    val range = of.toDouble()
+    val range = radius.toDouble()
     return center - range..center + range
 }
+
+fun <Q : Number> `±`(radius: Q) = 0.0 `±` radius
 
 /**
  * Returns the closest, largest range to `current`
@@ -26,7 +28,7 @@ infix fun Number.`±`(of: Number): ClosedFloatingPointRange<Double> {
  * @param leftBound the left extreme of `Q`. If the underlying mechanism for comparison is Int, make sure you
  * add 1 to leftBound otherwise `Q.abs` will fail due to integer overflow.
  */
-fun <Q: Quan<Q>> unionizeAndFindClosestRange(sequence: Sequence<ClosedRange<Q>>, current: Q, leftBound: Q): ClosedRange<Q> {
+fun <Q : Quan<Q>> unionizeAndFindClosestRange(sequence: Sequence<ClosedRange<Q>>, current: Q, leftBound: Q): ClosedRange<Q> {
 
     var currLeft = leftBound
     var currRight = leftBound
@@ -36,7 +38,7 @@ fun <Q: Quan<Q>> unionizeAndFindClosestRange(sequence: Sequence<ClosedRange<Q>>,
     }.forEach {
         when {
             it.start <= currRight -> currRight = max(currRight, it.endInclusive)
-            currLeft <= current && current <= currRight -> return@forEach
+            current in currLeft..currRight -> return@forEach
             (it.start - current).abs < (currRight - current).abs -> {
                 currLeft = it.start
                 currRight = it.endInclusive

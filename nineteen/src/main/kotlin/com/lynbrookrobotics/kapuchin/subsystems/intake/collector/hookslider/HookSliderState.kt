@@ -2,29 +2,42 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.pos
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.Companion.states
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
-import kotlin.math.pow
 
-sealed class HookSliderState(val output: Boolean) {
-    object In : HookSliderState(false)
-    object Out : HookSliderState(true)
+enum class HookSliderState(val output: Boolean) {
+
+    In(false),
+    Out(true),
+    Undetermined(true);
 
     companion object {
         val states = arrayOf(HookSliderState.In, HookSliderState.Out)
-        val pos = 5
-        operator fun invoke() = Subsystems.hookSlider.hardware.solenoid.get().let {
-            when (it) {
-                HookSliderState.In.output -> HookSliderState.In
-                HookSliderState.Out.output -> HookSliderState.Out
-                else -> null
+        operator fun invoke() = HookSliderState.In
+//                Subsystems.instance?.let {
+//            it.hookSlider?.hardware?.solenoid?.get().let {
+//                if (it == null) {
+//                    HookSliderState.Undetermined
+//                } else {
+//                    when (it) {
+//                        HookSliderState.In.output -> HookSliderState.In
+//                        HookSliderState.Out.output -> HookSliderState.Out
+//                        else -> HookSliderState.Undetermined
+//                    }
+//                }
+//            }
+//        }
+
+        fun legalRanges(): List<HookSliderState> {
+
+            val (legal, illegal) = Safeties.currentState(hookSlider = HookSliderState().takeIf { it == Undetermined })
+                    .partition { it !in Safeties.illegalStates }
+            val mappedLegal = legal.mapNotNull { decode(it) }
+            val mappedIllegal = illegal.mapNotNull { decode(it) }
+
+
+            return when {
+                mappedLegal.isEmpty() -> mappedIllegal
+                else -> mappedLegal
             }
         }
-
-        fun legalRanges() = Safeties.currentState(hookSlider = null)
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it) }
     }
 }
-

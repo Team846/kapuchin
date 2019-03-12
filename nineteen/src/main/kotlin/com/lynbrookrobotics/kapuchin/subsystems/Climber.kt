@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -13,14 +12,18 @@ class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, 
 
     override val fallbackController: ClimberComponent.(Time) -> DutyCycle = { 0.Percent }
 
-    val maxOutput by pref(20, Percent)
+    val maxOutput by pref(80, Percent)
+    val invert by pref(true)
 
     override fun ClimberHardware.output(value: DutyCycle) {
-        val safeOutput = value minMag maxOutput
-        hardware.leftEsc.set(safeOutput.Each)
-        hardware.rightEsc.set(safeOutput.Each)
-    }
+        val safeOutput =
+                if (value in `±`(maxOutput)) value
+                else maxOutput * value.signum
+        val invertedOutput = if (invert) -safeOutput else safeOutput
 
+        hardware.leftEsc.set(invertedOutput.Each)
+        hardware.rightEsc.set(invertedOutput.Each)
+    }
 }
 
 class ClimberHardware : SubsystemHardware<ClimberHardware, ClimberComponent>() {
@@ -29,9 +32,9 @@ class ClimberHardware : SubsystemHardware<ClimberHardware, ClimberComponent>() {
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Climber"
 
-    val leftEscPort by pref(4)
-    val leftEsc by hardw { Spark(leftEscPort) }
+    val leftPwmPort = 8
+    val leftEsc by hardw { Spark(leftPwmPort) }
 
-    val rightEscPort by pref(5)
-    val rightEsc by hardw { Spark(rightEscPort) }
+    val rightPwmPort = 9
+    val rightEsc by hardw { Spark(rightPwmPort) }
 }

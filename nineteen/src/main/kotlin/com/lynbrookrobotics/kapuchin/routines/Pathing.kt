@@ -1,12 +1,12 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
@@ -14,7 +14,7 @@ import java.io.File
 
 fun target(current: Waypt, target: Waypt) = atan2(target.x - current.x, target.y - current.y)
 
-suspend fun journal(dt: DrivetrainHardware) = startChoreo("Journal") {
+suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = startChoreo("Journal") {
 
     val pos by dt.position.readEagerly(2.milli(Second)).withStamps
     val log = File("/tmp/journal.tsv").printWriter().also {
@@ -32,25 +32,33 @@ suspend fun journal(dt: DrivetrainHardware) = startChoreo("Journal") {
                 val (t, loc) = pos
                 val (x, y) = startingRot rz (loc.vector - startingLoc)
 
-                if (loc != last) {
+                if (distance(loc.vector, last.vector) > ptDistance) {
                     it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
+                    last = loc
                 }
 
                 delay(100.milli(Second))
-                last = loc
             }
+
+            val (t, loc) = pos
+            val (x, y) = startingRot rz (loc.vector - startingLoc)
+            it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
         }
     }
 }
 
-suspend fun DrivetrainComponent.readJournal(tolerance: Length, endTolerance: Length, deceleration: Acceleration, relative: Boolean, waypts: List<TimeStamped<Waypt>>) = startRoutine("Read Journal") {
+suspend fun DrivetrainComponent.followTrajectory(
+        tolerance: Length, endTolerance: Length,
+        deceleration: Acceleration, waypts: List<TimeStamped<Waypt>>,
+        origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
+) = startRoutine("Read Journal") {
     val position by hardware.position.readOnTick.withStamps
-    val uni = UnicycleDrive(this@readJournal, this@startRoutine)
+    val uni = UnicycleDrive(this@followTrajectory, this@startRoutine)
 
     val waypointDistance = graph("Distance to Waypoint", Foot)
 
-    val startingLoc = if (relative) position.y.vector else Waypt(0.Foot, 0.Foot)
-    val mtrx = RotationMatrix(if (relative) position.y.bearing else 0.Degree)
+    val startingLoc = origin.vector
+    val mtrx = RotationMatrix(origin.bearing)
 
     var remainingDistance = waypts
             .zipWithNext { a, b -> distance(a.y, b.y) }
@@ -59,8 +67,6 @@ suspend fun DrivetrainComponent.readJournal(tolerance: Length, endTolerance: Len
     val targIter = waypts
             .map { (t, pt) -> (mtrx rz pt) + startingLoc stampWith t }
             .iterator()
-
-    System.gc()
 
     var target = targIter.next()
     var speed = 1.FootPerSecond

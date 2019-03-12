@@ -2,8 +2,10 @@ package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -18,18 +20,24 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val priority: Priority = Priority.Low
     override val syncThreshold: Time = 5.milli(Second)
 
-    val operatingVoltage by pref(12, Volt)
+    val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(30, Ampere)
-    val startupFrictionCompensation by pref(1.4, Volt)
+    val startupFrictionCompensation by pref(1, Volt)
 
-    val escCanId by pref(40)
-    val maxOutput by pref(30, Percent)
+    val escCanId = 40
+    val maxOutput by pref(100, Percent)
     val idx = 0
+
+    val invert by pref(false)
+    val invertSensor by pref(false)
 
     val conversions = LiftConversions(this)
 
     val esc by hardw { TalonSRX(escCanId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
+
+        it.inverted = invert
+        it.setSensorPhase(invertSensor)
 
         +it.configPeakOutputForward(maxOutput.siValue, configTimeout)
         +it.configPeakOutputReverse(-maxOutput.siValue, configTimeout)
@@ -41,17 +49,28 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
             +it.configForwardSoftLimitThreshold(native.native(maxPt.first).toInt(), configTimeout)
             +it.configForwardSoftLimitEnable(true, configTimeout)
         }
+    }.verify("soft-limits are set correctly") {
+        val configs = TalonSRXConfiguration()
+        it.getAllConfigs(configs, configTimeout)
+
+        configs.reverseSoftLimitThreshold.toDouble() in
+                conversions.minPt.second.toDouble() `±` 2.0 &&
+                configs.forwardSoftLimitThreshold.toDouble() in
+                conversions.maxPt.second.toDouble() `±` 2.0
     }
 
     val lazyOutput = lazyOutput(esc, idx)
 
-    val position = sensor {
-        conversions.native.realPosition(esc.getSelectedSensorPosition(idx)) stampWith it
+    val nativeGrapher = graph("Native", Each)
+    val position = sensor { t ->
+        conversions.native.realPosition(
+                esc.getSelectedSensorPosition(idx).also { nativeGrapher(t, it.Each) }
+        ) stampWith t
     }
             .with(graph("Height", Inch))
 
     init {
-        uiBaselineTicker.runOnTick { position.optimizedRead(it, 1.Second) }
+        uiBaselineTicker.runOnTick { position.optimizedRead(it, .5.Second) }
     }
 
 }

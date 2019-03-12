@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"
@@ -24,42 +23,51 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     private val triggerPressure by pref(50, Percent)
     private val lt get() = xbox.getTriggerAxis(kLeft) > triggerPressure.Each
-    private val rt get() = xbox.getTriggerAxis(kLeft) > triggerPressure.Each
+    private val rt get() = xbox.getTriggerAxis(kRight) > triggerPressure.Each
+    private val lb get() = xbox.getBumper(kLeft)
+    private val rb get() = xbox.getBumper(kRight)
 
-    val groundHeight = s { aButton }
-    val collectGroundPanel = s { aButton && lt }
+    private val start get() = xbox.startButton
+    private val back get() = xbox.backButton
 
-    val lowPanelHeight = s { yButton }
-    val lowCargoHeight = s { yButton && lt }
+    val liftSensitivity by pref(75, Percent)
+    val sliderSensitivity by pref(100, Percent)
 
-    val midPanelHeight = s { xButton }
-    val midCargoHeight = s { xButton && lt }
+    val lowPanelHeight = s { aButton && !lt }
+    val lowCargoHeight = s { aButton && lt }
 
-    val highPanelHeight = s { aButton }
-    val highCargoHeight = s { aButton && lt }
+    val midPanelHeight = s { bButton && !lt }
+    val midCargoHeight = s { bButton && lt }
 
-    private val povMush by pref(15, Degree)
+    val highPanelHeight = s { yButton && !lt }
+    val highCargoHeight = s { yButton && lt }
+
+    val deployCargo = s { rb && lt }
+    val softDeployCargo = s { rb && !lt }
+
+    val deployPanel = s { lb && lt }
+    val collectPanel = s { lb && !lt }
+
+    val cargoShipCargoHeight = s { xButton && !lt }
+    val pivotDown = s { xButton && lt }
+    val centerAll = s { rt && !lt }
+    val lineTracking = s { rt && lt }
+
     val liftPrecision = s {
-        val pov = xbox.pov.Degree
-        (when (pov) {
-            in 0.Turn `±` povMush,
-            in 1.Turn `±` povMush -> 1
-            in 0.5.Turn `±` povMush -> -1
-            else -> 0
-        }).Each
+        when (pov) {
+            0 -> liftSensitivity
+            180 -> -liftSensitivity
+            else -> 0.Percent
+        }
     }
     val sliderPrecision = s {
-        val pov = xbox.pov.Degree
-        (when (pov) {
-            in 0.25.Turn `±` povMush -> 1
-            in 0.75.Turn `±` povMush -> -1
-            else -> 0
-        }).Each
+        when (pov) {
+            90 -> sliderSensitivity
+            270 -> -sliderSensitivity
+            else -> 0.Percent
+        }
     }
 
-    val deployPanel = s { rt }
-    val deployCargo = s { lt && rt }
-
-    val pushPanel = s { getBumper(kLeft) }
-    val unleashTheCobra = s { lt && getBumper(kLeft) && getBumper(kRight) }
+    val unleashTheCobra = s { lt && start }
+    val oShitSnekGoBack = s { lt && back }
 }

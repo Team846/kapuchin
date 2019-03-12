@@ -12,11 +12,6 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     private val wheelRadius by pref(3, Inch)
 
     private val leftTrim by pref(1.0)
-    private val flipLeftPosition by pref(false)
-    private val flipRightPosition by pref(false)
-    private val flipOdometryLeft by pref(false)
-    private val flipOdometryRight by pref(false)
-    private val flipOdometrySides by pref(false)
     private val rightTrim by pref(1.0)
     val trackLength by pref(2, Foot)
 
@@ -25,7 +20,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     val encoder by pref {
         val encoderGear by pref(22)
         val wheelGear by pref(72)
-        val resolution by pref(1000)
+        val resolution by pref(256)
         ({
             val gearing = GearTrain(encoderGear, wheelGear)
             val nativeResolution = nativeEncoderCountMultiplier * resolution
@@ -39,8 +34,8 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
                     nativeOutputUnits = 1023, perOutputQuantity = hardware.operatingVoltage,
                     nativeFeedbackUnits = nativeResolution,
                     perFeedbackQuantity = avg(
-                            toLeftPosition(resolution, enc),
-                            toRightPosition(resolution, enc)
+                            toLeftPosition(resolution, enc).abs,
+                            toRightPosition(resolution, enc).abs
                     )
             )
 
@@ -53,12 +48,10 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     fun toLeftPosition(
             ticks: Int, conv: EncoderConversion = encoderConversion
     ): Length = wheelRadius * conv.angle(ticks.toDouble()) * leftTrim / Radian
-            .let { if (flipLeftPosition) -it else it }
 
     fun toRightPosition(
             ticks: Int, conv: EncoderConversion = encoderConversion
     ): Length = wheelRadius * conv.angle(ticks.toDouble()) * rightTrim / Radian
-            .let { if (flipRightPosition) -it else it }
 
     private val matrixCache = (-8..8)
             .flatMap {
@@ -72,12 +65,18 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
 
     val matrixTracking = RotationMatrixTracking(trackLength, Position(0.Foot, 0.Foot, 0.Degree), matrixCache)
 
+    val flipOdometrySides by pref(false)
+    val flipLeftOdometry by pref(false)
+    val flipRightOdometry by pref(true)
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
-        val posL = toLeftPosition(if(!flipOdometrySides) ticksL else ticksR)
-                .let { if (flipOdometryLeft) -it else it }
-        val posR = toRightPosition(if(!flipOdometrySides) ticksR else ticksL)
-                .let { if (flipOdometryRight) -it else it }
+        val fl = if (flipLeftOdometry) -ticksL else ticksL
+        val fr = if (flipRightOdometry) -ticksR else ticksR
+        val l = if (flipOdometrySides) fr else fl
+        val r = if (flipOdometrySides) fl else fr
 
-        matrixTracking(posL, posR)
+        matrixTracking(
+                toLeftPosition(l),
+                toRightPosition(r)
+        )
     }
 }

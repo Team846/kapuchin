@@ -5,26 +5,44 @@ import com.lynbrookrobotics.kapuchin.RobotState.Companion.decode
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
-sealed class HandoffPivotState(val rng: ClosedRange<Angle>) {
-    object Vertical : HandoffPivotState(70.Degree..90.Degree)
-    object High : HandoffPivotState(30.Degree..0.Degree)
-    object Mid : HandoffPivotState(60.Degree..30.Degree)
-    object Low : HandoffPivotState(60.Degree..70.Degree)
+enum class HandoffPivotState(val rng: ClosedRange<Angle>) {
+
+    Vertical(45.Degree..110.Degree),
+    High(40.Degree..45.Degree),
+    Mid(30.Degree..40.Degree),
+    Low(-5.Degree..30.Degree),
+    Undetermined(-5.Degree..110.Degree);
 
     companion object {
-        val pos = 2
-        val states = arrayOf(HandoffPivotState.High, HandoffPivotState.Mid, HandoffPivotState.Low)
-        operator fun invoke() = Subsystems.handoffPivot.hardware.position.optimizedRead(currentTime, 0.Second).y.let {
-            when (it) {
-                in HandoffPivotState.High.rng -> HandoffPivotState.High
-                in HandoffPivotState.Mid.rng -> HandoffPivotState.Mid
-                in HandoffPivotState.Low.rng -> HandoffPivotState.Low
-                else -> null
+        val states = arrayOf(HandoffPivotState.Vertical, HandoffPivotState.High, HandoffPivotState.Mid, HandoffPivotState.Low)
+        operator fun invoke() = Subsystems.instance?.let {
+            it.handoffPivot?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y.let {
+                if (it == null) {
+                    HandoffPivotState.Undetermined
+                } else {
+                    when (it) {
+                        in HandoffPivotState.High.rng -> HandoffPivotState.High
+                        in HandoffPivotState.Mid.rng -> HandoffPivotState.Mid
+                        in HandoffPivotState.Low.rng -> HandoffPivotState.Low
+                        in HandoffPivotState.Vertical.rng -> HandoffPivotState.Vertical
+                        else -> HandoffPivotState.Undetermined
+                    }
+                }
             }
         }
-        fun legalRanges() = Safeties.currentState(handoffPivot = null)
-                .filter { it !in Safeties.illegalStates }
-                .mapNotNull { decode(it)?.rng }
+
+        fun legalRanges(): List<ClosedRange<Angle>> {
+            val (legal, illegal) = Safeties.currentState(handoffPivot = HandoffPivotState().takeIf { it == Undetermined })
+                    .partition { it !in Safeties.illegalStates }
+            val mappedLegal = legal.mapNotNull { decode(it)?.rng }
+            val mappedIllegal = illegal.mapNotNull { decode(it)?.rng }
+
+
+            return when {
+                mappedLegal.isEmpty() -> mappedIllegal
+                else -> mappedLegal
+            }
+        }
     }
 }
 

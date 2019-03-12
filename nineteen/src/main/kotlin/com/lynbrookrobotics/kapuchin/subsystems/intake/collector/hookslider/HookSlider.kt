@@ -1,9 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -16,13 +13,17 @@ class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderCo
     override val fallbackController: HookSliderComponent.(Time) -> HookSliderState = { In }
 
     override fun HookSliderHardware.output(value: HookSliderState) {
-        val legal = HookSliderState.legalRanges()
 
-        when {
-            !legal.any() -> log(Warning) { "No legal states found" }
-            value in legal -> solenoid.set(value.output)
-            else -> solenoid.set(legal.first().output)
-        }
+        solenoid.set(value.output)
+
+//        val legal = HookSliderState.legalRanges()
+//
+//        when {
+//            !legal.any() -> log(Warning) { "No $name legal states found" }
+//            value == HookSliderState.Undetermined -> log(Warning) { "Illegal $name state inputted" }
+//            value in legal || HookSliderState.Undetermined in legal -> solenoid.set(value.output)
+//            else -> Unit
+//        }
     }
 }
 
@@ -32,6 +33,6 @@ class HookSliderHardware : SubsystemHardware<HookSliderHardware, HookSliderCompo
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Hook Slider"
 
-    val solenoidPort by pref(2)
+    val solenoidPort = 1
     val solenoid = Solenoid(solenoidPort)
 }

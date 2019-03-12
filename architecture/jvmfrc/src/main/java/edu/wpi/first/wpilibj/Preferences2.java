@@ -52,7 +52,7 @@ public final class Preferences2 {
      */
     private Preferences2() {
         table = NetworkTableInstance.getDefault().getTable(TABLE_NAME);
-        table.getEntry(".type").setString("RobotPreferences2");
+        table.getEntry(".type").setString("RobotPreferences");
         // Listener to set all Preferences2 values to persistent
         // (for backwards compatibility with old dashboards).
         table.addEntryListener(

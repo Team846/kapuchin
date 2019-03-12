@@ -34,7 +34,7 @@ class RealtimeChecker private constructor(parent: Ticker, private val setJitterP
 
         val memoryUsage = EventLoop.runOnTick { loopStart ->
             val usage = usedMemory.Each / maxMemory
-            if(usage > 80.Percent) log(Warning) { "RAM usage ≥ 80%. (Using $usedMemory of $maxMemory bytes)" }
+            if (usage > 80.Percent) log(Warning) { "RAM usage ≥ 80%. (Using $usedMemory of $maxMemory bytes)" }
 
             val deriv = deriv(loopStart, usage)
 

@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -28,6 +27,6 @@ class HookHardware : SubsystemHardware<HookHardware, HookComponent>() {
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Hook"
 
-    val solenoidPort by pref(6)
+    val solenoidPort = 2
     val solenoid = Solenoid(solenoidPort)
 }

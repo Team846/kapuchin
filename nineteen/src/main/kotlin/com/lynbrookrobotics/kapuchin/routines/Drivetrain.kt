@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -55,7 +54,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
     var startingAngle = -absSteering + position.y.bearing
 
-    controller { t ->
+    controller {
         if (
                 speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero
         ) System.gc()
@@ -82,23 +81,10 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     }
 }
 
-suspend fun DrivetrainComponent.pointWithLineScanner(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("Point with line scanner") {
-    val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
-    val uni = UnicycleDrive(this@pointWithLineScanner, this@startRoutine)
-
+suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open loop") {
     controller {
-        val errorA = linePosition?.let {
-            -atan(it / lineScannerLead)
-        } ?: 0.Degree
-
-        val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
-
-        val nativeL = hardware.conversions.nativeConversion.native(targetL)
-        val nativeR = hardware.conversions.nativeConversion.native(targetR)
-
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                PercentOutput(power)
         )
     }
 }
@@ -121,27 +107,6 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     }
 }
 
-suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Limelight tracking") {
-    val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
-    val robotPosition by hardware.position.readOnTick.withoutStamps
-    val uni = UnicycleDrive(this@limelightTracking, this@startRoutine)
-
-    val target = targetAngle?.let { it + robotPosition.bearing }
-
-    controller {
-        if (target != null) {
-            val (targs, _) = uni.speedAngleTarget(speed, target)
-
-            val nativeL = hardware.conversions.nativeConversion.native(targs.left)
-            val nativeR = hardware.conversions.nativeConversion.native(targs.right)
-
-            TwoSided(
-                    VelocityOutput(velocityGains, nativeL),
-                    VelocityOutput(velocityGains, nativeR)
-            )
-        } else null
-    }
-}
 
 suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 

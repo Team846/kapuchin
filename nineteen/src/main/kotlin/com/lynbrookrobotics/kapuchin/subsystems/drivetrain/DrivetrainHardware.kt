@@ -3,7 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX
-import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
@@ -11,7 +11,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort
@@ -33,15 +33,17 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val operatingVoltage by pref(11, Volt)
     val currentLimit by pref(30, Ampere)
-    val startupFrictionCompensation by pref(1.4, Volt)
+    val startupFrictionCompensation by pref(0.5, Volt)
 
-    val leftSlaveEscId by pref(11)
-    val rightSlaveEscId by pref(13)
-    val rightMasterEscId by pref(12)
-    val leftMasterEscId by pref(10)
+    val leftMasterEscId = 10
+    val leftSlaveEscId = 11
+    val rightMasterEscId = 12
+    val rightSlaveEscId = 13
 
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
+    val leftSensorInversion by pref(true)
+    val rightSensorInversion by pref(false)
 
     val conversions = DrivetrainConversions(this)
 
@@ -49,6 +51,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
+        it.setSensorPhase(leftSensorInversion)
         it.isSafetyEnabled = false
     }
     val leftSlaveEsc by hardw { WPI_VictorSPX(leftSlaveEscId) }.configure {
@@ -63,6 +66,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
+        it.setSensorPhase(rightSensorInversion)
         it.isSafetyEnabled = false
     }
     val rightSlaveEsc by hardw { WPI_VictorSPX(rightSlaveEscId) }.configure {
@@ -73,7 +77,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
     val rightLazyOutput = lazyOutput(rightMasterEsc)
 
-    private val ticksToSerialPort by pref("kUSB1")
+    private val ticksToSerialPort = "kUSB1"
     private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
 
     val position = sensor {
@@ -128,7 +132,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     init {
         uiBaselineTicker.runOnTick { time ->
             setOf(leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
-                it.optimizedRead(time, 1.Second)
+                it.optimizedRead(time, .5.Second)
             }
         }
 

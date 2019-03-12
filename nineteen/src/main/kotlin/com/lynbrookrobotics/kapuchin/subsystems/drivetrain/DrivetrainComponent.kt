@@ -12,8 +12,8 @@ import info.kunalsheth.units.generated.*
 
 class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
 
-    val maxLeftSpeed by pref(13, FootPerSecond)
-    val maxRightSpeed by pref(13.3, FootPerSecond)
+    val maxLeftSpeed by pref(11.9, FootPerSecond)
+    val maxRightSpeed by pref(12.5, FootPerSecond)
     val maxSpeed get() = maxLeftSpeed min maxRightSpeed
     val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian
 
@@ -33,8 +33,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
 
     val bearingKp by pref(5, FootPerSecond, 45, Degree)
     val bearingKd by pref(3, FootPerSecond, 360, DegreePerSecond)
-
-    val lineScannerLead by pref(2.5, Foot)
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         TwoSided(PercentOutput(0.Percent))

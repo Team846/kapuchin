@@ -30,6 +30,7 @@ suspend fun startChoreo(
     val named = Named(name)
     val sensorScope = FreeSensorScope()
     try {
+        named.log(Debug) { "Started $name choreography." }
         val controller = sensorScope.run(setup)
         coroutineScope { controller() }
         named.log(Debug) { "Completed $name choreography." }
@@ -58,12 +59,8 @@ fun choreography(controller: Block) = controller
  * @param blocks collection of functions to run in parallel
  * @return parent coroutine of the running routines
  */
-suspend fun runAll(vararg blocks: Block) = startChoreo("runAll") {
-    choreography {
-        supervisorScope {
-            blocks.forEach { launch { it() } }
-        }
-    }
+suspend fun runAll(vararg blocks: Block) = supervisorScope {
+    blocks.forEach { launch { it() } }
 }
 
 /**
@@ -73,21 +70,19 @@ suspend fun runAll(vararg blocks: Block) = startChoreo("runAll") {
  * @param block function to run
  * @return coroutine which runs until `predicate` returns false
  */
-suspend fun runWhile(predicate: () -> Boolean, block: Block) = startChoreo("runWhile") {
-    choreography {
-        if (predicate()) {
-            val job = launch { block() }
+suspend fun runWhile(predicate: () -> Boolean, block: Block) = coroutineScope {
+    if (predicate()) {
+        val job = launch { block() }
 
-            var runOnTick: Cancel? = null
-            runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-                if (!predicate()) {
-                    runOnTick?.cancel()
-                    job.cancel()
-                }
+        var runOnTick: Cancel? = null
+        runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
+            if (!predicate()) {
+                runOnTick?.cancel()
+                job.cancel()
             }
-
-            job.join()
         }
+
+        job.join()
     }
 }
 
@@ -98,26 +93,39 @@ suspend fun runWhile(predicate: () -> Boolean, block: Block) = startChoreo("runW
  * @param block function to run
  * @return coroutine which runs code whenever `predicate` returns false
  */
-suspend fun whenever(predicate: () -> Boolean, block: Block) = startChoreo("whenever") {
-    choreography {
-        var cont: CancellableContinuation<Unit>? = null
+suspend fun whenever(predicate: () -> Boolean, block: Block) = coroutineScope {
+    var cont: CancellableContinuation<Unit>? = null
 
-        val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-            if (predicate() && cont?.isActive == true) {
-                try {
-                    cont?.resume(Unit)
-                } catch (e: IllegalStateException) {
-                }
+    val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
+        if (predicate() && cont?.isActive == true) {
+            try {
+                cont?.resume(Unit)
+            } catch (e: IllegalStateException) {
             }
         }
+    }
 
-        try {
-            while (isActive) {
-                suspendCancellableCoroutine<Unit> { cont = it }
-                block()
+    try {
+        while (isActive) {
+            suspendCancellableCoroutine<Unit> { cont = it }
+            block()
+        }
+    } finally {
+        runOnTick.cancel()
+    }
+}
+
+/**
+ * Shortcut for a bunch of runWhiles in a whenever
+ *
+ * @param blocks List of pairs of a predicate and a function
+ */
+suspend fun runWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorScope {
+    blocks.forEach { (p, b) ->
+        launch {
+            whenever(p) {
+                runWhile(p, b)
             }
-        } finally {
-            runOnTick.cancel()
         }
     }
 }

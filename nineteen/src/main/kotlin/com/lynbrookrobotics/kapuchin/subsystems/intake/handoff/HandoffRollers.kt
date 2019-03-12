@@ -15,7 +15,7 @@ class HandoffRollersComponent(hardware: HandoffRollersHardware) : Component<Hand
     val cargoHoldStrength by pref(33, Percent)
     val cargoCollectSpeed by pref(50, Percent)
 
-    override val fallbackController: HandoffRollersComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(-cargoHoldStrength) }
+    override val fallbackController: HandoffRollersComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(0.Percent) }
 
     override fun HandoffRollersHardware.output(value: TwoSided<DutyCycle>) {
         leftEsc.set(value.left.Each)
@@ -30,9 +30,12 @@ class HandoffRollersHardware : SubsystemHardware<HandoffRollersHardware, Handoff
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Handoff Rollers"
 
-    val leftPwmPort by pref(2)
-    val leftEsc by hardw { Spark(leftPwmPort) }
+    val invertLeft by pref(false)
+    val invertRight by pref(true)
 
-    val rightPwmPort by pref(3)
-    val rightEsc by hardw { Spark(rightPwmPort) }.configure { it.inverted = true }
+    val leftPwmPort = 1
+    val leftEsc by hardw { Spark(leftPwmPort) }.configure { it.inverted = invertLeft }
+
+    val rightPwmPort = 5
+    val rightEsc by hardw { Spark(rightPwmPort) }.configure { it.inverted = invertRight }
 }

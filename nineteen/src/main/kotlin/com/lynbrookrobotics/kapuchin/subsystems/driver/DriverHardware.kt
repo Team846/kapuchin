@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -24,8 +25,8 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
         it.name == "FGT Rumble 3-in-1"
     }
-    val absoluteWheel by hardw { Joystick(3) }.verify("the driver absolute wheel is connected") {
-        it.name == "BU0836A Interface"
+    val absoluteWheel by hardw { Joystick(3) }.verify("the absolute wheel is connected") {
+        it.name == "Kunals Absolute Steering Wheel"
     }
 
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
@@ -49,20 +50,17 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     }
 
     val accelerator = s { -joystickMapping(stick.y.Each) }
+            .with(graph("Accelerator", Percent))
     val steering = s { wheelMapping(wheel.x.Each) }
+            .with(graph("Steering", Percent))
 
-    private val alpsRdcPhaseShift by pref(53.583, Percent)
-    private val alpsRdc80 = alpsRdc80(alpsRdcPhaseShift)
     val absSteering = s {
-        alpsRdc80(
-                (absoluteWheel.x + 1).Each / 2,
-                (absoluteWheel.y + 1).Each / 2
-        )
+        (-(absoluteWheel.x / 2 + 1) * 1023 / 1000).Turn
     }
+            .with(graph("Absolute Steering", Degree))
 
     // buttons
-    val collectCargo = s { stick[RightTrigger] }
-    val collectWallPanel = s { stick[BottomTrigger] }
-    val collectGroundPanel = s { stick[LeftTrigger] }
-    val visionAlign = s { stick[Trigger] }
+    val collectCargo = s { stick[Trigger] }
+    val interruptAuto = s { stick[LeftTrigger] }
+    val lineTracking = s { stick[BottomTrigger] }
 }

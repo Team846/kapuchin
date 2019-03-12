@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
-import com.lynbrookrobotics.kapuchin.Subsystems.uiBaselineTicker
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -72,7 +72,7 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     init {
         uiBaselineTicker.runOnTick { time ->
             setOf(targetPosition, targetAngle).forEach {
-                it.optimizedRead(time, 1.Second)
+                it.optimizedRead(time, .5.Second)
             }
         }
     }
