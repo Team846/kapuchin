@@ -12,10 +12,6 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     private val wheelRadius by pref(3, Inch)
 
     private val leftTrim by pref(1.0)
-
-    private val flipOdometryLeft by pref(false)
-    private val flipOdometryRight by pref(false)
-    private val flipOdometrySides by pref(false)
     private val rightTrim by pref(1.0)
     val trackLength by pref(2, Foot)
 
@@ -69,10 +65,18 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
 
     val matrixTracking = RotationMatrixTracking(trackLength, Position(0.Foot, 0.Foot, 0.Degree), matrixCache)
 
+    val flipOdometrySides by pref(false)
+    val flipLeftOdometry by pref(false)
+    val flipRightOdometry by pref(true)
     fun accumulateOdometry(ticksL: Int, ticksR: Int) {
-        val posL = toLeftPosition(ticksR)
-        val posR = toRightPosition(-ticksL)
+        val fl = if(flipLeftOdometry) -ticksL else ticksL
+        val fr = if(flipRightOdometry) -ticksR else ticksR
+        val l = if(flipOdometrySides) fr else fl
+        val r = if(flipOdometrySides) fl else fr
 
-        matrixTracking(posL, posR)
+        matrixTracking(
+                toLeftPosition(l),
+                toRightPosition(r)
+        )
     }
 }

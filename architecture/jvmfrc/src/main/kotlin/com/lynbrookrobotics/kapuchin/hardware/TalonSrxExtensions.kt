@@ -2,23 +2,24 @@ package com.lynbrookrobotics.kapuchin.hardware
 
 import com.ctre.phoenix.ErrorCode
 import com.ctre.phoenix.ErrorCode.OK
-import com.revrobotics.CANError
-import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
+import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.ControlMode.*
 import com.ctre.phoenix.motorcontrol.ControlMode.PercentOutput
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.*
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
+import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.revrobotics.CANError
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.io.IOException
 
 
-val configTimeout = if(HardwareInit.crashOnFailure) 1000 else 0
+val configTimeout = if (HardwareInit.crashOnFailure) 1000 else 0
 private val slowStatusFrameRate = 1000
 
 operator fun ErrorCode.unaryPlus() = checkOk
@@ -85,25 +86,10 @@ fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: 
 
     feedback.forEachIndexed { i, sensor -> +master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
 
-//    StatusFrameEnhanced.values().forEach { +master.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
-//
-//    mapOf(
-//            Status_1_General to 5, // tells slaves what to output
-//
-//            Status_2_Feedback0 to if (feedback.isNotEmpty()) 10 else slowStatusFrameRate, // tells RoboRIO about selected sensor data
-//            Status_12_Feedback1 to if (feedback.size > 1) 10 else slowStatusFrameRate, // tells RoboRIO about selected sensor data
-//
-//            Status_13_Base_PIDF0 to if (feedback.isNotEmpty()) 15 else slowStatusFrameRate, // current error, integral, and derivative
-//            Status_14_Turn_PIDF1 to if (feedback.size > 1) 15 else slowStatusFrameRate // current error, integral, and derivative
-//    ).forEach { frame, period ->
-//        +master.setStatusFramePeriod(frame, period, configTimeout)
-//    }
-
     +master.configVelocityMeasurementPeriod(Period_5Ms, configTimeout)
     +master.configVelocityMeasurementWindow(4, configTimeout)
 }
 
 fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V) {
     generalSetup(slave, voltageCompensation, currentLimit, startupFrictionCompensation)
-//    StatusFrame.values().forEach { +slave.setStatusFramePeriod(it, slowStatusFrameRate, configTimeout) }
 }

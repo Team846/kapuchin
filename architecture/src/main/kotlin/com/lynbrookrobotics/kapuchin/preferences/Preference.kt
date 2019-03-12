@@ -123,7 +123,7 @@ open class Preference<Value>(
         name = nameLayer(parent, prop.name + prefNameSuffix)
 
         if (!contains(name)) {
-            log(Level.Debug) { "initializing value to fallback $fallback" }
+            log(Level.Warning) { "initializing to fallback $fallback" }
             init(name, fallback)
             value = fallback
         }

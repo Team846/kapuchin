@@ -30,10 +30,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { deployPanel } to choreography { deployPanel() },
                 { collectCargo } to choreography { collectCargo() },
                 { collectPanel } to choreography { collectPanel() },
-//                { collectGroundPanel } to choreography { collectGroundPanel() },
                 { operatorLineTracking || driverLineTracking } to choreography { trackLine() },
-//                { centerSlider } to choreography { centerSlider() },
-//                { centerCargo } to choreography { centerCargo() },
                 { centerAll } to choreography { centerAll() },
                 { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
@@ -75,28 +72,6 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
 
         }
     }
-
-//    //Lift down
-//    withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
-//    launch { lift?.set(lift.collectPanel, 0.Inch) }
-//
-//    //Hook down, slider out
-//    val hookDown = launch { hook?.set(HookPosition.Down) }
-//    delay(0.5.Second)
-//    val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
-//
-//    try {
-//        freeze()
-//    } finally {
-//        withContext(NonCancellable) {
-//            lift?.set(lift.hardware.position.optimizedRead(
-//                    currentTime, 0.Second
-//            ).y + 3.Inch)
-//            hookDown.cancel()
-//            delay(0.2.Second)
-//            hookSliderOut.cancel()
-//        }
-//    }
 }
 
 suspend fun Subsystems.collectCargo() = supervisorScope {

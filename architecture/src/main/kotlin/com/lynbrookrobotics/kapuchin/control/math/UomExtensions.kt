@@ -38,14 +38,12 @@ fun <Q : Quan<Q>> unionizeAndFindClosestRange(sequence: Sequence<ClosedRange<Q>>
     }.forEach {
         when {
             it.start <= currRight -> currRight = max(currRight, it.endInclusive)
-            currLeft <= current && current <= currRight -> return@forEach
+            current in currLeft..currRight -> return@forEach
             (it.start - current).abs < (currRight - current).abs -> {
                 currLeft = it.start
                 currRight = it.endInclusive
             }
-            else -> {
-                return@forEach
-            }
+            else -> return@forEach
         }
     }
 
