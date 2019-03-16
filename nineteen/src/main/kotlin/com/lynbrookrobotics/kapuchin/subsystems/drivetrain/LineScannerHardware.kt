@@ -34,12 +34,12 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
 //    private val scannerFov by pref(53.13, Degree)
 //    private val bisectionPoint by pref(2, Inch)
 //    private val zeroOffset by pref(-3, Inch)
-//    val mounting by pref {
-//        val x by pref(-12, Inch)
-//        val y by pref(12, Inch)
-//        val z by pref(6, Inch)
-//        ({ UomVector(x, y, z) })
-//    }
+    val mounting by pref {
+        val x by pref(-12, Inch)
+        val y by pref(12, Inch)
+        val z by pref(6, Inch)
+        ({ UomVector(x, y, z) })
+    }
 
 //    private val scanEdge get() = atan(bisectionPoint / mounting.z) - (scannerFov / 2)
 //    private val scanShift get() = mounting.z * tan(scanEdge)

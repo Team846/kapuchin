@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 
-suspend fun LiftComponent.liftTeleop(operator: OperatorHardware, driver: DriverHardware) = startChoreo("Lift teleop") {
+suspend fun LiftComponent.teleop(operator: OperatorHardware, driver: DriverHardware) = startChoreo("Lift teleop") {
 
     val liftDown by driver.liftDown.readEagerly().withoutStamps
 
