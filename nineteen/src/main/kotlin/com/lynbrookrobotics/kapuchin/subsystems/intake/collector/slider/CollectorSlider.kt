@@ -44,21 +44,6 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
 
         esc.set(cappedOutput.Each)
         nativeGrapher(currentTime, cappedOutput)
-
-//        val current = position.optimizedRead(currentTime, 0.Second).y
-//
-//        val range = unionizeAndFindClosestRange(CollectorSliderState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
-//
-//        if (range.start - range.endInclusive != 0.Inch) {
-//            when {
-//                value.isPositive && range.endInclusive > current ||
-//                        value.isNegative && range.start < current
-//                -> esc.set(value.Percent)
-//                else -> esc.set(0.0)
-//            }
-//        } else if (Safeties.log) {
-//            //log(Warning) { "No legal states found" }
-//        }
     }
 }
 

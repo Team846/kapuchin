@@ -39,28 +39,7 @@ class HandoffPivotComponent(hardware: HandoffPivotHardware) : Component<HandoffP
     private var lastReverseSoftLimit = Integer.MAX_VALUE
     private var lastForwardSoftLimit = Integer.MIN_VALUE
     override fun HandoffPivotHardware.output(value: OffloadedOutput) {
-//        val current = position.optimizedRead(currentTime, 0.Second).y
-//
-//        val range = unionizeAndFindClosestRange(HandoffPivotState.legalRanges(), current, (Int.MIN_VALUE + 1).Degree)
-//
-//        if (range.start - range.endInclusive != 0.Degree) {
-//            val reverseSoftLimit = conversions.native.native(range.start).toInt()
-//            if (reverseSoftLimit != lastReverseSoftLimit) {
-//                lastReverseSoftLimit = reverseSoftLimit
-//                esc.configReverseSoftLimitThreshold(reverseSoftLimit)
-//                println("setting reverse soft limit to: ${range.start.Degree}")
-//            }
-//
-//            val forwardSoftLimit = conversions.native.native(range.endInclusive).toInt()
-//            if (forwardSoftLimit != lastForwardSoftLimit) {
-//                lastForwardSoftLimit = forwardSoftLimit
-//                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
-//                println("setting forward soft limit to: ${range.endInclusive.Degree}")
-//            }
         lazyOutput(value)
-//        } else if (Safeties.log) {
-//            log(Warning) { "No legal states found" }
-//        }
     }
 }
 

@@ -22,7 +22,6 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Initializing hardware...")
 
-        Safeties.init()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 

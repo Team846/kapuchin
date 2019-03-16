@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
@@ -13,17 +14,13 @@ class HookSliderComponent(hardware: HookSliderHardware) : Component<HookSliderCo
     override val fallbackController: HookSliderComponent.(Time) -> HookSliderState = { In }
 
     override fun HookSliderHardware.output(value: HookSliderState) {
+        val subsystems = Subsystems.instance!!
 
-        solenoid.set(value.output)
+        val liftPos = subsystems.lift?.hardware?.position?.optimizedRead(currentTime, 0.Second)?.y ?: 0.Inch
 
-//        val legal = HookSliderState.legalRanges()
-//
-//        when {
-//            !legal.any() -> log(Warning) { "No $name legal states found" }
-//            value == HookSliderState.Undetermined -> log(Warning) { "Illegal $name state inputted" }
-//            value in legal || HookSliderState.Undetermined in legal -> solenoid.set(value.output)
-//            else -> Unit
-//        }
+        if (liftPos > 6.Inch && subsystems.collectorPivot?.hardware?.solenoid?.get() == CollectorPivotState.Up.output) {
+            solenoid.set(value.output)
+        }
     }
 }
 
