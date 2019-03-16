@@ -19,7 +19,7 @@ suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = star
                             kD = native(kD)
                     ), native(target)
             ).takeUnless {
-                current in target `±` tolerance
+                (target - current).abs < tolerance
             }
         }
     }

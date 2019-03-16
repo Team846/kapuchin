@@ -25,7 +25,7 @@ suspend fun LimelightHardware.perpendicularAlign(
             val mtrx = RotationMatrix(robotSnapshot1.bearing)
             val targetLoc = mtrx rz visionSnapshot1.vector
 
-            if (visionSnapshot1.bearing in 0.Degree `±` tolerance) {
+            if (visionSnapshot1.bearing.abs < tolerance) {
                 val perpPt = mtrx rz UomVector(
                         closeEndPt * sin(0.Degree),
                         closeEndPt * cos(0.Degree)

@@ -1,10 +1,13 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
-import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
+import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 
-suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
+suspend fun LiftComponent.liftTeleop(operator: OperatorHardware, driver: DriverHardware) = startChoreo("Lift teleop") {
+
+    val liftDown by driver.liftDown.readEagerly().withoutStamps
 
     val lowPanelHeight by operator.lowPanelHeight.readEagerly().withoutStamps
     val lowCargoHeight by operator.lowCargoHeight.readEagerly().withoutStamps
@@ -18,16 +21,25 @@ suspend fun Subsystems.liftTeleop() = startChoreo("Lift teleop") {
 
     val liftPrecision by operator.liftPrecision.readEagerly().withoutStamps
 
+    val currentHeight by hardware.position.readEagerly().withoutStamps
+
     choreography {
-        runWhenever(
-                { lowPanelHeight } to choreography { lift?.set(lift.panelLowRocket, 0.Inch) },
-                { lowCargoHeight } to choreography { lift?.set(lift.cargoLowRocket, 0.Inch) },
-                { midPanelHeight } to choreography { lift?.set(lift.panelMidRocket, 0.Inch) },
-                { midCargoHeight } to choreography { lift?.set(lift.cargoMidRocket, 0.Inch) },
-                { cargoShipCargoHeight } to choreography { lift?.set(lift.cargoCargoShip, 0.Inch) },
-                { highPanelHeight } to choreography { lift?.set(lift.panelHighRocket, 0.Inch) },
-                { highCargoHeight } to choreography { lift?.set(lift.cargoHighRocket, 0.Inch) },
-                { !liftPrecision.isZero } to choreography { lift?.manualOverride(operator) }
+        launchWhenever(
+                { liftDown } to choreography { set(cargoCollect, 0.Inch) },
+                { lowPanelHeight } to choreography { set(panelLowRocket, 0.Inch) },
+                { lowCargoHeight } to choreography { set(cargoLowRocket, 0.Inch) },
+                { midPanelHeight } to choreography { set(panelMidRocket, 0.Inch) },
+                { midCargoHeight } to choreography { set(cargoMidRocket, 0.Inch) },
+                { cargoShipCargoHeight } to choreography { set(cargoCargoShip, 0.Inch) },
+                { highPanelHeight } to choreography { set(panelHighRocket, 0.Inch) },
+                { highCargoHeight } to choreography { set(cargoHighRocket, 0.Inch) },
+
+                { !liftPrecision.isZero } to choreography {
+                    runWhile({ !liftPrecision.isZero }) {
+                        manualOverride(operator)
+                    }
+                    set(currentHeight, 0.Inch)
+                }
         )
     }
 }

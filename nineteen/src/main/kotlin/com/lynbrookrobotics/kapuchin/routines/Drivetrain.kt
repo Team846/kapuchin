@@ -101,8 +101,8 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
-        ).takeIf {
-            error !in 0.Degree `±` tolerance
+        ).takeUnless {
+            error.abs < tolerance
         }
     }
 }

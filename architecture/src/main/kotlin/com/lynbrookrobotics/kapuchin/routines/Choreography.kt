@@ -131,6 +131,21 @@ suspend fun runWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorS
 }
 
 /**
+ * Shortcut for a bunch of runWhiles in a whenever
+ *
+ * @param blocks List of pairs of a predicate and a function
+ */
+suspend fun launchWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorScope {
+    blocks.forEach { (p, b) ->
+        launch {
+            whenever(p) {
+                b()
+            }
+        }
+    }
+}
+
+/**
  * Pauses the coroutine for some time
  *
  * @param time period to delay for

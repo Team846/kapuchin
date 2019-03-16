@@ -60,7 +60,8 @@ class DriverHardware : RobotHardware<DriverHardware>() {
             .with(graph("Absolute Steering", Degree))
 
     // buttons
-    val collectCargo = s { stick[Trigger] }
+    val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
+    val liftDown = s{ stick[Trigger] }
     val interruptAuto = s { stick[LeftTrigger] }
     val lineTracking = s { stick[BottomTrigger] }
 }

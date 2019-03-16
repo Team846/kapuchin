@@ -39,8 +39,8 @@ suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalS
         val error = target - current
         val voltage = kP * error
 
-        voltageToDutyCycle(voltage, vBat).takeIf {
-            current !in target `±` tolerance
+        voltageToDutyCycle(voltage, vBat).takeUnless {
+            error.abs < tolerance
         }
     }
 }
@@ -56,7 +56,7 @@ suspend fun CollectorSliderComponent.trackLine(tolerance: Length, lineScanner: L
         val voltage = kP * error
 
         voltageToDutyCycle(voltage, vBat).takeIf {
-            error in 0.Inch `±` tolerance
+            error.abs < tolerance
         }
     }
 }
@@ -91,7 +91,7 @@ suspend fun HandoffPivotComponent.set(target: Angle, tolerance: Angle = 5.Degree
                             kD = native(kD)
                     ), native(target)
             ).takeUnless {
-                current in target `±` tolerance
+                (target-current).abs < tolerance
             }
         }
     }
