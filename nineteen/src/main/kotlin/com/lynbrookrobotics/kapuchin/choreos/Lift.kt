@@ -25,7 +25,7 @@ suspend fun LiftComponent.liftTeleop(operator: OperatorHardware, driver: DriverH
 
     choreography {
         launchWhenever(
-                { liftDown } to choreography { set(cargoCollect, 0.Inch) },
+                { liftDown } to choreography { set(collectCargo, 0.Inch) },
                 { lowPanelHeight } to choreography { set(panelLowRocket, 0.Inch) },
                 { lowCargoHeight } to choreography { set(cargoLowRocket, 0.Inch) },
                 { midPanelHeight } to choreography { set(panelMidRocket, 0.Inch) },
