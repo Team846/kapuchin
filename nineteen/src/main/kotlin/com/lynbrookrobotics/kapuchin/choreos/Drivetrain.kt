@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -34,7 +35,10 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
     choreography {
         while (isActive) {
             runWhile({goToLeftLoadingStation}) {
-                drivetrain.waypoint()
+                drivetrain.waypoint(trapezoidalMotionProfile(
+                        0.5.FootPerSecondSquared,
+                        3.FootPerSecond
+                ), leftLoadingStation, 0.5.Inch)
             }
             runWhile({ !visionAlign }) {
                 drivetrain.teleop(driver)

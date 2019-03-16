@@ -121,7 +121,7 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
 
         val targetA = target(location, target)
         val speed = motionProfile(distance)
-        val (targVels, _) = uni.speedAngleTarget(speed, targetA)
+        val targVels = uni.speedTargetAngleError(speed, targetA)
 
         val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
