@@ -1,10 +1,13 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
@@ -131,6 +134,55 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
                 VelocityOutput(velocityGains, nativeR)
         ).takeIf {
             distance > tolerance
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.waypointWithLineScan(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length, lineScanner: LineScannerHardware, lookAhead: Length, lineFollowVelocity: Velocity) = startRoutine("Waypoint") {
+    val position by hardware.position.readOnTick.withStamps
+    val lineScan by lineScanner.linePosition.readOnTick.withStamps
+    val uni = UnicycleDrive(this@waypointWithLineScan, this@startRoutine)
+
+    val waypointDistance = graph("Distance to Waypoint", Foot)
+
+    controller { t ->
+
+        lineScan.y.let {
+
+            if (it != null) {
+                val error = atan2(it, lookAhead)
+                val targetVels = uni.speedTargetAngleError(lineFollowVelocity, error)
+
+                val nativeL = hardware.conversions.nativeConversion.native(targetVels.left)
+                val nativeR = hardware.conversions.nativeConversion.native(targetVels.right)
+
+                TwoSided(
+                        VelocityOutput(velocityGains, nativeL),
+                        VelocityOutput(velocityGains, nativeR)
+                )
+
+            } else {
+                val (_, p) = position
+                val location = p.vector
+
+                val distance = distance(location, target).also { waypointDistance(t, it) }
+
+                val targetA = target(location, target)
+                val speed = motionProfile(distance)
+                val targVels = uni.speedTargetAngleError(speed, targetA)
+
+                val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
+                val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+
+
+
+                TwoSided(
+                        VelocityOutput(velocityGains, nativeL),
+                        VelocityOutput(velocityGains, nativeR)
+                ).takeIf {
+                    distance > tolerance
+                }
+            }
         }
     }
 }
