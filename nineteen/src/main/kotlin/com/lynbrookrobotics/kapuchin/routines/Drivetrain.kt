@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -41,9 +42,9 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
 }
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
-    val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
-    val steering by driver.steering.readWithEventLoop.withoutStamps
-    val absSteering by driver.absSteering.readWithEventLoop.withoutStamps
+    val accelerator by driver.accelerator.readEagerly.withoutStamps
+    val steering by driver.steering.readEagerly.withoutStamps
+    val absSteering by driver.absSteering.readEagerly.withoutStamps
 
     val position by hardware.position.readOnTick.withStamps
 
@@ -54,11 +55,16 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
     var startingAngle = -absSteering + position.y.bearing
 
+    var lastGc = 0.Second
     controller {
         if (
-                speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero
-        ) System.gc()
-
+                speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero &&
+                        currentTime - lastGc > 2.Second
+        ) {
+            System.gc()
+            lastGc = currentTime
+        }
+        else lastGc = 0.Second
 
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering

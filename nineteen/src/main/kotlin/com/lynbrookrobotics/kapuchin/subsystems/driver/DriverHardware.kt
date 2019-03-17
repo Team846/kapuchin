@@ -55,7 +55,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
             .with(graph("Steering", Percent))
 
     val absSteering = s {
-        (-(absoluteWheel.x / 2 + 1) * 1023 / 1000).Turn
+        -(absoluteWheel.x / 2 + 1).Turn
     }
             .with(graph("Absolute Steering", Degree))
 
@@ -63,5 +63,5 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
     val liftDown = s{ stick[Trigger] }
     val interruptAuto = s { stick[LeftTrigger] }
-    val lineTracking = s { stick[BottomTrigger] }
+    val lineTracking = s { stick[RightTrigger] }
 }
