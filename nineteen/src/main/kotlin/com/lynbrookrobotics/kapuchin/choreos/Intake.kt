@@ -108,7 +108,6 @@ suspend fun Subsystems.collectPanel() = supervisorScope {
 
     //Hook down, slider out
     val hookDown = launch { hook?.set(HookPosition.Down) }
-    delay(0.5.Second)
     val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
 
     try {
@@ -116,11 +115,8 @@ suspend fun Subsystems.collectPanel() = supervisorScope {
     } finally {
         withContext(NonCancellable) {
             hookDown.cancel()
-            delay(0.3.Second)
-            withTimeout(1.2.Second) {
-                lift?.set(lift.hardware.position.optimizedRead(
-                        currentTime, 0.Second
-                ).y + 5.Inch, 0.1.Inch)
+            withTimeout(1.5.Second) {
+                lift?.set(lift.collectPanel + 8.Inch, 1.Inch)
             }
             hookSliderOut.cancel()
         }

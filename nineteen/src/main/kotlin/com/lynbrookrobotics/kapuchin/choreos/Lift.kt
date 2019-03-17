@@ -34,12 +34,7 @@ suspend fun LiftComponent.teleop(operator: OperatorHardware, driver: DriverHardw
                 { highPanelHeight } to choreography { set(panelHighRocket, 0.Inch) },
                 { highCargoHeight } to choreography { set(cargoHighRocket, 0.Inch) },
 
-                { !liftPrecision.isZero } to choreography {
-                    runWhile({ !liftPrecision.isZero }) {
-                        manualOverride(operator)
-                    }
-                    set(currentHeight, 0.Inch)
-                }
+                { !liftPrecision.isZero } to choreography { manualOverride(operator) }
         )
     }
 }

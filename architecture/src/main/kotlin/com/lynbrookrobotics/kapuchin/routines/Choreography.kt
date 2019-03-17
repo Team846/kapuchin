@@ -139,7 +139,9 @@ suspend fun launchWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervis
     blocks.forEach { (p, b) ->
         launch {
             whenever(p) {
-                b()
+                launch {
+                    b()
+                }.join()
             }
         }
     }
