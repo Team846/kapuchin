@@ -39,9 +39,6 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 }
 
 suspend fun Subsystems.deployCargo(soft: Boolean) {
-    //Center collector slider
-    collectorSlider?.set(0.Inch, electrical)
-
     //Eject cargo
     collectorRollers?.spin(electrical, if (soft) collectorRollers.cargoReleaseSpeed / 2 else collectorRollers.cargoReleaseSpeed)
     freeze()
