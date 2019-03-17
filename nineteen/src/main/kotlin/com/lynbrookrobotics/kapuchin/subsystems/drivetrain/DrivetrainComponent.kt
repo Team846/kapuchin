@@ -1,6 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -44,7 +46,28 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     private val leftEscErrorGraph = graph("Left ESC Error", Each)
     private val rightEscErrorGraph = graph("Right ESC Error", Each)
 
+    val highLiftThreshold by pref(2, Foot)
+    val highLiftPeakOutput by pref(30, Percent)
+
+    private var currentPeakOutputForward = 100.Percent
+
     override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
+        Subsystems.instance?.lift?.let {
+            val position = it.hardware.position.optimizedRead(currentTime, 0.Second).y
+
+            val newPeakOutputForward = when (position > highLiftThreshold) {
+                true -> 100.Percent
+                false -> highLiftPeakOutput
+            }
+
+            if (newPeakOutputForward != currentPeakOutputForward) {
+                +leftMasterEsc.configPeakOutputForward(newPeakOutputForward.Each)
+                +leftSlaveEsc.configPeakOutputForward(newPeakOutputForward.Each)
+                +rightMasterEsc.configPeakOutputForward(newPeakOutputForward.Each)
+                +rightSlaveEsc.configPeakOutputForward(newPeakOutputForward.Each)
+            }
+        }
+
         leftLazyOutput(value.left)
         rightLazyOutput(value.right)
 
@@ -56,6 +79,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     }
 
     init {
-        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, { hardware.jitterReadPin.period.Second })
+        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set) { hardware.jitterReadPin.period.Second }
     }
 }
