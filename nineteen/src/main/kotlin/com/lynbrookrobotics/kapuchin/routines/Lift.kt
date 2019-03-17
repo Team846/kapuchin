@@ -29,7 +29,7 @@ suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRout
     val liftPrecision by operator.liftPrecision.readEagerly.withoutStamps
     val position by hardware.position.readEagerly.withoutStamps
 
-    var targetting = position.also{}
+    var targetting = position.also {}
     controller {
         if (liftPrecision.isZero) with(hardware.conversions.native) {
             PositionOutput(
@@ -41,7 +41,7 @@ suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRout
             )
         }
         else {
-            targetting = position.also{}
+            targetting = position + 5.Inch * liftPrecision.signum
             PercentOutput(liftPrecision)
         }
     }
