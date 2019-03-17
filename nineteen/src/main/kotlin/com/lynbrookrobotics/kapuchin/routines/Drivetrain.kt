@@ -5,12 +5,10 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
     val position by with(scope) { c.hardware.position.readOnTick.withStamps }
@@ -57,14 +55,13 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
     var lastGc = 0.Second
     controller {
-        if (
+        lastGc = if (
                 speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero &&
-                        currentTime - lastGc > 2.Second
+                currentTime - lastGc > 2.Second
         ) {
             System.gc()
-            lastGc = currentTime
-        }
-        else lastGc = 0.Second
+            currentTime
+        } else 0.Second
 
         val forwardVelocity = maxSpeed * accelerator
         val steeringVelocity = maxSpeed * steering

@@ -55,7 +55,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
             .with(graph("Steering", Percent))
 
     val absSteering = s {
-        -(absoluteWheel.x / 2 + 1).Turn
+        -(absoluteWheel.x + 1).Turn / 2 * 1023 / 1000
     }
             .with(graph("Absolute Steering Native", Percent), {
                 absoluteWheel.x.Each
