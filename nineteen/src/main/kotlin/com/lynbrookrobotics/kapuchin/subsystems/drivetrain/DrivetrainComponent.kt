@@ -66,6 +66,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
                 +rightMasterEsc.configPeakOutputForward(newPeakOutputForward.Each)
                 +rightSlaveEsc.configPeakOutputForward(newPeakOutputForward.Each)
             }
+            currentPeakOutputForward = newPeakOutputForward
         }
 
         leftLazyOutput(value.left)

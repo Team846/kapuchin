@@ -30,21 +30,27 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     val kP by pref(12, Volt, 12, Inch)
     val kD by pref(0, Volt, 2, FootPerSecond)
 
-    val lopsidePeakOutput by pref(50, Percent)
-    val lopsideRange by pref(3, Inch)
-
     override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = { PercentOutput(0.Percent) }
 
     private var lastReverseSoftLimit = Integer.MAX_VALUE
     private var lastForwardSoftLimit = Integer.MIN_VALUE
+
+    val lopsidePeakOutput by pref(50, Percent)
+    val lopsideRange by pref(3, Inch)
+    private var currentPeakOutput = 100.Percent
+
     override fun LiftHardware.output(value: OffloadedOutput) {
         Subsystems.instance!!.collectorSlider?.let {
             val position = it.hardware.position.optimizedRead(currentTime, 0.Second).y
-            if (position !in `±`(lopsideRange)) {
-                +esc.configPeakOutputForward(lopsidePeakOutput.Each)
-            } else {
-                +esc.configPeakOutputForward(1.0)
+            val newPeakOutput = when (position in `±`(lopsideRange)) {
+                true -> 100.Percent
+                false -> lopsidePeakOutput
             }
+
+            if (newPeakOutput != currentPeakOutput) {
+                +esc.configPeakOutputForward(newPeakOutput.Each)
+            }
+            currentPeakOutput = newPeakOutput
         }
         lazyOutput(value)
     }
