@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
     val position by with(scope) { c.hardware.position.readOnTick.withStamps }
@@ -63,8 +64,15 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
             currentTime
         } else 0.Second
 
-        val forwardVelocity = maxSpeed * accelerator
-        val steeringVelocity = maxSpeed * steering
+
+        val driverMagnitude = sqrt(
+                accelerator * accelerator + steering * steering
+        )
+        val normAccelerator = accelerator / driverMagnitude
+        val normSteering = steering / driverMagnitude
+
+        val forwardVelocity = maxSpeed * normAccelerator
+        val steeringVelocity = maxSpeed * normSteering
 
         if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
 
