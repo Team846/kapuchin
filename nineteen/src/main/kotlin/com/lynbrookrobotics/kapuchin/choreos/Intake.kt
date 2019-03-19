@@ -17,8 +17,9 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val deployPanel by operator.deployPanel.readEagerly().withoutStamps
     val collectCargo by driver.collectCargo.readEagerly().withoutStamps
     val collectPanel by operator.collectPanel.readEagerly().withoutStamps
+    val lilDicky by operator.lilDicky.readEagerly().withoutStamps
 //    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
-    val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
+//    val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
     val driverLineTracking by driver.lineTracking.readEagerly().withoutStamps
     val centerAll by operator.centerAll.readEagerly().withoutStamps
     val pivotDown by operator.pivotDown.readEagerly().withoutStamps
@@ -30,7 +31,8 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { deployPanel } to choreography { deployPanel() },
                 { collectCargo } to choreography { collectCargo() },
                 { collectPanel } to choreography { collectPanel() },
-                { operatorLineTracking || driverLineTracking } to choreography { trackLine() },
+                { /*operatorLineTracking ||*/ driverLineTracking } to choreography { trackLine() },
+                { lilDicky } to choreography { lilDicky() },
                 { centerAll } to choreography { centerAll() },
                 { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
@@ -58,10 +60,10 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
     } finally {
         withContext(NonCancellable) {
             val hookDown = launch { hook?.set(HookPosition.Down) }
-            withTimeout(1.Second) {
+            withTimeout(0.5.Second) {
                 lift?.set(lift.hardware.position.optimizedRead(
                         currentTime, 0.Second
-                ).y - 3.5.Inch, 0.1.Inch)
+                ).y - 3.5.Inch, 0.5.Inch)
             }
             hookSliderOut.cancel()
             delay(0.2.Second)
@@ -98,22 +100,45 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
     }
 }
 
-suspend fun Subsystems.collectPanel() = supervisorScope {
+suspend fun Subsystems.collectPanel() = coroutineScope {
     //Lift down
-    withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
-    launch { lift?.set(lift.collectPanel, 0.Inch) }
+    withTimeout(1.Second) { lift?.set(lift.collectPanel + 2.Inch, 1.Inch) }
+    launch { lift?.set(lift.collectPanel + 2.Inch, 0.Inch) }
 
     //Hook down, slider out
-    val hookDown = launch { hook?.set(HookPosition.Down) }
-    val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
+    val hookDown = scope.launch { hook?.set(HookPosition.Down) }
+    val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
 
     try {
         freeze()
     } finally {
         withContext(NonCancellable) {
             hookDown.cancel()
-            withTimeout(1.5.Second) {
-                lift?.set(lift.collectPanel + 8.Inch, 1.Inch)
+            withTimeout(0.5.Second) {
+                lift?.set(lift.collectPanel + 10.Inch, 1.Inch)
+            }
+            hookSliderOut.cancel()
+        }
+    }
+}
+
+suspend fun Subsystems.lilDicky() = coroutineScope {
+    //Lift down
+    withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
+    launch { lift?.set(lift.collectPanel, 0.Inch) }
+
+    //Hook down, slider out
+    val hookDown = scope.launch { hook?.set(HookPosition.Down) }
+
+    try {
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
+            delay(0.2.Second)
+            hookDown.cancel()
+            withTimeout(0.5.Second) {
+                lift?.set(lift.collectPanel + 10.Inch, 1.Inch)
             }
             hookSliderOut.cancel()
         }

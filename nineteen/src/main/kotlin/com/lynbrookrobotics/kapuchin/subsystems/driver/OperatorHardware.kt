@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
+import kotlin.math.sign
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"
@@ -51,7 +52,9 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val cargoShipCargoHeight = s { xButton && !lt }
     val pivotDown = s { xButton && lt }
     val centerAll = s { rt && !lt }
+
     val lineTracking = s { rt && lt }
+    val lilDicky = s { rt && lt }
 
     val liftPrecision = s {
         when (pov) {
@@ -62,8 +65,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     }
     val sliderPrecision = s {
         when (pov) {
-            90 -> sliderSensitivity
-            270 -> -sliderSensitivity
+            90 -> -sliderSensitivity * (xbox.getTriggerAxis(kLeft) - 0.5).sign
+            270 -> sliderSensitivity * (xbox.getTriggerAxis(kLeft) - 0.5).sign
             else -> 0.Percent
         }
     }

@@ -13,7 +13,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 suspend fun CollectorPivotComponent.set(target: CollectorPivotState) = startRoutine("Set") {
     controller { target }
@@ -30,7 +29,7 @@ suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware,
     }
 }
 
-suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 1.Inch) = startRoutine("Set") {
+suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 0.5.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
@@ -91,7 +90,7 @@ suspend fun HandoffPivotComponent.set(target: Angle, tolerance: Angle = 5.Degree
                             kD = native(kD)
                     ), native(target)
             ).takeUnless {
-                (target-current).abs < tolerance
+                (target - current).abs < tolerance
             }
         }
     }

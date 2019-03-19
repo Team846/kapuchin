@@ -55,16 +55,16 @@ class DriverHardware : RobotHardware<DriverHardware>() {
             .with(graph("Steering", Percent))
 
     val absSteering = s {
-        -(absoluteWheel.x + 1).Turn / 2 * 1023 / 1000
+        val wpi = absoluteWheel.x
+        val teensy = wpi / 2 * 1023 + 512
+        val encoder = teensy / 1000
+        encoder.Turn
     }
-            .with(graph("Absolute Steering Native", Percent), {
-                absoluteWheel.x.Each
-            })
             .with(graph("Absolute Steering", Degree))
 
     // buttons
     val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
-    val liftDown = s{ stick[Trigger] }
+    val liftDown = s { stick[Trigger] }
     val interruptAuto = s { stick[LeftTrigger] }
     val lineTracking = s { stick[RightTrigger] }
 }
