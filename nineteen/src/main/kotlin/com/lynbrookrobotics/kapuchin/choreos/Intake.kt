@@ -74,6 +74,10 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
 }
 
 suspend fun Subsystems.collectCargo() = supervisorScope {
+    //lift, collector down
+    launch { lift?.set(lift.collectCargo, 0.Inch) }
+    launch { collectorPivot?.set(CollectorPivotState.Down) }
+
     //Start rollers
     launch { handoffRollers?.spin(handoffRollers.cargoCollectSpeed) }
     launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
@@ -84,10 +88,6 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
     //Set handoff pivot down
     withTimeout(1.Second) { handoffPivot?.set(handoffPivot.collectPosition, 10.Degree) }
     val handoffPivotSet = launch { handoffPivot?.set(handoffPivot.collectPosition, 0.Degree) }
-
-    //lift, collector down
-    launch { lift?.set(lift.collectCargo, 0.Inch) }
-    launch { collectorPivot?.set(CollectorPivotState.Down) }
 
     try {
         freeze()
@@ -115,7 +115,7 @@ suspend fun Subsystems.collectPanel() = coroutineScope {
         withContext(NonCancellable) {
             hookDown.cancel()
             withTimeout(0.5.Second) {
-                lift?.set(lift.collectPanel + 10.Inch, 1.Inch)
+                lift?.set(lift.collectPanel + 9.25.Inch, 1.Inch)
             }
             hookSliderOut.cancel()
         }
@@ -138,7 +138,7 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
             delay(0.2.Second)
             hookDown.cancel()
             withTimeout(0.5.Second) {
-                lift?.set(lift.collectPanel + 10.Inch, 1.Inch)
+                lift?.set(lift.collectPanel + 9.25.Inch, 1.Inch)
             }
             hookSliderOut.cancel()
         }
@@ -157,10 +157,11 @@ suspend fun Subsystems.centerAll() = coroutineScope {
     freeze()
 }
 
-suspend fun Subsystems.centerSlider() {
+suspend fun Subsystems.centerSlider(tolerance: Length = 1.Inch) {
     collectorSlider?.set(
             0.Inch,
-            electrical
+            electrical,
+            tolerance
     )
     freeze()
 }

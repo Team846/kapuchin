@@ -29,7 +29,8 @@ class FunkyRobot : RobotBase() {
         println("Trimming preferences...")
         trim()
 
-        runBlocking { withTimeout(.5.Second) { classPreloading.join() } }
+        println("Loading classes...")
+        runBlocking { withTimeout(10.Second) { classPreloading.join() } }
 
         scope.launch {
             while (isActive) {

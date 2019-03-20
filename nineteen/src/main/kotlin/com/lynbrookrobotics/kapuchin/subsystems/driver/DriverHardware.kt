@@ -64,7 +64,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     // buttons
     val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
-    val liftDown = s { stick[Trigger] }
+    val liftDown = s { stick[Trigger] && !stick[BottomTrigger] }
     val interruptAuto = s { stick[LeftTrigger] }
     val lineTracking = s { stick[RightTrigger] }
 }

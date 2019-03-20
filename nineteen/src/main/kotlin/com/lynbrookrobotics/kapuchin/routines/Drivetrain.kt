@@ -64,15 +64,10 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
             currentTime
         } else 0.Second
 
+        val cappedAccelerator = accelerator cap `±`(100.Percent - steering.abs)
 
-        val driverMagnitude = sqrt(
-                accelerator * accelerator + steering * steering
-        )
-        val normAccelerator = accelerator / driverMagnitude
-        val normSteering = steering / driverMagnitude
-
-        val forwardVelocity = maxSpeed * normAccelerator
-        val steeringVelocity = maxSpeed * normSteering
+        val forwardVelocity = maxSpeed * cappedAccelerator
+        val steeringVelocity = maxSpeed * steering
 
         if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
 
