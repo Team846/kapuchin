@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons.*
@@ -10,11 +11,19 @@ import kotlinx.coroutines.isActive
 
 suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
+
+    fun zero(location: UomVector<Length>) {
+        drivetrain.hardware.conversions.matrixTracking.x = location.x
+        drivetrain.hardware.conversions.matrixTracking.y = location.y
+     }
+
     val visionAlign by driver.lineTracking.readEagerly().withoutStamps
+
+
+    //go-to functions
 
     val goToLeftLoadingStation by driver.goToLeftLoadingStation.readEagerly().withoutStamps
     val goToRightLoadingStation by driver.goToRightLoadingStation.readEagerly().withoutStamps
-
 
     //TODO: goToLeftFrontCargo
     //TODO: goToRightFrontCargo
@@ -37,85 +46,114 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
     val goToLeftFarRocket by driver.goToLeftFarRocket.readEagerly().withoutStamps
     val goToRightFarRocket by driver.goToRightFarRocket.readEagerly().withoutStamps
 
+
+    //zero-at functions
+
+    val zeroAtLeftLoadingStation by driver.zeroAtLeftLoadingStation.readEagerly().withoutStamps
+    val zeroAtRightLoadingStation by driver.zeroAtRightLoadingStation.readEagerly().withoutStamps
+
+    //TODO: zeroAtLeftFrontCargo
+    //TODO: zeroAtRightFrontCargo
+
+    val zeroAtLeftCloseCargo by driver.zeroAtLeftCloseCargo.readEagerly().withoutStamps
+    val zeroAtRightCloseCargo by driver.zeroAtRightCloseCargo.readEagerly().withoutStamps
+
+    val zeroAtLeftMiddleCargo by driver.zeroAtLeftMiddleCargo.readEagerly().withoutStamps
+    val zeroAtRightMiddleCargo by driver.zeroAtRightMiddleCargo.readEagerly().withoutStamps
+
+    val zeroAtLeftFarCargo by driver.zeroAtLeftFarCargo.readEagerly().withoutStamps
+    val zeroAtRightFarCargo by driver.zeroAtRightFarCargo.readEagerly().withoutStamps
+
+    val zeroAtLeftCloseRocket by driver.zeroAtLeftCloseRocket.readEagerly().withoutStamps
+    val zeroAtRightCloseRocket by driver.zeroAtRightCloseRocket.readEagerly().withoutStamps
+
+    //TODO: zeroAtLeftMiddleRocket
+    //TODO: zeroAtRightMiddleRocket
+
+    val zeroAtLeftFarRocket by driver.zeroAtLeftFarRocket.readEagerly().withoutStamps
+    val zeroAtRightFarRocket by driver.zeroAtRightFarRocket.readEagerly().withoutStamps
+
+    
+
     choreography {
         while (isActive) {
             runWhile({goToLeftLoadingStation}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), leftLoadingStation, 0.5.Inch)
+
             }
             runWhile({goToRightLoadingStation}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), rightLoadingStation, 0.5.Inch)
+
             }
             runWhile({goToRightCloseCargo}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), rightCloseCargo, 0.5.Inch)
+
             }
             runWhile({goToLeftCloseCargo}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), leftCloseCargo, 0.5.Inch)
+
             }
             runWhile({goToRightCloseCargo}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), rightCloseCargo, 0.5.Inch)
+
             }
             runWhile({goToLeftMiddleCargo}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), leftMiddleCargo, 0.5.Inch)
+
             }
             runWhile({goToRightMiddleCargo}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), rightMiddleCargo, 0.5.Inch)
+
             }
             runWhile({goToLeftFarCargo}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), rightFarCargo, 0.5.Inch)
+
             }
             runWhile({goToRightFarCargo}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), rightFarCargo, 0.5.Inch)
+
             }
             runWhile({goToLeftCloseRocket}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), leftCloseRocket, 0.5.Inch)
+
             }
             runWhile({goToRightCloseRocket}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), rightCloseRocket, 0.5.Inch)
+
             }
             runWhile({goToLeftFarRocket}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), leftFarRocket, 0.5.Inch)
+
             }
             runWhile({goToRightFarRocket}) {
-                drivetrain.waypoint(trapezoidalMotionProfile(
-                        0.5.FootPerSecondSquared,
-                        3.FootPerSecond
-                ), rightFarRocket, 0.5.Inch)
+
+            }
+            runWhile({zeroAtLeftLoadingStation}) {
+                zero(leftLoadingStation)
+            }
+            runWhile({zeroAtRightLoadingStation}) {
+                zero(rightLoadingStation)
+            }
+            runWhile({zeroAtRightCloseCargo}) {
+                zero(rightCloseCargo)
+            }
+            runWhile({zeroAtLeftCloseCargo}) {
+                zero(leftCloseCargo)
+            }
+            runWhile({zeroAtRightCloseCargo}) {
+                zero(rightCloseCargo)
+            }
+            runWhile({zeroAtLeftMiddleCargo}) {
+                zero(leftMiddleCargo)
+            }
+            runWhile({zeroAtRightMiddleCargo}) {
+                zero(rightMiddleCargo)
+            }
+            runWhile({zeroAtLeftFarCargo}) {
+                zero(leftFarCargo)
+            }
+            runWhile({zeroAtRightFarCargo}) {
+                zero(rightFarCargo)
+            }
+            runWhile({zeroAtLeftCloseRocket}) {
+                zero(leftCloseRocket)
+            }
+            runWhile({zeroAtRightCloseRocket}) {
+                zero(rightCloseRocket)
+            }
+            runWhile({zeroAtLeftFarRocket}) {
+                zero(leftFarRocket)
+            }
+            runWhile({zeroAtRightFarRocket}) {
+                zero(rightFarRocket)
             }
             runWhile({ !visionAlign }) {
                 drivetrain.teleop(driver)

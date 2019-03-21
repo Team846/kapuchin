@@ -62,29 +62,53 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     // buttons
     private val lt get() = stick[LeftTrigger]
     private val rt get() = stick[RightTrigger]
+    private val bt get() = stick[BottomTrigger]
 
     val collectCargo = s { stick[BottomTrigger] && stick[Trigger] }
     val interruptAuto = s { false }
     val lineTracking = s { false }
     val liftDown = s { stick[Trigger] }
 
-    val goToLeftLoadingStation = s { stick[LeftFour] && lt }
-    val goToRightLoadingStation = s { stick[LeftFour] && rt }
+    val goToLeftLoadingStation = s { stick[LeftFour] && lt && !bt }
+    val goToRightLoadingStation = s { stick[LeftFour] && rt && !bt }
 
 
-    val goToLeftCloseCargo = s { stick[LeftFive] && lt }
-    val goToRightCloseCargo = s { stick[LeftFive] && rt }
+    val goToLeftCloseCargo = s { stick[LeftFive] && lt && !bt }
+    val goToRightCloseCargo = s { stick[LeftFive] && rt && !bt }
 
-    val goToLeftMiddleCargo = s { stick[LeftSix] && lt }
-    val goToRightMiddleCargo = s { stick[LeftSix] && rt }
+    val goToLeftMiddleCargo = s { stick[LeftSix] && lt && !bt }
+    val goToRightMiddleCargo = s { stick[LeftSix] && rt && !bt }
 
-    val goToLeftFarCargo = s { stick[LeftThree] && lt }
-    val goToRightFarCargo = s { stick[LeftThree] && rt }
+    val goToLeftFarCargo = s { stick[LeftThree] && lt && !bt }
+    val goToRightFarCargo = s { stick[LeftThree] && rt && !bt }
+    
+    val goToLeftCloseRocket = s { stick[LeftOne] && lt && !bt }
+    val goToRightCloseRocket = s { stick[LeftOne] && rt && !bt }
+
+    val goToLeftFarRocket = s { stick[LeftTwo] && lt && !bt }
+    val goToRightFarRocket = s { stick[LeftTwo] && rt && !bt }
 
 
-    val goToLeftCloseRocket = s { stick[LeftOne] && lt }
-    val goToRightCloseRocket = s { stick[LeftOne] && rt }
+    val zeroAtLeftLoadingStation = s { stick[LeftFour] && !lt && bt }
+    val zeroAtRightLoadingStation = s { stick[LeftFour] && !rt && bt }
 
-    val goToLeftFarRocket = s { stick[LeftTwo] && lt }
-    val goToRightFarRocket = s { stick[LeftTwo] && rt }
+
+    val zeroAtLeftCloseCargo = s { stick[LeftFive] && !lt && bt }
+    val zeroAtRightCloseCargo = s { stick[LeftFive] && !rt && bt }
+
+    val zeroAtLeftMiddleCargo = s { stick[LeftSix] && !lt && bt }
+    val zeroAtRightMiddleCargo = s { stick[LeftSix] && !rt && bt }
+
+    val zeroAtLeftFarCargo = s { stick[LeftThree] && !lt && bt }
+    val zeroAtRightFarCargo = s { stick[LeftThree] && !rt && bt }
+
+
+    val zeroAtLeftCloseRocket = s { stick[LeftOne] && !lt && bt }
+    val zeroAtRightCloseRocket = s { stick[LeftOne] && !rt && bt }
+
+    val zeroAtLeftFarRocket = s { stick[LeftTwo] && !lt && bt }
+    val zeroAtRightFarRocket = s { stick[LeftTwo] && !rt && bt }
+
+
+
 }
