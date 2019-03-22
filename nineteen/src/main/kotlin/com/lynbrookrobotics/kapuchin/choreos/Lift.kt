@@ -25,6 +25,13 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
         choreography {
             launchWhenever(
                     { liftDown } to choreography {
+                        withTimeout(0.5.Second) {
+                            collectorSlider?.set(
+                                    0.Inch,
+                                    electrical,
+                                    2.5.Inch
+                            )
+                        }
                         launch { centerSlider() }
                         set(collectCargo, 0.Inch)
                     },
