@@ -75,57 +75,63 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
     val zeroAtLeftFarRocket by driver.zeroAtLeftFarRocket.readEagerly().withoutStamps
     val zeroAtRightFarRocket by driver.zeroAtRightFarRocket.readEagerly().withoutStamps
 
-    
+
 
     choreography {
+
+        val motionProfile = trapezoidalMotionProfile(
+                deceleration = 5.FootPerSecondSquared,
+                topSpeed = drivetrain.maxSpeed
+        )
+
         while (isActive) {
             runWhile({goToLeftLoadingStation}) {
-
+                drivetrain.positionAndButtUp(motionProfile, leftLoadingStation, 0.5.Inch, 10.Degree)
             }
             runWhile({goToRightLoadingStation}) {
-
-            }
-            runWhile({goToRightCloseCargo}) {
-
+                drivetrain.positionAndButtUp(motionProfile, rightLoadingStation, 0.5.Inch, 10.Degree)
             }
             runWhile({goToLeftCloseCargo}) {
+                drivetrain.positionAndButtUp(motionProfile, leftCloseCargo, 0.5.Inch, 10.Degree)
 
             }
             runWhile({goToRightCloseCargo}) {
-
+                drivetrain.positionAndButtUp(motionProfile, rightCloseCargo, 0.5.Inch, 10.Degree)
             }
+
             runWhile({goToLeftMiddleCargo}) {
+                drivetrain.positionAndButtUp(motionProfile, leftMiddleCargo, 0.5.Inch, 10.Degree)
 
             }
             runWhile({goToRightMiddleCargo}) {
-
+                drivetrain.positionAndButtUp(motionProfile, rightMiddleCargo, 0.5.Inch, 10.Degree)
             }
+
             runWhile({goToLeftFarCargo}) {
+                drivetrain.positionAndButtUp(motionProfile, leftFarCargo, 0.5.Inch, 10.Degree)
 
             }
             runWhile({goToRightFarCargo}) {
-
+                drivetrain.positionAndButtUp(motionProfile, rightFarCargo, 0.5.Inch, 10.Degree)
             }
-            runWhile({goToLeftCloseRocket}) {
 
+            runWhile({goToLeftCloseRocket}) {
+                drivetrain.positionAndButtUp(motionProfile, leftCloseRocket, 0.5.Inch, 10.Degree)
             }
             runWhile({goToRightCloseRocket}) {
-
+                drivetrain.positionAndButtUp(motionProfile, rightCloseRocket, 0.5.Inch, 10.Degree)
             }
             runWhile({goToLeftFarRocket}) {
-
+                drivetrain.positionAndButtUp(motionProfile, leftFarRocket, 0.5.Inch, 10.Degree)
             }
             runWhile({goToRightFarRocket}) {
-
+                drivetrain.positionAndButtUp(motionProfile, rightFarRocket, 0.5.Inch, 10.Degree)
             }
             runWhile({zeroAtLeftLoadingStation}) {
                 zero(leftLoadingStation.vector)
             }
             runWhile({zeroAtRightLoadingStation}) {
                 zero(rightLoadingStation.vector)
-            }
-            runWhile({zeroAtRightCloseCargo}) {
-                zero(rightCloseCargo.vector)
             }
             runWhile({zeroAtLeftCloseCargo}) {
                 zero(leftCloseCargo.vector)
@@ -170,7 +176,7 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
     }
 }
 
-suspend fun DrivetrainComponent.positionAndForward(motionProfile: (Length) -> Velocity, targetPos: Position, posTolerance: Length, turnTolerance: Angle) = startChoreo("Go to position and drive forward") {
+suspend fun DrivetrainComponent.positionAndButtUp(motionProfile: (Length) -> Velocity, targetPos: Position, posTolerance: Length, turnTolerance: Angle) = startChoreo("Go to position and butt up") {
 
     val position by hardware.position.readEagerly().withoutStamps
 
@@ -180,4 +186,3 @@ suspend fun DrivetrainComponent.positionAndForward(motionProfile: (Length) -> Ve
         openLoop(50.Percent)
     }
 }
-
