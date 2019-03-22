@@ -8,6 +8,12 @@ operator fun <Q : Quan<Q>> Q.div(that: Q): Double = this.siValue / that.siValue
 infix fun <Q : Quan<Q>> Q.minMag(that: Q) = if (this.abs < that.abs) this else that
 infix fun <Q : Quan<Q>> Q.maxMag(that: Q) = if (this.abs > that.abs) this else that
 
+infix fun <Q : Quan<Q>> Q.cap(rng: ClosedRange<Q>) = when {
+    this > rng.endInclusive -> rng.endInclusive
+    this < rng.start -> rng.start
+    else -> this
+}
+
 inline infix fun <Q : Number> Q.`±`(radius: Q): ClosedFloatingPointRange<Double> {
     val center = toDouble()
     val range = radius.toDouble()

@@ -55,7 +55,10 @@ class DriverHardware : RobotHardware<DriverHardware>() {
             .with(graph("Steering", Percent))
 
     val absSteering = s {
-        (-(absoluteWheel.x / 2 + 1) * 1023 / 1000).Turn
+        val wpi = absoluteWheel.x
+        val teensy = wpi / 2 * 1023 + 512
+        val encoder = teensy / 1000
+        encoder.Turn
     }
             .with(graph("Absolute Steering", Degree))
 
@@ -63,11 +66,6 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     private val lt get() = stick[LeftTrigger]
     private val rt get() = stick[RightTrigger]
     private val bt get() = stick[BottomTrigger]
-
-    val collectCargo = s { stick[BottomTrigger] && stick[Trigger] }
-    val interruptAuto = s { false }
-    val lineTracking = s { false }
-    val liftDown = s { stick[Trigger] }
 
     val goToLeftLoadingStation = s { stick[LeftFour] && lt && !bt }
     val goToRightLoadingStation = s { stick[LeftFour] && rt && !bt }
@@ -109,6 +107,8 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val zeroAtLeftFarRocket = s { stick[LeftTwo] && !lt && bt }
     val zeroAtRightFarRocket = s { stick[LeftTwo] && !rt && bt }
 
-
-
+    val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
+    val liftDown = s { stick[Trigger] && !stick[BottomTrigger] }
+    val interruptAuto = s { stick[LeftTrigger] }
+    val lineTracking = s { stick[RightTrigger] }
 }

@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.routines
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -125,6 +126,23 @@ suspend fun runWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorS
         launch {
             whenever(p) {
                 runWhile(p, b)
+            }
+        }
+    }
+}
+
+/**
+ * Shortcut for a bunch of runWhiles in a whenever
+ *
+ * @param blocks List of pairs of a predicate and a function
+ */
+suspend fun launchWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorScope {
+    blocks.forEach { (p, b) ->
+        launch {
+            whenever(p) {
+                launch {
+                    b()
+                }.join()
             }
         }
     }

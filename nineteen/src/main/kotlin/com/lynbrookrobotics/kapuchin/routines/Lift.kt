@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 suspend fun LiftComponent.liftTeleop(driver: DriverHardware, operator: OperatorHardware) = startRoutine("Lift teleop") {
 
@@ -71,13 +70,31 @@ suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = star
                             kD = native(kD)
                     ), native(target)
             ).takeUnless {
-                current in target `±` tolerance
+                (target - current).abs < tolerance
             }
         }
     }
 }
 
 suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual override") {
-    val liftPrecision by operator.liftPrecision.readEagerly().withoutStamps
-    controller { PercentOutput(liftPrecision) }
+
+    val liftPrecision by operator.liftPrecision.readEagerly.withoutStamps
+    val position by hardware.position.readEagerly.withoutStamps
+
+    var targetting = position.also {}
+    controller {
+        if (liftPrecision.isZero) with(hardware.conversions.native) {
+            PositionOutput(
+                    OffloadedPidGains(
+                            kP = native(kP),
+                            kI = 0.0,
+                            kD = native(kD)
+                    ), native(targetting)
+            )
+        }
+        else {
+            targetting = position + 5.Inch * liftPrecision.signum
+            PercentOutput(liftPrecision)
+        }
+    }
 }

@@ -75,16 +75,13 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
     val zeroAtLeftFarRocket by driver.zeroAtLeftFarRocket.readEagerly().withoutStamps
     val zeroAtRightFarRocket by driver.zeroAtRightFarRocket.readEagerly().withoutStamps
 
-
-
     choreography {
-
         val motionProfile = trapezoidalMotionProfile(
                 deceleration = 5.FootPerSecondSquared,
                 topSpeed = drivetrain.maxSpeed
         )
 
-        while (isActive) {
+        whenever({drivetrain.routine == null}) {
             runWhile({goToLeftLoadingStation}) {
                 drivetrain.positionAndButtUp(motionProfile, leftLoadingStation, 0.5.Inch, 10.Degree)
             }
