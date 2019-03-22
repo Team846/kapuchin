@@ -140,7 +140,7 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
 
 suspend fun DrivetrainComponent.waypointAndButtUp(motionProfile: (Length) -> Velocity, target: Position, tolerance: Length) = startRoutine("Waypoint") {
     val position by hardware.position.readOnTick.withStamps
-    val uni = UnicycleDrive(this@waypointAndTurn, this@startRoutine)
+    val uni = UnicycleDrive(this@waypointAndButtUp, this@startRoutine)
 
     val waypointDistance = graph("Distance to Waypoint", Foot)
 
