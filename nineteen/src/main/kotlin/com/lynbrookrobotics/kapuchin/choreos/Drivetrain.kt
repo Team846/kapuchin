@@ -2,10 +2,12 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.isActive
 
@@ -117,43 +119,43 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
             }
             runWhile({zeroAtLeftLoadingStation}) {
-                zero(leftLoadingStation)
+                zero(leftLoadingStation.vector)
             }
             runWhile({zeroAtRightLoadingStation}) {
-                zero(rightLoadingStation)
+                zero(rightLoadingStation.vector)
             }
             runWhile({zeroAtRightCloseCargo}) {
-                zero(rightCloseCargo)
+                zero(rightCloseCargo.vector)
             }
             runWhile({zeroAtLeftCloseCargo}) {
-                zero(leftCloseCargo)
+                zero(leftCloseCargo.vector)
             }
             runWhile({zeroAtRightCloseCargo}) {
-                zero(rightCloseCargo)
+                zero(rightCloseCargo.vector)
             }
             runWhile({zeroAtLeftMiddleCargo}) {
-                zero(leftMiddleCargo)
+                zero(leftMiddleCargo.vector)
             }
             runWhile({zeroAtRightMiddleCargo}) {
-                zero(rightMiddleCargo)
+                zero(rightMiddleCargo.vector)
             }
             runWhile({zeroAtLeftFarCargo}) {
-                zero(leftFarCargo)
+                zero(leftFarCargo.vector)
             }
             runWhile({zeroAtRightFarCargo}) {
-                zero(rightFarCargo)
+                zero(rightFarCargo.vector)
             }
             runWhile({zeroAtLeftCloseRocket}) {
-                zero(leftCloseRocket)
+                zero(leftCloseRocket.vector)
             }
             runWhile({zeroAtRightCloseRocket}) {
-                zero(rightCloseRocket)
+                zero(rightCloseRocket.vector)
             }
             runWhile({zeroAtLeftFarRocket}) {
-                zero(leftFarRocket)
+                zero(leftFarRocket.vector)
             }
             runWhile({zeroAtRightFarRocket}) {
-                zero(rightFarRocket)
+                zero(rightFarRocket.vector)
             }
             runWhile({ !visionAlign }) {
                 drivetrain.teleop(driver)
@@ -167,3 +169,15 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
         }
     }
 }
+
+suspend fun DrivetrainComponent.positionAndForward(motionProfile: (Length) -> Velocity, targetPos: Position, posTolerance: Length, turnTolerance: Angle) = startChoreo("Go to position and drive forward") {
+
+    val position by hardware.position.readEagerly().withoutStamps
+
+    choreography {
+        waypoint(motionProfile, targetPos.vector, posTolerance)
+        turn(targetPos.bearing `coterminal -` position.bearing, turnTolerance)
+        openLoop(50.Percent)
+    }
+}
+

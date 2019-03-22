@@ -109,3 +109,59 @@ suspend fun DrivetrainComponent.followTrajectory(
         ).takeUnless { isDone }
     }
 }
+
+suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("Waypoint") {
+    val position by hardware.position.readOnTick.withStamps
+    val uni = UnicycleDrive(this@waypoint, this@startRoutine)
+
+    val waypointDistance = graph("Distance to Waypoint", Foot)
+
+    controller { t ->
+        val (_, p) = position
+        val location = p.vector
+
+        val distance = distance(location, target).also { waypointDistance(t, it) }
+
+        val targetA = target(location, target)
+        val speed = motionProfile(distance)
+        val targVels = uni.speedTargetAngleError(speed, targetA)
+
+        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
+        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        ).takeIf {
+            distance > tolerance
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.waypointAndButtUp(motionProfile: (Length) -> Velocity, target: Position, tolerance: Length) = startRoutine("Waypoint") {
+    val position by hardware.position.readOnTick.withStamps
+    val uni = UnicycleDrive(this@waypointAndTurn, this@startRoutine)
+
+    val waypointDistance = graph("Distance to Waypoint", Foot)
+
+    controller { t ->
+        val (_, p) = position
+        val location = p.vector
+
+        val distance = distance(location, target.vector).also { waypointDistance(t, it) }
+
+        val targetA = target(location, target.vector)
+        val speed = motionProfile(distance)
+        val targVels = uni.speedTargetAngleError(speed, targetA)
+
+        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
+        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+
+        TwoSided(
+                VelocityOutput(velocityGains, nativeL),
+                VelocityOutput(velocityGains, nativeR)
+        ).takeIf {
+            distance > tolerance
+        }
+    }
+}

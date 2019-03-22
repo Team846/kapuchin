@@ -6,9 +6,9 @@ import info.kunalsheth.units.generated.*
 //Based on the CAD diagram of the field.
 
 //HAB
-val leftHAB = UomVector(-21.33333.Inch, 82.875.Inch)
-val centerHAB = UomVector(0.Inch, 82.85.Inch)
-val rightHAB = UomVector(21.33333.Inch, 82.85.Inch)
+val leftHAB = Position(-21.33333.Inch, 82.875.Inch, 0.Degree)
+val centerHAB = Position(0.Inch, 82.875.Inch, 0.Degree)
+val rightHAB = Position(21.33333.Inch, 82.875.Inch, 0.Degree)
 
 //Cargo
 val cargoYSeparation = 21.75.Inch
@@ -17,20 +17,20 @@ val middleCargoY = closeCargoY + cargoYSeparation
 val farCargoY = closeCargoY + cargoYSeparation * 2.0
 val cargoX = 45.875.Inch 
 
-val leftCloseCargo = UomVector(cargoX, closeCargoY)
-val leftMiddleCargo = UomVector(cargoX, middleCargoY)
-val leftFarCargo = UomVector(cargoX, farCargoY)
+val leftCloseCargo = Position(cargoX, closeCargoY, 90.Degree)
+val leftMiddleCargo = Position(cargoX, middleCargoY, 90.Degree)
+val leftFarCargo = Position(cargoX, farCargoY, 90.Degree)
 
-val rightCloseCargo = UomVector(-cargoX, closeCargoY)
-val rightMiddleCargo = UomVector(-cargoX, middleCargoY)
-val rightFarCargo = UomVector(-cargoX, farCargoY)
+val rightCloseCargo = Position(-cargoX, closeCargoY, -90.Degree)
+val rightMiddleCargo = Position(-cargoX, middleCargoY, -90.Degree)
+val rightFarCargo = Position(-cargoX, farCargoY, -90.Degree)
 
-val leftFrontCargo = UomVector(-10.875.Inch, 201.375.Inch)
-val rightFrontCargo = UomVector(10.875.Inch, 201.375.Inch)
+val leftFrontCargo = Position(-10.875.Inch, 201.375.Inch, 0.Degree)
+val rightFrontCargo = Position(10.875.Inch, 201.375.Inch, 0.Degree)
 
 //Rocket
 val closeRocketX = 134.222.Inch
-val closeRocketY = 197.58.Inch
+val closeRocketY = 197.587.Inch
 
 val middleRocketX = 115.558.Inch
 val middleRocketY = 228.Inch
@@ -38,17 +38,17 @@ val middleRocketY = 228.Inch
 val farRocketX = 134.222.Inch
 val farRocketY = 258.413.Inch
 
-val leftCloseRocket = UomVector(-closeRocketX, closeRocketY)
-val leftMiddleRocket = UomVector(-middleRocketX, middleRocketY)
-val leftFarRocket = UomVector(-farRocketX, farRocketY)
+val leftCloseRocket = Position(-closeRocketX, closeRocketY, -30.Degree)
+val leftMiddleRocket = Position(-middleRocketX, middleRocketY, -90.Degree)
+val leftFarRocket = Position(-farRocketX, farRocketY, -150.Degree)
 
-val rightCloseRocket = UomVector(closeRocketX, closeRocketY)
-val rightMiddleRocket = UomVector(middleRocketX, middleRocketY)
-val rightFarRocket = UomVector(farRocketX, farRocketY)
+val rightCloseRocket = Position(closeRocketX, closeRocketY, 30.Degree)
+val rightMiddleRocket = Position(middleRocketX, middleRocketY, 90.Degree)
+val rightFarRocket = Position(farRocketX, farRocketY, 150.Degree)
 
 //Loading station
-val leftLoadingStation = UomVector(-135.285.Inch, 16.687.Inch)
-val rightLoadingStation = UomVector(135.285.Inch, 16.687.Inch)
+val leftLoadingStation = Position(-135.285.Inch, 16.687.Inch, 180.Degree)
+val rightLoadingStation = Position(135.285.Inch, 16.687.Inch, 180.Degree)
 
 
 
