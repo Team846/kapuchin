@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.choreos.*
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
@@ -106,7 +107,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
         fun concurrentInit() = runBlocking {
-            val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
+            val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware(Position(80.472.Inch, 104.489.Inch, 0.Degree))) }
             val electricalAsync = async { ElectricalSystemHardware() }
 
             val driverAsync = async { DriverHardware() }
@@ -181,7 +182,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val teleop = t { TeleopComponent(TeleopHardware(driver, operator, leds)) }!!
 
             instance = Subsystems(
-                    t { DrivetrainComponent(DrivetrainHardware()) }!!,
+                    t { DrivetrainComponent(DrivetrainHardware(Position(80.472.Inch, 104.489.Inch, 0.Degree))) }!!,
                     t { ElectricalSystemHardware() }!!,
                     teleop,
                     driver,

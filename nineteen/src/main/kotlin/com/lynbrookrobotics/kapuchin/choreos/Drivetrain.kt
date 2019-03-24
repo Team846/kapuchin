@@ -27,17 +27,10 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
               val lineScannerAngle = atan2(lineScanner.mounting.x, lineScanner.mounting.y)
               val lineScannerDistance = hypot(lineScanner.mounting.x, lineScanner.mounting.y)
 
-              val robotPosition = pos.vector -
-                UomVector(
-                  bumperToLineScanner * sin(pos.bearing),
-                  bumperToLineScanner * cos(pos.bearing)) -
-                UomVector(
-                  lineDist * sin(pos.bearing + lineAngle),
-                  lineDist * cos(pos.bearing + lineAngle)) -
-                UomVector(
-                    lineScannerDistance * sin(pos.bearing + lineScannerAngle),
-                    lineScannerDistance * cos(pos.bearing + lineScannerAngle)
-                  )
+              val x = pos.vector.x - bumperToLineScanner * sin(pos.bearing) - lineDist * sin(pos.bearing + lineAngle) - lineScannerDistance * sin(pos.bearing + lineScannerAngle)
+              val y = pos.vector.y - bumperToLineScanner * cos(pos.bearing) - lineDist * cos(pos.bearing + lineAngle) - lineScannerDistance * cos(pos.bearing + lineScannerAngle)
+              drivetrain.hardware.conversions.matrixTracking.x = x
+              drivetrain.hardware.conversions.matrixTracking.y = y
             }
         }
      }
