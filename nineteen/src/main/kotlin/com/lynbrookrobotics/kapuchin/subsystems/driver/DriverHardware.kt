@@ -1,5 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
+import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.Subsystems.*
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -54,13 +56,16 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val steering = s { wheelMapping(wheel.x.Each) }
             .with(graph("Steering", Percent))
 
-    val absSteering = s {
-        val wpi = absoluteWheel.x
-        val teensy = wpi / 2 * 1023 + 512
-        val encoder = teensy / 1000
-        encoder.Turn
-    }
+    val absSteering = s { 180.Degree * absoluteWheel.x }
             .with(graph("Absolute Steering", Degree))
+
+    init {
+        Subsystems.uiBaselineTicker.runOnTick { time ->
+            setOf(accelerator, steering, absSteering).forEach {
+                it.optimizedRead(time, .5.Second)
+            }
+        }
+    }
 
     // buttons
     val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }

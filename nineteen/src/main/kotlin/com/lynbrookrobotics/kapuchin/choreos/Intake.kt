@@ -147,12 +147,12 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
 
 suspend fun Subsystems.trackLine() = coroutineScope {
     //Track line with slider
-    collectorSlider?.trackLine(0.5.Inch, lineScanner, electrical)
+    collectorSlider?.trackLine(0.Inch, lineScanner, electrical)
     freeze()
 }
 
 suspend fun Subsystems.centerAll() = coroutineScope {
-    launch { centerSlider() }
+    centerSlider(0.Inch)
 //    launch { centerCargo() }
     freeze()
 }

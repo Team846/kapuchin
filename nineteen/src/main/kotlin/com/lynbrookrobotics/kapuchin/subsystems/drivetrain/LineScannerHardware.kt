@@ -34,12 +34,7 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
 //    private val scannerFov by pref(53.13, Degree)
 //    private val bisectionPoint by pref(2, Inch)
 //    private val zeroOffset by pref(-3, Inch)
-    val mounting by pref {
-        val x by pref(-12, Inch)
-        val y by pref(12, Inch)
-        val z by pref(6, Inch)
-        ({ UomVector(x, y, z) })
-    }
+    val lookAhead by pref(12, Inch)
 
 //    private val scanEdge get() = atan(bisectionPoint / mounting.z) - (scannerFov / 2)
 //    private val scanShift get() = mounting.z * tan(scanEdge)
@@ -80,13 +75,13 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
             fun p3(x: Dimensionless) = (x - x1) * (x - x2) * (x - x4)
             fun p4(x: Dimensionless) = (x - x1) * (x - x2) * (x - x3)
             fun(x: Dimensionless) = p1(x) * (y1 / p1(x1)) +
-                    p2(x) * (y2 / p1(x2)) +
-                    p3(x) * (y3 / p1(x3)) +
-                    p4(x) * (y4 / p1(x4))
+                    p2(x) * (y2 / p2(x2)) +
+                    p3(x) * (y3 / p3(x3)) +
+                    p4(x) * (y4 / p4(x4))
         })
     }
 
-    val nativeGrapher = graph("Native", Each)
+    val nativeGrapher = graph("Native", Percent)
     val linePosition = sensor(lineScanner) {
         val (x, y) = lineScanner(exposure, threshold)
         nativeGrapher(x, y ?: Double.NaN.Each)

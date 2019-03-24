@@ -77,7 +77,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         -liftJoystickMapping(getY(kLeft).Each) * liftSensitivity
     }
     val sliderPrecision = s {
-        sliderJoystickMapping(getX(kRight).Each) * sliderSensitivity * (getTriggerAxis(kLeft) - 0.5).sign
+        sliderJoystickMapping(getX(kRight).Each) * sliderSensitivity * -(getTriggerAxis(kLeft) - 0.5).sign
     }
 
     val unleashTheCobra = s { lt && start }
