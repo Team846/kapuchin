@@ -54,7 +54,7 @@ suspend fun CollectorSliderComponent.trackLine(tolerance: Length, lineScanner: L
         val error = (target ?: 0.Inch) - current
         val voltage = kP * error
 
-        voltageToDutyCycle(voltage, vBat).takeIf {
+        voltageToDutyCycle(voltage, vBat).takeUnless {
             error.abs < tolerance
         }
     }

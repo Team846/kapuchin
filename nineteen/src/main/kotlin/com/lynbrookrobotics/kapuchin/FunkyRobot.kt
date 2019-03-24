@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -39,6 +40,7 @@ class FunkyRobot : RobotBase() {
                 }
 
                 runWhile({ isEnabled && isAutonomous }) {
+                    subsystems.trackLine()
                     //                    subsystems.cargoShipSandstorm()
                     subsystems.teleop()
                 }

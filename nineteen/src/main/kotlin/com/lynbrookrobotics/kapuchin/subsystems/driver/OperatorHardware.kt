@@ -35,6 +35,9 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val liftSensitivity by pref(75, Percent)
     val sliderSensitivity by pref(100, Percent)
 
+    val cargoShipCargoHeight = s { xButton && !lt }
+    val pivotDown = s { xButton && lt }
+
     val lowPanelHeight = s { aButton && !lt }
     val lowCargoHeight = s { aButton && lt }
 
@@ -44,18 +47,16 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val highPanelHeight = s { yButton && !lt }
     val highCargoHeight = s { yButton && lt }
 
-    val deployCargo = s { rb && lt }
+    val lineTracking = s { rt }
+
+    val deployPanel = s { lb && !lt }
+    val lilDicky = s { lb && lt }
+
     val softDeployCargo = s { rb && !lt }
+    val deployCargo = s { rb && lt }
 
-    val deployPanel = s { lb && lt }
-    val collectPanel = s { lb && !lt }
-
-    val cargoShipCargoHeight = s { xButton && !lt }
-    val pivotDown = s { xButton && lt }
-    val centerAll = s { rt && !lt }
-
-    val lineTracking = s { rt && lt }
-    val lilDicky = s { rt && lt }
+    val unleashTheCobra = s { lt && start }
+    val oShitSnekGoBack = s { lt && back }
 
     val liftJoystickMapping by pref {
         val exponent by pref(2)
@@ -77,9 +78,6 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         -liftJoystickMapping(getY(kLeft).Each) * liftSensitivity
     }
     val sliderPrecision = s {
-        sliderJoystickMapping(getX(kRight).Each) * sliderSensitivity * (getTriggerAxis(kLeft) - 0.5).sign
+        sliderJoystickMapping(getX(kRight).Each) * sliderSensitivity * -(getTriggerAxis(kLeft) - 0.5).sign
     }
-
-    val unleashTheCobra = s { lt && start }
-    val oShitSnekGoBack = s { lt && back }
 }

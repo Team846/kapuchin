@@ -32,7 +32,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
 
         val zeroedOutput =
                 if (!isZeroed)
-                    if (!currentAtZero) -30.Percent
+                    if (!currentAtZero) 30.Percent
                     else {
                         zero()
                         0.Percent
@@ -71,8 +71,8 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     val currentLimit by pref(20, Ampere)
     val startupFrictionCompensation by pref(0.5, Volt)
 
-    val invert by pref(true)
-    val invertSensor by pref(true)
+    val invert by pref(false)
+    val invertSensor by pref(false)
 
     val escCanId = 20
 

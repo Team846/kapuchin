@@ -85,6 +85,6 @@ class RotationMatrixTracking(
 
         x = avg(lpx, rpx)
         y = avg(lpy, rpy)
-        bearing += theta(sl, sr, trackLength)
+        bearing += tl + tr
     }
 }
