@@ -16,12 +16,12 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val softDeployCargo by operator.softDeployCargo.readEagerly().withoutStamps
     val deployPanel by operator.deployPanel.readEagerly().withoutStamps
     val collectCargo by driver.collectCargo.readEagerly().withoutStamps
-    val collectPanel by operator.collectPanel.readEagerly().withoutStamps
+//    val collectPanel by operator.collectPanel.readEagerly().withoutStamps
     val lilDicky by operator.lilDicky.readEagerly().withoutStamps
 //    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
-//    val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
-    val driverLineTracking by driver.lineTracking.readEagerly().withoutStamps
-    val centerAll by operator.centerAll.readEagerly().withoutStamps
+    val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
+//    val driverLineTracking by driver.lineTracking.readEagerly().withoutStamps
+//    val centerAll by operator.centerAll.readEagerly().withoutStamps
     val pivotDown by operator.pivotDown.readEagerly().withoutStamps
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
@@ -30,10 +30,10 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { deployCargo || softDeployCargo } to choreography { deployCargo(softDeployCargo) },
                 { deployPanel } to choreography { deployPanel() },
                 { collectCargo } to choreography { collectCargo() },
-                { collectPanel } to choreography { collectPanel() },
-                { /*operatorLineTracking ||*/ driverLineTracking } to choreography { trackLine() },
+//                { collectPanel } to choreography { collectPanel() },
+                { operatorLineTracking } to choreography { trackLine() },
                 { lilDicky } to choreography { lilDicky() },
-                { centerAll } to choreography { centerAll() },
+//                { centerAll } to choreography { centerAll() },
                 { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
