@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
+class DrivetrainHardware(initPos: Position) : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
     override val syncThreshold = 3.milli(Second)
@@ -40,12 +40,19 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val rightMasterEscId = 12
     val rightSlaveEscId = 13
 
+    val bumperAheadDistance by pref {
+        val length by pref(3, Foot)
+        val bumperWidth by pref (6, Inch)
+        ({length / 2 + bumperWidth})
+    }
+
+
     val leftEscInversion by pref(false)
     val rightEscInversion by pref(true)
     val leftSensorInversion by pref(true)
     val rightSensorInversion by pref(false)
 
-    val conversions = DrivetrainConversions(this)
+    val conversions = DrivetrainConversions(this, initPos)
 
     val leftMasterEsc by hardw { WPI_TalonSRX(leftMasterEscId) }.configure {
         configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)

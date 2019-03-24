@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware) {
+class DrivetrainConversions(val hardware: DrivetrainHardware, initPos: Position) : Named by Named("Conversions", hardware) {
     private val wheelRadius by pref(3, Inch)
 
     private val leftTrim by pref(1.0)
@@ -63,7 +63,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
             .map { it to RotationMatrix(it) }
             .toMap()
 
-    val matrixTracking = RotationMatrixTracking(trackLength, Position(0.Foot, 0.Foot, 0.Degree), matrixCache)
+    val matrixTracking = RotationMatrixTracking(trackLength, initPos, matrixCache)
 
     val flipOdometrySides by pref(false)
     val flipLeftOdometry by pref(false)

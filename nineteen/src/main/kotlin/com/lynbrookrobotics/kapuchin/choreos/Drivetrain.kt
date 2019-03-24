@@ -8,15 +8,38 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
 
 suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
 
-    fun zero(location: UomVector<Length>) {
-        drivetrain.hardware.conversions.matrixTracking.x = location.x
-        drivetrain.hardware.conversions.matrixTracking.y = location.y
+    fun zero(pos: Position) {
+        lineScanner.linePosition.optimizedRead(currentTime, 0.Second).y.let {
+            if (it != null) {
+              val bumperToLineScanner = drivetrain.hardware.bumperAheadDistance - lineScanner.mounting.y - lineScanner.lookAhead
+
+              val lineAngle = atan2(it, lineScanner.lookAhead)
+              val lineDist = hypot(it, lineScanner.lookAhead)
+
+              val lineScannerAngle = atan2(lineScanner.mounting.x, lineScanner.mounting.y)
+              val lineScannerDistance = hypot(lineScanner.mounting.x, lineScanner.mounting.y)
+
+              val robotPosition = pos.vector -
+                UomVector(
+                  bumperToLineScanner * sin(pos.bearing),
+                  bumperToLineScanner * cos(pos.bearing)) -
+                UomVector(
+                  lineDist * sin(pos.bearing + lineAngle),
+                  lineDist * cos(pos.bearing + lineAngle)) -
+                UomVector(
+                    lineScannerDistance * sin(pos.bearing + lineScannerAngle),
+                    lineScannerDistance * cos(pos.bearing + lineScannerAngle)
+                  )
+            }
+        }
      }
 
     val visionAlign by driver.lineTracking.readEagerly().withoutStamps
@@ -125,40 +148,40 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
                 drivetrain.positionAndButtUp(motionProfile, rightFarRocket, 0.5.Inch, 10.Degree)
             }
             runWhile({zeroAtLeftLoadingStation}) {
-                zero(leftLoadingStation.vector)
+                zero(leftLoadingStation)
             }
             runWhile({zeroAtRightLoadingStation}) {
-                zero(rightLoadingStation.vector)
+                zero(rightLoadingStation)
             }
             runWhile({zeroAtLeftCloseCargo}) {
-                zero(leftCloseCargo.vector)
+                zero(leftCloseCargo)
             }
             runWhile({zeroAtRightCloseCargo}) {
-                zero(rightCloseCargo.vector)
+                zero(rightCloseCargo)
             }
             runWhile({zeroAtLeftMiddleCargo}) {
-                zero(leftMiddleCargo.vector)
+                zero(leftMiddleCargo)
             }
             runWhile({zeroAtRightMiddleCargo}) {
-                zero(rightMiddleCargo.vector)
+                zero(rightMiddleCargo)
             }
             runWhile({zeroAtLeftFarCargo}) {
-                zero(leftFarCargo.vector)
+                zero(leftFarCargo)
             }
             runWhile({zeroAtRightFarCargo}) {
-                zero(rightFarCargo.vector)
+                zero(rightFarCargo)
             }
             runWhile({zeroAtLeftCloseRocket}) {
-                zero(leftCloseRocket.vector)
+                zero(leftCloseRocket)
             }
             runWhile({zeroAtRightCloseRocket}) {
-                zero(rightCloseRocket.vector)
+                zero(rightCloseRocket)
             }
             runWhile({zeroAtLeftFarRocket}) {
-                zero(leftFarRocket.vector)
+                zero(leftFarRocket)
             }
             runWhile({zeroAtRightFarRocket}) {
-                zero(rightFarRocket.vector)
+                zero(rightFarRocket)
             }
             runWhile({ !visionAlign }) {
                 drivetrain.teleop(driver)
