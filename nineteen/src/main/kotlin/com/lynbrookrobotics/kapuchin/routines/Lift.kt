@@ -41,7 +41,7 @@ suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRout
             )
         }
         else {
-            targetting = position + 5.Inch * liftPrecision.signum
+            targetting = position + 2.Inch * liftPrecision.signum
             PercentOutput(liftPrecision)
         }
     }

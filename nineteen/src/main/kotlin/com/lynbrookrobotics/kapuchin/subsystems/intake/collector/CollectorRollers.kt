@@ -19,13 +19,14 @@ class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<
     val cargoCenterSpeed by pref(8.5, Volt)
     val cargoReleaseSpeed by pref(-6, Volt)
 
-    override val fallbackController: CollectorRollersComponent.(Time) -> TwoSided<DutyCycle> = {
-        TwoSided(cargoHoldStrength)
-    }
+    private val fallbackValue = TwoSided(
+            cargoHoldStrength
+    )
+    override val fallbackController: CollectorRollersComponent.(Time) -> TwoSided<DutyCycle> = { fallbackValue }
 
     override fun CollectorRollersHardware.output(value: TwoSided<DutyCycle>) {
-        topEsc.set(ControlMode.PercentOutput, value.left.Each)
-        bottomEsc.set(value.right.Each)
+        topEsc.set(value.left.Each)
+        bottomEsc.set(ControlMode.PercentOutput, value.right.Each)
     }
 }
 
@@ -38,13 +39,13 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
     private val invertTop by pref(false)
     private val invertBottom by pref(false)
 
-    val bottomPwmPort = 0
-    val bottomEsc by hardw { Spark(bottomPwmPort) }.configure {
+    val topPwmPort = 0
+    val topEsc by hardw { Spark(topPwmPort) }.configure {
         it.inverted = invertTop
     }
 
-    val topCanId = 50
-    val topEsc by hardw { VictorSPX(topCanId) }.configure {
+    val bottomCanId = 50
+    val bottomEsc by hardw { VictorSPX(bottomCanId) }.configure {
         generalSetup(it, 12.Volt, 20.Ampere, 0.Volt)
         it.inverted = invertBottom
     }

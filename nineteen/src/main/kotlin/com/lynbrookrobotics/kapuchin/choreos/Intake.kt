@@ -137,9 +137,10 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
             val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
             delay(0.2.Second)
             hookDown.cancel()
-            withTimeout(0.5.Second) {
+            withTimeout(0.2.Second) {
                 lift?.set(lift.collectPanel + 9.25.Inch, 1.Inch)
             }
+            launch { lift?.set(lift.collectPanel + 9.25.Inch, 0.Inch) }
             hookSliderOut.cancel()
         }
     }

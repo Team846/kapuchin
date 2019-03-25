@@ -26,7 +26,8 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     val kP by pref(12, Volt, 12, Inch)
     val kD by pref(0, Volt, 2, FootPerSecond)
 
-    override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = { PercentOutput(0.Percent) }
+    private val fallbackValue = PercentOutput(0.Percent)
+    override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = { fallbackValue }
 
     private var lastReverseSoftLimit = Integer.MAX_VALUE
     private var lastForwardSoftLimit = Integer.MIN_VALUE

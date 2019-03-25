@@ -32,8 +32,8 @@ val ErrorCode.checkOk: Unit
 operator fun CANError.unaryPlus() = checkOk
 val CANError.checkOk: Unit
     get() {
-        if (this != CANError.kOK && com.lynbrookrobotics.kapuchin.hardware.HardwareInit.crashOnFailure)
-            throw java.io.IOException("REV Spark Max call returned $this")
+        if (this != CANError.kOK && HardwareInit.crashOnFailure)
+            throw IOException("REV Spark Max call returned $this")
     }
 
 fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (OffloadedOutput) -> Unit {
