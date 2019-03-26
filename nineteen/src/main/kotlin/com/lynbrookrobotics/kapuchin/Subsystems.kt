@@ -55,7 +55,14 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { drivetrainTeleop() },
                 { intakeTeleop() },
                 { liftTeleop() },
-                { climberTeleop() }
+                { climberTeleop() },
+                {
+                    collectorSlider?.let { slider ->
+                        launchWhenever({ teleop.routine == null } to choreography {
+                                    teleop.vibrateOnAlign(lineScanner, slider)
+                                })
+                    }
+                }
         )
         System.gc()
     }

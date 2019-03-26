@@ -12,9 +12,10 @@ import java.awt.Color
 typealias Rumble = TwoSided<DutyCycle>
 
 class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, TeleopHardware, Pair<Rumble, Color>>(hardware, EventLoop) {
-    override val fallbackController: TeleopComponent.(Time) -> Pair<Rumble, Color> = {
-        TwoSided(0.Percent) to Color(Color.HSBtoRGB(((currentTime.Second / 3 % 1.0)).toFloat(), 1f, 1f))
-    }
+
+    val fallbackRumble = TwoSided(0.Percent)
+    val fallbackColor get() = Color(Color.HSBtoRGB(((currentTime.Second / 3 % 1.0)).toFloat(), 1f, 1f))
+    override val fallbackController: TeleopComponent.(Time) -> Pair<Rumble, Color> = { fallbackRumble to fallbackColor }
 
     override fun TeleopHardware.output(value: Pair<Rumble, Color>) {
         ledHardware?.channels?.invoke(value.second)
