@@ -21,6 +21,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     val min by pref(-3.5, Inch)
     val max by pref(4.75, Inch)
     val maxOutput by pref(100, Percent)
+    val operatingVoltage by pref(12, Volt)
 
     override val fallbackController: CollectorSliderComponent.(Time) -> DutyCycle = { 0.Percent }
 

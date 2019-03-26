@@ -19,9 +19,15 @@ class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<
     val cargoCenterSpeed by pref(8.5, Volt)
     val cargoReleaseSpeed by pref(-6, Volt)
 
-    private val fallbackValue = TwoSided(
+    val hatchState = TwoSided(
+            cargoHoldStrength,
+            0.Percent
+    )
+    val cargoState = TwoSided(
             cargoHoldStrength
     )
+
+    private val fallbackValue = hatchState
     override val fallbackController: CollectorRollersComponent.(Time) -> TwoSided<DutyCycle> = { fallbackValue }
 
     override fun CollectorRollersHardware.output(value: TwoSided<DutyCycle>) {

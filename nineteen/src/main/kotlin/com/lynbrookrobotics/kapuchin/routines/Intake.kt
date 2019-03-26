@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.electrical.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
@@ -13,6 +14,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 suspend fun CollectorPivotComponent.set(target: CollectorPivotState) = startRoutine("Set") {
     controller { target }
@@ -27,6 +29,10 @@ suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware,
                 voltageToDutyCycle(bottom, vBat)
         )
     }
+}
+
+suspend fun CollectorRollersComponent.set(state: TwoSided<DutyCycle>) = startRoutine("Set") {
+    controller { state }
 }
 
 suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 0.5.Inch) = startRoutine("Set") {
@@ -44,19 +50,22 @@ suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalS
     }
 }
 
-suspend fun CollectorSliderComponent.trackLine(tolerance: Length, lineScanner: LineScannerHardware, electrical: ElectricalSystemHardware) = startRoutine("Track line") {
+suspend fun CollectorSliderComponent.trackLine(lineScanner: LineScannerHardware, electrical: ElectricalSystemHardware) = startRoutine("Track line") {
 
     val target by lineScanner.linePosition.readOnTick.withoutStamps
     val current by hardware.position.readOnTick.withoutStamps
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
-        val error = (target ?: 0.Inch) - current
-        val voltage = kP * error
+        target?.let { snapshot ->
+            val error = snapshot - current
+            val voltage = kP * error
 
-        voltageToDutyCycle(voltage, vBat).takeUnless {
-            error.abs < tolerance
-        }
+            voltageToDutyCycle(
+                    voltage cap `±`(operatingVoltage),
+                    vBat
+            )
+        } ?: 0.Percent
     }
 }
 
