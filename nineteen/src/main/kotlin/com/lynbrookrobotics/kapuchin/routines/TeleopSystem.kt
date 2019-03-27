@@ -1,28 +1,26 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.TeleopComponent.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import info.kunalsheth.units.generated.*
 import java.awt.Color
 
 suspend fun TeleopComponent.vibrateOnAlign(lineScanner: LineScannerHardware, slider: CollectorSliderComponent) = startRoutine("Vibrate on align") {
-    val target by lineScanner.linePosition.readOnTick.withoutStamps
-    val current by slider.hardware.position.readOnTick.withoutStamps
+    val target by lineScanner.linePosition.readEagerly.withoutStamps
+    val current by slider.hardware.position.readEagerly.withoutStamps
 
     controller {
         target?.let { snapshot ->
             val error = snapshot - current
-            val balance = (snapshot - slider.min) / (slider.max - slider.min)
-            val rumble = TwoSided(
-                    100.Percent * (1.Each - balance),
-                    100.Percent * balance
-            )
 
-            if (error.abs < 1.Inch) {
-                rumble to Color.YELLOW
-            } else null
-        } ?: fallbackRumble to fallbackColor
+            if (error.abs < 1.5.Inch) TeleopFeedback(
+                    wheelRumble = 100.Percent,
+                    stickRumble = 100.Percent,
+                    xboxLeftRumble = 100.Percent, xboxRightRumble = 100.Percent,
+                    ledColor = Color.RED
+            ) else null
+        } ?: TeleopFeedback()
     }
 }

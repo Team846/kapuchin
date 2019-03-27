@@ -104,27 +104,27 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
     }
 }
 
-suspend fun Subsystems.collectPanel() = coroutineScope {
-    //Lift down
-    withTimeout(1.Second) { lift?.set(lift.collectPanel + 2.Inch, 1.Inch) }
-    launch { lift?.set(lift.collectPanel + 2.Inch, 0.Inch) }
-
-    //Hook down, slider out
-    val hookDown = scope.launch { hook?.set(HookPosition.Down) }
-    val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
-
-    try {
-        freeze()
-    } finally {
-        withContext(NonCancellable) {
-            hookDown.cancel()
-            withTimeout(0.5.Second) {
-                lift?.set(lift.collectPanel + 9.25.Inch, 1.Inch)
-            }
-            hookSliderOut.cancel()
-        }
-    }
-}
+//suspend fun Subsystems.collectPanel() = coroutineScope {
+//    //Lift down
+//    withTimeout(1.Second) { lift?.set(lift.collectPanel + 2.Inch, 1.Inch) }
+//    launch { lift?.set(lift.collectPanel + 2.Inch, 0.Inch) }
+//
+//    //Hook down, slider out
+//    val hookDown = scope.launch { hook?.set(HookPosition.Down) }
+//    val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
+//
+//    try {
+//        freeze()
+//    } finally {
+//        withContext(NonCancellable) {
+//            hookDown.cancel()
+//            withTimeout(0.5.Second) {
+//                lift?.set(lift.collectPanel + lift.collectPanelStroke, 1.Inch)
+//            }
+//            hookSliderOut.cancel()
+//        }
+//    }
+//}
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
     //Lift down
@@ -143,9 +143,9 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
             delay(0.2.Second)
             hookDown.cancel()
             withTimeout(0.2.Second) {
-                lift?.set(lift.collectPanel + 9.25.Inch, 1.Inch)
+                lift?.set(lift.collectPanel + lift.collectPanelStroke, 1.Inch)
             }
-            launch { lift?.set(lift.collectPanel + 9.25.Inch, 0.Inch) }
+            launch { lift?.set(lift.collectPanel + lift.collectPanelStroke, 0.Inch) }
             hookSliderOut.cancel()
         }
     }

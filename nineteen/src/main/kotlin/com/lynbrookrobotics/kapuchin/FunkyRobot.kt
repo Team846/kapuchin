@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.choreos.*
+import edu.wpi.first.networktables.NetworkTableInstance
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -23,7 +24,6 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Initializing hardware...")
 
-        Safeties.init()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
@@ -31,7 +31,7 @@ class FunkyRobot : RobotBase() {
         trim()
 
         println("Loading classes...")
-        runBlocking { withTimeout(10.Second) { classPreloading.join() } }
+        runBlocking { withTimeout(5.Second) { classPreloading.join() } }
 
         scope.launch {
             while (isActive) {
@@ -40,8 +40,7 @@ class FunkyRobot : RobotBase() {
                 }
 
                 runWhile({ isEnabled && isAutonomous }) {
-                    subsystems.trackLine()
-                    //                    subsystems.cargoShipSandstorm()
+                    // subsystems.cargoShipSandstorm()
                     subsystems.teleop()
                 }
 
@@ -68,7 +67,9 @@ class FunkyRobot : RobotBase() {
             val eventLoopTime = measureTimeMillis {
                 EventLoop.tick(currentTime)
             }.milli(Second)
-            if (eventLoopTime > eventLoopPeriod * 5) println("Overran event loop by ${eventLoopTime - eventLoopPeriod}")
+
+            if (eventLoopTime > eventLoopPeriod * 5)
+                println("Overran event loop by ${(eventLoopTime - eventLoopPeriod) withDecimals 3}")
         }
     }
 }

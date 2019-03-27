@@ -63,7 +63,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
         ) {
             System.gc()
             currentTime
-        } else 0.Second
+        } else lastGc
 
         // https://www.desmos.com/calculator/qkczjursq7
         val cappedAccelerator = accelerator cap `±`(100.Percent - steering.abs)
