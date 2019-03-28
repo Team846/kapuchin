@@ -16,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
 fun main(args: Array<String>) {
-    println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")
+    println("Kapuchin Run ID ${System.currentTimeMillis() / 60000 - 25896084}")
     RobotBase.startRobot(::FunkyRobot)
 }
 
