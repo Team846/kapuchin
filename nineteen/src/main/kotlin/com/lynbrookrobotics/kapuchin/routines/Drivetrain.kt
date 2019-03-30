@@ -123,7 +123,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 
     controller {
         val startTime = currentTime
-        while (currentTime - startTime < hardware.period * 90.Percent) {
+        while (currentTime - startTime < hardware.period * 60.Percent) {
             val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
             conv.accumulateOdometry(l, r)
         }
@@ -137,8 +137,8 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
         val targetL = maxSpeed * r() + pA + x / Second
         val targetR = maxSpeed * r() - pA + y / Second
 
-        val nativeL = hardware.conversions.nativeConversion.native(targetL) * 0.01
-        val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.01
+        val nativeL = hardware.conversions.nativeConversion.native(targetL) * 0.001
+        val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.001
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),

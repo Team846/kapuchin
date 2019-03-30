@@ -119,7 +119,7 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
 //        withContext(NonCancellable) {
 //            hookDown.cancel()
 //            withTimeout(0.5.Second) {
-//                lift?.set(lift.collectPanel + lift.collectPanelStroke, 1.Inch)
+//                lift?.set(lift.collectPanelStroke, 1.Inch)
 //            }
 //            hookSliderOut.cancel()
 //        }
@@ -143,9 +143,9 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
             delay(0.2.Second)
             hookDown.cancel()
             withTimeout(0.2.Second) {
-                lift?.set(lift.collectPanel + lift.collectPanelStroke, 1.Inch)
+                lift?.set(lift.collectPanelStroke, 1.Inch)
             }
-            launch { lift?.set(lift.collectPanel + lift.collectPanelStroke, 0.Inch) }
+            scope.launch { lift?.set(lift.collectPanelStroke, 0.Inch) }
             hookSliderOut.cancel()
         }
     }

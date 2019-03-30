@@ -63,7 +63,8 @@ suspend fun CollectorSliderComponent.trackLine(lineScanner: LineScannerHardware,
 
             voltageToDutyCycle(
                     voltage cap `±`(operatingVoltage),
-                    vBat
+                    vBat,
+                    false
             )
         } ?: 0.Percent
     }
