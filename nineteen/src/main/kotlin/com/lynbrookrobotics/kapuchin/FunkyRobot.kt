@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin
 
-import edu.wpi.first.networktables.NetworkTableInstance
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -10,7 +9,6 @@ import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
@@ -34,25 +32,22 @@ class FunkyRobot : RobotBase() {
         runBlocking { withTimeout(5.Second) { classPreloading.join() } }
 
         scope.launch {
-            while (isActive) {
-                runWhile({ isEnabled && isOperatorControl }) {
-                    subsystems.teleop()
-                }
-
-                runWhile({ isEnabled && isAutonomous }) {
-                    // subsystems.cargoShipSandstorm()
-                    subsystems.teleop()
-                }
-
-                runWhile({ isDisabled && !isTest }) {
-                    subsystems.warmup()
-                }
-
-                runWhile({ isTest }) {
-                    launch { journal(subsystems.drivetrain.hardware) }
-                    subsystems.teleop()
-                }
-            }
+            runWhenever(
+                    { isEnabled && isOperatorControl } to choreography {
+                        subsystems.teleop()
+                    },
+                    { isEnabled && isAutonomous } to choreography {
+                        // subsystems.cargoShipSandstorm()
+                        subsystems.teleop()
+                    },
+                    { isDisabled && !isTest } to choreography {
+                        subsystems.warmup()
+                    },
+                    { isTest } to choreography {
+                        launch { journal(subsystems.drivetrain.hardware) }
+                        subsystems.teleop()
+                    }
+            )
         }
 
         System.gc()
