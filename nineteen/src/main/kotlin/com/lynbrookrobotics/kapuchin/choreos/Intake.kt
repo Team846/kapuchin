@@ -56,7 +56,7 @@ suspend fun Subsystems.pivotDown() {
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
     //Eject panel
-    val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
+    val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
     scope.launch { collectorRollers?.set(collectorRollers.hatchState) }
 
     try {
@@ -70,7 +70,7 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
                 ).y - 3.5.Inch, 0.5.Inch)
             }
             hookSliderOut.cancel()
-            delay(0.2.Second)
+            delay(0.5.Second)
             hookDown.cancel()
         }
     }
