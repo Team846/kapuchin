@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
+import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -9,14 +10,15 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
+import kotlin.math.sign
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"
     override val priority = Priority.RealTime
 
     val xbox by hardw { XboxController(1) }.verify("the operator controller is connected") {
-        //        it.name == "T.16000M" TODO: Get Controller Device Name
-        true
+        it.name == "Controller (Xbox One For Windows)"
     }
 
     private fun <Input> s(f: XboxController.() -> Input) = sensor { f(xbox) stampWith it }
@@ -33,6 +35,9 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val liftSensitivity by pref(75, Percent)
     val sliderSensitivity by pref(100, Percent)
 
+    val cargoShipCargoHeight = s { xButton }
+    val pivotDown = s { /*xButton && lt*/ false }
+
     val lowPanelHeight = s { aButton && !lt }
     val lowCargoHeight = s { aButton && lt }
 
@@ -42,32 +47,38 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val highPanelHeight = s { yButton && !lt }
     val highCargoHeight = s { yButton && lt }
 
-    val deployCargo = s { rb && lt }
+    val lineTracking = s { rt }
+    val centerAll = s { pov == 0 }
+
+    val deployPanel = s { lb && !lt }
+    val lilDicky = s { lb && lt }
+
     val softDeployCargo = s { rb && !lt }
-
-    val deployPanel = s { lb && lt }
-    val collectPanel = s { lb && !lt }
-
-    val cargoShipCargoHeight = s { xButton && !lt }
-    val pivotDown = s { xButton && lt }
-    val centerAll = s { rt && !lt }
-    val lineTracking = s { rt && lt }
-
-    val liftPrecision = s {
-        when (pov) {
-            0 -> liftSensitivity
-            180 -> -liftSensitivity
-            else -> 0.Percent
-        }
-    }
-    val sliderPrecision = s {
-        when (pov) {
-            90 -> sliderSensitivity
-            270 -> -sliderSensitivity
-            else -> 0.Percent
-        }
-    }
+    val deployCargo = s { rb && lt }
 
     val unleashTheCobra = s { lt && start }
     val oShitSnekGoBack = s { lt && back }
+
+    val liftJoystickMapping by pref {
+        val exponent by pref(2)
+        val deadband by pref(10, Percent)
+        ({
+            val db = horizontalDeadband(deadband, 100.Percent)
+            fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)
+        })
+    }
+    val sliderJoystickMapping by pref {
+        val exponent by pref(1)
+        val deadband by pref(10, Percent)
+        ({
+            val db = horizontalDeadband(deadband, 100.Percent)
+            fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)
+        })
+    }
+    val liftPrecision = s {
+        -liftJoystickMapping(getY(kLeft).Each) * liftSensitivity
+    }
+    val sliderPrecision = s {
+        sliderJoystickMapping(getX(kRight).Each) * sliderSensitivity * -(getTriggerAxis(kLeft) - 0.5).sign
+    }
 }

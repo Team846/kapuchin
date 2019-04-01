@@ -230,7 +230,7 @@ class StandardChoreographiesTest {
             }
             predicates[8] = false
 
-            while (comps[4].out.count { it == "countTo(4)" } < 4 * 2) {
+            while (comps[4].out.count { it == "countTo(4)" } < 4 * 2 - 2) {
                 delay(20.milli(Second))
                 EventLoop.tick(currentTime)
             }
@@ -245,7 +245,7 @@ class StandardChoreographiesTest {
             j.cancelAndJoin()
 
             comps[8].checkCount(8, 8, 1)
-            comps[4].checkCount(4, 4 * 2, 1)
+            comps[4].checkCount(4, 4 * 2 - 2, 1)
             comps[6].checkCount(6, 6 * 3, 1)
         }
     }
@@ -283,6 +283,151 @@ class StandardChoreographiesTest {
             predicates = List(last + 1) { true }.toMutableList()
             val j2 = launch {
                 runWhenever(
+                        *predicates.mapIndexed { i, _ -> { predicates[i] } }
+                                .zip(comps.mapIndexed { i, c ->
+                                    choreography {
+                                        c.countTo(i)
+                                        predicates[i] = false
+                                    }
+                                }).toTypedArray()
+                )
+            }
+            while (comps[last].routine == null) {
+                delay(20.milli(Second))
+                EventLoop.tick(currentTime)
+            }
+            comps[last].routine!!.cancel()
+            predicates[last] = false
+            while (predicates.any { it }) {
+                EventLoop.tick(currentTime)
+                delay(20.milli(Second))
+            }
+            j2.cancelAndJoin()
+            comps.take(last).forEachIndexed { i, c ->
+                c.checkCount(i, i, 1)
+            }
+            comps[last].checkCount(last, 0, 1)
+        }
+    }
+
+    @Test(timeout = 5 * 1000)
+    fun `launchWhenever launches all routines`() = threadDumpOnFailure {
+        runBlocking {
+            val comps = List(15) { ChoreographyTestC(it) }
+            val predicates = List(15) { false }.toMutableList()
+            val j = launch {
+                launchWhenever(
+                        *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
+                            choreography {
+                                c.countTo(i)
+                                predicates[i] = false
+                            }
+                        }).toTypedArray()
+                )
+            }
+
+            comps.forEachIndexed { i, c ->
+                c.checkCount(i, 0)
+            }
+
+            for (i in 0 until 15) {
+                predicates[i] = true
+            }
+
+            while (comps[14].out.count { it == "countTo(14)" } < 14) {
+                delay(20.milli(Second))
+                EventLoop.tick(currentTime)
+            }
+
+            j.cancelAndJoin()
+
+            comps.forEachIndexed { i, c ->
+                c.checkCount(i, i, 1)
+            }
+        }
+    }
+
+    @Test(timeout = 30 * 1000)
+    fun `launchWhenever runs even after one job fails`() = threadDumpOnFailure {
+        runBlocking {
+            val comps = List(15) { ChoreographyTestC(it) }
+            val predicates = List(15) { false }.toMutableList()
+            val j = launch {
+                launchWhenever(
+                        { true } to choreography { error("This job intentionally fails") },
+                        *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
+                            choreography { c.countTo(i) }
+                        }).toTypedArray()
+                )
+            }
+
+            comps.forEachIndexed { i, c ->
+                c.checkCount(i, 0)
+            }
+
+            predicates[8] = true
+            predicates[4] = true
+            predicates[6] = true
+
+            while (comps[8].out.count { it == "countTo(8)" } < 8) {
+                delay(20.milli(Second))
+                EventLoop.tick(currentTime)
+            }
+            predicates[8] = false
+
+            while (comps[4].out.count { it == "countTo(4)" } < 4 * 2 - 2) {
+                delay(20.milli(Second))
+                EventLoop.tick(currentTime)
+            }
+            predicates[4] = false
+
+            while (comps[6].out.count { it == "countTo(6)" } < 6 * 3) {
+                delay(20.milli(Second))
+                EventLoop.tick(currentTime)
+            }
+            predicates[6] = false
+
+            j.cancelAndJoin()
+
+            comps[8].checkCount(8, 8, 1)
+            comps[4].checkCount(4, 4 * 2, 1)
+            comps[6].checkCount(6, 6 * 3, 1)
+        }
+    }
+
+    @Test(timeout = 4 * 1000)
+    fun `launchWhenever can be cancelled externally`() = threadDumpOnFailure {
+        runBlocking {
+            val last = 10
+            val comps = List(last + 1) { ChoreographyTestC(it) }
+            var predicates = List(last + 1) { it % 2 == 0 }.toMutableList()
+
+            val j1 = launch {
+                launchWhenever(
+                        *predicates.mapIndexed { i, _ -> { predicates[i] } }
+                                .zip(comps.mapIndexed { i, c ->
+                                    choreography {
+                                        c.countTo(i)
+                                        predicates[i] = false
+                                    }
+                                }).toTypedArray()
+                )
+            }
+
+            while (predicates.any { it }) {
+                EventLoop.tick(currentTime)
+                delay(20.milli(Second))
+            }
+            j1.cancelAndJoin()
+
+            comps.filterIndexed { i, _ -> i % 2 == 0 }.forEachIndexed { i, c ->
+                c.checkCount(i + 1, 1, 1)
+            }
+
+            comps.forEach { it.out.clear() }
+            predicates = List(last + 1) { true }.toMutableList()
+            val j2 = launch {
+                launchWhenever(
                         *predicates.mapIndexed { i, _ -> { predicates[i] } }
                                 .zip(comps.mapIndexed { i, c ->
                                     choreography {

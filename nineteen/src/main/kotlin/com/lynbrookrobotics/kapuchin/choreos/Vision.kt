@@ -25,7 +25,7 @@ suspend fun LimelightHardware.perpendicularAlign(
             val mtrx = RotationMatrix(robotSnapshot1.bearing)
             val targetLoc = mtrx rz visionSnapshot1.vector
 
-            if (visionSnapshot1.bearing in 0.Degree `±` tolerance) {
+            if (visionSnapshot1.bearing.abs < tolerance) {
                 val perpPt = mtrx rz UomVector(
                         closeEndPt * sin(0.Degree),
                         closeEndPt * cos(0.Degree)
@@ -113,7 +113,7 @@ suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, lineScanner:
 
     controller {
         val errorA = linePosition?.let {
-            -atan(it / lineScanner.mounting.y)
+            -atan(it / lineScanner.lookAhead)
         } ?: 0.Degree
 
         val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)

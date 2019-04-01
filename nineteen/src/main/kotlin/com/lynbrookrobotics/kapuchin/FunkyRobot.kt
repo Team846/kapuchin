@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -8,13 +9,12 @@ import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
 fun main(args: Array<String>) {
-    println("Kapuchin Run ID ${System.currentTimeMillis() / 1000 - 1514000000}")
+    println("Kapuchin Run ID ${System.currentTimeMillis() / 60000 - 25896084}")
     RobotBase.startRobot(::FunkyRobot)
 }
 
@@ -22,35 +22,32 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Initializing hardware...")
 
-        Safeties.init()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
         println("Trimming preferences...")
         trim()
 
-        runBlocking { withTimeout(.5.Second) { classPreloading.join() } }
+        println("Loading classes...")
+        runBlocking { withTimeout(5.Second) { classPreloading.join() } }
 
         scope.launch {
-            while (isActive) {
-                runWhile({ isEnabled && isOperatorControl }) {
-                    subsystems.teleop()
-                }
-
-                runWhile({ isEnabled && isAutonomous }) {
-                    //                    subsystems.cargoShipSandstorm()
-                    subsystems.teleop()
-                }
-
-                runWhile({ isDisabled && !isTest }) {
-                    subsystems.warmup()
-                }
-
-                runWhile({ isTest }) {
-                    launch { journal(subsystems.drivetrain.hardware) }
-                    subsystems.teleop()
-                }
-            }
+            runWhenever(
+                    { isEnabled && isOperatorControl } to choreography {
+                        subsystems.teleop()
+                    },
+                    { isEnabled && isAutonomous } to choreography {
+                        // subsystems.cargoShipSandstorm()
+                        subsystems.teleop()
+                    },
+                    { isDisabled && !isTest } to choreography {
+                        subsystems.warmup()
+                    },
+                    { isTest } to choreography {
+                        launch { journal(subsystems.drivetrain.hardware) }
+                        subsystems.teleop()
+                    }
+            )
         }
 
         System.gc()
@@ -65,7 +62,9 @@ class FunkyRobot : RobotBase() {
             val eventLoopTime = measureTimeMillis {
                 EventLoop.tick(currentTime)
             }.milli(Second)
-            if (eventLoopTime > eventLoopPeriod * 5) println("Overran event loop by ${eventLoopTime - eventLoopPeriod}")
+
+            if (eventLoopTime > eventLoopPeriod * 5)
+                println("Overran event loop by ${(eventLoopTime - eventLoopPeriod) withDecimals 3}")
         }
     }
 }

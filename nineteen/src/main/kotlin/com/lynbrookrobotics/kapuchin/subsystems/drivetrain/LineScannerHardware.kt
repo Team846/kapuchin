@@ -31,27 +31,63 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     private val exposure by pref(10, Millisecond)
     private val threshold by pref(25, Percent)
 
-    private val scannerFov by pref(53.13, Degree)
-    private val bisectionPoint by pref(2, Inch)
-    private val zeroOffset by pref(-3, Inch)
-    val mounting by pref {
-        val x by pref(-12, Inch)
-        val y by pref(12, Inch)
-        val z by pref(6, Inch)
-        ({ UomVector(x, y, z) })
+//    private val scannerFov by pref(53.13, Degree)
+//    private val bisectionPoint by pref(2, Inch)
+//    private val zeroOffset by pref(-3, Inch)
+    val lookAhead by pref(12, Inch)
+
+//    private val scanEdge get() = atan(bisectionPoint / mounting.z) - (scannerFov / 2)
+//    private val scanShift get() = mounting.z * tan(scanEdge)
+//    private fun locate(raw: Dimensionless) = (mounting.z * tan(scanEdge + raw * scannerFov)) - scanShift
+
+    private val conversion by pref {
+        val pt1 by pref {
+            val pixel by pref(20, Percent)
+            val location by pref(-5, Inch)
+            ({ pixel to location })
+        }
+        val pt2 by pref {
+            val pixel by pref(40, Percent)
+            val location by pref(-2, Inch)
+            ({ pixel to location })
+        }
+        val pt3 by pref {
+            val pixel by pref(60, Percent)
+            val location by pref(2, Inch)
+            ({ pixel to location })
+        }
+        val pt4 by pref {
+            val pixel by pref(80, Percent)
+            val location by pref(5, Inch)
+            ({ pixel to location })
+        }
+
+        ({
+            // lagrange's formula
+            // https://www.desmos.com/calculator/dffnj2jbow
+
+            val (x1, y1) = pt1
+            val (x2, y2) = pt2
+            val (x3, y3) = pt3
+            val (x4, y4) = pt4
+            fun p1(x: Dimensionless) = (x - x2) * (x - x3) * (x - x4)
+            fun p2(x: Dimensionless) = (x - x1) * (x - x3) * (x - x4)
+            fun p3(x: Dimensionless) = (x - x1) * (x - x2) * (x - x4)
+            fun p4(x: Dimensionless) = (x - x1) * (x - x2) * (x - x3)
+            fun(x: Dimensionless) = p1(x) * (y1 / p1(x1)) +
+                    p2(x) * (y2 / p2(x2)) +
+                    p3(x) * (y3 / p3(x3)) +
+                    p4(x) * (y4 / p4(x4))
+        })
     }
 
-    private val scanEdge get() = atan(bisectionPoint / mounting.z) - (scannerFov / 2)
-    private val scanShift get() = mounting.z * tan(scanEdge)
-    private fun locate(raw: Dimensionless) = (mounting.z * tan(scanEdge + raw * scannerFov)) - scanShift
-
-    val nativeGrapher = graph("Native", Each)
+    val nativeGrapher = graph("Native", Percent)
     val linePosition = sensor(lineScanner) {
         val (x, y) = lineScanner(exposure, threshold)
         nativeGrapher(x, y ?: Double.NaN.Each)
-        y?.let { locate(it) - zeroOffset } stampWith x
+        y?.let { conversion(y) } stampWith x
     }
-            .with(graph("Line Position", Inch)) { it ?: 0.Inch }
+            .with(graph("Line Position", Inch)) { it ?: Double.NaN.Inch }
 
     init {
         uiBaselineTicker.runOnTick { time ->

@@ -129,8 +129,8 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
-        ).takeIf {
-            distance > tolerance
+        ).takeUnless {
+            distance < tolerance
         }
     }
 }
