@@ -119,7 +119,7 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
 suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 
     fun r() = Math.random()
-    val conv = DrivetrainConversions(hardware)
+    val conv = hardware.conversions
 
     controller {
         val startTime = currentTime

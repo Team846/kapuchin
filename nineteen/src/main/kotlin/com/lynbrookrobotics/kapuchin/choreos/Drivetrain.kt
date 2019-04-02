@@ -17,23 +17,18 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
 
     fun zero(pos: Position) {
-        lineScanner.linePosition.optimizedRead(currentTime, 0.Second).y.let {
-            if (it != null) {
-              val bumperToLineScanner = drivetrain.hardware.bumperAheadDistance - lineScanner.mounting.y - lineScanner.lookAhead
+        lineScanner.linePosition.optimizedRead(currentTime, 0.Second).y?.let {
+            val bumperToLineScanner = drivetrain.hardware.bumperAheadDistance - lineScanner.lookAhead
 
-              val lineAngle = atan2(it, lineScanner.lookAhead)
-              val lineDist = hypot(it, lineScanner.lookAhead)
+            val lineAngle = atan2(it, lineScanner.lookAhead)
+            val lineDist = hypot(it, lineScanner.lookAhead)
 
-              val lineScannerAngle = atan2(lineScanner.mounting.x, lineScanner.mounting.y)
-              val lineScannerDistance = hypot(lineScanner.mounting.x, lineScanner.mounting.y)
-
-              val x = pos.vector.x - bumperToLineScanner * sin(pos.bearing) - lineDist * sin(pos.bearing + lineAngle) - lineScannerDistance * sin(pos.bearing + lineScannerAngle)
-              val y = pos.vector.y - bumperToLineScanner * cos(pos.bearing) - lineDist * cos(pos.bearing + lineAngle) - lineScannerDistance * cos(pos.bearing + lineScannerAngle)
-              drivetrain.hardware.conversions.matrixTracking.x = x
-              drivetrain.hardware.conversions.matrixTracking.y = y
-            }
+            val x = pos.vector.x - bumperToLineScanner * sin(pos.bearing) - lineDist * sin(pos.bearing + lineAngle)
+            val y = pos.vector.y - bumperToLineScanner * cos(pos.bearing) - lineDist * cos(pos.bearing + lineAngle)
+            drivetrain.hardware.conversions.matrixTracking.x = x
+            drivetrain.hardware.conversions.matrixTracking.y = y
         }
-     }
+    }
 
     val visionAlign by driver.lineTracking.readEagerly().withoutStamps
 
@@ -97,83 +92,83 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
                 topSpeed = drivetrain.maxSpeed
         )
 
-        whenever({drivetrain.routine == null}) {
-            runWhile({goToLeftLoadingStation}) {
+        whenever({ drivetrain.routine == null }) {
+            runWhile({ goToLeftLoadingStation }) {
                 drivetrain.positionAndButtUp(motionProfile, leftLoadingStation, 0.5.Inch, 10.Degree)
             }
-            runWhile({goToRightLoadingStation}) {
+            runWhile({ goToRightLoadingStation }) {
                 drivetrain.positionAndButtUp(motionProfile, rightLoadingStation, 0.5.Inch, 10.Degree)
             }
-            runWhile({goToLeftCloseCargo}) {
+            runWhile({ goToLeftCloseCargo }) {
                 drivetrain.positionAndButtUp(motionProfile, leftCloseCargo, 0.5.Inch, 10.Degree)
 
             }
-            runWhile({goToRightCloseCargo}) {
+            runWhile({ goToRightCloseCargo }) {
                 drivetrain.positionAndButtUp(motionProfile, rightCloseCargo, 0.5.Inch, 10.Degree)
             }
 
-            runWhile({goToLeftMiddleCargo}) {
+            runWhile({ goToLeftMiddleCargo }) {
                 drivetrain.positionAndButtUp(motionProfile, leftMiddleCargo, 0.5.Inch, 10.Degree)
 
             }
-            runWhile({goToRightMiddleCargo}) {
+            runWhile({ goToRightMiddleCargo }) {
                 drivetrain.positionAndButtUp(motionProfile, rightMiddleCargo, 0.5.Inch, 10.Degree)
             }
 
-            runWhile({goToLeftFarCargo}) {
+            runWhile({ goToLeftFarCargo }) {
                 drivetrain.positionAndButtUp(motionProfile, leftFarCargo, 0.5.Inch, 10.Degree)
 
             }
-            runWhile({goToRightFarCargo}) {
+            runWhile({ goToRightFarCargo }) {
                 drivetrain.positionAndButtUp(motionProfile, rightFarCargo, 0.5.Inch, 10.Degree)
             }
 
-            runWhile({goToLeftCloseRocket}) {
+            runWhile({ goToLeftCloseRocket }) {
                 drivetrain.positionAndButtUp(motionProfile, leftCloseRocket, 0.5.Inch, 10.Degree)
             }
-            runWhile({goToRightCloseRocket}) {
+            runWhile({ goToRightCloseRocket }) {
                 drivetrain.positionAndButtUp(motionProfile, rightCloseRocket, 0.5.Inch, 10.Degree)
             }
-            runWhile({goToLeftFarRocket}) {
+            runWhile({ goToLeftFarRocket }) {
                 drivetrain.positionAndButtUp(motionProfile, leftFarRocket, 0.5.Inch, 10.Degree)
             }
-            runWhile({goToRightFarRocket}) {
+            runWhile({ goToRightFarRocket }) {
                 drivetrain.positionAndButtUp(motionProfile, rightFarRocket, 0.5.Inch, 10.Degree)
             }
-            runWhile({zeroAtLeftLoadingStation}) {
+            runWhile({ zeroAtLeftLoadingStation }) {
                 zero(leftLoadingStation)
             }
-            runWhile({zeroAtRightLoadingStation}) {
+            runWhile({ zeroAtRightLoadingStation }) {
                 zero(rightLoadingStation)
             }
-            runWhile({zeroAtLeftCloseCargo}) {
+            runWhile({ zeroAtLeftCloseCargo }) {
                 zero(leftCloseCargo)
             }
-            runWhile({zeroAtRightCloseCargo}) {
+            runWhile({ zeroAtRightCloseCargo }) {
                 zero(rightCloseCargo)
             }
-            runWhile({zeroAtLeftMiddleCargo}) {
+            runWhile({ zeroAtLeftMiddleCargo }) {
                 zero(leftMiddleCargo)
             }
-            runWhile({zeroAtRightMiddleCargo}) {
+            runWhile({ zeroAtRightMiddleCargo }) {
                 zero(rightMiddleCargo)
             }
-            runWhile({zeroAtLeftFarCargo}) {
+            runWhile({ zeroAtLeftFarCargo }) {
                 zero(leftFarCargo)
             }
-            runWhile({zeroAtRightFarCargo}) {
+            runWhile({ zeroAtRightFarCargo }) {
                 zero(rightFarCargo)
             }
-            runWhile({zeroAtLeftCloseRocket}) {
+            runWhile({ zeroAtLeftCloseRocket }) {
                 zero(leftCloseRocket)
             }
-            runWhile({zeroAtRightCloseRocket}) {
+            runWhile({ zeroAtRightCloseRocket }) {
                 zero(rightCloseRocket)
             }
-            runWhile({zeroAtLeftFarRocket}) {
+            runWhile({ zeroAtLeftFarRocket }) {
                 zero(leftFarRocket)
             }
-            runWhile({zeroAtRightFarRocket}) {
+            runWhile({ zeroAtRightFarRocket }) {
                 zero(rightFarRocket)
             }
             runWhile({ !visionAlign }) {
