@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.FeedbackSystemComponent.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.GenericHID.RumbleType.kLeftRumble
@@ -10,17 +9,31 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.awt.Color
 
-class FeedbackSystemComponent(hardware: FeedbackSystemHardware) : Component<FeedbackSystemComponent, FeedbackSystemHardware, Feedback>(hardware, EventLoop) {
+data class Feedback(
+        val wheelRumble: DutyCycle = 0.Percent,
+        val stickRumble: DutyCycle = 0.Percent,
+        val xboxLeftRumble: DutyCycle = 0.Percent,
+        val xboxRightRumble: DutyCycle = xboxLeftRumble,
+        val ledColor: Color = Color(
+                Color.HSBtoRGB(((currentTime.Second / 5 % 1.0)).toFloat(), 1f, 1f)
+        )
+) {
 
-    data class Feedback(
-            val wheelRumble: DutyCycle = 0.Percent,
-            val stickRumble: DutyCycle = 0.Percent,
-            val xboxLeftRumble: DutyCycle = 0.Percent,
-            val xboxRightRumble: DutyCycle = xboxLeftRumble,
-            val ledColor: Color = Color(
-                    Color.HSBtoRGB(((currentTime.Second / 3 % 1.0)).toFloat(), 1f, 1f)
-            )
+    val fullRumble = Feedback(
+            wheelRumble = 100.Percent,
+            stickRumble = 100.Percent,
+            xboxLeftRumble = 100.Percent, xboxRightRumble = 100.Percent,
+            ledColor = this.ledColor
     )
+
+    companion object {
+        val RED = Feedback(ledColor = Color.RED)
+        val GREEN = Feedback(ledColor = Color.GREEN)
+        val BLUE = Feedback(ledColor = Color.BLUE)
+    }
+}
+
+class FeedbackSystemComponent(hardware: FeedbackSystemHardware) : Component<FeedbackSystemComponent, FeedbackSystemHardware, Feedback>(hardware, EventLoop) {
 
     override val fallbackController: FeedbackSystemComponent.(Time) -> Feedback = { Feedback() }
 
