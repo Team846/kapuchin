@@ -31,7 +31,7 @@ import java.io.File
 class Subsystems(val drivetrain: DrivetrainComponent,
                  val electrical: ElectricalSystemHardware,
 
-                 val teleop: TeleopComponent,
+                 val feedbackSystem: FeedbackSystemComponent,
                  val driver: DriverHardware,
                  val operator: OperatorHardware,
                  val leds: LedHardware?,
@@ -60,8 +60,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { climberTeleop() },
                 {
                     collectorSlider?.let { slider ->
-                        launchWhenever({ teleop.routine == null } to choreography {
-                            teleop.vibrateOnAlign(lineScanner, slider)
+                        launchWhenever({ feedbackSystem.routine == null } to choreography {
+                            feedbackSystem.vibrateOnAlign(lineScanner, slider)
                         })
                     }
                 }
@@ -152,8 +152,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 if (crashOnFailure) throw t else null
             }
 
-            val teleopAsync = async {
-                TeleopComponent(TeleopHardware(
+            val feedbackSystemAsync = async {
+                FeedbackSystemComponent(FeedbackSystemHardware(
                         t { driverAsync.await() }!!,
                         t { operatorAsync.await() }!!,
                         t { ledsAsync.await() }
@@ -164,7 +164,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     t { drivetrainAsync.await() }!!,
                     t { electricalAsync.await() }!!,
 
-                    t { teleopAsync.await() }!!,
+                    t { feedbackSystemAsync.await() }!!,
                     t { driverAsync.await() }!!,
                     t { operatorAsync.await() }!!,
                     t { ledsAsync.await() },
@@ -196,12 +196,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val driver = t { DriverHardware() }!!
             val operator = t { OperatorHardware() }!!
             val leds = i(initLeds) { t { LedHardware() } }
-            val teleop = t { TeleopComponent(TeleopHardware(driver, operator, leds)) }!!
+            val feedbackSystem = t { FeedbackSystemComponent(FeedbackSystemHardware(driver, operator, leds)) }!!
 
             instance = Subsystems(
                     t { DrivetrainComponent(DrivetrainHardware()) }!!,
                     t { ElectricalSystemHardware() }!!,
-                    teleop,
+                    feedbackSystem,
                     driver,
                     operator,
                     leds,

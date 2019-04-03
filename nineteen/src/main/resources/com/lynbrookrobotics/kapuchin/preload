@@ -1782,9 +1782,9 @@ DEBUG Climber/rightEsc: Initializing
 [16.324s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$teleopAsync$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.336s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$teleopAsync$1$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.344s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$teleopAsync$1$3 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.358s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.TeleopHardware source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.365s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.TeleopComponent source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.373s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.TeleopComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.358s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.FeedbackHardware source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.365s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.FeedbackSystemComponent source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.373s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.FeedbackSystemComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.386s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$4 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.398s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$5 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.405s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$6 source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1862,7 +1862,7 @@ Starting event loop...
 [17.325s][info][class,load] com.lynbrookrobotics.kapuchin.routines.ChoreographyKt$runAll$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [17.335s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ClimberComponent$output$$inlined$Â±$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [17.356s][info][class,load] kotlinx.coroutines.SupervisorKt source: file:/home/lvuser/nineteen-1.0.0.jar
-WARNING Collector Slider/Ticker: Ticker overran its 0.03 s loop by 0.1125 s[17.363s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.TeleopComponent$TeleopFeedback source: file:/home/lvuser/nineteen-1.0.0.jar
+WARNING Collector Slider/Ticker: Ticker overran its 0.03 s loop by 0.1125 s[17.363s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.FeedbackSystemComponent$TeleopFeedback source: file:/home/lvuser/nineteen-1.0.0.jar
 
 WARNING Drivetrain/Ticker: Ticker overran its 0.03 s loop by 0.1439 s
 WARNING Subsystems/Pneumatic System Ticker: Pneumatic System Ticker overran its 0.05 s loop by 0.1228 s
@@ -2405,9 +2405,9 @@ DEBUG Lift/Manual override: Cancelled
 [106.068s][info][class,load  ] com.lynbrookrobotics.kapuchin.routines.IntakeKt$spin$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Collector Rollers/Set: Cancelled
 [106.078s][info][class,load  ] com.lynbrookrobotics.kapuchin.control.electrical.BatteryCompensatorKt$voltageToDutyCycle$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-WARNING Collector Rollers: 11.0 m²?kg?s?³?A?¹ target cannot be reached with a 10.8 m²?kg?s?³?A?¹ battery.
+WARNING Collector Rollers: 11.0 mï¿½?kg?s?ï¿½?A?ï¿½ target cannot be reached with a 10.8 mï¿½?kg?s?ï¿½?A?ï¿½ battery.
 [106.091s][info][class,load  ] com.lynbrookrobotics.kapuchin.choreos.IntakeKt$collectCargo$2$5 source: file:/home/lvuser/nineteen-1.0.0.jar
-WARNING Collector Rollers: 11.0 m²?kg?s?³?A?¹ target cannot be reached with a 10.8 m²?kg?s?³?A?¹ battery.
+WARNING Collector Rollers: 11.0 mï¿½?kg?s?ï¿½?A?ï¿½ target cannot be reached with a 10.8 mï¿½?kg?s?ï¿½?A?ï¿½ battery.
 DEBUG Collector Slider/Set: Completed
 [106.102s][info][class,load  ] com.lynbrookrobotics.kapuchin.choreos.IntakeKt$collectCargo$2$handoffPivotSet$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Safeties: Lift transitioned from Bottom to Bottom
@@ -2438,9 +2438,9 @@ WARNING Drivetrain/Ticker: Ticker overran its 0.03 s loop by 0.1001 s
 [131.310s][info][class,load  ] com.lynbrookrobotics.kapuchin.routines.IntakeKt$trackLine$2$1$$special$$inlined$Â±$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 WARNING Drivetrain/Ticker: Ticker overran its 0.03 s loop by 0.1049 s
 WARNING Drivetrain/Ticker: Ticker overran its 0.03 s loop by 0.1016 s
-WARNING Collector Slider: 12.0 m²?kg?s?³?A?¹ target cannot be reached with a 10.5 m²?kg?s?³?A?¹ battery.
-WARNING Collector Slider: 12.0 m²?kg?s?³?A?¹ target cannot be reached with a 10.8 m²?kg?s?³?A?¹ battery.
-WARNING Collector Slider: 12.0 m²?kg?s?³?A?¹ target cannot be reached with a 11.5 m²?kg?s?³?A?¹ battery.
+WARNING Collector Slider: 12.0 mï¿½?kg?s?ï¿½?A?ï¿½ target cannot be reached with a 10.5 mï¿½?kg?s?ï¿½?A?ï¿½ battery.
+WARNING Collector Slider: 12.0 mï¿½?kg?s?ï¿½?A?ï¿½ target cannot be reached with a 10.8 mï¿½?kg?s?ï¿½?A?ï¿½ battery.
+WARNING Collector Slider: 12.0 mï¿½?kg?s?ï¿½?A?ï¿½ target cannot be reached with a 11.5 mï¿½?kg?s?ï¿½?A?ï¿½ battery.
 DEBUG Collector Slider/Track line: Cancelled
 [141.801s][info][class,load  ] jdk.internal.reflect.ClassFileConstants source: jrt:/java.base
 [141.808s][info][class,load  ] jdk.internal.reflect.AccessorGenerator source: jrt:/java.base

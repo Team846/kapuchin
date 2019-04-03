@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.TeleopComponent.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.FeedbackSystemComponent.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.GenericHID.RumbleType.kLeftRumble
@@ -10,9 +10,9 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.awt.Color
 
-class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, TeleopHardware, TeleopFeedback>(hardware, EventLoop) {
+class FeedbackSystemComponent(hardware: FeedbackSystemHardware) : Component<FeedbackSystemComponent, FeedbackSystemHardware, Feedback>(hardware, EventLoop) {
 
-    data class TeleopFeedback(
+    data class Feedback(
             val wheelRumble: DutyCycle = 0.Percent,
             val stickRumble: DutyCycle = 0.Percent,
             val xboxLeftRumble: DutyCycle = 0.Percent,
@@ -22,9 +22,9 @@ class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, Tel
             )
     )
 
-    override val fallbackController: TeleopComponent.(Time) -> TeleopFeedback = { TeleopFeedback() }
+    override val fallbackController: FeedbackSystemComponent.(Time) -> Feedback = { Feedback() }
 
-    override fun TeleopHardware.output(value: TeleopFeedback) = value.run {
+    override fun FeedbackSystemHardware.output(value: Feedback) = value.run {
         ledHardware?.channels?.invoke(value.ledColor)
 
         with(operatorHardware.xbox) {
@@ -44,13 +44,13 @@ class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, Tel
     }
 }
 
-class TeleopHardware(
+class FeedbackSystemHardware(
         val driverHardware: DriverHardware,
         val operatorHardware: OperatorHardware,
         val ledHardware: LedHardware?
-) : SubsystemHardware<TeleopHardware, TeleopComponent>() {
+) : SubsystemHardware<FeedbackSystemHardware, FeedbackSystemComponent>() {
+    override val name = "Feedback System"
     override val period = 20.milli(Second)
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
-    override val name = "Teleop Interface"
 }
