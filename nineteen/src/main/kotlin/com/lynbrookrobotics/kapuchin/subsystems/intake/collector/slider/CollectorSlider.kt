@@ -21,6 +21,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     val min by pref(-3.5, Inch)
     val max by pref(4.75, Inch)
     val maxOutput by pref(100, Percent)
+    val operatingVoltage by pref(12, Volt)
 
     override val fallbackController: CollectorSliderComponent.(Time) -> DutyCycle = { 0.Percent }
 
@@ -37,35 +38,20 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
                         zero()
                         0.Percent
                     }
-                else if (currentPosition > max && value.isPositive) 0.Percent
-                else if (currentPosition < min && value.isNegative) 0.Percent
+                else if (currentPosition > max && !value.isNegative) -20.Percent
+                else if (currentPosition < min && !value.isPositive) 20.Percent
                 else value
         val cappedOutput = zeroedOutput minMag (maxOutput * zeroedOutput.siValue)
 
         esc.set(cappedOutput.Each)
         nativeGrapher(currentTime, cappedOutput)
-
-//        val current = position.optimizedRead(currentTime, 0.Second).y
-//
-//        val range = unionizeAndFindClosestRange(CollectorSliderState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
-//
-//        if (range.start - range.endInclusive != 0.Inch) {
-//            when {
-//                value.isPositive && range.endInclusive > current ||
-//                        value.isNegative && range.start < current
-//                -> esc.set(value.Percent)
-//                else -> esc.set(0.0)
-//            }
-//        } else if (Safeties.log) {
-//            //log(Warning) { "No legal states found" }
-//        }
     }
 }
 
 class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, CollectorSliderComponent>() {
     override val priority: Priority = Priority.RealTime
     override val period: Time = 30.milli(Second)
-    override val syncThreshold: Time = 5.milli(Second)
+    override val syncThreshold: Time = 2.milli(Second)
     override val name: String = "Collector Slider"
 
     val currentLimit by pref(20, Ampere)

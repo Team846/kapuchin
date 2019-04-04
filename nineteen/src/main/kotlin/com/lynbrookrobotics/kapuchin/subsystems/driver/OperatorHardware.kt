@@ -35,8 +35,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val liftSensitivity by pref(75, Percent)
     val sliderSensitivity by pref(100, Percent)
 
-    val cargoShipCargoHeight = s { xButton && !lt }
-    val pivotDown = s { xButton && lt }
+    val cargoShipCargoHeight = s { xButton }
+    val pivotDown = s { /*xButton && lt*/ false }
 
     val lowPanelHeight = s { aButton && !lt }
     val lowCargoHeight = s { aButton && lt }
@@ -48,6 +48,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val highCargoHeight = s { yButton && lt }
 
     val lineTracking = s { rt }
+
+    val centerAll = s { pov == 0 }
 
     val deployPanel = s { lb && !lt }
     val lilDicky = s { lb && lt }

@@ -15,7 +15,8 @@ class HandoffRollersComponent(hardware: HandoffRollersHardware) : Component<Hand
     val cargoHoldStrength by pref(33, Percent)
     val cargoCollectSpeed by pref(50, Percent)
 
-    override val fallbackController: HandoffRollersComponent.(Time) -> TwoSided<DutyCycle> = { TwoSided(0.Percent) }
+    private val fallbackValue = TwoSided(0.Percent)
+    override val fallbackController: HandoffRollersComponent.(Time) -> TwoSided<DutyCycle> = { fallbackValue }
 
     override fun HandoffRollersHardware.output(value: TwoSided<DutyCycle>) {
         leftEsc.set(value.left.Each)

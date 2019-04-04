@@ -87,6 +87,7 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
     val zeroAtRightFarRocket by driver.zeroAtRightFarRocket.readEagerly().withoutStamps
 
     choreography {
+<<<<<<< HEAD
         val motionProfile = trapezoidalMotionProfile(
                 deceleration = 5.FootPerSecondSquared,
                 topSpeed = drivetrain.maxSpeed
@@ -171,6 +172,9 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
             runWhile({ zeroAtRightFarRocket }) {
                 zero(rightFarRocket)
             }
+=======
+        whenever({drivetrain.routine == null}) {
+>>>>>>> master
             runWhile({ !visionAlign }) {
                 drivetrain.teleop(driver)
             }

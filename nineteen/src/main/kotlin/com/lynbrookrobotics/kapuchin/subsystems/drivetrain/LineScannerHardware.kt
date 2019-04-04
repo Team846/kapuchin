@@ -36,7 +36,6 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
 //    private val zeroOffset by pref(-3, Inch)
     val lookAhead by pref(12, Inch)
 
-
 //    private val scanEdge get() = atan(bisectionPoint / mounting.z) - (scannerFov / 2)
 //    private val scanShift get() = mounting.z * tan(scanEdge)
 //    private fun locate(raw: Dimensionless) = (mounting.z * tan(scanEdge + raw * scannerFov)) - scanShift

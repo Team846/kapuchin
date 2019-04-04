@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.electrical.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
@@ -29,6 +30,13 @@ suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware,
     }
 }
 
+<<<<<<< HEAD
+=======
+suspend fun CollectorRollersComponent.set(state: TwoSided<DutyCycle>) = startRoutine("Set") {
+    controller { state }
+}
+
+>>>>>>> master
 suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 0.5.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
@@ -44,19 +52,32 @@ suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalS
     }
 }
 
-suspend fun CollectorSliderComponent.trackLine(tolerance: Length, lineScanner: LineScannerHardware, electrical: ElectricalSystemHardware) = startRoutine("Track line") {
+suspend fun CollectorSliderComponent.trackLine(lineScanner: LineScannerHardware, electrical: ElectricalSystemHardware) = startRoutine("Track line") {
 
     val target by lineScanner.linePosition.readOnTick.withoutStamps
     val current by hardware.position.readOnTick.withoutStamps
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
+<<<<<<< HEAD
         val error = (target ?: 0.Inch) - current
         val voltage = kP * error
 
         voltageToDutyCycle(voltage, vBat).takeUnless {
             error.abs < tolerance
         }
+=======
+        target?.let { snapshot ->
+            val error = snapshot - current
+            val voltage = kP * error
+
+            voltageToDutyCycle(
+                    voltage cap `±`(operatingVoltage),
+                    vBat,
+                    false
+            )
+        } ?: 0.Percent
+>>>>>>> master
     }
 }
 

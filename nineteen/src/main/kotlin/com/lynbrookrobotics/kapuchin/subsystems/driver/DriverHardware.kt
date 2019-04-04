@@ -11,7 +11,9 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.Joystick
+import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -56,7 +58,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val steering = s { wheelMapping(wheel.x.Each) }
             .with(graph("Steering", Percent))
 
-    val absSteering = s { 180.Degree * absoluteWheel.x }
+    val absSteering = s { -180.Degree * absoluteWheel.x }
             .with(graph("Absolute Steering", Degree))
 
     init {

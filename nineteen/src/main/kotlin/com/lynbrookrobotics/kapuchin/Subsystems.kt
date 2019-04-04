@@ -20,12 +20,14 @@ import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
+import java.io.File
 
 class Subsystems(val drivetrain: DrivetrainComponent,
                  val electrical: ElectricalSystemHardware,
@@ -55,8 +57,15 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         runAll(
                 { drivetrainTeleop() },
                 { intakeTeleop() },
-                { lift?.liftTeleop(driver, operator) },
-                { climberTeleop() }
+                { liftTeleop() },
+                { climberTeleop() },
+                {
+                    collectorSlider?.let { slider ->
+                        launchWhenever({ teleop.routine == null } to choreography {
+                            teleop.vibrateOnAlign(lineScanner, slider)
+                        })
+                    }
+                }
         )
         System.gc()
     }
@@ -67,7 +76,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { drivetrain.warmup() },
                 {
                     while (isActive) {
-                        delay(1.Second)
+                        delay(0.3.Second)
                         if (RobotController.getUserButton()) System.exit(0)
                     }
                 }
@@ -77,13 +86,22 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     companion object : Named by Named("Subsystems") {
 
-        val isCorrupted by pref(true)
+        private val isCorrupted by pref(true)
 
         init {
             if (isCorrupted) {
-                log(Error) { "The config seems to be corrupted. Blocking indefinitely." }
-                while (isCorrupted) Thread.sleep(1000)
-                System.exit(0)
+                log(Error) { "The config seems to be corrupted. Attempting restoration." }
+                NetworkTableInstance.getDefault().stopServer()
+
+                val ntPath = "/home/lvuser/networktables.ini"
+
+                Thread.currentThread()
+                        .contextClassLoader
+                        .getResourceAsStream("com/lynbrookrobotics/kapuchin/configbackups/networktables.ini")
+                        .copyTo(File(ntPath).outputStream())
+                File("$ntPath.bak").delete()
+
+                System.exit(1)
             }
         }
 

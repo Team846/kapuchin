@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
+<<<<<<< HEAD
 
 suspend fun LiftComponent.liftTeleop(driver: DriverHardware, operator: OperatorHardware) = startRoutine("Lift teleop") {
 
@@ -56,6 +57,8 @@ suspend fun LiftComponent.liftTeleop(driver: DriverHardware, operator: OperatorH
         }
     }
 }
+=======
+>>>>>>> master
 
 suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = startRoutine("Set") {
 
@@ -93,7 +96,11 @@ suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRout
             )
         }
         else {
+<<<<<<< HEAD
             targetting = position + 5.Inch * liftPrecision.signum
+=======
+            targetting = position + 2.Inch * liftPrecision.signum
+>>>>>>> master
             PercentOutput(liftPrecision)
         }
     }
