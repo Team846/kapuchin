@@ -26,10 +26,21 @@ data class Feedback(
             ledColor = this.ledColor
     )
 
+    fun withRumble(rumble: DutyCycle) = Feedback(
+            wheelRumble = rumble,
+            stickRumble = rumble,
+            xboxLeftRumble = rumble, xboxRightRumble = rumble,
+            ledColor = this.ledColor
+    )
+
     companion object {
         val RED = Feedback(ledColor = Color.RED)
         val GREEN = Feedback(ledColor = Color.GREEN)
         val BLUE = Feedback(ledColor = Color.BLUE)
+
+        operator fun invoke(r: Double, g: Double, b: Double) = Feedback(
+                ledColor = Color(r.toFloat(), g.toFloat(), b.toFloat())
+        )
     }
 }
 
