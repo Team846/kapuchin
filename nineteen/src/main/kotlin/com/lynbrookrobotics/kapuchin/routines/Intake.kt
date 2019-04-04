@@ -14,6 +14,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
+
 
 suspend fun CollectorPivotComponent.set(target: CollectorPivotState) = startRoutine("Set") {
     controller { target }
@@ -30,13 +32,10 @@ suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware,
     }
 }
 
-<<<<<<< HEAD
-=======
 suspend fun CollectorRollersComponent.set(state: TwoSided<DutyCycle>) = startRoutine("Set") {
     controller { state }
 }
 
->>>>>>> master
 suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalSystemHardware, tolerance: Length = 0.5.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
@@ -59,25 +58,16 @@ suspend fun CollectorSliderComponent.trackLine(lineScanner: LineScannerHardware,
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
-<<<<<<< HEAD
-        val error = (target ?: 0.Inch) - current
-        val voltage = kP * error
-
-        voltageToDutyCycle(voltage, vBat).takeUnless {
-            error.abs < tolerance
-        }
-=======
         target?.let { snapshot ->
             val error = snapshot - current
             val voltage = kP * error
 
             voltageToDutyCycle(
-                    voltage cap `±`(operatingVoltage),
+                    voltage.cap(`±` (operatingVoltage)),
                     vBat,
                     false
             )
         } ?: 0.Percent
->>>>>>> master
     }
 }
 

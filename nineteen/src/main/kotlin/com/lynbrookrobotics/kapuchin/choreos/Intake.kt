@@ -21,11 +21,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 //    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
     val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
 //    val driverLineTracking by driver.lineTracking.readEagerly().withoutStamps
-<<<<<<< HEAD
-//    val centerAll by operator.centerAll.readEagerly().withoutStamps
-=======
     val centerAll by operator.centerAll.readEagerly().withoutStamps
->>>>>>> master
     val pivotDown by operator.pivotDown.readEagerly().withoutStamps
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
@@ -37,11 +33,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 //                { collectPanel } to choreography { collectPanel() },
                 { operatorLineTracking } to choreography { trackLine() },
                 { lilDicky } to choreography { lilDicky() },
-<<<<<<< HEAD
-//                { centerAll } to choreography { centerAll() },
-=======
                 { centerAll } to choreography { centerAll() },
->>>>>>> master
                 { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
@@ -112,29 +104,6 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
     }
 }
 
-<<<<<<< HEAD
-suspend fun Subsystems.collectPanel() = coroutineScope {
-    //Lift down
-    withTimeout(1.Second) { lift?.set(lift.collectPanel + 2.Inch, 1.Inch) }
-    launch { lift?.set(lift.collectPanel + 2.Inch, 0.Inch) }
-
-    //Hook down, slider out
-    val hookDown = scope.launch { hook?.set(HookPosition.Down) }
-    val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
-
-    try {
-        freeze()
-    } finally {
-        withContext(NonCancellable) {
-            hookDown.cancel()
-            withTimeout(0.5.Second) {
-                lift?.set(lift.collectPanel + 9.25.Inch, 1.Inch)
-            }
-            hookSliderOut.cancel()
-        }
-    }
-}
-=======
 //suspend fun Subsystems.collectPanel() = coroutineScope {
 //    //Lift down
 //    withTimeout(1.Second) { lift?.set(lift.collectPanel + 2.Inch, 1.Inch) }
@@ -156,7 +125,6 @@ suspend fun Subsystems.collectPanel() = coroutineScope {
 //        }
 //    }
 //}
->>>>>>> master
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
     //Lift down
@@ -165,10 +133,7 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
 
     //Hook down, slider out
     val hookDown = scope.launch { hook?.set(HookPosition.Down) }
-<<<<<<< HEAD
-=======
     scope.launch { collectorRollers?.set(collectorRollers.hatchState) }
->>>>>>> master
 
     try {
         freeze()
@@ -177,13 +142,8 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
             val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
             delay(0.2.Second)
             hookDown.cancel()
-<<<<<<< HEAD
-            withTimeout(0.5.Second) {
-                lift?.set(lift.collectPanel + 9.25.Inch, 1.Inch)
-=======
             withTimeout(0.2.Second) {
                 lift?.set(lift.collectPanelStroke, 1.Inch)
->>>>>>> master
             }
             scope.launch { lift?.set(lift.collectPanelStroke, 0.Inch) }
             hookSliderOut.cancel()
@@ -193,11 +153,7 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
 
 suspend fun Subsystems.trackLine() = coroutineScope {
     //Track line with slider
-<<<<<<< HEAD
-    collectorSlider?.trackLine(0.Inch, lineScanner, electrical)
-=======
     collectorSlider?.trackLine(lineScanner, electrical)
->>>>>>> master
     freeze()
 }
 

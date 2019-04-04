@@ -1,10 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
-<<<<<<< HEAD
 import com.lynbrookrobotics.kapuchin.choreos.*
-=======
 import com.lynbrookrobotics.kapuchin.logging.*
->>>>>>> master
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*

@@ -12,6 +12,8 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
+import info.kunalsheth.units.math.*
+
 
 suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
@@ -87,7 +89,6 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
     val zeroAtRightFarRocket by driver.zeroAtRightFarRocket.readEagerly().withoutStamps
 
     choreography {
-<<<<<<< HEAD
         val motionProfile = trapezoidalMotionProfile(
                 deceleration = 5.FootPerSecondSquared,
                 topSpeed = drivetrain.maxSpeed
@@ -172,17 +173,16 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
             runWhile({ zeroAtRightFarRocket }) {
                 zero(rightFarRocket)
             }
-=======
-        whenever({drivetrain.routine == null}) {
->>>>>>> master
-            runWhile({ !visionAlign }) {
-                drivetrain.teleop(driver)
-            }
-            runWhile({ visionAlign }) {
-                if (limelight != null) {
-                    drivetrain.visionSnapshotTracking(5.FootPerSecond, limelight)
+            whenever({ drivetrain.routine == null }) {
+                runWhile({ !visionAlign }) {
+                    drivetrain.teleop(driver)
                 }
-                freeze()
+                runWhile({ visionAlign }) {
+                    if (limelight != null) {
+                        drivetrain.visionSnapshotTracking(5.FootPerSecond, limelight)
+                    }
+                    freeze()
+                }
             }
         }
     }
