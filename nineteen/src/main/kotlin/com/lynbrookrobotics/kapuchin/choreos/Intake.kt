@@ -11,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
+import java.awt.Color
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
     val deployCargo by operator.deployCargo.readEagerly().withoutStamps
@@ -57,7 +58,7 @@ suspend fun Subsystems.pivotDown() {
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
 
-    launch { feedbackSystem.set(Feedback.RED) }
+    launch { feedbackSystem.set(Feedback(0.Percent, 0.Percent, 0.Percent, 0.Percent, Color.RED)) }
 
     val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
     scope.launch { collectorRollers?.set(collectorRollers.hatchState) }
@@ -66,6 +67,7 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
         freeze()
     } finally {
         withContext(NonCancellable) {
+            launch { feedbackSystem.set(Feedback(0.Percent, 0.Percent, 0.Percent, 0.Percent, Color.RED)) }
             val hookDown = launch { hook?.set(HookPosition.Down) }
             withTimeout(0.5.Second) {
                 lift?.set(lift.hardware.position.optimizedRead(
@@ -77,7 +79,8 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
             hookDown.cancel()
 
             scope.launch {
-                withTimeout(0.5.Second) { feedbackSystem.set(Feedback.GREEN.fullRumble) }
+                delay(0.5.Second)
+                withTimeout(0.5.Second) { feedbackSystem.set(Feedback(100.Percent,100.Percent,100.Percent,100.Percent,Color.GREEN)) }
             }
         }
     }
@@ -135,7 +138,7 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
 
-    launch { feedbackSystem.set(Feedback.RED) }
+    launch { feedbackSystem.set(Feedback(0.Percent, 0.Percent, 0.Percent, 0.Percent, Color.RED)) }
 
     //Lift down
     withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
@@ -159,7 +162,8 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
             hookSliderOut.cancel()
 
             scope.launch {
-                withTimeout(0.5.Second) { feedbackSystem.set(Feedback.GREEN.fullRumble) }
+                delay(0.5.Second)
+                withTimeout(0.5.Second) { feedbackSystem.set(Feedback(100.Percent,100.Percent,100.Percent,100.Percent,Color.GREEN)) }
             }
         }
     }
