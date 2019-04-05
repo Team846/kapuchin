@@ -3,21 +3,15 @@ package com.lynbrookrobotics.kapuchin.hardware
 import com.ctre.phoenix.ErrorCode
 import com.ctre.phoenix.ErrorCode.OK
 import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.ControlMode.*
-import com.ctre.phoenix.motorcontrol.ControlMode.PercentOutput
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
-import com.ctre.phoenix.motorcontrol.can.BaseMotorController
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.ctre.phoenix.motorcontrol.can.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.revrobotics.CANError
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.io.IOException
-
 
 val configTimeout = if (HardwareInit.crashOnFailure) 1000 else 0
 private val slowStatusFrameRate = 1000
@@ -36,60 +30,96 @@ val CANError.checkOk: Unit
             throw IOException("REV Spark Max call returned $this")
     }
 
-fun SubsystemHardware<*, *>.lazyOutput(talonSRX: TalonSRX, idx: Int = 0): (OffloadedOutput) -> Unit {
-    val gainConfigTimeout = (period / 2).milli(Second).toInt()
-    fun wrap(f: (Int, Double, Int) -> ErrorCode): (Double) -> Unit = { f(idx, it, gainConfigTimeout) }
+sealed class OffloadedOutput
+data class VelocityOutput(
+        val config: OffloadedEscConfiguration,
+        val gains: SlotConfiguration,
+        val value: Double
+) : OffloadedOutput()
 
-    return lazyOffloadedGainWriter(
-            writeKp = wrap(talonSRX::config_kP),
-            writeKi = wrap(talonSRX::config_kI),
-            writeKd = wrap(talonSRX::config_kD),
-            writeKf = wrap(talonSRX::config_kF),
-            writePercent = { talonSRX.set(PercentOutput, it.Each) },
-            writeCurrent = { talonSRX.set(Current, it.Ampere) },
-            writePosition = { talonSRX.set(Position, it) },
-            writeVelocity = { talonSRX.set(ControlMode.Velocity, it) }
-    )
+data class PositionOutput(
+        val config: OffloadedEscConfiguration,
+        val gains: SlotConfiguration,
+        val value: Double
+) : OffloadedOutput()
+
+data class PercentOutput(
+        val config: OffloadedEscConfiguration,
+        val value: DutyCycle
+) : OffloadedOutput()
+
+data class CurrentOutput(
+        val config: OffloadedEscConfiguration,
+        val value: ElectricCurrent
+) : OffloadedOutput()
+
+data class OffloadedEscConfiguration(
+        val openloopRamp: Time = 0.Second,
+        val closedloopRamp: Time = 0.Second,
+        val peakOutputForward: DutyCycle = 100.Percent,
+        val nominalOutputForward: DutyCycle = 0.Percent,
+        val nominalOutputReverse: DutyCycle = 0.Percent,
+        val peakOutputReverse: DutyCycle = -100.Percent,
+        val voltageCompSaturation: V = 12.Volt,
+        val continuousCurrentLimit: I = 25.Ampere,
+        val peakCurrentLimit: I = 40.Ampere,
+        val peakCurrentDuration: Time = 1.Second
+) {
+
+    val talon by lazy {
+        TalonSRXConfiguration().also {
+            it.openloopRamp = openloopRamp.Second
+            it.closedloopRamp = closedloopRamp.Second
+
+            it.peakOutputForward = peakOutputForward.Each
+            it.nominalOutputForward = nominalOutputForward.Each
+            it.nominalOutputReverse = nominalOutputReverse.Each
+            it.peakOutputReverse = peakOutputReverse.Each
+
+            it.voltageCompSaturation = voltageCompSaturation.Volt
+
+            it.continuousCurrentLimit = continuousCurrentLimit.Ampere.toInt()
+            it.peakCurrentLimit = peakCurrentLimit.Ampere.toInt()
+            it.peakCurrentDuration = peakCurrentDuration.milli(Second).toInt()
+        }
+    }
+
+    val victor by lazy {
+        VictorSPXConfiguration().also {
+            it.openloopRamp = openloopRamp.Second
+            it.closedloopRamp = closedloopRamp.Second
+
+            it.peakOutputForward = peakOutputForward.Each
+            it.nominalOutputForward = nominalOutputForward.Each
+            it.nominalOutputReverse = nominalOutputReverse.Each
+            it.peakOutputReverse = peakOutputReverse.Each
+
+            it.voltageCompSaturation = voltageCompSaturation.Volt
+        }
+    }
 }
 
-fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V) {
-    +esc.configFactoryDefault(configTimeout)
+fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, config: OffloadedEscConfiguration) {
 
     esc.setNeutralMode(NeutralMode.Brake)
-    +esc.configOpenloopRamp(0.0, configTimeout)
-    +esc.configClosedloopRamp(0.0, configTimeout)
 
-    val minOutput = (startupFrictionCompensation / voltageCompensation).Each
-
-    +esc.configPeakOutputReverse(-1.0, configTimeout)
-    +esc.configNominalOutputReverse(-minOutput, configTimeout)
-    +esc.configNominalOutputForward(minOutput, configTimeout)
-    +esc.configPeakOutputForward(1.0, configTimeout)
     +esc.configNeutralDeadband(0.001, configTimeout)
-
-    +esc.configVoltageCompSaturation(voltageCompensation.Volt, configTimeout)
-    +esc.configVoltageMeasurementFilter(32, configTimeout)
     esc.enableVoltageCompensation(true)
 
     val controlFramePeriod = syncThreshold.milli(Second).toInt()
     +esc.setControlFramePeriod(Control_3_General, controlFramePeriod)
 
-    if (esc is TalonSRX) {
-        +esc.configContinuousCurrentLimit(currentLimit.Ampere.toInt(), configTimeout)
-        +esc.configPeakCurrentLimit(0, configTimeout) // simpler, single-threshold limiting
-        esc.enableCurrentLimit(true)
-    }
+    if (esc is TalonSRX) esc.enableCurrentLimit(true)
+
+    if (esc is TalonSRX) +esc.configAllSettings(config.talon, configTimeout)
+    if (esc is VictorSPX) +esc.configAllSettings(config.victor, configTimeout)
 }
 
-fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V, vararg feedback: FeedbackDevice) {
-    generalSetup(master, voltageCompensation, currentLimit, startupFrictionCompensation)
+fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, config: OffloadedEscConfiguration, vararg feedback: FeedbackDevice) {
+    generalSetup(master, config)
 
     feedback.forEachIndexed { i, sensor -> +master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
 
     +master.configVelocityMeasurementPeriod(Period_5Ms, configTimeout)
     +master.configVelocityMeasurementWindow(4, configTimeout)
-}
-
-fun SubsystemHardware<*, *>.configSlave(slave: BaseMotorController, voltageCompensation: V, currentLimit: I, startupFrictionCompensation: V) {
-    generalSetup(slave, voltageCompensation, currentLimit, startupFrictionCompensation)
 }

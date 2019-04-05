@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.EntryListenerFlags
@@ -24,6 +25,47 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
         ::registerCallback,
         " (${withUnits.unitName})"
 )
+
+fun <Q : Quan<Q>> Named.pref(
+        defaultOpenloopRamp: Time = 0.Second,
+        defaultClosedloopRamp: Time = 0.Second,
+        defaultPeakOutput: DutyCycle = 100.Percent,
+        defaultNominalOutput: DutyCycle = 0.Percent,
+        defaultVoltageCompSaturation: V = 12.Volt,
+        defaultContinuousCurrentLimit: I = 25.Ampere,
+        defaultPeakCurrentLimit: I = 40.Ampere,
+        defaultPeakCurrentDuration: Time = 1.Second
+) = pref {
+
+    val openloopRamp by pref(defaultOpenloopRamp.Second, Second)
+    val closedloopRamp by pref(defaultClosedloopRamp.Second, Second)
+
+    val peakOutput by pref(defaultPeakOutput.Percent, Percent)
+    val nominalOutput by pref(defaultNominalOutput.Percent, Percent)
+
+    val voltageCompSaturation by pref(defaultVoltageCompSaturation.Volt, Volt)
+
+    val continuousCurrentLimit by pref(defaultContinuousCurrentLimit.Ampere, Ampere)
+    val peakCurrentLimit by pref(defaultPeakCurrentLimit.Ampere, Ampere)
+    val peakCurrentDuration by pref(defaultPeakCurrentDuration.Second, Second)
+
+    ({
+        OffloadedEscConfiguration(
+                openloopRamp = openloopRamp,
+                closedloopRamp = closedloopRamp,
+
+                peakOutputForward = peakOutput,
+                nominalOutputForward = nominalOutput,
+                nominalOutputReverse = -nominalOutput,
+                peakOutputReverse = -peakOutput,
+
+                voltageCompSaturation = voltageCompSaturation,
+                continuousCurrentLimit = continuousCurrentLimit,
+                peakCurrentLimit = peakCurrentLimit,
+                peakCurrentDuration = peakCurrentDuration
+        )
+    })
+}
 
 
 /**
