@@ -11,7 +11,6 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
-import java.awt.Color
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
     val deployCargo by operator.deployCargo.readEagerly().withoutStamps
@@ -58,7 +57,7 @@ suspend fun Subsystems.pivotDown() {
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
 
-    launch { feedbackSystem.set(Feedback(0.Percent, 0.Percent, 0.Percent, 0.Percent, Color.RED)) }
+    launch { feedbackSystem.set(Feedback.red) }
 
     val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
     scope.launch { collectorRollers?.set(collectorRollers.hatchState) }
@@ -67,7 +66,6 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
         freeze()
     } finally {
         withContext(NonCancellable) {
-            launch { feedbackSystem.set(Feedback(0.Percent, 0.Percent, 0.Percent, 0.Percent, Color.RED)) }
             val hookDown = launch { hook?.set(HookPosition.Down) }
             withTimeout(0.5.Second) {
                 lift?.set(lift.hardware.position.optimizedRead(
@@ -80,7 +78,7 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
 
             scope.launch {
                 delay(0.5.Second)
-                withTimeout(0.5.Second) { feedbackSystem.set(Feedback(100.Percent,100.Percent,100.Percent,100.Percent,Color.GREEN)) }
+                withTimeout(0.5.Second) { feedbackSystem.set(Feedback.green.fullRumble()) }
             }
         }
     }
@@ -138,7 +136,7 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
 
-    launch { feedbackSystem.set(Feedback(0.Percent, 0.Percent, 0.Percent, 0.Percent, Color.RED)) }
+    launch { feedbackSystem.set(Feedback.red) }
 
     //Lift down
     withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
@@ -163,7 +161,7 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
 
             scope.launch {
                 delay(0.5.Second)
-                withTimeout(0.5.Second) { feedbackSystem.set(Feedback(100.Percent,100.Percent,100.Percent,100.Percent,Color.GREEN)) }
+                withTimeout(0.5.Second) { feedbackSystem.set(Feedback.green.fullRumble()) }
             }
         }
     }
@@ -227,4 +225,3 @@ suspend fun Subsystems.collectGroundPanel() = coroutineScope {
 
     freeze()
 }
-

@@ -10,59 +10,51 @@ import info.kunalsheth.units.math.*
 import java.awt.Color
 
 data class Feedback(
-        val wheelRumble: DutyCycle = 0.Percent,
-        val stickRumble: DutyCycle = 0.Percent,
-        val xboxLeftRumble: DutyCycle = 0.Percent,
-        val xboxRightRumble: DutyCycle = xboxLeftRumble,
-        val ledColor: Color =Color.BLACK
-                //Color(Color.HSBtoRGB(((currentTime.Second / 5 % 1.0)).toFloat(), 1f, 0.3f))
+        val driverRumble: DutyCycle = 0.Percent,
+        val operatorRumble: DutyCycle = 0.Percent,
+        val ledColor: Color = Color.BLACK
+        //Color(Color.HSBtoRGB(((currentTime.Second / 5 % 1.0)).toFloat(), 1f, 0.3f))
 ) {
 
-//     val fullRumble = Feedback(
-//             wheelRumble = 100.Percent,
-//             stickRumble = 100.Percent,
-//             xboxLeftRumble = 100.Percent, xboxRightRumble = 100.Percent,
-//             ledColor = this.ledColor
-//     )
-//
-//     fun withRumble(rumble: DutyCycle) = Feedback(
-//             wheelRumble = rumble,
-//             stickRumble = rumble,
-//             xboxLeftRumble = rumble, xboxRightRumble = rumble,
-//             ledColor = this.ledColor
-//     )
-//
-//     companion object {
-//         val RED = Feedback(ledColor = Color.RED)
-//         val GREEN = Feedback(ledColor = Color.GREEN)
-//         val BLUE = Feedback(ledColor = Color.BLUE)
-//
-//         operator fun invoke(r: Double, g: Double, b: Double) = Feedback(
-//                 ledColor = Color(r.toFloat(), g.toFloat(), b.toFloat())
-//         )
-//     }
+    fun fullRumble() = Feedback(
+            driverRumble = 100.Percent,
+            operatorRumble = 100.Percent,
+            ledColor = this.ledColor
+    )
+
+    companion object {
+        val red = Feedback(ledColor = Color.RED)
+        val green = Feedback(ledColor = Color.GREEN)
+        val blue = Feedback(ledColor = Color.BLUE)
+        val black = Feedback(ledColor = Color.BLACK)
+        val white = Feedback(ledColor = Color.WHITE)
+
+        operator fun invoke(r: Double, g: Double, b: Double) = Feedback(
+                ledColor = Color(r.toFloat(), g.toFloat(), b.toFloat())
+        )
+    }
 }
 
 class FeedbackSystemComponent(hardware: FeedbackSystemHardware) : Component<FeedbackSystemComponent, FeedbackSystemHardware, Feedback>(hardware, EventLoop) {
 
-    override val fallbackController: FeedbackSystemComponent.(Time) -> Feedback = { Feedback() }
+    override val fallbackController: FeedbackSystemComponent.(Time) -> Feedback = { Feedback.black }
 
     override fun FeedbackSystemHardware.output(value: Feedback) = value.run {
         ledHardware?.channels?.invoke(value.ledColor)
 
         with(operatorHardware.xbox) {
-            setRumble(kLeftRumble, xboxLeftRumble.Each)
-            setRumble(kRightRumble, xboxRightRumble.Each)
+            setRumble(kLeftRumble, operatorRumble.Each)
+            setRumble(kRightRumble, operatorRumble.Each)
         }
 
         with(driverHardware.wheel) {
-            setRumble(kLeftRumble, wheelRumble.Each)
-            setRumble(kRightRumble, wheelRumble.Each)
+            setRumble(kLeftRumble, driverRumble.Each)
+            setRumble(kRightRumble, driverRumble.Each)
         }
 
         with(driverHardware.stick) {
-            setRumble(kLeftRumble, stickRumble.Each)
-            setRumble(kRightRumble, stickRumble.Each)
+            setRumble(kLeftRumble, driverRumble.Each)
+            setRumble(kRightRumble, driverRumble.Each)
         }
     }
 }
