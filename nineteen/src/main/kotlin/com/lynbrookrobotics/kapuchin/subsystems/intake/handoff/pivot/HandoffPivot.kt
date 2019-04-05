@@ -84,7 +84,7 @@ class HandoffPivotHardware : SubsystemHardware<HandoffPivotHardware, HandoffPivo
 
     val escCanId = 30
     val esc by hardw { TalonSRX(escCanId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
+        setupMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, FeedbackDevice.Analog)
 
         it.inverted = invert
         it.setSensorPhase(invertSensor)

@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
+import com.ctre.phoenix.motorcontrol.can.SlotConfiguration
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -26,11 +27,11 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
         " (${withUnits.unitName})"
 )
 
-fun <Q : Quan<Q>> Named.pref(
+fun Named.escConfigPref(
         defaultOpenloopRamp: Time = 0.Second,
         defaultClosedloopRamp: Time = 0.Second,
-        defaultPeakOutput: DutyCycle = 100.Percent,
-        defaultNominalOutput: DutyCycle = 0.Percent,
+        defaultPeakOutput: V = 12.Volt,
+        defaultNominalOutput: V = 0.Volt,
         defaultVoltageCompSaturation: V = 12.Volt,
         defaultContinuousCurrentLimit: I = 25.Ampere,
         defaultPeakCurrentLimit: I = 40.Ampere,
@@ -40,8 +41,8 @@ fun <Q : Quan<Q>> Named.pref(
     val openloopRamp by pref(defaultOpenloopRamp.Second, Second)
     val closedloopRamp by pref(defaultClosedloopRamp.Second, Second)
 
-    val peakOutput by pref(defaultPeakOutput.Percent, Percent)
-    val nominalOutput by pref(defaultNominalOutput.Percent, Percent)
+    val peakOutput by pref(defaultPeakOutput.Volt, Volt)
+    val nominalOutput by pref(defaultNominalOutput.Volt, Volt)
 
     val voltageCompSaturation by pref(defaultVoltageCompSaturation.Volt, Volt)
 

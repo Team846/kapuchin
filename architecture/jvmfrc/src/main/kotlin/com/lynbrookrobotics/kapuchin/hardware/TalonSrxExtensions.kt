@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.hardware
 import com.ctre.phoenix.ErrorCode
 import com.ctre.phoenix.ErrorCode.OK
 import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
+import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
@@ -30,36 +31,65 @@ val CANError.checkOk: Unit
             throw IOException("REV Spark Max call returned $this")
     }
 
-sealed class OffloadedOutput
+
+sealed class OffloadedOutput {
+    fun writeTo(esc: VictorSPX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration? = null) {
+        if (gains != null) config.victor.slot0 = gains
+        esc.configAllSettings(config.victor)
+        esc.set(mode, value)
+    }
+
+    fun writeTo(esc: TalonSRX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration? = null) {
+        if (gains != null) config.victor.slot0 = gains
+        esc.configAllSettings(config.talon)
+        esc.set(mode, value)
+    }
+
+    abstract fun writeTo(esc: TalonSRX)
+    abstract fun writeTo(esc: VictorSPX)
+}
+
 data class VelocityOutput(
         val config: OffloadedEscConfiguration,
         val gains: SlotConfiguration,
         val value: Double
-) : OffloadedOutput()
+) : OffloadedOutput() {
+    override fun writeTo(esc: TalonSRX) = writeTo(esc, config, ControlMode.Velocity, value, gains)
+    override fun writeTo(esc: VictorSPX) = writeTo(esc, config, ControlMode.Velocity, value, gains)
+}
 
 data class PositionOutput(
         val config: OffloadedEscConfiguration,
         val gains: SlotConfiguration,
         val value: Double
-) : OffloadedOutput()
+) : OffloadedOutput() {
+    override fun writeTo(esc: TalonSRX) = writeTo(esc, config, ControlMode.Position, value, gains)
+    override fun writeTo(esc: VictorSPX) = writeTo(esc, config, ControlMode.Position, value, gains)
+}
 
 data class PercentOutput(
         val config: OffloadedEscConfiguration,
         val value: DutyCycle
-) : OffloadedOutput()
+) : OffloadedOutput() {
+    override fun writeTo(esc: TalonSRX) = writeTo(esc, config, ControlMode.PercentOutput, value.Each)
+    override fun writeTo(esc: VictorSPX) = writeTo(esc, config, ControlMode.PercentOutput, value.Each)
+}
 
 data class CurrentOutput(
         val config: OffloadedEscConfiguration,
         val value: ElectricCurrent
-) : OffloadedOutput()
+) : OffloadedOutput() {
+    override fun writeTo(esc: TalonSRX) = writeTo(esc, config, ControlMode.Current, value.Ampere)
+    override fun writeTo(esc: VictorSPX) = writeTo(esc, config, ControlMode.Current, value.Ampere)
+}
 
 data class OffloadedEscConfiguration(
         val openloopRamp: Time = 0.Second,
         val closedloopRamp: Time = 0.Second,
-        val peakOutputForward: DutyCycle = 100.Percent,
-        val nominalOutputForward: DutyCycle = 0.Percent,
-        val nominalOutputReverse: DutyCycle = 0.Percent,
-        val peakOutputReverse: DutyCycle = -100.Percent,
+        val peakOutputForward: V = 12.Volt,
+        val nominalOutputForward: V = 0.Volt,
+        val nominalOutputReverse: V = -nominalOutputForward,
+        val peakOutputReverse: V = -peakOutputForward,
         val voltageCompSaturation: V = 12.Volt,
         val continuousCurrentLimit: I = 25.Ampere,
         val peakCurrentLimit: I = 40.Ampere,
@@ -71,10 +101,10 @@ data class OffloadedEscConfiguration(
             it.openloopRamp = openloopRamp.Second
             it.closedloopRamp = closedloopRamp.Second
 
-            it.peakOutputForward = peakOutputForward.Each
-            it.nominalOutputForward = nominalOutputForward.Each
-            it.nominalOutputReverse = nominalOutputReverse.Each
-            it.peakOutputReverse = peakOutputReverse.Each
+            it.peakOutputForward = (peakOutputForward / voltageCompSaturation).Each
+            it.nominalOutputForward = (nominalOutputForward / voltageCompSaturation).Each
+            it.nominalOutputReverse = (nominalOutputReverse / voltageCompSaturation).Each
+            it.peakOutputReverse = (peakOutputReverse / voltageCompSaturation).Each
 
             it.voltageCompSaturation = voltageCompSaturation.Volt
 
@@ -85,14 +115,15 @@ data class OffloadedEscConfiguration(
     }
 
     val victor by lazy {
+        // copy and paste from `talon`
         VictorSPXConfiguration().also {
             it.openloopRamp = openloopRamp.Second
             it.closedloopRamp = closedloopRamp.Second
 
-            it.peakOutputForward = peakOutputForward.Each
-            it.nominalOutputForward = nominalOutputForward.Each
-            it.nominalOutputReverse = nominalOutputReverse.Each
-            it.peakOutputReverse = peakOutputReverse.Each
+            it.peakOutputForward = (peakOutputForward / voltageCompSaturation).Each
+            it.nominalOutputForward = (nominalOutputForward / voltageCompSaturation).Each
+            it.nominalOutputReverse = (nominalOutputReverse / voltageCompSaturation).Each
+            it.peakOutputReverse = (peakOutputReverse / voltageCompSaturation).Each
 
             it.voltageCompSaturation = voltageCompSaturation.Volt
         }
@@ -115,7 +146,7 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, config: Offlo
     if (esc is VictorSPX) +esc.configAllSettings(config.victor, configTimeout)
 }
 
-fun SubsystemHardware<*, *>.configMaster(master: TalonSRX, config: OffloadedEscConfiguration, vararg feedback: FeedbackDevice) {
+fun SubsystemHardware<*, *>.setupMaster(master: TalonSRX, config: OffloadedEscConfiguration, vararg feedback: FeedbackDevice) {
     generalSetup(master, config)
 
     feedback.forEachIndexed { i, sensor -> +master.configSelectedFeedbackSensor(sensor, i, configTimeout) }

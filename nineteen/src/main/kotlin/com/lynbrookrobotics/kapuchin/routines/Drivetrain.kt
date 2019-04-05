@@ -83,8 +83,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
         )
 
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         )
     }
 }
@@ -92,7 +92,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open loop") {
     controller {
         TwoSided(
-                PercentOutput(power)
+                PercentOutput(hardware.escConfig, power)
         )
     }
 }
@@ -107,8 +107,8 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         ).takeUnless {
             error.abs < tolerance
         }
@@ -141,8 +141,8 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
         val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.001
 
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         )
     }
 }

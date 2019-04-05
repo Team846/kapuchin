@@ -31,10 +31,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
-    val operatingVoltage by pref(11, Volt)
-    val currentLimit by pref(30, Ampere)
-    val startupFrictionCompensation by pref(0.5, Volt)
-
     val leftMasterEscId = 10
     val leftSlaveEscId = 11
     val rightMasterEscId = 12
@@ -47,35 +43,37 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val conversions = DrivetrainConversions(this)
 
+    val escConfig by escConfigPref(
+            defaultNominalOutput = 0.5.Volt
+    )
+
     val leftMasterEsc by hardw { WPI_TalonSRX(leftMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
+        setupMaster(it, escConfig, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
         it.isSafetyEnabled = false
     }
     val leftSlaveEsc by hardw { WPI_VictorSPX(leftSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, startupFrictionCompensation)
+        generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
         it.isSafetyEnabled = false
     }
-    val leftLazyOutput = lazyOutput(leftMasterEsc)
 
     val rightMasterEsc by hardw { WPI_TalonSRX(rightMasterEscId) }.configure {
-        configMaster(it, operatingVoltage, currentLimit, startupFrictionCompensation, QuadEncoder)
+        setupMaster(it, escConfig, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
         it.isSafetyEnabled = false
     }
     val rightSlaveEsc by hardw { WPI_VictorSPX(rightSlaveEscId) }.configure {
-        configSlave(it, operatingVoltage, currentLimit, startupFrictionCompensation)
+        generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
         it.isSafetyEnabled = false
     }
-    val rightLazyOutput = lazyOutput(rightMasterEsc)
 
     private val ticksToSerialPort = "kUSB1"
     private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
