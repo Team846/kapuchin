@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -41,9 +42,9 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
 }
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
-    val accelerator by driver.accelerator.readWithEventLoop.withoutStamps
-    val steering by driver.steering.readWithEventLoop.withoutStamps
-    val absSteering by driver.absSteering.readWithEventLoop.withoutStamps
+    val accelerator by driver.accelerator.readEagerly.withoutStamps
+    val steering by driver.steering.readEagerly.withoutStamps
+    val absSteering by driver.absSteering.readEagerly.withoutStamps
 
     val position by hardware.position.readOnTick.withStamps
 
@@ -54,13 +55,20 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
     var startingAngle = -absSteering + position.y.bearing
 
+    var lastGc = 0.Second
     controller {
-        if (
-                speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero
-        ) System.gc()
+        lastGc = if (
+                speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero &&
+                currentTime - lastGc > 2.Second
+        ) {
+            System.gc()
+            currentTime
+        } else lastGc
 
+        // https://www.desmos.com/calculator/qkczjursq7
+        val cappedAccelerator = accelerator cap `±`(100.Percent - steering.abs)
 
-        val forwardVelocity = maxSpeed * accelerator
+        val forwardVelocity = maxSpeed * cappedAccelerator
         val steeringVelocity = maxSpeed * steering
 
         if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
@@ -101,8 +109,8 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),
                 VelocityOutput(velocityGains, nativeR)
-        ).takeIf {
-            error !in 0.Degree `±` tolerance
+        ).takeUnless {
+            error.abs < tolerance
         }
     }
 }
@@ -115,7 +123,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 
     controller {
         val startTime = currentTime
-        while (currentTime - startTime < hardware.period * 90.Percent) {
+        while (currentTime - startTime < hardware.period * 60.Percent) {
             val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
             conv.accumulateOdometry(l, r)
         }
@@ -129,8 +137,8 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
         val targetL = maxSpeed * r() + pA + x / Second
         val targetR = maxSpeed * r() - pA + y / Second
 
-        val nativeL = hardware.conversions.nativeConversion.native(targetL) * 0.01
-        val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.01
+        val nativeL = hardware.conversions.nativeConversion.native(targetL) * 0.001
+        val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.001
 
         TwoSided(
                 VelocityOutput(velocityGains, nativeL),

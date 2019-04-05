@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 /**
  * Utility to manage sensor use within robot choreographies
@@ -29,7 +30,7 @@ open class FreeSensorScope {
     /**
      * Update this sensor's value on every `EventLoop` tick
      */
-    fun <Input> Sensor<Input>.readWithEventLoop(syncThreshold: Time = 0.Second) =
+    fun <Input> Sensor<Input>.readWithEventLoop(syncThreshold: Time = 5.milli(Second)) =
             Sensor.UpdateSource(this, startUpdates = { _ ->
                 cleanup += EventLoop.runOnTick { value = optimizedRead(it, syncThreshold) }
             })
@@ -37,7 +38,7 @@ open class FreeSensorScope {
     /**
      * Update this sensor's value every time the property is accessed
      */
-    fun <Input> Sensor<Input>.readEagerly(syncThreshold: Time = 0.Second) =
+    fun <Input> Sensor<Input>.readEagerly(syncThreshold: Time = 5.milli(Second)) =
             Sensor.UpdateSource(this, getValue = { _ ->
                 optimizedRead(currentTime, syncThreshold).also { value = it }
             })

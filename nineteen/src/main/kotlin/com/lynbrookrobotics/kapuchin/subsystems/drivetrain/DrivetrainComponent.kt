@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
@@ -36,9 +37,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val bearingKp by pref(5, FootPerSecond, 45, Degree)
     val bearingKd by pref(3, FootPerSecond, 360, DegreePerSecond)
 
-    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
-        TwoSided(PercentOutput(0.Percent))
-    }
+    private val fallbackValue = TwoSided(PercentOutput(0.Percent))
+    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = { fallbackValue }
 
     private val leftEscOutputGraph = graph("Left ESC Output", Volt)
     private val rightEscOutputGraph = graph("Right ESC Output", Volt)

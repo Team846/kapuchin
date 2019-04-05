@@ -1,29 +1,45 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.TeleopComponent.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import edu.wpi.first.wpilibj.GenericHID.RumbleType
+import edu.wpi.first.wpilibj.GenericHID.RumbleType.kLeftRumble
+import edu.wpi.first.wpilibj.GenericHID.RumbleType.kRightRumble
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.awt.Color
 
-typealias Rumble = TwoSided<DutyCycle>
+class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, TeleopHardware, TeleopFeedback>(hardware, EventLoop) {
 
-class TeleopComponent(hardware: TeleopHardware) : Component<TeleopComponent, TeleopHardware, Pair<Rumble, Color>>(hardware, EventLoop) {
-    override val fallbackController: TeleopComponent.(Time) -> Pair<Rumble, Color> = {
-        TwoSided(0.Percent) to Color(Color.HSBtoRGB(((currentTime.Second / 3 % 1.0)).toFloat(), 1f, 1f))
-    }
+    data class TeleopFeedback(
+            val wheelRumble: DutyCycle = 0.Percent,
+            val stickRumble: DutyCycle = 0.Percent,
+            val xboxLeftRumble: DutyCycle = 0.Percent,
+            val xboxRightRumble: DutyCycle = xboxLeftRumble,
+            val ledColor: Color = Color(
+                    Color.HSBtoRGB(((currentTime.Second / 3 % 1.0)).toFloat(), 1f, 1f)
+            )
+    )
 
-    override fun TeleopHardware.output(value: Pair<Rumble, Color>) {
-        ledHardware?.channels?.invoke(value.second)
+    override val fallbackController: TeleopComponent.(Time) -> TeleopFeedback = { TeleopFeedback() }
+
+    override fun TeleopHardware.output(value: TeleopFeedback) = value.run {
+        ledHardware?.channels?.invoke(value.ledColor)
 
         with(operatorHardware.xbox) {
-            value.first.let { (l, r) ->
-                setRumble(RumbleType.kLeftRumble, l.abs.Each)
-                setRumble(RumbleType.kRightRumble, r.abs.Each)
-            }
+            setRumble(kLeftRumble, xboxLeftRumble.Each)
+            setRumble(kRightRumble, xboxRightRumble.Each)
+        }
+
+        with(driverHardware.wheel) {
+            setRumble(kLeftRumble, wheelRumble.Each)
+            setRumble(kRightRumble, wheelRumble.Each)
+        }
+
+        with(driverHardware.stick) {
+            setRumble(kLeftRumble, stickRumble.Each)
+            setRumble(kRightRumble, stickRumble.Each)
         }
     }
 }

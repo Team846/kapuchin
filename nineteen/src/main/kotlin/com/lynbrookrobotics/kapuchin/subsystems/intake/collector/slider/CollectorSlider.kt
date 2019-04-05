@@ -21,6 +21,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     val min by pref(-3.5, Inch)
     val max by pref(4.75, Inch)
     val maxOutput by pref(100, Percent)
+    val operatingVoltage by pref(12, Volt)
 
     override val fallbackController: CollectorSliderComponent.(Time) -> DutyCycle = { 0.Percent }
 
@@ -32,13 +33,13 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
 
         val zeroedOutput =
                 if (!isZeroed)
-                    if (!currentAtZero) -30.Percent
+                    if (!currentAtZero) 30.Percent
                     else {
                         zero()
                         0.Percent
                     }
-                else if (currentPosition > max && value.isPositive) 0.Percent
-                else if (currentPosition < min && value.isNegative) 0.Percent
+                else if (currentPosition > max && !value.isNegative) -20.Percent
+                else if (currentPosition < min && !value.isPositive) 20.Percent
                 else value
         val cappedOutput = zeroedOutput minMag (maxOutput * zeroedOutput.siValue)
 
@@ -50,14 +51,14 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
 class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, CollectorSliderComponent>() {
     override val priority: Priority = Priority.RealTime
     override val period: Time = 30.milli(Second)
-    override val syncThreshold: Time = 5.milli(Second)
+    override val syncThreshold: Time = 2.milli(Second)
     override val name: String = "Collector Slider"
 
     val currentLimit by pref(20, Ampere)
     val startupFrictionCompensation by pref(0.5, Volt)
 
-    val invert by pref(true)
-    val invertSensor by pref(true)
+    val invert by pref(false)
+    val invertSensor by pref(false)
 
     val escCanId = 20
 
