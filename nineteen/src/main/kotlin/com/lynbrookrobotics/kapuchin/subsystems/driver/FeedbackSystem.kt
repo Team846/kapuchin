@@ -14,7 +14,8 @@ data class Feedback(
         val stickRumble: DutyCycle = 0.Percent,
         val xboxLeftRumble: DutyCycle = 0.Percent,
         val xboxRightRumble: DutyCycle = xboxLeftRumble,
-        val ledColor: Color = Color(Color.HSBtoRGB(((currentTime.Second / 5 % 1.0)).toFloat(), 1f, 0.3f))
+        val ledColor: Color =Color.BLACK
+                //Color(Color.HSBtoRGB(((currentTime.Second / 5 % 1.0)).toFloat(), 1f, 0.3f))
 ) {
 
 //     val fullRumble = Feedback(
