@@ -3,7 +3,6 @@ package com.lynbrookrobotics.kapuchin.choreos
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.isActive
 
 suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 

@@ -10,7 +10,6 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     override val priority = Priority.Medium

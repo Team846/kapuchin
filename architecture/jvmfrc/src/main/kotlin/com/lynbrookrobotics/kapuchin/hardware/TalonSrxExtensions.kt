@@ -33,20 +33,20 @@ val CANError.checkOk: Unit
 
 
 sealed class OffloadedOutput {
-    fun writeTo(esc: VictorSPX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration? = null) {
+    fun writeTo(esc: VictorSPX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration?, f: (VictorSPXConfiguration) -> Unit) {
         if (gains != null) config.victor.slot0 = gains
-        esc.configAllSettings(config.victor)
+        +esc.configAllSettings(config.victor.also(f))
         esc.set(mode, value)
     }
 
-    fun writeTo(esc: TalonSRX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration? = null) {
+    fun writeTo(esc: TalonSRX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration?, f: (TalonSRXConfiguration) -> Unit) {
         if (gains != null) config.victor.slot0 = gains
-        esc.configAllSettings(config.talon)
+        +esc.configAllSettings(config.talon.also(f))
         esc.set(mode, value)
     }
 
-    abstract fun writeTo(esc: TalonSRX)
-    abstract fun writeTo(esc: VictorSPX)
+    abstract fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit = {})
+    abstract fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit = {})
 }
 
 data class VelocityOutput(
@@ -54,8 +54,8 @@ data class VelocityOutput(
         val gains: SlotConfiguration,
         val value: Double
 ) : OffloadedOutput() {
-    override fun writeTo(esc: TalonSRX) = writeTo(esc, config, ControlMode.Velocity, value, gains)
-    override fun writeTo(esc: VictorSPX) = writeTo(esc, config, ControlMode.Velocity, value, gains)
+    override fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Velocity, value, gains, f)
+    override fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Velocity, value, gains, f)
 }
 
 data class PositionOutput(
@@ -63,24 +63,24 @@ data class PositionOutput(
         val gains: SlotConfiguration,
         val value: Double
 ) : OffloadedOutput() {
-    override fun writeTo(esc: TalonSRX) = writeTo(esc, config, ControlMode.Position, value, gains)
-    override fun writeTo(esc: VictorSPX) = writeTo(esc, config, ControlMode.Position, value, gains)
+    override fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Position, value, gains, f)
+    override fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Position, value, gains, f)
 }
 
 data class PercentOutput(
         val config: OffloadedEscConfiguration,
         val value: DutyCycle
 ) : OffloadedOutput() {
-    override fun writeTo(esc: TalonSRX) = writeTo(esc, config, ControlMode.PercentOutput, value.Each)
-    override fun writeTo(esc: VictorSPX) = writeTo(esc, config, ControlMode.PercentOutput, value.Each)
+    override fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.PercentOutput, value.Each, null, f)
+    override fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.PercentOutput, value.Each, null, f)
 }
 
 data class CurrentOutput(
         val config: OffloadedEscConfiguration,
         val value: ElectricCurrent
 ) : OffloadedOutput() {
-    override fun writeTo(esc: TalonSRX) = writeTo(esc, config, ControlMode.Current, value.Ampere)
-    override fun writeTo(esc: VictorSPX) = writeTo(esc, config, ControlMode.Current, value.Ampere)
+    override fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Current, value.Ampere, null, f)
+    override fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Current, value.Ampere, null, f)
 }
 
 data class OffloadedEscConfiguration(

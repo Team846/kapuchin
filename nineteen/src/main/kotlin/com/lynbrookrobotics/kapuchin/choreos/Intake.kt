@@ -2,10 +2,9 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.hookslider.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.pivot.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
@@ -82,25 +81,15 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
     launch { collectorPivot?.set(CollectorPivotState.Down) }
 
     //Start rollers
-    launch { handoffRollers?.spin(handoffRollers.cargoCollectSpeed) }
     launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
 
     //Center slider
     collectorSlider?.set(0.Inch, electrical)
 
-    //Set handoff pivot down
-    withTimeout(1.Second) { handoffPivot?.set(handoffPivot.collectPosition, 10.Degree) }
-    val handoffPivotSet = launch { handoffPivot?.set(handoffPivot.collectPosition, 0.Degree) }
-
     try {
         freeze()
     } finally {
         scope.launch { collectorRollers?.set(collectorRollers.cargoState) }
-        withContext(NonCancellable) {
-            withTimeout(1.Second) {
-                handoffPivotSet.join()
-            }
-        }
     }
 }
 
@@ -178,32 +167,6 @@ suspend fun Subsystems.centerCargo() {
             bottom = collectorRollers.cargoCenterSpeed, //+ collectorRollers.inBias, // top out
             top = -collectorRollers.cargoCenterSpeed // top in
     )
-    freeze()
-}
-
-/**
- * Collect panel from the ground
- *
- * Ends with:
- * CollectorPivot - Up
- * CollectorSlider - Center
- * HandoffPivot - Handoff position
- * VelcroPivot - Down
- * Hook - Up
- * Lift - Collect ground panel height
- */
-suspend fun Subsystems.collectGroundPanel() = coroutineScope {
-    //Center slider
-    collectorSlider?.set(0.Inch, electrical)
-
-    //Lift down
-    launch { lift?.set(lift.collectGroundPanel) }
-
-    //Handoff, velcro, hook down
-    launch { handoffPivot?.set(handoffPivot.collectPosition) }
-    launch { velcroPivot?.set(VelcroPivotPosition.Down) }
-    launch { hook?.set(HookPosition.Down) }
-
     freeze()
 }
 

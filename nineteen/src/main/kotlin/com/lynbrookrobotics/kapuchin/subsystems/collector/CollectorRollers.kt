@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
+package com.lynbrookrobotics.kapuchin.subsystems.collector
 
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
@@ -55,7 +55,7 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
 
     val bottomCanId = 50
     val bottomEsc by hardw { VictorSPX(bottomCanId) }.configure {
-        generalSetup(it, 12.Volt, 20.Ampere, 0.Volt)
+        generalSetup(it, OffloadedEscConfiguration())
         it.inverted = invertBottom
     }
 }

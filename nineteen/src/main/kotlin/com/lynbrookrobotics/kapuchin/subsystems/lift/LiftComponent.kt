@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.lift
 
+import com.ctre.phoenix.motorcontrol.can.SlotConfiguration
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -24,37 +25,22 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     val cargoMidRocket get() = panelMidRocket + panelCargoOffset
     val cargoHighRocket get() = panelHighRocket + panelCargoOffset
 
-    val kP by pref(12, Volt, 12, Inch)
-    val kD by pref(0, Volt, 2, FootPerSecond)
+    val positionGains by pref {
+        val kP by pref(12, Volt, 12, Inch)
+        val kD by pref(0, Volt, 2, FootPerSecond)
+        ({
+            SlotConfiguration().also {
+                it.kP = hardware.conversions.native.native(kP)
+                it.kD = hardware.conversions.native.native(kD)
+            }
+        })
+    }
 
-    private val fallbackValue = PercentOutput(0.Percent)
-    override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = { fallbackValue }
+    override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = {
+        PercentOutput(hardware.escConfig, 0.Percent)
+    }
 
-    private var lastReverseSoftLimit = Integer.MAX_VALUE
-    private var lastForwardSoftLimit = Integer.MIN_VALUE
     override fun LiftHardware.output(value: OffloadedOutput) {
-
-        lazyOutput(value)
-
-//        val current = position.optimizedRead(currentTime, 0.Second).y
-//
-//        val range = unionizeAndFindClosestRange(LiftState.legalRanges(), current, (Int.MIN_VALUE + 1).Inch)
-//
-//        if (range.start - range.endInclusive != 0.Inch) {
-//            val reverseSoftLimit = conversions.native.native(range.start).toInt()
-//            if (reverseSoftLimit != lastReverseSoftLimit) {
-//                lastReverseSoftLimit = reverseSoftLimit
-//                esc.configReverseSoftLimitThreshold(reverseSoftLimit)
-//            }
-//
-//            val forwardSoftLimit = conversions.native.native(range.endInclusive).toInt()
-//            if (forwardSoftLimit != lastForwardSoftLimit) {
-//                lastForwardSoftLimit = forwardSoftLimit
-//                esc.configForwardSoftLimitThreshold(forwardSoftLimit)
-//            }
-//            lazyOutput(value)
-//        } else if (Safeties.log) {
-//            log(Warning) { "No legal states found" }
-//        }
+        value.writeTo(esc, ::withSafeties)
     }
 }

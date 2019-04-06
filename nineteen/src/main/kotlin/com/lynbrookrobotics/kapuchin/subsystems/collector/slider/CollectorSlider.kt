@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider
+package com.lynbrookrobotics.kapuchin.subsystems.collector.slider
 
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*

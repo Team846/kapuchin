@@ -80,8 +80,8 @@ suspend fun DrivetrainComponent.visionSnapshotTracking(speed: Velocity, limeligh
             val nativeR = hardware.conversions.nativeConversion.native(targs.right)
 
             TwoSided(
-                    VelocityOutput(velocityGains, nativeL),
-                    VelocityOutput(velocityGains, nativeR)
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
             )
         } else null
     }
@@ -100,8 +100,8 @@ suspend fun DrivetrainComponent.visionActiveTracking(speed: Velocity, limelight:
             val nativeR = hardware.conversions.nativeConversion.native(targs.right)
 
             TwoSided(
-                    VelocityOutput(velocityGains, nativeL),
-                    VelocityOutput(velocityGains, nativeR)
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
             )
         }
     }
@@ -122,8 +122,8 @@ suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, lineScanner:
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
 
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         )
     }
 }

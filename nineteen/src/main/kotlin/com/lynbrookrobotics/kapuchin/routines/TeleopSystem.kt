@@ -1,9 +1,9 @@
 package com.lynbrookrobotics.kapuchin.routines
 
+import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.TeleopComponent.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
 import info.kunalsheth.units.generated.*
 import java.awt.Color
 

@@ -1,9 +1,9 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -101,8 +101,8 @@ suspend fun DrivetrainComponent.followTrajectory(
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         ).takeUnless { isDone }
     }
 }
@@ -127,8 +127,8 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         ).takeUnless {
             distance < tolerance
         }
