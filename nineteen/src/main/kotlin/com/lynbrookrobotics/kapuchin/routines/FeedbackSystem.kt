@@ -31,6 +31,6 @@ suspend fun FeedbackSystemComponent.trackLineFeedback(lineScanner: LineScannerHa
 suspend fun FeedbackSystemComponent.rainbow() = startRoutine("Rainbow") {
 
     controller {
-        Color(Color.HSBtoRGB(((currentTime.Second / 5 % 1.0)).toFloat(), 1f, 1f))
+        Feedback(ledColor = Color(Color.HSBtoRGB(((currentTime.Second / 5 % 1.0)).toFloat(), 1f, 1f)))
     }
 }
