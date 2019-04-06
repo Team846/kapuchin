@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
@@ -57,8 +56,6 @@ suspend fun Subsystems.pivotDown() {
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
 
-    launch { feedbackSystem.set(Feedback.red) }
-
     val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
     scope.launch { collectorRollers?.set(collectorRollers.hatchState) }
 
@@ -75,11 +72,6 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
             hookSliderOut.cancel()
             delay(0.5.Second)
             hookDown.cancel()
-
-            scope.launch {
-                delay(0.5.Second)
-                withTimeout(0.5.Second) { feedbackSystem.set(Feedback.green.fullRumble()) }
-            }
         }
     }
 }
@@ -136,8 +128,6 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
 
-    launch { feedbackSystem.set(Feedback.red) }
-
     //Lift down
     withTimeout(1.Second) { lift?.set(lift.collectPanel, 1.Inch) }
     launch { lift?.set(lift.collectPanel, 0.Inch) }
@@ -158,20 +148,14 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
             }
             scope.launch { lift?.set(lift.collectPanelStroke, 0.Inch) }
             hookSliderOut.cancel()
-
-            scope.launch {
-                delay(0.5.Second)
-                withTimeout(0.5.Second) { feedbackSystem.set(Feedback.green.fullRumble()) }
-            }
         }
     }
 }
 
 suspend fun Subsystems.trackLine() = coroutineScope {
     launch {
-        collectorSlider?.let { feedbackSystem.trackLineFeedback(lineScanner, it) }
+        collectorSlider?.let { rumble.trackLineFeedback(lineScanner, it) }
     }
-
     collectorSlider?.trackLine(lineScanner, electrical)
     freeze()
 }

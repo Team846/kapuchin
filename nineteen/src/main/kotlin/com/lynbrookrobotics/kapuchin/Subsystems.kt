@@ -31,10 +31,9 @@ import java.io.File
 class Subsystems(val drivetrain: DrivetrainComponent,
                  val electrical: ElectricalSystemHardware,
 
-                 val feedbackSystem: FeedbackSystemComponent,
                  val driver: DriverHardware,
                  val operator: OperatorHardware,
-                 val leds: LedHardware?,
+                 val rumble: RumbleComponent,
 
                  val lineScanner: LineScannerHardware,
                  val collectorPivot: CollectorPivotComponent?,
@@ -47,7 +46,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val velcroPivot: VelcroPivotComponent?,
                  val lift: LiftComponent?,
                  val climber: ClimberComponent?,
-                 val limelight: LimelightHardware?
+                 val limelight: LimelightHardware?,
+                 val leds: LedComponent?
 ) : Named by Named("Subsystems") {
 
     suspend fun teleop() {
@@ -117,16 +117,22 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
         fun concurrentInit() = runBlocking {
+            suspend fun <T> t(f: suspend () -> T): T? = try {
+                f()
+            } catch (t: Throwable) {
+                if (crashOnFailure) throw t else null
+            }
+
+            suspend fun <R> i(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
+
             val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
             val electricalAsync = async { ElectricalSystemHardware() }
 
             val driverAsync = async { DriverHardware() }
             val operatorAsync = async { OperatorHardware() }
+            val rumbleAsync = async { RumbleComponent(RumbleHardware(t { operatorAsync.await() }!!)) }
             val lineScannerAsync = async { LineScannerHardware() }
 
-            suspend fun <R> i(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
-
-            val ledsAsync = i(initLeds) { LedHardware() }
             val collectorPivotAsync = i(initCollectorPivot) { CollectorPivotComponent(CollectorPivotHardware()) }
             val collectorRollersAsync = i(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
             val collectorSliderAsync = i(initCollectorSlider) { CollectorSliderComponent(CollectorSliderHardware()) }
@@ -138,29 +144,15 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val liftAsync = i(initLift) { LiftComponent(LiftHardware()) }
             val climberAsync = i(initClimber) { ClimberComponent(ClimberHardware()) }
             val limelightAsync = i(initLimelight) { LimelightHardware() }
-
-            suspend fun <T> t(f: suspend () -> T): T? = try {
-                f()
-            } catch (t: Throwable) {
-                if (crashOnFailure) throw t else null
-            }
-
-            val feedbackSystemAsync = async {
-                FeedbackSystemComponent(FeedbackSystemHardware(
-                        t { driverAsync.await() }!!,
-                        t { operatorAsync.await() }!!,
-                        t { ledsAsync.await() }
-                ))
-            }
+            val ledsAsync = i(initLeds) { LedComponent(LedHardware()) }
 
             instance = Subsystems(
                     t { drivetrainAsync.await() }!!,
                     t { electricalAsync.await() }!!,
 
-                    t { feedbackSystemAsync.await() }!!,
                     t { driverAsync.await() }!!,
                     t { operatorAsync.await() }!!,
-                    t { ledsAsync.await() },
+                    t { rumbleAsync.await() }!!,
 
                     t { lineScannerAsync.await() }!!,
                     t { collectorPivotAsync.await() },
@@ -173,7 +165,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     t { velcroPivotAsync.await() },
                     t { liftAsync.await() },
                     t { climberAsync.await() },
-                    t { limelightAsync.await() }
+                    t { limelightAsync.await() },
+                    t { ledsAsync.await() }
             )
         }
 
@@ -186,18 +179,15 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
             fun <R> i(b: Boolean, f: () -> R) = if (b) f() else null
 
-            val driver = t { DriverHardware() }!!
             val operator = t { OperatorHardware() }!!
-            val leds = i(initLeds) { t { LedHardware() } }
-            val feedbackSystem = t { FeedbackSystemComponent(FeedbackSystemHardware(driver, operator, leds)) }!!
+            val rumble = t { RumbleComponent(RumbleHardware(operator)) }!!
 
             instance = Subsystems(
                     t { DrivetrainComponent(DrivetrainHardware()) }!!,
                     t { ElectricalSystemHardware() }!!,
-                    feedbackSystem,
-                    driver,
+                    t { DriverHardware() }!!,
                     operator,
-                    leds,
+                    rumble,
                     t { LineScannerHardware() }!!,
                     i(initCollectorPivot) { t { CollectorPivotComponent(CollectorPivotHardware()) } },
                     i(initCollectorRollers) { t { CollectorRollersComponent(CollectorRollersHardware()) } },
@@ -209,7 +199,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     i(initVelcroPivot) { t { VelcroPivotComponent(VelcroPivotHardware()) } },
                     i(initLift) { t { LiftComponent(LiftHardware()) } },
                     i(initClimber) { t { ClimberComponent(ClimberHardware()) } },
-                    i(initLimelight) { t { LimelightHardware() } }
+                    i(initLimelight) { t { LimelightHardware() } },
+                    i(initLeds) { t { LedComponent(LedHardware()) } }
             )
         }
     }
