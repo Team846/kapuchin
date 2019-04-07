@@ -125,7 +125,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
         fun concurrentInit() = runBlocking {
-            val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware(Position(80.472.Inch, 104.489.Inch, 0.Degree))) }
+            val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware(Position(-33.75.Inch, 259.625.Inch, -90.Degree))) }
             val electricalAsync = async { ElectricalSystemHardware() }
 
             val driverAsync = async { DriverHardware() }

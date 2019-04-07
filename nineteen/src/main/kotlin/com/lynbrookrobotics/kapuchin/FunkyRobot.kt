@@ -27,7 +27,7 @@ class FunkyRobot : RobotBase() {
         val subsystems = Subsystems.instance!!
 
         println("Trimming preferences...")
-        trim()
+        //trim()
 
         println("Loading classes...")
 

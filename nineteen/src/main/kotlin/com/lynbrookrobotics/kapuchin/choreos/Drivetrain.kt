@@ -102,6 +102,7 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
                 drivetrain.positionAndButtUp(motionProfile, rightLoadingStation, 0.5.Inch, 10.Degree)
             }
             runWhile({ goToLeftCloseCargo }) {
+                println("helo world")
                 drivetrain.positionAndButtUp(motionProfile, leftCloseCargo, 0.5.Inch, 10.Degree)
 
             }
@@ -195,6 +196,6 @@ suspend fun DrivetrainComponent.positionAndButtUp(motionProfile: (Length) -> Vel
     choreography {
         waypoint(motionProfile, targetPos.vector, posTolerance)
         turn(targetPos.bearing `coterminal -` position.bearing, turnTolerance)
-        openLoop(50.Percent)
+        //openLoop(50.Percent)
     }
 }
