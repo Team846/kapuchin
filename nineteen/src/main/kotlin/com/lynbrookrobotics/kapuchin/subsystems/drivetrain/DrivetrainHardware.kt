@@ -41,11 +41,11 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val leftSensorInversion by pref(true)
     val rightSensorInversion by pref(false)
 
-    val conversions = DrivetrainConversions(this)
-
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt
     )
+
+    val conversions = DrivetrainConversions(this)
 
     val leftMasterEsc by hardw { WPI_TalonSRX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder)
