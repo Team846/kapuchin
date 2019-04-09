@@ -158,8 +158,8 @@ suspend fun Subsystems.trackLine() = coroutineScope {
 }
 
 suspend fun Subsystems.centerAll() = coroutineScope {
-    centerSlider(0.Inch)
-//    launch { centerCargo() }
+    launch { centerSlider(0.Inch) }
+    launch { centerCargo() }
     freeze()
 }
 
@@ -175,8 +175,8 @@ suspend fun Subsystems.centerSlider(tolerance: Length = 1.Inch) {
 suspend fun Subsystems.centerCargo() {
     collectorRollers?.spin(
             electrical,
-            bottom = collectorRollers.cargoCenterSpeed, //+ collectorRollers.inBias, // top out
-            top = -collectorRollers.cargoCenterSpeed // top in
+            bottom = collectorRollers.cargoCenterSpeed,
+            top = -collectorRollers.cargoCenterSpeed
     )
     freeze()
 }
