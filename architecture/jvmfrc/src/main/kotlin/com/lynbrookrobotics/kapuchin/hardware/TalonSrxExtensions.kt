@@ -130,15 +130,13 @@ data class OffloadedEscConfiguration(
     }
 }
 
-fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, config: OffloadedEscConfiguration) {
+fun RobotHardware<*>.generalSetup(esc: BaseMotorController, config: OffloadedEscConfiguration) {
+    +esc.configFactoryDefault(configTimeout)
 
     esc.setNeutralMode(NeutralMode.Brake)
 
     +esc.configNeutralDeadband(0.001, configTimeout)
     esc.enableVoltageCompensation(true)
-
-    val controlFramePeriod = syncThreshold.milli(Second).toInt()
-    +esc.setControlFramePeriod(Control_3_General, controlFramePeriod)
 
     if (esc is TalonSRX) esc.enableCurrentLimit(true)
 
@@ -149,6 +147,7 @@ fun SubsystemHardware<*, *>.generalSetup(esc: BaseMotorController, config: Offlo
 fun SubsystemHardware<*, *>.setupMaster(master: TalonSRX, config: OffloadedEscConfiguration, vararg feedback: FeedbackDevice) {
     generalSetup(master, config)
 
+    +master.setControlFramePeriod(Control_3_General, syncThreshold.milli(Second).toInt())
     feedback.forEachIndexed { i, sensor -> +master.configSelectedFeedbackSensor(sensor, i, configTimeout) }
 
     +master.configVelocityMeasurementPeriod(Period_5Ms, configTimeout)

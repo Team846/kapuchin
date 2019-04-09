@@ -1,8 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -42,37 +42,34 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val rightSensorInversion by pref(false)
 
     val escConfig by escConfigPref(
-            defaultNominalOutput = 0.5.Volt
+            defaultNominalOutput = 0.5.Volt,
+            defaultPeakCurrentLimit = 35.Ampere
     )
 
     val conversions = DrivetrainConversions(this)
 
-    val leftMasterEsc by hardw { WPI_TalonSRX(leftMasterEscId) }.configure {
+    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
-        it.isSafetyEnabled = false
     }
-    val leftSlaveEsc by hardw { WPI_VictorSPX(leftSlaveEscId) }.configure {
+    val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
-        it.isSafetyEnabled = false
     }
 
-    val rightMasterEsc by hardw { WPI_TalonSRX(rightMasterEscId) }.configure {
+    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
-        it.isSafetyEnabled = false
     }
-    val rightSlaveEsc by hardw { WPI_VictorSPX(rightSlaveEscId) }.configure {
+    val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
-        it.isSafetyEnabled = false
     }
 
     private val ticksToSerialPort = "kUSB1"
