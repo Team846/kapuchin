@@ -40,7 +40,7 @@ sealed class OffloadedOutput {
     }
 
     fun writeTo(esc: TalonSRX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration?, f: (TalonSRXConfiguration) -> Unit) {
-        if (gains != null) config.victor.slot0 = gains
+        if (gains != null) config.talon.slot0 = gains
         +esc.configAllSettings(config.talon.also(f))
         esc.set(mode, value)
     }
