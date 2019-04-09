@@ -175,8 +175,8 @@ suspend fun Subsystems.centerSlider(tolerance: Length = 1.Inch) {
 suspend fun Subsystems.centerCargo() {
     collectorRollers?.spin(
             electrical,
-            bottom = collectorRollers.cargoCenterSpeed,
-            top = -collectorRollers.cargoCenterSpeed
+            top = -10.5.Volt,
+            bottom = 11.5.Volt
     )
     freeze()
 }
