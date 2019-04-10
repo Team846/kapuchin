@@ -22,12 +22,13 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val kP by pref(5, Volt, 2, FootPerSecond)
         val kF by pref(110, Percent)
         ({
-            SlotConfiguration().also {
-                it.kP = hardware.conversions.nativeConversion.native(kP)
-                it.kF = hardware.conversions.nativeConversion.native(
+            OffloadedEscGains(
+                syncThreshold = hardware.syncThreshold,
+                kP = hardware.conversions.nativeConversion.native(kP),
+                kF = hardware.conversions.nativeConversion.native(
                         Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
                 ) * kF.Each
-            }
+            )
         })
     }
 

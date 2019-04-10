@@ -55,7 +55,7 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
 
     val bottomCanId = 50
     val bottomEsc by hardw { VictorSPX(bottomCanId) }.configure {
-        generalSetup(it, OffloadedEscConfiguration())
+        generalSetup(it, OffloadedEscConfiguration(syncThreshold))
         it.inverted = invertBottom
     }
 }

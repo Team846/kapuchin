@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.preferences
 import com.ctre.phoenix.motorcontrol.can.SlotConfiguration
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.EntryListenerFlags
 import edu.wpi.first.networktables.NetworkTable
@@ -27,7 +28,8 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
         " (${withUnits.unitName})"
 )
 
-fun Named.escConfigPref(
+fun SubsystemHardware<*, *>.escConfigPref(
+        defaultSyncThreshold: Time = syncThreshold,
         defaultOpenloopRamp: Time = 0.Second,
         defaultClosedloopRamp: Time = 0.Second,
         defaultPeakOutput: V = 12.Volt,
@@ -52,6 +54,7 @@ fun Named.escConfigPref(
 
     ({
         OffloadedEscConfiguration(
+                syncThreshold = defaultSyncThreshold,
                 openloopRamp = openloopRamp,
                 closedloopRamp = closedloopRamp,
 

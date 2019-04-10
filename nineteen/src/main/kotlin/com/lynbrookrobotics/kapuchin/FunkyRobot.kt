@@ -31,7 +31,7 @@ class FunkyRobot : RobotBase() {
         val subsystems = Subsystems.instance!!
 
         println("Trimming preferences...")
-        trim()
+//        trim()
 
         println("Loading classes...")
         runBlocking { withTimeout(5.Second) { classPreloading.join() } }

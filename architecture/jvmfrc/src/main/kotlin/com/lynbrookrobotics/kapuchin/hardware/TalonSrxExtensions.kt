@@ -13,6 +13,7 @@ import com.revrobotics.CANError
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
 
 val configTimeout = if (HardwareInit.crashOnFailure) 1000 else 0
 private val slowStatusFrameRate = 1000
@@ -31,59 +32,96 @@ val CANError.checkOk: Unit
             throw IOException("REV Spark Max call returned $this")
     }
 
-
 sealed class OffloadedOutput {
-    fun writeTo(esc: VictorSPX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration?, f: (VictorSPXConfiguration) -> Unit) {
-        if (gains != null) config.victor.slot0 = gains
-        +esc.configAllSettings(config.victor.also(f))
+    abstract val gains: OffloadedEscGains?
+    abstract val config: OffloadedEscConfiguration
+    abstract val mode: ControlMode
+    abstract val value: Double
+
+    fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit = {}) {
+        config.writeTo(esc)
         esc.set(mode, value)
     }
 
-    fun writeTo(esc: TalonSRX, config: OffloadedEscConfiguration, mode: ControlMode, value: Double, gains: SlotConfiguration?, f: (TalonSRXConfiguration) -> Unit) {
-        if (gains != null) config.talon.slot0 = gains
-        +esc.configAllSettings(config.talon.also(f))
+    fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit = {}) {
+        gains?.writeTo(esc)
+        config.writeTo(esc)
         esc.set(mode, value)
     }
-
-    abstract fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit = {})
-    abstract fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit = {})
 }
 
 data class VelocityOutput(
-        val config: OffloadedEscConfiguration,
-        val gains: SlotConfiguration,
-        val value: Double
+        override val config: OffloadedEscConfiguration,
+        override val gains: OffloadedEscGains,
+        override val value: Double
 ) : OffloadedOutput() {
-    override fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Velocity, value, gains, f)
-    override fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Velocity, value, gains, f)
+    override val mode = ControlMode.Velocity
 }
 
 data class PositionOutput(
-        val config: OffloadedEscConfiguration,
-        val gains: SlotConfiguration,
-        val value: Double
+        override val config: OffloadedEscConfiguration,
+        override val gains: OffloadedEscGains,
+        override val value: Double
 ) : OffloadedOutput() {
-    override fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Position, value, gains, f)
-    override fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Position, value, gains, f)
+    override val mode = ControlMode.Position
 }
 
 data class PercentOutput(
-        val config: OffloadedEscConfiguration,
-        val value: DutyCycle
+        override val config: OffloadedEscConfiguration,
+        val dutyCycle: DutyCycle
 ) : OffloadedOutput() {
-    override fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.PercentOutput, value.Each, null, f)
-    override fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.PercentOutput, value.Each, null, f)
+    override val mode = ControlMode.PercentOutput
+    override val value = dutyCycle.Each
+    override val gains = null
 }
 
 data class CurrentOutput(
-        val config: OffloadedEscConfiguration,
-        val value: ElectricCurrent
+        override val config: OffloadedEscConfiguration,
+        val current: ElectricCurrent
 ) : OffloadedOutput() {
-    override fun writeTo(esc: TalonSRX, f: (TalonSRXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Current, value.Ampere, null, f)
-    override fun writeTo(esc: VictorSPX, f: (VictorSPXConfiguration) -> Unit) = writeTo(esc, config, ControlMode.Current, value.Ampere, null, f)
+    override val mode = ControlMode.Current
+    override val value = current.Ampere
+    override val gains = null
+}
+
+data class OffloadedEscGains(
+        val syncThreshold: Time,
+        var kP: Double = 0.0,
+        var kI: Double = 0.0,
+        var kD: Double = 0.0,
+        var kF: Double = 0.0,
+        var maxIntegralAccumulator: Double = 0.0
+) {
+    companion object {
+        const val idx = 0
+        val talonCache = ConcurrentHashMap<TalonSRX, OffloadedEscGains>()
+    }
+
+    private val timeoutMs = syncThreshold.milli(Second).toInt()
+
+    fun writeTo(esc: TalonSRX) {
+        talonCache[esc].takeIf { this != it }.also {
+            if (it == null || it.kP != this.kP)
+                +esc.config_kP(idx, kP, timeoutMs)
+
+            if (it == null || it.kI != this.kI)
+                +esc.config_kI(idx, kI, timeoutMs)
+
+            if (it == null || it.kD != this.kD)
+                +esc.config_kD(idx, kD, timeoutMs)
+
+            if (it == null || it.kF != this.kF)
+                +esc.config_kF(idx, kF, timeoutMs)
+
+            if (it == null || it.maxIntegralAccumulator != this.maxIntegralAccumulator)
+                +esc.configMaxIntegralAccumulator(idx, maxIntegralAccumulator, timeoutMs)
+        }
+        talonCache[esc] = this
+    }
 }
 
 data class OffloadedEscConfiguration(
+        val syncThreshold: Time,
         val openloopRamp: Time = 0.Second,
         val closedloopRamp: Time = 0.Second,
         val peakOutputForward: V = 12.Volt,
@@ -96,37 +134,73 @@ data class OffloadedEscConfiguration(
         val peakCurrentDuration: Time = 1.Second
 ) {
 
-    val talon by lazy {
-        TalonSRXConfiguration().also {
-            it.openloopRamp = openloopRamp.Second
-            it.closedloopRamp = closedloopRamp.Second
-
-            it.peakOutputForward = (peakOutputForward / voltageCompSaturation).Each
-            it.nominalOutputForward = (nominalOutputForward / voltageCompSaturation).Each
-            it.nominalOutputReverse = (nominalOutputReverse / voltageCompSaturation).Each
-            it.peakOutputReverse = (peakOutputReverse / voltageCompSaturation).Each
-
-            it.voltageCompSaturation = voltageCompSaturation.Volt
-
-            it.continuousCurrentLimit = continuousCurrentLimit.Ampere.toInt()
-            it.peakCurrentLimit = peakCurrentLimit.Ampere.toInt()
-            it.peakCurrentDuration = peakCurrentDuration.milli(Second).toInt()
-        }
+    companion object {
+        val talonCache = ConcurrentHashMap<TalonSRX, OffloadedEscConfiguration>()
+        val victorCache = ConcurrentHashMap<VictorSPX, OffloadedEscConfiguration>()
     }
 
-    val victor by lazy {
-        // copy and paste from `talon`
-        VictorSPXConfiguration().also {
-            it.openloopRamp = openloopRamp.Second
-            it.closedloopRamp = closedloopRamp.Second
+    private val timeoutMs = syncThreshold.milli(Second).toInt()
 
-            it.peakOutputForward = (peakOutputForward / voltageCompSaturation).Each
-            it.nominalOutputForward = (nominalOutputForward / voltageCompSaturation).Each
-            it.nominalOutputReverse = (nominalOutputReverse / voltageCompSaturation).Each
-            it.peakOutputReverse = (peakOutputReverse / voltageCompSaturation).Each
+    fun writeTo(esc: TalonSRX) {
+        talonCache[esc].takeIf { this != it }.also {
+            if (it == null || it.openloopRamp != this.openloopRamp)
+                +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
 
-            it.voltageCompSaturation = voltageCompSaturation.Volt
+            if (it == null || it.closedloopRamp != this.closedloopRamp)
+                +esc.configClosedloopRamp(closedloopRamp.Second, timeoutMs)
+
+            if (it == null || it.peakOutputForward != this.peakOutputForward)
+                +esc.configPeakOutputForward((peakOutputForward / voltageCompSaturation).Each, timeoutMs)
+
+            if (it == null || it.nominalOutputForward != this.nominalOutputForward)
+                +esc.configNominalOutputForward((nominalOutputForward / voltageCompSaturation).Each, timeoutMs)
+
+            if (it == null || it.nominalOutputReverse != this.nominalOutputReverse)
+                +esc.configNominalOutputReverse((nominalOutputReverse / voltageCompSaturation).Each, timeoutMs)
+
+            if (it == null || it.peakOutputReverse != this.peakOutputReverse)
+                +esc.configPeakOutputReverse((peakOutputReverse / voltageCompSaturation).Each, timeoutMs)
+
+            if (it == null || it.voltageCompSaturation != this.voltageCompSaturation)
+                +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
+
+            if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
+                +esc.configContinuousCurrentLimit(continuousCurrentLimit.Ampere.toInt(), timeoutMs)
+
+            if (it == null || it.peakCurrentLimit != this.peakCurrentLimit)
+                +esc.configPeakCurrentLimit(peakCurrentLimit.Ampere.toInt(), timeoutMs)
+
+            if (it == null || it.peakCurrentDuration != this.peakCurrentDuration)
+                +esc.configPeakCurrentDuration(peakCurrentDuration.milli(Second).toInt(), timeoutMs)
         }
+        talonCache[esc] = this
+    }
+
+    fun writeTo(esc: VictorSPX) {
+        // copy and paste from `talon`
+        victorCache[esc].takeIf { this != it }.also {
+            if (it == null || it.openloopRamp != this.openloopRamp)
+                +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
+
+            if (it == null || it.closedloopRamp != this.closedloopRamp)
+                +esc.configClosedloopRamp(closedloopRamp.Second, timeoutMs)
+
+            if (it == null || it.peakOutputForward != this.peakOutputForward)
+                +esc.configPeakOutputForward((peakOutputForward / voltageCompSaturation).Each, timeoutMs)
+
+            if (it == null || it.nominalOutputForward != this.nominalOutputForward)
+                +esc.configNominalOutputForward((nominalOutputForward / voltageCompSaturation).Each, timeoutMs)
+
+            if (it == null || it.nominalOutputReverse != this.nominalOutputReverse)
+                +esc.configNominalOutputReverse((nominalOutputReverse / voltageCompSaturation).Each, timeoutMs)
+
+            if (it == null || it.peakOutputReverse != this.peakOutputReverse)
+                +esc.configPeakOutputReverse((peakOutputReverse / voltageCompSaturation).Each, timeoutMs)
+
+            if (it == null || it.voltageCompSaturation != this.voltageCompSaturation)
+                +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
+        }
+        victorCache[esc] = this
     }
 }
 
@@ -140,8 +214,8 @@ fun RobotHardware<*>.generalSetup(esc: BaseMotorController, config: OffloadedEsc
 
     if (esc is TalonSRX) esc.enableCurrentLimit(true)
 
-    if (esc is TalonSRX) +esc.configAllSettings(config.talon, configTimeout)
-    if (esc is VictorSPX) +esc.configAllSettings(config.victor, configTimeout)
+    if (esc is TalonSRX) config.writeTo(esc)
+    if (esc is VictorSPX) config.writeTo(esc)
 }
 
 fun SubsystemHardware<*, *>.setupMaster(master: TalonSRX, config: OffloadedEscConfiguration, vararg feedback: FeedbackDevice) {

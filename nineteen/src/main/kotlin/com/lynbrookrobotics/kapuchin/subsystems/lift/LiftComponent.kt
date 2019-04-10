@@ -29,10 +29,11 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
         val kP by pref(12, Volt, 12, Inch)
         val kD by pref(0, Volt, 2, FootPerSecond)
         ({
-            SlotConfiguration().also {
-                it.kP = hardware.conversions.native.native(kP)
-                it.kD = hardware.conversions.native.native(kD)
-            }
+            OffloadedEscGains(
+                    syncThreshold = hardware.syncThreshold,
+                kP = hardware.conversions.native.native(kP),
+                kD = hardware.conversions.native.native(kD)
+            )
         })
     }
 
