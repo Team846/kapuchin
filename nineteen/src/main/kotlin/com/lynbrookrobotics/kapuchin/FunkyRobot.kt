@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -25,6 +26,7 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Initializing hardware...")
 
+        Compressor()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
