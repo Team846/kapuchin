@@ -20,7 +20,7 @@ data class OffloadedEscGains(
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
-    fun writeTo(esc: TalonSRX) {
+    fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
         talonCache[esc].takeIf { this != it }.also {
             if (it == null || it.kP != this.kP)
                 +esc.config_kP(idx, kP, timeoutMs)

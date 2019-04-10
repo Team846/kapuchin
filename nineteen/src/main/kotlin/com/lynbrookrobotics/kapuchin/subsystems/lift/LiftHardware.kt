@@ -19,7 +19,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val name: String = "Lift"
     override val period: Time = 30.milli(Second)
     override val priority: Priority = Priority.Low
-    override val syncThreshold: Time = 5.milli(Second)
+    override val syncThreshold: Time = 15.milli(Second)
 
     val escCanId = 40
     val idx = 0
@@ -37,29 +37,21 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
             defaultPeakCurrentDuration = 0.5.Second
     )
 
-    fun withSafeties(it: TalonSRXConfiguration) = with(conversions) {
-        it.reverseSoftLimitThreshold = native.native(minPt.first).toInt()
-        it.reverseSoftLimitEnable = true
-
-        it.forwardSoftLimitThreshold = native.native(maxPt.first).toInt()
-        it.forwardSoftLimitEnable = true
-    }
-
     val esc by hardw { TalonSRX(escCanId) }.configure {
         setupMaster(it, escConfig, FeedbackDevice.Analog)
 
         it.inverted = invert
         it.setSensorPhase(invertSensor)
     }.verify("soft-limits are set correctly") {
-        com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput(escConfig, 0.Percent).writeTo(it, ::withSafeties)
+        PercentOutput(escConfig, 0.Percent, conversions.safeties).writeTo(it)
 
         val configs = TalonSRXConfiguration()
         it.getAllConfigs(configs, configTimeout)
 
-        configs.reverseSoftLimitThreshold.toDouble() in
-                conversions.minPt.second.toDouble() `±` 2.0 &&
-                configs.forwardSoftLimitThreshold.toDouble() in
-                conversions.maxPt.second.toDouble() `±` 2.0
+        configs.reverseSoftLimitThreshold ==
+                conversions.safeties.min &&
+                configs.forwardSoftLimitThreshold ==
+                conversions.safeties.max
     }
 
     val nativeGrapher = graph("Native", Each)

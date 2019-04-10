@@ -36,11 +36,16 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
         })
     }
 
-    override val fallbackController: LiftComponent.(Time) -> com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput = {
-        com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput(hardware.escConfig, 0.Percent)
+    override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = {
+        PercentOutput(hardware.escConfig, 0.Percent)
     }
 
-    override fun LiftHardware.output(value: com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput) {
-        value.writeTo(esc, ::withSafeties)
+    override fun LiftHardware.output(value: OffloadedOutput) {
+        when (value) {
+            is PositionOutput -> value.copy(safeties = hardware.conversions.safeties)
+            is VelocityOutput -> value.copy(safeties = hardware.conversions.safeties)
+            is PercentOutput -> value.copy(safeties = hardware.conversions.safeties)
+            is CurrentOutput -> value.copy(safeties = hardware.conversions.safeties)
+        }.writeTo(esc)
     }
 }

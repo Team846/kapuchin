@@ -27,7 +27,7 @@ data class OffloadedEscConfiguration(
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
-    fun writeTo(esc: TalonSRX) {
+    fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
         talonCache[esc].takeIf { this != it }.also {
             if (it == null || it.openloopRamp != this.openloopRamp)
                 +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
@@ -62,7 +62,7 @@ data class OffloadedEscConfiguration(
         talonCache[esc] = this
     }
 
-    fun writeTo(esc: VictorSPX) {
+    fun writeTo(esc: VictorSPX, timeoutMs: Int = this.timeoutMs) {
         // copy and paste from `talon`
         victorCache[esc].takeIf { this != it }.also {
             if (it == null || it.openloopRamp != this.openloopRamp)

@@ -43,8 +43,8 @@ fun RobotHardware<*>.generalSetup(esc: BaseMotorController, config: OffloadedEsc
 
     if (esc is TalonSRX) esc.enableCurrentLimit(true)
 
-    if (esc is TalonSRX) config.writeTo(esc)
-    if (esc is VictorSPX) config.writeTo(esc)
+    if (esc is TalonSRX) config.writeTo(esc, configTimeout)
+    if (esc is VictorSPX) config.writeTo(esc, configTimeout)
 }
 
 fun SubsystemHardware<*, *>.setupMaster(master: TalonSRX, config: OffloadedEscConfiguration, vararg feedback: FeedbackDevice) {
