@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
@@ -82,8 +81,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
         )
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         )
     }
 }
@@ -91,7 +90,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open loop") {
     controller {
         TwoSided(
-                PercentOutput(hardware.escConfig, power)
+                com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput(hardware.escConfig, power)
         )
     }
 }
@@ -106,8 +105,8 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         ).takeUnless {
             error.abs < tolerance
         }
@@ -140,8 +139,8 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
         val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.001
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                com.lynbrookrobotics.kapuchin.hardware.offloaded.VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         )
     }
 }

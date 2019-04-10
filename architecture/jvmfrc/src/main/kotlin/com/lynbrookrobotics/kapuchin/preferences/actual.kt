@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
-import com.ctre.phoenix.motorcontrol.can.SlotConfiguration
-import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*

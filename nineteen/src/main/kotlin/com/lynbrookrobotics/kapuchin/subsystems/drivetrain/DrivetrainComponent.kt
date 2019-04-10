@@ -1,8 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
-import com.ctre.phoenix.motorcontrol.can.SlotConfiguration
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -11,7 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import info.kunalsheth.units.generated.*
 
-class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
+class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput>>(hardware) {
 
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
@@ -23,11 +22,11 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val kF by pref(110, Percent)
         ({
             OffloadedEscGains(
-                syncThreshold = hardware.syncThreshold,
-                kP = hardware.conversions.nativeConversion.native(kP),
-                kF = hardware.conversions.nativeConversion.native(
-                        Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
-                ) * kF.Each
+                    syncThreshold = hardware.syncThreshold,
+                    kP = hardware.conversions.nativeConversion.native(kP),
+                    kF = hardware.conversions.nativeConversion.native(
+                            Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
+                    ) * kF.Each
             )
         })
     }
@@ -35,8 +34,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val bearingKp by pref(5, FootPerSecond, 45, Degree)
     val bearingKd by pref(3, FootPerSecond, 360, DegreePerSecond)
 
-    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
-        TwoSided(PercentOutput(hardware.escConfig, 0.Percent))
+    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput> = {
+        TwoSided(com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput(hardware.escConfig, 0.Percent))
     }
 
     private val leftEscOutputGraph = graph("Left ESC Output", Volt)
@@ -45,7 +44,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     private val leftEscErrorGraph = graph("Left ESC Error", Each)
     private val rightEscErrorGraph = graph("Right ESC Error", Each)
 
-    override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
+    override fun DrivetrainHardware.output(value: TwoSided<com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput>) {
         value.left.writeTo(leftMasterEsc)
         value.right.writeTo(rightMasterEsc)
 

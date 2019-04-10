@@ -9,7 +9,7 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
     val visionAlign by driver.lineTracking.readEagerly().withoutStamps
 
     choreography {
-        whenever({drivetrain.routine == null}) {
+        whenever({ drivetrain.routine == null }) {
             runWhile({ !visionAlign }) {
                 drivetrain.teleop(driver)
             }

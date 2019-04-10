@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -35,6 +36,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
             defaultPeakCurrentLimit = 35.Ampere,
             defaultPeakCurrentDuration = 0.5.Second
     )
+
     fun withSafeties(it: TalonSRXConfiguration) = with(conversions) {
         it.reverseSoftLimitThreshold = native.native(minPt.first).toInt()
         it.reverseSoftLimitEnable = true
@@ -49,7 +51,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
         it.inverted = invert
         it.setSensorPhase(invertSensor)
     }.verify("soft-limits are set correctly") {
-        PercentOutput(escConfig, 0.Percent).writeTo(it, ::withSafeties)
+        com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput(escConfig, 0.Percent).writeTo(it, ::withSafeties)
 
         val configs = TalonSRXConfiguration()
         it.getAllConfigs(configs, configTimeout)
