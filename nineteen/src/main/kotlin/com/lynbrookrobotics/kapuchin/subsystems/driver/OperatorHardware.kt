@@ -49,6 +49,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val lineTracking = s { rt }
     val centerAll = s { pov == 0 }
+    val centerAllFlipped = s { pov == 0 && lt }
 
     val deployPanel = s { lb && !lt }
     val lilDicky = s { lb && lt }

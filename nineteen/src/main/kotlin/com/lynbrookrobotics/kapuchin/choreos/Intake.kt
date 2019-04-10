@@ -21,6 +21,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
 //    val driverLineTracking by driver.lineTracking.readEagerly().withoutStamps
     val centerAll by operator.centerAll.readEagerly().withoutStamps
+    val centerAllFlipped by operator.centerAllFlipped.readEagerly().withoutStamps
     val pivotDown by operator.pivotDown.readEagerly().withoutStamps
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
@@ -32,7 +33,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 //                { collectPanel } to choreography { collectPanel() },
                 { operatorLineTracking } to choreography { trackLine() },
                 { lilDicky } to choreography { lilDicky() },
-                { centerAll } to choreography { centerAll() },
+                { centerAll || centerAllFlipped } to choreography { centerAll(centerAllFlipped) },
                 { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
@@ -146,9 +147,9 @@ suspend fun Subsystems.trackLine() = coroutineScope {
     freeze()
 }
 
-suspend fun Subsystems.centerAll() = coroutineScope {
+suspend fun Subsystems.centerAll(flip: Boolean) = coroutineScope {
     launch { centerSlider(0.Inch) }
-    launch { centerCargo() }
+    launch { centerCargo(flip) }
     freeze()
 }
 
@@ -161,12 +162,15 @@ suspend fun Subsystems.centerSlider(tolerance: Length = 1.Inch) {
     freeze()
 }
 
-suspend fun Subsystems.centerCargo() {
-    collectorRollers?.spin(
-            electrical,
-            top = -10.5.Volt,
-            bottom = 11.5.Volt
-    )
-    freeze()
+suspend fun Subsystems.centerCargo(flip: Boolean) {
+    try {
+        collectorRollers?.spin(
+                electrical,
+                top = if (flip) -10.5.Volt else 11.5.Volt,
+                bottom = if (flip) 11.5.Volt else -9.5.Volt
+        )
+    } finally {
+        scope.launch { collectorRollers?.set(collectorRollers.cargoState) }
+    }
 }
 
