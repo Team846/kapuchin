@@ -8,19 +8,24 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType.kRightRumble
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class RumbleComponent(hardware: RumbleHardware) : Component<RumbleComponent, RumbleHardware, DutyCycle>(hardware, EventLoop) {
+typealias Rumble = Pair<DutyCycle, DutyCycle>
 
-    override val fallbackController: RumbleComponent.(Time) -> DutyCycle = { 0.Percent }
+class RumbleComponent(hardware: RumbleHardware) : Component<RumbleComponent, RumbleHardware, Rumble>(hardware, EventLoop) {
 
-    override fun RumbleHardware.output(value: DutyCycle) {
+    override val fallbackController: RumbleComponent.(Time) -> Rumble = { 0.Percent to 0.Percent }
+
+    override fun RumbleHardware.output(value: Rumble) {
+        //TODO driver feedback with(driverHardware) {}
+
         with(operatorHardware.xbox) {
-            setRumble(kLeftRumble, value.Each)
-            setRumble(kRightRumble, value.Each)
+            setRumble(kLeftRumble, value.second.Each)
+            setRumble(kRightRumble, value.second.Each)
         }
     }
 }
 
 class RumbleHardware(
+        val driverHardware: DriverHardware,
         val operatorHardware: OperatorHardware
 ) : SubsystemHardware<RumbleHardware, RumbleComponent>() {
     override val name = "Feedback System"

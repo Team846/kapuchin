@@ -97,7 +97,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             }
         }
 
-        private val initLeds by pref(false)
         private val initCollectorPivot by pref(true)
         private val initCollectorRollers by pref(true)
         private val initCollectorSlider by pref(false)
@@ -109,6 +108,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initLift by pref(true)
         private val initClimber by pref(false)
         private val initLimelight by pref(true)
+        private val initLeds by pref(true)
 
         var instance: Subsystems? = null
             private set
@@ -130,7 +130,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
             val driverAsync = async { DriverHardware() }
             val operatorAsync = async { OperatorHardware() }
-            val rumbleAsync = async { RumbleComponent(RumbleHardware(t { operatorAsync.await() }!!)) }
+            val rumbleAsync = async { RumbleComponent(RumbleHardware(t { driverAsync.await() }!!, t { operatorAsync.await() }!!)) }
             val lineScannerAsync = async { LineScannerHardware() }
 
             val collectorPivotAsync = i(initCollectorPivot) { CollectorPivotComponent(CollectorPivotHardware()) }
@@ -179,13 +179,14 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
             fun <R> i(b: Boolean, f: () -> R) = if (b) f() else null
 
+            val driver = t { DriverHardware() }!!
             val operator = t { OperatorHardware() }!!
-            val rumble = t { RumbleComponent(RumbleHardware(operator)) }!!
+            val rumble = t { RumbleComponent(RumbleHardware(driver, operator)) }!!
 
             instance = Subsystems(
                     t { DrivetrainComponent(DrivetrainHardware()) }!!,
                     t { ElectricalSystemHardware() }!!,
-                    t { DriverHardware() }!!,
+                    driver,
                     operator,
                     rumble,
                     t { LineScannerHardware() }!!,
