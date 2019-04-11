@@ -6,7 +6,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 
-class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput>(hardware, EventLoop) {
+class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
 
     val collectCargo by pref(6, Inch)
     val collectPanel by pref(2.24, Inch)
@@ -41,11 +41,6 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
     }
 
     override fun LiftHardware.output(value: OffloadedOutput) {
-        when (value) {
-            is PositionOutput -> value.copy(safeties = hardware.conversions.safeties)
-            is VelocityOutput -> value.copy(safeties = hardware.conversions.safeties)
-            is PercentOutput -> value.copy(safeties = hardware.conversions.safeties)
-            is CurrentOutput -> value.copy(safeties = hardware.conversions.safeties)
-        }.writeTo(esc)
+        value.with(hardware.conversions.safeties).writeTo(esc)
     }
 }

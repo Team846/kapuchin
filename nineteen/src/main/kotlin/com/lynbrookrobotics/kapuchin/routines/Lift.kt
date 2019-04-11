@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines
 
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
@@ -9,7 +10,7 @@ suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = star
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {
-        com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput(
+        PositionOutput(
                 hardware.escConfig, positionGains,
                 hardware.conversions.native.native(target)
         ).takeUnless {
@@ -25,13 +26,13 @@ suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRout
 
     var targetting = position.also {}
     controller {
-        if (liftPrecision.isZero) com.lynbrookrobotics.kapuchin.hardware.offloaded.PositionOutput(
+        if (liftPrecision.isZero) PositionOutput(
                 hardware.escConfig, positionGains,
                 hardware.conversions.native.native(targetting)
         )
         else {
             targetting = position + 2.Inch * liftPrecision.signum
-            com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput(hardware.escConfig, liftPrecision)
+            PercentOutput(hardware.escConfig, liftPrecision)
         }
     }
 }

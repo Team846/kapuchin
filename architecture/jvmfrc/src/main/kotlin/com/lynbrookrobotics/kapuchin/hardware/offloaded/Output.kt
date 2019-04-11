@@ -12,6 +12,13 @@ sealed class OffloadedOutput {
     abstract val mode: ControlMode
     abstract val value: Double
 
+    fun with(safeties: OffloadedEscSafeties) = when (this) {
+        is PositionOutput -> copy(safeties = safeties)
+        is VelocityOutput -> copy(safeties = safeties)
+        is PercentOutput -> copy(safeties = safeties)
+        is CurrentOutput -> copy(safeties = safeties)
+    }
+
     fun writeTo(esc: VictorSPX, timeoutMs: Int = 0) {
         config.writeTo(esc, timeoutMs)
         esc.set(mode, value)
