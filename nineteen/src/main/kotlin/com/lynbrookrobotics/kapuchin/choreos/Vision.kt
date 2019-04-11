@@ -1,13 +1,54 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.launch
+
+suspend fun limeLineAlign(
+        drivetrain: DrivetrainComponent,
+        limelight: LimelightHardware,
+        lineScanner: LineScannerHardware,
+        slider: CollectorSliderComponent,
+        electrical: ElectricalSystemHardware
+) = startChoreo("Limelight / Line Scanner Alignment") {
+
+    val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
+    val targetPosition by limelight.targetPosition.readEagerly().withoutStamps
+    val linePosition by lineScanner.linePosition.readEagerly().withoutStamps
+
+    val transitionPoint = 18.Inch + lineScanner.lookAhead - 2.Inch
+    val targetRange = slider.run { (min + 1.Inch)..(max - 1.Inch) }
+
+    choreography {
+        linePosition?.let {
+            launch { slider.trackLine(lineScanner, electrical) }
+            drivetrain.lineActiveTracking(
+                    2.FootPerSecond, targetRange, lineScanner
+            )
+        } ?: targetPosition?.let { visionSnapshot1 ->
+            val robotSnapshot1 = robotPosition
+            val mtrx = RotationMatrix(robotSnapshot1.bearing)
+            val targetLoc = mtrx rz visionSnapshot1.vector
+            val transitionPt = mtrx rz UomVector(0.Inch, transitionPoint)
+            val waypt = robotSnapshot1.vector + targetLoc - transitionPt
+
+            drivetrain.waypoint(
+                    trapezoidalMotionProfile(
+                            0.5.FootPerSecondSquared,
+                            3.FootPerSecond
+                    ), waypt, slider.run { min.abs min max.abs }
+            )
+        }
+    }
+}
 
 suspend fun LimelightHardware.perpendicularAlign(
         drivetrain: DrivetrainComponent,
@@ -107,23 +148,37 @@ suspend fun DrivetrainComponent.visionActiveTracking(speed: Velocity, limelight:
     }
 }
 
-suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, lineScanner: LineScannerHardware) = startRoutine("Point with line scanner") {
+suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, targetRange: ClosedRange<Length>, lineScanner: LineScannerHardware) = startRoutine("Point with line scanner") {
     val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
     val uni = UnicycleDrive(this@lineActiveTracking, this@startRoutine)
 
+    var targetLinePosition: Length? = null
+
     controller {
-        val errorA = linePosition?.let {
-            -atan(it / lineScanner.lookAhead)
-        } ?: 0.Degree
+        linePosition?.let { lineSnapshot ->
+            if (targetLinePosition == null)
+                targetLinePosition = lineSnapshot cap targetRange
 
-        val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
+            val targetA = atan((targetLinePosition ?: 0.Inch) / lineScanner.lookAhead)
+            val currentA = atan(lineSnapshot / lineScanner.lookAhead)
+            val errorA = targetA - currentA
 
-        val nativeL = hardware.conversions.nativeConversion.native(targetL)
-        val nativeR = hardware.conversions.nativeConversion.native(targetR)
+            val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
 
-        TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-        )
+            val nativeL = hardware.conversions.nativeConversion.native(targetL)
+            val nativeR = hardware.conversions.nativeConversion.native(targetR)
+
+            TwoSided(
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+            )
+        }
+
+        // errorA = 0 - current
+//        val errorA = linePosition?.let {
+//            -atan(it / lineScanner.lookAhead)
+//        } ?: 0.Degree
+
+
     }
 }
