@@ -104,6 +104,8 @@ fun trim(table: NetworkTable = impl.table) {
             println("Trimming $it")
             table.getEntry(it).clearPersistent()
             table.getEntry(it).delete()
+            table.getEntry(it).clearPersistent()
+            table.getEntry(it).delete()
         }
     }
     //Recurse through all subTables of the current subTable

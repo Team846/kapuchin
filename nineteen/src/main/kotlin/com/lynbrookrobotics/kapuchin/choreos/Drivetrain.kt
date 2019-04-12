@@ -4,10 +4,11 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import kotlinx.coroutines.launch
 
 suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
-    val visionAlign by driver.lineTracking.readEagerly().withoutStamps
+    val autoAlign by driver.autoAlign.readEagerly().withoutStamps
 
     choreography {
         //        whenever({ drivetrain.routine == null }) {
@@ -24,16 +25,23 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 //        }
 
         try {
-            runWhenever(
-                { drivetrain.routine == null && !visionAlign } to choreography {
-                    drivetrain.teleop(driver)
-                },
-                { drivetrain.routine == null && visionAlign } to choreography {
-                    if (limelight != null && collectorSlider != null) limeLineAlign(
-                            drivetrain, limelight, lineScanner, collectorSlider, electrical
-                    ) else freeze()
-                }
-            )
+            launch {
+                launchWhenever(
+                        { drivetrain.routine == null } to choreography {
+                            drivetrain.teleop(driver)
+                        }
+                )
+            }
+            launch {
+                runWhenever(
+                        { autoAlign } to choreography {
+                            if (limelight != null && collectorSlider != null) limeLineAlign(
+                                    drivetrain, limelight, lineScanner, collectorSlider, electrical
+                            ) else freeze()
+                        }
+                )
+            }
+            freeze()
         } catch (t: Throwable) {
             log(Error, t) { "The drivetrain teleop control is exiting!!!" }
             throw t
