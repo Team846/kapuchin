@@ -14,14 +14,15 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val deployCargo by operator.deployCargo.readEagerly().withoutStamps
     val softDeployCargo by operator.softDeployCargo.readEagerly().withoutStamps
     val deployPanel by operator.deployPanel.readEagerly().withoutStamps
+
     val collectCargo by driver.collectCargo.readEagerly().withoutStamps
-//    val panelCollect by operator.panelCollect.readEagerly().withoutStamps
     val lilDicky by operator.lilDicky.readEagerly().withoutStamps
-//    val collectGroundPanel by operator.collectGroundPanel.readEagerly().withoutStamps
+
     val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
-//    val driverLineTracking by driver.lineTracking.readEagerly().withoutStamps
-    val centerAll by operator.centerAll.readEagerly().withoutStamps
-    val centerAllFlipped by operator.centerAllFlipped.readEagerly().withoutStamps
+    val centerSlider by operator.centerSlider.readEagerly().withoutStamps
+    val centerCargoLeft by operator.centerCargoLeft.readEagerly().withoutStamps
+    val centerCargoRight by operator.centerCargoRight.readEagerly().withoutStamps
+
     val pivotDown by operator.pivotDown.readEagerly().withoutStamps
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
@@ -30,10 +31,13 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { deployCargo || softDeployCargo } to choreography { deployCargo(softDeployCargo) },
                 { deployPanel } to choreography { deployPanel() },
                 { collectCargo } to choreography { collectCargo() },
-//                { panelCollect } to choreography { panelCollect() },
                 { operatorLineTracking } to choreography { trackLine() },
                 { lilDicky } to choreography { lilDicky() },
-                { centerAll || centerAllFlipped } to choreography { centerAll(centerAllFlipped) },
+
+                { centerSlider } to choreography { centerSlider() },
+                { centerCargoLeft } to choreography { centerCargo(false) },
+                { centerCargoRight } to choreography { centerCargo(true) },
+
                 { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
@@ -95,28 +99,6 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
         scope.launch { collectorRollers?.set(collectorRollers.cargoState) }
     }
 }
-
-//suspend fun Subsystems.panelCollect() = coroutineScope {
-//    //Lift down
-//    withTimeout(1.Second) { lift?.set(lift.panelCollect + 2.Inch, 1.Inch) }
-//    launch { lift?.set(lift.panelCollect + 2.Inch, 0.Inch) }
-//
-//    //Hook down, slider out
-//    val hookDown = scope.launch { hook?.set(HookPosition.Down) }
-//    val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
-//
-//    try {
-//        freeze()
-//    } finally {
-//        withContext(NonCancellable) {
-//            hookDown.cancel()
-//            withTimeout(0.5.Second) {
-//                lift?.set(lift.panelCollectStroke, 1.Inch)
-//            }
-//            hookSliderOut.cancel()
-//        }
-//    }
-//}
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
     //Lift down

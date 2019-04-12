@@ -48,8 +48,10 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val highCargoHeight = s { yButton && lt }
 
     val lineTracking = s { rt }
-    val centerAll = s { pov == 0 }
-    val centerAllFlipped = s { pov == 0 && lt }
+
+    val centerSlider = s { pov == 0 }
+    val centerCargoLeft = s { pov == 180 || pov == 45 }
+    val centerCargoRight = s { pov == 270 || pov == 315 }
 
     val deployPanel = s { lb && !lt }
     val lilDicky = s { lb && lt }
