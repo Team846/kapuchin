@@ -16,6 +16,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
@@ -23,6 +24,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -118,7 +120,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         val pneumaticTicker = ticker(Medium, 50.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
-        fun concurrentInit() = runBlocking {
+        fun concurrentInit() = scope.launch {
             val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
             val electricalAsync = async { ElectricalSystemHardware() }
 
@@ -171,7 +173,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     t { climberAsync.await() },
                     t { limelightAsync.await() }
             )
-        }
+        }.also { runBlocking { it.join() } }
 
         fun sequentialInit() {
             fun <T> t(f: () -> T): T? = try {

@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedEscSafeties.Companion.NoSafeties
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
@@ -16,6 +17,14 @@ suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = star
         ).takeUnless {
             (target - current).abs < tolerance
         }
+    }
+}
+
+suspend fun LiftComponent.set(dutyCycle: DutyCycle) = startRoutine("Set Openloop") {
+    controller {
+        PercentOutput(
+                hardware.escConfig, dutyCycle, NoSafeties
+        )
     }
 }
 

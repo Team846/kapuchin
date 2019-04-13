@@ -24,3 +24,11 @@ suspend fun TeleopComponent.vibrateOnAlign(lineScanner: LineScannerHardware, sli
         } ?: TeleopFeedback()
     }
 }
+
+suspend fun TeleopComponent.vibrateJames() = startRoutine("Vibrate james") {
+    controller {
+        TeleopFeedback(
+                xboxLeftRumble = 100.Percent, xboxRightRumble = 100.Percent
+        )
+    }
+}

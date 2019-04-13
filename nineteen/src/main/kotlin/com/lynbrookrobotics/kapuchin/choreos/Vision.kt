@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.Subsystems
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -9,32 +10,38 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 
-suspend fun limeLineAlign(
-        drivetrain: DrivetrainComponent,
+suspend fun Subsystems.limeLineAlign(
         limelight: LimelightHardware,
-        lineScanner: LineScannerHardware,
         slider: CollectorSliderComponent,
-        electrical: ElectricalSystemHardware
+        lift: LiftComponent
 ) = startChoreo("Limelight / Line Scanner Alignment") {
 
     val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
     val targetPosition by limelight.targetPosition.readEagerly().withoutStamps
     val linePosition by lineScanner.linePosition.readEagerly().withoutStamps
 
-    val transitionPoint = 18.Inch + lineScanner.lookAhead + 6.Inch
+    val liftHeight by lift.hardware.position.readEagerly().withoutStamps
+
+    val transitionPoint = 18.Inch + lineScanner.lookAhead + 1.Foot
     val targetRange = slider.min..slider.max
 
     choreography {
-        suspend fun lime() = targetPosition?.let { visionSnapshot1 ->
+        suspend fun lime() = targetPosition?.takeIf { liftHeight < 1.Inch }?.let { visionSnapshot1 ->
             val robotSnapshot1 = robotPosition
             val mtrx = RotationMatrix(robotSnapshot1.bearing)
             val targetLoc = mtrx rz visionSnapshot1.vector
             val waypt = robotSnapshot1.vector + targetLoc
+
+            launch {
+                withTimeout(2.Second) { teleop.vibrateJames() }
+            }
 
             drivetrain.waypoint(
                     trapezoidalMotionProfile(
@@ -164,27 +171,28 @@ suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, targetRange:
     val uni = UnicycleDrive(this@lineActiveTracking, this@startRoutine)
 
     var targetLinePosition: Length? = null
+    val kF = velocityGains.copy(kP = 0.0)
 
     controller {
         if (targetLinePosition == null) {
             linePosition?.let { lineSnapshot ->
                 targetLinePosition = lineSnapshot cap targetRange
+                log(Debug) { "Holding line at ${(targetLinePosition ?: 0.Inch).Inch withDecimals 2} inches" }
             }
-            log(Debug) { "Holding line at ${(targetLinePosition ?: 0.Inch) withDecimals 2}" }
         }
 
         val targetA = atan((targetLinePosition ?: 0.Inch) / lineScanner.lookAhead)
         val currentA = atan((linePosition ?: 0.Inch) / lineScanner.lookAhead)
-        val errorA = targetA - currentA
+        val errorA = -(targetA - currentA)
 
-        val (targetL, targetR) = uni.speedTargetAngleError(speed, -errorA)
+        val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
 
         val nativeL = hardware.conversions.nativeConversion.native(targetL)
         val nativeR = hardware.conversions.nativeConversion.native(targetR)
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, kF, nativeL),
+                VelocityOutput(hardware.escConfig, kF, nativeR)
         )
     }
 }

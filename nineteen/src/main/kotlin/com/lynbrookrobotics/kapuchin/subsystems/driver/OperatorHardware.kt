@@ -50,7 +50,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val lineTracking = s { rt }
 
     val centerSlider = s { pov == 0 }
-    val centerCargoLeft = s { pov == 180 || pov == 45 }
+    val centerCargoLeft = s { pov == 90 || pov == 45 }
     val centerCargoRight = s { pov == 270 || pov == 315 }
 
     val deployPanel = s { lb && !lt }

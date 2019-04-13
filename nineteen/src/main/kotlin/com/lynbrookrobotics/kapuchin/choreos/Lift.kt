@@ -9,6 +9,7 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
     startChoreo("Lift teleop") {
 
         val liftDown by driver.liftDown.readEagerly().withoutStamps
+        val autoAlign by driver.autoAlign.readEagerly().withoutStamps
         val collectCargo by driver.collectCargo.readEagerly().withoutStamps
 
         val lowPanelHeight by operator.lowPanelHeight.readEagerly().withoutStamps
@@ -34,7 +35,7 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
                             )
                         }
                         launch { centerSlider() }
-                        set(1.Inch, 0.Inch)
+                        set(lift.cargoCollect, 0.Inch)
                     },
                     { lowPanelHeight } to choreography { set(panelLowRocket, 0.Inch) },
                     { lowCargoHeight } to choreography { set(cargoLowRocket, 0.Inch) },
