@@ -59,15 +59,14 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
     delay(0.2.Second)
     val hookDown = scope.launch { hook?.set(HookPosition.Down) }
 
-//    val tapToDeploy = scope.launch { delay(0.2.Second) }
+    withContext(NonCancellable) { delay(0.2.Second) }
 
     try {
         freeze()
     } finally {
         withContext(NonCancellable) {
-//            tapToDeploy.join()
             hookSliderOut.cancel()
-            delay(1.Second)
+            delay(0.5.Second)
             hookDown.cancel()
         }
     }
@@ -125,8 +124,8 @@ suspend fun Subsystems.centerSlider(tolerance: Length = 1.Inch) {
 suspend fun Subsystems.centerCargo(flip: Boolean) {
     collectorRollers?.spin(
             electrical,
-            top = if (flip) -9.Volt else 11.5.Volt,
-            bottom = if (flip) 11.5.Volt else -9.Volt
+            top = if (flip) -8.Volt else 11.5.Volt,
+            bottom = if (flip) 11.5.Volt else -8.Volt
     )
 }
 
