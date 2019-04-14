@@ -17,8 +17,8 @@ class RumbleComponent(hardware: RumbleHardware) : Component<RumbleComponent, Rum
 
     override fun RumbleHardware.output(value: Rumble) {
         operator.xbox.apply {
-            setRumble(kLeftRumble, value.right.Each)
-            setRumble(kRightRumble, value.right.Each)
+            setRumble(kLeftRumble, value.left.Each)
+            setRumble(kRightRumble, value.left.Each)
         }
 
         driver.rumble?.apply {

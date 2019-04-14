@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import info.kunalsheth.units.generated.*
@@ -26,15 +27,22 @@ class LiftConversions(val hardware: LiftHardware) : Named by Named("Conversions"
             val nfu = max.second - min.second
             val pfq = max.first - min.first
 
-            LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
-                    nativeOutputUnits = 1023, perOutputQuantity = hardware.operatingVoltage,
+            val native = LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
+                    nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = nfu, perFeedbackQuantity = pfq,
                     feedbackZero = zeroOffset
-            ) to (min to max)
+            )
+
+            val safeties = OffloadedEscSafeties(
+                    syncThreshold = hardware.syncThreshold,
+                    min = native.native(min.first).toInt(),
+                    max = native.native(max.first).toInt()
+            )
+
+            native to safeties
         })
     }
 
     val native get() = conversions.first
-    val minPt get() = conversions.second.first
-    val maxPt get() = conversions.second.second
+    val safeties get() = conversions.second
 }

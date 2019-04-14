@@ -29,7 +29,7 @@ suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
             launch { drivetrain.openLoop(30.Percent) }
             lift?.set(lift.cargoCargoShip)
             deployCargo(true)
-            lift?.set(lift.collectPanel)
+            lift?.set(lift.panelCollect)
 
             val origin1 = currentPosition.vector +
                     (RotationMatrix(currentPosition.bearing) rz UomVector(

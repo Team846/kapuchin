@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedEscSafeties.Companion.NoSafeties
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
@@ -10,17 +11,20 @@ suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = star
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {
-        with(hardware.conversions.native) {
-            PositionOutput(
-                    OffloadedPidGains(
-                            kP = native(kP),
-                            kI = 0.0,
-                            kD = native(kD)
-                    ), native(target)
-            ).takeUnless {
-                (target - current).abs < tolerance
-            }
+        PositionOutput(
+                hardware.escConfig, positionGains,
+                hardware.conversions.native.native(target)
+        ).takeUnless {
+            (target - current).abs < tolerance
         }
+    }
+}
+
+suspend fun LiftComponent.set(dutyCycle: DutyCycle) = startRoutine("Set Openloop") {
+    controller {
+        PercentOutput(
+                hardware.escConfig, dutyCycle, NoSafeties
+        )
     }
 }
 
@@ -31,18 +35,13 @@ suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRout
 
     var targetting = position.also {}
     controller {
-        if (liftPrecision.isZero) with(hardware.conversions.native) {
-            PositionOutput(
-                    OffloadedPidGains(
-                            kP = native(kP),
-                            kI = 0.0,
-                            kD = native(kD)
-                    ), native(targetting)
-            )
-        }
+        if (liftPrecision.isZero) PositionOutput(
+                hardware.escConfig, positionGains,
+                hardware.conversions.native.native(targetting)
+        )
         else {
             targetting = position + 2.Inch * liftPrecision.signum
-            PercentOutput(liftPrecision)
+            PercentOutput(hardware.escConfig, liftPrecision)
         }
     }
 }

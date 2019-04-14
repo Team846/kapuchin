@@ -1,6 +1,8 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.EntryListenerFlags
 import edu.wpi.first.networktables.NetworkTable
@@ -24,6 +26,49 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
         ::registerCallback,
         " (${withUnits.unitName})"
 )
+
+fun SubsystemHardware<*, *>.escConfigPref(
+        defaultSyncThreshold: Time = syncThreshold,
+        defaultOpenloopRamp: Time = 0.Second,
+        defaultClosedloopRamp: Time = 0.Second,
+        defaultPeakOutput: V = 12.Volt,
+        defaultNominalOutput: V = 0.Volt,
+        defaultVoltageCompSaturation: V = 12.Volt,
+        defaultContinuousCurrentLimit: I = 25.Ampere,
+        defaultPeakCurrentLimit: I = 40.Ampere,
+        defaultPeakCurrentDuration: Time = 1.Second
+) = pref {
+
+    val openloopRamp by pref(defaultOpenloopRamp.Second, Second)
+    val closedloopRamp by pref(defaultClosedloopRamp.Second, Second)
+
+    val peakOutput by pref(defaultPeakOutput.Volt, Volt)
+    val nominalOutput by pref(defaultNominalOutput.Volt, Volt)
+
+    val voltageCompSaturation by pref(defaultVoltageCompSaturation.Volt, Volt)
+
+    val continuousCurrentLimit by pref(defaultContinuousCurrentLimit.Ampere, Ampere)
+    val peakCurrentLimit by pref(defaultPeakCurrentLimit.Ampere, Ampere)
+    val peakCurrentDuration by pref(defaultPeakCurrentDuration.Second, Second)
+
+    ({
+        OffloadedEscConfiguration(
+                syncThreshold = defaultSyncThreshold,
+                openloopRamp = openloopRamp,
+                closedloopRamp = closedloopRamp,
+
+                peakOutputForward = peakOutput,
+                nominalOutputForward = nominalOutput,
+                nominalOutputReverse = -nominalOutput,
+                peakOutputReverse = -peakOutput,
+
+                voltageCompSaturation = voltageCompSaturation,
+                continuousCurrentLimit = continuousCurrentLimit,
+                peakCurrentLimit = peakCurrentLimit,
+                peakCurrentDuration = peakCurrentDuration
+        )
+    })
+}
 
 
 /**
@@ -57,6 +102,8 @@ fun trim(table: NetworkTable = impl.table) {
     table.keys.forEach {
         if (it !in keys) {
             println("Trimming $it")
+            table.getEntry(it).clearPersistent()
+            table.getEntry(it).delete()
             table.getEntry(it).clearPersistent()
             table.getEntry(it).delete()
         }

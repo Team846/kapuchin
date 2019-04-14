@@ -7,17 +7,16 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.hookslider.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.pivot.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
@@ -25,6 +24,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -42,9 +42,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val collectorSlider: CollectorSliderComponent?,
                  val hook: HookComponent?,
                  val hookSlider: HookSliderComponent?,
-                 val handoffPivot: HandoffPivotComponent?,
-                 val handoffRollers: HandoffRollersComponent?,
-                 val velcroPivot: VelcroPivotComponent?,
                  val lift: LiftComponent?,
                  val climber: ClimberComponent?,
                  val limelight: LimelightHardware?
@@ -116,7 +113,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         val pneumaticTicker = ticker(Medium, 50.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
-        fun concurrentInit() = runBlocking {
+        fun concurrentInit() = scope.launch {
             suspend fun <T> t(f: suspend () -> T): T? = try {
                 f()
             } catch (t: Throwable) {
@@ -139,9 +136,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val collectorSliderAsync = i(initCollectorSlider) { CollectorSliderComponent(CollectorSliderHardware()) }
             val hookAsync = i(initHook) { HookComponent(HookHardware()) }
             val hookSliderAsync = i(initHookSlider) { HookSliderComponent(HookSliderHardware()) }
-            val handoffPivotAsync = i(initHandoffPivot) { HandoffPivotComponent(HandoffPivotHardware()) }
-            val handoffRollersAsync = i(initHandoffRollers) { HandoffRollersComponent(HandoffRollersHardware()) }
-            val velcroPivotAsync = i(initVelcroPivot) { VelcroPivotComponent(VelcroPivotHardware()) }
             val liftAsync = i(initLift) { LiftComponent(LiftHardware()) }
             val climberAsync = i(initClimber) { ClimberComponent(ClimberHardware()) }
             val limelightAsync = i(initLimelight) { LimelightHardware() }
@@ -161,14 +155,11 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     t { collectorSliderAsync.await() },
                     t { hookAsync.await() },
                     t { hookSliderAsync.await() },
-                    t { handoffPivotAsync.await() },
-                    t { handoffRollersAsync.await() },
-                    t { velcroPivotAsync.await() },
                     t { liftAsync.await() },
                     t { climberAsync.await() },
                     t { limelightAsync.await() }
             )
-        }
+        }.also { runBlocking { it.join() } }
 
         fun sequentialInit() {
             fun <T> t(f: () -> T): T? = try {
@@ -197,9 +188,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     i(initCollectorSlider) { t { CollectorSliderComponent(CollectorSliderHardware()) } },
                     i(initHook) { t { HookComponent(HookHardware()) } },
                     i(initHookSlider) { t { HookSliderComponent(HookSliderHardware()) } },
-                    i(initHandoffPivot) { t { HandoffPivotComponent(HandoffPivotHardware()) } },
-                    i(initHandoffRollers) { t { HandoffRollersComponent(HandoffRollersHardware()) } },
-                    i(initVelcroPivot) { t { VelcroPivotComponent(VelcroPivotHardware()) } },
                     i(initLift) { t { LiftComponent(LiftHardware()) } },
                     i(initClimber) { t { ClimberComponent(ClimberHardware()) } },
                     i(initLimelight) { t { LimelightHardware() } }
