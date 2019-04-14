@@ -34,6 +34,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val driver: DriverHardware,
                  val operator: OperatorHardware,
                  val rumble: RumbleComponent,
+                 val leds: LedComponent?,
 
                  val lineScanner: LineScannerHardware,
                  val collectorPivot: CollectorPivotComponent?,
@@ -46,8 +47,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val velcroPivot: VelcroPivotComponent?,
                  val lift: LiftComponent?,
                  val climber: ClimberComponent?,
-                 val limelight: LimelightHardware?,
-                 val leds: LedComponent?
+                 val limelight: LimelightHardware?
 ) : Named by Named("Subsystems") {
 
     suspend fun teleop() {
@@ -97,6 +97,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             }
         }
 
+        private val initLeds by pref(true)
         private val initCollectorPivot by pref(true)
         private val initCollectorRollers by pref(true)
         private val initCollectorSlider by pref(false)
@@ -108,7 +109,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initLift by pref(true)
         private val initClimber by pref(false)
         private val initLimelight by pref(true)
-        private val initLeds by pref(true)
 
         var instance: Subsystems? = null
             private set
@@ -133,6 +133,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val rumbleAsync = async { RumbleComponent(RumbleHardware(t { driverAsync.await() }!!, t { operatorAsync.await() }!!)) }
             val lineScannerAsync = async { LineScannerHardware() }
 
+            val ledsAsync = i(initLeds) { LedComponent(LedHardware(t { driverAsync.await() }!!)) }
             val collectorPivotAsync = i(initCollectorPivot) { CollectorPivotComponent(CollectorPivotHardware()) }
             val collectorRollersAsync = i(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
             val collectorSliderAsync = i(initCollectorSlider) { CollectorSliderComponent(CollectorSliderHardware()) }
@@ -144,7 +145,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val liftAsync = i(initLift) { LiftComponent(LiftHardware()) }
             val climberAsync = i(initClimber) { ClimberComponent(ClimberHardware()) }
             val limelightAsync = i(initLimelight) { LimelightHardware() }
-            val ledsAsync = i(initLeds) { LedComponent(LedHardware()) }
 
             instance = Subsystems(
                     t { drivetrainAsync.await() }!!,
@@ -153,6 +153,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     t { driverAsync.await() }!!,
                     t { operatorAsync.await() }!!,
                     t { rumbleAsync.await() }!!,
+                    t { ledsAsync.await() },
 
                     t { lineScannerAsync.await() }!!,
                     t { collectorPivotAsync.await() },
@@ -165,8 +166,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     t { velcroPivotAsync.await() },
                     t { liftAsync.await() },
                     t { climberAsync.await() },
-                    t { limelightAsync.await() },
-                    t { ledsAsync.await() }
+                    t { limelightAsync.await() }
             )
         }
 
@@ -182,6 +182,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val driver = t { DriverHardware() }!!
             val operator = t { OperatorHardware() }!!
             val rumble = t { RumbleComponent(RumbleHardware(driver, operator)) }!!
+            val leds = i(initLeds) { t { LedComponent(LedHardware(driver)) } }
 
             instance = Subsystems(
                     t { DrivetrainComponent(DrivetrainHardware()) }!!,
@@ -189,6 +190,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     driver,
                     operator,
                     rumble,
+                    leds,
                     t { LineScannerHardware() }!!,
                     i(initCollectorPivot) { t { CollectorPivotComponent(CollectorPivotHardware()) } },
                     i(initCollectorRollers) { t { CollectorRollersComponent(CollectorRollersHardware()) } },
@@ -200,8 +202,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     i(initVelcroPivot) { t { VelcroPivotComponent(VelcroPivotHardware()) } },
                     i(initLift) { t { LiftComponent(LiftHardware()) } },
                     i(initClimber) { t { ClimberComponent(ClimberHardware()) } },
-                    i(initLimelight) { t { LimelightHardware() } },
-                    i(initLeds) { t { LedComponent(LedHardware()) } }
+                    i(initLimelight) { t { LimelightHardware() } }
             )
         }
     }
