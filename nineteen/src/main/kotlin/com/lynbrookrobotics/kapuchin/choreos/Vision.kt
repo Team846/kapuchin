@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.Subsystems
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -10,7 +10,6 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
@@ -40,13 +39,13 @@ suspend fun Subsystems.limeLineAlign(
             val waypt = robotSnapshot1.vector + targetLoc
 
             launch {
-                withTimeout(2.Second) { teleop.vibrateJames() }
+                withTimeout(1.Second) { teleop.vibrateJames() }
             }
 
             drivetrain.waypoint(
                     trapezoidalMotionProfile(
                             6.FootPerSecondSquared,
-                            12.FootPerSecond
+                            9.FootPerSecond
                     ), waypt, transitionPoint
             )
         }
@@ -146,14 +145,17 @@ suspend fun DrivetrainComponent.visionSnapshotTracking(speed: Velocity, limeligh
     }
 }
 
-suspend fun DrivetrainComponent.visionActiveTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Vision snapshot tracking") {
+suspend fun DrivetrainComponent.visionActiveTracking(motionProfile: (Length) -> Velocity, limelight: LimelightHardware, tolerance: Length) = startRoutine("Vision snapshot tracking") {
     val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
+    val targetPosition by limelight.targetPosition.readOnTick.withoutStamps
     val robotPosition by hardware.position.readOnTick.withoutStamps
     val uni = UnicycleDrive(this@visionActiveTracking, this@startRoutine)
 
     controller {
         targetAngle?.let { targetSnapshot ->
-            val (targs, _) = uni.speedAngleTarget(speed, targetSnapshot + robotPosition.bearing)
+            val distance = targetPosition!!.vector.abs
+
+            val (targs, _) = uni.speedAngleTarget(motionProfile(distance), targetSnapshot + robotPosition.bearing)
 
             val nativeL = hardware.conversions.nativeConversion.native(targs.left)
             val nativeR = hardware.conversions.nativeConversion.native(targs.right)
@@ -161,7 +163,9 @@ suspend fun DrivetrainComponent.visionActiveTracking(speed: Velocity, limelight:
             TwoSided(
                     VelocityOutput(hardware.escConfig, velocityGains, nativeL),
                     VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-            )
+            ).takeIf {
+                distance > tolerance
+            }
         }
     }
 }
@@ -171,7 +175,6 @@ suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, targetRange:
     val uni = UnicycleDrive(this@lineActiveTracking, this@startRoutine)
 
     var targetLinePosition: Length? = null
-    val kF = velocityGains.copy(kP = 0.0)
 
     controller {
         if (targetLinePosition == null) {
@@ -179,20 +182,23 @@ suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, targetRange:
                 targetLinePosition = lineSnapshot cap targetRange
                 log(Debug) { "Holding line at ${(targetLinePosition ?: 0.Inch).Inch withDecimals 2} inches" }
             }
+            TwoSided(VelocityOutput(hardware.escConfig, velocityGains,
+                    hardware.conversions.nativeConversion.native(speed))
+            )
+        } else linePosition?.let { lineSnapshot ->
+            val targetA = atan((targetLinePosition ?: 0.Inch) / lineScanner.lookAhead)
+            val currentA = atan(lineSnapshot / lineScanner.lookAhead)
+            val errorA = -(targetA - currentA)
+
+            val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
+
+            val nativeL = hardware.conversions.nativeConversion.native(targetL)
+            val nativeR = hardware.conversions.nativeConversion.native(targetR)
+
+            TwoSided(
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+            )
         }
-
-        val targetA = atan((targetLinePosition ?: 0.Inch) / lineScanner.lookAhead)
-        val currentA = atan((linePosition ?: 0.Inch) / lineScanner.lookAhead)
-        val errorA = -(targetA - currentA)
-
-        val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
-
-        val nativeL = hardware.conversions.nativeConversion.native(targetL)
-        val nativeR = hardware.conversions.nativeConversion.native(targetR)
-
-        TwoSided(
-                VelocityOutput(hardware.escConfig, kF, nativeL),
-                VelocityOutput(hardware.escConfig, kF, nativeR)
-        )
     }
 }

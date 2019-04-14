@@ -22,7 +22,7 @@ import info.kunalsheth.units.math.*
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
-    override val syncThreshold = 15.milli(Second)
+    override val syncThreshold = 5.milli(Second)
     override val name = "Drivetrain"
 
     private val idx = 0

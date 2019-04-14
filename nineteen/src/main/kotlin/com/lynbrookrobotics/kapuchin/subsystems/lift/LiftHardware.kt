@@ -19,7 +19,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val name: String = "Lift"
     override val period: Time = 30.milli(Second)
     override val priority: Priority = Priority.Low
-    override val syncThreshold: Time = 15.milli(Second)
+    override val syncThreshold: Time = 5.milli(Second)
 
     val escCanId = 40
     val idx = 0
