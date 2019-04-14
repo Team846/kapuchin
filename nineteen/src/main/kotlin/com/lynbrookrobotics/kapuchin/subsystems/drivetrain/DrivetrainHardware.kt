@@ -76,10 +76,23 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     private val ticksToSerialPort = "kUSB1"
-    private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
+    private val ticksToSerial by hardw<TicksToSerial?> {
+        TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort))
+    }.verify("ticks-to-serial is connected") {
+        it!!().forEach {}
+        true
+    }.otherwise(hardw { null })
 
     val position = sensor {
-        ticksToSerial().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
+        ticksToSerial?.also {
+            it().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
+        } ?: conversions.accumulateOdometry(
+                leftMasterEsc.getSelectedSensorPosition(idx) /
+                        conversions.nativeEncoderCountMultiplier,
+                rightMasterEsc.getSelectedSensorPosition(idx) /
+                        conversions.nativeEncoderCountMultiplier
+        )
+
         conversions.matrixTracking.run { Position(x, y, bearing) } stampWith it
     }
             .with(graph("X Location", Foot)) { it.x }
