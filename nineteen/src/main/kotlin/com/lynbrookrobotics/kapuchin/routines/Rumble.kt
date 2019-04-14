@@ -23,6 +23,6 @@ suspend fun RumbleComponent.trackLineFeedback(lineScanner: LineScannerHardware, 
             }
         }
 
-        0.Percent to operator
+        TwoSided(0.Percent, operator)
     }
 }
