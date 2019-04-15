@@ -94,6 +94,7 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
 }
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
+
     //Lift down
 
     var hookDown:Job? = null
@@ -113,7 +114,9 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
 }
 
 suspend fun Subsystems.trackLine() = coroutineScope {
-    //Track line with slider
+    launch {
+        collectorSlider?.let { rumble.trackLineFeedback(lineScanner, it) }
+    }
     collectorSlider?.trackLine(lineScanner, electrical)
 }
 
@@ -132,4 +135,3 @@ suspend fun Subsystems.centerCargo(flip: Boolean) {
             bottom = if (flip) 11.5.Volt else -8.Volt
     )
 }
-

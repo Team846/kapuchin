@@ -38,9 +38,7 @@ suspend fun Subsystems.limeLineAlign(
             val targetLoc = mtrx rz visionSnapshot1.vector
             val waypt = robotSnapshot1.vector + targetLoc
 
-            launch {
-                withTimeout(1.Second) { teleop.vibrateJames() }
-            }
+            launch { withTimeout(1.Second) { rumble.set(TwoSided(0.Percent, 100.Percent)) } }
 
             drivetrain.waypoint(
                     trapezoidalMotionProfile(
