@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 
 suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
@@ -23,14 +22,18 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
             launch {
                 runWhenever(
                         { autoAlign } to choreography {
-                            launch { collectorSlider?.trackLine(lineScanner, electrical) }
-                            drivetrain.lineActiveTracking(
-                                    2.FootPerSecond,
-                                    collectorSlider
-                                            ?.run { (min-1.Inch)..(max+1.Inch) }
-                                            ?: -5.Inch..5.Inch,
-                                    lineScanner
-                            )
+                            if (limelight != null && collectorSlider != null && lift != null) {
+                                limeLineAlign(limelight, collectorSlider, lift)
+                            }
+//                            launch { collectorSlider?.trackLine(lineScanner, electrical) }
+//                            drivetrain.lineActiveTracking(
+//                                    1.FootPerSecond,
+//                                    collectorSlider
+//                                            ?.run { (min - 0.5.Inch)..(max + 0.5.Inch) }
+//                                            ?: -5.Inch..5.Inch,
+////                                    -3.Inch..3.Inch,
+//                                    lineScanner
+//                            )
                         }
                 )
             }

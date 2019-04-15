@@ -54,20 +54,23 @@ suspend fun Subsystems.pivotDown() {
 }
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
+    //Eject panel
 
-    val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
-    delay(0.2.Second)
-    val hookDown = scope.launch { hook?.set(HookPosition.Down) }
-
-    withContext(NonCancellable) { delay(0.2.Second) }
-
+    var hookSliderOut: Job? = null
+    var hookDown: Job? = null
     try {
+        hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
+        delay(0.2.Second)
+        hookDown = scope.launch { hook?.set(HookPosition.Down) }
+
+        withContext(NonCancellable) { delay(0.2.Second) }
+
         freeze()
     } finally {
         withContext(NonCancellable) {
-            hookSliderOut.cancel()
+            hookSliderOut?.cancel()
             delay(0.5.Second)
-            hookDown.cancel()
+            hookDown?.cancel()
         }
     }
 }
@@ -94,15 +97,16 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
 
     //Lift down
 
-    val hookDown = scope.launch { hook?.set(HookPosition.Down) }
+    var hookDown:Job? = null
     try {
+        hookDown =  scope.launch { hook?.set(HookPosition.Down) }
         lift?.set(lift.panelCollect, 0.Inch)
     } finally {
         withContext(NonCancellable) {
             val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
             delay(0.2.Second)
-            hookDown.cancel()
-            scope.launch { lift?.set(lift.panelCollect + 2.5.Inch, 0.Inch) }
+            hookDown?.cancel()
+            launch { lift?.set(lift.panelCollectStroke, 0.Inch) }
             delay(0.2.Second)
             hookSliderOut.cancel()
         }
