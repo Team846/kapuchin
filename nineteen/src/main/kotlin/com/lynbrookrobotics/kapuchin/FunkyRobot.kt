@@ -27,8 +27,8 @@ class FunkyRobot : RobotBase() {
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
-//        println("Trimming preferences...")
-//        trim()
+        println("Printing key list to `keylist.txt`...")
+        printKeys()
 
         println("Loading classes...")
         runBlocking { withTimeout(5.Second) { classPreloading.join() } }

@@ -8,6 +8,7 @@ import edu.wpi.first.networktables.EntryListenerFlags
 import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.wpilibj.Preferences2
 import info.kunalsheth.units.generated.*
+import java.io.File
 
 private val impl = Preferences2.getInstance()
 
@@ -71,6 +72,8 @@ fun SubsystemHardware<*, *>.escConfigPref(
 }
 
 
+private val keys = mutableSetOf<String>()
+
 /**
  * Adds an EntryListener to the NetworkTable in Preferences2
  *
@@ -81,8 +84,8 @@ fun SubsystemHardware<*, *>.escConfigPref(
  */
 private fun registerCallback(key: String, callback: () -> Unit) {
     blockingMutex(keys) {
-        keys += NetworkTable.basenameKey(key)
-        Preferences2.getInstance().table.addEntryListener(key, { _, _, _, _, _ ->
+        keys += key
+        impl.table.addEntryListener(key, { _, _, _, _, _ ->
             callback()
         }, EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
     }
@@ -95,8 +98,7 @@ private fun registerCallback(key: String, callback: () -> Unit) {
  * @see Preferences2
  * @see NetworkTable
  */
-private val keys = mutableSetOf<String>()
-
+@Deprecated(message = "Doesn't work for subtables", replaceWith = ReplaceWith("printKeys()"))
 fun trim(table: NetworkTable = impl.table) {
     //Gets rid of all unused keys in the current subTable
     table.keys.forEach {
@@ -110,3 +112,8 @@ fun trim(table: NetworkTable = impl.table) {
     table.subTables.forEach { trim(table.getSubTable(it)) }
 }
 
+fun printKeys() = blockingMutex(keys) {
+    File("/home/lvuser/keylist.txt").writeText(
+            keys.joinToString(separator = "\n")
+    )
+}
