@@ -30,7 +30,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
         it.name == "Kunals Absolute Steering Wheel"
     }
     val rumble by hardw<Joystick?> { Joystick(4) }.verify("the rumblr is connected") {
-        it!!.name == "Controller (Xbox 360 For Windows)"
+        it!!.name == "Controller (XBOX 360 For Windows)"
     }.otherwise(hardw { null })
 
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }

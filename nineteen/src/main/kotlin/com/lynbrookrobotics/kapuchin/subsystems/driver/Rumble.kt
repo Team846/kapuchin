@@ -16,12 +16,12 @@ class RumbleComponent(hardware: RumbleHardware) : Component<RumbleComponent, Rum
     override val fallbackController: RumbleComponent.(Time) -> Rumble = { TwoSided(0.Percent) }
 
     override fun RumbleHardware.output(value: Rumble) {
-        operator.xbox.apply {
+        driver.rumble?.apply {
             setRumble(kLeftRumble, value.left.Each)
             setRumble(kRightRumble, value.left.Each)
         }
 
-        driver.rumble?.apply {
+        operator.xbox.apply {
             setRumble(kLeftRumble, value.right.Each)
             setRumble(kRightRumble, value.right.Each)
         }

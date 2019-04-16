@@ -22,7 +22,7 @@ import info.kunalsheth.units.math.*
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
-    override val syncThreshold = 5.milli(Second)
+    override val syncThreshold = 4.milli(Second)
     override val name = "Drivetrain"
 
     private val idx = 0
@@ -45,7 +45,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
 
-            defaultContinuousCurrentLimit = 15.Ampere,
+            defaultContinuousCurrentLimit = 25.Ampere,
             defaultPeakCurrentLimit = 35.Ampere
     )
 

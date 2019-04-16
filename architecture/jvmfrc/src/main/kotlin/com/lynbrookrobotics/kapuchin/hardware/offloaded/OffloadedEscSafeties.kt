@@ -17,7 +17,10 @@ data class OffloadedEscSafeties(
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
     fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
-        talonCache[esc].takeIf { this != it }.also {
+        val cached = talonCache[esc]
+        if (this != cached) cached.also {
+            println("Writing safeties to TalonSRX ${esc.deviceID}")
+
             if (it == null || it.min != this.min) {
                 +esc.configReverseSoftLimitEnable(min != null, timeoutMs)
                 if (min != null) +esc.configReverseSoftLimitThreshold(min, timeoutMs)

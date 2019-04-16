@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.hookslider.*
@@ -31,7 +32,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { deployCargo || softDeployCargo } to choreography { deployCargo(softDeployCargo) },
                 { deployPanel } to choreography { deployPanel() },
                 { collectCargo } to choreography { collectCargo() },
-                { operatorLineTracking } to choreography { trackLine() },
+                { operatorLineTracking } to choreography { collectorSlider?.trackLine(lineScanner, electrical) },
                 { lilDicky } to choreography { lilDicky() },
 
                 { centerSlider } to choreography { centerSlider(0.Inch) },
@@ -62,6 +63,10 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
         hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
         delay(0.2.Second)
         hookDown = scope.launch { hook?.set(HookPosition.Down) }
+
+        scope.launch {
+            withTimeout(1.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
+        }
 
         withContext(NonCancellable) { delay(0.2.Second) }
 
@@ -97,12 +102,16 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
 
     //Lift down
 
-    var hookDown:Job? = null
+    var hookDown: Job? = null
     try {
-        hookDown =  scope.launch { hook?.set(HookPosition.Down) }
+        hookDown = scope.launch { hook?.set(HookPosition.Down) }
         lift?.set(lift.panelCollect, 0.Inch)
+        freeze()
     } finally {
         withContext(NonCancellable) {
+            scope.launch {
+                withTimeout(1.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
+            }
             val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
             delay(0.2.Second)
             hookDown?.cancel()
@@ -111,13 +120,6 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
             hookSliderOut.cancel()
         }
     }
-}
-
-suspend fun Subsystems.trackLine() = coroutineScope {
-    launch {
-        collectorSlider?.let { rumble.trackLineFeedback(lineScanner, it) }
-    }
-    collectorSlider?.trackLine(lineScanner, electrical)
 }
 
 suspend fun Subsystems.centerSlider(tolerance: Length = 1.Inch) {

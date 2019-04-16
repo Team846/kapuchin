@@ -41,9 +41,9 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
 }
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
-    val accelerator by driver.accelerator.readEagerly.withoutStamps
-    val steering by driver.steering.readEagerly.withoutStamps
-    val absSteering by driver.absSteering.readEagerly.withoutStamps
+    val accelerator by driver.accelerator.readOnTick.withoutStamps
+    val steering by driver.steering.readOnTick.withoutStamps
+    val absSteering by driver.absSteering.readOnTick.withoutStamps
 
     val position by hardware.position.readOnTick.withStamps
 
