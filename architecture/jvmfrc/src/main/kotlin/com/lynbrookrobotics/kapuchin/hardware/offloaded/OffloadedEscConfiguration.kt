@@ -28,7 +28,10 @@ data class OffloadedEscConfiguration(
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
     fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
-        talonCache[esc].takeIf { this != it }.also {
+        val cached = talonCache[esc]
+        if (this != cached) talonCache[esc].also {
+            println("Writing configurations to TalonSRX ${esc.deviceID}")
+
             if (it == null || it.openloopRamp != this.openloopRamp)
                 +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
 

@@ -16,6 +16,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.timing.scope
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
@@ -23,16 +24,17 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class Subsystems(val drivetrain: DrivetrainComponent,
                  val electrical: ElectricalSystemHardware,
 
-                 val teleop: TeleopComponent,
                  val driver: DriverHardware,
                  val operator: OperatorHardware,
-                 val leds: LedHardware?,
+                 val rumble: RumbleComponent,
+                 val leds: LedComponent?,
 
                  val lineScanner: LineScannerHardware,
                  val collectorPivot: CollectorPivotComponent?,
@@ -53,13 +55,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { intakeTeleop() },
                 { liftTeleop() },
                 { climberTeleop() },
-                {
-                    collectorSlider?.let { slider ->
-                        launchWhenever({ teleop.routine == null } to choreography {
-                            teleop.vibrateOnAlign(lineScanner, slider)
-                        })
-                    }
-                }
+                { rumbleTeleop() }
         )
         System.gc()
     }
@@ -99,7 +95,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             }
         }
 
-        private val initLeds by pref(false)
+        private val initLeds by pref(true)
         private val initCollectorPivot by pref(true)
         private val initCollectorRollers by pref(true)
         private val initCollectorSlider by pref(false)
@@ -118,17 +114,24 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         val pneumaticTicker = ticker(Medium, 50.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
-        fun concurrentInit() = runBlocking {
+        fun concurrentInit() = scope.launch {
+            suspend fun <T> t(f: suspend () -> T): T? = try {
+                f()
+            } catch (t: Throwable) {
+                if (crashOnFailure) throw t else null
+            }
+
+            suspend fun <R> i(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
+
             val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
             val electricalAsync = async { ElectricalSystemHardware() }
 
             val driverAsync = async { DriverHardware() }
             val operatorAsync = async { OperatorHardware() }
+            val rumbleAsync = async { RumbleComponent(RumbleHardware(t { driverAsync.await() }!!, t { operatorAsync.await() }!!)) }
             val lineScannerAsync = async { LineScannerHardware() }
 
-            suspend fun <R> i(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
-
-            val ledsAsync = i(initLeds) { LedHardware() }
+            val ledsAsync = i(initLeds) { LedComponent(LedHardware(t { driverAsync.await() }!!)) }
             val collectorPivotAsync = i(initCollectorPivot) { CollectorPivotComponent(CollectorPivotHardware()) }
             val collectorRollersAsync = i(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
             val collectorSliderAsync = i(initCollectorSlider) { CollectorSliderComponent(CollectorSliderHardware()) }
@@ -138,27 +141,13 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val climberAsync = i(initClimber) { ClimberComponent(ClimberHardware()) }
             val limelightAsync = i(initLimelight) { LimelightHardware() }
 
-            suspend fun <T> t(f: suspend () -> T): T? = try {
-                f()
-            } catch (t: Throwable) {
-                if (crashOnFailure) throw t else null
-            }
-
-            val teleopAsync = async {
-                TeleopComponent(TeleopHardware(
-                        t { driverAsync.await() }!!,
-                        t { operatorAsync.await() }!!,
-                        t { ledsAsync.await() }
-                ))
-            }
-
             instance = Subsystems(
                     t { drivetrainAsync.await() }!!,
                     t { electricalAsync.await() }!!,
 
-                    t { teleopAsync.await() }!!,
                     t { driverAsync.await() }!!,
                     t { operatorAsync.await() }!!,
+                    t { rumbleAsync.await() }!!,
                     t { ledsAsync.await() },
 
                     t { lineScannerAsync.await() }!!,
@@ -171,7 +160,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     t { climberAsync.await() },
                     t { limelightAsync.await() }
             )
-        }
+        }.also { runBlocking { it.join() } }
 
         fun sequentialInit() {
             fun <T> t(f: () -> T): T? = try {
@@ -184,15 +173,15 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
             val driver = t { DriverHardware() }!!
             val operator = t { OperatorHardware() }!!
-            val leds = i(initLeds) { t { LedHardware() } }
-            val teleop = t { TeleopComponent(TeleopHardware(driver, operator, leds)) }!!
+            val rumble = t { RumbleComponent(RumbleHardware(driver, operator)) }!!
+            val leds = i(initLeds) { t { LedComponent(LedHardware(driver)) } }
 
             instance = Subsystems(
                     t { DrivetrainComponent(DrivetrainHardware()) }!!,
                     t { ElectricalSystemHardware() }!!,
-                    teleop,
                     driver,
                     operator,
+                    rumble,
                     leds,
                     t { LineScannerHardware() }!!,
                     i(initCollectorPivot) { t { CollectorPivotComponent(CollectorPivotHardware()) } },

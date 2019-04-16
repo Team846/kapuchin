@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -26,8 +27,8 @@ class FunkyRobot : RobotBase() {
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
-        println("Trimming preferences...")
-//        trim()
+        println("Printing key list to `keylist.txt`...")
+        printKeys()
 
         println("Loading classes...")
         runBlocking { withTimeout(5.Second) { classPreloading.join() } }

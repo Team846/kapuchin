@@ -19,12 +19,12 @@ sealed class OffloadedOutput {
         is CurrentOutput -> copy(safeties = safeties)
     }
 
-    fun writeTo(esc: VictorSPX, timeoutMs: Int = 0) {
+    fun writeTo(esc: VictorSPX, timeoutMs: Int = 15) {
         config.writeTo(esc, timeoutMs)
         esc.set(mode, value)
     }
 
-    fun writeTo(esc: TalonSRX, timeoutMs: Int = 0) {
+    fun writeTo(esc: TalonSRX, timeoutMs: Int = 15) {
         safeties.writeTo(esc, timeoutMs)
         gains?.writeTo(esc, timeoutMs)
         config.writeTo(esc, timeoutMs)

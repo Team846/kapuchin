@@ -29,6 +29,9 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val absoluteWheel by hardw { Joystick(3) }.verify("the absolute wheel is connected") {
         it.name == "Kunals Absolute Steering Wheel"
     }
+    val rumble by hardw<Joystick?> { Joystick(4) }.verify("the rumblr is connected") {
+        it!!.name == "Controller (XBOX 360 For Windows)"
+    }.otherwise(hardw { null })
 
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
@@ -70,5 +73,5 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
     val liftDown = s { stick[Trigger] && !stick[BottomTrigger] }
     val interruptAuto = s { stick[LeftTrigger] }
-    val lineTracking = s { stick[RightTrigger] }
+    val autoAlign = s { stick[RightTrigger] }
 }

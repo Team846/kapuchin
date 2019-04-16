@@ -30,14 +30,7 @@ class LineScannerHardware : RobotHardware<LineScannerHardware>() {
     private val exposure by pref(10, Millisecond)
     private val threshold by pref(25, Percent)
 
-    //    private val scannerFov by pref(53.13, Degree)
-//    private val bisectionPoint by pref(2, Inch)
-//    private val zeroOffset by pref(-3, Inch)
     val lookAhead by pref(12, Inch)
-
-//    private val scanEdge get() = atan(bisectionPoint / mounting.z) - (scannerFov / 2)
-//    private val scanShift get() = mounting.z * tan(scanEdge)
-//    private fun locate(raw: Dimensionless) = (mounting.z * tan(scanEdge + raw * scannerFov)) - scanShift
 
     private val conversion by pref {
         val pt1 by pref {

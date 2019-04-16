@@ -22,7 +22,7 @@ import info.kunalsheth.units.math.*
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
-    override val syncThreshold = 15.milli(Second)
+    override val syncThreshold = 4.milli(Second)
     override val name = "Drivetrain"
 
     private val idx = 0
@@ -45,7 +45,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
 
-            defaultContinuousCurrentLimit = 15.Ampere,
+            defaultContinuousCurrentLimit = 25.Ampere,
             defaultPeakCurrentLimit = 35.Ampere
     )
 
@@ -76,10 +76,23 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     private val ticksToSerialPort = "kUSB1"
-    private val ticksToSerial by hardw { TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort)) }
+    private val ticksToSerial by hardw<TicksToSerial?> {
+        TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort))
+    }.verify("ticks-to-serial is connected") {
+        it!!().forEach {}
+        true
+    }.otherwise(hardw { null })
 
     val position = sensor {
-        ticksToSerial().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
+        ticksToSerial?.also {
+            it().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
+        } ?: conversions.accumulateOdometry(
+                leftMasterEsc.getSelectedSensorPosition(idx) /
+                        conversions.nativeEncoderCountMultiplier,
+                rightMasterEsc.getSelectedSensorPosition(idx) /
+                        conversions.nativeEncoderCountMultiplier
+        )
+
         conversions.matrixTracking.run { Position(x, y, bearing) } stampWith it
     }
             .with(graph("X Location", Foot)) { it.x }
