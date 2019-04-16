@@ -1,16 +1,12 @@
 #!/bin/bash
 
-# ini="./networktables.ini"
-# keylist="./keylist.txt"
-# out="./output.txt"
-ini="/home/lvuser/networktables.ini"
-keylist="/home/lvuser/keylist.txt"
-out="/home/lvuser/output.txt"
+ini="./networktables.ini"
+keylist="./keylist.txt"
+out="./output.txt"
+# ini="/home/lvuser/networktables.ini"
+# keylist="/home/lvuser/keylist.txt"
+# out="/home/lvuser/output.txt"
 f=false
-
-touch "$out"
-
-
 
 #Check if -f was passed
 while getopts ":f" opt; do
@@ -25,6 +21,7 @@ done
 
 while read -r line
 do
+    killall java
     if grep -q 'NetworkTables' <<< "$line"
     then
         continue
@@ -49,10 +46,11 @@ do
 done < "$ini" | sed '1d'
 
 
-
+killall java
 if [ $f = true ]
 then
     echo "Copying output.txt to networktables.ini"
+
     cp -f "$out" "$ini"
     echo "[NetworkTables Storage 3.0]
 $(cat $ini)" > "$ini"
@@ -61,3 +59,4 @@ $(cat $ini)" > "$ini"
 else
     echo "Run with -f to trim"
 fi
+killall java
