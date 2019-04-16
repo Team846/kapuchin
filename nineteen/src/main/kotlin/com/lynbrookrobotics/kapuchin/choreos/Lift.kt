@@ -33,7 +33,7 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
                             )
                         }
                         launch { centerSlider() }
-                        set(collectCargo, 0.Inch)
+                        set(cargoCollect, 1.Inch)
                     },
                     { lowPanelHeight } to choreography { set(panelLowRocket, 0.Inch) },
                     { lowCargoHeight } to choreography { set(cargoLowRocket, 0.Inch) },

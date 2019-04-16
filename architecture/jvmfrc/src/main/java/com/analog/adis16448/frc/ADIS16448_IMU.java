@@ -52,7 +52,7 @@ public class ADIS16448_IMU extends GyroBase implements Gyro, PIDSource, Sendable
     private Axis m_yaw_axis;
 
     //CRC-16 Look-Up Table
-    int adiscrc[] = new int[]{
+    int[] adiscrc = new int[]{
             0x0000, 0x17CE, 0x0FDF, 0x1811, 0x1FBE, 0x0870, 0x1061, 0x07AF,
             0x1F3F, 0x08F1, 0x10E0, 0x072E, 0x0081, 0x174F, 0x0F5E, 0x1890,
             0x1E3D, 0x09F3, 0x11E2, 0x062C, 0x0183, 0x164D, 0x0E5C, 0x1992,
@@ -461,7 +461,7 @@ public class ADIS16448_IMU extends GyroBase implements Gyro, PIDSource, Sendable
         int array_offset = 0;
         int imu_crc = 0;
         double dt = 0.009765625; // This number must be adjusted if decimation setting is changed. Default is 1/102.4 SPS
-        int data_subset[] = new int[28];
+        int[] data_subset = new int[28];
 
         while (!m_freed.get()) {
             // Waiting for the buffer to fill...

@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.Subsystems.*
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -11,9 +10,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.Joystick
-import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -32,6 +29,9 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val absoluteWheel by hardw { Joystick(3) }.verify("the absolute wheel is connected") {
         it.name == "Kunals Absolute Steering Wheel"
     }
+    val rumble by hardw<Joystick?> { Joystick(4) }.verify("the rumblr is connected") {
+        it!!.name == "Controller (XBOX 360 For Windows)"
+    }.otherwise(hardw { null })
 
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
@@ -73,5 +73,5 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
     val liftDown = s { stick[Trigger] && !stick[BottomTrigger] }
     val interruptAuto = s { stick[LeftTrigger] }
-    val lineTracking = s { stick[RightTrigger] }
+    val autoAlign = s { stick[RightTrigger] }
 }

@@ -1,8 +1,8 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider
+package com.lynbrookrobotics.kapuchin.subsystems.collector.hookslider
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderState.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.hookslider.HookSliderState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*

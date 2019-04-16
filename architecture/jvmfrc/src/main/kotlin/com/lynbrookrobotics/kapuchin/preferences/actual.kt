@@ -1,11 +1,14 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.EntryListenerFlags
 import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.wpilibj.Preferences2
 import info.kunalsheth.units.generated.*
+import java.io.File
 
 private val impl = Preferences2.getInstance()
 
@@ -25,6 +28,51 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
         " (${withUnits.unitName})"
 )
 
+fun SubsystemHardware<*, *>.escConfigPref(
+        defaultSyncThreshold: Time = syncThreshold,
+        defaultOpenloopRamp: Time = 0.Second,
+        defaultClosedloopRamp: Time = 0.Second,
+        defaultPeakOutput: V = 12.Volt,
+        defaultNominalOutput: V = 0.Volt,
+        defaultVoltageCompSaturation: V = 12.Volt,
+        defaultContinuousCurrentLimit: I = 25.Ampere,
+        defaultPeakCurrentLimit: I = 40.Ampere,
+        defaultPeakCurrentDuration: Time = 1.Second
+) = pref {
+
+    val openloopRamp by pref(defaultOpenloopRamp.Second, Second)
+    val closedloopRamp by pref(defaultClosedloopRamp.Second, Second)
+
+    val peakOutput by pref(defaultPeakOutput.Volt, Volt)
+    val nominalOutput by pref(defaultNominalOutput.Volt, Volt)
+
+    val voltageCompSaturation by pref(defaultVoltageCompSaturation.Volt, Volt)
+
+    val continuousCurrentLimit by pref(defaultContinuousCurrentLimit.Ampere, Ampere)
+    val peakCurrentLimit by pref(defaultPeakCurrentLimit.Ampere, Ampere)
+    val peakCurrentDuration by pref(defaultPeakCurrentDuration.Second, Second)
+
+    ({
+        OffloadedEscConfiguration(
+                syncThreshold = defaultSyncThreshold,
+                openloopRamp = openloopRamp,
+                closedloopRamp = closedloopRamp,
+
+                peakOutputForward = peakOutput,
+                nominalOutputForward = nominalOutput,
+                nominalOutputReverse = -nominalOutput,
+                peakOutputReverse = -peakOutput,
+
+                voltageCompSaturation = voltageCompSaturation,
+                continuousCurrentLimit = continuousCurrentLimit,
+                peakCurrentLimit = peakCurrentLimit,
+                peakCurrentDuration = peakCurrentDuration
+        )
+    })
+}
+
+
+private val keys = mutableSetOf<String>()
 
 /**
  * Adds an EntryListener to the NetworkTable in Preferences2
@@ -36,8 +84,8 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
  */
 private fun registerCallback(key: String, callback: () -> Unit) {
     blockingMutex(keys) {
-        keys += NetworkTable.basenameKey(key)
-        Preferences2.getInstance().table.addEntryListener(key, { _, _, _, _, _ ->
+        keys += key
+        impl.table.addEntryListener(key, { _, _, _, _, _ ->
             callback()
         }, EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
     }
@@ -50,8 +98,7 @@ private fun registerCallback(key: String, callback: () -> Unit) {
  * @see Preferences2
  * @see NetworkTable
  */
-private val keys = mutableSetOf<String>()
-
+@Deprecated(message = "Doesn't work for subtables", replaceWith = ReplaceWith("printKeys()"))
 fun trim(table: NetworkTable = impl.table) {
     //Gets rid of all unused keys in the current subTable
     table.keys.forEach {
@@ -65,3 +112,8 @@ fun trim(table: NetworkTable = impl.table) {
     table.subTables.forEach { trim(table.getSubTable(it)) }
 }
 
+fun printKeys() = blockingMutex(keys) {
+    File("/home/lvuser/keylist.txt").writeText(
+            keys.joinToString(separator = "\n")
+    )
+}

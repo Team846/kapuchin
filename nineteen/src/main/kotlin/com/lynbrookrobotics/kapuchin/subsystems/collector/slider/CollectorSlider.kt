@@ -1,9 +1,12 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider
+package com.lynbrookrobotics.kapuchin.subsystems.collector.slider
 
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -35,6 +38,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
                 if (!isZeroed)
                     if (!currentAtZero) 30.Percent
                     else {
+                        log(Debug) { "zeroing" }
                         zero()
                         0.Percent
                     }

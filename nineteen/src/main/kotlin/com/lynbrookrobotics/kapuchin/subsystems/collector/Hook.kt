@@ -1,8 +1,8 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector
+package com.lynbrookrobotics.kapuchin.subsystems.collector
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.HookPosition.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*

@@ -101,8 +101,8 @@ suspend fun DrivetrainComponent.followTrajectory(
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         ).takeUnless { isDone }
     }
 }
@@ -127,8 +127,8 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(velocityGains, nativeL),
-                VelocityOutput(velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         ).takeUnless {
             distance < tolerance
         }

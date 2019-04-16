@@ -1,45 +1,54 @@
-//package com.lynbrookrobotics.kapuchin.routines
+package com.lynbrookrobotics.kapuchin.routines
+
+import com.lynbrookrobotics.kapuchin.subsystems.driver.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import info.kunalsheth.units.generated.*
+import java.awt.Color
+
+suspend fun LedComponent.set(color: Color) = startRoutine("Set") {
+    controller { color }
+}
+
+suspend fun LedComponent.rainbow() = startRoutine("Rainbow") {
+    controller { Color(Color.HSBtoRGB(((currentTime.Second / periods.first.Second % 1.0)).toFloat(), 1f, 1f)) }
+}
+
+//suspend fun LedComponent.fade(period: Time, vararg colors: Color) = startRoutine("Fade") {
 //
-//import com.lynbrookrobotics.kapuchin.subsystems.driver.*
-//import com.lynbrookrobotics.kapuchin.timing.*
-//import info.kunalsheth.units.generated.*
-//import info.kunalsheth.units.math.*
-//import java.awt.Color
-//import kotlin.math.PI
-//import kotlin.math.abs
-//import kotlin.math.sin
+//    val diffList = mutableListOf<Triple<Double, Double, Double>>()
+//    val size = colors.size
+//    val freq = (period / hardware.period).Each.toInt()
 //
-//suspend fun LEDLightsComponent.rainbow(period: Time) = startRoutine("Rainbow") {
-//
-//    val startTime = currentTime
-//
-//    controller {
-//        Color(Color.HSBtoRGB(((currentTime.Second / 5 % 1.0)).toFloat(), 1f, 1f)).takeIf { currentTime - startTime < period }
-//    }
-//}
-//
-//suspend fun LEDLightsComponent.cycle(count: Int, period: Time, vararg colors: Color) = startRoutine("Cycle") {
-//
+//    var cur = colors[0]
+//    var count = 0
 //    var index = 0
-//    var prevTime: Time = 0.milli(Second)
-//    var color: Color? = null
+//
+//    for (i in 0 until size) {
+//        diffList.add(
+//                Triple(
+//                        ((colors[(i + 1) % size].red - colors[i].red) / freq).toDouble(),
+//                        ((colors[(i + 1) % size].green - colors[i].green) / freq).toDouble(),
+//                        ((colors[(i + 1) % size].blue - colors[i].blue) / freq).toDouble()
+//                )
+//        )
+//    }
+//
+//    val diff = diffList.toTypedArray()
 //
 //    controller {
-//        if (currentTime - prevTime > period) {
-//            color = colors[index % colors.size]
+//        if (count == freq) {
+//            count = 0
 //            index++
-//            prevTime = currentTime
 //        }
 //
-//        color.takeIf { index <= count }
-//    }
-//}
+//        count++
 //
-//suspend fun LEDLightsComponent.fade(period: Time, color: Color) = startRoutine("Fade") {
-//
-//    val hue = Color.RGBtoHSB(color.red, color.green, color.blue, null)[0]
-//
-//    controller {
-//        Color(Color.HSBtoRGB(hue, 1.0f, (abs(sin(((currentTime.Second / period.Second) % 1.0) * PI))).toFloat()))
+//        cur.also {
+//            cur = Color(
+//                    cur.red + diff[index % size].first.toInt(),
+//                    cur.green + diff[index % size].second.toInt(),
+//                    cur.blue + diff[index % size].third.toInt()
+//            )
+//        }
 //    }
 //}
