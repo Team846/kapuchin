@@ -81,21 +81,27 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
 }
 
 suspend fun Subsystems.collectCargo() = supervisorScope {
-    //lift, collector down
-    scope.launch { hookSlider?.set(HookSliderState.In) }
 
-    lift?.set(lift.cargoCollect, 2.Inch)
-    launch { lift?.set(lift.cargoCollect, 0.Inch) }
+    try {
+        lift?.set(lift.cargoCollect, 2.Inch)
+        launch { lift?.set(lift.cargoCollect, 0.Inch) }
 
-    launch { collectorPivot?.set(CollectorPivotState.Down) }
+        launch { collectorPivot?.set(CollectorPivotState.Down) }
 
-    //Start rollers
-    launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
+        //Start rollers
+        launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
 
-    //Center slider
-    collectorSlider?.set(0.Inch, electrical)
+        //Center slider
+        collectorSlider?.set(0.Inch, electrical)
 
-    freeze()
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            withTimeout(1.Second) {
+                collectorRollers?.spin(electrical, 8.Volt)
+            }
+        }
+    }
 }
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
@@ -133,7 +139,7 @@ suspend fun Subsystems.centerSlider(tolerance: Length = 1.Inch) {
 suspend fun Subsystems.centerCargo(flip: Boolean) {
     collectorRollers?.spin(
             electrical,
-            top = if (flip) -8.Volt else 11.5.Volt,
-            bottom = if (flip) 11.5.Volt else -8.Volt
+            top = if (flip) -5.Volt else 11.5.Volt,
+            bottom = if (flip) 11.5.Volt else -5.Volt
     )
 }

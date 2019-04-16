@@ -17,7 +17,6 @@ class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<
 
     val cargoHoldStrength by pref(20, Percent)
     val cargoCollectSpeed by pref(11, Volt)
-    val cargoCenterSpeed by pref(8.5, Volt)
     val cargoReleaseSpeed by pref(-6, Volt)
 
     private val fallbackValue = TwoSided(cargoHoldStrength)
