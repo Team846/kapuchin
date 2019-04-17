@@ -65,7 +65,7 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
         hookDown = scope.launch { hook?.set(HookPosition.Down) }
 
         scope.launch {
-            withTimeout(1.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
+            withTimeout(1.5.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
         }
 
         withContext(NonCancellable) { delay(0.2.Second) }
@@ -105,9 +105,6 @@ suspend fun Subsystems.collectCargo() = supervisorScope {
 }
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
-
-    //Lift down
-
     var hookDown: Job? = null
     try {
         hookDown = scope.launch { hook?.set(HookPosition.Down) }
@@ -116,12 +113,12 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
     } finally {
         withContext(NonCancellable) {
             scope.launch {
-                withTimeout(1.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
+                withTimeout(1.5.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
             }
             val hookSliderOut = launch { hookSlider?.set(HookSliderState.Out) }
             delay(0.2.Second)
             hookDown?.cancel()
-            launch { lift?.set(lift.panelCollectStroke, 0.Inch) }
+            scope.launch { lift?.set(lift.panelCollectStroke, 0.Inch) }
             delay(0.2.Second)
             hookSliderOut.cancel()
         }
