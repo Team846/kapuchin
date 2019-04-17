@@ -1,8 +1,10 @@
 package com.lynbrookrobotics.kapuchin.subsystems.lift
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 
@@ -40,7 +42,11 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
         PercentOutput(hardware.escConfig, 0.Percent)
     }
 
+    private val errorGraph = graph("Closed Loop Error", Inch)
+
     override fun LiftHardware.output(value: OffloadedOutput) {
         value.with(hardware.conversions.safeties).writeTo(esc)
+
+        errorGraph(currentTime, hardware.conversions.native.realPosition(esc.closedLoopError))
     }
 }
