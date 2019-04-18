@@ -112,16 +112,14 @@ suspend fun Subsystems.lilDicky() = coroutineScope {
         freeze()
     } finally {
         withContext(NonCancellable) {
-            scope.launch { lift?.set(lift.panelCollectStroke, 0.Inch) }
             val hookSliderOut = scope.launch { hookSlider?.set(HookSliderState.Out) }
             delay(0.2.Second)
             hookDown?.cancel()
+            scope.launch { lift?.set(lift.panelCollectStroke, 0.Inch) }
             delay(0.2.Second)
             hookSliderOut.cancel()
             scope.launch {
-                withTimeout(1.5.Second) {
-                    rumble.set(TwoSided(100.Percent, 0.Percent))
-                }
+                withTimeout(1.5.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
             }
         }
     }
