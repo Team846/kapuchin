@@ -15,7 +15,7 @@ suspend fun LiftComponent.set(target: Length, tolerance: Length = 1.Inch) = star
     val startTime = currentTime
 
     controller {
-        if (currentTime - startTime > 2.Second) {
+        if (currentTime - startTime > 5.Second) {
             log(Warning) { "Killing set routine to cool motor" }
             null
         } else PositionOutput(

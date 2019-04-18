@@ -10,7 +10,10 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
+import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.Joystick
+import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -29,9 +32,12 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val absoluteWheel by hardw { Joystick(3) }.verify("the absolute wheel is connected") {
         it.name == "Kunals Absolute Steering Wheel"
     }
-    val rumble by hardw<Joystick?> { Joystick(4) }.verify("the rumblr is connected") {
+    val rumble by hardw<XboxController?> { XboxController(4) }.verify("the rumblr is connected") {
         it!!.name == "Controller (XBOX 360 For Windows)"
-    }.otherwise(hardw { null })
+    }.verify("xbox controller and rumblr are not swapped") {
+        it!!.getTriggerAxis(kLeft) > 0.1 && it.getTriggerAxis(kRight) > 0.1
+    }
+            .otherwise(hardw { null })
 
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
