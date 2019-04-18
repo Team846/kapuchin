@@ -122,7 +122,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 
     controller {
         val startTime = currentTime
-        while (currentTime - startTime < hardware.period * 80.Percent) {
+        while (currentTime - startTime < hardware.period * 60.Percent) {
             val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
             conv.accumulateOdometry(l, r)
         }
