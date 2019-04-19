@@ -55,8 +55,6 @@ suspend fun Subsystems.pivotDown() {
 }
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
-    //Eject panel
-
     var hookSliderOut: Job? = null
     var hookDown: Job? = null
     try {
