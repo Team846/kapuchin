@@ -113,6 +113,7 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     fun zero() {
         zeroOffset = position.optimizedRead(currentTime, 0.Second).y + center
         isZeroed = true
+        +limitSwitch.enableLimitSwitch(false)
     }
 
     init {
