@@ -21,6 +21,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
     val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
     val centerSlider by operator.centerSlider.readEagerly().withoutStamps
+    val zeroSlider by operator.reZero.readEagerly().withoutStamps
     val centerCargoLeft by operator.centerCargoLeft.readEagerly().withoutStamps
     val centerCargoRight by operator.centerCargoRight.readEagerly().withoutStamps
 
@@ -36,6 +37,7 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { lilDicky } to choreography { lilDicky() },
 
                 { centerSlider } to choreography { centerSlider(0.Inch) },
+                { zeroSlider } to choreography { collectorSlider?.reZero() },
                 { centerCargoLeft } to choreography { centerCargo(true) },
                 { centerCargoRight } to choreography { centerCargo(false) },
 

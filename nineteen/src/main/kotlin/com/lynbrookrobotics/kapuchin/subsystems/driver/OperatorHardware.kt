@@ -54,6 +54,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val centerSlider = s { pov == 0 }
     val centerCargoLeft = s { pov == 90 || pov == 45 }
     val centerCargoRight = s { pov == 270 || pov == 315 }
+    val reZero = s { pov == 180 }
 
     val deployPanel = s { lb && !lt }
     val lilDicky = s { lb && lt }

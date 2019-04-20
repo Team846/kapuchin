@@ -71,6 +71,13 @@ suspend fun CollectorSliderComponent.set(target: DutyCycle) = startRoutine("Manu
     controller { target }
 }
 
+suspend fun CollectorSliderComponent.reZero() = startChoreo("Re-Zero") {
+    hardware.isZeroed = false
+    choreography {
+        while (!hardware.isZeroed) delay(0.2.Second)
+    }
+}
+
 suspend fun CollectorSliderComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
     controller { sliderPrecision }
