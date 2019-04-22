@@ -175,10 +175,7 @@ suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: Li
 //    val startingSideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget.siValue * cos(startingTXValue!!)))
 //    val startingIsosAngle = acos(((distanceToTarget * distanceToTarget) + (startingSideAcrossTX * startingSideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
 //    val startingTurnAngle = startingIsosAngle - startingTXValue!!
-//
-//    val corner1 by limelight.corner1.readOnTick.withoutStamps
-//    val lastCorner by limelight.cornerLast.readOnTick.withoutStamps
-//
+
 //    controller {
 //        val txValue by limelight.angleToTarget.readOnTick.withoutStamps
 //        val sideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget!!.siValue * cos(txValue!!)))
