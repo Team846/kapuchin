@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.choreos
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 suspend fun Subsystems.liftTeleop() = lift?.run {
@@ -24,17 +25,7 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
 
         choreography {
             launchWhenever(
-                    { liftDown } to choreography {
-                        withTimeout(0.5.Second) {
-                            collectorSlider?.set(
-                                    0.Inch,
-                                    electrical,
-                                    2.5.Inch
-                            )
-                        }
-                        launch { centerSlider() }
-                        set(cargoCollect, 1.Inch)
-                    },
+                    { liftDown } to choreography { liftDown() },
                     { lowPanelHeight } to choreography { set(panelLowRocket, 0.Inch) },
                     { lowCargoHeight } to choreography { set(cargoLowRocket, 0.Inch) },
                     { midPanelHeight } to choreography { set(panelMidRocket, 0.Inch) },
@@ -47,4 +38,16 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
             )
         }
     }
+}
+
+suspend fun Subsystems.liftDown() = coroutineScope {
+    withTimeout(0.5.Second) {
+        collectorSlider?.set(
+                0.Inch,
+                electrical,
+                2.5.Inch
+        )
+    }
+    launch { centerSlider() }
+    lift?.run { set(cargoCollect, 1.Inch) }
 }
