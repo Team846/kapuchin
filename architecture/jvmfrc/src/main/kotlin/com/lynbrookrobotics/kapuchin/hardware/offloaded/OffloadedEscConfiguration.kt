@@ -67,7 +67,10 @@ data class OffloadedEscConfiguration(
 
     fun writeTo(esc: VictorSPX, timeoutMs: Int = this.timeoutMs) {
         // copy and paste from `talon`
-        victorCache[esc].takeIf { this != it }.also {
+        val cached = victorCache[esc]
+        if (this != cached) victorCache[esc].also {
+            println("Writing configurations to VictorSPX ${esc.deviceID}")
+
             if (it == null || it.openloopRamp != this.openloopRamp)
                 +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
 
