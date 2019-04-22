@@ -11,7 +11,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.sin
 
 class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
     val position by with(scope) { c.hardware.position.readOnTick.withStamps }
@@ -202,23 +201,23 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
                                                     trackLength: Length,
                                                     speedMultiplier: Double
 ) = startRoutine("Curve Drive to Target") {
-    val target by limelight.targetPosition.readOnTick.withoutStamps
     val txValue by limelight.angleToTarget.readOnTick.withoutStamps
-    val distanceToTarget = sqrt(((target!!.x / 1.Foot) * (target!!.x / 1.Foot)) + ((target!!.y / 1.Foot) * (target!!.y / 1.Foot)))
-    val targetStatus by limelight.targetStatus.readOnTick.withoutStamps
+    val tVert = limelight.l("tvert")
+    val distanceToTarget = limelight.distanceToTarget(tVert)
+    val targetExists by limelight.targetStatus.readOnTick.withoutStamps
 
-    val aTT by limelight.angleToTarget.readOnTick.withoutStamps
+    val angleToTarget by limelight.angleToTarget.readOnTick.withoutStamps
     val converter = kotlin.math.PI / 180.0
 
-    val aTTinRadians = aTT!!.Radian * converter.Radian
+    val targetAngle = angleToTarget!!.Radian * converter.Radian
 
-    val innerLength = ((distanceToTarget * (aTTinRadians / 1.Radian) / sin(aTTinRadians / converter)) - (trackLength / 1.Foot) * (aTTinRadians / 1.Radian))
-    val outerLength = ((distanceToTarget * (aTTinRadians / 1.Radian) / sin(aTTinRadians / converter)) + (trackLength / 1.Foot) * (aTTinRadians / 1.Radian))
+    val innerLength = ((distanceToTarget * (targetAngle / 1.Radian) / sin(targetAngle / converter)) - (trackLength ) * (targetAngle / 1.Radian))
+    val outerLength = ((distanceToTarget * (targetAngle / 1.Radian) / sin(targetAngle / converter)) + (trackLength) * (targetAngle / 1.Radian))
 
     val outerVelocity = maxSpeed * speedMultiplier
     val innerVelocity = (outerVelocity * innerLength / outerLength)
     controller {
-        if (targetStatus != null && targetStatus == true && txValue!!.Degree < 0.0) {
+        if (targetExists != null && targetExists == true && txValue!!.Degree < 0.0) {
 
             val nativeL = hardware.conversions.nativeConversion.native(innerVelocity)
             val nativeR = hardware.conversions.nativeConversion.native(outerVelocity)
@@ -227,7 +226,7 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
                     VelocityOutput(velocityGains, nativeL),
                     VelocityOutput(velocityGains, nativeR)
             )
-        } else if (targetStatus != null && targetStatus == true && txValue!!.Degree >= 0.0) {
+        } else if (targetExists != null && targetExists == true && txValue!!.Degree >= 0.0) {
 
             val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
             val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
