@@ -29,11 +29,11 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
 
     private val table = NetworkTableInstance.getDefault().getTable("/limelight")
 
-    fun l(key: String) = table.getEntry(key).getDouble(0.0)
+    private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private fun targetExists() = l("tv").roundToInt() == 1
     private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
 
-    fun distanceToTarget(tvert: Double) = distanceVerticalConstant / tvert
+    private fun distanceToTarget(tvert: Double) = distanceVerticalConstant / tvert
     private fun turn(tx: Angle, distance: Length) = atan(distance * tan(tx) / (distance + mounting.y))
     private fun aspect(thor: Double, tvert: Double) = thor / tvert
     private fun skew(aspect: Double) = acos(aspect.Each / aspect0 minMag 1.Each)
