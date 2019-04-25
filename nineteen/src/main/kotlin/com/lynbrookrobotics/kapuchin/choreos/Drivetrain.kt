@@ -38,18 +38,41 @@ suspend fun optimizedLimelightTracking(
 
     val distToNorm by limelight.distanceToNormal.readEagerly().withoutStamps
     val targetLocation by limelight.targetPosition.readEagerly().withoutStamps
-    val distanceToTarget = sqrt(Dimensionless((targetLocation!!.x.siValue * targetLocation!!.x.siValue) + (targetLocation!!.y.siValue * targetLocation!!.y.siValue)))
+    val distanceToTarget = targetLocation?.let {
+        sqrt(Dimensionless((it.x.siValue * it.x.siValue) + (it.y.siValue * it.y.siValue)))
+    }
     val startingTXValue by limelight.targetAngle.readEagerly().withoutStamps
-    val startingSideAcrossTX = sqrt((distanceToTarget * distanceToTarget) + (Dimensionless(distToNorm!!.siValue) * Dimensionless(distToNorm!!.siValue)) - (2 * distToNorm!!.siValue * distanceToTarget.siValue * cos(startingTXValue!!)))
-    val startingIsosAngle = acos(((distanceToTarget * distanceToTarget) + (startingSideAcrossTX * startingSideAcrossTX) - Dimensionless(distToNorm!!.siValue * distToNorm!!.siValue)) / (Dimensionless(2.0) * distanceToTarget * distToNorm!!.siValue).siValue)
-    val startingTurnAngle = startingIsosAngle - startingTXValue!!
+    val startingSideAcrossTX = distanceToTarget?.let { distance ->
+        distToNorm?.let {normal ->
+            startingTXValue?.let {tx ->
+                sqrt((distance * distance) + (Dimensionless(normal.siValue) * Dimensionless(normal.siValue)) - (2 * normal.siValue * distance.siValue * cos(tx)))
+            }
 
-    choreography {
-        drivetrain.turn(startingTurnAngle, tolerance / 2)
-        drivetrain.limelightCurveDrive(limelight, 2.Foot, 0.5)
+        }
+    }
+    val startingIsosAngle = distanceToTarget?.let { distance ->
+        distToNorm?.let { normal ->
+            startingSideAcrossTX?.let { side ->
+                acos(((distance * distance) + (side * side) - Dimensionless(normal.siValue * normal.siValue)) / (Dimensionless(2.0) * distance * normal.siValue).siValue)
+            }
+
+        }
+    }
+    val startingTurnAngle = startingTXValue?.let {
+        startingIsosAngle?.let {angle ->
+            angle - it
+        }
     }
 
-}
+        choreography {
+            if (startingTurnAngle != null) {
+                drivetrain.turn(startingTurnAngle, tolerance / 2)
+                drivetrain.limelightCurveDrive(limelight, 2.Foot, 0.5)
+            }
+        }
+    }
+
+
 
 suspend fun limelightAlign(
         drivetrain: DrivetrainComponent,
