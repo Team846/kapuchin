@@ -208,8 +208,8 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
 
     val targetAngle = angleToTarget!!.Radian * converter.Radian
 
-    val innerLength = ((distanceToTarget * (targetAngle / 1.Radian) / sin(targetAngle / converter)) - (trackLength ) * (targetAngle / 1.Radian))
-    val outerLength = ((distanceToTarget * (targetAngle / 1.Radian) / sin(targetAngle / converter)) + (trackLength) * (targetAngle / 1.Radian))
+    val innerLength = ((distanceToTarget * (targetAngle) / sin(targetAngle / converter)) - (trackLength ) * (targetAngle))
+    val outerLength = ((distanceToTarget * (targetAngle) / sin(targetAngle / converter)) + (trackLength) * (targetAngle))
 
     val outerVelocity = maxSpeed * speedMultiplier
     val innerVelocity = (outerVelocity * innerLength / outerLength)
