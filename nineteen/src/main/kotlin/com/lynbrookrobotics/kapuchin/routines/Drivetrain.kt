@@ -206,36 +206,47 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
     val angleToTarget by limelight.angleToTarget.readOnTick.withoutStamps
     val converter = kotlin.math.PI / 180.0
 
-    val targetAngle = angleToTarget!!.Radian * converter.Radian
-
-    val innerLength = ((distanceToTarget * (targetAngle) / sin(targetAngle / converter)) - (trackLength ) * (targetAngle))
-    val outerLength = ((distanceToTarget * (targetAngle) / sin(targetAngle / converter)) + (trackLength) * (targetAngle))
-
-    val outerVelocity = maxSpeed * speedMultiplier
-    val innerVelocity = (outerVelocity * innerLength / outerLength)
-    controller {
-        if (targetExists != null && targetExists == true && txValue!!.Degree < 0.0) {
-
-            val nativeL = hardware.conversions.nativeConversion.native(innerVelocity)
-            val nativeR = hardware.conversions.nativeConversion.native(outerVelocity)
-
-            TwoSided(
-                    VelocityOutput(velocityGains, nativeL),
-                    VelocityOutput(velocityGains, nativeR)
-            )
-        } else if (targetExists != null && targetExists == true && txValue!!.Degree >= 0.0) {
-
-            val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
-            val nativeR = hardware.conversions.nativeConversion.native(innerVelocity)
-
-            TwoSided(
-                    VelocityOutput(velocityGains, nativeL),
-                    VelocityOutput(velocityGains, nativeR)
-            )
-        } else null
-
+    val targetAngle = angleToTarget?.let {
+        it.Radian * converter.Radian
     }
-}
+
+    val innerLength = targetAngle?.let {
+        ((distanceToTarget * (it) / sin(targetAngle / converter)) - (trackLength) * (it))
+    }
+        val outerLength = targetAngle?.let {
+            ((distanceToTarget * (it) / sin(targetAngle / converter)) + (trackLength) * (it))
+        }
+
+        val outerVelocity = maxSpeed * speedMultiplier
+        val innerVelocity = innerLength?.let {
+            outerLength?.let {outer ->
+                (outerVelocity * (it / outer))
+            }
+        }
+        controller {
+            if (targetExists != null && targetExists == true && txValue!!.Degree < 0.0) {
+
+                val nativeL = if (innerVelocity != null) hardware.conversions.nativeConversion.native(innerVelocity) else null
+                val nativeR = hardware.conversions.nativeConversion.native(outerVelocity)
+
+                TwoSided(
+                        VelocityOutput(velocityGains, nativeL!!),
+                        VelocityOutput(velocityGains, nativeR)
+                )
+            } else if (targetExists != null && targetExists == true && txValue!!.Degree >= 0.0) {
+
+                val nativeL = hardware.conversions.nativeConversion.native(outerVelocity)
+                val nativeR = if (innerVelocity != null) hardware.conversions.nativeConversion.native(innerVelocity) else null
+
+                TwoSided(
+                        VelocityOutput(velocityGains, nativeL),
+                        VelocityOutput(velocityGains, nativeR!!)
+                )
+            } else null
+
+        }
+    }
+
 
 
 suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
