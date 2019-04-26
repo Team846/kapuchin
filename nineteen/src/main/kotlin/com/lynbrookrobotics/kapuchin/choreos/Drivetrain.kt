@@ -65,7 +65,7 @@ suspend fun optimizedLimelightTracking(
             angle - it
         }
     }
-    val trackLength: Length = drivetrainConversions.trackLength //by drivetrainConversions.trackLength <- needs to be fixed but this is filler so the code doesn't crash
+    val trackLength: Length = drivetrainConversions.trackLength
         choreography {
             if (startingTurnAngle != null) {
                 drivetrain.turn(startingTurnAngle, tolerance / 2)
