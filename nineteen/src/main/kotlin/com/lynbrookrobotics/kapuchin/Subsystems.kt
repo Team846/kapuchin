@@ -52,6 +52,7 @@ object Subsystems : Named by Named("subsystems") {
     lateinit var climber: ClimberComponent private set
     lateinit var limelight: LimelightHardware private set
     lateinit var electrical: ElectricalSystemHardware private set
+    lateinit var drivetrainConversions: DrivetrainConversions private set
 
     fun concurrentInit() = runBlocking {
         val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
@@ -153,7 +154,7 @@ object Subsystems : Named by Named("subsystems") {
     }
 
     suspend fun limelightCurve() {
-        optimizedLimelightTracking(drivetrain, limelight)
+        optimizedLimelightTracking(drivetrain, limelight, 10.Degree, drivetrainConversions)
     }
 
     val performance by pref(40, Percent)

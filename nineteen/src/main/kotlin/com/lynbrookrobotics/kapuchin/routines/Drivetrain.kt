@@ -196,7 +196,8 @@ suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: Li
 
 suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware,
                                                     trackLength: Length,
-                                                    speedMultiplier: Double
+                                                    speedMultiplier: Double,
+                                                    drivetrainConversions: DrivetrainConversions
 ) = startRoutine("Curve Drive to Target") {
     val txValue by limelight.angleToTarget.readOnTick.withoutStamps
     val tVert = limelight.l("tvert")

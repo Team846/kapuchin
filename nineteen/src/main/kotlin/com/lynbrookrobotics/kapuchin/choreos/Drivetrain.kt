@@ -34,7 +34,8 @@ suspend fun drivetrainTeleop(
 suspend fun optimizedLimelightTracking(
         drivetrain: DrivetrainComponent,
         limelight: LimelightHardware,
-        tolerance: Angle = 10.Degree
+        tolerance: Angle = 10.Degree,
+        drivetrainConversions: DrivetrainConversions
 ) = startChoreo("Optimized Limelight Tracking") {
 
     val distToNorm by limelight.distanceToNormal.readEagerly().withoutStamps
@@ -64,11 +65,11 @@ suspend fun optimizedLimelightTracking(
             angle - it
         }
     }
-
+    val trackLength: Length = 2.Foot //by drivetrainConversions.trackLength <- needs to be fixed but this is filler so the code doesn't crash
         choreography {
             if (startingTurnAngle != null) {
                 drivetrain.turn(startingTurnAngle, tolerance / 2)
-                drivetrain.limelightCurveDrive(limelight, 2.Foot, 0.5)
+                drivetrain.limelightCurveDrive(limelight, trackLength , 0.5, drivetrainConversions)
             }
         }
     }
