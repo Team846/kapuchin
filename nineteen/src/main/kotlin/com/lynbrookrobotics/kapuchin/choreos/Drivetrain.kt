@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -39,21 +40,21 @@ suspend fun optimizedLimelightTracking(
     val distToNorm by limelight.distanceToNormal.readEagerly().withoutStamps
     val targetLocation by limelight.targetPosition.readEagerly().withoutStamps
     val distanceToTarget = targetLocation?.let {
-        sqrt(Dimensionless((it.x.siValue * it.x.siValue) + (it.y.siValue * it.y.siValue)))
+        UomVector(it.x, it.y).abs
     }
     val startingTXValue by limelight.targetAngle.readEagerly().withoutStamps
-    val startingSideAcrossTX = distanceToTarget?.let { distance ->
+    val acrossTx = distanceToTarget?.let { distance ->
         distToNorm?.let {normal ->
             startingTXValue?.let {tx ->
-                sqrt((distance * distance) + (Dimensionless(normal.siValue) * Dimensionless(normal.siValue)) - (2 * normal.siValue * distance.siValue * cos(tx)))
+                sqrt(Dimensionless(((distance * distance) + (normal * normal) - (2 * normal * distance * cos(tx))).siValue)) * 1.Inch
             }
 
         }
     }
     val startingIsosAngle = distanceToTarget?.let { distance ->
         distToNorm?.let { normal ->
-            startingSideAcrossTX?.let { side ->
-                acos(((distance * distance) + (side * side) - Dimensionless(normal.siValue * normal.siValue)) / (Dimensionless(2.0) * distance * normal.siValue).siValue)
+            acrossTx?.let { side ->
+                acos(((distance * distance) + (side * side) - (normal * normal)) / (Dimensionless(2.0) * distance * normal))
             }
 
         }
