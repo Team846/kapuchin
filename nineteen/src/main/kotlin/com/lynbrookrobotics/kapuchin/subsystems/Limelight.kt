@@ -104,7 +104,7 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     }
     val targetStatus = sensor {
         (if (targetExists()) {
-            (true)
+            (targetExists())
         } else null) stampWith timeStamp(it)
     }
     val distanceToNormal = sensor {
