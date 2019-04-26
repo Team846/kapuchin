@@ -195,8 +195,8 @@ suspend fun DrivetrainComponent.limelightTracking(speed: Velocity, limelight: Li
 //}
 
 suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware,
-                                                    speedMultiplier: Double,
-                                                    trackLength: DrivetrainConversions
+                                                    trackLength: Length,
+                                                    speedMultiplier: Double
 ) = startRoutine("Curve Drive to Target") {
     val txValue by limelight.angleToTarget.readOnTick.withoutStamps
     val tVert = limelight.l("tvert")
@@ -211,10 +211,10 @@ suspend fun DrivetrainComponent.limelightCurveDrive(limelight: LimelightHardware
     }
 
     val innerLength = targetAngle?.let {
-        ((distanceToTarget * (it) / sin(targetAngle / converter)) - (trackLength.trackLength) * (it))
+        ((distanceToTarget * (it) / sin(targetAngle / converter)) - (trackLength) * (it))
     }
         val outerLength = targetAngle?.let {
-            ((distanceToTarget * (it) / sin(targetAngle / converter)) + (trackLength.trackLength) * (it))
+            ((distanceToTarget * (it) / sin(targetAngle / converter)) + (trackLength) * (it))
         }
 
         val outerVelocity = maxSpeed * speedMultiplier
