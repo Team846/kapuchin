@@ -9,7 +9,6 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

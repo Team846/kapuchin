@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.sign
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"

@@ -1,9 +1,9 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
-import info.kunalsheth.units.generated.*
-import com.ctre.phoenix.motorcontrol.can.VictorSPX
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import info.kunalsheth.units.generated.*
 
 sealed class OffloadedOutput {
     abstract val gains: OffloadedEscGains?
