@@ -1,26 +1,37 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedEscSafeties.Companion.NoSafeties
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
-suspend fun LiftComponent.set(target: Length, tolerance: Length = 2.Inch) = startRoutine("Set") {
+suspend fun LiftComponent.set(target: Length, tolerance: Length = 1.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
+    val startTime = currentTime
 
     controller {
-        with(hardware.conversions.native) {
-            PositionOutput(
-                    OffloadedPidGains(
-                            kP = native(kP),
-                            kI = 0.0,
-                            kD = native(kD)
-                    ), native(target)
-            ).takeUnless {
-                (target - current).abs < tolerance
-            }
+        if (currentTime - startTime > 5.Second) {
+            log(Warning) { "Killing set routine to cool motor" }
+            null
+        } else PositionOutput(
+                hardware.escConfig, positionGains,
+                hardware.conversions.native.native(target)
+        ).takeUnless {
+            (target - current).abs < tolerance
         }
+    }
+}
+
+suspend fun LiftComponent.set(dutyCycle: DutyCycle) = startRoutine("Set Openloop") {
+    controller {
+        PercentOutput(
+                hardware.escConfig, dutyCycle, NoSafeties
+        )
     }
 }
 
@@ -29,20 +40,7 @@ suspend fun LiftComponent.manualOverride(operator: OperatorHardware) = startRout
     val liftPrecision by operator.liftPrecision.readEagerly.withoutStamps
     val position by hardware.position.readEagerly.withoutStamps
 
-    var targetting = position.also {}
     controller {
-        if (liftPrecision.isZero) with(hardware.conversions.native) {
-            PositionOutput(
-                    OffloadedPidGains(
-                            kP = native(kP),
-                            kI = 0.0,
-                            kD = native(kD)
-                    ), native(targetting)
-            )
-        }
-        else {
-            targetting = position + 2.Inch * liftPrecision.signum
-            PercentOutput(liftPrecision)
-        }
+        PercentOutput(hardware.escConfig, liftPrecision)
     }
 }

@@ -1,10 +1,12 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider
+package com.lynbrookrobotics.kapuchin.subsystems.collector.slider
 
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -35,13 +37,14 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
                 if (!isZeroed)
                     if (!currentAtZero) 30.Percent
                     else {
+                        log(Debug) { "zeroing" }
                         zero()
                         0.Percent
                     }
-                else if (currentPosition > max && !value.isNegative) -20.Percent
-                else if (currentPosition < min && !value.isPositive) 20.Percent
+                else if (currentPosition > max) -50.Percent
+                else if (currentPosition < min) 50.Percent
                 else value
-        val cappedOutput = zeroedOutput minMag (maxOutput * zeroedOutput.siValue)
+        val cappedOutput = zeroedOutput minMag (maxOutput * zeroedOutput.signum)
 
         esc.set(cappedOutput.Each)
         nativeGrapher(currentTime, cappedOutput)
@@ -55,7 +58,6 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
     override val name: String = "Collector Slider"
 
     val currentLimit by pref(20, Ampere)
-    val startupFrictionCompensation by pref(0.5, Volt)
 
     val invert by pref(false)
     val invertSensor by pref(false)
@@ -103,11 +105,10 @@ class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, Colle
             .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
 
     var isZeroed = false
-        private set
     private var zeroOffset = 0.Inch
     private val center by pref(4.25, Inch)
     fun zero() {
-        zeroOffset = position.optimizedRead(currentTime, 0.Second).y + center
+        zeroOffset = position.optimizedRead(currentTime, 0.Second).y + zeroOffset + center
         isZeroed = true
     }
 

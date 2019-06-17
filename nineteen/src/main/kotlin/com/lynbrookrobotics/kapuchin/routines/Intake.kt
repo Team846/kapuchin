@@ -3,16 +3,13 @@ package com.lynbrookrobotics.kapuchin.routines
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.hookslider.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.pivot.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.handoff.pivot.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -74,6 +71,13 @@ suspend fun CollectorSliderComponent.set(target: DutyCycle) = startRoutine("Manu
     controller { target }
 }
 
+suspend fun CollectorSliderComponent.reZero() = startChoreo("Re-Zero") {
+    hardware.isZeroed = false
+    choreography {
+        while (!hardware.isZeroed) delay(0.2.Second)
+    }
+}
+
 suspend fun CollectorSliderComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
     controller { sliderPrecision }
@@ -84,36 +88,5 @@ suspend fun HookComponent.set(target: HookPosition) = startRoutine("Set") {
 }
 
 suspend fun HookSliderComponent.set(target: HookSliderState) = startRoutine("Set") {
-    controller { target }
-}
-
-suspend fun HandoffPivotComponent.set(target: Angle, tolerance: Angle = 5.Degree) = startRoutine("Set Angle") {
-
-    val current by hardware.position.readOnTick.withoutStamps
-
-    controller {
-        with(hardware.conversions.native) {
-            PositionOutput(
-                    OffloadedPidGains(
-                            kP = native(kP),
-                            kI = 0.0,
-                            kD = native(kD)
-                    ), native(target)
-            ).takeUnless {
-                (target - current).abs < tolerance
-            }
-        }
-    }
-}
-
-suspend fun HandoffPivotComponent.set(speed: DutyCycle) = startRoutine("Set Duty Cycle") {
-    controller { PercentOutput(speed) }
-}
-
-suspend fun HandoffRollersComponent.spin(target: DutyCycle) = startRoutine("Spin") {
-    controller { TwoSided(target) }
-}
-
-suspend fun VelcroPivotComponent.set(target: VelcroPivotPosition) = startRoutine("Set") {
     controller { target }
 }

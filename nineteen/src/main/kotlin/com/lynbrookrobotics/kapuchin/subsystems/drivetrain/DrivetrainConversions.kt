@@ -31,7 +31,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
             )
 
             val nat = LinearOffloadedNativeConversion(::div, ::div, ::times, ::times,
-                    nativeOutputUnits = 1023, perOutputQuantity = hardware.operatingVoltage,
+                    nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = nativeResolution,
                     perFeedbackQuantity = avg(
                             toLeftPosition(resolution, enc).abs,

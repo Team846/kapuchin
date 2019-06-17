@@ -1,9 +1,9 @@
-package com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot
+package com.lynbrookrobotics.kapuchin.subsystems.collector.pivot
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotState.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.pivot.CollectorPivotState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*

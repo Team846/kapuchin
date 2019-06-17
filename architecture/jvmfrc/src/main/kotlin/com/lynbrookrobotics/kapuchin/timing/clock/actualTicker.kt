@@ -45,15 +45,30 @@ actual class Ticker internal actual constructor(
     }
 
     val overrunLogThreshold by pref(100, Millisecond)
+    val overrunFrequencyThreshold by pref(10, Percent)
     private val thread = platformThread(name, priority) {
+        var totalRuns = 0uL
+        var overruns = 0uL
+
         while (true) {
             val startTime = waitOnTick()
             tick(startTime)
             computeTime = currentTime - startTime
 
-            computeTime.takeIf { it > period + overrunLogThreshold }?.also {
+            totalRuns++
+            if (computeTime > period) overruns++
+            if (overruns * 100u / totalRuns > overrunFrequencyThreshold.Percent.toUInt()) {
+                log(Error) {
+                    "more than ${overrunFrequencyThreshold.Percent withDecimals 0}% of loops overrun"
+                }
+                overruns = 0uL
+                totalRuns = 0uL
+            }
+
+            if (computeTime > period + overrunLogThreshold) {
+                val computeTimeCopy = computeTime
                 log(Warning) {
-                    "$name overran its ${period withDecimals 4} loop by ${(it - period) withDecimals 4}"
+                    "overran ${period withDecimals 4} loop by ${(computeTimeCopy - period) withDecimals 4}"
                 }
             }
         }

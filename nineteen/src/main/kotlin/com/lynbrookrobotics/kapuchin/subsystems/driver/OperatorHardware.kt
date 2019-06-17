@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.sign
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"
@@ -19,6 +18,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val xbox by hardw { XboxController(1) }.verify("the operator controller is connected") {
         it.name == "Controller (Xbox One For Windows)"
+    }.verify("xbox controller and rumblr are not swapped") {
+        it.getTriggerAxis(kLeft) < 0.1 && it.getTriggerAxis(kRight) < 0.1
     }
 
     private fun <Input> s(f: XboxController.() -> Input) = sensor { f(xbox) stampWith it }
@@ -48,7 +49,11 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val highCargoHeight = s { yButton && lt }
 
     val lineTracking = s { rt }
-    val centerAll = s { pov == 0 }
+
+    val centerSlider = s { pov == 0 }
+    val centerCargoLeft = s { pov == 90 || pov == 45 }
+    val centerCargoRight = s { pov == 270 || pov == 315 }
+    val reZero = s { pov == 180 }
 
     val deployPanel = s { lb && !lt }
     val lilDicky = s { lb && lt }
@@ -79,6 +84,6 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         -liftJoystickMapping(getY(kLeft).Each) * liftSensitivity
     }
     val sliderPrecision = s {
-        sliderJoystickMapping(getX(kRight).Each) * sliderSensitivity * -(getTriggerAxis(kLeft) - 0.5).sign
+        sliderJoystickMapping(getX(kRight).Each) * sliderSensitivity
     }
 }

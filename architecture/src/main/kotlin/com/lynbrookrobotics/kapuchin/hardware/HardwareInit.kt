@@ -41,7 +41,7 @@ class HardwareInit<Hardw> internal constructor(
                     }
 
             object : ReadOnlyProperty<Any?, Hardw> {
-                override fun getValue(thisRef: Any?, property: KProperty<*>) = value!!
+                override fun getValue(thisRef: Any?, property: KProperty<*>) = value
             }
 
         } catch (t: Throwable) {
