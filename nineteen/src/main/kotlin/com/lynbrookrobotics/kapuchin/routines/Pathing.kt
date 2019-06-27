@@ -47,7 +47,7 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = start
     }
 }
 
-suspend fun DrivetrainComponent.followTrajectory(
+suspend fun Drivetrain.followTrajectory(
         tolerance: Length, endTolerance: Length,
         deceleration: Acceleration, waypts: List<TimeStamped<Waypt>>,
         origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
@@ -107,7 +107,7 @@ suspend fun DrivetrainComponent.followTrajectory(
     }
 }
 
-suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("Waypoint") {
+suspend fun Drivetrain.waypoint(motionProfile: (Length) -> Velocity, target: UomVector<Length>, tolerance: Length) = startRoutine("Waypoint") {
     val position by hardware.position.readOnTick.withStamps
     val uni = UnicycleDrive(this@waypoint, this@startRoutine)
 

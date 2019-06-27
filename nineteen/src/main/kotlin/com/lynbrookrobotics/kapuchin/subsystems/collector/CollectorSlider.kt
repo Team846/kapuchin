@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.collector.slider
+package com.lynbrookrobotics.kapuchin.subsystems.collector
 
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
@@ -16,18 +16,18 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<CollectorSliderComponent, CollectorSliderHardware, DutyCycle>(hardware) {
+class CollectorSlider(hardware: CollectorSliderHardware) : Component<CollectorSlider, CollectorSliderHardware, DutyCycle>(hardware) {
 
     val kP by pref(12, Volt, 1, Inch)
-
     val min by pref(-3.5, Inch)
     val max by pref(4.75, Inch)
     val maxOutput by pref(100, Percent)
     val operatingVoltage by pref(12, Volt)
 
-    override val fallbackController: CollectorSliderComponent.(Time) -> DutyCycle = { 0.Percent }
-
     val nativeGrapher = graph("Output", Percent)
+
+    override val fallbackController: CollectorSlider.(Time) -> DutyCycle = { 0.Percent }
+
     override fun CollectorSliderHardware.output(value: DutyCycle) {
 
         val currentAtZero = atZero.optimizedRead(currentTime, 0.Second).y
@@ -51,7 +51,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
     }
 }
 
-class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, CollectorSliderComponent>() {
+class CollectorSliderHardware : SubsystemHardware<CollectorSliderHardware, CollectorSlider>() {
     override val priority: Priority = Priority.RealTime
     override val period: Time = 30.milli(Second)
     override val syncThreshold: Time = 2.milli(Second)

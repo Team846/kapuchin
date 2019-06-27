@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
     val habToCloseCargo = loadTrajectory("hab_to_close_cargo.tsv", 60.Percent)
     val closeCargoToLoading = loadTrajectory("close_cargo_to_loading.tsv", 60.Percent)
-    val loadingToMiddleCargo = loadTrajectory("loading_to_middle_cargo.tsv", 60.Percent)
+//    val loadingToMiddleCargo = loadTrajectory("loading_to_middle_cargo.tsv", 60.Percent)
 
     val interrupt by driver.interruptAuto.readEagerly(0.Second).withoutStamps
 
@@ -23,11 +23,11 @@ suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
 
     choreography {
         runWhile({ !interrupt }) {
-            launch { lift?.set(lift.panelLowRocket) }
+            launch { lift?.set(lift.panelLow) }
             drivetrain.followTrajectory(20.Inch, 8.Inch, 5.FootPerSecondSquared, habToCloseCargo)
             launch { collectorSlider?.trackLine(lineScanner, electrical) }
             launch { drivetrain.openLoop(30.Percent) }
-            lift?.set(lift.cargoCargoShip)
+            lift?.set(lift.cargoShip)
             deployCargo(true)
             lift?.set(lift.panelCollect)
 
@@ -45,7 +45,7 @@ suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
             )
 //            launch { trackLine() }
 //            launch { drivetrain.openLoop(30.Percent) }
-//            lift?.set(lift.panelMidRocket)
+//            lift?.set(lift.panelMid)
 //            deployPanel()
 //            withTimeout(0.5.Second) { drivetrain.openLoop(-30.Percent) }
 //
@@ -61,7 +61,7 @@ suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
 
 //            withTimeout(2.Second) {
 //                launch { trackLine() }
-//                lift?.set(lift.panelHighRocket)
+//                lift?.set(lift.panelHigh)
 //            }
 //            withTimeout(1.Second) { deployPanel() }
 

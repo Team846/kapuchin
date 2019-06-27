@@ -1,19 +1,19 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.subsystems.driver.*
+import com.lynbrookrobotics.kapuchin.subsystems.feedback.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import java.awt.Color
 
-suspend fun LedComponent.set(color: Color) = startRoutine("Set") {
+suspend fun Leds.set(color: Color) = startRoutine("Set") {
     controller { color }
 }
 
-suspend fun LedComponent.rainbow() = startRoutine("Rainbow") {
+suspend fun Leds.rainbow() = startRoutine("Rainbow") {
     controller { Color(Color.HSBtoRGB(((currentTime.Second / periods.first.Second % 1.0)).toFloat(), 1f, 1f)) }
 }
 
-//suspend fun LedComponent.fade(period: Time, vararg colors: Color) = startRoutine("Fade") {
+//suspend fun Leds.fade(period: Time, vararg colors: Color) = startRoutine("Fade") {
 //
 //    val diffList = mutableListOf<Triple<Double, Double, Double>>()
 //    val size = colors.size

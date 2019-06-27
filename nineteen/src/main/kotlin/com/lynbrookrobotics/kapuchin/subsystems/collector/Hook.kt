@@ -12,16 +12,16 @@ enum class HookPosition(val output: Boolean) {
     Up(false), Down(true)
 }
 
-class HookComponent(hardware: HookHardware) : Component<HookComponent, HookHardware, HookPosition>(hardware, Subsystems.pneumaticTicker) {
+class Hook(hardware: HookHardware) : Component<Hook, HookHardware, HookPosition>(hardware, Subsystems.pneumaticTicker) {
 
-    override val fallbackController: HookComponent.(Time) -> HookPosition = { Up }
+    override val fallbackController: Hook.(Time) -> HookPosition = { Up }
 
     override fun HookHardware.output(value: HookPosition) {
         solenoid.set(value.output)
     }
 }
 
-class HookHardware : SubsystemHardware<HookHardware, HookComponent>() {
+class HookHardware : SubsystemHardware<HookHardware, Hook>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 100.milli(Second)
     override val syncThreshold: Time = 20.milli(Second)

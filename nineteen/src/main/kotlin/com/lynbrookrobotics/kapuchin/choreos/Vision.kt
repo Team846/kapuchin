@@ -9,7 +9,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import info.kunalsheth.units.generated.*
@@ -17,9 +17,9 @@ import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 
 suspend fun Subsystems.limeLineAlign(
-        limelight: LimelightHardware,
-        slider: CollectorSliderComponent,
-        lift: LiftComponent
+        limelight: Limelight,
+        slider: CollectorSlider,
+        lift: Lift
 ) = startChoreo("Limelight / Line Scanner Alignment") {
 
     val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
@@ -65,8 +65,8 @@ suspend fun Subsystems.limeLineAlign(
     }
 }
 
-suspend fun LimelightHardware.perpendicularAlign(
-        drivetrain: DrivetrainComponent,
+suspend fun Limelight.perpendicularAlign(
+        drivetrain: Drivetrain,
         tolerance: Angle = 10.Degree
 ) = startChoreo("Perpendicular align") {
     val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
@@ -121,7 +121,7 @@ suspend fun LimelightHardware.perpendicularAlign(
     }
 }
 
-suspend fun DrivetrainComponent.visionSnapshotTracking(speed: Velocity, limelight: LimelightHardware) = startRoutine("Vision snapshot tracking") {
+suspend fun Drivetrain.visionSnapshotTracking(speed: Velocity, limelight: Limelight) = startRoutine("Vision snapshot tracking") {
     val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
     val robotPosition by hardware.position.readOnTick.withoutStamps
     val uni = UnicycleDrive(this@visionSnapshotTracking, this@startRoutine)
@@ -143,7 +143,7 @@ suspend fun DrivetrainComponent.visionSnapshotTracking(speed: Velocity, limeligh
     }
 }
 
-suspend fun DrivetrainComponent.visionActiveTracking(motionProfile: (Length) -> Velocity, limelight: LimelightHardware, tolerance: Length) = startRoutine("Vision snapshot tracking") {
+suspend fun Drivetrain.visionActiveTracking(motionProfile: (Length) -> Velocity, limelight: Limelight, tolerance: Length) = startRoutine("Vision snapshot tracking") {
     val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
     val targetPosition by limelight.targetPosition.readOnTick.withoutStamps
     val robotPosition by hardware.position.readOnTick.withoutStamps
@@ -168,7 +168,7 @@ suspend fun DrivetrainComponent.visionActiveTracking(motionProfile: (Length) -> 
     }
 }
 
-suspend fun DrivetrainComponent.lineActiveTracking(speed: Velocity, targetRange: ClosedRange<Length>, lineScanner: LineScannerHardware) = startRoutine("Point with line scanner") {
+suspend fun Drivetrain.lineActiveTracking(speed: Velocity, targetRange: ClosedRange<Length>, lineScanner: LineScanner) = startRoutine("Point with line scanner") {
     val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
     val uni = UnicycleDrive(this@lineActiveTracking, this@startRoutine)
 

@@ -14,7 +14,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
+class LiftHardware : SubsystemHardware<LiftHardware, Lift>() {
     override val name: String = "Lift"
     override val period: Time = 30.milli(Second)
     override val priority: Priority = Priority.Low

@@ -8,12 +8,12 @@ import edu.wpi.first.wpilibj.Spark
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, ClimberHardware, DutyCycle>(hardware, EventLoop) {
-
-    override val fallbackController: ClimberComponent.(Time) -> DutyCycle = { 0.Percent }
+class Climber(hardware: ClimberHardware) : Component<Climber, ClimberHardware, DutyCycle>(hardware, EventLoop) {
 
     val maxOutput by pref(80, Percent)
     val invert by pref(false)
+
+    override val fallbackController: Climber.(Time) -> DutyCycle = { 0.Percent }
 
     override fun ClimberHardware.output(value: DutyCycle) {
         val safeOutput =
@@ -26,7 +26,7 @@ class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, 
     }
 }
 
-class ClimberHardware : SubsystemHardware<ClimberHardware, ClimberComponent>() {
+class ClimberHardware : SubsystemHardware<ClimberHardware, Climber>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 250.milli(Second)
     override val syncThreshold: Time = 20.milli(Second)

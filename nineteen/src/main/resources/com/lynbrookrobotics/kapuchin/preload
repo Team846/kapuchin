@@ -1346,7 +1346,7 @@ DEBUG Subsystems/Pneumatic System Ticker: Starting Subsystems/Pneumatic System T
 [10.552s][info][class,load] kotlinx.coroutines.DisposeOnCancel source: file:/home/lvuser/nineteen-1.0.0.jar
 [10.562s][info][class,load] kotlinx.coroutines.internal.LockFreeTaskQueueCore$Placeholder source: file:/home/lvuser/nineteen-1.0.0.jar
 [10.578s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.Component source: file:/home/lvuser/nineteen-1.0.0.jar
-[10.579s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent source: file:/home/lvuser/nineteen-1.0.0.jar
+[10.579s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.Drivetrain source: file:/home/lvuser/nineteen-1.0.0.jar
 [10.590s][info][class,load] kotlin.jvm.internal.PropertyReference0Impl source: file:/home/lvuser/nineteen-1.0.0.jar
 [10.597s][info][class,load] kotlin.reflect.jvm.internal.KProperty0Impl source: file:/home/lvuser/nineteen-1.0.0.jar
 [10.602s][info][class,load] kotlin.reflect.jvm.internal.KProperty0Impl$_getter$1 source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1526,14 +1526,14 @@ DEBUG Drivetrain/ticksToSerial: Initializing
 [12.670s][info][class,load] com.lynbrookrobotics.kapuchin.timing.clock.EventLoop source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.679s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainHardware$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.706s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.Component$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[12.713s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent$velocityGains$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[12.713s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.Drivetrain$velocityGains$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Drivetrain/Ticker: Starting Drivetrain/Ticker Ticker Thread
 [12.728s][info][class,load] com.lynbrookrobotics.kapuchin.preferences.PreferenceLayerKt$pref$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.737s][info][class,load] com.lynbrookrobotics.kapuchin.preferences.PreferenceLayerKt$pref$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.756s][info][class,load] info.kunalsheth.units.generated.Percent source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.769s][info][class,load] com.lynbrookrobotics.kapuchin.control.data.TimeStampedKt source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.776s][info][class,load] com.lynbrookrobotics.kapuchin.control.data.TimeStamped source: file:/home/lvuser/nineteen-1.0.0.jar
-[12.777s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent$velocityGains$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[12.777s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.Drivetrain$velocityGains$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.790s][info][class,load] info.kunalsheth.units.generated.DegreePerSecond source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.794s][info][class,load] com.lynbrookrobotics.kapuchin.logging.Grapher$invoke$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.804s][info][class,load] edu.wpi.first.wpilibj.smartdashboard.SmartDashboard source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1541,7 +1541,7 @@ DEBUG Drivetrain/Ticker: Starting Drivetrain/Ticker Ticker Thread
 [12.832s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedOutput source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.838s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.offloaded.PercentOutput source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.845s][info][class,load] com.lynbrookrobotics.kapuchin.control.data.TwoSided source: file:/home/lvuser/nineteen-1.0.0.jar
-[12.859s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[12.859s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.Drivetrain$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.885s][info][class,load] info.kunalsheth.units.generated.Each source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.898s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedPidControlLoop source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.899s][info][class,load] com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1555,97 +1555,97 @@ DEBUG Drivetrain/Ticker: Starting Drivetrain/Ticker Ticker Thread
 [12.978s][info][class,load] kotlin.jvm.internal.Ref$DoubleRef source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.983s][info][class,load] com.lynbrookrobotics.kapuchin.control.math.DifferentiatorKt$differentiator$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [12.992s][info][class,load] com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker$Companion$memoryUsage$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.002s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.008s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.DrivetrainComponent$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.002s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.Drivetrain$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.008s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.Drivetrain$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.029s][info][class,load] com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker$jitterPulse$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.035s][info][class,load] kotlinx.coroutines.IncompleteStateBox source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.042s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.053s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ElectricalSystemHardware$batteryVoltage$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.066s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.077s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$station$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.042s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ElectricalHardware source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.053s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ElectricalHardware$batteryVoltage$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.066s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.077s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$station$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Driver/station: Initializing
-[13.095s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$stick$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.102s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$stick$3 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.095s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$stick$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.102s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$stick$3 source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.109s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.HardwareInit$verify$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Driver/stick: Initializing
 [13.127s][info][class,load] edu.wpi.first.wpilibj.GenericHID source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.131s][info][class,load] edu.wpi.first.wpilibj.Joystick source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.145s][info][class,load] edu.wpi.first.wpilibj.Joystick$Axis source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.156s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$wheel$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.163s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$wheel$3 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.156s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$wheel$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.163s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$wheel$3 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Driver/wheel: Initializing
-[13.183s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$absoluteWheel$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.192s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$absoluteWheel$3 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.183s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$absoluteWheel$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.192s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$absoluteWheel$3 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Driver/absoluteWheel: Initializing
-[13.213s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$joystickMapping$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.225s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$joystickMapping$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.241s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$wheelMapping$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.250s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$wheelMapping$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.259s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$accelerator$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.213s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$joystickMapping$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.225s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$joystickMapping$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.241s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$wheelMapping$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.250s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$wheelMapping$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.259s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$accelerator$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.266s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Sensor$$special$$inlined$±$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.277s][info][class,load] kotlin.ranges.ClosedRange$DefaultImpls source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.282s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$s$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.308s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$steering$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.326s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$absSteering$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.342s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.352s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$collectCargo$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.362s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$liftDown$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.370s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$interruptAuto$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.378s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$lineTracking$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.396s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.415s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$xbox$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.422s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$xbox$3 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.282s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$s$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.308s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$steering$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.326s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$absSteering$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.342s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.352s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$collectCargo$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.362s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$liftDown$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.370s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$interruptAuto$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.378s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$lineTracking$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.396s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.415s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$xbox$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.422s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$xbox$3 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Operator/xbox: Initializing
 [13.435s][info][class,load] edu.wpi.first.wpilibj.XboxController source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.460s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$cargoShipCargoHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.478s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$s$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.489s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$pivotDown$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.495s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$lowPanelHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.521s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$lowCargoHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.542s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$midPanelHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.546s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$midCargoHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.551s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$highPanelHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.554s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$highCargoHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.556s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$lineTracking$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.581s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$centerAll$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.584s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$deployPanel$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.603s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$lilDicky$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.608s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$softDeployCargo$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.613s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$deployCargo$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.635s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$unleashTheCobra$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.638s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$oShitSnekGoBack$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.641s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$liftJoystickMapping$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.645s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$liftJoystickMapping$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.665s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$sliderJoystickMapping$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.692s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$sliderJoystickMapping$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.705s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$liftPrecision$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.726s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$sliderPrecision$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.756s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.460s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$cargoShipCargoHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.478s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$s$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.489s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$pivotDown$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.495s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$lowPanelHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.521s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$lowCargoHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.542s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$midPanelHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.546s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$midCargoHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.551s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$highPanelHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.554s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$highCargoHeight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.556s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$lineTracking$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.581s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$centerAll$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.584s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$deployPanel$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.603s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$lilDicky$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.608s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$softDeployCargo$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.613s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$deployCargo$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.635s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$unleashTheCobra$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.638s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$oShitSnekGoBack$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.641s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$liftJoystickMapping$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.645s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$liftJoystickMapping$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.665s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$sliderJoystickMapping$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.692s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$sliderJoystickMapping$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.705s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$liftPrecision$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.726s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$sliderPrecision$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.756s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.769s][info][class,load] com.lynbrookrobotics.kapuchin.control.conversion.deadband.HorizontalDeadbandKt source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.773s][info][class,load] com.lynbrookrobotics.kapuchin.control.conversion.deadband.HorizontalDeadbandKt$horizontalDeadband$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.792s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$joystickMapping$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.792s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$joystickMapping$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.812s][info][class,load] edu.wpi.first.wpilibj.GenericHID$Hand source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.827s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$lineScanner$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.827s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$lineScanner$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Line Scanner/lineScanner: Initializing
-[13.845s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.DriverHardware$wheelMapping$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.870s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.908s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$$special$$inlined$±$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.845s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Driver$wheelMapping$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.870s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScannerHardware source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.908s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScannerHardware$$special$$inlined$±$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [13.927s][info][class,load] info.kunalsheth.units.generated.Hertz source: file:/home/lvuser/nineteen-1.0.0.jar
-[13.985s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.005s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$pt1$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.025s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$pt1$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.030s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$pt2$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.044s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$pt2$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.047s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$pt3$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.051s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$pt3$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.059s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$pt4$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.062s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$pt4$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.075s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.088s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$linePosition$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[13.985s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.005s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$pt1$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.025s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$pt1$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.030s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$pt2$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.044s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$pt2$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.047s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$pt3$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.051s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$pt3$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.059s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$pt4$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.062s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$pt4$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.075s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.088s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$linePosition$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.095s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.SensorKt$sensor$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.106s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$linePosition$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.116s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.164s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotComponent source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.106s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$linePosition$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.116s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.LineScanner$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.164s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivot source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.178s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotHardware source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.202s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotHardware$solenoid$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Collector Pivot/solenoid: Initializing
@@ -1654,9 +1654,9 @@ DEBUG Collector Pivot/solenoid: Initializing
 [14.244s][info][class,load] edu.wpi.first.hal.SolenoidJNI source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.265s][info][class,load] java.util.Collections$SingletonSet source: jrt:/java.base
 [14.266s][info][class,load] java.util.Collections$1 source: jrt:/java.base
-[14.276s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivotComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.276s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.pivot.CollectorPivot$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.279s][info][class,load] kotlin.jvm.internal.DoubleCompanionObject source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.301s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollersComponent source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.301s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollers source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.324s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollersHardware source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.331s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollersHardware$topEsc$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.349s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollersHardware$topEsc$3 source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1673,8 +1673,8 @@ DEBUG Collector Rollers/topEsc: Initializing
 [14.474s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollersHardware$bottomEsc$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.485s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollersHardware$bottomEsc$3 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Collector Rollers/bottomEsc: Initializing
-[14.573s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollersComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[14.632s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderComponent source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.573s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.CollectorRollers$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[14.632s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSlider source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.700s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderHardware source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.748s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderHardware$esc$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [14.753s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderHardware$esc$3 source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1714,7 +1714,7 @@ DEBUG Collector Slider/limitSwitch: Initializing
 [15.130s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderHardware$atZero$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [15.144s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderHardware$atZero$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [15.167s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderHardware$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[15.190s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSliderComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[15.190s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.slider.CollectorSlider$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Collector Slider/Ticker: Starting Collector Slider/Ticker Ticker Thread
 [15.209s][info][class,load] com.revrobotics.CANSparkMax$FaultID source: file:/home/lvuser/nineteen-1.0.0.jar
 [15.214s][info][class,load] com.revrobotics.CANSparkMaxFrames$Status0In source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1733,7 +1733,7 @@ DEBUG Collector Slider/Ticker: Starting Collector Slider/Ticker Ticker Thread
 [15.311s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderHardware source: file:/home/lvuser/nineteen-1.0.0.jar
 [15.321s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.hookslider.HookSliderComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [15.328s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.intake.collector.HookPosition source: file:/home/lvuser/nineteen-1.0.0.jar
-[15.343s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.LiftComponent source: file:/home/lvuser/nineteen-1.0.0.jar
+[15.343s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.Lift source: file:/home/lvuser/nineteen-1.0.0.jar
 [15.369s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.LiftHardware source: file:/home/lvuser/nineteen-1.0.0.jar
 [15.380s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.LiftConversions source: file:/home/lvuser/nineteen-1.0.0.jar
 [15.405s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.LiftConversions$conversions$2 source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1760,31 +1760,31 @@ DEBUG Lift/esc: Initializing
 [16.082s][info][class,load] kotlin.ranges.ClosedDoubleRange source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.096s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.LiftHardware$position$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.105s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.LiftHardware$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.119s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.LiftComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.128s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ClimberComponent source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.119s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.lift.Lift$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.128s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.Climber source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.138s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ClimberHardware source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.150s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ClimberHardware$leftEsc$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Climber/leftEsc: Initializing
 [16.161s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ClimberHardware$rightEsc$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 DEBUG Climber/rightEsc: Initializing
-[16.181s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ClimberComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.194s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.210s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$mounting$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.218s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$mounting$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.225s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$aspect0$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.239s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$aspect0$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.248s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$targetPosition$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.262s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$targetPosition$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.278s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$targetPosition$3 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.289s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$targetPosition$4 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.294s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$targetAngle$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.305s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.LimelightHardware$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.181s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.Climber$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.194s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.210s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$mounting$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.218s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$mounting$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.225s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$aspect0$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.239s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$aspect0$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.248s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$targetPosition$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.262s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$targetPosition$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.278s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$targetPosition$3 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.289s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$targetPosition$4 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.294s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$targetAngle$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.305s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Limelight$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.324s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$teleopAsync$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.336s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$teleopAsync$1$2 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.344s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$teleopAsync$1$3 source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.358s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.RumbleHardware source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.365s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.RumbleComponent source: file:/home/lvuser/nineteen-1.0.0.jar
-[16.373s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.RumbleComponent$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.358s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.feedback.RumbleHardware source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.365s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.feedback.Rumble source: file:/home/lvuser/nineteen-1.0.0.jar
+[16.373s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.feedback.Rumble$fallbackController$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.386s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$4 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.398s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$5 source: file:/home/lvuser/nineteen-1.0.0.jar
 [16.405s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$Companion$concurrentInit$1$6 source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -1860,9 +1860,9 @@ Starting event loop...
 [17.310s][info][class,load] com.lynbrookrobotics.kapuchin.routines.ChoreographyKt$runWhile$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [17.318s][info][class,load] com.lynbrookrobotics.kapuchin.Subsystems$warmup$3 source: file:/home/lvuser/nineteen-1.0.0.jar
 [17.325s][info][class,load] com.lynbrookrobotics.kapuchin.routines.ChoreographyKt$runAll$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[17.335s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.ClimberComponent$output$$inlined$±$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[17.335s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.Climber$output$$inlined$±$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [17.356s][info][class,load] kotlinx.coroutines.SupervisorKt source: file:/home/lvuser/nineteen-1.0.0.jar
-WARNING Collector Slider/Ticker: Ticker overran its 0.03 s loop by 0.1125 s[17.363s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.RumbleComponent$TeleopFeedback source: file:/home/lvuser/nineteen-1.0.0.jar
+WARNING Collector Slider/Ticker: Ticker overran its 0.03 s loop by 0.1125 s[17.363s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.feedback.Rumble$TeleopFeedback source: file:/home/lvuser/nineteen-1.0.0.jar
 
 WARNING Drivetrain/Ticker: Ticker overran its 0.03 s loop by 0.1439 s
 WARNING Subsystems/Pneumatic System Ticker: Pneumatic System Ticker overran its 0.05 s loop by 0.1228 s
@@ -2118,7 +2118,7 @@ DEBUG Intake teleop: Started Intake teleop choreography.
 [33.206s][info][class,load] com.lynbrookrobotics.kapuchin.choreos.LiftKt$liftTeleop$$inlined$run$lambda$1$1$10 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.220s][info][class,load] com.lynbrookrobotics.kapuchin.choreos.IntakeKt$intakeTeleop$2$1$11 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.227s][info][class,load] com.lynbrookrobotics.kapuchin.routines.ChoreographyKt$launchWhenever$2$1$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[33.228s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons source: file:/home/lvuser/nineteen-1.0.0.jar
+[33.228s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButton source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.228s][info][class,load] com.lynbrookrobotics.kapuchin.choreos.LiftKt$liftTeleop$$inlined$run$lambda$1$1$11 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.242s][info][class,load] com.lynbrookrobotics.kapuchin.choreos.IntakeKt$intakeTeleop$2$1$12 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.253s][info][class,load] com.lynbrookrobotics.kapuchin.choreos.IntakeKt$intakeTeleop$2$1$13 source: file:/home/lvuser/nineteen-1.0.0.jar
@@ -2143,12 +2143,12 @@ DEBUG Intake teleop: Started Intake teleop choreography.
 [33.404s][info][class,load] com.lynbrookrobotics.kapuchin.routines.BoundSensorScope$readOnTick$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.411s][info][class,load] com.lynbrookrobotics.kapuchin.choreos.LiftKt$liftTeleop$$inlined$run$lambda$1$1$18 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.423s][info][class,load] com.lynbrookrobotics.kapuchin.routines.TeleopSystemKt$vibrateOnAlign$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[33.429s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$sliderJoystickMapping$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[33.429s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$sliderJoystickMapping$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.434s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Sensor$UpdateSource$withStamps$1$provideDelegate$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.468s][info][class,load] com.lynbrookrobotics.kapuchin.routines.UnicycleDrive source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.475s][info][class,load] com.lynbrookrobotics.kapuchin.routines.UnicycleDrive$dadt$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.493s][info][class,load] com.lynbrookrobotics.kapuchin.routines.DrivetrainKt$teleop$2$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[33.506s][info][class,load] com.lynbrookrobotics.kapuchin.subsystems.driver.OperatorHardware$liftJoystickMapping$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[33.506s][info][class,load] com.lynbrookrobotics.kapuchin.hardware.Operator$liftJoystickMapping$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 [33.621s][info][class,unload] unloading class java.lang.invoke.LambdaForm$MH/0xaaa99828 0xaaa99828
 [33.621s][info][class,unload] unloading class java.lang.invoke.LambdaForm$MH/0xaaa9ac28 0xaaa9ac28
 [33.621s][info][class,unload] unloading class java.lang.invoke.LambdaForm$MH/0xaaa9b428 0xaaa9b428
@@ -2430,11 +2430,11 @@ DEBUG Climber/Spin: Cancelled
 DEBUG Climber/Spin: Cancelled
 DEBUG Climber/Spin: Cancelled
 WARNING Drivetrain/Ticker: Ticker overran its 0.03 s loop by 0.1001 s
-[131.269s][info][class,load  ] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
-[131.278s][info][class,load  ] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$1$2 source: file:/home/lvuser/nineteen-1.0.0.jar
-[131.286s][info][class,load  ] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$1$3 source: file:/home/lvuser/nineteen-1.0.0.jar
-[131.295s][info][class,load  ] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$1$4 source: file:/home/lvuser/nineteen-1.0.0.jar
-[131.302s][info][class,load  ] com.lynbrookrobotics.kapuchin.subsystems.drivetrain.LineScannerHardware$conversion$2$1$5 source: file:/home/lvuser/nineteen-1.0.0.jar
+[131.269s][info][class,load  ] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$1$1 source: file:/home/lvuser/nineteen-1.0.0.jar
+[131.278s][info][class,load  ] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$1$2 source: file:/home/lvuser/nineteen-1.0.0.jar
+[131.286s][info][class,load  ] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$1$3 source: file:/home/lvuser/nineteen-1.0.0.jar
+[131.295s][info][class,load  ] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$1$4 source: file:/home/lvuser/nineteen-1.0.0.jar
+[131.302s][info][class,load  ] com.lynbrookrobotics.kapuchin.hardware.LineScanner$conversion$2$1$5 source: file:/home/lvuser/nineteen-1.0.0.jar
 [131.310s][info][class,load  ] com.lynbrookrobotics.kapuchin.routines.IntakeKt$trackLine$2$1$$special$$inlined$±$1 source: file:/home/lvuser/nineteen-1.0.0.jar
 WARNING Drivetrain/Ticker: Ticker overran its 0.03 s loop by 0.1049 s
 WARNING Drivetrain/Ticker: Ticker overran its 0.03 s loop by 0.1016 s

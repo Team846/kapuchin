@@ -6,7 +6,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.RobotController
 import info.kunalsheth.units.generated.*
 
-class ElectricalSystemHardware : RobotHardware<ElectricalSystemHardware>() {
+class Electrical : RobotHardware<Electrical>() {
     override val name = "Electrical System"
     override val priority = Priority.Lowest
 

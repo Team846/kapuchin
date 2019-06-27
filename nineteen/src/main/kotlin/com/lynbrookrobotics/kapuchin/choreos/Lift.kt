@@ -26,13 +26,13 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
         choreography {
             launchWhenever(
                     { liftDown } to choreography { liftDown() },
-                    { lowPanelHeight } to choreography { set(panelLowRocket, 0.Inch) },
-                    { lowCargoHeight } to choreography { set(cargoLowRocket, 0.Inch) },
-                    { midPanelHeight } to choreography { set(panelMidRocket, 0.Inch) },
-                    { midCargoHeight } to choreography { set(cargoMidRocket, 0.Inch) },
-                    { cargoShipCargoHeight } to choreography { set(cargoCargoShip, 0.Inch) },
-                    { highPanelHeight } to choreography { set(panelHighRocket, 0.Inch) },
-                    { highCargoHeight } to choreography { set(cargoHighRocket, 0.Inch) },
+                    { lowPanelHeight } to choreography { set(panelLow, 0.Inch) },
+                    { lowCargoHeight } to choreography { set(cargoLow, 0.Inch) },
+                    { midPanelHeight } to choreography { set(panelMid, 0.Inch) },
+                    { midCargoHeight } to choreography { set(cargoMid, 0.Inch) },
+                    { cargoShipCargoHeight } to choreography { set(cargoShip, 0.Inch) },
+                    { highPanelHeight } to choreography { set(panelHigh, 0.Inch) },
+                    { highCargoHeight } to choreography { set(cargoHigh, 0.Inch) },
 
                     { !liftPrecision.isZero } to choreography { manualOverride(operator) }
             )

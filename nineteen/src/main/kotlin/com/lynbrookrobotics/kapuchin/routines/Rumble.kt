@@ -1,16 +1,16 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.*
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.feedback.*
 import info.kunalsheth.units.generated.*
 
-suspend fun RumbleComponent.set(rumble: Rumble) = startRoutine("Set") {
+suspend fun Rumble.set(rumble: TwoSided<DutyCycle>) = startRoutine("Set") {
     controller { rumble }
 }
 
-suspend fun RumbleComponent.trackLineFeedback(lineScanner: LineScannerHardware, collectorSlider: CollectorSliderComponent) = startRoutine("Track line") {
+suspend fun Rumble.trackLineFeedback(lineScanner: LineScanner, collectorSlider: CollectorSlider) = startRoutine("Track line") {
 
     val target by lineScanner.linePosition.readEagerly.withoutStamps
     val current by collectorSlider.hardware.position.readEagerly.withoutStamps

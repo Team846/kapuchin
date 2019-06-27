@@ -12,7 +12,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
 
-class LimelightHardware : RobotHardware<LimelightHardware>() {
+class Limelight : RobotHardware<Limelight>() {
     override val name = "Limelight"
     override val priority = Priority.Lowest
 

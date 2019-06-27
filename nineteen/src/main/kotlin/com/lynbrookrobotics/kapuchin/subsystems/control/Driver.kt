@@ -1,13 +1,13 @@
-package com.lynbrookrobotics.kapuchin.subsystems.driver
+package com.lynbrookrobotics.kapuchin.subsystems.control
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.hardware.ThrustmasterButtons.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.control.ThrustmasterButton.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
@@ -17,7 +17,20 @@ import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DriverHardware : RobotHardware<DriverHardware>() {
+enum class ThrustmasterButton(val raw: Int) {
+    Trigger(1),
+    LeftTrigger(3), BottomTrigger(2), RightTrigger(4),
+
+    LeftOne(5), LeftTwo(6), LeftThree(7),
+    LeftFour(10), LeftFive(9), LeftSix(8),
+
+    RightThree(13), RightTwo(12), RightOne(11),
+    RightSix(14), RightFive(15), RightFour(16),
+}
+
+operator fun Joystick.get(button: ThrustmasterButton) = getRawButton(button.raw)
+
+class Driver : RobotHardware<Driver>() {
     override val name = "Driver"
     override val priority = Priority.RealTime
 
@@ -75,7 +88,6 @@ class DriverHardware : RobotHardware<DriverHardware>() {
         }
     }
 
-    // buttons
     val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
     val liftDown = s { stick[Trigger] && !stick[BottomTrigger] }
     val interruptAuto = s { stick[LeftTrigger] }

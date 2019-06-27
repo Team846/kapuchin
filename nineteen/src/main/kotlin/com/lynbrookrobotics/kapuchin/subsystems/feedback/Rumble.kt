@@ -1,7 +1,8 @@
-package com.lynbrookrobotics.kapuchin.subsystems.driver
+package com.lynbrookrobotics.kapuchin.subsystems.feedback
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.control.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.GenericHID.RumbleType.kLeftRumble
@@ -9,13 +10,11 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType.kRightRumble
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-typealias Rumble = TwoSided<DutyCycle>
+class Rumble(hardware: RumbleHardware) : Component<Rumble, RumbleHardware, TwoSided<DutyCycle>>(hardware, EventLoop) {
 
-class RumbleComponent(hardware: RumbleHardware) : Component<RumbleComponent, RumbleHardware, Rumble>(hardware, EventLoop) {
+    override val fallbackController: Rumble.(Time) -> TwoSided<DutyCycle> = { TwoSided(0.Percent) }
 
-    override val fallbackController: RumbleComponent.(Time) -> Rumble = { TwoSided(0.Percent) }
-
-    override fun RumbleHardware.output(value: Rumble) {
+    override fun RumbleHardware.output(value: TwoSided<DutyCycle>) {
         driver.rumble?.apply {
             setRumble(kLeftRumble, value.left.Each)
             setRumble(kRightRumble, value.left.Each)
@@ -29,11 +28,11 @@ class RumbleComponent(hardware: RumbleHardware) : Component<RumbleComponent, Rum
 }
 
 class RumbleHardware(
-        val driver: DriverHardware,
-        val operator: OperatorHardware
-) : SubsystemHardware<RumbleHardware, RumbleComponent>() {
-    override val name = "Feedback System"
+        val driver: Driver,
+        val operator: Operator
+) : SubsystemHardware<RumbleHardware, Rumble>() {
+    override val priority = Priority.High
     override val period = 20.milli(Second)
     override val syncThreshold = 10.milli(Second)
-    override val priority = Priority.High
+    override val name = "Rumble"
 }

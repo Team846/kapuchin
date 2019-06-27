@@ -1,9 +1,10 @@
-package com.lynbrookrobotics.kapuchin.subsystems.driver
+package com.lynbrookrobotics.kapuchin.subsystems.feedback
 
 import com.ctre.phoenix.CANifier
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.control.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.DriverStation.Alliance
@@ -14,9 +15,9 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
 
-class LedComponent(hardware: LedHardware) : Component<LedComponent, LedHardware, Color>(hardware, EventLoop) {
+class Leds(hardware: LedsHardware) : Component<Leds, LedsHardware, Color>(hardware, EventLoop) {
 
-    override val fallbackController: LedComponent.(Time) -> Color = {
+    override val fallbackController: Leds.(Time) -> Color = {
         when (hardware.driver.station.alliance) {
             Alliance.Blue -> Color(Color.HSBtoRGB(
                     2 / 3f, 1.0f,
@@ -33,7 +34,7 @@ class LedComponent(hardware: LedHardware) : Component<LedComponent, LedHardware,
         }
     }
 
-    override fun LedHardware.output(value: Color) {
+    override fun LedsHardware.output(value: Color) {
         channels(value)
     }
 
@@ -55,16 +56,15 @@ class LedComponent(hardware: LedHardware) : Component<LedComponent, LedHardware,
             }
         })
     }
-
 }
 
-class LedHardware(
-        val driver: DriverHardware
-) : SubsystemHardware<LedHardware, LedComponent>() {
-    override val name = "LEDs"
+class LedsHardware(
+        val driver: Driver
+) : SubsystemHardware<LedsHardware, Leds>() {
+    override val priority = Priority.Low
     override val period = 50.milli(Second)
     override val syncThreshold = 10.milli(Second)
-    override val priority = Priority.Low
+    override val name = "LEDs"
 
     val canifierDeviceId = 60
     val canifier by hardw { CANifier(canifierDeviceId) }

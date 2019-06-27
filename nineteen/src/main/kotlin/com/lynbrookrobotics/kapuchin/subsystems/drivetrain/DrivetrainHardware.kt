@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
+class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, Drivetrain>() {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
     override val syncThreshold = 4.milli(Second)
@@ -124,7 +124,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
                 rightMasterEsc.getSelectedSensorVelocity(idx)
         ) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
-
 
 // todo: Causes major lag on the v13 RoboRIO image. DO NOT USE.
 //    private val driftTolerance by pref(1, DegreePerSecond)

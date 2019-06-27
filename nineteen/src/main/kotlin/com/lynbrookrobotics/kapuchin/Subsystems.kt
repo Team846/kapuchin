@@ -8,11 +8,9 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.hookslider.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.pivot.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.*
+import com.lynbrookrobotics.kapuchin.subsystems.control.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.subsystems.feedback.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
@@ -25,23 +23,26 @@ import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.io.File
 
-class Subsystems(val drivetrain: DrivetrainComponent,
-                 val electrical: ElectricalSystemHardware,
+class Subsystems(
+        val driver: Driver,
+        val operator: Operator,
 
-                 val driver: DriverHardware,
-                 val operator: OperatorHardware,
-                 val rumble: RumbleComponent,
-                 val leds: LedComponent?,
+        val drivetrain: Drivetrain,
+        val lift: Lift?,
+        val climber: Climber?,
 
-                 val lineScanner: LineScannerHardware,
-                 val collectorPivot: CollectorPivotComponent?,
-                 val collectorRollers: CollectorRollersComponent?,
-                 val collectorSlider: CollectorSliderComponent?,
-                 val hook: HookComponent?,
-                 val hookSlider: HookSliderComponent?,
-                 val lift: LiftComponent?,
-                 val climber: ClimberComponent?,
-                 val limelight: LimelightHardware?
+        val collectorPivot: CollectorPivot?,
+        val collectorRollers: CollectorRollers?,
+        val collectorSlider: CollectorSlider?,
+        val hook: Hook?,
+        val hookSlider: HookSlider?,
+
+        val leds: Leds?,
+        val rumble: Rumble,
+
+        val electrical: Electrical,
+        val limelight: Limelight?,
+        val lineScanner: LineScanner
 ) : Named by Named("Subsystems") {
 
     suspend fun teleop() {
@@ -92,17 +93,15 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             }
         }
 
+
+        private val initLift by pref(true)
+        private val initClimber by pref(true)
         private val initLeds by pref(true)
         private val initCollectorPivot by pref(true)
         private val initCollectorRollers by pref(true)
-        private val initCollectorSlider by pref(false)
+        private val initCollectorSlider by pref(true)
         private val initHook by pref(true)
         private val initHookSlider by pref(true)
-        private val initHandoffPivot by pref(false)
-        private val initHandoffRollers by pref(false)
-        private val initVelcroPivot by pref(false)
-        private val initLift by pref(true)
-        private val initClimber by pref(false)
         private val initLimelight by pref(true)
 
         var instance: Subsystems? = null
@@ -121,42 +120,46 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
                 suspend fun <R> i(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
 
-                val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
-                val electricalAsync = async { ElectricalSystemHardware() }
+                val driverAsync = async { Driver() }
+                val operatorAsync = async { Operator() }
 
-                val driverAsync = async { DriverHardware() }
-                val operatorAsync = async { OperatorHardware() }
-                val rumbleAsync = async { RumbleComponent(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
-                val lineScannerAsync = async { LineScannerHardware() }
+                val drivetrainAsync = async { Drivetrain(DrivetrainHardware()) }
+                val liftAsync = i(initLift) { Lift(LiftHardware()) }
+                val climberAsync = i(initClimber) { Climber(ClimberHardware()) }
 
-                val ledsAsync = i(initLeds) { LedComponent(LedHardware(driverAsync.await())) }
-                val collectorPivotAsync = i(initCollectorPivot) { CollectorPivotComponent(CollectorPivotHardware()) }
-                val collectorRollersAsync = i(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
-                val collectorSliderAsync = i(initCollectorSlider) { CollectorSliderComponent(CollectorSliderHardware()) }
-                val hookAsync = i(initHook) { HookComponent(HookHardware()) }
-                val hookSliderAsync = i(initHookSlider) { HookSliderComponent(HookSliderHardware()) }
-                val liftAsync = i(initLift) { LiftComponent(LiftHardware()) }
-                val climberAsync = i(initClimber) { ClimberComponent(ClimberHardware()) }
-                val limelightAsync = i(initLimelight) { LimelightHardware() }
+                val collectorPivotAsync = i(initCollectorPivot) { CollectorPivot(CollectorPivotHardware()) }
+                val collectorRollersAsync = i(initCollectorRollers) { CollectorRollers(CollectorRollersHardware()) }
+                val collectorSliderAsync = i(initCollectorSlider) { CollectorSlider(CollectorSliderHardware()) }
+                val hookAsync = i(initHook) { Hook(HookHardware()) }
+                val hookSliderAsync = i(initHookSlider) { HookSlider(HookSliderHardware()) }
+
+                val ledsAsync = i(initLeds) { Leds(LedsHardware(driverAsync.await())) }
+                val rumbleAsync = async { Rumble(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
+
+                val electricalAsync = async { Electrical() }
+                val limelightAsync = i(initLimelight) { Limelight() }
+                val lineScannerAsync = async { LineScanner() }
 
                 instance = Subsystems(
-                        drivetrainAsync.await(),
-                        electricalAsync.await(),
-
                         driverAsync.await(),
                         operatorAsync.await(),
-                        rumbleAsync.await(),
-                        t { ledsAsync.await() },
 
-                        lineScannerAsync.await(),
+                        drivetrainAsync.await(),
+                        t { liftAsync.await() },
+                        t { climberAsync.await() },
+
                         t { collectorPivotAsync.await() },
                         t { collectorRollersAsync.await() },
                         t { collectorSliderAsync.await() },
                         t { hookAsync.await() },
                         t { hookSliderAsync.await() },
-                        t { liftAsync.await() },
-                        t { climberAsync.await() },
-                        t { limelightAsync.await() }
+
+                        t { ledsAsync.await() },
+                        rumbleAsync.await(),
+
+                        electricalAsync.await(),
+                        t { limelightAsync.await() },
+                        lineScannerAsync.await()
                 )
             }
         }.also { runBlocking { it.join() } }
@@ -170,27 +173,31 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
             fun <R> i(b: Boolean, f: () -> R) = if (b) f() else null
 
-            val driver = DriverHardware()
-            val operator = OperatorHardware()
-            val rumble = RumbleComponent(RumbleHardware(driver, operator))
-            val leds = i(initLeds) { t { LedComponent(LedHardware(driver)) } }
+            val driver = Driver()
+            val operator = Operator()
+            val rumble = Rumble(RumbleHardware(driver, operator))
+            val leds = i(initLeds) { t { Leds(LedsHardware(driver)) } }
 
             instance = Subsystems(
-                    DrivetrainComponent(DrivetrainHardware()),
-                    ElectricalSystemHardware(),
                     driver,
                     operator,
-                    rumble,
+
+                    Drivetrain(DrivetrainHardware()),
+                    i(initLift) { t { Lift(LiftHardware()) } },
+                    i(initClimber) { t { Climber(ClimberHardware()) } },
+
+                    i(initCollectorPivot) { t { CollectorPivot(CollectorPivotHardware()) } },
+                    i(initCollectorRollers) { t { CollectorRollers(CollectorRollersHardware()) } },
+                    i(initCollectorSlider) { t { CollectorSlider(CollectorSliderHardware()) } },
+                    i(initHook) { t { Hook(HookHardware()) } },
+                    i(initHookSlider) { t { HookSlider(HookSliderHardware()) } },
+
                     leds,
-                    LineScannerHardware(),
-                    i(initCollectorPivot) { t { CollectorPivotComponent(CollectorPivotHardware()) } },
-                    i(initCollectorRollers) { t { CollectorRollersComponent(CollectorRollersHardware()) } },
-                    i(initCollectorSlider) { t { CollectorSliderComponent(CollectorSliderHardware()) } },
-                    i(initHook) { t { HookComponent(HookHardware()) } },
-                    i(initHookSlider) { t { HookSliderComponent(HookSliderHardware()) } },
-                    i(initLift) { t { LiftComponent(LiftHardware()) } },
-                    i(initClimber) { t { ClimberComponent(ClimberHardware()) } },
-                    i(initLimelight) { t { LimelightHardware() } }
+                    rumble,
+
+                    Electrical(),
+                    i(initLimelight) { t { Limelight() } },
+                    LineScanner()
             )
         }
     }

@@ -10,7 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import info.kunalsheth.units.generated.*
 
-class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
+class Drivetrain(hardware: DrivetrainHardware) : Component<Drivetrain, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware) {
 
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
@@ -34,15 +34,15 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     val bearingKp by pref(5, FootPerSecond, 45, Degree)
     val bearingKd by pref(3, FootPerSecond, 360, DegreePerSecond)
 
-    override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
-        TwoSided(PercentOutput(hardware.escConfig, 0.Percent))
-    }
-
     private val leftEscOutputGraph = graph("Left ESC Output", Volt)
     private val rightEscOutputGraph = graph("Right ESC Output", Volt)
 
     private val leftEscErrorGraph = graph("Left ESC Error", Each)
     private val rightEscErrorGraph = graph("Right ESC Error", Each)
+
+    override val fallbackController: Drivetrain.(Time) -> TwoSided<OffloadedOutput> = {
+        TwoSided(PercentOutput(hardware.escConfig, 0.Percent))
+    }
 
     override fun DrivetrainHardware.output(value: TwoSided<OffloadedOutput>) {
         value.left.writeTo(leftMasterEsc)
@@ -56,6 +56,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     }
 
     init {
-        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, { hardware.jitterReadPin.period.Second })
+        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set) { hardware.jitterReadPin.period.Second }
     }
 }

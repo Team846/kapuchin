@@ -8,23 +8,23 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 
-class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
+class Lift(hardware: LiftHardware) : Component<Lift, LiftHardware, OffloadedOutput>(hardware, EventLoop) {
 
     val cargoCollect by pref(8.5, Inch)
     val panelCollect by pref(1.5, Inch)
     val panelCollectStroke by pref(9.75, Inch)
-    val collectGroundPanel by pref(0, Inch)
 
-    val panelLowRocket by pref(4.24, Inch)
     val rocketLevelShift by pref(29, Inch)
-    val panelMidRocket get() = panelLowRocket + rocketLevelShift
-    val panelHighRocket get() = panelLowRocket + rocketLevelShift * 2
+    val panelCargoOffset by pref(-2.5, Inch)
 
-    private val panelCargoOffset by pref(-2.5, Inch)
-    val cargoLowRocket get() = panelLowRocket + panelCargoOffset
-    val cargoCargoShip by pref(17, Inch)
-    val cargoMidRocket get() = panelMidRocket + panelCargoOffset
-    val cargoHighRocket get() = panelHighRocket + panelCargoOffset
+    val panelLow by pref(4.24, Inch)
+    val panelMid get() = panelLow + rocketLevelShift
+    val panelHigh get() = panelLow + rocketLevelShift * 2
+
+    val cargoLow get() = panelLow + panelCargoOffset
+    val cargoShip by pref(17, Inch)
+    val cargoMid get() = panelMid + panelCargoOffset
+    val cargoHigh get() = panelHigh + panelCargoOffset
 
     val positionGains by pref {
         val kP by pref(12, Volt, 12, Inch)
@@ -38,7 +38,7 @@ class LiftComponent(hardware: LiftHardware) : Component<LiftComponent, LiftHardw
         })
     }
 
-    override val fallbackController: LiftComponent.(Time) -> OffloadedOutput = {
+    override val fallbackController: Lift.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
     }
 

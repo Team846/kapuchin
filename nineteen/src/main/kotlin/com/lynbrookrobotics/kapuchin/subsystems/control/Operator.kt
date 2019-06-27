@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.driver
+package com.lynbrookrobotics.kapuchin.subsystems.control
 
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class OperatorHardware : RobotHardware<OperatorHardware>() {
+class Operator : RobotHardware<Operator>() {
     override val name = "Operator"
     override val priority = Priority.RealTime
 

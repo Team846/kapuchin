@@ -12,14 +12,14 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<CollectorRollersComponent, CollectorRollersHardware, TwoSided<DutyCycle>>(hardware, Subsystems.pneumaticTicker) {
+class CollectorRollers(hardware: CollectorRollersHardware) : Component<CollectorRollers, CollectorRollersHardware, TwoSided<DutyCycle>>(hardware, Subsystems.pneumaticTicker) {
 
     val cargoHoldStrength by pref(20, Percent)
     val cargoCollectSpeed by pref(11, Volt)
     val cargoReleaseSpeed by pref(-6, Volt)
 
     private val fallbackValue = TwoSided(cargoHoldStrength)
-    override val fallbackController: CollectorRollersComponent.(Time) -> TwoSided<DutyCycle> = { fallbackValue }
+    override val fallbackController: CollectorRollers.(Time) -> TwoSided<DutyCycle> = { fallbackValue }
 
     override fun CollectorRollersHardware.output(value: TwoSided<DutyCycle>) {
         topEsc.set(ControlMode.PercentOutput, value.left.Each)
@@ -27,7 +27,7 @@ class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<
     }
 }
 
-class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, CollectorRollersComponent>() {
+class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, CollectorRollers>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 50.milli(Second)
     override val syncThreshold: Time = 20.milli(Second)

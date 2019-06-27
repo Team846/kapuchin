@@ -5,13 +5,13 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.*
+import com.lynbrookrobotics.kapuchin.subsystems.control.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
+class UnicycleDrive(private val c: Drivetrain, scope: BoundSensorScope) {
     val position by with(scope) { c.hardware.position.readOnTick.withStamps }
     val dadt = differentiator(::div, position.x, position.y.bearing)
 
@@ -40,7 +40,7 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
     }
 }
 
-suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
+suspend fun Drivetrain.teleop(driver: Driver) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
     val absSteering by driver.absSteering.readOnTick.withoutStamps
@@ -88,7 +88,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     }
 }
 
-suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open loop") {
+suspend fun Drivetrain.openLoop(power: DutyCycle) = startRoutine("open loop") {
     controller {
         TwoSided(
                 PercentOutput(hardware.escConfig, power)
@@ -96,7 +96,7 @@ suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open 
     }
 }
 
-suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRoutine("Turn") {
+suspend fun Drivetrain.turn(target: Angle, tolerance: Angle) = startRoutine("Turn") {
     val uni = UnicycleDrive(this@turn, this@startRoutine)
 
     controller {
@@ -115,7 +115,7 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
 }
 
 
-suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
+suspend fun Drivetrain.warmup() = startRoutine("Warmup") {
 
     fun r() = Math.random()
     val conv = DrivetrainConversions(hardware)
@@ -146,7 +146,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
     }
 }
 
-//suspend fun DrivetrainComponent.arcTo(
+//suspend fun Drivetrain.arcTo(
 //        bearing: Angle, radius: Length,
 //        angleTolerance: Angle, distanceTolerance: Length,
 //
@@ -218,7 +218,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 //    }
 //}
 //
-//suspend fun DrivetrainComponent.driveStraight(
+//suspend fun Drivetrain.driveStraight(
 //        distance: Length, bearing: Angle,
 //        distanceTolerance: Length, angleTolerance: Angle,
 //
