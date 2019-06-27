@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
-suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
+suspend fun Subsystems.collectorTeleop() = startChoreo("Collector teleop") {
 
     val deployCargo by operator.deployCargo.readEagerly().withoutStamps
     val softDeployCargo by operator.softDeployCargo.readEagerly().withoutStamps

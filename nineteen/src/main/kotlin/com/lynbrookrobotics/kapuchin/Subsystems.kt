@@ -50,10 +50,10 @@ class Subsystems(
         HAL.observeUserProgramTeleop()
         runAll(
                 { drivetrainTeleop() },
-                { intakeTeleop() },
+                { collectorTeleop() },
                 { liftTeleop() },
                 { climberTeleop() },
-                { rumbleTeleop() }
+                { feedbackTeleop() }
         )
         System.gc()
     }
