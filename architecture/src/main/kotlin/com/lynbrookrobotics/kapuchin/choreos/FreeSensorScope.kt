@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.routines
+package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
