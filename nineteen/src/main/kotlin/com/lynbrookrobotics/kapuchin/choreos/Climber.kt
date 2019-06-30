@@ -2,30 +2,40 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
-suspend fun Subsystems.climberTeleop() = startChoreo("Climber teleop") {
+//suspend fun Subsystems.climberTeleop() = startChoreo("Climber teleop") {
+//
+//    val unleashTheCobra by operator.unleashTheCobra.readEagerly().withoutStamps
+//    val oShitSnekGoBack by operator.oShitSnekGoBack.readEagerly().withoutStamps
+//
+//    choreography {
+//        runWhenever(
+//                { unleashTheCobra } to choreography { unleashTheCobra() },
+//                { oShitSnekGoBack } to choreography { climber?.set(-climber.maxOutput / 2) ?: freeze() }
+//        )
+//    }
+//}
 
-    val unleashTheCobra by operator.unleashTheCobra.readEagerly().withoutStamps
-    val oShitSnekGoBack by operator.oShitSnekGoBack.readEagerly().withoutStamps
+fun Subsystems.unleashTheCobra() = choreo("Unleash the cobra") {
+    onStart = parallel {
+        sequential {
+            +delay(0.5.Second)
+            globalLaunch {
+                +leds?.rainbow()
+            }
+            +drivetrain.openLoop(30.Percent)
+        }
 
-    choreography {
-        runWhenever(
-                { unleashTheCobra } to choreography { unleashTheCobra() },
-                { oShitSnekGoBack } to choreography { climber?.spin(-climber.maxOutput / 2) ?: freeze() }
-        )
+        +leds?.rainbow()
+        +climber?.set(climber.maxOutput)
+        +freeze()
     }
 }
 
-suspend fun Subsystems.unleashTheCobra() = coroutineScope {
-    launch {
-        delay(0.5.Second)
-        scope.launch { leds?.rainbow() }
-        drivetrain.openLoop(30.Percent)
+fun Subsystems.oShitSnekGoBack() = choreo("O shit snek go back") {
+    onStart = sequential {
+        +climber?.set(-climber.maxOutput / 2)
+        +freeze()
     }
-    launch { leds?.rainbow() }
-    climber?.spin(climber.maxOutput) ?: freeze()
 }
