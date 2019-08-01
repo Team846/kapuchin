@@ -11,28 +11,21 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
 
         val liftDown by driver.liftDown.readEagerly().withoutStamps
 
-        val lowPanelHeight by operator.lowPanelHeight.readEagerly().withoutStamps
-        val lowCargoHeight by operator.lowCargoHeight.readEagerly().withoutStamps
-
-        val midPanelHeight by operator.midPanelHeight.readEagerly().withoutStamps
-        val midCargoHeight by operator.midCargoHeight.readEagerly().withoutStamps
-        val cargoShipCargoHeight by operator.cargoShipCargoHeight.readEagerly().withoutStamps
-
-        val highPanelHeight by operator.highPanelHeight.readEagerly().withoutStamps
-        val highCargoHeight by operator.highCargoHeight.readEagerly().withoutStamps
+        val cargoShipHeight by operator.cargoShipHeight.readEagerly().withoutStamps
+        val rocketLowHeight by operator.rocketLowHeight.readEagerly().withoutStamps
+        val rocketMidHeight by operator.rocketMidHeight.readEagerly().withoutStamps
+        val rocketHighHeight by operator.rocketHighHeight.readEagerly().withoutStamps
 
         val liftPrecision by operator.liftPrecision.readEagerly().withoutStamps
 
         choreography {
             launchWhenever(
                     { liftDown } to choreography { liftDown() },
-                    { lowPanelHeight } to choreography { set(panelLowRocket, 0.Inch) },
-                    { lowCargoHeight } to choreography { set(cargoLowRocket, 0.Inch) },
-                    { midPanelHeight } to choreography { set(panelMidRocket, 0.Inch) },
-                    { midCargoHeight } to choreography { set(cargoMidRocket, 0.Inch) },
-                    { cargoShipCargoHeight } to choreography { set(cargoCargoShip, 0.Inch) },
-                    { highPanelHeight } to choreography { set(panelHighRocket, 0.Inch) },
-                    { highCargoHeight } to choreography { set(cargoHighRocket, 0.Inch) },
+
+                    { cargoShipHeight } to choreography { set(cargoShip, 0.Inch) },
+                    { rocketLowHeight } to choreography { set(rocketLow(operator.currentPiece), 0.Inch) },
+                    { rocketMidHeight } to choreography { set(rocketMid(operator.currentPiece), 0.Inch) },
+                    { rocketHighHeight } to choreography { set(rocketHigh(operator.currentPiece), 0.Inch) },
 
                     { !liftPrecision.isZero } to choreography { manualOverride(operator) }
             )

@@ -5,12 +5,17 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.GamePiece.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+
+enum class GamePiece {
+    Panel, Cargo
+}
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val name = "Operator"
@@ -21,6 +26,9 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     }.verify("xbox controller and rumblr are not swapped") {
         it.getTriggerAxis(kLeft) < 0.1 && it.getTriggerAxis(kRight) < 0.1
     }
+
+    // Whichever piece was last collected
+    var currentPiece = Panel
 
     private fun <Input> s(f: XboxController.() -> Input) = sensor { f(xbox) stampWith it }
 
@@ -36,33 +44,28 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val liftSensitivity by pref(75, Percent)
     val sliderSensitivity by pref(100, Percent)
 
-    val cargoShipCargoHeight = s { xButton }
-    val pivotDown = s { /*xButton && lt*/ false }
+    // Depending on currentPiece, lift  will automatically go to cargo/panel specific heights
+    val cargoShipHeight = s { xButton }
+    val rocketLowHeight = s { aButton }
+    val rocketMidHeight = s { bButton }
+    val rocketHighHeight = s { yButton }
 
-    val lowPanelHeight = s { aButton && !lt }
-    val lowCargoHeight = s { aButton && lt }
-
-    val midPanelHeight = s { bButton && !lt }
-    val midCargoHeight = s { bButton && lt }
-
-    val highPanelHeight = s { yButton && !lt }
-    val highCargoHeight = s { yButton && lt }
+    // lilDicky to collect panel
+    // If the currentPiece is Panel, deploy will deploy the panel
+    // If the currentPiece is Cargo, deploy will deploy the ball. Hard deploy if hardDeploy is true
+    val lilDicky = s { lb }
+    val deploy = s { rb }
+    val hardDeploy = s { lt }
 
     val lineTracking = s { rt }
+
+    val unleashTheCobra = s { lt && start }
+    val oShitSnekGoBack = s { lt && back }
 
     val centerSlider = s { pov == 0 }
     val centerCargoLeft = s { pov == 90 || pov == 45 }
     val centerCargoRight = s { pov == 270 || pov == 315 }
-    val reZero = s { pov == 180 }
-
-    val deployPanel = s { lb && !lt }
-    val lilDicky = s { lb && lt }
-
-    val softDeployCargo = s { rb && !lt }
-    val deployCargo = s { rb && lt }
-
-    val unleashTheCobra = s { lt && start }
-    val oShitSnekGoBack = s { lt && back }
+    val zeroSlider = s { pov == 180 }
 
     val liftJoystickMapping by pref {
         val exponent by pref(2)
