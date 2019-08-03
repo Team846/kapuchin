@@ -56,9 +56,9 @@ fun <C, H, Output> Component<C, H, Output>.controller(
  * @param Output type of this subsystem's output
  */
 class Routine<C, H, Output> internal constructor(
-        val component: C,
-        val name: String,
-        val controller: C.(Time) -> Output?,
+        private val component: C,
+        private val name: String,
+        private val controller: C.(Time) -> Output?,
         private val sensorScope: BoundSensorScope
 )
         where C : Component<C, H, Output>,
@@ -72,7 +72,7 @@ class Routine<C, H, Output> internal constructor(
         try {
             runner?.log(Debug) { "Starting" }
             suspendCancellableCoroutine<Unit> { cont ->
-                RoutineRunner(this, cont).also {
+                RoutineRunner(component, name, controller, cont).also {
                     runner = it
                     component.routineRunner = it
                 }
