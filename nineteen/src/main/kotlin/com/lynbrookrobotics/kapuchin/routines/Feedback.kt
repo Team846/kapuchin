@@ -8,19 +8,19 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import java.awt.Color
 
-fun Leds.set(color: Color) = newRoutine("Set") {
+suspend fun Leds.set(color: Color) = startRoutine("Set") {
     controller { color }
 }
 
-fun Leds.rainbow() = newRoutine("Rainbow") {
+suspend fun Leds.rainbow() = startRoutine("Rainbow") {
     controller { Color(Color.HSBtoRGB(((currentTime.Second / periods.first.Second % 1.0)).toFloat(), 1f, 1f)) }
 }
 
-fun Rumble.set(rumble: TwoSided<DutyCycle>) = newRoutine("Set") {
+suspend fun Rumble.set(rumble: TwoSided<DutyCycle>) = startRoutine("Set") {
     controller { rumble }
 }
 
-fun Rumble.trackLineFeedback(lineScanner: LineScanner, collectorSlider: CollectorSlider) = newRoutine("Track line") {
+suspend fun Rumble.trackLineFeedback(lineScanner: LineScanner, collectorSlider: CollectorSlider) = startRoutine("Track line") {
 
     val target by lineScanner.linePosition.readEagerly.withoutStamps
     val current by collectorSlider.hardware.position.readEagerly.withoutStamps

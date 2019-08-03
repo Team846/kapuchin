@@ -9,7 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
-fun Lift.set(target: Length, tolerance: Length = 1.Inch) = newRoutine("Set") {
+suspend fun Lift.set(target: Length, tolerance: Length = 1.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
     val startTime = currentTime
@@ -27,13 +27,15 @@ fun Lift.set(target: Length, tolerance: Length = 1.Inch) = newRoutine("Set") {
     }
 }
 
-fun Lift.set(dutyCycle: DutyCycle) = newRoutine("Set") {
+suspend fun Lift.set(dutyCycle: DutyCycle) = startRoutine("Set Openloop") {
     controller {
-        PercentOutput(hardware.escConfig, dutyCycle, NoSafeties)
+        PercentOutput(
+                hardware.escConfig, dutyCycle, NoSafeties
+        )
     }
 }
 
-fun Lift.manualOverride(operator: Operator) = newRoutine("Manual override") {
+suspend fun Lift.manualOverride(operator: Operator) = startRoutine("Manual override") {
 
     val liftPrecision by operator.liftPrecision.readEagerly.withoutStamps
 

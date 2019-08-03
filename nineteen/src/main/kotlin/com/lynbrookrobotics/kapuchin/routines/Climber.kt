@@ -3,6 +3,6 @@ package com.lynbrookrobotics.kapuchin.routines
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import info.kunalsheth.units.generated.*
 
-fun Climber.set(target: DutyCycle) = newRoutine("Set") {
+suspend fun Climber.spin(target: DutyCycle) = startRoutine("Spin") {
     controller { target }
 }

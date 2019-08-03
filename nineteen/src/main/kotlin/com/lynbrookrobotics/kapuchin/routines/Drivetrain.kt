@@ -2,12 +2,9 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.control.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -43,16 +40,14 @@ class UnicycleDrive(private val c: Drivetrain, scope: BoundSensorScope) {
     }
 }
 
-fun target(current: Waypt, target: Waypt) = atan2(target.x - current.x, target.y - current.y)
-
-fun Drivetrain.teleop(driver: Driver) = newRoutine("Teleop") {
+suspend fun Drivetrain.teleop(driver: Driver) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
     val absSteering by driver.absSteering.readOnTick.withoutStamps
 
     val position by hardware.position.readOnTick.withStamps
 
-    val uni = UnicycleDrive(this@teleop, this@newRoutine)
+    val uni = UnicycleDrive(this@teleop, this@startRoutine)
 
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
@@ -93,12 +88,16 @@ fun Drivetrain.teleop(driver: Driver) = newRoutine("Teleop") {
     }
 }
 
-fun Drivetrain.openLoop(power: DutyCycle) = newRoutine("Open loop") {
-    controller { TwoSided(PercentOutput(hardware.escConfig, power)) }
+suspend fun Drivetrain.openLoop(power: DutyCycle) = startRoutine("open loop") {
+    controller {
+        TwoSided(
+                PercentOutput(hardware.escConfig, power)
+        )
+    }
 }
 
-fun Drivetrain.turn(target: Angle, tolerance: Angle) = newRoutine("Turn") {
-    val uni = UnicycleDrive(this@turn, this@newRoutine)
+suspend fun Drivetrain.turn(target: Angle, tolerance: Angle) = startRoutine("Turn") {
+    val uni = UnicycleDrive(this@turn, this@startRoutine)
 
     controller {
         val (targVels, error) = uni.speedAngleTarget(0.FootPerSecond, target)
@@ -116,7 +115,7 @@ fun Drivetrain.turn(target: Angle, tolerance: Angle) = newRoutine("Turn") {
 }
 
 
-fun Drivetrain.warmup() = newRoutine("Warmup") {
+suspend fun Drivetrain.warmup() = startRoutine("Warmup") {
 
     fun r() = Math.random()
     val conv = DrivetrainConversions(hardware)
@@ -144,188 +143,5 @@ fun Drivetrain.warmup() = newRoutine("Warmup") {
                 VelocityOutput(hardware.escConfig, velocityGains, nativeL),
                 VelocityOutput(hardware.escConfig, velocityGains, nativeR)
         )
-    }
-}
-
-fun Drivetrain.followTrajectory(
-        tolerance: Length, endTolerance: Length,
-        deceleration: Acceleration, waypts: List<TimeStamped<Waypt>>,
-        origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
-) = newRoutine("Read journal") {
-    val position by hardware.position.readOnTick.withStamps
-    val uni = UnicycleDrive(this@followTrajectory, this@newRoutine)
-
-    val waypointDistance = graph("Distance to Waypoint", Foot)
-
-    val startingLoc = origin.vector
-    val mtrx = RotationMatrix(origin.bearing)
-
-    var remainingDistance = waypts
-            .zipWithNext { a, b -> distance(a.y, b.y) }
-            .reduce { a, b -> a + b }
-
-    val targIter = waypts
-            .map { (t, pt) -> (mtrx rz pt) + startingLoc stampWith t }
-            .iterator()
-
-    var target = targIter.next()
-    var speed = 1.FootPerSecond
-    var isDone = false
-
-    controller { t ->
-        val (_, p) = position
-        val location = p.vector
-
-        val distanceToNext = distance(location, target.y).also { waypointDistance(t, it) }
-        if (!targIter.hasNext() && distanceToNext < endTolerance) {
-            isDone = true
-            speed = 0.FootPerSecond
-        } else if (targIter.hasNext() && distanceToNext < tolerance) {
-            val newTarget = targIter.next()
-
-            val dist = distance(newTarget.y, target.y)
-            speed = avg(
-                    speed, dist / (newTarget.x - target.x)
-            )
-            remainingDistance -= dist
-            target = newTarget
-        }
-
-        val targetA = target(location, target.y)
-        val (targVels, _) = uni.speedAngleTarget(
-                speed min v(deceleration, 0.FootPerSecond, remainingDistance + distanceToNext),
-                targetA
-        )
-
-        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
-        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
-
-        TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-        ).takeUnless { isDone }
-    }
-}
-
-fun Drivetrain.waypoint(
-        motionProfile: (Length) -> Velocity,
-        target: UomVector<Length>,
-        tolerance: Length
-) = newRoutine("Waypoint") {
-    val position by hardware.position.readOnTick.withStamps
-    val uni = UnicycleDrive(this@waypoint, this@newRoutine)
-
-    val waypointDistance = graph("Distance to Waypoint", Foot)
-
-    controller { t ->
-        val (_, p) = position
-        val location = p.vector
-
-        val distance = distance(location, target).also { waypointDistance(t, it) }
-
-        val targetA = target(location, target)
-        val speed = motionProfile(distance)
-        val (targVels, _) = uni.speedAngleTarget(speed, targetA)
-
-        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
-        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
-
-        TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-        ).takeUnless {
-            distance < tolerance
-        }
-    }
-}
-
-fun Drivetrain.visionSnapshotTracking(
-        speed: Velocity,
-        limelight: Limelight
-) = newRoutine("Vision snapshot tracking") {
-    val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
-    val robotPosition by hardware.position.readOnTick.withoutStamps
-    val uni = UnicycleDrive(this@visionSnapshotTracking, this@newRoutine)
-
-    val target = targetAngle?.let { it + robotPosition.bearing }
-
-    controller {
-        if (target != null) {
-            val (targs, _) = uni.speedAngleTarget(speed, target)
-
-            val nativeL = hardware.conversions.nativeConversion.native(targs.left)
-            val nativeR = hardware.conversions.nativeConversion.native(targs.right)
-
-            TwoSided(
-                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-            )
-        } else null
-    }
-}
-
-fun Drivetrain.visionActiveTracking(
-        motionProfile: (Length) -> Velocity,
-        limelight: Limelight,
-        tolerance: Length
-) = newRoutine("Vision snapshot tracking") {
-    val targetAngle by limelight.targetAngle.readOnTick.withoutStamps
-    val targetPosition by limelight.targetPosition.readOnTick.withoutStamps
-    val robotPosition by hardware.position.readOnTick.withoutStamps
-    val uni = UnicycleDrive(this@visionActiveTracking, this@newRoutine)
-
-    controller {
-        targetAngle?.let { targetSnapshot ->
-            val distance = targetPosition!!.vector.abs
-
-            val (targs, _) = uni.speedAngleTarget(motionProfile(distance), targetSnapshot + robotPosition.bearing)
-
-            val nativeL = hardware.conversions.nativeConversion.native(targs.left)
-            val nativeR = hardware.conversions.nativeConversion.native(targs.right)
-
-            TwoSided(
-                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-            ).takeIf {
-                distance > tolerance
-            }
-        }
-    }
-}
-
-fun Drivetrain.lineActiveTracking(
-        speed: Velocity,
-        targetRange: ClosedRange<Length>,
-        lineScanner: LineScanner
-) = newRoutine("Point with line scanner") {
-    val linePosition by lineScanner.linePosition.readOnTick.withoutStamps
-    val uni = UnicycleDrive(this@lineActiveTracking, this@newRoutine)
-
-    var targetLinePosition: Length? = null
-
-    controller {
-        if (targetLinePosition == null) {
-            linePosition?.let { lineSnapshot ->
-                targetLinePosition = lineSnapshot cap targetRange
-                log(Debug) { "Holding line at ${(targetLinePosition ?: 0.Inch).Inch withDecimals 2} inches" }
-            }
-            TwoSided(VelocityOutput(hardware.escConfig, velocityGains,
-                    hardware.conversions.nativeConversion.native(speed))
-            )
-        } else linePosition?.let { lineSnapshot ->
-            val targetA = atan((targetLinePosition ?: 0.Inch) / lineScanner.lookAhead)
-            val currentA = atan(lineSnapshot / lineScanner.lookAhead)
-            val errorA = -(targetA - currentA)
-
-            val (targetL, targetR) = uni.speedTargetAngleError(speed, errorA)
-
-            val nativeL = hardware.conversions.nativeConversion.native(targetL)
-            val nativeR = hardware.conversions.nativeConversion.native(targetR)
-
-            TwoSided(
-                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-            )
-        }
     }
 }

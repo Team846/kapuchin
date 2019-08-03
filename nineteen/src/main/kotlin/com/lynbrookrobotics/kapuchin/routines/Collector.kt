@@ -9,11 +9,11 @@ import com.lynbrookrobotics.kapuchin.subsystems.control.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-fun CollectorPivot.set(target: CollectorPivotState) = newRoutine("Set") {
+suspend fun CollectorPivot.set(target: CollectorPivotState) = startRoutine("Set") {
     controller { target }
 }
 
-fun CollectorRollers.set(electrical: Electrical, top: V, bottom: V = top) = newRoutine("Set") {
+suspend fun CollectorRollers.spin(electrical: Electrical, top: V, bottom: V = top) = startRoutine("Spin") {
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
@@ -24,11 +24,11 @@ fun CollectorRollers.set(electrical: Electrical, top: V, bottom: V = top) = newR
     }
 }
 
-fun CollectorRollers.set(state: TwoSided<DutyCycle>) = newRoutine("Set") {
+suspend fun CollectorRollers.set(state: TwoSided<DutyCycle>) = startRoutine("Set") {
     controller { state }
 }
 
-fun CollectorSlider.set(target: Length, electrical: Electrical, tolerance: Length = 0.5.Inch) = newRoutine("Set") {
+suspend fun CollectorSlider.set(target: Length, electrical: Electrical, tolerance: Length = 0.5.Inch) = startRoutine("Set") {
 
     val current by hardware.position.readOnTick.withoutStamps
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
@@ -43,7 +43,7 @@ fun CollectorSlider.set(target: Length, electrical: Electrical, tolerance: Lengt
     }
 }
 
-fun CollectorSlider.trackLine(lineScanner: LineScanner, electrical: Electrical) = newRoutine("Track line") {
+suspend fun CollectorSlider.trackLine(lineScanner: LineScanner, electrical: Electrical) = startRoutine("Track line") {
 
     val target by lineScanner.linePosition.readOnTick.withoutStamps
     val current by hardware.position.readOnTick.withoutStamps
@@ -63,19 +63,26 @@ fun CollectorSlider.trackLine(lineScanner: LineScanner, electrical: Electrical) 
     }
 }
 
-fun CollectorSlider.set(target: DutyCycle) = newRoutine("Set") {
+suspend fun CollectorSlider.set(target: DutyCycle) = startRoutine("Manual Override") {
     controller { target }
 }
 
-fun CollectorSlider.manualOverride(operator: Operator) = newRoutine("Manual override") {
+suspend fun CollectorSlider.reZero() = startChoreo("Re-Zero") {
+    hardware.isZeroed = false
+    choreography {
+        while (!hardware.isZeroed) delay(0.2.Second)
+    }
+}
+
+suspend fun CollectorSlider.manualOverride(operator: Operator) = startRoutine("Manual Override") {
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
     controller { sliderPrecision }
 }
 
-fun Hook.set(target: HookPosition) = newRoutine("Set") {
+suspend fun Hook.set(target: HookPosition) = startRoutine("Set") {
     controller { target }
 }
 
-fun HookSlider.set(target: HookSliderState) = newRoutine("Set") {
+suspend fun HookSlider.set(target: HookSliderState) = startRoutine("Set") {
     controller { target }
 }
