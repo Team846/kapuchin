@@ -25,7 +25,6 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
     val centerCargoLeft by operator.centerCargoLeft.readEagerly().withoutStamps
     val centerCargoRight by operator.centerCargoRight.readEagerly().withoutStamps
 
-    val pivotDown by operator.pivotDown.readEagerly().withoutStamps
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
@@ -41,7 +40,6 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
                 { centerCargoLeft } to choreography { centerCargo(true) },
                 { centerCargoRight } to choreography { centerCargo(false) },
 
-                { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
     }
@@ -49,11 +47,6 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
 suspend fun Subsystems.deployCargo(soft: Boolean) {
     collectorRollers?.spin(electrical, if (soft) collectorRollers.cargoReleaseSpeed / 2 else collectorRollers.cargoReleaseSpeed)
-}
-
-suspend fun Subsystems.pivotDown() {
-    collectorPivot?.set(CollectorPivotState.Down)
-    freeze()
 }
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
