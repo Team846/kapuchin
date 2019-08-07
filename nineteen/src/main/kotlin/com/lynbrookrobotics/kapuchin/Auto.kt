@@ -27,7 +27,7 @@ suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
             drivetrain.followTrajectory(20.Inch, 8.Inch, 5.FootPerSecondSquared, habToCloseCargo)
             launch { collectorSlider?.trackLine(lineScanner, electrical) }
             launch { drivetrain.openLoop(30.Percent) }
-            lift?.set(lift.cargoShip)
+            lift?.set(lift.cargoCargoShip)
             deployCargo(true)
             lift?.set(lift.panelCollect)
 

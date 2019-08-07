@@ -6,53 +6,54 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.hookslider.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.pivot.*
-import com.lynbrookrobotics.kapuchin.subsystems.driver.GamePiece.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
+    val deployCargo by operator.deployCargo.readEagerly().withoutStamps
+    val softDeployCargo by operator.softDeployCargo.readEagerly().withoutStamps
+    val deployPanel by operator.deployPanel.readEagerly().withoutStamps
+
     val collectCargo by driver.collectCargo.readEagerly().withoutStamps
-
     val lilDicky by operator.lilDicky.readEagerly().withoutStamps
-    val deploy by operator.deploy.readEagerly().withoutStamps
-    val hardDeploy by operator.hardDeploy.readEagerly().withoutStamps
 
-    val lineTracking by operator.lineTracking.readEagerly().withoutStamps
-
+    val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
     val centerSlider by operator.centerSlider.readEagerly().withoutStamps
+    val zeroSlider by operator.reZero.readEagerly().withoutStamps
     val centerCargoLeft by operator.centerCargoLeft.readEagerly().withoutStamps
     val centerCargoRight by operator.centerCargoRight.readEagerly().withoutStamps
-    val zeroSlider by operator.zeroSlider.readEagerly().withoutStamps
 
+    val pivotDown by operator.pivotDown.readEagerly().withoutStamps
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
         runWhenever(
-                { collectCargo } to choreography {
-                    operator.currentPiece = Cargo
-                    collectCargo()
-                },
-                { lilDicky } to choreography {
-                    operator.currentPiece = Panel
-                    lilDicky()
-                },
-                { deploy && operator.currentPiece == Panel } to choreography { deployPanel() },
-                { deploy && operator.currentPiece == Cargo } to choreography { deployCargo(hardDeploy) },
-                { lineTracking } to choreography { collectorSlider?.trackLine(lineScanner, electrical) },
+                { deployCargo || softDeployCargo } to choreography { deployCargo(softDeployCargo) },
+                { deployPanel } to choreography { deployPanel() },
+                { collectCargo } to choreography { collectCargo() },
+                { operatorLineTracking } to choreography { collectorSlider?.trackLine(lineScanner, electrical) },
+                { lilDicky } to choreography { lilDicky() },
+
                 { centerSlider } to choreography { centerSlider(0.Inch) },
+                { zeroSlider } to choreography { collectorSlider?.reZero() },
                 { centerCargoLeft } to choreography { centerCargo(true) },
                 { centerCargoRight } to choreography { centerCargo(false) },
-                { zeroSlider } to choreography { collectorSlider?.reZero() },
 
+                { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
     }
 }
 
-suspend fun Subsystems.deployCargo(hard: Boolean) {
-    collectorRollers?.spin(electrical, collectorRollers.cargoReleaseSpeed / (if (hard) 1 else 2))
+suspend fun Subsystems.deployCargo(soft: Boolean) {
+    collectorRollers?.spin(electrical, if (soft) collectorRollers.cargoReleaseSpeed / 2 else collectorRollers.cargoReleaseSpeed)
+}
+
+suspend fun Subsystems.pivotDown() {
+    collectorPivot?.set(CollectorPivotState.Down)
+    freeze()
 }
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
