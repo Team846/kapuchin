@@ -12,41 +12,69 @@ import kotlinx.coroutines.*
 
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake teleop") {
 
-    val deployCargo by operator.deployCargo.readEagerly().withoutStamps
-    val softDeployCargo by operator.softDeployCargo.readEagerly().withoutStamps
-    val deployPanel by operator.deployPanel.readEagerly().withoutStamps
+    val lineTracking by operator.lineTracking.readEagerly().withoutStamps
 
+    val deployCargoSoft by operator.deployCargoSoft.readEagerly().withoutStamps
+    val deployCargoHard by operator.deployCargoHard.readEagerly().withoutStamps
     val collectCargo by driver.collectCargo.readEagerly().withoutStamps
+
+    val deployPanel by operator.deployPanel.readEagerly().withoutStamps
     val lilDicky by operator.lilDicky.readEagerly().withoutStamps
 
-    val operatorLineTracking by operator.lineTracking.readEagerly().withoutStamps
     val centerSlider by operator.centerSlider.readEagerly().withoutStamps
-    val zeroSlider by operator.reZero.readEagerly().withoutStamps
     val centerCargoLeft by operator.centerCargoLeft.readEagerly().withoutStamps
     val centerCargoRight by operator.centerCargoRight.readEagerly().withoutStamps
+    val zeroSlider by operator.zeroSlider.readEagerly().withoutStamps
 
     val sliderPrecision by operator.sliderPrecision.readEagerly().withoutStamps
 
     choreography {
         runWhenever(
-                { deployCargo || softDeployCargo } to choreography { deployCargo(softDeployCargo) },
-                { deployPanel } to choreography { deployPanel() },
+                { lineTracking } to choreography { collectorSlider?.trackLine(lineScanner, electrical) },
+
+                { deployCargoSoft } to choreography { deployCargo(false) },
+                { deployCargoHard } to choreography { deployCargo(true) },
                 { collectCargo } to choreography { collectCargo() },
-                { operatorLineTracking } to choreography { collectorSlider?.trackLine(lineScanner, electrical) },
+
+                { deployPanel } to choreography { deployPanel() },
                 { lilDicky } to choreography { lilDicky() },
 
                 { centerSlider } to choreography { centerSlider(0.Inch) },
-                { zeroSlider } to choreography { collectorSlider?.reZero() },
                 { centerCargoLeft } to choreography { centerCargo(true) },
                 { centerCargoRight } to choreography { centerCargo(false) },
+                { zeroSlider } to choreography { collectorSlider?.reZero() },
 
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
     }
 }
 
-suspend fun Subsystems.deployCargo(soft: Boolean) {
-    collectorRollers?.spin(electrical, if (soft) collectorRollers.cargoReleaseSpeed / 2 else collectorRollers.cargoReleaseSpeed)
+suspend fun Subsystems.deployCargo(hard: Boolean) {
+    collectorRollers?.spin(electrical, collectorRollers.cargoReleaseSpeed / (if (hard) 1 else 2 ))
+}
+
+suspend fun Subsystems.collectCargo() = supervisorScope {
+
+    try {
+        lift?.set(lift.cargoCollect, 2.Inch)
+        launch { lift?.set(lift.cargoCollect, 0.Inch) }
+
+        launch { collectorPivot?.set(CollectorPivotState.Down) }
+
+        //Start rollers
+        launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
+
+        //Center slider
+        collectorSlider?.set(0.Inch, electrical)
+
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            withTimeout(1.Second) {
+                collectorRollers?.spin(electrical, 8.Volt)
+            }
+        }
+    }
 }
 
 suspend fun Subsystems.deployPanel() = supervisorScope {
@@ -73,29 +101,7 @@ suspend fun Subsystems.deployPanel() = supervisorScope {
     }
 }
 
-suspend fun Subsystems.collectCargo() = supervisorScope {
 
-    try {
-        lift?.set(lift.cargoCollect, 2.Inch)
-        launch { lift?.set(lift.cargoCollect, 0.Inch) }
-
-        launch { collectorPivot?.set(CollectorPivotState.Down) }
-
-        //Start rollers
-        launch { collectorRollers?.spin(electrical, collectorRollers.cargoCollectSpeed) }
-
-        //Center slider
-        collectorSlider?.set(0.Inch, electrical)
-
-        freeze()
-    } finally {
-        withContext(NonCancellable) {
-            withTimeout(1.Second) {
-                collectorRollers?.spin(electrical, 8.Volt)
-            }
-        }
-    }
-}
 
 suspend fun Subsystems.lilDicky() = coroutineScope {
     var hookDown: Job? = null
