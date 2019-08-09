@@ -36,10 +36,9 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val liftSensitivity by pref(75, Percent)
     val sliderSensitivity by pref(100, Percent)
 
-    val cargoShipCargoHeight = s { xButton }
-    val pivotDown = s { /*xButton && lt*/ false }
+    val cargoShipHeight = s { xButton && lt }
 
-    val lowPanelHeight = s { aButton && !lt }
+    val lowPanelHeight = s { (aButton || xButton) && !lt }
     val lowCargoHeight = s { aButton && lt }
 
     val midPanelHeight = s { bButton && !lt }
@@ -50,16 +49,16 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val lineTracking = s { rt }
 
+    val deployCargoSoft = s { rb && lt }
+    val deployCargoHard = s { lb && lt }
+
+    val deployPanel = s { rb && !lt }
+    val lilDicky = s { lb && !lt }
+
     val centerSlider = s { pov == 0 }
     val centerCargoLeft = s { pov == 90 || pov == 45 }
     val centerCargoRight = s { pov == 270 || pov == 315 }
-    val reZero = s { pov == 180 }
-
-    val deployPanel = s { lb && !lt }
-    val lilDicky = s { lb && lt }
-
-    val softDeployCargo = s { rb && !lt }
-    val deployCargo = s { rb && lt }
+    val zeroSlider = s { pov == 180 }
 
     val unleashTheCobra = s { lt && start }
     val oShitSnekGoBack = s { lt && back }
