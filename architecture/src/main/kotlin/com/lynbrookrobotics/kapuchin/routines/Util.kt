@@ -35,28 +35,15 @@ suspend fun CoroutineScope.runWhile(predicate: () -> Boolean, block: Block) {
  *
  * Even if the predicate turns false while the block is running, the block will not be cancelled.
  *
+ * @see waitUntil
+ *
  * @param predicate function to check if the block should be run.
  * @param block function to run.
  */
 suspend fun CoroutineScope.whenever(predicate: () -> Boolean, block: Block) {
-    var cont: CancellableContinuation<Unit>? = null
-
-    val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-        if (predicate() && cont?.isActive == true) {
-            try {
-                cont?.resume(Unit)
-            } catch (e: IllegalStateException) {
-            }
-        }
-    }
-
-    try {
-        while (isActive) {
-            suspendCancellableCoroutine<Unit> { cont = it }
-            block()
-        }
-    } finally {
-        runOnTick.cancel()
+    while (isActive) {
+        waitUntil(predicate)
+        block()
     }
 }
 
@@ -137,4 +124,28 @@ suspend fun freeze() = suspendCancellableCoroutine<Unit> { }
  */
 suspend fun withTimeout(time: Time, block: Block) {
     withTimeoutOrNull(time.milli(Second).toLong(), block)
+}
+
+/**
+ * Pauses the coroutine until the predicate is true.
+ *
+ * @param predicate function to check
+ */
+suspend fun waitUntil(predicate: () -> Boolean) {
+    var cont: CancellableContinuation<Unit>? = null
+
+    val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
+        if (predicate() && cont?.isActive == true) {
+            try {
+                cont?.resume(Unit)
+            } catch (e: IllegalStateException) {
+            }
+        }
+    }
+
+    try {
+        suspendCancellableCoroutine<Unit> { cont = it }
+    } finally {
+        runOnTick.cancel()
+    }
 }
