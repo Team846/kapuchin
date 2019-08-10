@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.choreographies.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.coroutineScope
@@ -36,6 +37,7 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
 
                     { !liftPrecision.isZero } to choreography { manualOverride(operator) }
             )
+            freeze()
         }
     }
 }

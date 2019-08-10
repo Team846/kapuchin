@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.choreographies.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -33,24 +34,22 @@ class FunkyRobot : RobotBase() {
         println("Loading classes...")
         runBlocking { withTimeout(5.Second) { classPreloading.join() } }
 
-        scope.launch {
-            runWhenever(
-                    { isEnabled && isOperatorControl } to choreography {
-                        subsystems.teleop()
-                    },
-                    { isEnabled && isAutonomous } to choreography {
-                        // subsystems.cargoShipSandstorm()
-                        subsystems.teleop()
-                    },
-                    { isDisabled && !isTest } to choreography {
-                        subsystems.warmup()
-                    },
-                    { isTest } to choreography {
-                        launch { journal(subsystems.drivetrain.hardware) }
-                        subsystems.teleop()
-                    }
-            )
-        }
+        scope.runWhenever(
+                { isEnabled && isOperatorControl } to choreography {
+                    subsystems.teleop()
+                },
+                { isEnabled && isAutonomous } to choreography {
+                    // subsystems.cargoShipSandstorm()
+                    subsystems.teleop()
+                },
+                { isDisabled && !isTest } to choreography {
+                    subsystems.warmup()
+                },
+                { isTest } to choreography {
+                    launch { journal(subsystems.drivetrain.hardware) }
+                    subsystems.teleop()
+                }
+        )
 
         System.gc()
         HAL.observeUserProgramStarting()

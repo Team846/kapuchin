@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.choreographies.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
@@ -42,6 +43,7 @@ suspend fun Subsystems.collectorTeleop() = startChoreo("Collector teleop") {
                 { pivotDown } to choreography { pivotDown() },
                 { !sliderPrecision.isZero } to choreography { collectorSlider?.manualOverride(operator) }
         )
+        freeze()
     }
 }
 

@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.choreographies.*
 import com.lynbrookrobotics.kapuchin.routines.*
 
 suspend fun Subsystems.feedbackTeleop() = collectorSlider?.let { slider ->

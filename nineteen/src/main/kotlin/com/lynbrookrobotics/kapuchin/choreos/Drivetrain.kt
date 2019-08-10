@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.choreographies.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -14,30 +15,26 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
     choreography {
         try {
-            launch {
-                launchWhenever(
-                        { drivetrain.routine == null } to choreography {
-                            drivetrain.teleop(driver)
-                        }
-                )
-            }
-            launch {
-                runWhenever(
-                        { autoAlign } to choreography {
-                            //if (limelight != null && collectorSlider != null && lift != null) {
+            launchWhenever(
+                    { drivetrain.routine == null } to choreography {
+                        drivetrain.teleop(driver)
+                    }
+            )
+            runWhenever(
+                    { autoAlign } to choreography {
+                        //if (limelight != null && collectorSlider != null && lift != null) {
 //limeLineAlign(limelight, collectorSlider, lift)
 //}
-                            launch { collectorSlider?.trackLine(lineScanner, electrical) }
-                            drivetrain.lineActiveTracking(
-                                    3.FootPerSecond,
-                                    collectorSlider
-                                            ?.run { (min - 0.5.Inch)..(max + 0.5.Inch) }
-                                            ?: -5.Inch..5.Inch,
-                                    lineScanner
-                            )
-                        }
-                )
-            }
+                        launch { collectorSlider?.trackLine(lineScanner, electrical) }
+                        drivetrain.lineActiveTracking(
+                                3.FootPerSecond,
+                                collectorSlider
+                                        ?.run { (min - 0.5.Inch)..(max + 0.5.Inch) }
+                                        ?: -5.Inch..5.Inch,
+                                lineScanner
+                        )
+                    }
+            )
             freeze()
         } catch (t: Throwable) {
             log(Error, t) { "The drivetrain teleop control is exiting!!!" }
