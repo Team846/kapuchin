@@ -14,11 +14,12 @@ internal typealias Block = suspend CoroutineScope.() -> Unit
  * @param predicate function to check if the coroutine should still be running.
  * @param block function to run
  */
-suspend fun CoroutineScope.runWhile(predicate: () -> Boolean, block: Block) {
+suspend fun runWhile(predicate: () -> Boolean, block: Block) = coroutineScope {
     if (predicate()) {
         val job = launch { block() }
 
         var runOnTick: Cancel? = null
+        @Suppress("RemoveRedundantQualifierName")
         runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
             if (!predicate()) {
                 runOnTick?.cancel()
@@ -31,73 +32,15 @@ suspend fun CoroutineScope.runWhile(predicate: () -> Boolean, block: Block) {
 }
 
 /**
- * Runs a block whenever the predicate is met.
- *
- * Even if the predicate turns false while the block is running, the block will not be cancelled.
- *
- * @see waitUntil
- *
- * @param predicate function to check if the block should be run.
- * @param block function to run.
- */
-suspend fun CoroutineScope.whenever(predicate: () -> Boolean, block: Block) {
-    while (isActive) {
-        waitUntil(predicate)
-        block()
-    }
-}
-
-/**
  * Creates a new coroutine running blocks in parallel.
  * The coroutine ends when all blocks are complete.
  *
  * @param blocks list of functions to run in parallel.
  */
-suspend fun runAll(vararg blocks: Block): Unit = supervisorScope {
+suspend fun runAll(vararg blocks: Block) = supervisorScope {
     blocks.forEach {
         launch {
             it()
-        }
-    }
-}
-
-/**
- * Creates a new corotuine that runs `runWhile`s in a `whenever`.
- *
- * Whenever a prediate is true, its block will be run.
- * However, the block will be cancelled once its predicate returns false.
- *
- * @see runWhile
- * @see whenever
- *
- * @param blocks list of pairs of a predicate and a block.
- */
-suspend fun runWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorScope {
-    blocks.forEach { (p, b) ->
-        launch {
-            whenever(p) {
-                runWhile(p, b)
-            }
-        }
-    }
-}
-
-/**
- * Creates a new coroutine that launches blocks in a `whenever` block.
- *
- * Whenever a predicate is true, its block will be run.
- * The block will not be cancelled even if its predicate returns false while the block is running.
- *
- * @see whenever
- *
- * @param blocks List of pairs of a predicate and a function
- */
-suspend fun launchWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorScope {
-    blocks.forEach { (p, b) ->
-        launch {
-            whenever(p) {
-                b()
-            }
         }
     }
 }
@@ -112,7 +55,7 @@ suspend fun delay(time: Time) = delay(time.milli(Second).toLong())
 /**
  * Pauses the coroutine until cancelled.
  *
- * Essentially a `delay` with an infinitely long time.
+ * Essentially an infinitely long delay.
  */
 suspend fun freeze() = suspendCancellableCoroutine<Unit> { }
 
@@ -134,6 +77,7 @@ suspend fun withTimeout(time: Time, block: Block) {
 suspend fun waitUntil(predicate: () -> Boolean) {
     var cont: CancellableContinuation<Unit>? = null
 
+    @Suppress("RemoveRedundantQualifierName")
     val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
         if (predicate() && cont?.isActive == true) {
             try {
