@@ -46,7 +46,7 @@ suspend fun Subsystems.liftTeleop() = lift?.run {
 }
 
 suspend fun Subsystems.liftDown() = coroutineScope {
-    withTimeout(0.5.Second) {
+    withTimeout(0.2.Second) {
         collectorSlider?.set(
                 0.Inch,
                 electrical,

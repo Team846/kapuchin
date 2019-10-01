@@ -33,21 +33,34 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
         val currentAtZero = atZero.optimizedRead(currentTime, 0.Second).y
         val currentPosition = position.optimizedRead(currentTime, 0.Second).y
 
-        val zeroedOutput =
-                if (!isZeroed)
-                    if (!currentAtZero) 30.Percent
-                    else {
-                        log(Debug) { "zeroing" }
-                        zero()
-                        0.Percent
-                    }
-                else if (currentPosition > max) -50.Percent
-                else if (currentPosition < min) 50.Percent
-                else value
-        val cappedOutput = zeroedOutput minMag (maxOutput * zeroedOutput.signum)
+        fun cap(value: DutyCycle, max: DutyCycle) = value minMag (max * value.signum)
 
-        esc.set(cappedOutput.Each)
-        nativeGrapher(currentTime, cappedOutput)
+        val safeOutput = when {
+            !isZeroed && !currentAtZero -> 30.Percent
+            !isZeroed && currentAtZero -> {
+                log(Debug) { "Zeroing" }
+                zero()
+                0.Percent
+            }
+
+            // these are "hard" safeties (prevent going past end of travel)
+            // THESE MUST BE RUN BEFORE THE SOFT SAFETIES
+            currentPosition > max && value.isPositive -> 0.Percent
+            currentPosition < min && value.isNegative -> 0.Percent
+
+            // these are "soft" safeties (prevent overshoot incase of GC)
+            // THESE MUST BE RUN AFTER THE HARD SAFETIES
+            currentPosition + 1.5.Inch > max && value.isPositive ->
+                cap(value, maxOutput / 3)
+
+            currentPosition - 1.5.Inch < min && value.isNegative ->
+                cap(value, maxOutput / 3)
+
+            else -> cap(value, maxOutput)
+        }
+
+        esc.set(safeOutput.Each)
+        nativeGrapher(currentTime, safeOutput)
     }
 }
 
