@@ -33,7 +33,7 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
         val currentAtZero = atZero.optimizedRead(currentTime, 0.Second).y
         val currentPosition = position.optimizedRead(currentTime, 0.Second).y
 
-        fun cap(value: DutyCycle, max: DutyCycle) = value minMag (max * value.signum)
+        val slowedOutput = `±`(maxOutput / 3)
 
         val safeOutput = when {
             !isZeroed && !currentAtZero -> 30.Percent
@@ -51,12 +51,12 @@ class CollectorSliderComponent(hardware: CollectorSliderHardware) : Component<Co
             // these are "soft" safeties (prevent overshoot incase of GC)
             // THESE MUST BE RUN AFTER THE HARD SAFETIES
             currentPosition + 1.5.Inch > max && value.isPositive ->
-                cap(value, maxOutput / 3)
+                value cap slowedOutput
 
             currentPosition - 1.5.Inch < min && value.isNegative ->
-                cap(value, maxOutput / 3)
+                value cap slowedOutput
 
-            else -> cap(value, maxOutput)
+            else -> value cap `±`(maxOutput)
         }
 
         esc.set(safeOutput.Each)

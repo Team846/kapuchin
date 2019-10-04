@@ -85,4 +85,28 @@ class GeometryTest {
             abs(-180.Degree `coterminal +` n.Turn) `is equal to?` 180.Degree
         }
     }
+
+    @Test
+    fun `coterminal difference is always within range`() {
+        anyDouble.forEach { a ->
+            anyDouble.forEach { b ->
+                a.Degree `coterminal -` b.Degree `is within?` `±`(180.Degree)
+                a.Degree `coterminal -` b.Radian `is within?` `±`(180.Degree)
+                a.Radian `coterminal -` b.Degree `is within?` `±`(180.Degree)
+                a.Radian `coterminal -` b.Radian `is within?` `±`(180.Degree)
+            }
+        }
+    }
+
+    @Test
+    fun `coterminal sum is always within range`() {
+        anyDouble.forEach { a ->
+            anyDouble.forEach { b ->
+                a.Degree `coterminal +` b.Radian `is within?` `±`(180.Degree)
+                a.Degree `coterminal +` b.Degree `is within?` `±`(180.Degree)
+                a.Radian `coterminal +` b.Degree `is within?` `±`(180.Degree)
+                a.Radian `coterminal +` b.Radian `is within?` `±`(180.Degree)
+            }
+        }
+    }
 }
