@@ -16,6 +16,7 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
     val dadt = differentiator(::div, position.x, position.y.bearing)
 
     val errorGraph = c.graph("Error Angle", Degree)
+    val targetGraph = c.graph("Target Angle", Degree)
     val speedGraph = c.graph("Target Speed", FootPerSecond)
 
     fun speedAngleTarget(speed: Velocity, angle: Angle): Pair<TwoSided<Velocity>, Angle> {
@@ -34,7 +35,8 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
         val targetR = speed - pA
 
         TwoSided(targetL, targetR).also {
-            speedGraph(t, it.avg)
+            speedGraph(t, speed)
+            targetGraph(t, error `coterminal +` p.bearing)
             errorGraph(t, error)
         }
     }
