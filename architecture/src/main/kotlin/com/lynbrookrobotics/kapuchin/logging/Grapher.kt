@@ -29,4 +29,4 @@ expect class Grapher<Q : Quan<Q>> internal constructor(parent: Named, of: String
  * @param withUnits y-axis units
  * @return new `Grapher` instance
  */
-fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>) = Grapher(this, of, withUnits)
+fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>, parent: Named = this) = Grapher(parent, of, withUnits)
