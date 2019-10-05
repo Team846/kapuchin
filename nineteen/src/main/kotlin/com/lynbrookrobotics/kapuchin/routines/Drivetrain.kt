@@ -146,8 +146,8 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
         val targetL = maxSpeed * r() + pA + x / Second - (b * Foot / Second / Degree)
         val targetR = maxSpeed * r() - pA + y / Second + (b * Foot / Second / Degree)
 
-        val nativeL = hardware.conversions.nativeConversion.native(targetL) * 0.01
-        val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.01
+        val nativeL = hardware.conversions.nativeConversion.native(targetL cap `±`(3.Inch / Second))
+        val nativeR = hardware.conversions.nativeConversion.native(targetR cap `±`(1.Inch / Second))
 
         TwoSided(
                 VelocityOutput(hardware.escConfig, velocityGains, nativeL),

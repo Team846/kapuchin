@@ -107,7 +107,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             .with(graph("Y Location", Foot, escNamed)) { it.y }
             .with(graph("Bearing", Degree, escNamed)) { it.bearing }
 
-    val position = t2sPosition ?: escPosition
+    val position = /*t2sPosition ?:*/ escPosition
 
     val leftPosition = sensor {
         conversions.toLeftPosition(

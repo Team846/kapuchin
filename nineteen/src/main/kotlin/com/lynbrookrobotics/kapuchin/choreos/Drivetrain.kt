@@ -24,12 +24,9 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
             launch {
                 runWhenever(
                         { autoAlign } to choreography {
-                            //if (limelight != null && collectorSlider != null && lift != null) {
-//limeLineAlign(limelight, collectorSlider, lift)
-//}
                             launch { collectorSlider?.trackLine(lineScanner, electrical) }
                             drivetrain.lineActiveTracking(
-                                    3.FootPerSecond,
+                                    2.FootPerSecond,
                                     collectorSlider
                                             ?.run { (min - 0.5.Inch)..(max + 0.5.Inch) }
                                             ?: -5.Inch..5.Inch,
