@@ -12,6 +12,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
@@ -83,21 +84,30 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         true
     }.otherwise(hardw { null })
 
-    val position = sensor {
-        ticksToSerial?.also {
-            it().forEach { (l, r) -> conversions.accumulateOdometry(l, r) }
-        } ?: conversions.accumulateOdometry(
-                leftMasterEsc.getSelectedSensorPosition(idx) /
-                        conversions.nativeEncoderCountMultiplier,
-                rightMasterEsc.getSelectedSensorPosition(idx) /
-                        conversions.nativeEncoderCountMultiplier
-        )
-
-        conversions.matrixTracking.run { Position(x, y, bearing) } stampWith it
+    private val t2sNamed = Named("T2S Odometry", this)
+    val t2sPosition = ticksToSerial?.let { t2s ->
+        sensor {
+            t2s().forEach { (l, r) -> conversions.t2sOdometry(l, r) }
+            conversions.t2sOdometry.matrixTracking.run { Position(x, y, bearing) } stampWith it
+        }
+                .with(graph("X Location", Foot, t2sNamed)) { it.x }
+                .with(graph("Y Location", Foot, t2sNamed)) { it.y }
+                .with(graph("Bearing", Degree, t2sNamed)) { it.bearing }
     }
-            .with(graph("X Location", Foot)) { it.x }
-            .with(graph("Y Location", Foot)) { it.y }
-            .with(graph("Encoder Bearing", Degree)) { it.bearing }
+
+    private val escNamed = Named("ESC Odometry", this)
+    val escPosition = sensor {
+        conversions.escOdometry(
+                leftMasterEsc.getSelectedSensorPosition(idx),
+                rightMasterEsc.getSelectedSensorPosition(idx)
+        )
+        conversions.escOdometry.matrixTracking.run { Position(x, y, bearing) } stampWith it
+    }
+            .with(graph("X Location", Foot, escNamed)) { it.x }
+            .with(graph("Y Location", Foot, escNamed)) { it.y }
+            .with(graph("Bearing", Degree, escNamed)) { it.bearing }
+
+    val position = /*t2sPosition ?:*/ escPosition
 
     val leftPosition = sensor {
         conversions.toLeftPosition(
@@ -148,7 +158,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         }
 
         EventLoop.runOnTick { time ->
-            position.optimizedRead(time, period)
+            t2sPosition?.optimizedRead(time, period)
+            escPosition.optimizedRead(time, period)
         }
     }
 }

@@ -16,6 +16,7 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
     val dadt = differentiator(::div, position.x, position.y.bearing)
 
     val errorGraph = c.graph("Error Angle", Degree)
+    val targetGraph = c.graph("Target Angle", Degree)
     val speedGraph = c.graph("Target Speed", FootPerSecond)
 
     fun speedAngleTarget(speed: Velocity, angle: Angle): Pair<TwoSided<Velocity>, Angle> {
@@ -34,7 +35,8 @@ class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope)
         val targetR = speed - pA
 
         TwoSided(targetL, targetR).also {
-            speedGraph(t, it.avg)
+            speedGraph(t, speed)
+            targetGraph(t, error `coterminal +` p.bearing)
             errorGraph(t, error)
         }
     }
@@ -124,20 +126,28 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
         val startTime = currentTime
         while (currentTime - startTime < hardware.period * 60.Percent) {
             val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
-            conv.accumulateOdometry(l, r)
+            conv.t2sOdometry(l, r)
+            conv.escOdometry(l * 50, r * 50)
         }
-        val (x, y, _) = Position(conv.matrixTracking.x, conv.matrixTracking.y, conv.matrixTracking.bearing)
-
+        val (x1, y1, b1) = conv.t2sOdometry.matrixTracking.run {
+            Position(x, y, bearing)
+        }
+        val (x2, y2, b2) = conv.escOdometry.matrixTracking.run {
+            Position(x, y, bearing)
+        }
+        val x = avg(x1, x2)
+        val y = avg(y1, y2)
+        val b = avg(b1, b2)
 
         val targetA = 1.Turn * r()
         val errorA = targetA `coterminal -` 1.Turn * r()
         val pA = bearingKp * errorA
 
-        val targetL = maxSpeed * r() + pA + x / Second
-        val targetR = maxSpeed * r() - pA + y / Second
+        val targetL = maxSpeed * r() + pA + x / Second - (b * Foot / Second / Degree)
+        val targetR = maxSpeed * r() - pA + y / Second + (b * Foot / Second / Degree)
 
-        val nativeL = hardware.conversions.nativeConversion.native(targetL) * 0.001
-        val nativeR = hardware.conversions.nativeConversion.native(targetR) * 0.001
+        val nativeL = hardware.conversions.nativeConversion.native(targetL cap `±`(3.Inch / Second))
+        val nativeR = hardware.conversions.nativeConversion.native(targetR cap `±`(1.Inch / Second))
 
         TwoSided(
                 VelocityOutput(hardware.escConfig, velocityGains, nativeL),

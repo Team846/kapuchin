@@ -8,7 +8,7 @@ val anyInt = setOf(0, 1, 2, 373, 1024, 1492, 8397)
         .flatMap { setOf(it, -it) }
         .toSet()
 
-val anyDouble = setOf(0.001, 0.3, 0.8, 1.0, 1.4, 3.7, 9.0, 23.9, 77.3, 1429.5)
+val anyDouble = setOf(0.001, 0.3, 0.8, 1.0, 1.4, 3.7, 9.0, 23.9, 77.3, 123.4, 180.0, 191.34, 1429.5)
         .flatMap { setOf(it, -it) }
         .toSet()
 

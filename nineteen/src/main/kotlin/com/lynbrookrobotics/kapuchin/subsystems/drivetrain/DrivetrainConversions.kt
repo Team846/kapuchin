@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -63,20 +64,65 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
             .map { it to RotationMatrix(it) }
             .toMap()
 
-    val matrixTracking = RotationMatrixTracking(trackLength, Position(0.Foot, 0.Foot, 0.Degree), matrixCache)
+    val t2sOdometry = TicksToSerialOdometry(this)
 
-    val flipOdometrySides by pref(false)
-    val flipLeftOdometry by pref(false)
-    val flipRightOdometry by pref(true)
-    fun accumulateOdometry(ticksL: Int, ticksR: Int) {
-        val fl = if (flipLeftOdometry) -ticksL else ticksL
-        val fr = if (flipRightOdometry) -ticksR else ticksR
-        val l = if (flipOdometrySides) fr else fl
-        val r = if (flipOdometrySides) fl else fr
+    class TicksToSerialOdometry(val conversions: DrivetrainConversions) : Named by Named("T2S Odometry", conversions) {
+        private var noTicksL = true
+        private var noTicksR = true
+        val matrixTracking = RotationMatrixTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree), conversions.matrixCache)
 
-        matrixTracking(
-                toLeftPosition(l),
-                toRightPosition(r)
-        )
+        val flipOdometrySides by pref(true)
+        val flipLeftOdometry by pref(true)
+        val flipRightOdometry by pref(false)
+        operator fun invoke(deltaT2sTicksL: Int, deltaT2sTicksR: Int) {
+            if (noTicksL && deltaT2sTicksL != 0) log(Level.Debug) {
+                "Received first left tick at $currentTime"
+            }.also { noTicksL = false }
+
+            if (noTicksR && deltaT2sTicksR != 0) log(Level.Debug) {
+                "Received first right tick at $currentTime"
+            }.also { noTicksR = false }
+
+            val fl = if (flipLeftOdometry) -deltaT2sTicksL else deltaT2sTicksL
+            val fr = if (flipRightOdometry) -deltaT2sTicksR else deltaT2sTicksR
+            val l = if (flipOdometrySides) fr else fl
+            val r = if (flipOdometrySides) fl else fr
+
+            matrixTracking(
+                    conversions.toLeftPosition(l),
+                    conversions.toRightPosition(r)
+            )
+        }
+    }
+
+    val escOdometry = EscOdometry(this)
+
+    class EscOdometry(val conversions: DrivetrainConversions) : Named by Named("ESC Odometry", conversions) {
+        private var noTicksL = true
+        private var noTicksR = true
+        val matrixTracking = RotationMatrixTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree), conversions.matrixCache)
+
+        private var lastL = 0
+        private var lastR = 0
+        operator fun invoke(totalEscTicksL: Int, totalEscTicksR: Int) = conversions.run {
+            if (noTicksL && totalEscTicksL != 0) log(Level.Debug) {
+                "Received first left tick at $currentTime"
+            }.also { noTicksL = false }
+
+            if (noTicksR && totalEscTicksR != 0) log(Level.Debug) {
+                "Received first right tick at $currentTime"
+            }.also { noTicksR = false }
+
+            matrixTracking(
+                    toLeftPosition(
+                            (totalEscTicksL - lastL) / nativeEncoderCountMultiplier
+                    ),
+                    toRightPosition(
+                            (totalEscTicksR - lastR) / nativeEncoderCountMultiplier
+                    )
+            )
+            lastL = totalEscTicksL
+            lastR = totalEscTicksR
+        }
     }
 }

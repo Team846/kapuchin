@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -16,9 +17,7 @@ class ClimberComponent(hardware: ClimberHardware) : Component<ClimberComponent, 
     val invert by pref(false)
 
     override fun ClimberHardware.output(value: DutyCycle) {
-        val safeOutput =
-                if (value in `±`(maxOutput)) value
-                else maxOutput * value.signum
+        val safeOutput = value cap `±`(maxOutput)
         val invertedOutput = if (invert) -safeOutput else safeOutput
 
         hardware.leftEsc.set(invertedOutput.Each)
