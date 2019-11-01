@@ -20,7 +20,7 @@ import kotlin.math.sqrt
  * @param init first value
  */
 fun <Q : Quan<Q>, Q2 : Quan<Q2>> infiniteStdev(
-        times: (Q, Q) -> Q2,
+        `_`: Q.(`*`, Q) -> Q2,
         init: Q
 ): (Q) -> Q {
     var sum = init
@@ -52,7 +52,7 @@ fun <Q : Quan<Q>, Q2 : Quan<Q2>> infiniteStdev(
  * @param falloff number of values to look back when calculating
  */
 fun <Q : Quan<Q>, Q2 : Quan<Q2>> finiteStdev(
-        times: (Q, Q) -> Q2,
+        `_`: Q.(`*`, Q) -> Q2,
         init: Q,
         falloff: Int
 ): (Q) -> Q {
@@ -77,7 +77,7 @@ fun <Q : Quan<Q>, Q2 : Quan<Q2>> finiteStdev(
     }
 }
 
-private fun <Q : Quan<Q>, Q2 : Quan<Q2>> stdev(times: (Q, Q) -> Q2, n: Int, sum: Q, sqSum: Q2): Q {
+private fun <Q : Quan<Q>, Q2 : Quan<Q2>> stdev(`_`: Q.(`*`, Q) -> Q2, n: Int, sum: Q, sqSum: Q2): Q {
     val xBar = sum / n
     val xBarSum2 = times(xBar, sum) * 2 // 2̄xΣxᵢ
     val nxBarSq = times(xBar, xBar) * n // n̄x²

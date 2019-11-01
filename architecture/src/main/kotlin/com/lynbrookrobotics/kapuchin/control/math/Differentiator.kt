@@ -19,7 +19,7 @@ import info.kunalsheth.units.generated.*
  * @param y1 initial value
  */
 fun <Q, DQDT> differentiator(
-        div: (Q, T) -> DQDT,
+        `_`: Q.(`÷`, T) -> DQDT,
         x1: Time, y1: Q
 ): (Time, Q) -> DQDT
 

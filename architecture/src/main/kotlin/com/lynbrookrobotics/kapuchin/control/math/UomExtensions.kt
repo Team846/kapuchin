@@ -20,7 +20,13 @@ inline infix fun <Q : Number> Q.`±`(radius: Q): ClosedFloatingPointRange<Double
     return center - range..center + range
 }
 
+inline infix fun <Q : Quan<Q>> Q.`±`(radius: Q): ClosedRange<Q> {
+    return this - radius..this + radius
+}
+
 fun <Q : Number> `±`(radius: Q) = 0.0 `±` radius
+
+inline fun <Q : Quan<Q>> `±`(radius: Q) = radius.new(0.0) `±` radius
 
 /**
  * Returns the closest, largest range to `current`

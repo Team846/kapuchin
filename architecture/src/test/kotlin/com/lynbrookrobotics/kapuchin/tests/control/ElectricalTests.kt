@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.tests.control
 
 import com.lynbrookrobotics.kapuchin.control.electrical.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
@@ -91,7 +92,7 @@ class ElectricalTests {
     fun `threshold checker triggers after duration outside safe range`() {
         val duration = 3.Second
         val tolerance = 25.Ampere
-        val safeRange = 0.Ampere `±` tolerance
+        val safeRange = `±`(tolerance)
         val checker = outsideThresholdChecker(safeRange, duration)
 
         val insideStartTime = 846.Minute

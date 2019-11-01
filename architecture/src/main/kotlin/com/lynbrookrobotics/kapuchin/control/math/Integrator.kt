@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import info.kunalsheth.units.generated.*
 
 private fun <Q, SQDT> integrator(
-        times: (Q, T) -> SQDT,
+        `_`: Q.(`*`, T) -> SQDT,
         x1: Time, y1: Q,
         nextArea: (x1: Time, y1: Q, x2: Time, y2: Q) -> SQDT
 ): (Time, Q) -> SQDT
@@ -42,7 +42,7 @@ private fun <Q, SQDT> integrator(
  * @param y1 initial value
  */
 fun <Q, SQDT> infiniteIntegrator(
-        times: (Q, T) -> SQDT,
+        p: Q.(`*`, T) -> SQDT
         x1: Time, y1: Q
 ): (Time, Q) -> SQDT
 
@@ -74,7 +74,7 @@ fun <Q, SQDT> infiniteIntegrator(
  * @param falloff number of trapezoids to look back when accumulating
  */
 fun <Q, SQDT> finiteIntegrator(
-        times: (Q, T) -> SQDT,
+        `_`: Q.(`*`, T) -> SQDT,
         x1: Time, y1: Q,
         falloff: Int
 ): (Time, Q) -> SQDT
