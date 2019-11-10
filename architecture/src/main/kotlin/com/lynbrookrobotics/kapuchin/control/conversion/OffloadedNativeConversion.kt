@@ -25,10 +25,10 @@ import kotlin.jvm.JvmName
  * @param D derivative of sensor input
  * @param DD second derivative of sensor input
  *
- * @param d2 UOM proof (just pass in `::div`)
- * @param d1 UOM proof (just pass in `::div`)
- * @param t1 UOM proof (just pass in `::times`)
- * @param t2 UOM proof (just pass in `::times`)
+ * @param d2 UOM proof (just pass in `::p`)
+ * @param d1 UOM proof (just pass in `::p`)
+ * @param t1 UOM proof (just pass in `::p`)
+ * @param t2 UOM proof (just pass in `::p`)
  *
  * @property nativeOutputUnits ESC API value corresponding to 1 `perOutputQuantity`
  * @property perOutputQuantity output corresponding to `nativeOutputUnits` value
@@ -42,10 +42,10 @@ import kotlin.jvm.JvmName
  * @property nativeRateUnit factor used in ESC derivative and integral calculations
  */
 class OffloadedNativeConversion<O, I, Q, D, DD>(
-        private val d2: (I, T) -> Q,
-        private val d1: (Q, T) -> D,
-        private val t1: (D, T) -> Q,
-        private val t2: (DD, T) -> D,
+        private val d2: (I, `÷`, T) -> Q,
+        private val d1: (Q, `÷`, T) -> D,
+        private val t1: (D, `*`, T) -> Q,
+        private val t2: (DD, `*`, T) -> D,
         val nativeOutputUnits: Int, val perOutputQuantity: O,
         val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
         val feedbackZero: Q = perFeedbackQuantity * 0,
@@ -65,19 +65,19 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
     fun native(x: O) = x * nativeOutputUnits / perOutputQuantity
 
     @JvmName("nativeAbsement")
-    fun native(x: I) = convert(d2(x, nativeRateUnit))
+    fun native(x: I) = convert(d2(x, `÷`, nativeRateUnit))
 
     @JvmName("nativePosition")
     fun native(x: Q) = convert(x + feedbackZero)
 
     @JvmName("nativeVelocity")
-    fun native(x: D) = convert(t1(x, nativeTimeUnit))
+    fun native(x: D) = convert(t1(x, `*`, nativeTimeUnit))
 
     @JvmName("nativeAcceleration")
-    fun native(x: DD) = native(t2(x, nativeRateUnit))
+    fun native(x: DD) = native(t2(x, `*`, nativeRateUnit))
 
     fun realPosition(x: Number) = convert(x) - feedbackZero
-    fun realVelocity(x: Number) = d1(convert(x), nativeTimeUnit)
+    fun realVelocity(x: Number) = d1(convert(x), `÷`, nativeTimeUnit)
 
     @JvmName("nativeAbsementGain")
     fun native(x: Gain<O, I>) = native(x.compensation) / native(x.forError)

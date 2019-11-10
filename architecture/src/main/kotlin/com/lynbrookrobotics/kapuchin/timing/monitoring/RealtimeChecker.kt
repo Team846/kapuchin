@@ -30,7 +30,7 @@ class RealtimeChecker private constructor(parent: Ticker, private val setJitterP
         val memoryUsageGraph = graph("Memory Usage", Percent)
         val garbageProductionGraph = graph("Garbage Production", PercentPerSecond)
 
-        val deriv = differentiator(::div, 0.Second, 0.Percent)
+        val deriv = differentiator(::p, 0.Second, 0.Percent)
 
         val memoryUsage = EventLoop.runOnTick { loopStart ->
             val usage = usedMemory.Each / maxMemory

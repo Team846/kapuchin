@@ -31,7 +31,7 @@ class ConversionTest {
     fun `offloaded real and native methods are inverses`() {
         anyInt.filter { it != 0 }.map { resolution ->
             LinearOffloadedNativeConversion(
-                    ::div, ::div, ::times, ::times,
+                    ::p, ::p, ::p, ::p,
                     1023, 12.Volt, resolution, 8.46.Metre, 1.Foot
             )
         }.forEach { conversion ->
@@ -48,7 +48,7 @@ class ConversionTest {
     fun `offloaded native methods are linear`() {
         anyInt.filter { it != 0 }.map { resolution ->
             OffloadedNativeConversion<V, Absement, Length, Velocity, Acceleration>(
-                    ::div, ::div, ::times, ::times,
+                    ::p, ::p, ::p, ::p,
                     1023, 12.Volt, resolution, 8.46.Metre
             )
         }.forEach { conversion ->

@@ -1,22 +1,6 @@
 import static java.lang.Math.PI
 
 generateUnitsOfMeasure {
-    relationships += r(
-            d(T: 1), d(T: 2), // time
-            d(L: 1), d(L: 2) // length
-    ) + r(
-            d(M: 1, L: 2, T: -3, I: -1), // volts
-            d(M: 1, L: 2, T: -3, I: -2), // ohms
-            d(I: 1), // amps
-            d(T: 1), // time
-    ) + r(
-            d(), // dimensionless
-            d(A: 1), // angle
-            d(T: 1), d(T: 2), // time
-            d(L: 1), // length
-            d(L: 1, A: 1, T: -1)
-    )
-
     quantities += [
             q("Absement", d(L: 1, T: 1)),
             q("AngularAbsement", d(A: 1, T: 1)),

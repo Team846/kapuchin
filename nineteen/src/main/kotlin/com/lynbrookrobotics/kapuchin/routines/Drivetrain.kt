@@ -13,7 +13,7 @@ import info.kunalsheth.units.math.*
 
 class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
     val position by with(scope) { c.hardware.position.readOnTick.withStamps }
-    val dadt = differentiator(::div, position.x, position.y.bearing)
+    val dadt = differentiator(::p, position.x, position.y.bearing)
 
     val errorGraph = c.graph("Error Angle", Degree)
     val targetGraph = c.graph("Target Angle", Degree)
@@ -191,7 +191,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 //    )
 //
 //    val startingPostion = position
-//    val turnControl = pidControlLoop(::div, ::times, turningPositionGains) {
+//    val turnControl = pidControlLoop(::p, ::p, turningPositionGains) {
 //        // θ = s ÷ r
 //        (position.avg - startingPostion.avg) / radius * Radian
 //    }
@@ -252,7 +252,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
 //    )
 //
 //    val startingPostion = position
-//    val turnControl = pidControlLoop(::div, ::times, turningPositionGains) { bearing }
+//    val turnControl = pidControlLoop(::p, ::p, turningPositionGains) { bearing }
 //
 //    val distanceRange = distance `±` distanceTolerance
 //    val bearingRange = bearing `±` angleTolerance

@@ -98,7 +98,7 @@ class CartesianTrackingTest {
 
                 val track = when (direction) {
                     Left -> 1.Foot
-                    Right -> (-1).Foot
+                    Right -> -1.Foot
                 }
 
                 val distl = theta * (r - track) / Radian

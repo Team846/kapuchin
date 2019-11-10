@@ -15,7 +15,7 @@ class ElectricalTests {
     fun `ramp rate limiting ramps up and down output`() {
         val startRampUpTime = 846.Minute
 
-        val limiter = rampRateLimiter(::div, ::times,
+        val limiter = rampRateLimiter(::p, ::p,
                 startRampUpTime, 0.Volt
         ) { 12.VoltPerSecond }
 
