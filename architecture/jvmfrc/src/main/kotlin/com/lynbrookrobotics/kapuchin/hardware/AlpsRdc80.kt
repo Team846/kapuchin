@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*

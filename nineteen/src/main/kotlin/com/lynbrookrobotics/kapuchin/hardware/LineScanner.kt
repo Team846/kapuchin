@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalInput

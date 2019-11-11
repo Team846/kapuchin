@@ -11,7 +11,7 @@ class StandardDeviationTest {
     @Test
     fun `Finite stdev of constant is zero`() {
         anyInt.filter { it > 2 }.forEach { falloff ->
-            val stdev = finiteStdev(::times, 0.Foot, falloff)
+            val stdev = finiteStdev(::p, 0.Foot, falloff)
             anyDouble.forEach { const ->
                 repeat(falloff) { stdev(const.Foot) }
                 stdev(const.Foot) `is within?` (0.Foot `±` 0.01.Foot) // lots of floating point error
@@ -23,7 +23,7 @@ class StandardDeviationTest {
     fun `Infinite stdev of constant is zero`() {
         anyInt.filter { it > 0 }.forEach { falloff ->
             anyDouble.forEach { const ->
-                val stdev = infiniteStdev(::times, const.Foot)
+                val stdev = infiniteStdev(::p, const.Foot)
                 repeat(falloff) { stdev(const.Foot) `is within?` (0.Foot `±` 0.01.Foot) } // lots of floating point error
             }
         }
@@ -32,7 +32,7 @@ class StandardDeviationTest {
     @Test
     fun `Finite stdev is finite`() {
         anyInt.filter { it > 2 }.forEach { falloff ->
-            val stdev = finiteStdev(::times, 10.Foot, falloff)
+            val stdev = finiteStdev(::p, 10.Foot, falloff)
 
             repeat(falloff) {
                 stdev(it.Foot) `is greater than?` 0.Foot
@@ -46,7 +46,7 @@ class StandardDeviationTest {
 
     @Test
     fun `Infinite stdev is infinite`() {
-        val stdev = infiniteStdev(::times, 10.Foot)
+        val stdev = infiniteStdev(::p, 10.Foot)
         repeat(1000) {
             stdev(0.Foot) `is greater than?` 0.Foot
         }
@@ -55,7 +55,7 @@ class StandardDeviationTest {
     @Test
     fun `Finite stdev of a increasing numbers is greater than zero`() {
         anyInt.filter { it > 0 }.forEach { falloff ->
-            val stdev = finiteStdev(::times, 10.Foot, falloff)
+            val stdev = finiteStdev(::p, 10.Foot, falloff)
             anyDouble.sorted().forEach { value ->
                 stdev(value.Foot) `is greater than?` 0.Foot
             }
@@ -64,7 +64,7 @@ class StandardDeviationTest {
 
     @Test
     fun `Infinite stdev of a positive number is greater than zero`() {
-        val stdev = infiniteStdev(::times, 10.Foot)
+        val stdev = infiniteStdev(::p, 10.Foot)
         anyDouble.sorted().forEach { value ->
             stdev(value.Foot) `is greater than?` 0.Foot
         }

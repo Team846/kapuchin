@@ -15,15 +15,15 @@ import info.kunalsheth.units.generated.*
  * @param Q type of input and output
  * @param D derivative of input
  *
- * @param div UOM proof (just pass in `::div`)
- * @param times UOM proof (just pass in `::times`)
+ * @param p1 UOM proof (just pass in `::p`)
+ * @param p2 UOM proof (just pass in `::p`)
  * @param x1 start time
  * @param y1 initial value
  * @param limit function returning max ramp rate
  */
 fun <Q, D> rampRateLimiter(
-        div: (Q, T) -> D,
-        times: (D, T) -> Q,
+        p1: (Q, `÷`, T) -> D,
+        p2: (D, `*`, T) -> Q,
         x1: Time, y1: Q,
         limit: (Time) -> D
 ): (Time, Q) -> Q
@@ -39,11 +39,11 @@ fun <Q, D> rampRateLimiter(
 
         val dt = x2 - x1
         val dv = y2 - y1
-        val ramp = div(dv, dt)
+        val ramp = p1(dv, `÷`, dt)
 
         return when {
-            ramp > rampRate -> y1 + times(rampRate, dt)
-            ramp < -rampRate -> y1 - times(rampRate, dt)
+            ramp > rampRate -> y1 + p2(rampRate, `*`, dt)
+            ramp < -rampRate -> y1 - p2(rampRate, `*`, dt)
             else -> y2
         }.also {
             x1 = x2
