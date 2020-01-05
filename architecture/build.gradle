@@ -1,7 +1,7 @@
 apply plugin: 'kotlin-platform-common'
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.1.1'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutines_version"
     implementation project(':uoms')
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version"
