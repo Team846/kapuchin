@@ -6,7 +6,6 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
-import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -14,7 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-fun main(args: Array<String>) {
+fun main() {
     println("Kapuchin Run ID ${System.currentTimeMillis() / 60000 - 25896084}")
     RobotBase.startRobot(::FunkyRobot)
 }
@@ -23,9 +22,9 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Initializing hardware...")
 
-        Compressor()
-        Subsystems.concurrentInit()
-        val subsystems = Subsystems.instance!!
+//        Compressor()
+//        Subsystems.concurrentInit()
+//        val subsystems = Subsystems.instance!!
 
         println("Printing key list to `keylist.txt`...")
         printKeys()
@@ -36,18 +35,17 @@ class FunkyRobot : RobotBase() {
         scope.launch {
             runWhenever(
                     { isEnabled && isOperatorControl } to choreography {
-                        subsystems.teleop()
+                        //                        subsystems.teleop()
                     },
                     { isEnabled && isAutonomous } to choreography {
-                        // subsystems.cargoShipSandstorm()
-                        subsystems.teleop()
+                        //                        subsystems.teleop()
                     },
                     { isDisabled && !isTest } to choreography {
-                        subsystems.warmup()
+                        //                        subsystems.warmup()
                     },
                     { isTest } to choreography {
-                        launch { journal(subsystems.drivetrain.hardware) }
-                        subsystems.teleop()
+                        //                        launch { journal(subsystems.drivetrain.hardware) }
+//                        subsystems.teleop()
                     }
             )
         }
@@ -79,11 +77,11 @@ val classPreloading = scope.launch {
     Thread.currentThread()
             .contextClassLoader
             .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
-            .bufferedReader()
-            .lineSequence()
-            .filter { it.matches(classNameRegex) }
-            .map { it.replace(classNameRegex, "$1") }
-            .forEach {
+            ?.bufferedReader()
+            ?.lineSequence()
+            ?.filter { it.matches(classNameRegex) }
+            ?.map { it.replace(classNameRegex, "$1") }
+            ?.forEach {
                 launch {
                     try {
                         Class.forName(it)
