@@ -7,84 +7,62 @@ import info.kunalsheth.units.math.*
 fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
 fun s(sl: Length, sr: Length) = avg(sl, sr)
 
-// todo: unit test!
-fun simpleVectorTracking(
-        trackLength: Length, init: Position
-): (Length, Length) -> Position {
-
-    var pos = init
-
-    return fun(
-            sl: Length, sr: Length
-    ): Position {
-        val s = s(sl, sr)
-        val theta = theta(sl, sr, trackLength)
-
-        pos += Position(
-                //Using compass bearings not trig bearings
-                x = s * sin(pos.bearing),
-                y = s * cos(pos.bearing),
-                bearing = theta
-        )
-
-        return pos
-    }
-}
-
 class RotationMatrixTracking(
-        private var trackLength: Length, init: Position, private var cache: Map<Angle, RotationMatrix> = emptyMap()
+        private var trackLength: Length,
+        init: Position,
+        private var cache: Map<Angle, RotationMatrix> = emptyMap()
 ) : (Length, Length) -> Unit {
 
-    private var lpx: Length
-    private var lpy: Length
-    private var rpx: Length
-    private var rpy: Length
-
-    init {
-        UomVector(-trackLength / 2, 0.Foot).let {
-            (RotationMatrix(init.bearing) rz it) + init.vector
-        }.let { (lpx, lpy) ->
-            this.lpx = lpx
-            this.lpy = lpy
-        }
-
-        UomVector(trackLength / 2, 0.Foot).let {
-            (RotationMatrix(init.bearing) rz it) + init.vector
-        }.let { (rpx, rpy) ->
-            this.rpx = rpx
-            this.rpy = rpy
-        }
-    }
+    private var leftX: Length
+    private var leftY: Length
+    private var rightX: Length
+    private var rightY: Length
 
     var x = init.x
     var y = init.y
     var bearing = init.bearing
 
-    override fun invoke(sl: Length, sr: Length) {
-        val tl = theta(sl, 0.Foot, trackLength)
-        val tr = theta(0.Foot, sr, trackLength)
+    init {
+        UomVector(-trackLength / 2, 0.Foot).let {
+            (RotationMatrix(init.bearing).rotate(it)) + init.vector
+        }.let { (leftX, leftY) ->
+            this.leftX = leftX
+            this.leftY = leftY
+        }
 
-        val ml = cache[tl] ?: RotationMatrix(tl)//.also { println("Cache miss L") }
-        val mr = cache[tr] ?: RotationMatrix(tr)//.also { println("Cache miss R") }
+        UomVector(trackLength / 2, 0.Foot).let {
+            (RotationMatrix(init.bearing).rotate(it)) + init.vector
+        }.let { (rightX, rightY) ->
+            this.rightX = rightX
+            this.rightY = rightY
+        }
+    }
+
+    override fun invoke(sl: Length, sr: Length) {
+        val leftTheta = theta(sl, 0.Foot, trackLength)
+        val rightTheta = theta(0.Foot, sr, trackLength)
+
+        val leftMatrix = cache[leftTheta] ?: RotationMatrix(leftTheta)
+        val rightMatrix = cache[rightTheta] ?: RotationMatrix(rightTheta)
 
         // copy of previous state
-        val olpx = lpx
-        val olpy = lpy
-        val orpx = rpx
-        val orpy = rpy
+        val prevLeftX = leftX
+        val prevLeftY = leftY
+        val prevRightX = rightX
+        val prevRightY = rightY
 
         // do matrix operations without creating new objects
-        val olpxMorpx = olpx - orpx
-        val olpyMorpy = olpy - orpy
+        val olpxMorpx = prevLeftX - prevRightX
+        val olpyMorpy = prevLeftY - prevRightY
 
-        lpx = ml.rzComponentX(olpxMorpx, olpyMorpy) + orpx
-        lpy = ml.rzComponentY(olpxMorpx, olpyMorpy) + orpy
+        leftX = leftMatrix.rotateX(olpxMorpx, olpyMorpy) + prevRightX
+        leftY = leftMatrix.rotateY(olpxMorpx, olpyMorpy) + prevRightY
 
-        rpx = mr.rzComponentX(-olpxMorpx, -olpyMorpy) + olpx
-        rpy = mr.rzComponentY(-olpxMorpx, -olpyMorpy) + olpy
+        rightX = rightMatrix.rotateX(-olpxMorpx, -olpyMorpy) + prevLeftX
+        rightY = rightMatrix.rotateY(-olpxMorpx, -olpyMorpy) + prevLeftY
 
-        x = avg(lpx, rpx)
-        y = avg(lpy, rpy)
-        bearing += tl + tr
+        x = avg(leftX, rightX)
+        y = avg(leftY, rightY)
+        bearing += leftTheta + rightTheta
     }
 }

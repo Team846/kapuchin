@@ -30,7 +30,7 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = start
         log.use {
             while (isActive) {
                 val (t, loc) = pos
-                val (x, y) = startingRot rz (loc.vector - startingLoc)
+                val (x, y) = startingRot.rotate(loc.vector - startingLoc)
 
                 if (distance(loc.vector, last.vector) > ptDistance) {
                     it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
@@ -41,7 +41,7 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = start
             }
 
             val (t, loc) = pos
-            val (x, y) = startingRot rz (loc.vector - startingLoc)
+            val (x, y) = startingRot.rotate(loc.vector - startingLoc)
             it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
         }
     }
@@ -65,7 +65,7 @@ suspend fun DrivetrainComponent.followTrajectory(
             .reduce { a, b -> a + b }
 
     val targIter = waypts
-            .map { (t, pt) -> (mtrx rz pt) + startingLoc stampWith t }
+            .map { (t, pt) -> mtrx.rotate(pt) + startingLoc stampWith t }
             .iterator()
 
     var target = targIter.next()

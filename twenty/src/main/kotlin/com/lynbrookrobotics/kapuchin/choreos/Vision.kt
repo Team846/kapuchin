@@ -35,7 +35,7 @@ suspend fun Subsystems.limeLineAlign(
         suspend fun lime() = targetPosition?.takeIf { liftHeight < 1.Inch }?.let { visionSnapshot1 ->
             val robotSnapshot1 = robotPosition
             val mtrx = RotationMatrix(robotSnapshot1.bearing)
-            val targetLoc = mtrx rz visionSnapshot1.vector
+            val targetLoc = mtrx.rotate(visionSnapshot1.vector)
             val waypt = robotSnapshot1.vector + targetLoc
 
             launch { withTimeout(1.Second) { rumble.set(TwoSided(0.Percent, 100.Percent)) } }
@@ -79,13 +79,13 @@ suspend fun LimelightHardware.perpendicularAlign(
         targetPosition?.let { visionSnapshot1 ->
             val robotSnapshot1 = robotPosition
             val mtrx = RotationMatrix(robotSnapshot1.bearing)
-            val targetLoc = mtrx rz visionSnapshot1.vector
+            val targetLoc = mtrx.rotate(visionSnapshot1.vector)
 
             if (visionSnapshot1.bearing.abs < tolerance) {
-                val perpPt = mtrx rz UomVector(
+                val perpPt = mtrx.rotate(UomVector(
                         closeEndPt * sin(0.Degree),
                         closeEndPt * cos(0.Degree)
-                )
+                ))
 
                 val waypt = robotSnapshot1.vector + targetLoc - perpPt
 
@@ -96,10 +96,10 @@ suspend fun LimelightHardware.perpendicularAlign(
                         ), waypt, 4.Inch
                 )
             } else {
-                val farPerpPt = mtrx rz UomVector(
+                val farPerpPt = mtrx.rotate(UomVector(
                         farEndPt * sin(visionSnapshot1.bearing),
                         farEndPt * cos(visionSnapshot1.bearing)
-                )
+                ))
 
                 val waypt = robotSnapshot1.vector + targetLoc - farPerpPt
 
