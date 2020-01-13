@@ -40,17 +40,15 @@ fun nSect(a: Waypt, b: Waypt, cut: Length): List<Waypt> {
 fun pathToTrajectory(waypts: List<Waypt>, performance: Dimensionless, maxV: Velocity, maxOmega: AngularVelocity): List<TimeStamped<Waypt>> {
     val numPts = waypts.size
 
-    val first = 0.Second
-    val last = distance(waypts[numPts - 1], waypts[numPts - 2]) / maxV
+    val first = abs(distance(waypts[0], waypts[1]) / performance / maxV)
 
-    val times = mutableListOf<Time>()
-    times += first
+    val times = mutableListOf(0.Second, first)
 
     var tSum = first
-    for (i in 1..(numPts - 2)) {
-        val p1 = waypts[i - 1]
-        val p2 = waypts[i + 0]
-        val p3 = waypts[i + 1]
+    for (i in 2 until numPts) {
+        val p1 = waypts[i - 2]
+        val p2 = waypts[i - 1]
+        val p3 = waypts[i - 0]
 
         val a = distance(p1, p2)
         val `a²` = a * a
@@ -61,15 +59,13 @@ fun pathToTrajectory(waypts: List<Waypt>, performance: Dimensionless, maxV: Velo
         val c = distance(p1, p3)
         val `c²` = c * c
 
-        val `Δθ` = asin(
-                (`c²` - `a²` - `ΔP²`) / (a * `ΔP` * 2)
-        ) - 90.Degree
+        val `Δθ` = 180.Degree - acos(
+                (`a²` + `ΔP²` - `c²`) / (a * `ΔP` * 2)
+        )
 
         tSum += abs(`Δθ` / performance / maxOmega) + abs(`ΔP` / performance / maxV)
         times += tSum
     }
-
-    times += last
 
     return waypts
             .zip(times)
