@@ -30,7 +30,7 @@ class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
     override val priority: Priority
         get() = Priority.High
     override val name: String
-        get() = "Shooter 'Em Up, the classic high school experience"
+        get() = "Shooter"
 
     private val leftFlywheelId by pref(10)
     private val rightFlywheelId by pref(11)
