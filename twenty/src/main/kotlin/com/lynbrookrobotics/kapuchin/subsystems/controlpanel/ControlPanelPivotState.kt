@@ -1,4 +1,3 @@
 package com.lynbrookrobotics.kapuchin.subsystems.controlpanel
 
-class ControlPanelPivotState {
-}
+enum class ControlPanelPivotState(val output: Boolean) { Up(false), Down(true) }
