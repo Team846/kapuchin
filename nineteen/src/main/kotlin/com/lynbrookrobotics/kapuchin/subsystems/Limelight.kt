@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import info.kunalsheth.units.math.tan
 import kotlin.math.roundToInt
 
 class LimelightHardware : RobotHardware<LimelightHardware>() {
@@ -17,11 +18,13 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     override val priority = Priority.Lowest
 
     private val mounting by pref {
-        val x by pref(-4.5, Inch)
-        val y by pref(9, Inch)
+        val x by pref(0, Inch)
+        val y by pref(0, Inch)
         ({ UomVector(x, y) })
     }
-    private val distanceVerticalConstant by pref(472, Foot)
+    private val targetHeightConstant by pref (107, Inch)
+    private val mountingAngleConstant by pref(38,Degree)
+    private val mountingHeight by pref(24, Inch)
     private val aspect0 by pref {
         val thor by pref(226)
         val tvert by pref(94)
@@ -34,24 +37,25 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     private fun targetExists() = l("tv").roundToInt() == 1
     private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
 
-    private fun distanceToTarget(tvert: Double) = distanceVerticalConstant / tvert
     private fun turn(tx: Angle, distance: Length) = atan(distance * tan(tx) / (distance + mounting.y))
     private fun aspect(thor: Double, tvert: Double) = thor / tvert
     private fun skew(aspect: Double) = acos(aspect.Each / aspect0 minMag 1.Each)
+    private fun targetDistance(ty: Double) = (targetHeightConstant-mountingHeight)/tan(mountingAngleConstant+ty.Degree)
+    private fun targetX(tx: Angle) = (tan(tx) * targetDistance(l("ty")))
 
     val targetPosition = sensor {
         (if (targetExists()) {
-            val tvert = l("tvert")
+            val ty = l("ty")
             val tx = l("tx").Degree
             val thor = l("thor")
+            val tvert = l("tvert")
 
-            val distance = distanceToTarget(tvert)
-            val turn = turn(tx, distance)
+            val distance = targetDistance(ty)
             val skew = skew(aspect(thor, tvert))
 
             Position(
-                    distance * sin(turn) + mounting.x,
-                    distance * cos(turn) + mounting.y,
+                    (targetX(tx).Inch + mounting.x.Inch).Inch,
+                    distance + mounting.y,
                     skew * tx.signum
             )
         } else null) stampWith timeStamp(it)
@@ -63,7 +67,8 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     val targetAngle = sensor {
         (if (targetExists()) {
             val tvert = l("tvert")
-            val distance = distanceToTarget(tvert)
+            val ty = l("ty")
+            val distance = targetDistance(ty)
             val tx = l("tx").Degree
             turn(tx, distance)
         } else null) stampWith timeStamp(it)
