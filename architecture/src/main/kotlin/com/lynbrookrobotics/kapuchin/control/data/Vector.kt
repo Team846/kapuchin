@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 /**
  * Represents a 3D vector
