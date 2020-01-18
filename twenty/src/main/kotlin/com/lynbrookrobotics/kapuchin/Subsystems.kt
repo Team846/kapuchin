@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class Subsystems(val drivetrain: DrivetrainComponent,
@@ -37,6 +38,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
         var instance : Subsystems? = null
         val pneumaticTicker = ticker(Medium, 50.milli(Second), "Pneumatic System Ticker")
+        val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
+
+
         fun concurrentInit(){
 
         }
