@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import info.kunalsheth.units.math.tan
 import kotlin.math.roundToInt
 
 class LimelightHardware : RobotHardware<LimelightHardware>() {
@@ -39,19 +40,21 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     private fun turn(tx: Angle, distance: Length) = atan(distance * tan(tx) / (distance + mounting.y))
     private fun aspect(thor: Double, tvert: Double) = thor / tvert
     private fun skew(aspect: Double) = acos(aspect.Each / aspect0 minMag 1.Each)
-    private fun targetDistance(ty: Double) = (targetHeightConstant-mountingHeight)/tan(mountingAngleConstant+ty)
-    private fun targetX(tx: Degree) = tan(tx)*targetDistance(l("ty"))
+    private fun targetDistance(ty: Double) = (targetHeightConstant-mountingHeight)/tan(mountingAngleConstant+ty.Degree)
+    private fun targetX(tx: Angle) = (tan(tx) * targetDistance(l("ty")))
 
     val targetPosition = sensor {
         (if (targetExists()) {
             val ty = l("ty")
             val tx = l("tx").Degree
+            val thor = l("thor")
+            val tvert = l("tvert")
 
-            val distance = distanceToTarget(ty)
+            val distance = targetDistance(ty)
             val skew = skew(aspect(thor, tvert))
 
             Position(
-                    targetX + mounting.x,
+                    (targetX(tx).Inch + mounting.x.Inch).Inch,
                     distance + mounting.y,
                     skew * tx.signum
             )
@@ -64,7 +67,8 @@ class LimelightHardware : RobotHardware<LimelightHardware>() {
     val targetAngle = sensor {
         (if (targetExists()) {
             val tvert = l("tvert")
-            val distance = distanceToTarget(tvert)
+            val ty = l("ty")
+            val distance = targetDistance(ty)
             val tx = l("tx").Degree
             turn(tx, distance)
         } else null) stampWith timeStamp(it)
