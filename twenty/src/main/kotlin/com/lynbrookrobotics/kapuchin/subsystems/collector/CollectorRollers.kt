@@ -16,8 +16,7 @@ class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<
     val cargoReleaseSpeed by pref(-6, Volt)
 
 
-    override val fallbackController: CollectorRollersComponent.(Time) -> DutyCycle ={0.Percent}
-
+    override val fallbackController: CollectorRollersComponent.(Time) -> DutyCycle = { 0.Percent }
 
 
     override fun CollectorRollersHardware.output(value: DutyCycle) {
@@ -40,7 +39,7 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
     )
 
 
-    val collectorEsc by hardw { CANSparkMax( collectorEscId , kBrushless) }.configure {
+    val collectorEsc by hardw { CANSparkMax(collectorEscId, kBrushless) }.configure {
 
 
     }

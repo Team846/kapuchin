@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems.collector
 
-import com.ctre.phoenix.motorcontrol.ControlMode
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -15,7 +14,7 @@ class StorageBeltComponent(hardware: StorageBeltHardware) : Component<StorageBel
 
 
     override val fallbackController: StorageBeltComponent.(Time) -> TwoSided<DutyCycle>
-    get() = {TwoSided(0.Percent, 0.Percent)}
+        get() = { TwoSided(0.Percent, 0.Percent) }
 
     override fun StorageBeltHardware.output(value: TwoSided<DutyCycle>) {
         topEsc.set(value.left.Each)

@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.climber
 
 
-
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -15,7 +14,7 @@ import info.kunalsheth.units.math.*
 
 class ClimberStowComponent(hardware: ClimberStowHardware) : Component<ClimberStowComponent, ClimberStowHardware, ClimberStowState>(hardware, Subsystems.pneumaticTicker) {
 
-    override val fallbackController: ClimberStowComponent.(Time) -> ClimberStowState = { Up }
+    override val fallbackController: ClimberStowComponent.(Time) -> ClimberStowState = { Down }
 
     override fun ClimberStowHardware.output(value: ClimberStowState) {
 
@@ -30,7 +29,7 @@ class ClimberStowComponent(hardware: ClimberStowHardware) : Component<ClimberSto
         override val syncThreshold: Time = 20.milli(Second)
         override val name: String = "Climber Stow"
 
-        
+
         val solenoidPort = 0
         val solenoid by hardw { Solenoid(solenoidPort) }
 

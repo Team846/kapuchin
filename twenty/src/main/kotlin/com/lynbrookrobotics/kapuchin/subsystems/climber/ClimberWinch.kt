@@ -8,20 +8,18 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushed
 import info.kunalsheth.units.generated.*
 
-class ClimberWinchComponent (hardware: ClimberWinchHardware) : Component<ClimberWinchComponent, ClimberWinchHardware, DutyCycle>(hardware) {
-    override val fallbackController: ClimberWinchComponent.(Time) -> DutyCycle ={0.Percent}
+class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberWinchComponent, ClimberWinchHardware, DutyCycle>(hardware) {
+    override val fallbackController: ClimberWinchComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun ClimberWinchHardware.output(value: DutyCycle) {
         climberwinchEsc.set(value.Each)
 
 
-
-
     }
 
 
-
 }
+
 class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinchComponent>() {
     override val period: Time = 30.Millisecond
     override val syncThreshold: Time = 30.Millisecond

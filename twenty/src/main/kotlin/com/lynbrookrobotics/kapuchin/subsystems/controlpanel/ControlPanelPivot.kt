@@ -13,7 +13,7 @@ import info.kunalsheth.units.math.*
 
 class ControlPanelPivotComponent(hardware: ControlPanelPivotHardware) : Component<ControlPanelPivotComponent, ControlPanelPivotHardware, ControlPanelPivotState>(hardware, Subsystems.pneumaticTicker) {
 
-    override val fallbackController: ControlPanelPivotComponent.(Time) -> ControlPanelPivotState = { Up }
+    override val fallbackController: ControlPanelPivotComponent.(Time) -> ControlPanelPivotState = { Down }
 
     override fun ControlPanelPivotHardware.output(value: ControlPanelPivotState) {
 

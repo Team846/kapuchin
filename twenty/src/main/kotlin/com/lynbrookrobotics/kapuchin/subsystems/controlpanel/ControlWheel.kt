@@ -8,20 +8,18 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 
-class ControlWheelComponent (hardware: ControlWheelHardware) : Component<ControlWheelComponent, ControlWheelHardware, DutyCycle>(hardware) {
-    override val fallbackController: ControlWheelComponent.(Time) -> DutyCycle ={0.Percent}
+class ControlWheelComponent(hardware: ControlWheelHardware) : Component<ControlWheelComponent, ControlWheelHardware, DutyCycle>(hardware) {
+    override val fallbackController: ControlWheelComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun ControlWheelHardware.output(value: DutyCycle) {
         controlwheelEsc.set(value.Each)
 
 
-
-
     }
 
 
-
 }
+
 class ControlWheelHardware : SubsystemHardware<ControlWheelHardware, ControlWheelComponent>() {
     override val period: Time = 30.Millisecond
     override val syncThreshold: Time = 30.Millisecond

@@ -16,7 +16,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val driver : DriverHardware,
                  val operator: OperatorHardware,
                  val rumble: RumbleComponent,
-                 val leds: LedComponent,
                  val collectorRollers : CollectorRollersComponent?,
                  val storageBelt : StorageBeltComponent?,
                  val barAdjustment : BarAdjustmentComponent?,
@@ -37,6 +36,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val isCorrupted by pref(true)
 
         var instance : Subsystems? = null
+            private set
         val pneumaticTicker = ticker(Medium, 50.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
