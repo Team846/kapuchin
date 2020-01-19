@@ -1,7 +1,8 @@
-package com.lynbrookrobotics.kapuchin.tests.control.math.trajectory
+package com.lynbrookrobotics.kapuchin.tests.control.math.drivetrain
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.control.math.trajectory.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
 import kotlin.math.PI
@@ -9,16 +10,17 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.test.Test
 
-class TrajectoriesTest {
+class TrajectoryGeneratorTest {
 
     private fun waypt(t: Double) = Waypt(
             sin(5 * PI * t).Metre,
             cos(7 * PI * t).Metre
     )
 
-    private val maxV = 10.Metre / Second
+    private val maxVelocity = 10.Metre / Second
     private val maxOmega = 4.Radian / Second
-    private val maxA = 4.Metre / Second / Second
+    private val maxAcceleration = 4.Metre / Second / Second
+    private val maxAlpha = 2.Radian / Second / Second
 
     private val path = (0 until 2000)
             .map { it / 1000.0 }
@@ -26,26 +28,26 @@ class TrajectoriesTest {
 
     @Test
     fun `trajectories never exceed max constants`() {
-        val trajectory = pathToTrajectory(path, maxV, maxOmega, maxA)
+        val trajectory = pathToTrajectory(path, maxVelocity, maxOmega, maxAcceleration, maxAlpha)
         trajectory.forEach {
-            maxV `is greater than or equal to?` it.velocity
-            maxA `is greater than or equal to?` it.acceleration
+            maxVelocity `is greater than or equal to?` it.velocity
+            maxAcceleration `is greater than or equal to?` it.acceleration
 
-            it.velocity `is greater than or equal to?` -maxV
-            it.acceleration `is greater than or equal to?` -maxA
+            it.velocity `is greater than or equal to?` -maxVelocity
+            it.acceleration `is greater than or equal to?` -maxAcceleration
         }
     }
 
     @Test
     fun `trajectories start and end at zero velocity`() {
-        val trajectory = pathToTrajectory(path, maxV, maxOmega, maxA)
+        val trajectory = pathToTrajectory(path, maxVelocity, maxOmega, maxAcceleration, maxAlpha)
         trajectory.first().velocity `is equal to?` 0.Metre / Second
         trajectory.last().velocity `is equal to?` 0.Metre / Second
     }
 
     @Test
     fun `trajectories have valid timestamps and velocities`() {
-        val trajectory = pathToTrajectory(path, maxV, maxOmega, maxA)
+        val trajectory = pathToTrajectory(path, maxVelocity, maxOmega, maxAcceleration, maxAlpha)
         for (i in 1 until trajectory.size) {
             val s1 = trajectory[i - 1]
             val s2 = trajectory[i]
@@ -59,7 +61,7 @@ class TrajectoriesTest {
 
     @Test
     fun `trajectories have valid accelerations`() {
-        val trajectory = pathToTrajectory(path, maxV, maxOmega, maxA)
+        val trajectory = pathToTrajectory(path, maxVelocity, maxOmega, maxAcceleration, maxAlpha)
         for (i in 1 until trajectory.size) {
             val s1 = trajectory[i - 1]
             val s2 = trajectory[i]

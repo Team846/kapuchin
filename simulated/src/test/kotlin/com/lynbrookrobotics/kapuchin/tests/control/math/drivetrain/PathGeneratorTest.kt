@@ -1,13 +1,14 @@
-package com.lynbrookrobotics.kapuchin.tests.control.math.trajectory
+package com.lynbrookrobotics.kapuchin.tests.control.math.drivetrain
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.control.math.trajectory.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
 import kotlin.test.Ignore
 import kotlin.test.Test
 
-class PathsTest {
+class PathGeneratorTest {
 
     @Test
     @Ignore // takes too long
@@ -23,15 +24,15 @@ class PathsTest {
                                     val a = Waypt(x1.Metre, y1.Metre)
                                     val b = Waypt(x2.Metre, y2.Metre)
 
-                                    val pts = nSect(a, b, len)
+                                    val path = nSect(a, b, len)
 
-                                    pts.size `is greater than or equal to?` 2
+                                    path.size `is greater than or equal to?` 2
 
-                                    if (pts.size > 2) pts
+                                    if (path.size > 2) path
                                             .zipWithNext { p1, p2 -> distance(p1, p2) }
                                             .forEach { len `is greater than or equal to?` it }
 
-                                    pts.zipWithNext().forEach { (p1, p2) ->
+                                    path.zipWithNext().forEach { (p1, p2) ->
                                         val da1 = distance(a, p1)
                                         val da2 = distance(a, p2)
 
@@ -49,8 +50,8 @@ class PathsTest {
     }
 
     @Test
-    fun `toPath smooths waypoints`() {
-        val waypts = listOf(
+    fun `interpolatePath smooths waypoints`() {
+        val path = listOf(
                 Waypt(-1.Metre, -1.Metre),
                 Waypt(-1.Metre, 0.Metre),
                 Waypt(1.Metre, 0.Metre),
@@ -58,18 +59,18 @@ class PathsTest {
         )
 
         val len = 0.1.Metre
-        val path = toPath(waypts, len)
-        val segs = path.zipWithNext()
+        val newPath = interpolatePath(path, len)
+        val segs = newPath.zipWithNext()
 
         segs
                 .map { (a, b) -> distance(a, b) }
                 .forEach { len * 2 `is greater than or equal to?` it }
 
 
-        val start = waypts.first()
-        val end = waypts.last()
+        val start = path.first()
+        val end = path.last()
 
-        path.zipWithNext().forEach { (p1, p2) ->
+        newPath.zipWithNext().forEach { (p1, p2) ->
             val da1 = distance(start, p1)
             val da2 = distance(start, p2)
 
@@ -80,7 +81,7 @@ class PathsTest {
             db1 `is greater than?` db2
         }
 
-        (waypts - start - end).none { it in path } `is equal to?` true
+        (path - start - end).none { it in newPath } `is equal to?` true
     }
 
 }

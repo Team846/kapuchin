@@ -1,5 +1,6 @@
-package com.lynbrookrobotics.kapuchin.control.math.trajectory
+package com.lynbrookrobotics.kapuchin.control.math.drivetrain
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -13,54 +14,62 @@ import kotlin.math.sqrt
  * 3) Merge the two trajectories by always taking the smaller velocity at each [Segment].
  * 4) Generate a timestamp and acceleration for each [Segment] of the merged [Trajectory].
  *
+ * (any variable starting with "d" is a finite change Δ, not an infinitely small calculus "d")
+ *
  * @author Andy
  *
- * @param waypts a path consisting of a list of waypoints.
- * @param maxV the maximum linear velocity of the robot.
+ * @param path a path consisting of a list of waypoints.
+ * @param maxVelocity the maximum linear velocity of the robot.
  * @param maxOmega the maximum angular velocity of the robot.
- * @param maxA the maximum linear acceleration of the robot.
+ * @param maxAcceleration the maximum linear acceleration of the robot.
+ * @param maxAlpha the maximum angular acceleration of the robot.
  *
  * @return a trajectory consisting of a list of segments.
  */
 fun pathToTrajectory(
-        waypts: Path,
-        maxV: Velocity,
+        path: Path,
+        maxVelocity: Velocity,
         maxOmega: AngularVelocity,
-        maxA: Acceleration
+        maxAcceleration: Acceleration,
+        maxAlpha: AngularAcceleration
 ): Trajectory {
 
-    check(maxV > 0.Metre / Second)
+    check(maxVelocity > 0.Metre / Second)
+    check(maxAcceleration > 0.Metre / Second / Second)
     check(maxOmega > 0.Radian / Second)
-    check(maxA > 0.Metre / Second / Second)
+    check(maxAlpha > 0.Radian / Second / Second)
 
     // (1)
 
-    val forwardWaypts = waypts.toMutableList()
-    val forwardTrajectory = oneWayAccelCap(forwardWaypts, maxV, maxOmega, maxA)
+    val forwardPath = path.toMutableList()
+    val forwardTrajectory = oneWayAccelCap(forwardPath, maxVelocity, maxOmega, maxAcceleration, maxAlpha)
+
 
     // (2)
 
-    val reverseWaypts = waypts.toMutableList().reversed()
-    var reverseTrajectory = oneWayAccelCap(reverseWaypts, maxV, maxOmega, maxA)
+    val reversePath = path.toMutableList().reversed()
+    var reverseTrajectory = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration, maxAlpha)
 
     // Reverse the times for the reverse trajectory so time 0 is the first waypoint
     val maxT = reverseTrajectory.last().time
     reverseTrajectory.forEach { it.time = maxT - it.time }
     reverseTrajectory = reverseTrajectory.reversed()
 
+
     // (3)
 
     val mergedTrajectory = mutableListOf<Segment>()
-    for (i in 0 until waypts.size) {
+    for (i in 0 until path.size) {
         val f = forwardTrajectory[i]
         val r = reverseTrajectory[i]
         mergedTrajectory += if (f.velocity <= r.velocity) f else r
     }
 
+
     // (4)
 
     mergedTrajectory.first().time = 0.Second
-    for (i in 1 until waypts.size) {
+    for (i in 1 until path.size) {
         val s1 = mergedTrajectory[i - 1]
         val s2 = mergedTrajectory[i]
 
@@ -80,37 +89,40 @@ fun pathToTrajectory(
 /**
  * Generates a [Trajectory] with acceleration capped in 1 direction (left to right).
  *
- * 1) Find the velocity cap of each [Segment] by using region of feasibility (higher Δtheta means lower velocity cap).
+ * 1) Find the velocity cap of each [Segment] by using region of feasibility.
+ *    https://www.desmos.com/calculator/qcpfvixfvg
  * 2) Going from left to right, cap linear acceleration.
  * Timestamps are not generated yet.
  *
  * @author Andy
  *
- * @param waypts a path consisting of a list of waypoints.
- * @param maxV the maximum linear velocity of the robot.
+ * @param path a path consisting of a list of waypoints.
+ * @param maxVelocity the maximum linear velocity of the robot.
  * @param maxOmega the maximum angular velocity of the robot.
- * @param maxA the maximum linear acceleration of the robot.
+ * @param maxAcceleration the maximum linear acceleration of the robot.
+ * @param maxAlpha the maximum angular acceleration of the robot.
  *
  * @return a trajectory without timestamps generated yet.
  */
 private fun oneWayAccelCap(
-        waypts: Path,
-        maxV: Velocity,
+        path: Path,
+        maxVelocity: Velocity,
         maxOmega: AngularVelocity,
-        maxA: Acceleration
+        maxAcceleration: Acceleration,
+        maxAlpha: AngularAcceleration
 ): Trajectory {
 
     val trajectory = mutableListOf(
-            Segment(waypts[0]),
-            Segment(waypts[1], maxV)
+            Segment(path[0]),
+            Segment(path[1], maxVelocity)
     )
 
     // (1)
 
-    for (i in 2 until waypts.size) {
-        val p1 = waypts[i - 2]
-        val p2 = waypts[i - 1]
-        val p3 = waypts[i] // current
+    for (i in 2 until path.size) {
+        val p1 = path[i - 2]
+        val p2 = path[i - 1]
+        val p3 = path[i] // current
 
         val d1 = distance(p1, p2)
         val dx = distance(p2, p3)
@@ -122,17 +134,18 @@ private fun oneWayAccelCap(
                 else 180.Degree - acos((d1 * d1 + dx * dx - d3 * d3) / (d1 * dx * 2))
 
         // Find Δt based on region of feasibility
-        val dt = abs(dtheta / maxOmega) + dx / maxV
+        val dt = abs(dtheta / maxOmega) + dx / maxVelocity
 
-        trajectory += Segment(waypts[i], dx / dt)
+        trajectory += Segment(path[i], dx / dt)
     }
+
 
     // (2)
 
-    for (i in 1 until waypts.size) {
+    for (i in 1 until path.size) {
         val s1 = trajectory[i - 1]
         val s2 = trajectory[i] // current
-        val s3 = if (i != waypts.size - 1) trajectory[i + 1] else Segment(Waypt(0.Metre, 0.Metre))
+        val s3 = if (i != path.size - 1) trajectory[i + 1] else Segment(Waypt(0.Metre, 0.Metre))
 
         // Find Δt based on the target velocity and Δx
         // The target velocity is the minimum velocity cap of either the current or the next segment.
@@ -144,15 +157,15 @@ private fun oneWayAccelCap(
         s2.acceleration = (s2.velocity - s1.velocity) / dt
 
         // Cap linear acceleration
-        if (s2.acceleration > maxA) {
+        if (s2.acceleration > maxAcceleration) {
             // Find a new dt using acceleration and dx instead of a target velocity
             // Δx = v₀t + (1/2)at²
             // t = (-v₀ ± sqrt(v₀² + 2aΔx)) / a -- quadratic formula
             // t = (-v₀ + sqrt(v₀² + 2aΔx)) / a -- only need to consider positive t
-            dt = (-s1.velocity + Velocity(sqrt((s1.velocity * s1.velocity + 2 * maxA * dx).siValue))) / maxA
+            dt = (-s1.velocity + Velocity(sqrt((s1.velocity * s1.velocity + 2 * maxAcceleration * dx).siValue))) / maxAcceleration
 
-            s2.velocity = s1.velocity + maxA * dt
-            s2.acceleration = maxA
+            s2.velocity = s1.velocity + maxAcceleration * dt
+            s2.acceleration = maxAcceleration
         }
     }
 
