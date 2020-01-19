@@ -46,7 +46,6 @@ class FunkyRobot : RobotBase() {
                         subsystems.warmup()
                     },
                     { isTest } to choreography {
-                        launch { journal(subsystems.drivetrain.hardware) }
                         subsystems.teleop()
                     }
             )
