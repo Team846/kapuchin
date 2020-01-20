@@ -1265,7 +1265,6 @@ NT: server: client CONNECTED: 10.8.46.11 port 57161
 [Loaded com.lynbrookrobotics.kapuchin.routines.teleop.LiftKt$teleop$2$1 from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded com.lynbrookrobotics.kapuchin.hardware.Sensor$UpdateSource$withoutStamps$1$provideDelegate$1 from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded com.lynbrookrobotics.kapuchin.routines.teleop.ClimberKt$teleop$6$1 from file:/home/lvuser/eighteen-1.0.0.jar]
-[Loaded com.lynbrookrobotics.kapuchin.subsystems.drivetrain.GyroInput from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded info.kunalsheth.units.generated.L0A0M0T0I0Theta0N0J0 from file:/home/lvuser/eighteen-1.0.0.jar]
 [Loaded java.util.concurrent.Callable from /usr/local/frc/JRE/lib/rt.jar]
 [Loaded java.util.concurrent.ForkJoinPool$ManagedBlocker from /usr/local/frc/JRE/lib/rt.jar]

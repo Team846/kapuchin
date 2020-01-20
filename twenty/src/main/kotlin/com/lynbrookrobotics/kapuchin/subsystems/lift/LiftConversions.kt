@@ -21,9 +21,9 @@ class LiftConversions(val hardware: LiftHardware) : Named by Named("Conversions"
             ({ Pair(real, native) })
         }
 
-        val zeroOffset by pref(17.42, Inch)
+        val zeroOffset by pref(17.42, Inch);
 
-        ({
+        {
             val nfu = max.second - min.second
             val pfq = max.first - min.first
 
@@ -40,7 +40,7 @@ class LiftConversions(val hardware: LiftHardware) : Named by Named("Conversions"
             )
 
             native to safeties
-        })
+        }
     }
 
     val native get() = conversions.first

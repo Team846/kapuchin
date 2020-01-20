@@ -12,12 +12,8 @@ class BarAdjustmentComponent(hardware: BarAdjustmentHardware) : Component<BarAdj
     override val fallbackController: BarAdjustmentComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun BarAdjustmentHardware.output(value: DutyCycle) {
-        baradjustmentEsc.set(value.Each)
-
-
+        barAdjustmentEsc.set(value.Each)
     }
-
-
 }
 
 class BarAdjustmentHardware : SubsystemHardware<BarAdjustmentHardware, BarAdjustmentComponent>() {
@@ -26,16 +22,7 @@ class BarAdjustmentHardware : SubsystemHardware<BarAdjustmentHardware, BarAdjust
     override val priority: Priority = Priority.Low
     override val name: String = "Bar Adjustment"
 
-    val baradjustmentEscId by pref(10)
-    val baradjustmentEscInversion by pref(false)
+    private val barAdjustmentEscId by pref(10)
 
-    val escConfig by escConfigPref(
-            defaultNominalOutput = 0.5.Volt,
-            defaultContinuousCurrentLimit = 25.Ampere,
-            defaultPeakCurrentLimit = 35.Ampere
-    )
-
-    val baradjustmentEsc by hardw { CANSparkMax(baradjustmentEscId, kBrushed) }.configure {
-
-    }
+    val barAdjustmentEsc by hardw { CANSparkMax(barAdjustmentEscId, kBrushed) }
 }

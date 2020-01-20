@@ -10,14 +10,10 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<CollectorRollersComponent, CollectorRollersHardware, DutyCycle>(hardware) {
-
-
     val cargoCollectSpeed by pref(11, Volt)
     val cargoReleaseSpeed by pref(-6, Volt)
 
-
     override val fallbackController: CollectorRollersComponent.(Time) -> DutyCycle = { 0.Percent }
-
 
     override fun CollectorRollersHardware.output(value: DutyCycle) {
         collectorEsc.set(value.Each)
@@ -30,17 +26,7 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "Collector Rollers"
 
-    val collectorEscId by pref(10)
-    val collectorEscInversion by pref(false)
-    val escConfig by escConfigPref(
-            defaultNominalOutput = 0.5.Volt,
-            defaultContinuousCurrentLimit = 25.Ampere,
-            defaultPeakCurrentLimit = 35.Ampere
-    )
+    private val collectorEscId by pref(10)
 
-
-    val collectorEsc by hardw { CANSparkMax(collectorEscId, kBrushless) }.configure {
-
-
-    }
+    val collectorEsc by hardw { CANSparkMax(collectorEscId, kBrushless) }
 }

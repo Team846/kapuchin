@@ -12,12 +12,8 @@ class ControlWheelComponent(hardware: ControlWheelHardware) : Component<ControlW
     override val fallbackController: ControlWheelComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun ControlWheelHardware.output(value: DutyCycle) {
-        controlwheelEsc.set(value.Each)
-
-
+        spinnerEsc.set(value.Each)
     }
-
-
 }
 
 class ControlWheelHardware : SubsystemHardware<ControlWheelHardware, ControlWheelComponent>() {
@@ -26,16 +22,7 @@ class ControlWheelHardware : SubsystemHardware<ControlWheelHardware, ControlWhee
     override val priority: Priority = Priority.Low
     override val name: String = "ControlPanel"
 
-    val controlwheelEscId by pref(10)
-    val controlwheelEscInversion by pref(false)
+    private val controlWheelEscId by pref(10)
 
-    val escConfig by escConfigPref(
-            defaultNominalOutput = 0.5.Volt,
-            defaultContinuousCurrentLimit = 25.Ampere,
-            defaultPeakCurrentLimit = 35.Ampere
-    )
-
-    val controlwheelEsc by hardw { CANSparkMax(controlwheelEscId, kBrushless) }.configure {
-
-    }
+    val spinnerEsc by hardw { CANSparkMax(controlWheelEscId, kBrushless) }
 }

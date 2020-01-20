@@ -12,12 +12,8 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberW
     override val fallbackController: ClimberWinchComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun ClimberWinchHardware.output(value: DutyCycle) {
-        climberwinchEsc.set(value.Each)
-
-
+        climberWinchEsc.set(value.Each)
     }
-
-
 }
 
 class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinchComponent>() {
@@ -26,16 +22,10 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
     override val priority: Priority = Priority.Low
     override val name: String = "Climber Winch"
 
-    val climberwinchEscId by pref(10)
-    val climberwinchEscInversion by pref(false)
+    val climberWinchEscId by pref(10)
+    val climberWinchEscInversion by pref(false)
 
-    val escConfig by escConfigPref(
-            defaultNominalOutput = 0.5.Volt,
-            defaultContinuousCurrentLimit = 25.Ampere,
-            defaultPeakCurrentLimit = 35.Ampere
-    )
-
-    val climberwinchEsc by hardw { CANSparkMax(climberwinchEscId, kBrushed) }.configure {
+    val climberWinchEsc by hardw { CANSparkMax(climberWinchEscId, kBrushed) }.configure {
 
     }
 }
