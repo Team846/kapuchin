@@ -31,7 +31,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
                     l("tx").Degree, l("ty").Degree,
                     l("tx0"), l("ty0"),
                     l("thor"), l("tvert"),
-                    l("ta"))
+                    l("ta"), l("getpipe"))
             else -> null
         } stampWith it
     }
@@ -42,6 +42,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
             .with(graph("thor", Each)) { it?.thor?.Each ?: Double.NaN.Each }
             .with(graph("tvert", Each)) { it?.tvert?.Each ?: Double.NaN.Each }
             .with(graph("ta", Each)) { it?.ta?.Each ?: Double.NaN.Each }
+            .with(graph("getpipe",Each)) { it?.pipeline?.Each ?: Double.NaN.Each}
 
 
     init {

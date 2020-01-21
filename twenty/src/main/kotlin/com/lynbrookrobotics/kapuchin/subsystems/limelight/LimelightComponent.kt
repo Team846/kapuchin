@@ -2,20 +2,22 @@ package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.LimelightReading
 
 enum class Pipeline(val number: Int) {
     One(1), Two(2), Three(3), Four(4)
 }
 
 class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, EventLoop) {
-    override val fallbackController: LimelightComponent.(Time) -> Pipeline
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
     private val mounting by pref {
         val x by pref(0, Inch)
         val y by pref(0, Inch)
@@ -29,6 +31,13 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         val tvert by pref(94)
         ({ thor / tvert.toDouble() })
     }
+
+    override val fallbackController: LimelightComponent.(Time) -> Pipeline
+        get() =
+
+    val table = NetworkTableInstance.getDefault().getTable("/limelight")
+    private fun l(key: String) = table.getEntry(key).getDouble(0.0)
+
     private fun targetExists() = l("tv").roundToInt() == 1
     private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
 
@@ -37,7 +46,13 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
     private fun skew(aspect: Double) = acos(aspect.Each / aspect0 minMag 1.Each)
     private fun targetDistance(ty: Double) = (targetHeightConstant-mountingHeight)/ tan(/*mountingAngleConstant+*/ty.Degree)
     private fun targetX(tx: Angle) = (tan(tx) * targetDistance(l("ty")))
-    private fun targetPosition() = TODO()
+    private fun targetPosition(tx: Angle, ty: Double, aspect: Double) = Position(targetX(tx),targetDistance(ty),skew(aspect))
+    private fun zoomMode() = tx0
+    private fun getResolution() {
+        if(hardware.readings.getPipeline() == 0){
+
+        }
+    }
 
     override fun LimelightHardware.output(value: Pipeline) {
         table.getEntry("pipeline").setNumber(value.number)
