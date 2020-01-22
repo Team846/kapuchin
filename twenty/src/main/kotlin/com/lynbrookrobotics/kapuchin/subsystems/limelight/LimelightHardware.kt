@@ -45,7 +45,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
 
     init {
         uiBaselineTicker.runOnTick { time ->
-            setOf(readings).forEach {
+            setOf(readings, pipeline).forEach {
                 it.optimizedRead(time, .5.Second)
             }
         }
