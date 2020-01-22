@@ -21,11 +21,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
 
+@Suppress("unused")
 class Subsystems(val drivetrain: DrivetrainComponent,
 
                  val electrical: ElectricalSystemHardware,
                  val driver: DriverHardware,
-                 val operator : OperatorHardware,
+                 val operator: OperatorHardware,
 
                  val collectorRollers: CollectorRollersComponent?,
                  val storageBelt: StorageBeltComponent?,
@@ -49,9 +50,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     }
 
     companion object : Named by Named("Subsystem") {
-
-
-
         private val initCollectorRollers by pref(true)
         private val initStorageBelt by pref(true)
         private val initControlPanelPivot by pref(true)
@@ -64,19 +62,16 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initShooter by pref(true)
         private val initLimelight by pref(true)
 
-
         var instance: Subsystems? = null
             private set
         val pneumaticTicker = ticker(Medium, 50.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
-
 
         fun sequentialInit() {
             val drivetrainHardware = DrivetrainHardware()
             val drivetrain = DrivetrainComponent(drivetrainHardware)
 
             val electricalHardware = ElectricalSystemHardware()
-
 
             val driverHardware = DriverHardware()
             val operatorHardware = OperatorHardware()
@@ -101,7 +96,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
             val controlWheelHardware = ControlWheelHardware()
             val controlWheel = ControlWheelComponent(controlWheelHardware)
-            
+
             val shooterHardware = ShooterHardware()
             val shooter = ShooterComponent(shooterHardware)
 
@@ -114,19 +109,19 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val limelight = LimelightHardware()
 
             instance = Subsystems(
-                drivetrain, electricalHardware , driverHardware, operatorHardware, collectorRollers, storageBelt, barAdjustment, climberStow, climberWinch, controlPanel, controlWheel, shooter, feederRoller, turret, limelight
+                    drivetrain, electricalHardware, driverHardware, operatorHardware, collectorRollers, storageBelt, barAdjustment, climberStow, climberWinch, controlPanel, controlWheel, shooter, feederRoller, turret, limelight
             )
         }
 
         fun concurrentInit() = scope.launch {
             supervisorScope {
-                suspend fun <T> t(f: suspend () -> T): T? = try {
-                    f()
+                suspend fun <T> safeInit(producer: suspend () -> T): T? = try {
+                    producer()
                 } catch (t: Throwable) {
                     if (HardwareInit.crashOnFailure) throw t else null
                 }
 
-                suspend fun <R> i(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
+                suspend fun <R> initAsync(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
 
                 val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
                 val electricalAsync = async { ElectricalSystemHardware() }
@@ -134,38 +129,36 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val driverAsync = async { DriverHardware() }
                 val operatorAsync = async { OperatorHardware() }
 
+                val collectorRollersAsync = initAsync(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
+                val storageBeltAsync = initAsync(initStorageBelt) { StorageBeltComponent(StorageBeltHardware()) }
+                val controlPanelPivotAsync = initAsync(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
+                val controlWheelAsync = initAsync(initControlWheel) { ControlWheelComponent(ControlWheelHardware()) }
+                val barAdjustmentAsync = initAsync(initBarAdjustment) { BarAdjustmentComponent(BarAdjustmentHardware()) }
+                val climberStowAsync = initAsync(initClimberStow) { ClimberStowComponent(ClimberStowHardware()) }
+                val climberWinchAsync = initAsync(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
+                val feederRollerAsync = initAsync(initFeederRoller) { FeederRollerComponent(FeederRollerHardware()) }
+                val turretAsync = initAsync(initTurret) { TurretComponent(TurretHardware()) }
+                val shooterAsync = initAsync(initShooter) { ShooterComponent(ShooterHardware()) }
 
-                val collectorRollersAsync = i(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
-                val storageBeltAsync = i(initStorageBelt) { StorageBeltComponent(StorageBeltHardware()) }
-                val controlPanelPivotAsync = i(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
-                val controlWheelAsync = i(initControlWheel) { ControlWheelComponent(ControlWheelHardware()) }
-                val barAdjustmentAsync = i(initBarAdjustment) { BarAdjustmentComponent(BarAdjustmentHardware()) }
-                val climberStowAsync = i(initClimberStow) { ClimberStowComponent(ClimberStowHardware()) }
-                val climberWinchAsync = i(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
-                val feederRollerAsync = i(initFeederRoller) { FeederRollerComponent(FeederRollerHardware()) }
-                val turretAsync = i(initTurret) { TurretComponent(TurretHardware()) }
-                val shooterAsync = i(initShooter) { ShooterComponent(ShooterHardware()) }
 
-
-                val limelightAsync = i(initLimelight) { LimelightHardware() }
+                val limelightAsync = initAsync(initLimelight) { LimelightHardware() }
 
                 instance = Subsystems(
                         drivetrainAsync.await(),
                         electricalAsync.await(),
                         driverAsync.await(),
                         operatorAsync.await(),
-                        t { collectorRollersAsync.await() },
-                        t { storageBeltAsync.await() },
-                        t { barAdjustmentAsync.await() },
-                        t { climberStowAsync.await() },
-                        t { climberWinchAsync.await() },
-                        t { controlPanelPivotAsync.await() },
-                        t { controlWheelAsync.await() },
-                        t { shooterAsync.await() },
-                        t { feederRollerAsync.await() },
-                        t { turretAsync.await() },
-                        t { limelightAsync.await() }
-
+                        safeInit { collectorRollersAsync.await() },
+                        safeInit { storageBeltAsync.await() },
+                        safeInit { barAdjustmentAsync.await() },
+                        safeInit { climberStowAsync.await() },
+                        safeInit { climberWinchAsync.await() },
+                        safeInit { controlPanelPivotAsync.await() },
+                        safeInit { controlWheelAsync.await() },
+                        safeInit { shooterAsync.await() },
+                        safeInit { feederRollerAsync.await() },
+                        safeInit { turretAsync.await() },
+                        safeInit { limelightAsync.await() }
                 )
             }
         }.also { runBlocking { it.join() } }
