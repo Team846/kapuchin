@@ -25,7 +25,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
 
-    val readings = sensor {
+    public val readings = sensor {
         when {
             l("tv").roundToInt() == 1 -> LimelightReading(
                     l("tx").Degree, l("ty").Degree,
