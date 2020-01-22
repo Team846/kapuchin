@@ -5,6 +5,7 @@ import info.kunalsheth.units.math.*
 
 typealias `÷` = div
 typealias `*` = times
+
 operator fun <Q : Quan<Q>> Q.div(that: Q): Double = this.siValue / that.siValue
 
 infix fun <Q : Quan<Q>> Q.minMag(that: Q) = if (this.abs < that.abs) this else that
@@ -29,6 +30,9 @@ inline infix fun <Q : Quan<Q>> Q.`±`(radius: Q): ClosedRange<Q> {
 fun <Q : Number> `±`(radius: Q) = 0.0 `±` radius
 
 inline fun <Q : Quan<Q>> `±`(radius: Q) = radius.new(0.0) `±` radius
+
+operator fun <Q : Quan<Q>> ClosedRange<Q>.contains(subset: ClosedRange<Q>) =
+        this.start <= subset.start && subset.endInclusive <= this.endInclusive
 
 /**
  * Returns the closest, largest range to `current`
