@@ -63,12 +63,6 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
 
     override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.ZoomOut }
 
-//    private fun targetExists() = l("tv").roundToInt() == 1
-//    private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
-
-//    private fun turn(tx: Angle, distance: Length) = atan(distance * tan(tx) / (distance + mounting.y))
-//    private fun aspect(thor: Double, tvert: Double) = thor / tvert
-
     override fun LimelightHardware.output(value: Pipeline) {
         pipelineEntry.setNumber(value.number)
     }
