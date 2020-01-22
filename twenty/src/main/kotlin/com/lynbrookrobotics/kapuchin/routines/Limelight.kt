@@ -15,8 +15,8 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
         visionTarget?.run {
             if (currentPipeline == ZoomOut) {
                 val insideBoxResolution = zoomOutResolution / zoomMultiplier
-                val insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomSafetyZone)
-                val insideBoxBoundsY = `±`(insideBoxResolution.y / 2 - zoomSafetyZone)
+                val insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomOutSafetyZone)
+                val insideBoxBoundsY = `±`(insideBoxResolution.y / 2 - zoomOutSafetyZone)
 
                 val angleToPixelsX = zoomOutResolution.x / zoomOutFov.x
                 val targetBoxBoundsX = (tx * angleToPixelsX) `±` (thor / 2)
@@ -27,8 +27,8 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in insideBoxBoundsY) ZoomIn
                 else ZoomOut
             } else if (currentPipeline == ZoomIn) {
-                val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomSafetyZone)
-                val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomSafetyZone)
+                val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
+                val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
                 val angleToPixelsX = zoomInResolution.x / zoomInFov.x
                 val targetBoxBoundsX = (tx * angleToPixelsX) `±` (thor / 2)

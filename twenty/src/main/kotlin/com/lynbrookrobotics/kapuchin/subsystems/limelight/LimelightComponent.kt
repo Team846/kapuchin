@@ -35,7 +35,8 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         ({ UomVector(x, y, z) })
     }
 
-    val zoomSafetyZone by pref(10, Pixel)
+    val zoomOutSafetyZone by pref(40, Pixel)
+    val zoomInSafetyZone by pref(10, Pixel)
     val zoomMultiplier by pref(2)
 
     val zoomInResolution by pref {
@@ -60,7 +61,7 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         ({ UomVector(x, y) })
     }
 
-    override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.DriverStream }
+    override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.ZoomOut }
 
 //    private fun targetExists() = l("tv").roundToInt() == 1
 //    private fun timeStamp(t: Time) = t - l("tl").milli(Second) - 11.milli(Second)
