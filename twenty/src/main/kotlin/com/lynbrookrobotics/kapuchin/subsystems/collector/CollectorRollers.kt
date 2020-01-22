@@ -1,6 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems.collector
 
+import com.ctre.phoenix.motorcontrol.ControlMode
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -10,13 +12,17 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<CollectorRollersComponent, CollectorRollersHardware, DutyCycle>(hardware) {
-    val cargoCollectSpeed by pref(11, Volt)
-    val cargoReleaseSpeed by pref(-6, Volt)
+    val fallbackValue by pref(0, Percent)
+    val CollectSpeed by pref(11, Volt)
+    val ReleaseSpeed by pref(-6, Volt)
 
-    override val fallbackController: CollectorRollersComponent.(Time) -> DutyCycle = { 0.Percent }
+
+
+
+    override val fallbackController: CollectorRollersComponent.(Time) -> DutyCycle = { fallbackValue }
 
     override fun CollectorRollersHardware.output(value: DutyCycle) {
-        collectorEsc.set(value.Each)
+        collectorEsc.set(ControlMode.PercentOutput , value.Each)
     }
 }
 
@@ -27,6 +33,15 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
     override val name: String = "Collector Rollers"
 
     private val collectorEscId by pref(10)
+    val escConfig by escConfigPref(
+            defaultNominalOutput = 0.5.Volt,
 
-    val collectorEsc by hardw { CANSparkMax(collectorEscId, kBrushless) }
+            defaultContinuousCurrentLimit = 25.Ampere,
+            defaultPeakCurrentLimit = 35.Ampere
+    )
+
+    val collectorEsc by hardw { CANSparkMax(collectorEscId, kBrushless)}
+
+
+
 }
