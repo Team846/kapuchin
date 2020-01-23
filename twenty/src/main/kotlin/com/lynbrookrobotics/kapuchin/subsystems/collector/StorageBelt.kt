@@ -10,13 +10,11 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class StorageBeltComponent(hardware: StorageBeltHardware) : Component<StorageBeltComponent, StorageBeltHardware, TwoSided<DutyCycle>>(hardware) {
-    override val fallbackController: StorageBeltComponent.(Time) -> TwoSided<DutyCycle>
-        get() = { TwoSided(0.Percent, 0.Percent) }
+class StorageBeltComponent(hardware: StorageBeltHardware) : Component<StorageBeltComponent, StorageBeltHardware, DutyCycle>(hardware) {
+    override val fallbackController: StorageBeltComponent.(Time) -> DutyCycle = { 0.Percent }
 
-    override fun StorageBeltHardware.output(value: TwoSided<DutyCycle>) {
-        topEsc.set(value.left.Each)
-        bottomEsc.set(value.right.Each)
+    override fun StorageBeltHardware.output(value: DutyCycle) {
+        topEsc.set(value.Each)
     }
 }
 
@@ -27,15 +25,12 @@ class StorageBeltHardware : SubsystemHardware<StorageBeltHardware, StorageBeltCo
     override val name: String = "StorageBelt"
 
     private val topEscId by pref(10)
-    private val bottomEscId by pref(11)
     private val topEscInversion by pref(false)
-    private val bottomEscInversion by pref(false)
+
 
     val topEsc by hardw { CANSparkMax(topEscId, kBrushless) }.configure {
         it.inverted = topEscInversion
     }
 
-    val bottomEsc by hardw { CANSparkMax(bottomEscId, kBrushless) }.configure {
-        it.inverted = bottomEscInversion
-    }
+
 }

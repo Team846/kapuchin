@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.ControlFrame.Control_3_General
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
+import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -32,7 +33,7 @@ val CANError.checkOk: Unit
             throw IOException("REV Spark Max call returned $this")
     }
 
-fun RobotHardware<*>.generalSetup(esc: CANSparkMax, config: OffloadedEscConfiguration) {
+fun RobotHardware<*>.generalSetup(esc: BaseMotorController, config: OffloadedEscConfiguration) {
     +esc.configFactoryDefault(configTimeout)
 
     esc.setNeutralMode(NeutralMode.Brake)
