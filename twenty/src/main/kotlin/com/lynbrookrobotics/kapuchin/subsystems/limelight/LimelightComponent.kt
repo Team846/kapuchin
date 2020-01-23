@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.DetectedTarget.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -27,23 +28,39 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
             val tSkew = targetPosition(sample).bearing
             val offsetAngle = 90.Degree - tSkew
 
-            Position(
+            val innerGoal = InnerGoal(Position(
                     innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
                     innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                     tSkew
-            )
+            ))
+            if (tSkew > skewTolerance)
+            {
+                OuterGoal(targetPosition(sample))
+            }
+            else{
+                innerGoal
+            }
         }
         else {
             val offsetAngle = 90.Degree - skew
 
-            Position(
+            val innerGoal = InnerGoal(Position(
                     innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
                     innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                     skew
-            )
+            ))
+            if (skew > skewTolerance)
+            {
+                OuterGoal(targetPosition(sample))
+            }
+            else{
+                innerGoal
+            }
         }
+
     }
 
+    private val skewTolerance by pref(1,Degree)
     private val innerGoalOffset by pref(29.25, Inch)
     private val targetHeight by pref(107, Inch)
     private val aspect0 by pref {
