@@ -121,7 +121,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     if (HardwareInit.crashOnFailure) throw t else null
                 }
 
-                suspend fun <R> initAsync(b: Boolean, f: suspend () -> R) = async { if (b) f() else null }
+                suspend fun <R> initAsync(shouldInit: Boolean, producer: suspend () -> R) = async { if (shouldInit) producer() else null }
 
                 val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
                 val electricalAsync = async { ElectricalSystemHardware() }
