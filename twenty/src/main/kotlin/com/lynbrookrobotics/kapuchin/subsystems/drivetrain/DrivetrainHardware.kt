@@ -75,25 +75,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.inverted = rightEscInversion
     }
 
-    private val ticksToSerialPort = "kUSB1"
-    private val ticksToSerial by hardw<TicksToSerial?> {
-        TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort))
-    }.verify("ticks-to-serial is connected") {
-        it!!().forEach {}
-        true
-    }.otherwise(hardw { null })
-
-    private val t2sNamed = Named("T2S Odometry", this)
-    val t2sPosition = ticksToSerial?.let { t2s ->
-        sensor {
-            t2s().forEach { (l, r) -> conversions.t2sOdometry(l, r) }
-            conversions.t2sOdometry.matrixTracking.run { Position(x, y, bearing) } stampWith it
-        }
-                .with(graph("X Location", Foot, t2sNamed)) { it.x }
-                .with(graph("Y Location", Foot, t2sNamed)) { it.y }
-                .with(graph("Bearing", Degree, t2sNamed)) { it.bearing }
-    }
-
     private val escNamed = Named("ESC Odometry", this)
     val escPosition = sensor {
         conversions.escOdometry(
@@ -106,7 +87,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             .with(graph("Y Location", Foot, escNamed)) { it.y }
             .with(graph("Bearing", Degree, escNamed)) { it.bearing }
 
-    val position = /*t2sPosition ?:*/ escPosition
+    val position = escPosition
 
     val leftPosition = sensor {
         conversions.toLeftPosition(
@@ -157,7 +138,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         }
 
         EventLoop.runOnTick { time ->
-            t2sPosition?.optimizedRead(time, period)
             escPosition.optimizedRead(time, period)
         }
     }
