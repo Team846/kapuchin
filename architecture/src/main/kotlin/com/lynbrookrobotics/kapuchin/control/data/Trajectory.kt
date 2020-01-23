@@ -14,7 +14,6 @@ typealias Trajectory = List<Segment> // a path with generated timestamps, veloci
  * @property waypt the ending waypoint of the segment.
  * @property velocity the final linear velocity at the end of the segment.
  * @property omega the constant angular velocity throughout the segment.
- * @property time the amount of time elapsed since beginning of trajectory.
  */
 data class Segment(
         var waypt: Waypt,
