@@ -15,6 +15,8 @@ import info.kunalsheth.units.generated.*
 class ControlWheelComponent(hardware: ControlWheelHardware) : Component<ControlWheelComponent, ControlWheelHardware, DutyCycle>(hardware) {
     override val fallbackController: ControlWheelComponent.(Time) -> DutyCycle = { 0.Percent }
 
+    val motorSpeed by pref(50, Percent)
+
     override fun ControlWheelHardware.output(value: DutyCycle) {
         spinnerEsc.set(value.Each)
     }
