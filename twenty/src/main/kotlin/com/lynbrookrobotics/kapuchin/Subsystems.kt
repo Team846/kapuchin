@@ -10,6 +10,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -37,7 +39,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val shooter: ShooterComponent?,
                  val feederRoller: FeederRollerComponent?,
                  val turret: TurretComponent?,
-                 val limelight: LimelightHardware?
+                 val limelight: LimelightComponent?
 ) : Named by Named("Subsystems") {
 
     fun teleop() {
@@ -105,7 +107,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val turretHardware = TurretHardware()
             val turret = TurretComponent(turretHardware)
 
-            val limelight = LimelightHardware()
+            val limelightHardware = LimelightHardware()
+            val limelight = LimelightComponent(limelightHardware)
 
             instance = Subsystems(
                     drivetrain, electricalHardware, driverHardware, operatorHardware, collectorRollers, storageBelt, barAdjustment, climberStow, climberWinch, controlPanel, controlWheel, shooter, feederRoller, turret, limelight

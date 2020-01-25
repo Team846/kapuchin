@@ -40,10 +40,10 @@ operator fun <Q : Quan<Q>> UomVector<Q>.times(that: Double) = UomVector(
         this.z * that
 )
 
-operator fun <Q : Quan<Q>> UomVector<Q>.div(that: Double) = UomVector(
-        this.x / that,
-        this.y / that,
-        this.z / that
+operator fun <Q : Quan<Q>> UomVector<Q>.div(that: Number) = UomVector(
+        this.x / that.toDouble(),
+        this.y / that.toDouble(),
+        this.z / that.toDouble()
 )
 
 data class NumVector(override val x: Double, override val y: Double, override val z: Double) : Vector<Double>
