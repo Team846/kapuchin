@@ -10,7 +10,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
-import com.lynbrookrobotics.kapuchin.subsystems.lift.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
@@ -143,7 +142,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val shooterAsync = initAsync(initShooter) { ShooterComponent(ShooterHardware()) }
 
 
-                val limelightAsync = initAsync(initLimelight) { LimelightHardware() }
+                val limelightAsync = initAsync(initLimelight) { LimelightComponent(LimelightHardware()) }
 
                 instance = Subsystems(
                         drivetrainAsync.await(),
