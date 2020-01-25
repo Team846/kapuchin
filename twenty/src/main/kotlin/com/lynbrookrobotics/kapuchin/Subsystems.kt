@@ -7,7 +7,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
-import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.ControlPanelPivotComponent.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*

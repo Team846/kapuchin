@@ -6,7 +6,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
-import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalInput
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -31,16 +30,15 @@ class StorageBeltHardware : SubsystemHardware<StorageBeltHardware, StorageBeltCo
     private val storageEscInversion by pref(false)
 
 
-
-    val halleffect by hardw{ DigitalInput(2) }
+    val halleffect by hardw { DigitalInput(2) }
 
     val proximity by hardw {
         DigitalInput(1)
     }
 
     val storageEsc by hardw { CANSparkMax(storageEscId, kBrushless) }.configure {
-            it.inverted = storageEscInversion
-        }
-
-
+        it.inverted = storageEscInversion
     }
+
+
+}

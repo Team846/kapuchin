@@ -1,8 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.collector
 
-import com.ctre.phoenix.motorcontrol.ControlMode
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -15,8 +13,6 @@ class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<
     val fallbackValue by pref(0, Percent)
     val CollectSpeed by pref(11, Volt)
     val ReleaseSpeed by pref(-6, Volt)
-
-
 
 
     override val fallbackController: CollectorRollersComponent.(Time) -> DutyCycle = { fallbackValue }
@@ -41,7 +37,6 @@ class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, Col
     )
 
     val collectorEsc by hardw { CANSparkMax(collectorEscId, kBrushless) }
-
 
 
 }

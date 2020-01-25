@@ -3,7 +3,6 @@ package com.lynbrookrobotics.kapuchin.subsystems.controlpanel
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.ControlPanelPivotComponent.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.ControlPanelPivotState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
