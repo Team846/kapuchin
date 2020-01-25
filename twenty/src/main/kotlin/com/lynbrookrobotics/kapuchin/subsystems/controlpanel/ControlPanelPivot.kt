@@ -18,16 +18,17 @@ class ControlPanelPivotComponent(hardware: ControlPanelPivotHardware) : Componen
         solenoid.set(value.output)
     }
 
-    class ControlPanelPivotHardware : SubsystemHardware<ControlPanelPivotHardware, ControlPanelPivotComponent>() {
-        override val priority: Priority = Priority.Low
-        override val period: Time = 100.milli(Second)
-        override val syncThreshold: Time = 20.milli(Second)
-        override val name: String = "Control Panel Pivot"
 
-        private val solenoidPort = 0
-        val solenoid by hardw { Solenoid(solenoidPort) }
-    }
 }
 
+class ControlPanelPivotHardware : SubsystemHardware<ControlPanelPivotHardware, ControlPanelPivotComponent>() {
+    override val priority: Priority = Priority.Low
+    override val period: Time = 100.milli(Second)
+    override val syncThreshold: Time = 20.milli(Second)
+    override val name: String = "Control Panel Pivot"
+
+    private val solenoidPort = 0
+    val solenoid by hardw { Solenoid(solenoidPort) }
+}
 
 enum class ControlPanelPivotState(val output: Boolean) { Up(true), Down(false) }
