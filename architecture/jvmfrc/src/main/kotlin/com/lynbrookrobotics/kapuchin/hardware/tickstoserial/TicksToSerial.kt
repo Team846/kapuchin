@@ -21,7 +21,7 @@ class TicksToSerial(
         val recieved = device.bytesReceived
         val toRead = min(recieved, buffer.size)
 
-        val gotten = SerialPortJNI.serialRead(port.value.toByte(), buffer, toRead)
+        val gotten = SerialPortJNI.serialRead(port.value, buffer, toRead)
 
         repeat(gotten) { i ->
             yield(TicksToSerialValue(buffer[i].toInt()))
