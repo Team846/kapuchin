@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.control.math.drivetrain
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -12,54 +13,52 @@ import info.kunalsheth.units.math.*
  * @author Andy, Alvyn
  *
  * @property drivetrain a tank drive drivetrain component.
+ * @property tolerance the tolerance to move onto the next waypoint.
+ * @property endTolerance the tolerance to end at the final waypoint.
+ * @scope sensor scope of the routine.
  * @param trajectory the trajectory to follow.
  * @param origin the starting position of the robot.
  */
 class TrajectoryFollower(
         val drivetrain: GenericDrivetrainComponent,
+        val tolerance: Length,
+        val endTolerance: Length,
+        scope: BoundSensorScope,
         trajectory: Trajectory,
-        origin: Position = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y
+        origin: Position
 ) {
-    private val matrix = RotationMatrix(origin.bearing)
 
     // Make segment waypoints relative to origin
-    private val segments = trajectory
-            .map { it.copy(waypt = matrix.rotate(it.waypt) + origin.vector) }
+    private val segments = with(RotationMatrix(origin.bearing)) {
+        trajectory
+            .map { it.copy(waypt = rotate(it.waypt) + origin.vector) }
             .iterator()
+    }
 
-    private var totalTime = 0.Second
-    private var previousTime: Time? = null
-
-    private var currentSegment = segments.next()
-    private var currentSegmentEndingTime = distance(currentSegment.waypt, origin.vector) / currentSegment.velocity
+    private var target = segments.next()
     private var done = false
 
-    fun simpleOutput(time: Time, currPosition: Position): TwoSided<Velocity>? {
+    private val uni = UnicycleDrive(drivetrain, scope)
+    private val position by with(scope) { drivetrain.hardware.position.readOnTick.withoutStamps }
 
-        val vector = currPosition.vector
+    operator fun invoke(): TwoSided<Velocity>? {
+        val distanceToNext = distance(position.vector, target.waypt)
 
-        val dt = time - (previousTime ?: time)
-        previousTime = time
-        totalTime += dt
-
-        if (totalTime > currentSegmentEndingTime) {
-            if (!segments.hasNext()) {
-                done = true
-            } else {
-                val prevSegment = currentSegment
-                currentSegment = segments.next()
-                currentSegmentEndingTime += distance(currentSegment.waypt, prevSegment.waypt) / currentSegment.velocity
-            }
+        done = !segments.hasNext() && distanceToNext < endTolerance
+        if (segments.hasNext() && distanceToNext < tolerance) {
+            target = segments.next()
         }
 
-        val angleError =  atan2(currentSegment.waypt.x - vector.x, currentSegment.waypt.y - vector.y)
+        // trig angle to compass bearing
+        val targetAngle = 90.Degree - atan2(target.waypt.x - position.vector.x, target.waypt.y - position.vector.y)
 
-        //http://faculty.salina.k-state.edu/tim/robotics_sg/Control/kinematics/unicycle.html
         with(drivetrain.hardware.conversions) {
-            val velocityL = currentSegment.velocity - ((currentSegment.omega / Radian) * trackLength) / 2
-            val velocityR = currentSegment.velocity + ((currentSegment.omega / Radian) * trackLength) / 2
-            val velocityFeedback = drivetrain.bearingKp * angleError + drivetrain.bearingKf * currentSegment.omega
-            return TwoSided(velocityL + velocityFeedback, velocityR - velocityFeedback).takeIf { !done }
+            var (velocityL, velocityR) = uni.speedAngleTarget(target.velocity, targetAngle).first
+            val feedforward = ((target.omega / Radian) * trackLength) / 2
+            velocityL -= feedforward
+            velocityR += feedforward
+
+            return TwoSided(velocityL, velocityR).takeIf { !done }
         }
     }
 }

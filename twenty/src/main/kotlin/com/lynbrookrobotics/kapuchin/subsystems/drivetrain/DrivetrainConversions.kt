@@ -3,18 +3,21 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware) {
+class DrivetrainConversions(val hardware: DrivetrainHardware) :
+        Named by Named("Conversions", hardware),
+        GenericDrivetrainConversions {
     private val wheelRadius by pref(3, Inch)
 
     private val leftTrim by pref(1.0)
     private val rightTrim by pref(1.0)
-    val trackLength by pref(2, Foot)
+    override val trackLength by pref(2, Foot)
 
     val nativeEncoderCountMultiplier by pref(4)
 

@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
@@ -20,7 +21,7 @@ import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
+class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>(), GenericDrivetrainHardware {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
     override val syncThreshold = 4.milli(Second)
@@ -50,7 +51,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             defaultPeakCurrentLimit = 35.Ampere
     )
 
-    val conversions = DrivetrainConversions(this)
+    override val conversions = DrivetrainConversions(this)
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder)
@@ -107,7 +108,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             .with(graph("Y Location", Foot, escNamed)) { it.y }
             .with(graph("Bearing", Degree, escNamed)) { it.bearing }
 
-    val position = /*t2sPosition ?:*/ escPosition
+    override val position = /*t2sPosition ?:*/ escPosition
 
     val leftPosition = sensor {
         conversions.toLeftPosition(
