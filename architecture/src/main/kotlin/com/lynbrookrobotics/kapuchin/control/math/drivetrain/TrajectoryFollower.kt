@@ -31,8 +31,9 @@ class TrajectoryFollower(
     // Make segment waypoints relative to origin
     private val segments = with(RotationMatrix(origin.bearing)) {
         trajectory
-            .map { it.copy(waypt = rotate(it.waypt) + origin.vector) }
-            .iterator()
+                .also { t -> t.forEach { it.waypt = rotate(it.waypt) + origin.vector } }
+                .drop(1)
+                .iterator()
     }
 
     private var target = segments.next()

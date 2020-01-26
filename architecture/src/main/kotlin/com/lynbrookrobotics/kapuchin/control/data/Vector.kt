@@ -27,8 +27,8 @@ data class UomVector<Q : Quan<Q>>(
 
     operator fun plus(that: UomVector<Q>) = UomVector(
             x + that.x,
-            y = that.y,
-            z = that.z
+            y + that.y,
+            z + that.z
     )
 
     operator fun minus(that: UomVector<Q>) = UomVector(
