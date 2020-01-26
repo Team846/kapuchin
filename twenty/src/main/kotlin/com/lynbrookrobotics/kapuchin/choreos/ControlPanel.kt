@@ -10,32 +10,23 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
-suspend fun Subsystems.controlpanelTeleop() = startChoreo("Control Panel") {
-
-    choreography{
-        val wacking by operator.wacker.readEagerly().withoutStamps
-
-
+suspend fun Subsystems.teletop() = startChoreo("Teletop") {
+    val wacking = operator.wacker.readOptimized.withoutStamps
+    choreography {
         runWhenever(
-                { wacking } to choreography { flip() }
+                { wacking } to ::flipUp
         )
     }
 }
 
-
-suspend fun Subsystems.flip() = supervisorScope{
-    var wheel: Job? = null
-    try {
-        controlPanelPivot?.set(Up)
-        delay(0.2.Second)
-        wheel = launch { controlWheel?.set(controlWheel.motorSpeed)  }
-
-        freeze()
-    }
-    finally {
-        wheel?.cancel()
-        controlPanelPivot?.set(Down)
-
-    }
+suspend fun Subsystems.flipUp() {
+    controlPanelPivot?.set(Up)
 }
 
+suspend fun Subsystems.flipDown() {
+    controlPanelPivot?.set(Down)
+}
+
+suspend fun Subsystems.spinSpinner() {
+    controlWheel?.set(controlWheel.motorSpeed)
+}
