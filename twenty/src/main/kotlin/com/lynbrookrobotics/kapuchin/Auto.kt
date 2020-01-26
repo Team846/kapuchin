@@ -1,14 +1,74 @@
 package com.lynbrookrobotics.kapuchin
-//
-//import com.lynbrookrobotics.kapuchin.choreos.*
-//import com.lynbrookrobotics.kapuchin.control.data.*
-//import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
-//import com.lynbrookrobotics.kapuchin.logging.*
-//import com.lynbrookrobotics.kapuchin.logging.Level.*
-//import com.lynbrookrobotics.kapuchin.routines.*
-//import info.kunalsheth.units.generated.*
-//import kotlinx.coroutines.launch
-//
+
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
+import com.lynbrookrobotics.kapuchin.routines.*
+import info.kunalsheth.units.generated.*
+import java.io.File
+import kotlin.math.sin
+import kotlin.math.cos
+import kotlin.math.PI
+
+fun loadPath(name: String): Path =
+        Thread.currentThread()
+                .contextClassLoader
+                .getResourceAsStream("com/lynbrookrobotics/kapuchin/paths/$name")
+                .bufferedReader()
+                .lineSequence()
+                .drop(1)
+                .map { it.split('\t') }
+                .map { it.map { tkn -> tkn.trim() } }
+                .map { Waypt(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+                .toList()
+
+fun loadTempPath(): Path =
+        File("/tmp/journal.tsv")
+                .bufferedReader()
+                .lineSequence()
+                .drop(1)
+                .map { it.split('\t') }
+                .map { it.map { tkn -> tkn.trim() } }
+                .map { Waypt(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+                .toList()
+
+
+
+suspend fun Subsystems.straightLine() = startChoreo("Straight line") {
+    val path = nSect(Waypt(0.Foot, 0.Foot), Waypt(0.Foot, 8.Foot), 3.Inch)
+    val trajectory = pathToTrajectory(path, 10.FootPerSecond, 1.Radian / Second, 3.FootPerSecondSquared)
+
+    System.gc()
+
+    choreography {
+        drivetrain.followTrajectory(trajectory, 1.Inch, 1.Inch)
+    }
+}
+
+suspend fun Subsystems.circle() = startChoreo("Circle") {
+    val path = (0 until 300)
+            .map { it / 150.0 }
+            .map { Waypt((5 * cos(PI * it) - 5).Foot, (5 *sin(PI * it)).Foot) }
+
+    val trajectory = pathToTrajectory(path, 10.FootPerSecond, 1.Radian / Second, 3.FootPerSecondSquared)
+
+    System.gc()
+
+    choreography {
+        drivetrain.followTrajectory(trajectory, 20.Inch, 6.Inch)
+    }
+}
+
+suspend fun Subsystems.followJournal() = startChoreo("Follow journal") {
+    val path = loadTempPath()
+
+    val trajectory = pathToTrajectory(path, 10.FootPerSecond, 1.Radian / Second, 3.FootPerSecondSquared)
+
+    System.gc()
+
+    choreography {
+        drivetrain.followTrajectory(trajectory, 20.Inch, 6.Inch)
+    }
+}
 //suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
 //    val habToCloseCargo = loadTrajectory("hab_to_close_cargo.tsv", 60.Percent)
 //    val closeCargoToLoading = loadTrajectory("close_cargo_to_loading.tsv", 60.Percent)
@@ -79,22 +139,3 @@ package com.lynbrookrobotics.kapuchin
 //    }
 //}
 //
-//fun Subsystems.loadTrajectory(name: String, performance: Dimensionless): List<TimeStamped<Waypt>> {
-//    val waypts = Thread.currentThread()
-//            .contextClassLoader
-//            .getResourceAsStream("com/lynbrookrobotics/kapuchin/paths/$name")
-//            .bufferedReader()
-//            .lineSequence()
-//            .drop(1)
-//            .map { it.split('\t') }
-//            .map { it.map { tkn -> tkn.trim() } }
-//            .map { Waypt(it[1].toDouble().Foot, it[2].toDouble().Foot) /*stampWith it[0].toDouble().Second*/ }
-//            .toList()
-//
-//    return pathToTrajectory(
-//            waypts,
-//            performance,
-//            drivetrain.maxSpeed,
-//            drivetrain.maxOmega
-//    )
-//}

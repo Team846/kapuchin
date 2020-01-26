@@ -16,33 +16,32 @@ fun target(current: Waypt, target: Waypt) = atan2(target.x - current.x, target.y
 
 suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = startChoreo("Journal") {
 
-    val pos by dt.position.readEagerly(2.milli(Second)).withStamps
+    val pos by dt.position.readEagerly(2.milli(Second)).withoutStamps
     val log = File("/tmp/journal.tsv").printWriter().also {
-        it.println("time\tx\ty")
+        it.println("x\ty")
+        it.println("0.0\t0.0")
     }
 
-    val startingLoc = pos.y.vector
-    val startingRot = RotationMatrix(-pos.y.bearing)
+    val startingLoc = pos.vector
+    val startingRot = RotationMatrix(-pos.bearing)
 
-    var last = pos.y
+    var last = pos
 
     choreography {
         log.use {
             while (isActive) {
-                val (t, loc) = pos
-                val (x, y) = startingRot.rotate(loc.vector - startingLoc)
+                val (x, y) = startingRot.rotate(pos.vector - startingLoc)
 
-                if (distance(loc.vector, last.vector) > ptDistance) {
-                    it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
-                    last = loc
+                if (distance(pos.vector, last.vector) > ptDistance) {
+                    it.println("${x.Foot}\t${y.Foot}")
+                    last = pos
                 }
 
                 delay(100.milli(Second))
             }
 
-            val (t, loc) = pos
-            val (x, y) = startingRot.rotate(loc.vector - startingLoc)
-            it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
+            val (x, y) = startingRot.rotate(pos.vector - startingLoc)
+            it.println("${x.Foot}\t${y.Foot}")
         }
     }
 }

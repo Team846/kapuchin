@@ -14,14 +14,14 @@ import info.kunalsheth.units.math.*
  * @property drivetrain a tank drive drivetrain component.
  * @property tolerance the tolerance to move onto the next waypoint.
  * @property endTolerance the tolerance to end at the final waypoint.
- * @scope sensor scope of the routine.
+ * @param scope sensor scope of the routine.
  * @param trajectory the trajectory to follow.
  * @param origin the starting position of the robot.
  */
 class TrajectoryFollower(
-        val drivetrain: GenericDrivetrainComponent,
-        val tolerance: Length,
-        val endTolerance: Length,
+        private val drivetrain: GenericDrivetrainComponent,
+        private val tolerance: Length,
+        private val endTolerance: Length,
         scope: BoundSensorScope,
         trajectory: Trajectory,
         origin: Position
@@ -31,7 +31,6 @@ class TrajectoryFollower(
     private val segments = with(RotationMatrix(origin.bearing)) {
         trajectory
                 .also { t -> t.forEach { it.waypt = rotate(it.waypt) + origin.vector } }
-                .drop(1)
                 .iterator()
     }
 
@@ -70,6 +69,7 @@ class TrajectoryFollower(
         val feedforward = ((target.omega / Radian) * drivetrain.hardware.conversions.trackLength) / 2
         velocityL += feedforward
         velocityR -= feedforward
+
         return TwoSided(velocityL, velocityR).takeIf { !done }
     }
 }

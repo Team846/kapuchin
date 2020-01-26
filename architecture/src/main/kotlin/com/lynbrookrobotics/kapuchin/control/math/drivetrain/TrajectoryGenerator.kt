@@ -2,9 +2,9 @@ package com.lynbrookrobotics.kapuchin.control.math.drivetrain
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.sqrt
 
 /**
  * Generates a [Trajectory] given a [Path].
@@ -46,7 +46,7 @@ fun pathToTrajectory(
     val reversePath = path.toMutableList().reversed()
     val reverseTrajectory = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration)
             .reversed()
-            .map { it.copy(omega = -it.omega)}
+            .map { it.copy(omega = -it.omega) }
 
 
     // (3)
@@ -139,7 +139,7 @@ private fun oneWayAccelCap(
             // Δx = v₀t + (1/2)at²
             // t = (-v₀ ± sqrt(v₀² + 2aΔx)) / a -- quadratic formula
             // t = (-v₀ + sqrt(v₀² + 2aΔx)) / a -- only need to consider positive t
-            dt = (-s1.velocity + Velocity(sqrt((s1.velocity * s1.velocity + 2 * maxAcceleration * dx).siValue))) / maxAcceleration
+            dt = (-s1.velocity + v(maxAcceleration, s1.velocity, dx)) / maxAcceleration
 
             s2.velocity = s1.velocity + maxAcceleration * dt
             s2.omega = dthetas[i] / dt
