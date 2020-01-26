@@ -33,15 +33,25 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
             rightFlywheelEsc.set(value.right.Each)
         }
     }
-    private fun ballVelToRollerVel(ballVel: Velocity){
-        val ret = ballVel*rollerRadius*(momentFactor*ballMass+(2*MomentOfInertia(rollerInertia.Each))/(rollerRadius*rollerRadius))/MomentOfInertia(rollerInertia.Each)
+    
+    private fun shooterState(target: DetectedTarget) {
+        val dist = sqrt(((target.estimate.x * target.estimate.x) + (target.estimate.y * target.estimate.y)).siValue) * 1.Foot
+
     }
-    private fun rollerVels(target: DetectedTarget, shooterAngle: Angle) // This needs to toggle between states, not angles
+    private fun ballVel(target: DetectedTarget, shooterAngle: Angle): `L⋅T⁻¹` // This needs to toggle between states, not angles
     {
         val straightDist = sqrt((target.estimate.x.Foot *
                 target.estimate.x + target.estimate.y.Foot * target.estimate.y).Foot.Each).Each.Foot
         val v_ball = 1.FootPerSecond * sqrt(1.0/2.0) * sqrt((straightDist * straightDist * 32.2) / ((straightDist * tan(shooterAngle) - shooterHeight) * cos(shooterAngle))/1.Foot)
+        return v_ball
     }
+
+    private fun rollerVel(target: DetectedTarget, shooterAngle: Angle): `T⁻¹` { // This also needs to toggle between states
+        val ballVel = this.ballVel(target, shooterAngle)
+        val w = ballVel*rollerRadius*(momentFactor*ballMass+(2*MomentOfInertia(rollerInertia.Each))/(rollerRadius*rollerRadius))/MomentOfInertia(rollerInertia.Each)
+        return w
+    }
+
 }
 
 class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
