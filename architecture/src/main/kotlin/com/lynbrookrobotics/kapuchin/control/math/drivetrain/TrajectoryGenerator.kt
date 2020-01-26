@@ -44,7 +44,9 @@ fun pathToTrajectory(
     // (2)
 
     val reversePath = path.toMutableList().reversed()
-    val reverseTrajectory = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration).reversed()
+    val reverseTrajectory = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration)
+            .reversed()
+            .map { it.copy(omega = -it.omega)}
 
 
     // (3)
