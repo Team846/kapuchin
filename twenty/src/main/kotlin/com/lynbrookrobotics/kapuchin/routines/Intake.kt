@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.routines
 import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import info.kunalsheth.units.generated.*
 
 suspend fun CollectorRollersComponent.spin(electrical: ElectricalSystemHardware, Rollers: V) = startRoutine("spin") {
@@ -17,10 +18,18 @@ suspend fun CollectorRollersComponent.set(target: DutyCycle) = startRoutine("set
     controller { target }
 }
 
-suspend fun StorageBeltComponent.spin(electrical: ElectricalSystemHardware, Storage: V) = startRoutine("spin") {
+suspend fun StorageComponent.spin(electrical: ElectricalSystemHardware, Storage: V) = startRoutine("spin") {
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
         voltageToDutyCycle(Storage, vBat)
     }
+}
+
+suspend fun IntakePneumaticComponent.set(target: IntakePneumaticState) = startRoutine("Set") {
+    controller { target }
+}
+
+suspend fun OmniWheelComponent.spin(target: DutyCycle) = startRoutine("spin") {
+    controller { target }
 }
