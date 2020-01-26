@@ -16,7 +16,7 @@ import kotlin.math.sqrt
 class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, TwoSided<DutyCycle>>(hardware) {
 
     private val shooterHeight by pref(24, Inch)
-    private val maximumAngle by pref(0, Degree)
+    private val maximumAngle by pref(0, Degree) // Maximum entry angle for the ball: still have to do math for this
     private val lowLaunchAngle by pref(1,Degree)
     private val highLaunchAngle by pref(2, Degree)
     private var launchAngle = 0.Degree // Set to either low or high based on vision data
