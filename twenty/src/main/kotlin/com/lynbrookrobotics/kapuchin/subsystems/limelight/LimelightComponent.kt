@@ -35,7 +35,7 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
             ))
             if (tSkew > skewTolerance)
             {
-                OuterGoal(targetPosition(sample))
+                OuterGoal(outerGoalPos)
             }
             else{
                 innerGoal
