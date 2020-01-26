@@ -17,6 +17,7 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
 
     private val shooterHeight by pref(24, Inch)
     private val maximumAngle by pref(33, Degree) // Maximum entry angle
+    private val minimumAngle by pref(17, Degree) // Minimum entry angle
     private val lowLaunchAngle by pref(1,Degree)
     private val highLaunchAngle by pref(2, Degree)
     private var launchAngle = 0.Degree // Set to either low or high based on vision data
@@ -44,14 +45,14 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
         val state1 = this.slope(target, lowLaunchAngle)
         val state2 = this.slope(target, highLaunchAngle)
         when {
-            state1 < maximumAngle -> {
+            state1 < maximumAngle && state1 > minimumAngle -> {
                 this.launchAngle = lowLaunchAngle
             }
-            state2 < maximumAngle -> { // Might need to double check the math on this condition
+            state2 > -1 * maximumAngle && state2 < -1 * minimumAngle -> { // Might need to double check the math on this condition
                 this.launchAngle = highLaunchAngle
             }
             else -> {
-                // Do nothing
+                null
             }
         }
     }
