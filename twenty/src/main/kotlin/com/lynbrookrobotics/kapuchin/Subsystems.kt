@@ -123,7 +123,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val omniWheel = OmniWheelComponent(omniWheelHardware)
 
             instance = Subsystems(
-                    drivetrain, electricalHardware, driverHardware, operatorHardware, collectorRollers, barAdjustment, climberStow, climberWinch, controlPanel, controlWheel, shooter, feederRoller, turret,  intakePneumatic, omniWheel, limelight
+                    drivetrain, electricalHardware, driverHardware, operatorHardware, collectorRollers, storage, barAdjustment, climberStow, climberWinch, controlPanel, controlWheel, shooter, feederRoller, turret,  intakePneumatic, omniWheel, limelight
             )
         }
 

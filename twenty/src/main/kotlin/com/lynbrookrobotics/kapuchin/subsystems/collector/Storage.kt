@@ -12,6 +12,7 @@ import info.kunalsheth.units.math.*
 
 
 class StorageComponent(hardware: StorageHardware) : Component<StorageComponent, StorageHardware, DutyCycle>(hardware) {
+    val carouselspeed by pref(6, Volt)
     override val fallbackController: StorageComponent.(Time) -> DutyCycle = { 0.Percent }
 
     override fun StorageHardware.output(value: DutyCycle) {

@@ -28,16 +28,17 @@ suspend fun Subsystems.Collect() = supervisorScope {
     var carousel: Job? = null
     var omni: Job? = null
     try{
+        intakePneumatic?.set(Down)
         roller = launch { collectorRollers?.spin(electrical, collectorRollers.CollectSpeed) }
         freeze()
 
     }
     finally{
         roller?.cancel()
-        intakePneumatic?.set(Up)
-        carousel = launch { storage?.spin(electrical, collectorRollers.CollectSpeed) }
+        carousel = launch { storage?.spin(electrical, storage.carouselspeed) }
         delay(1.Second)
         carousel?.cancel()
+        intakePneumatic?.set(Up)
 
     }
 }
