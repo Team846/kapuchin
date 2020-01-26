@@ -33,15 +33,18 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
             rightFlywheelEsc.set(value.right.Each)
         }
     }
-    
+
+    private fun distance(target: DetectedTarget): L {
+        return sqrt(((target.estimate.x * target.estimate.x) + (target.estimate.y * target.estimate.y)).siValue) * 1.Foot
+    }
+
     private fun shooterState(target: DetectedTarget) {
         val dist = sqrt(((target.estimate.x * target.estimate.x) + (target.estimate.y * target.estimate.y)).siValue) * 1.Foot
 
     }
     private fun ballVel(target: DetectedTarget, shooterAngle: Angle): `L⋅T⁻¹` // This needs to toggle between states, not angles
     {
-        val straightDist = sqrt((target.estimate.x.Foot *
-                target.estimate.x + target.estimate.y.Foot * target.estimate.y).Foot.Each).Each.Foot
+        val straightDist = this.distance(target)
         val v_ball = 1.FootPerSecond * sqrt(1.0/2.0) * sqrt((straightDist * straightDist * 32.2) / ((straightDist * tan(shooterAngle) - shooterHeight) * cos(shooterAngle))/1.Foot)
         return v_ball
     }
