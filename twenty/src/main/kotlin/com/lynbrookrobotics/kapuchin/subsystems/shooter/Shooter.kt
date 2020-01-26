@@ -19,10 +19,10 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
     private val lowLaunchAngle by pref(1,Degree)
     private val highLaunchAngle by pref(2, Degree)
     private val maxRPM by pref(5676, Rpm)
-    private val factorOfMomentOfProjectile by pref (1.4, Each)
+    private val momentFactor by pref (1.4, Each)
     private val rollerRadius by pref (2,Inch)
     private val ballMass by pref(1, Kilogram)
-    private val rollerMomentOfInertia by pref(1, Each)
+    private val rollerInertia by pref(1, Each)
 
     override val fallbackController: ShooterComponent.(Time) -> TwoSided<DutyCycle>
         get() = { TwoSided(0.Percent, 0.Percent) }
@@ -34,14 +34,13 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
         }
     }
     private fun ballVelToRollerVel(ballVel: Velocity){
-        val ret = ballVel*rollerRadius*(factorOfMomentOfProjectile*ballMass+(2*MomentOfInertia(rollerMomentOfInertia.Each))/(rollerRadius*rollerRadius))/MomentOfInertia(rollerMomentOfInertia.Each)
+        val ret = ballVel*rollerRadius*(momentFactor*ballMass+(2*MomentOfInertia(rollerInertia.Each))/(rollerRadius*rollerRadius))/MomentOfInertia(rollerInertia.Each)
     }
-    private fun rollerVels(target: DetectedTarget, shooterAngle: Angle)
+    private fun rollerVels(target: DetectedTarget, shooterAngle: Angle) // This needs to toggle between states, not angles
     {
         val straightDist = sqrt((target.estimate.x.Foot *
                 target.estimate.x + target.estimate.y.Foot * target.estimate.y).Foot.Each).Each.Foot
-        //fix type: should be velocity not dimensionless
-        val ballShotVel = sqrt(1.0/2.0)*sqrt((straightDist*straightDist*32.2)/((straightDist*tan(shooterAngle)-shooterHeight)*cos(shooterAngle)*cos(shooterAngle))/1.Foot)
+        val v_ball = 1.FootPerSecond * sqrt(1.0/2.0) * sqrt((straightDist * straightDist * 32.2) / ((straightDist * tan(shooterAngle) - shooterHeight) * cos(shooterAngle))/1.Foot)
     }
 }
 
