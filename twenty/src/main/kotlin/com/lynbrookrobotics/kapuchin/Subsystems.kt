@@ -30,7 +30,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
 
                  val collectorRollers: CollectorRollersComponent?,
-                 val storageBelt: StorageComponent?,
+                 val storage: StorageComponent?,
                  val barAdjustment: BarAdjustmentComponent?,
                  val climberStow: ClimberStowComponent?,
                  val climberWinch: ClimberWinchComponent?,
@@ -39,6 +39,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val shooter: ShooterComponent?,
                  val feederRoller: FeederRollerComponent?,
                  val turret: TurretComponent?,
+                 val intakePneumatic: IntakePneumaticComponent?,
+                 val omniWheel: OmniWheelComponent?,
 
                  val limelight: LimelightComponent?
 ) : Named by Named("Subsystems") {
@@ -53,7 +55,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     companion object : Named by Named("Subsystem") {
         private val initCollectorRollers by pref(true)
-        private val initStorageBelt by pref(true)
+        private val initStorage by pref(true)
         private val initControlPanelPivot by pref(true)
         private val initControlWheel by pref(false)
         private val initBarAdjustment by pref(false)
@@ -84,8 +86,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val collectorRollersHardware = CollectorRollersHardware()
             val collectorRollers = CollectorRollersComponent(collectorRollersHardware)
 
-            val storageBeltHardware = StorageHardware()
-            val storageBelt = StorageComponent(storageBeltHardware)
+            val storageHardware = StorageHardware()
+            val storage = StorageComponent(storageHardware)
 
             val barAdjustmentHardware = BarAdjustmentHardware()
             val barAdjustment = BarAdjustmentComponent(barAdjustmentHardware)
@@ -121,7 +123,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val omniWheel = OmniWheelComponent(omniWheelHardware)
 
             instance = Subsystems(
-                    drivetrain, electricalHardware, driverHardware, operatorHardware, collectorRollers, storageBelt, barAdjustment, climberStow, climberWinch, controlPanel, controlWheel, shooter, feederRoller, turret, limelight
+                    drivetrain, electricalHardware, driverHardware, operatorHardware, collectorRollers, barAdjustment, climberStow, climberWinch, controlPanel, controlWheel, shooter, feederRoller, turret,  intakePneumatic, omniWheel, limelight
             )
         }
 
@@ -142,7 +144,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val operatorAsync = async { OperatorHardware() }
 
                 val collectorRollersAsync = initAsync(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
-                val storageAsync = initAsync(initStorageBelt) { StorageComponent(StorageHardware()) }
+                val storageAsync = initAsync(initStorage) { StorageComponent(StorageHardware()) }
                 val controlPanelPivotAsync = initAsync(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
                 val controlWheelAsync = initAsync(initControlWheel) { ControlWheelComponent(ControlWheelHardware()) }
                 val barAdjustmentAsync = initAsync(initBarAdjustment) { BarAdjustmentComponent(BarAdjustmentHardware()) }
@@ -171,9 +173,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         safeInit { shooterAsync.await() },
                         safeInit { feederRollerAsync.await() },
                         safeInit { turretAsync.await() },
-                        safeInit { limelightAsync.await() },
                         safeInit { intakePneumaticAsync.await()},
-                        safeInit { omniWheelAsync.await()}
+                        safeInit { omniWheelAsync.await()},
+                        safeInit { limelightAsync.await() }
+
 
 
                 )

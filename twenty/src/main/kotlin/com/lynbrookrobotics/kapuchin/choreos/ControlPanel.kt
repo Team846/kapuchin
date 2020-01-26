@@ -3,10 +3,8 @@ package com.lynbrookrobotics.kapuchin.choreos
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.ControlPanelPivotState.*
-import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 

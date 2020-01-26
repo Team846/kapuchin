@@ -11,7 +11,7 @@ import info.kunalsheth.units.math.*
 
 class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<CollectorRollersComponent, CollectorRollersHardware, DutyCycle>(hardware) {
     val fallbackValue by pref(0, Percent)
-    val CollectSpeed by pref(11, Volt)
+    val CollectSpeed by pref(6, Volt)
     val ReleaseSpeed by pref(-6, Volt)
 
 
