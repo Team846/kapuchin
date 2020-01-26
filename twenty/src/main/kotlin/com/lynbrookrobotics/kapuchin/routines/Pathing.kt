@@ -48,9 +48,9 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = start
 }
 
 suspend fun DrivetrainComponent.followTrajectory(
+        trajectory: Trajectory,
         tolerance: Length,
         endTolerance: Length,
-        trajectory: Trajectory,
         origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
 ) = startRoutine("Read Journal") {
 
@@ -59,17 +59,17 @@ suspend fun DrivetrainComponent.followTrajectory(
     )
 
     controller {
-        follower()?.let { (velocityL, velocityR) ->
-            val nativeL = hardware.conversions.nativeConversion.native(velocityL)
-            val nativeR = hardware.conversions.nativeConversion.native(velocityR)
-
+        val velocities = follower()
+        if (velocities != null) {
+            val nativeL = hardware.conversions.nativeConversion.native(velocities.left)
+            val nativeR = hardware.conversions.nativeConversion.native(velocities.right)
             TwoSided(
                     VelocityOutput(hardware.escConfig, velocityGains, nativeL),
                     VelocityOutput(hardware.escConfig, velocityGains, nativeR)
             )
+        } else {
+            null
         }
-
-        null
     }
 }
 

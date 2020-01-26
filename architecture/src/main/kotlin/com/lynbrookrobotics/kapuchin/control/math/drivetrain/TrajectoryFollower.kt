@@ -3,12 +3,11 @@ package com.lynbrookrobotics.kapuchin.control.math.drivetrain
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 /**
- * Given a differential drivetrain and a [Trajectory], calculate the left and right velocities at a specific time.
+ * Given a differential drivetrain and a [Trajectory], calculate the left and right velocity outputs.
  *
  * @author Andy, Alvyn
  *
@@ -42,6 +41,19 @@ class TrajectoryFollower(
     private val uni = UnicycleDrive(drivetrain, scope)
     private val position by with(scope) { drivetrain.hardware.position.readOnTick.withoutStamps }
 
+    /**
+     * Bearing angle of target waypoint from current waypoint
+     */
+    private fun target(current: Waypt, target: Waypt) = atan2(target.x - current.x, target.y - current.y)
+
+    /**
+     * Calculate the next left and right velocity outputs given the current position.
+     *
+     * For each side, the velocity is the current segment's linear velocity factored in with the current segment's
+     * angular velocity along with a PD loop for angular velocity.
+     *
+     * @return the left and right velocities, null if the robot is at the target.
+     */
     operator fun invoke(): TwoSided<Velocity>? {
         val distanceToNext = distance(position.vector, target.waypt)
 
@@ -50,16 +62,14 @@ class TrajectoryFollower(
             target = segments.next()
         }
 
-        // trig angle to compass bearing
-        val targetAngle = 90.Degree - atan2(target.waypt.x - position.vector.x, target.waypt.y - position.vector.y)
+        var (velocityL, velocityR) = uni.speedAngleTarget(
+                target.velocity,
+                target(position.vector, target.waypt)
+        ).first
 
-        with(drivetrain.hardware.conversions) {
-            var (velocityL, velocityR) = uni.speedAngleTarget(target.velocity, targetAngle).first
-            val feedforward = ((target.omega / Radian) * trackLength) / 2
-            velocityL -= feedforward
-            velocityR += feedforward
-
-            return TwoSided(velocityL, velocityR).takeIf { !done }
-        }
+        val feedforward = ((target.omega / Radian) * drivetrain.hardware.conversions.trackLength) / 2
+        velocityL += feedforward
+        velocityR -= feedforward
+        return TwoSided(velocityL, velocityR).takeIf { !done }
     }
 }

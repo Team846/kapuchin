@@ -101,7 +101,7 @@ private fun oneWayAccelCap(
         val dx = distance(p2, p3)
         val d3 = distance(p1, p3)
 
-        // Use law of cosines to find Δtheta
+        // Use law of cosines to find Δtheta.
         val dtheta = {
             val mag = 180.Degree - acos((d1 * d1 + dx * dx - d3 * d3) / (d1 * dx * 2))
             val dir = -((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x)).signum
@@ -110,7 +110,7 @@ private fun oneWayAccelCap(
 
         dthetas += dtheta
 
-        // Find Δt based on region of feasibility
+        // Find Δt based on region of feasibility.
         val dt = abs(dtheta / maxOmega) + dx / maxVelocity
 
         trajectory += Segment(path[i], dx / dt)
@@ -124,9 +124,9 @@ private fun oneWayAccelCap(
         val s2 = trajectory[i] // current
         val s3 = if (i != path.size - 1) trajectory[i + 1] else Segment(Waypt(0.Metre, 0.Metre))
 
-        // Find Δt based on the target velocity and Δx
+        // Find Δt based on the target velocity and Δx.
         // The target velocity is the minimum velocity cap of either the current or the next segment.
-        // The area under the segment in a velocity vs. time graph must equal Δx
+        // The area under the segment in a velocity vs. time graph must equal Δx.
         val dx = distance(s2.waypt, s1.waypt)
         var dt = dx / (s1.velocity + (min(s2.velocity, s3.velocity) - s1.velocity) / 2)
 
@@ -135,7 +135,7 @@ private fun oneWayAccelCap(
 
         // Cap linear acceleration
         if ((s2.velocity - s1.velocity) / dt > maxAcceleration) {
-            // Find a new dt using acceleration and dx instead of a target velocity
+            // Find a new dt using acceleration and dx instead of a target velocity.
             // Δx = v₀t + (1/2)at²
             // t = (-v₀ ± sqrt(v₀² + 2aΔx)) / a -- quadratic formula
             // t = (-v₀ + sqrt(v₀² + 2aΔx)) / a -- only need to consider positive t
