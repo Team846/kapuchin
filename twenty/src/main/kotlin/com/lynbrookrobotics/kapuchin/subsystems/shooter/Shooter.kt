@@ -71,9 +71,9 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
         return 1.FootPerSecond * sqrt(1.0/2.0) * sqrt((straightDist * straightDist * 32.2) / ((straightDist * tan(shooterAngle) - shooterHeight) * cos(shooterAngle))/1.Foot)
     }
 
-    private fun rollerVel(target: DetectedTarget): `T⁻¹` { // Returns required rpm
+    private fun rollerVel(target: DetectedTarget): `∠⋅T⁻¹` { // Returns required rpm
         val ballVel = this.ballVel(target)
-        return ballVel* rollerRadius *(momentFactor * ballMass +(2*MomentOfInertia(rollerInertia.Each))/(rollerRadius * rollerRadius))/MomentOfInertia(rollerInertia.Each)
+        return 1.Rpm * ((ballVel* rollerRadius *(momentFactor * ballMass +(2*MomentOfInertia(rollerInertia.Each))/(rollerRadius * rollerRadius))/MomentOfInertia(rollerInertia.Each)).siValue)
     }
 
 }
