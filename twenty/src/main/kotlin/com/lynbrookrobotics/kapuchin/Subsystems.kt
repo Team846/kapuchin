@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
@@ -14,12 +15,15 @@ import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import edu.wpi.first.hal.HAL
+import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
+import java.io.File
 
 
 class Subsystems(val drivetrain: DrivetrainComponent,
@@ -44,7 +48,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val limelight: LimelightComponent?
 ) : Named by Named("Subsystems") {
 
-    fun teleop() {
+    suspend fun teleop() {
+        System.gc()
+        HAL.observeUserProgramTeleop()
+        runAll(
+
+        )
         System.gc()
     }
 
@@ -52,7 +61,27 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         System.gc()
     }
 
-    companion object : Named by Named("Subsystem") {
+    companion object : Named by Named("Subsystems") {
+
+        private val isCorrupted by pref(true)
+
+        init {
+            if (isCorrupted) {
+                log(Error) { "The config seems to be corrupted. Attempting restoration." }
+                NetworkTableInstance.getDefault().stopServer()
+
+                val ntPath = "/home/lvuser/networktables.ini"
+
+                Thread.currentThread()
+                        .contextClassLoader
+                        .getResourceAsStream("com/lynbrookrobotics/kapuchin/configbackups/networktables.ini")!!
+                        .copyTo(File(ntPath).outputStream())
+                File("$ntPath.bak").delete()
+
+                System.exit(1)
+            }
+        }
+
         private val initCollectorRollers by pref(true)
         private val initCarousel by pref(true)
         private val initControlPanelPivot by pref(true)
