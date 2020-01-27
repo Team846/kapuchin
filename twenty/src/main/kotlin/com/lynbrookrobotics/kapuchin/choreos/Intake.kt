@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.IntakePneumaticState.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.IntakePivotState.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -25,20 +25,19 @@ suspend fun Subsystems.IntakeTeleop() = startChoreo("Intake Teleop") {
 
 suspend fun Subsystems.Collect() = supervisorScope {
     var roller: Job? = null
-    var carousel: Job? = null
-    var omni: Job? = null
+    var spin: Job? = null
     try{
-        intakePneumatic?.set(Down)
+        intakePivot?.set(Down)
         roller = launch { collectorRollers?.spin(electrical, collectorRollers.CollectSpeed) }
         freeze()
 
     }
     finally{
         roller?.cancel()
-        carousel = launch { storage?.spin(electrical, storage.carouselspeed) }
+        spin = launch { carousel?.spin(electrical, carousel.carouselspeed) }
         delay(1.Second)
-        carousel?.cancel()
-        intakePneumatic?.set(Up)
+        spin?.cancel()
+        intakePivot?.set(Up)
 
     }
 }

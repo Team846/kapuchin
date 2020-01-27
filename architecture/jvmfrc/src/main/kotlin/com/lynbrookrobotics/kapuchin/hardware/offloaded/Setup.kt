@@ -32,7 +32,7 @@ val CANError.checkOk: Unit
             throw IOException("REV Spark Max call returned $this")
     }
 
-fun generalSetup(esc: BaseMotorController, config: OffloadedEscConfiguration) {
+fun RobotHardware<*>.generalSetup(esc: BaseMotorController, config: OffloadedEscConfiguration) {
     +esc.configFactoryDefault(configTimeout)
 
     esc.setNeutralMode(NeutralMode.Brake)

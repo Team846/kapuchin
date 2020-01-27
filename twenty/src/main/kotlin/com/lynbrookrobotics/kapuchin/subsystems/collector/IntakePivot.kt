@@ -4,23 +4,23 @@ package com.lynbrookrobotics.kapuchin.subsystems.collector
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.IntakePneumaticState.*
+import com.lynbrookrobotics.kapuchin.subsystems.collector.IntakePivotState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class IntakePneumaticComponent(hardware: IntakePneumaticHardware) : Component<IntakePneumaticComponent, IntakePneumaticHardware, IntakePneumaticState>(hardware, Subsystems.pneumaticTicker) {
+class IntakePivotComponent(hardware: IntakePivotHardware) : Component<IntakePivotComponent, IntakePivotHardware, IntakePivotState>(hardware, Subsystems.pneumaticTicker) {
 
-    override val fallbackController: IntakePneumaticComponent.(Time) -> IntakePneumaticState = { Down }
+    override val fallbackController: IntakePivotComponent.(Time) -> IntakePivotState = { Down }
 
-    override fun IntakePneumaticHardware.output(value: IntakePneumaticState) {
+    override fun IntakePivotHardware.output(value: IntakePivotState) {
         solenoid.set(value.output)
         solenoid2.set(value.output)
     }
 }
 
-class IntakePneumaticHardware : SubsystemHardware<IntakePneumaticHardware, IntakePneumaticComponent>() {
+class IntakePivotHardware : SubsystemHardware<IntakePivotHardware, IntakePivotComponent>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 100.milli(Second)
     override val syncThreshold: Time = 20.milli(Second)
@@ -33,4 +33,4 @@ class IntakePneumaticHardware : SubsystemHardware<IntakePneumaticHardware, Intak
 
 }
 
-enum class IntakePneumaticState(val output: Boolean) { Up(true), Down(false) }
+enum class IntakePivotState(val output: Boolean) { Up(true), Down(false) }

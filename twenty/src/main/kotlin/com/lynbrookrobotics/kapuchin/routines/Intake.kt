@@ -18,7 +18,7 @@ suspend fun CollectorRollersComponent.set(target: DutyCycle) = startRoutine("set
     controller { target }
 }
 
-suspend fun StorageComponent.spin(electrical: ElectricalSystemHardware, Storage: V) = startRoutine("spin") {
+suspend fun CarouselComponent.spin(electrical: ElectricalSystemHardware, Storage: V) = startRoutine("spin") {
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
@@ -26,10 +26,6 @@ suspend fun StorageComponent.spin(electrical: ElectricalSystemHardware, Storage:
     }
 }
 
-suspend fun IntakePneumaticComponent.set(target: IntakePneumaticState) = startRoutine("Set") {
-    controller { target }
-}
-
-suspend fun OmniWheelComponent.spin(target: DutyCycle) = startRoutine("spin") {
+suspend fun IntakePivotComponent.set(target: IntakePivotState) = startRoutine("Set") {
     controller { target }
 }

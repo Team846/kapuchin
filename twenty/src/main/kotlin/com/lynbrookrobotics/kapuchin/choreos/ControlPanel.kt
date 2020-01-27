@@ -26,7 +26,8 @@ suspend fun Subsystems.flip() = supervisorScope{
     try {
         controlPanelPivot?.set(Up)
         delay(0.2.Second)
-        wheel = launch { controlWheel?.set(controlWheel.motorSpeed)  }
+        wheel = launch { controlPanelSpinner?.set(controlPanelSpinner.motorSpeed)  }
+
 
         freeze()
     }

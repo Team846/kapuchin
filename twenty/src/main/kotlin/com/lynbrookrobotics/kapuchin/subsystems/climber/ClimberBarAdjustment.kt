@@ -8,15 +8,15 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushed
 import info.kunalsheth.units.generated.*
 
-class BarAdjustmentComponent(hardware: BarAdjustmentHardware) : Component<BarAdjustmentComponent, BarAdjustmentHardware, DutyCycle>(hardware) {
-    override val fallbackController: BarAdjustmentComponent.(Time) -> DutyCycle = { 0.Percent }
+class ClimberBarAdjustmentComponent(hardware: ClimberBarAdjustmentHardware) : Component<ClimberBarAdjustmentComponent, ClimberBarAdjustmentHardware, DutyCycle>(hardware) {
+    override val fallbackController: ClimberBarAdjustmentComponent.(Time) -> DutyCycle = { 0.Percent }
 
-    override fun BarAdjustmentHardware.output(value: DutyCycle) {
+    override fun ClimberBarAdjustmentHardware.output(value: DutyCycle) {
         barAdjustmentEsc.set(value.Each)
     }
 }
 
-class BarAdjustmentHardware : SubsystemHardware<BarAdjustmentHardware, BarAdjustmentComponent>() {
+class ClimberBarAdjustmentHardware : SubsystemHardware<ClimberBarAdjustmentHardware, ClimberBarAdjustmentComponent>() {
     override val period: Time = 30.Millisecond
     override val syncThreshold: Time = 30.Millisecond
     override val priority: Priority = Priority.Low

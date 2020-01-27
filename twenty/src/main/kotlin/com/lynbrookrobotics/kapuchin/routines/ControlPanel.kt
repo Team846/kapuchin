@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import info.kunalsheth.units.generated.*
 
-suspend fun ControlWheelComponent.spin(electrical: ElectricalSystemHardware, Rollers: V) = startRoutine("spin") {
+suspend fun ControlPanelSpinnerComponent.spin(electrical: ElectricalSystemHardware, Rollers: V) = startRoutine("spin") {
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
@@ -13,7 +13,7 @@ suspend fun ControlWheelComponent.spin(electrical: ElectricalSystemHardware, Rol
     }
 }
 
-suspend fun ControlWheelComponent.set(target: DutyCycle) = startRoutine("set") {
+suspend fun ControlPanelSpinnerComponent.set(target: DutyCycle) = startRoutine("set") {
     controller { target }
 }
 

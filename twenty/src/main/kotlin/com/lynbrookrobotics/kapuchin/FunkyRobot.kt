@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-fun main() {
+fun main(args: Array<String>) {
     println("Kapuchin Run ID ${System.currentTimeMillis() / 60000 - 25896084}")
     RobotBase.startRobot(::FunkyRobot)
 }
@@ -46,6 +46,7 @@ class FunkyRobot : RobotBase() {
                         subsystems.warmup()
                     },
                     { isTest } to choreography {
+
                         subsystems.teleop()
                     }
             )
@@ -75,7 +76,7 @@ val classPreloading = scope.launch {
     val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
     Thread.currentThread()
             .contextClassLoader
-            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")!!
+            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
             .bufferedReader()
             .lineSequence()
             .filter { it.matches(classNameRegex) }

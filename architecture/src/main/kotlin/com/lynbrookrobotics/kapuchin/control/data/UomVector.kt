@@ -40,7 +40,7 @@ operator fun <Q : Quan<Q>> UomVector<Q>.times(that: Double) = UomVector(
         this.z * that
 )
 
-operator fun <Q : Quan<Q>> UomVector<Q>.div(that: Number) = UomVector(
+inline operator fun <Q : Quan<Q>, That : Number> UomVector<Q>.div(that: That) = UomVector(
         this.x / that.toDouble(),
         this.y / that.toDouble(),
         this.z / that.toDouble()

@@ -12,12 +12,12 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import edu.wpi.first.wpilibj.I2C
 import info.kunalsheth.units.generated.*
 
-class ControlWheelComponent(hardware: ControlWheelHardware) : Component<ControlWheelComponent, ControlWheelHardware, DutyCycle>(hardware) {
-    override val fallbackController: ControlWheelComponent.(Time) -> DutyCycle = { 0.Percent }
+class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware) {
+    override val fallbackController: ControlPanelSpinnerComponent.(Time) -> DutyCycle = { 0.Percent }
 
     val motorSpeed by pref(50, Percent)
 
-    override fun ControlWheelHardware.output(value: DutyCycle) {
+    override fun ControlPanelSpinnerHardware.output(value: DutyCycle) {
         spinnerEsc.set(value.Each)
     }
 }
@@ -26,7 +26,7 @@ val readColorSensor: RevColorSensor.(Time) -> TimeStamped<String> = {
     getCurrentValue() stampWith currentTime
 }
 
-class ControlWheelHardware : SubsystemHardware<ControlWheelHardware, ControlWheelComponent>() {
+class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardware, ControlPanelSpinnerComponent>() {
     override val period: Time = 30.Millisecond
     override val syncThreshold: Time = 30.Millisecond
     override val priority: Priority = Priority.Low
