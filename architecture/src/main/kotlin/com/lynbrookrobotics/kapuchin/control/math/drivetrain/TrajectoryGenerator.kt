@@ -85,8 +85,8 @@ private fun oneWayAccelCap(
 ): Trajectory {
 
     val trajectory = mutableListOf(
-            Segment(path[0]),
-            Segment(path[1], velocity = maxVelocity)
+            MutableSegment(path[0]),
+            MutableSegment(path[1], velocity = maxVelocity)
     )
     val dthetas = mutableListOf(0.Degree, 0.Degree)
 
@@ -113,7 +113,7 @@ private fun oneWayAccelCap(
         // Find Δt based on region of feasibility.
         val dt = abs(dtheta / maxOmega) + dx / maxVelocity
 
-        trajectory += Segment(path[i], dx / dt)
+        trajectory += MutableSegment(path[i], velocity = dx / dt)
     }
 
 
@@ -122,7 +122,7 @@ private fun oneWayAccelCap(
     for (i in 1 until path.size) {
         val s1 = trajectory[i - 1]
         val s2 = trajectory[i] // current
-        val s3 = if (i != path.size - 1) trajectory[i + 1] else Segment(Waypt(0.Metre, 0.Metre))
+        val s3 = if (i != path.size - 1) trajectory[i + 1] else MutableSegment(Waypt(0.Metre, 0.Metre))
 
         // Find Δt based on the target velocity and Δx.
         // The target velocity is the minimum velocity cap of either the current or the next segment.
@@ -146,5 +146,6 @@ private fun oneWayAccelCap(
         }
     }
 
-    return trajectory
+    // MutableSegment to (immutable) Segment
+    return trajectory.map { Segment(it.waypt, it.velocity, it.omega) }
 }

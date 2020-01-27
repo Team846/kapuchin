@@ -40,7 +40,7 @@ suspend fun Subsystems.straightLine() = startChoreo("Straight line") {
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 1.Inch, 1.Inch)
+        drivetrain.followTrajectory(trajectory, 6.Inch, 1.Inch)
     }
 }
 
@@ -54,14 +54,14 @@ suspend fun Subsystems.circle() = startChoreo("Circle") {
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 20.Inch, 6.Inch)
+        drivetrain.followTrajectory(trajectory, 10.Inch, 10.Inch)
     }
 }
 
 suspend fun Subsystems.followJournal() = startChoreo("Follow journal") {
     val path = loadTempPath()
 
-    val trajectory = pathToTrajectory(path, 10.FootPerSecond, 1.Radian / Second, 3.FootPerSecondSquared)
+    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, 3.FootPerSecondSquared)
 
     System.gc()
 

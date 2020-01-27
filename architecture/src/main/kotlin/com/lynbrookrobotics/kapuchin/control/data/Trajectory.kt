@@ -16,7 +16,16 @@ typealias Trajectory = List<Segment> // a path with generated timestamps, veloci
  * @property omega the constant angular velocity throughout the segment.
  */
 data class Segment(
-        var waypt: Waypt,
+        val waypt: Waypt,
+        val velocity: Velocity,
+        val omega: AngularVelocity
+)
+
+/**
+ * Internal representation of a segment with mutable properties.
+ */
+internal data class MutableSegment(
+        val waypt: Waypt,
         var velocity: Velocity = 0.Foot / Second,
         var omega: AngularVelocity = 0.Radian / Second
 )

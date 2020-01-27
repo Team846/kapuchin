@@ -30,7 +30,8 @@ class TrajectoryFollower(
     // Make segment waypoints relative to origin
     private val segments = with(RotationMatrix(origin.bearing)) {
         trajectory
-                .also { t -> t.forEach { it.waypt = rotate(it.waypt) + origin.vector } }
+                .map { it.copy(waypt = rotate(it.waypt) + origin.vector)}
+                .drop(1)
                 .iterator()
     }
 
@@ -59,16 +60,21 @@ class TrajectoryFollower(
         done = !segments.hasNext() && distanceToNext < endTolerance
         if (segments.hasNext() && distanceToNext < tolerance) {
             target = segments.next()
+            println("NNNNNNNNNNEEEEEXXXXXXXXXXXTTTTTTTTTTT WWWWWAYYYYPPOOINNNNNNTTT")
         }
 
+//        var velocityL = target.velocity
+//        var velocityR = target.velocity
         var (velocityL, velocityR) = uni.speedAngleTarget(
                 target.velocity,
                 target(position.vector, target.waypt)
         ).first
 
+        println("1: ${velocityL.FootPerSecond}\t${velocityR.FootPerSecond}")
         val feedforward = ((target.omega / Radian) * drivetrain.hardware.conversions.trackLength) / 2
         velocityL += feedforward
         velocityR -= feedforward
+        println("2: ${velocityL.FootPerSecond}\t${velocityR.FootPerSecond}")
 
         return TwoSided(velocityL, velocityR).takeIf { !done }
     }
