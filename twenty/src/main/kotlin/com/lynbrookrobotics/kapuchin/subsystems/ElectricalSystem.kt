@@ -10,6 +10,5 @@ class ElectricalSystemHardware : RobotHardware<ElectricalSystemHardware>() {
     override val name = "Electrical System"
     override val priority = Priority.Lowest
 
-    // val pdp by hardw { PowerDistributionPanel() }
     val batteryVoltage = sensor { RobotController.getBatteryVoltage().Volt stampSince it }
 }
