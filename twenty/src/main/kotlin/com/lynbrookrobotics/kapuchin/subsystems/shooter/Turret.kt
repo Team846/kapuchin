@@ -19,10 +19,10 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
 
 
     override fun TurretHardware.output(value: OffloadedOutput) {
-        val aLL = atLeftLimit.optimizedRead(currentTime, 0.Second)
-        val aLR = atRightLimit.optimizedRead(currentTime, 0.Second)
+        val atLeft = leftLimit.optimizedRead(currentTime, 0.Second).y
+        val atRight = rightLimit.optimizedRead(currentTime, 0.Second).y
         when {
-            aLL.y || aLR.y -> value.writeTo(0.0)
+            atLeft || atRight -> turretEsc.set(0.0)
             else -> value.writeTo(turretEsc)
         }
     }
@@ -49,14 +49,13 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
 
     val turretEsc by hardw { CANSparkMax(turretEscId, CANSparkMaxLowLevel.MotorType.kBrushless) }
 
-    val leftLimitSwitch by hardw { turretMotorEsc.getForwardLimitSwitch(CANDigitalInput.LimitSwitchPolarity.kNormallyOpen) }.configure {
+    val leftStop: CANDigitalInput by hardw { turretEsc.getForwardLimitSwitch(CANDigitalInput.LimitSwitchPolarity.kNormallyOpen) }.configure {
         +it.enableLimitSwitch(true)
     }
-    val rightLimitSwitch by hardw { turretMotorEsc.getReverseLimitSwitch(CANDigitalInput.LimitSwitchPolarity.kNormallyOpen) }.configure {
+    val rightStop: CANDigitalInput by hardw { turretEsc.getReverseLimitSwitch(CANDigitalInput.LimitSwitchPolarity.kNormallyOpen) }.configure {
         +it.enableLimitSwitch(true)
     }
 
-    val atLeftLimit = sensor(leftLimitSwitch) { get() stampWith it }
-    val atRightLimit = sensor(rightLimitSwitch) { get() stampWith it }
+    val leftLimit = sensor(leftStop) { get() stampWith it }
+    val rightLimit = sensor(rightStop) { get() stampWith it }
 }
-
