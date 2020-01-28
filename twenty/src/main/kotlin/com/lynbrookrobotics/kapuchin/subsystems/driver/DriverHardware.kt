@@ -64,7 +64,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val steering = s { wheelMapping(wheel.x.Each) }
             .with(graph("Steering", Percent))
 
-    val absSteering = s { -180.Degree * absoluteWheel.x }
+    val absSteering = s { (-180).Degree * absoluteWheel.x }
             .with(graph("Absolute Steering", Degree))
 
     init {
@@ -75,9 +75,5 @@ class DriverHardware : RobotHardware<DriverHardware>() {
         }
     }
 
-    // buttons
-    val collectCargo = s { stick[Trigger] && stick[BottomTrigger] }
-    val liftDown = s { stick[Trigger] && !stick[BottomTrigger] }
     val interruptAuto = s { stick[LeftTrigger] }
-    val autoAlign = s { stick[RightTrigger] }
 }
