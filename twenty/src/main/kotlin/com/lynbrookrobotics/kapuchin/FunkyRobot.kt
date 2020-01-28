@@ -12,10 +12,22 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.File
 import kotlin.system.measureTimeMillis
 
-fun main(args: Array<String>) {
-    println("Kapuchin Run ID ${System.currentTimeMillis() / 60000 - 25896084}")
+const val BASE_PATH = "com/lynbrookrobotics/kapuchin"
+const val ID_FILE = "$BASE_PATH/run_id"
+
+fun main() {
+    val runId = Thread.currentThread().contextClassLoader.getResource(ID_FILE)?.path?.let {
+        val runIdFile = File(it)
+        val runId = (runIdFile.readBytes().first() + 1).toByte()
+        runIdFile.writeBytes(ByteArray(1) { runId })
+        runId
+    } ?: -1
+
+    println("Kapuchin Run ID $runId")
+
     RobotBase.startRobot(::FunkyRobot)
 }
 
@@ -76,7 +88,7 @@ val classPreloading = scope.launch {
     val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
     Thread.currentThread()
             .contextClassLoader
-            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
+            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")!!
             .bufferedReader()
             .lineSequence()
             .filter { it.matches(classNameRegex) }
