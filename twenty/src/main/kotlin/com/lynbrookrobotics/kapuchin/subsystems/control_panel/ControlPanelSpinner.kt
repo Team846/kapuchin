@@ -1,6 +1,6 @@
 @file:Suppress("EXPERIMENTAL_API_USAGE")
 
-package com.lynbrookrobotics.kapuchin.subsystems.controlpanel
+package com.lynbrookrobotics.kapuchin.subsystems.control_panel
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -17,7 +17,7 @@ class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Comp
     override val fallbackController: ControlPanelSpinnerComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent) }
 
-    val motorSpeed by pref(50, Percent)
+    val spinSpeed by pref(6, Volt)
 
     override fun ControlPanelSpinnerHardware.output(value: OffloadedOutput) {
         value.writeTo(spinnerEsc)
@@ -34,7 +34,6 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
     override val priority: Priority = Priority.Low
     override val name: String = "ControlPanel"
 
-    private val controlWheelEscId by pref(10)
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
 
@@ -42,12 +41,12 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
             defaultPeakCurrentLimit = 35.Ampere
     )
 
-    private val leftColorSensorAddress by pref(6)
-    private val rightColorSensorAddress by pref(7)
+    private val controlWheelEscId by pref(10)
+    val spinnerEsc by hardw { CANSparkMax(controlWheelEscId, kBrushless) }
 
+    private val leftColorSensorAddress by pref(6)
     val leftColorSensor = sensor(RevColorSensor(I2C.Port.kOnboard, leftColorSensorAddress), readColorSensor)
 
+    private val rightColorSensorAddress by pref(7)
     val rightColorSensor = sensor(RevColorSensor(I2C.Port.kOnboard, rightColorSensorAddress), readColorSensor)
-
-    val spinnerEsc by hardw { CANSparkMax(controlWheelEscId, kBrushless) }
 }
