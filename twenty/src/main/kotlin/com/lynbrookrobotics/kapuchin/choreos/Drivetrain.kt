@@ -10,8 +10,6 @@ import kotlinx.coroutines.launch
 
 suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
-    val autoAlign by driver.autoAlign.readEagerly().withoutStamps
-
     choreography {
         try {
             launch {
@@ -23,16 +21,7 @@ suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
             }
             launch {
                 runWhenever(
-                        { autoAlign } to choreography {
-                            launch { collectorSlider?.trackLine(lineScanner, electrical) }
-                            drivetrain.lineActiveTracking(
-                                    2.FootPerSecond,
-                                    collectorSlider
-                                            ?.run { (min - 0.5.Inch)..(max + 0.5.Inch) }
-                                            ?: -5.Inch..5.Inch,
-                                    lineScanner
-                            )
-                        }
+
                 )
             }
             freeze()

@@ -47,26 +47,6 @@ suspend fun CollectorSliderComponent.set(target: Length, electrical: ElectricalS
     }
 }
 
-suspend fun CollectorSliderComponent.trackLine(lineScanner: LineScannerHardware, electrical: ElectricalSystemHardware) = startRoutine("Track line") {
-
-    val target by lineScanner.linePosition.readOnTick.withoutStamps
-    val current by hardware.position.readOnTick.withoutStamps
-    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
-
-    controller {
-        target?.let { snapshot ->
-            val error = snapshot - current
-            val voltage = kP * error
-
-            voltageToDutyCycle(
-                    voltage cap `±`(operatingVoltage),
-                    vBat,
-                    false
-            )
-        } ?: 0.Percent
-    }
-}
-
 suspend fun CollectorSliderComponent.set(target: DutyCycle) = startRoutine("Manual Override") {
     controller { target }
 }

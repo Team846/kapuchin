@@ -56,6 +56,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
     }
 
     init {
-        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, { hardware.jitterReadPin.period.Second })
+        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set) { hardware.jitterReadPin.period.Second }
     }
 }
