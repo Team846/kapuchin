@@ -13,9 +13,11 @@ import info.kunalsheth.units.math.*
 
 
 class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
-    val carouselspeed by pref(6, Volt)
+    val carouselSpeed by pref(6, Volt)
+
     override val fallbackController: CarouselComponent.(Time) -> OffloadedOutput = {
-        PercentOutput(hardware.escConfig, 0.Percent) }
+        PercentOutput(hardware.escConfig, 0.Percent)
+    }
 
     override fun CarouselHardware.output(value: OffloadedOutput) {
         value.writeTo(carouselEsc)
@@ -29,7 +31,18 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     override val syncThreshold: Time = 20.milli(Second)
     override val name: String = "StorageBelt"
 
-    private val carouselEscId by pref(10)
+    /**
+     * Detects the number of rotations the carousel has performed
+     */
+    val rotationHallEffect by hardw { DigitalInput(2) }
+
+    /**
+     * Detects if there is a ball in the active carousel slot
+     */
+    val proximity by hardw {
+        DigitalInput(1)
+    }
+
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
 
@@ -37,14 +50,6 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
             defaultPeakCurrentLimit = 35.Ampere
     )
 
-
-    val halleffect by hardw { DigitalInput(2) }
-
-    val proximity by hardw {
-        DigitalInput(1)
-    }
-
+    private val carouselEscId by pref(10)
     val carouselEsc by hardw { CANSparkMax(carouselEscId, kBrushless) }
-
-
 }
