@@ -83,7 +83,7 @@ data class OffloadedEscConfiguration(
         victorCache[esc] = this
     }
 
-    fun writeTo(esc: CANSparkMax, timeoutMs: Int = this.timeoutMs) {
+    fun writeTo(esc: CANSparkMax) {
         val cached = sparkCache[esc]
         if (this != cached) sparkCache[esc].also {
             println("Writing configurations to CANSparkMAX ${esc.deviceId}")

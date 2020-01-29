@@ -3,6 +3,8 @@ package com.lynbrookrobotics.kapuchin.hardware.offloaded
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.revrobotics.CANSparkMax
+import edu.wpi.first.wpilibj.Talon
 import info.kunalsheth.units.generated.*
 
 sealed class OffloadedOutput {
@@ -29,6 +31,10 @@ sealed class OffloadedOutput {
         gains?.writeTo(esc, timeoutMs)
         config.writeTo(esc, timeoutMs)
         esc.set(mode, value)
+    }
+
+    fun writeTo(esc: CANSparkMax) {
+        config.writeTo(esc)
     }
 }
 
