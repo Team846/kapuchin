@@ -20,14 +20,10 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
 }
 
 class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRollerComponent>() {
-    override val period: Time
-        get() = 50.Millisecond
-    override val syncThreshold: Time
-        get() = 20.Millisecond
-    override val priority: Priority
-        get() = Medium
-    override val name: String
-        get() = "Feeder Roller"
+    override val period: Time = 50.Millisecond
+    override val syncThreshold: Time = 20.Millisecond
+    override val priority: Priority = Medium
+    override val name: String = "Feeder Roller"
 
     private val feederRollerEscId by pref(55)
     val escConfig by escConfigPref(
@@ -39,4 +35,3 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
 
     val feederRollerEsc by hardw { CANSparkMax(feederRollerEscId, CANSparkMaxLowLevel.MotorType.kBrushless) }
 }
-
