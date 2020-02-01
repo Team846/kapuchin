@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
-import com.ctre.phoenix.motorcontrol.can.BaseMotorController
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.revrobotics.CANSparkMax
@@ -30,36 +29,25 @@ data class OffloadedEscConfiguration(
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
-    private fun configureEsc(it: OffloadedEscConfiguration?, esc: BaseMotorController, timeoutMs: Int) {
-        if (it == null || it.openloopRamp != this.openloopRamp)
-            +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
-
-        if (it == null || it.closedloopRamp != this.closedloopRamp)
-            +esc.configClosedloopRamp(closedloopRamp.Second, timeoutMs)
-
-        if (it == null || it.peakOutputForward != this.peakOutputForward)
-            +esc.configPeakOutputForward((peakOutputForward / voltageCompSaturation).Each, timeoutMs)
-
-        if (it == null || it.nominalOutputForward != this.nominalOutputForward)
-            +esc.configNominalOutputForward((nominalOutputForward / voltageCompSaturation).Each, timeoutMs)
-
-        if (it == null || it.nominalOutputReverse != this.nominalOutputReverse)
-            +esc.configNominalOutputReverse((nominalOutputReverse / voltageCompSaturation).Each, timeoutMs)
-
-        if (it == null || it.peakOutputReverse != this.peakOutputReverse)
-            +esc.configPeakOutputReverse((peakOutputReverse / voltageCompSaturation).Each, timeoutMs)
-
-        if (it == null || it.voltageCompSaturation != this.voltageCompSaturation)
-            +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
-    }
-
     fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
         val cached = talonCache[esc]
         if (this != cached) talonCache[esc].also {
             println("Writing configurations to TalonSRX ${esc.deviceID}")
 
-            configureEsc(it, esc, timeoutMs)
-
+            if (it == null || it.openloopRamp != openloopRamp)
+                +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
+            if (it == null || it.closedloopRamp != closedloopRamp)
+                +esc.configClosedloopRamp(closedloopRamp.Second, timeoutMs)
+            if (it == null || it.peakOutputForward != peakOutputForward)
+                +esc.configPeakOutputForward((peakOutputForward / voltageCompSaturation).Each, timeoutMs)
+            if (it == null || it.nominalOutputForward != nominalOutputForward)
+                +esc.configNominalOutputForward((nominalOutputForward / voltageCompSaturation).Each, timeoutMs)
+            if (it == null || it.nominalOutputReverse != nominalOutputReverse)
+                +esc.configNominalOutputReverse((nominalOutputReverse / voltageCompSaturation).Each, timeoutMs)
+            if (it == null || it.peakOutputReverse != peakOutputReverse)
+                +esc.configPeakOutputReverse((peakOutputReverse / voltageCompSaturation).Each, timeoutMs)
+            if (it == null || it.voltageCompSaturation != voltageCompSaturation)
+                +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
             if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
                 +esc.configContinuousCurrentLimit(continuousCurrentLimit.Ampere.toInt(), timeoutMs)
 
@@ -78,7 +66,20 @@ data class OffloadedEscConfiguration(
         if (this != cached) victorCache[esc].also {
             println("Writing configurations to VictorSPX ${esc.deviceID}")
 
-            configureEsc(it, esc, timeoutMs)
+            if (it == null || it.openloopRamp != openloopRamp)
+                +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
+            if (it == null || it.closedloopRamp != closedloopRamp)
+                +esc.configClosedloopRamp(closedloopRamp.Second, timeoutMs)
+            if (it == null || it.peakOutputForward != peakOutputForward)
+                +esc.configPeakOutputForward((peakOutputForward / voltageCompSaturation).Each, timeoutMs)
+            if (it == null || it.nominalOutputForward != nominalOutputForward)
+                +esc.configNominalOutputForward((nominalOutputForward / voltageCompSaturation).Each, timeoutMs)
+            if (it == null || it.nominalOutputReverse != nominalOutputReverse)
+                +esc.configNominalOutputReverse((nominalOutputReverse / voltageCompSaturation).Each, timeoutMs)
+            if (it == null || it.peakOutputReverse != peakOutputReverse)
+                +esc.configPeakOutputReverse((peakOutputReverse / voltageCompSaturation).Each, timeoutMs)
+            if (it == null || it.voltageCompSaturation != voltageCompSaturation)
+                +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
         }
         victorCache[esc] = this
     }
@@ -88,11 +89,20 @@ data class OffloadedEscConfiguration(
         if (this != cached) sparkCache[esc].also {
             println("Writing configurations to CANSparkMAX ${esc.deviceId}")
 
-            if (it == null || it.openloopRamp != this.openloopRamp)
-                esc.rampRate = openloopRamp.Second
-
-            if (it == null || it.closedloopRamp != this.closedloopRamp)
-                +esc.setRampRate(openloopRamp.Second)
+            if (it == null || it.openloopRamp != openloopRamp)
+                +esc.setOpenLoopRampRate(openloopRamp.Second)
+            if (it == null || it.closedloopRamp != closedloopRamp)
+                +esc.setClosedLoopRampRate(closedloopRamp.Second)
+            if (it == null || it.peakOutputForward != peakOutputForward)
+                TODO()
+            if (it == null || it.nominalOutputForward != nominalOutputForward)
+                TODO()
+            if (it == null || it.nominalOutputReverse != nominalOutputReverse)
+                TODO()
+            if (it == null || it.peakOutputReverse != peakOutputReverse)
+                TODO()
+            if (it == null || it.voltageCompSaturation != voltageCompSaturation)
+                TODO()
 
             sparkCache[esc] = this
         }
