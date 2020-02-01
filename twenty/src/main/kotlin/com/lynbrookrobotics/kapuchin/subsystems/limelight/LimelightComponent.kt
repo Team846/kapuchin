@@ -32,10 +32,10 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
                     innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
                     innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                     tSkew
-            ))
+            ),outerGoalPos)
             if (tSkew > skewTolerance)
             {
-                OuterGoal(targetPosition(sample))
+                OuterGoal(null,targetPosition(sample))
             }
             else{
                 innerGoal
@@ -48,10 +48,10 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
                     innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
                     innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                     skew
-            ))
+            ), outerGoalPos)
             if (skew > skewTolerance)
             {
-                OuterGoal(targetPosition(sample))
+                OuterGoal(null,targetPosition(sample))
             }
             else{
                 innerGoal
