@@ -1,10 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.limelight.DetectedTarget.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -20,47 +17,25 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
 
         Position(x, distance, skew)
     }
-    private fun innerGoalPos(sample: LimelightReading, skew: Angle?)
-    {
+
+    fun goalPosition(sample: LimelightReading, skew: Angle? = null): DetectedTarget {
         val outerGoalPos = targetPosition(sample)
-        if(skew == null)
-        {
-            val tSkew = targetPosition(sample).bearing
-            val offsetAngle = 90.Degree - tSkew
+        val skew = skew ?: targetPosition(sample).bearing
+        val offsetAngle = 90.Degree - skew
 
-            val innerGoal = DetectedTarget(Position(
-                    innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
-                    innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
-                    tSkew
-            ),outerGoalPos)
-            if (tSkew > skewTolerance)
-            {
-                DetectedTarget(null,targetPosition(sample))
-            }
-            else{
-                innerGoal
-            }
+        val innerGoal = DetectedTarget(Position(
+                innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
+                innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
+                skew
+        ), outerGoalPos)
+        return if (skew > skewTolerance) {
+            DetectedTarget(null, targetPosition(sample))
+        } else {
+            innerGoal
         }
-        else {
-            val offsetAngle = 90.Degree - skew
-
-            val innerGoal = DetectedTarget(Position(
-                    innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
-                    innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
-                    skew
-            ), outerGoalPos)
-            if (skew > skewTolerance)
-            {
-                DetectedTarget(null,targetPosition(sample))
-            }
-            else{
-                innerGoal
-            }
-        }
-
     }
 
-    private val skewTolerance by pref(1,Degree)
+    private val skewTolerance by pref(1, Degree)
     private val innerGoalOffset by pref(29.25, Inch)
     private val targetHeight by pref(107, Inch)
     private val aspect0 by pref {
@@ -103,7 +78,7 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         ({ UomVector(x, y) })
     }
 
-    override val fallbackController: LimelightComponent.(Time) -> LimelightOutput = { LimelightOutput(Pipeline.ZoomOut,0,0) }
+    override val fallbackController: LimelightComponent.(Time) -> LimelightOutput = { LimelightOutput(Pipeline.ZoomOut, 0, 0) }
 
     override fun LimelightHardware.output(value: LimelightOutput) {
         pipelineEntry.setNumber(value.pipe?.number)

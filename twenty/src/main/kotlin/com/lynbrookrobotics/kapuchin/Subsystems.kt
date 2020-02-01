@@ -11,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -34,7 +35,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val climberWinch: ClimberWinchComponent?,
                  val climberPivot: ClimberPivotComponent?,
 
-                 val limelight: LimelightHardware?
+                 val flywheel: FlywheelComponent?,
+                 val hood: HoodComponent?,
+
+                 val limelight: LimelightComponent?
 ) : Named by Named("Subsystems") {
 
     suspend fun teleop() {
@@ -86,6 +90,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initCollectorRollers by pref(true)
         private val initClimberWinch by pref(false)
         private val initClimberIntake by pref(false)
+        private val initFlywheel by pref(true)
+        private val initHood by pref(true)
         private val initLimelight by pref(true)
 
         var instance: Subsystems? = null
@@ -114,7 +120,11 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val collectorRollersAsync = initAsync(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
                 val climberWinchAsync = initAsync(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
                 val climberIntakeAsync = initAsync(initClimberIntake) { ClimberIntakeComponent(ClimberIntakeHardware()) }
-                val limelightAsync = initAsync(initLimelight) { LimelightHardware() }
+
+                val flywheelAsync = initAsync(initFlywheel) { FlywheelComponent(FlywheelHardware()) }
+                val hoodAsync = initAsync(initHood) { HoodComponent(HoodHardware) }
+
+                val limelightAsync = initAsync(initLimelight) { LimelightComponent(LimelightHardware()) }
 
                 instance = Subsystems(
                         drivetrainAsync.await(),
@@ -127,6 +137,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         safeInit { collectorRollersAsync.await() },
                         safeInit { climberWinchAsync.await() },
                         safeInit { climberInitAsync.await() },
+                        safeInit { flywheelAsync.await() },
+                        safeInit { hoodAsync.await() },
                         safeInit { limelightAsync.await() }
                 )
             }
@@ -154,8 +166,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     initOrNull(initCollectorRollers) { safeInit { CollectorRollersComponent(CollectorRollersHardware()) } },
                     initOrNull(initClimberWinch) { safeInit { ClimberWinchComponent(ClimberWinchHardware()) } },
                     initOrNull(initClimberIntake) { safeInit { ClimberIntakeComponent(ClimberIntakeHardware()) } },
-
-                    initOrNull(initLimelight) { safeInit { LimelightHardware() } }
+                    initOrNull(initFlywheel) { safeInit { FlywheelComponent(FlywheelHardware()) } },
+                    initOrNull(initHood) { safeInit { HoodComponent(HoodHardware()) } },
+                    initOrNull(initLimelight) { safeInit { LimelightComponent(LimelightHardware()) } }
             )
         }
     }
