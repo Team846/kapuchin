@@ -4,7 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.revrobotics.CANSparkMax
-import edu.wpi.first.wpilibj.Talon
+import com.revrobotics.ControlType
 import info.kunalsheth.units.generated.*
 
 sealed class OffloadedOutput {
@@ -35,6 +35,15 @@ sealed class OffloadedOutput {
 
     fun writeTo(esc: CANSparkMax) {
         config.writeTo(esc)
+        safeties.writeTo(esc)
+        gains?.writeTo(esc)
+        val controlType = when (this) {
+            is PositionOutput -> ControlType.kPosition
+            is VelocityOutput -> ControlType.kVelocity
+            is PercentOutput -> ControlType.kDutyCycle
+            is CurrentOutput -> ControlType.kCurrent
+        }
+        esc.pidController.setReference(value, controlType)
     }
 }
 

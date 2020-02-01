@@ -1,6 +1,9 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMax.SoftLimitDirection.kForward
+import com.revrobotics.CANSparkMax.SoftLimitDirection.kReverse
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.util.concurrent.ConcurrentHashMap
@@ -12,6 +15,7 @@ data class OffloadedEscSafeties(
     companion object {
         val NoSafeties = OffloadedEscSafeties(0.Second, null, null)
         val talonCache = ConcurrentHashMap<TalonSRX, OffloadedEscSafeties>()
+        val sparkMaxCache = ConcurrentHashMap<CANSparkMax, OffloadedEscSafeties>()
     }
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
@@ -31,5 +35,26 @@ data class OffloadedEscSafeties(
             }
         }
         talonCache[esc] = this
+    }
+
+    fun writeTo(esc: CANSparkMax) {
+        val cached = sparkMaxCache[esc]
+        if (this != cached) cached.also {
+            println("Writing safeties to CANSparkMax ${esc.deviceId}")
+
+            if (it == null || it.min != min) {
+                +esc.enableSoftLimit(kReverse, min != null)
+                min?.toFloat()?.let { min ->
+                    +esc.setSoftLimit(kReverse, min)
+                }
+            }
+            if (it == null || it.max != max) {
+                +esc.enableSoftLimit(kForward, max != null)
+                max?.toFloat()?.let { max ->
+                    +esc.setSoftLimit(kForward, max)
+                }
+            }
+        }
+        sparkMaxCache[esc] = this
     }
 }
