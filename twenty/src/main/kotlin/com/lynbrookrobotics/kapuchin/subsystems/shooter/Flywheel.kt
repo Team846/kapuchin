@@ -30,7 +30,8 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val momentFactor by pref(1.4)
     val ballMass by pref(0.141748, Kilogram)
     val rollerRadius by pref(2, Inch)
-    val momentOfInertia by pref(1, PoundFootSquared)
+    val momentOfInertia by pref(1) // TODO
+    val targetHeight by pref(100, Inch) // TODO
 
     override val fallbackController: FlywheelComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)

@@ -18,19 +18,17 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     ): Pair<Velocity, AngularVelocity> {
         val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
 
-        val ballVelocity = run {
-            val dist = /*distanceToTarget(target)*/0.Foot // TODO
-            val deltaHeight = targetHeight - flywheel.height
 
-            val numerator = dist * dist * 1.EarthGravity
-            val denominator = (dist * tan(launchA) - deltaHeight) * cos(launchA) * cos(launchA)
+        val dist = 0.Foot // TODO
+        val deltaHeight = flywheel.targetHeight - flywheel.height
 
-            sqrt(0.5) * Velocity(sqrt((numerator / denominator).siValue))
-        }
+        val expression = ((dist * 1.EarthGravity) / (((dist * tan(launchA)) - deltaHeight) * cos(launchA) * cos(launchA))) * dist
+        val ballVelocity = Velocity(sqrt(expression.siValue / 2))
+
 
         val flywheelOmega = with(flywheel) {
-            (momentFactor * ballMass + ((2 * momentOfInertia) / (rollerRadius * rollerRadius))) * (ballVelocity * rollerRadius) / momentOfInertia
-        } * Radian
+            AngularVelocity(((momentFactor * ballMass + (2 * MomentOfInertia(momentOfInertia.toDouble()) / (rollerRadius * rollerRadius))) * ballVelocity * rollerRadius / MomentOfInertia(momentOfInertia.toDouble())).siValue)
+        }
 
         return ballVelocity to flywheelOmega
     }
