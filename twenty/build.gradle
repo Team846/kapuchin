@@ -10,12 +10,16 @@ dependencies {
     implementation project(":architecture:jvmfrc")
 
     implementation wpi.deps.wpilib()
+    nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
+    nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
+
     implementation wpi.deps.vendor.java()
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 }
 
-repositories.maven { url 'https://jitpack.io' }
+// uncommenting makes compilation not work, didn't test much -Andy
+//repositories.maven { url 'https://jitpack.io' }
 
 deploy {
     targets {
@@ -26,7 +30,7 @@ deploy {
     artifacts {
         frcJavaArtifact(project.name) {
             targets << "roborio"
-            jvmArgs << '-XX:+UseG1GC' << '-XX:MaxGCPauseMillis=75' << '-Xmx100M'
+            jvmArgs /*<< '-XX:+UseG1GC'*/ << '-XX:MaxGCPauseMillis=75' << '-Xmx100M' << '-verbose:gc'
 //          jvmArgs << '-verbose:class'
 //          jvmArgs << '-verbosegc'
 //          arguments << 'myCustomArgs'
