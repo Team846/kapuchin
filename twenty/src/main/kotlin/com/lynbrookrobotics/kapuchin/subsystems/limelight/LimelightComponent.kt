@@ -9,7 +9,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, EventLoop) {
+class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, LimelightOutput>(hardware, EventLoop) {
 
     private fun targetPosition(sample: LimelightReading) = sample.run {
         val aspect = thor / tvert
@@ -103,9 +103,11 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         ({ UomVector(x, y) })
     }
 
-    override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.ZoomOut }
+    override val fallbackController: LimelightComponent.(Time) -> LimelightOutput = { LimelightOutput(Pipeline.ZoomOut,0,0) }
 
-    override fun LimelightHardware.output(value: Pipeline) {
-        pipelineEntry.setNumber(value.number)
+    override fun LimelightHardware.output(value: LimelightOutput) {
+        pipelineEntry.setNumber(value.pipe?.number)
+        panEntryX.setNumber(value.panX)
+        panEntryY.setNumber(value.panY)
     }
 }

@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
 
@@ -24,21 +25,26 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 val angleToPixelsY = zoomOutResolution.y / zoomOutFov.y
                 val targetBoxBoundsY = (ty * angleToPixelsY) `±` (tvert / 2)
 
-                if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in insideBoxBoundsY) ZoomIn
-                else ZoomOut
+                if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in insideBoxBoundsY) LimelightOutput(ZoomIn,0,0)
+                else LimelightOutput(ZoomOut,0,0)
             } else if (currentPipeline == ZoomIn) {
                 val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
                 val angleToPixelsX = zoomInResolution.x / zoomInFov.x
-                val targetBoxBoundsX = (tx * angleToPixelsX) `±` (thor / 2)
+                val centerInPixX = tx * angleToPixelsX
+                val targetBoxBoundsX = centerInPixX `±` (thor / 2)
 
                 val angleToPixelsY = zoomInResolution.y / zoomInFov.y
-                val targetBoxBoundsY = (ty * angleToPixelsY) `±` (tvert / 2)
+                val centerInPixY = ty * angleToPixelsY
+                val targetBoxBoundsY = (centerInPixY) `±` (tvert / 2)
 
-                if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in insideBoxBoundsY) ZoomIn
-                else ZoomOut
-            } else currentPipeline
-        } ?: ZoomOut
+                if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in insideBoxBoundsY) {
+
+                    LimelightOutput(ZoomIn,centerInPixX.signum,centerInPixY.signum)
+                }
+                else LimelightOutput(ZoomOut,0,0)
+            } else LimelightOutput(currentPipeline,0,0)
+        } ?: LimelightOutput(ZoomOut, 0,0)
     }
 }

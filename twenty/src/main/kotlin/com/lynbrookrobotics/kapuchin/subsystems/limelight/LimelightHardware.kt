@@ -19,19 +19,22 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
 
     val table by hardw { NetworkTableInstance.getDefault().getTable("/limelight") }
     val pipelineEntry by hardw { table.getEntry("pipeline") }
+    val panEntryX by hardw {table.getEntry("panX")}
+    val panEntryY by hardw {table.getEntry("panY")}
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private infix fun <Q> Q.lstamp(withTime: Time) = TimeStamped(
             withTime - l("tl").milli(Second) - 11.milli(Second), this
     )
 
-    public val readings = sensor {
+    val readings = sensor {
         when {
             l("tv").roundToInt() == 1 -> LimelightReading(
                     l("tx").Degree, l("ty").Degree,
                     l("tx0").Pixel, l("ty0").Pixel,
                     l("thor").Pixel, l("tvert").Pixel,
-                    l("ta").Pixel // this is actually Pixels Squared
+                    l("ta").Pixel// this is actually Pixels Squared
+                    //l("panX"), l("panY")
             )
             else -> null
         } lstamp it
