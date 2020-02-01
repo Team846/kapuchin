@@ -85,7 +85,7 @@ private val keys = mutableSetOf<String>()
 private fun registerCallback(key: String, callback: () -> Unit) {
     blockingMutex(keys) {
         keys += key
-        impl.table.addEntryListener(key, { _, _, _, _, _ ->
+        impl.m_table.addEntryListener(key, { _, _, _, _, _ ->
             callback()
         }, EntryListenerFlags.kNew or EntryListenerFlags.kUpdate)
     }
@@ -99,7 +99,7 @@ private fun registerCallback(key: String, callback: () -> Unit) {
  * @see NetworkTable
  */
 @Deprecated(message = "Doesn't work for subtables", replaceWith = ReplaceWith("printKeys()"))
-fun trim(table: NetworkTable = impl.table) {
+fun trim(table: NetworkTable = impl.m_table) {
     //Gets rid of all unused keys in the current subTable
     table.keys.forEach {
         if (it !in keys) {
