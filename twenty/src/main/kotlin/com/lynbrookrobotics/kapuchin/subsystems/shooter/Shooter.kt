@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.Limelight.*
@@ -13,7 +14,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.sqrt
 
-class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, TwoSided<DutyCycle>>(hardware) {
+class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, OffloadedOutput>(hardware) {
 
     private val shooterHeight by pref(24, Inch)
     private val maximumAngle by pref(33, Degree) // Maximum entry angle
@@ -27,10 +28,10 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
     private val ballMass by pref(1, Kilogram)
     private val rollerInertia by pref(1, Each)
 
-    override val fallbackController: ShooterComponent.(Time) -> TwoSided<DutyCycle>
+    override val fallbackController: ShooterComponent.(Time) -> OffloadedOutput
         get() = { TwoSided(0.Percent, 0.Percent) }
 
-    override fun ShooterHardware.output(value: TwoSided<DutyCycle>) {
+    override fun ShooterHardware.output(value: OffloadedOutput) {
         if (ballLimitSwitch.get()) {
             leftFlywheelEsc.set(value.left.Each)
             rightFlywheelEsc.set(value.right.Each)

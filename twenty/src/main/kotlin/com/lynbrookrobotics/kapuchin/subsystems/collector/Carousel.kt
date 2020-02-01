@@ -29,7 +29,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     override val priority: Priority = Priority.Medium
     override val period: Time = 50.milli(Second)
     override val syncThreshold: Time = 20.milli(Second)
-    override val name: String = "StorageBelt"
+    override val name: String = "Carousel"
 
     /**
      * Detects the number of rotations the carousel has performed

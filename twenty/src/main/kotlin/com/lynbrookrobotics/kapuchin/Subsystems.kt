@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
@@ -30,7 +31,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val rumble: RumbleComponent,
 
                  val collectorRollers: CollectorRollersComponent?,
-                 val climber: ClimberComponent?,
+                 val climberWinch: ClimberWinchComponent?,
+                 val climberPivot: ClimberPivotComponent?,
+
                  val limelight: LimelightHardware?
 ) : Named by Named("Subsystems") {
 
@@ -81,7 +84,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         }
 
         private val initCollectorRollers by pref(true)
-        private val initClimber by pref(false)
+        private val initClimberWinch by pref(false)
+        private val initClimberIntake by pref(false)
         private val initLimelight by pref(true)
 
         var instance: Subsystems? = null
@@ -108,7 +112,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val rumbleAsync = async { RumbleComponent(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
 
                 val collectorRollersAsync = initAsync(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
-                val climberAsync = initAsync(initClimber) { ClimberComponent(ClimberHardware()) }
+                val climberWinchAsync = initAsync(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
+                val climberIntakeAsync = initAsync(initClimberIntake) { ClimberIntakeComponent(ClimberIntakeHardware()) }
                 val limelightAsync = initAsync(initLimelight) { LimelightHardware() }
 
                 instance = Subsystems(
@@ -120,7 +125,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         rumbleAsync.await(),
 
                         safeInit { collectorRollersAsync.await() },
-                        safeInit { climberAsync.await() },
+                        safeInit { climberWinchAsync.await() },
+                        safeInit { climberInitAsync.await() },
                         safeInit { limelightAsync.await() }
                 )
             }
@@ -146,7 +152,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     operator,
                     rumble,
                     initOrNull(initCollectorRollers) { safeInit { CollectorRollersComponent(CollectorRollersHardware()) } },
-                    initOrNull(initClimber) { safeInit { ClimberComponent(ClimberHardware()) } },
+                    initOrNull(initClimberWinch) { safeInit { ClimberWinchComponent(ClimberWinchHardware()) } },
+                    initOrNull(initClimberIntake) { safeInit { ClimberIntakeComponent(ClimberIntakeHardware()) } },
+
                     initOrNull(initLimelight) { safeInit { LimelightHardware() } }
             )
         }

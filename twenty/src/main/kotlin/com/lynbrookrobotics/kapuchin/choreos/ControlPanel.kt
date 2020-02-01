@@ -2,13 +2,12 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.climber.*
-import com.lynbrookrobotics.kapuchin.subsystems.climber.ClimberPivotState.*
+import com.lynbrookrobotics.kapuchin.subsystems.control_panel.ControlPanelPivotState.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
+suspend fun Subsystems.controlPanelTeleop() = startChoreo("Control Panel Teleop") {
 
 
     choreography {
@@ -18,12 +17,12 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
     }
 }
 
-suspend fun Subsystems.climb() = coroutineScope {
+suspend fun Subsystems.spin() = coroutineScope {
     launch {
-        climberPivot?.set(Deployed)
+        controlPanelPivot?.set(Up)
         delay(0.1.Second)
-        climberWinch?.spin()
+        controlPanelSpinner?.spin()
         freeze()
-        
+
     }
 }
