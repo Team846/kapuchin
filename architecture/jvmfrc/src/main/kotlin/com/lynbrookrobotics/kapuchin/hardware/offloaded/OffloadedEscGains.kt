@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.revrobotics.CANSparkMax
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.util.concurrent.ConcurrentHashMap
@@ -16,6 +17,7 @@ data class OffloadedEscGains(
     companion object {
         const val idx = 0
         val talonCache = ConcurrentHashMap<TalonSRX, OffloadedEscGains>()
+        val sparkMaxCache = ConcurrentHashMap<CANSparkMax, OffloadedEscGains>()
     }
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
@@ -41,5 +43,29 @@ data class OffloadedEscGains(
                 +esc.configMaxIntegralAccumulator(idx, maxIntegralAccumulator, timeoutMs)
         }
         talonCache[esc] = this
+    }
+
+    fun writeTo(esc: CANSparkMax) {
+        val gainsFromCache = sparkMaxCache[esc]
+        if (this != gainsFromCache) gainsFromCache.also { cache ->
+            println("Writing gains to CANSparkMax ${esc.deviceId}")
+
+            if (cache == null || cache.kP != kP) {
+                +esc.pidController.setP(kP, idx)
+            }
+            if (cache == null || cache.kI != kI) {
+                +esc.pidController.setI(kI, idx)
+            }
+            if (cache == null || cache.kD != kD) {
+                +esc.pidController.setD(kD, idx)
+            }
+            if (cache == null || cache.kF != kF) {
+                +esc.pidController.setFF(kF, idx)
+            }
+            if (cache == null || cache.maxIntegralAccumulator != maxIntegralAccumulator) {
+                +esc.pidController.setIMaxAccum(maxIntegralAccumulator, idx)
+            }
+        }
+        sparkMaxCache[esc] = this
     }
 }
