@@ -38,8 +38,8 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     fun targetEntryAngle(hood: HoodComponent, hoodState: HoodState, ballVelocity: Velocity): Angle {
         val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
         val dist = /*distanceToTarget(target)*/0.Foot // TODO
-        return 0.Degree
-//        return Angle(atan((-((dist * 1.EarthGravity) / (ballVelocity * cos(launchA) * cos(launchA))) + tan(launchA)).siValue))
+        val slope = ((-1 * dist * 1.EarthGravity) / (ballVelocity * ballVelocity * cos(launchA) * cos(launchA))) + tan(launchA)
+        return atan(slope)
     }
 
     fun shotState(
