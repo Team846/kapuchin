@@ -28,14 +28,14 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
             val tSkew = targetPosition(sample).bearing
             val offsetAngle = 90.Degree - tSkew
 
-            val innerGoal = InnerGoal(Position(
+            val innerGoal = DetectedTarget(Position(
                     innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
                     innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                     tSkew
             ),outerGoalPos)
             if (tSkew > skewTolerance)
             {
-                OuterGoal(null,targetPosition(sample))
+                DetectedTarget(null,targetPosition(sample))
             }
             else{
                 innerGoal
@@ -44,14 +44,14 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         else {
             val offsetAngle = 90.Degree - skew
 
-            val innerGoal = InnerGoal(Position(
+            val innerGoal = DetectedTarget(Position(
                     innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
                     innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                     skew
             ), outerGoalPos)
             if (skew > skewTolerance)
             {
-                OuterGoal(null,targetPosition(sample))
+                DetectedTarget(null,targetPosition(sample))
             }
             else{
                 innerGoal
