@@ -1,90 +1,54 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.limelight.DetectedTarget.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.timing.*
+import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.roundToInt
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, EventLoop) {
+class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponent>() {
+    override val name = "Limelight"
+    override val priority = Priority.Lowest
+    override val period = 30.milli(Second)
+    override val syncThreshold = 4.milli(Second)
 
-    private fun targetPosition(sample: LimelightReading) = sample.run {
-        val aspect = thor / tvert
+    val table by hardw { NetworkTableInstance.getDefault().getTable("/limelight") }
+    val pipelineEntry by hardw { table.getEntry("pipeline") }
 
-        val skew = acos(aspect / aspect0 minMag 1.Each)
-        val distance = (targetHeight - mounting.z) / tan(mountingIncline + ty)
-        val x = tan(tx) * distance
+    private fun l(key: String) = table.getEntry(key).getDouble(0.0)
+    private infix fun <Q> Q.lstamp(withTime: Time) = TimeStamped(
+            withTime - l("tl").milli(Second) - 11.milli(Second), this
+    )
 
-        Position(x, distance, skew)
+    val readings = sensor {
+        when {
+            l("tv").roundToInt() == 1 -> LimelightReading(
+                    l("tx").Degree, l("ty").Degree,
+                    l("tx0").Pixel, l("ty0").Pixel,
+                    l("thor").Pixel, l("tvert").Pixel,
+                    l("ta").Pixel// this is actually Pixels Squared
+                    //l("panX"), l("panY")
+            )
+            else -> null
+        } lstamp it
     }
 
-    private fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
-        val outerGoalPos = targetPosition(sample)
-        val skew = skew
-        val offsetAngle = 90.Degree - skew
+    val pipeline = sensor {
+        val getpipe = l("getpipe").roundToInt()
+        Pipeline.values().firstOrNull() { getpipe == it.number } lstamp it
+    }
+            .with(graph("pipeline", Each)) { it?.number?.Each ?: -1.Each }
 
-        val innerGoal = DetectedTarget(Position(
-                innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
-                innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
-                skew
-        ), outerGoalPos)
-        if (skew > skewTolerance) {
-            return DetectedTarget(null, targetPosition(sample))
-        } else {
-            return innerGoal
+    init {
+        uiBaselineTicker.runOnTick { time ->
+            setOf(readings, pipeline).forEach {
+                it.optimizedRead(time, .5.Second)
+            }
         }
-
-    }
-
-    private val skewTolerance by pref(1, Degree)
-    private val innerGoalOffset by pref(29.25, Inch)
-    private val targetHeight by pref(107, Inch)
-    private val aspect0 by pref {
-        val thor by pref(226)
-        val tvert by pref(94)
-        ({ thor / tvert.toDouble() })
-    }
-
-    private val mountingIncline by pref(38, Degree)
-    private val mounting by pref {
-        val x by pref(0, Inch)
-        val y by pref(0, Inch)
-        val z by pref(24, Inch)
-        ({ UomVector(x, y, z) })
-    }
-
-    val zoomOutSafetyZone by pref(40, Pixel)
-    val zoomInSafetyZone by pref(10, Pixel)
-    val zoomMultiplier by pref(2)
-
-    val zoomInResolution by pref {
-        val x by pref(320, Pixel)
-        val y by pref(240, Pixel)
-        ({ UomVector(x, y) })
-    }
-    val zoomInFov by pref {
-        val x by pref(28, Degree)
-        val y by pref(20.5, Degree)
-        ({ UomVector(x, y) })
-    }
-
-    val zoomOutResolution by pref {
-        val x by pref(960, Pixel)
-        val y by pref(720, Pixel)
-        ({ UomVector(x, y) })
-    }
-    val zoomOutFov by pref {
-        val x by pref(56, Degree)
-        val y by pref(41, Degree)
-        ({ UomVector(x, y) })
-    }
-
-    override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.ZoomOut }
-
-    override fun LimelightHardware.output(value: Pipeline) {
-        pipelineEntry.setNumber(value.number)
     }
 }
