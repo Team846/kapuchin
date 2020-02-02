@@ -14,18 +14,20 @@ import java.io.File
 
 fun target(current: Waypt, target: Waypt) = atan2(target.x - current.x, target.y - current.y)
 
-suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = startChoreo("Journal") {
+suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = startChoreo("Journal") {
 
     val pos by dt.position.readEagerly(2.milli(Second)).withoutStamps
     val log = File("/tmp/journal.tsv").printWriter().also {
         it.println("x\ty")
         it.println("0.0\t0.0")
+        it.flush()
     }
 
     val startingLoc = pos.vector
     val startingRot = RotationMatrix(-pos.bearing)
 
     var last = pos
+    val startTime = currentTime
 
     choreography {
         log.use {
@@ -34,6 +36,7 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = start
 
                 if (distance(pos.vector, last.vector) > ptDistance) {
                     it.println("${x.Foot}\t${y.Foot}")
+                    it.flush()
                     last = pos
                 }
 
@@ -43,6 +46,7 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = start
             val (x, y) = startingRot.rotate(pos.vector - startingLoc)
             it.println("${x.Foot}\t${y.Foot}")
         }
+        log.close()
     }
 }
 

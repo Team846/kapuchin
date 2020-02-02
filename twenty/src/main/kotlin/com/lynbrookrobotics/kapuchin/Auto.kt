@@ -76,12 +76,13 @@ suspend fun Subsystems.figureEight() = startChoreo("figure eight") {
 suspend fun Subsystems.followJournal() = startChoreo("Follow journal") {
     val path = loadTempPath()
 
-    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, 3.FootPerSecondSquared)
+    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, drivetrain.maxAcceleration)
 
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 20.Inch, 6.Inch)
+        drivetrain.followTrajectory(trajectory, 5.Inch, 3.Inch)
+        freeze()
     }
 }
 //suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
