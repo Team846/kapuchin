@@ -1,12 +1,11 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.revrobotics.CANSparkMax
-import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -38,5 +37,5 @@ class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRol
     )
 
     private val rollersEscId by pref(0)
-    val rollersEsc by hardw { CANSparkMax(rollersEscId, kBrushless) }
+    val rollersEsc by hardw { TalonSRX(rollersEscId) }
 }
