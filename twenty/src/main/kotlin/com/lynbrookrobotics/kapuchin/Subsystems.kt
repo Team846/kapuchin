@@ -140,7 +140,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val controlPanelPivotAsync = initAsync(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
                 val controlPanelSpinnerAsync = initAsync(initControlPanelSpinner) { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware()) }
                 val feederRollerAsync = initAsync(initFeederRoller) { FeederRollerComponent(FeederRollerHardware()) }
-                val shooterAsync = initAsync(initShooter) { FeederRollerComponent(FeederRollerHardware()) }
+                val shooterAsync = initAsync(initShooter) { ShooterComponent(ShooterHardware()) }
                 val turretAsync = initAsync(initTurret) { TurretComponent(TurretHardware()) }
                 val limelightAsync = initAsync(initLimelight) { LimelightComponent(LimelightHardware()) }
 

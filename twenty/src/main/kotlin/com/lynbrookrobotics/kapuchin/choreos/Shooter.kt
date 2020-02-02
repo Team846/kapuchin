@@ -25,27 +25,30 @@ suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
 suspend fun Subsystems.shoot() = supervisorScope() {
     try {
         launch { feederRoller?.spin(PercentOutput(feederRoller.hardware.escConfig, 30.Percent)) }
-        launch {
-            shooter?.set(PercentOutput(shooter.hardware.escConfig, 30.Percent))
+        launch { shooter?.set(PercentOutput(shooter.hardware.escConfig, 30.Percent)) }
         } finally {
             withContext(NonCancellable) {
             }
         }
     }
-}
+
 suspend fun Subsystems.turretTurnRight() = supervisorScope() {
     try {
-        launch { turret?.spin(PercentOutput(shooter.hardware.escConfig, 30.Percent)) }
+        launch { turret?.spin(PercentOutput(turret.hardware.escConfig, 30.Percent)) }
 
     } finally {
-        withContext(NonCancellable)
+        withContext(NonCancellable){
+
+        }
     }
 }
 suspend fun Subsystems.turretTurnLeft() = supervisorScope() {
     try {
-        launch {  turret?.spin(PercentOutput(shooter.hardware.escConfig, -Percent)) }
+        launch { turret?.spin(PercentOutput(turret.hardware.escConfig, 30.Percent)) }
     } finally {
-        withContext(NonCancellable)
+        withContext(NonCancellable){
+
+        }
     }
 }
 

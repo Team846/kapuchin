@@ -23,7 +23,6 @@ suspend fun Subsystems.spin() = coroutineScope {
     try {
         launch {
             controlPanelPivot?.set(ControlPanelPivotState.Up)
-            delay(0.1.Second)
 
 
         }
