@@ -9,7 +9,7 @@ suspend fun FeederRollerComponent.spin(target: OffloadedOutput) = startRoutine("
     controller { target }
 }
 
-suspend fun ShooterComponent.set(state: TwoSided<DutyCycle>) = startRoutine("Set") {
+suspend fun ShooterComponent.set(state: OffloadedOutput) = startRoutine("Set") {
     controller { state }
 }
 

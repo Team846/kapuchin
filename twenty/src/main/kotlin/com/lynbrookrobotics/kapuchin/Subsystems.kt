@@ -9,8 +9,10 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.control_panel.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -31,10 +33,14 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val rumble: RumbleComponent,
 
                  val collectorRollers: CollectorRollersComponent?,
+                 val intakePivot: IntakePivotComponent?,
                  val climberWinch: ClimberWinchComponent?,
                  val climberPivot: ClimberPivotComponent?,
+                 val carousel: CarouselComponent?,
+                 val controlPanelPivot: ControlPanelPivotComponent?,
+                 val controlPanelSpinner: ControlPanelSpinnerComponent?,
 
-                 val limelight: LimelightHardware?
+                 val limelight: LimelightComponent?
 ) : Named by Named("Subsystems") {
 
     suspend fun teleop() {
@@ -43,7 +49,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         runAll(
                 { drivetrainTeleop() },
                 { climberTeleop() },
-                { rumbleTeleop() }
+                { intakeTeleop() },
+                { controlPanelTeleop() },
+                { rumbleTeleop() },
+                { limelight?.autoZoom() }
         )
         System.gc()
     }
@@ -84,8 +93,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         }
 
         private val initCollectorRollers by pref(true)
-        private val initClimberWinch by pref(false)
-        private val initClimberIntake by pref(false)
+        private val initIntakePivot by pref(true)
+        private val initClimberWinch by pref(true)
+        private val initClimberPivot by pref(true)
+        private val initCarousel by pref(true)
+        private val initControlPanelPivot by pref(true)
+        private val initControlPanelSpinner by pref(true)
         private val initLimelight by pref(true)
 
         var instance: Subsystems? = null
@@ -113,8 +126,13 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
                 val collectorRollersAsync = initAsync(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
                 val climberWinchAsync = initAsync(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
-                val climberIntakeAsync = initAsync(initClimberIntake) { ClimberIntakeComponent(ClimberIntakeHardware()) }
-                val limelightAsync = initAsync(initLimelight) { LimelightHardware() }
+                val climberPivotAsync = initAsync(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
+                val intakePivotAsync = initAsync(initIntakePivot) { IntakePivotComponent(IntakePivotHardware()) }
+                val carouselAsync = initAsync(initCarousel) { CarouselComponent(CarouselHardware()) }
+                val controlPanelPivotAsync = initAsync(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
+                val controlPanelSpinnerAsync = initAsync(initControlPanelSpinner) { ControlPanelSpinnerComponent(ControlPanelSpinnerHarware()) }
+                val limelightAsync = initAsync(initLimelight) { LimelightComponent(LimelightHardware()) }
+
 
                 instance = Subsystems(
                         drivetrainAsync.await(),
@@ -125,8 +143,13 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         rumbleAsync.await(),
 
                         safeInit { collectorRollersAsync.await() },
+                        safeInit { intakePivotAsync.await() },
                         safeInit { climberWinchAsync.await() },
-                        safeInit { climberInitAsync.await() },
+                        safeInit { climberPivotAsync.await() },
+                        safeInit { carouselAsync.await() },
+                        safeInit { controlPanelPivotAsync.await() },
+                        safeInit { controlPanelSpinnerAsync.await() },
+
                         safeInit { limelightAsync.await() }
                 )
             }
@@ -152,10 +175,13 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     operator,
                     rumble,
                     initOrNull(initCollectorRollers) { safeInit { CollectorRollersComponent(CollectorRollersHardware()) } },
+                    initOrNull(initIntakePivot) { safeInit { IntakePivotComponent(IntakePivotHardware()) } },
                     initOrNull(initClimberWinch) { safeInit { ClimberWinchComponent(ClimberWinchHardware()) } },
-                    initOrNull(initClimberIntake) { safeInit { ClimberIntakeComponent(ClimberIntakeHardware()) } },
-
-                    initOrNull(initLimelight) { safeInit { LimelightHardware() } }
+                    initOrNull(initClimberPivot) { safeInit { ClimberPivotComponent(ClimberPivotHardware()) } },
+                    initOrNull(initCarousel) { safeInit { CarouselComponent(CarouselHardware()) } },
+                    initOrNull(initControlPanelPivot) { safeInit { ControlPanelPivotComponent(ControlPanelPivotHardware()) } },
+                    initOrNull(initControlPanelSpinner) { safeInit { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware()) } },
+                    initOrNull(initLimelight) { safeInit { LimelightComponent(LimelightHardware()) } }
             )
         }
     }

@@ -5,8 +5,9 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.Limelight.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import edu.wpi.first.wpilibj.DigitalInput
@@ -28,13 +29,13 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
     private val ballMass by pref(1, Kilogram)
     private val rollerInertia by pref(1, Each)
 
-    override val fallbackController: ShooterComponent.(Time) -> OffloadedOutput
-        get() = { TwoSided(0.Percent, 0.Percent) }
+    override val fallbackController: ShooterComponent.(Time) -> OffloadedOutput = {
+        PercentOutput(hardware.escConfig, 0.Percent)
+    }
 
     override fun ShooterHardware.output(value: OffloadedOutput) {
         if (ballLimitSwitch.get()) {
-            leftFlywheelEsc.set(value.left.Each)
-            rightFlywheelEsc.set(value.right.Each)
+            value.writeTo(masterFlywheelEsc)
         }
     }
 
@@ -80,14 +81,12 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
 }
 
 class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
-    override val period: Time
-        get() = 50.Millisecond
-    override val syncThreshold: Time
-        get() = 20.Millisecond
-    override val priority: Priority
-        get() = Priority.High
-    override val name: String
-        get() = "Shooter"
+    override val period = 50.Millisecond
+    override val syncThreshold = 20.Millisecond
+    override val priority = High
+    override val name = "Shooter"
+
+    val escConfig by escConfigPref()
 
     private val leftFlywheelId by pref(10)
     private val rightFlywheelId by pref(11)
@@ -99,6 +98,11 @@ class ShooterHardware : SubsystemHardware<ShooterHardware, ShooterComponent>() {
     /**
      * This motor is a NEO 550 controlling the rotation of the shooter's wheels
      */
-    val leftFlywheelEsc by hardw { CANSparkMax(leftFlywheelId, kBrushless) }
-    val rightFlywheelEsc by hardw { CANSparkMax(rightFlywheelId, kBrushless) }
+    val masterFlywheelEsc by hardw { CANSparkMax(leftFlywheelId, kBrushless) }.configure {
+        setupMaster(it, escConfig)
+    }
+    val slaveFlywheelEsc by hardw { CANSparkMax(rightFlywheelId, kBrushless) }.configure {
+        generalSetup(it, escConfig)
+        it.follow(masterFlywheelEsc)
+     }
 }
