@@ -11,8 +11,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<CollectorRollersComponent, CollectorRollersHardware, OffloadedOutput>(hardware) {
-    val cargoCollectSpeed by pref(11, Volt)
-    val cargoReleaseSpeed by pref(-6, Volt)
+    val collectSpeed by pref(50, Percent)
 
     override val fallbackController: CollectorRollersComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)

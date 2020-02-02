@@ -16,8 +16,11 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
         visionTarget?.run {
             if (currentPipeline == ZoomOut) {
                 val insideBoxResolution = zoomOutResolution / zoomMultiplier
+
                 val insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomOutSafetyZone)
-                val insideBoxBoundsY = `±`(insideBoxResolution.y / 2 - zoomOutSafetyZone)
+                val highInsideBoxBoundsY = 0.Pixel..(insideBoxResolution.y - zoomOutSafetyZone)
+                val midInsideBoxBoundsY = `±`(insideBoxResolution.y / 2 - zoomOutSafetyZone)
+                val lowInsideBoxBoundsY = 0.Pixel..-(insideBoxResolution.y - zoomOutSafetyZone)
 
                 val angleToPixelsX = zoomOutResolution.x / zoomOutFov.x
                 val targetBoxBoundsX = (tx * angleToPixelsX) `±` (thor / 2)
@@ -25,9 +28,11 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 val angleToPixelsY = zoomOutResolution.y / zoomOutFov.y
                 val targetBoxBoundsY = (ty * angleToPixelsY) `±` (tvert / 2)
 
-                if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in insideBoxBoundsY) LimelightOutput(ZoomIn,0,0)
-                else LimelightOutput(ZoomOut,0,0)
-            } else if (currentPipeline == ZoomIn) {
+                if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in midInsideBoxBoundsY) ZoomInPanMid
+                else if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in highInsideBoxBoundsY) ZoomInPanHigh
+                else if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in lowInsideBoxBoundsY) ZoomInPanLow
+                else ZoomOut
+            } else if (currentPipeline == ZoomInPanMid) {
                 val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
@@ -41,10 +46,9 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
 
                 if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in insideBoxBoundsY) {
 
-                    LimelightOutput(ZoomIn,centerInPixX.signum,centerInPixY.signum)
-                }
-                else LimelightOutput(ZoomOut,0,0)
-            } else LimelightOutput(currentPipeline,0,0)
-        } ?: LimelightOutput(ZoomOut, 0,0)
+                    ZoomInPanMid
+                } else ZoomOut
+            } else ZoomOut
+        } ?: ZoomOut
     }
 }

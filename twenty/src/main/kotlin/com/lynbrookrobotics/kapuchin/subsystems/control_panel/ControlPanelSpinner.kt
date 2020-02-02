@@ -49,4 +49,6 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
 
     private val rightColorSensorAddress by pref(7)
     val rightColorSensor = sensor(RevColorSensor(I2C.Port.kOnboard, rightColorSensorAddress), readColorSensor)
+
+
 }

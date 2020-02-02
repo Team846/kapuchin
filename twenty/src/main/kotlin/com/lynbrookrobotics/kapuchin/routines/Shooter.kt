@@ -11,8 +11,13 @@ suspend fun HoodComponent.set(target: HoodState) = startRoutine("Set") {
     controller { target }
 }
 
+<<<<<<< HEAD
 suspend fun FlywheelComponent.set(target: Velocity) = startRoutine("Set") {
     controller { VelocityOutput(target) }
+=======
+suspend fun ShooterComponent.set(state: OffloadedOutput) = startRoutine("Set") {
+    controller { state }
+>>>>>>> teleop2020
 }
 
 suspend fun TurretComponent.set(target: Position) = startRoutine("Set") {

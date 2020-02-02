@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems.climber
 
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -22,14 +21,18 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
     private val winchMasterEscId by pref(14)
     private val winchSlaveEscId by pref(15)
     val winchMasterEsc by hardw { CANSparkMax(winchMasterEscId, kBrushless) }.configure {
+        setupMaster(it, escConfig)
 
     }
-    val winchSlaveEsc by hardw { CANSparkMax(winchSlaveEscId, kBrushless) }
+    val winchSlaveEsc by hardw { CANSparkMax(winchSlaveEscId, kBrushless) }.configure {
+        generalSetup(it, escConfig)
+        it.follow(winchMasterEsc)
+    }
 }
 
 class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberWinchComponent, ClimberWinchHardware, OffloadedOutput>(hardware) {
     override val fallbackController: ClimberWinchComponent.(Time) -> OffloadedOutput = {
-        PercentOutput(hardware.escConfig,0.Percent)
+        PercentOutput(hardware.escConfig, 0.Percent)
 
     }
 

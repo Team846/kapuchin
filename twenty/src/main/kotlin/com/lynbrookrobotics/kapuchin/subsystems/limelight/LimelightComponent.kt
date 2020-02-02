@@ -6,7 +6,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, LimelightOutput>(hardware, EventLoop) {
+class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, EventLoop) {
 
     private fun targetPosition(sample: LimelightReading) = sample.run {
         val aspect = thor / tvert
@@ -18,9 +18,15 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         Position(x, distance, skew)
     }
 
+<<<<<<< HEAD
     fun goalPosition(sample: LimelightReading, skew: Angle? = null): DetectedTarget {
         val outerGoalPos = targetPosition(sample)
         val skew = skew ?: targetPosition(sample).bearing
+=======
+    private fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
+        val outerGoalPos = targetPosition(sample)
+        val skew = skew
+>>>>>>> teleop2020
         val offsetAngle = 90.Degree - skew
 
         val innerGoal = DetectedTarget(Position(
@@ -28,10 +34,17 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
                 innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                 skew
         ), outerGoalPos)
+<<<<<<< HEAD
         return if (skew > skewTolerance) {
             DetectedTarget(null, targetPosition(sample))
         } else {
             innerGoal
+=======
+        if (skew > skewTolerance) {
+            return DetectedTarget(null, targetPosition(sample))
+        } else {
+            return innerGoal
+>>>>>>> teleop2020
         }
     }
 
@@ -78,11 +91,13 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         ({ UomVector(x, y) })
     }
 
+<<<<<<< HEAD
     override val fallbackController: LimelightComponent.(Time) -> LimelightOutput = { LimelightOutput(Pipeline.ZoomOut, 0, 0) }
+=======
+    override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.ZoomOut }
+>>>>>>> teleop2020
 
-    override fun LimelightHardware.output(value: LimelightOutput) {
-        pipelineEntry.setNumber(value.pipe?.number)
-        panEntryX.setNumber(value.panX)
-        panEntryY.setNumber(value.panY)
+    override fun LimelightHardware.output(value: Pipeline) {
+        pipelineEntry.setNumber(value.number)
     }
 }

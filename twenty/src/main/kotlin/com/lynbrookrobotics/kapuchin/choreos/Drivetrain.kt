@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
 
-    val autoAlign by driver.autoAlign.readEagerly().withoutStamps
+//    val autoAlign by driver.autoAlign.readEagerly().withoutStamps
 
     choreography {
         try {

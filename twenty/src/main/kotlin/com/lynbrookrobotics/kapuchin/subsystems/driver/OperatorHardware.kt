@@ -29,7 +29,13 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val rt get() = xbox.getTriggerAxis(kRight) > triggerPressure.Each
     private val lb get() = xbox.getBumper(kLeft)
     private val rb get() = xbox.getBumper(kRight)
-
     private val start get() = xbox.startButton
     private val back get() = xbox.backButton
+
+    val intakeUp = s { xButton && lt }
+    val intakeDown = s { xButton && rt }
+    val collect = s { yButton }
+    val shoot = s { xButton }
+    val turretTurnRight = s { xButton && lt }
+    val turretTurnLeft = s { xButton && rt }
 }
