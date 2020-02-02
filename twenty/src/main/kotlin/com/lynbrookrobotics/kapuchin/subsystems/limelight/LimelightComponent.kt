@@ -9,7 +9,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, LimelightOutput>(hardware, EventLoop) {
+class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, EventLoop) {
 
     private fun targetPosition(sample: LimelightReading) = sample.run {
         val aspect = thor / tvert
@@ -23,25 +23,7 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
     private fun innerGoalPos(sample: LimelightReading, skew: Angle?)
     {
         val outerGoalPos = targetPosition(sample)
-        if(skew == null)
-        {
-            val tSkew = targetPosition(sample).bearing
-            val offsetAngle = 90.Degree - tSkew
-
-            val innerGoal = DetectedTarget(Position(
-                    innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
-                    innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
-                    tSkew
-            ),outerGoalPos)
-            if (tSkew > skewTolerance)
-            {
-                DetectedTarget(null,targetPosition(sample))
-            }
-            else{
-                innerGoal
-            }
-        }
-        else {
+        val skew = skew ?: tSkew
             val offsetAngle = 90.Degree - skew
 
             val innerGoal = DetectedTarget(Position(
@@ -56,7 +38,6 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
             else{
                 innerGoal
             }
-        }
 
     }
 
@@ -103,11 +84,9 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         ({ UomVector(x, y) })
     }
 
-    override val fallbackController: LimelightComponent.(Time) -> LimelightOutput = { LimelightOutput(Pipeline.ZoomOut,0,0) }
+    override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.ZoomOut }
 
-    override fun LimelightHardware.output(value: LimelightOutput) {
-        pipelineEntry.setNumber(value.pipe?.number)
-        panEntryX.setNumber(value.panX)
-        panEntryY.setNumber(value.panY)
+    override fun LimelightHardware.output(value: Pipeline) {
+        pipelineEntry.setNumber(value.number)
     }
 }

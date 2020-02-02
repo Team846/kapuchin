@@ -19,8 +19,6 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
 
     val table by hardw { NetworkTableInstance.getDefault().getTable("/limelight") }
     val pipelineEntry by hardw { table.getEntry("pipeline") }
-    val panEntryX by hardw {table.getEntry("panX")}
-    val panEntryY by hardw {table.getEntry("panY")}
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private infix fun <Q> Q.lstamp(withTime: Time) = TimeStamped(
