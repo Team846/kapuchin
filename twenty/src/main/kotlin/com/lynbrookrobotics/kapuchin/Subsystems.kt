@@ -8,12 +8,13 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.*
-import com.lynbrookrobotics.kapuchin.subsystems.control_panel.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.*
+import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.storage.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -33,7 +34,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val operator: OperatorHardware,
                  val rumble: RumbleComponent,
 
-                 val collectorRollers: CollectorRollersComponent?,
+                 val intakeRollers: IntakeRollersComponent?,
                  val intakePivot: IntakePivotComponent?,
                  val climberWinch: ClimberWinchComponent?,
                  val climberPivot: ClimberPivotComponent?,
@@ -97,7 +98,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             }
         }
 
-        private val initCollectorRollers by pref(true)
+        private val initIntakeRollers by pref(true)
         private val initIntakePivot by pref(true)
         private val initClimberWinch by pref(true)
         private val initClimberPivot by pref(true)
@@ -132,7 +133,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val operatorAsync = async { OperatorHardware() }
                 val rumbleAsync = async { RumbleComponent(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
 
-                val collectorRollersAsync = initAsync(initCollectorRollers) { CollectorRollersComponent(CollectorRollersHardware()) }
+                val intakeRollersAsync = initAsync(initIntakeRollers) { IntakeRollersComponent(IntakeRollersHardware()) }
                 val climberWinchAsync = initAsync(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
                 val climberPivotAsync = initAsync(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
                 val intakePivotAsync = initAsync(initIntakePivot) { IntakePivotComponent(IntakePivotHardware()) }
@@ -153,7 +154,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         operatorAsync.await(),
                         rumbleAsync.await(),
 
-                        safeInit { collectorRollersAsync.await() },
+                        safeInit { intakeRollersAsync.await() },
                         safeInit { intakePivotAsync.await() },
                         safeInit { climberWinchAsync.await() },
                         safeInit { climberPivotAsync.await() },
@@ -188,7 +189,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     driver,
                     operator,
                     rumble,
-                    initOrNull(initCollectorRollers) { safeInit { CollectorRollersComponent(CollectorRollersHardware()) } },
+                    initOrNull(initIntakeRollers) { safeInit { IntakeRollersComponent(IntakeRollersHardware()) } },
                     initOrNull(initIntakePivot) { safeInit { IntakePivotComponent(IntakePivotHardware()) } },
                     initOrNull(initClimberWinch) { safeInit { ClimberWinchComponent(ClimberWinchHardware()) } },
                     initOrNull(initClimberPivot) { safeInit { ClimberPivotComponent(ClimberPivotHardware()) } },

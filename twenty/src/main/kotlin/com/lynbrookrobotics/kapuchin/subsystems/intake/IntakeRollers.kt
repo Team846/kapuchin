@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.collector
+package com.lynbrookrobotics.kapuchin.subsystems.intake
 
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -10,23 +10,23 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class CollectorRollersComponent(hardware: CollectorRollersHardware) : Component<CollectorRollersComponent, CollectorRollersHardware, OffloadedOutput>(hardware) {
+class IntakeRollersComponent(hardware: IntakeRollersHardware) : Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware) {
     val collectSpeed by pref(50, Percent)
 
-    override val fallbackController: CollectorRollersComponent.(Time) -> OffloadedOutput = {
+    override val fallbackController: IntakeRollersComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
     }
 
-    override fun CollectorRollersHardware.output(value: OffloadedOutput) {
+    override fun IntakeRollersHardware.output(value: OffloadedOutput) {
         value.writeTo(rollersEsc)
     }
 }
 
-class CollectorRollersHardware : SubsystemHardware<CollectorRollersHardware, CollectorRollersComponent>() {
+class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRollersComponent>() {
     override val priority: Priority = Priority.Low
     override val period: Time = 50.milli(Second)
     override val syncThreshold: Time = 20.milli(Second)
-    override val name: String = "Collector Rollers"
+    override val name: String = "Intake Rollers"
 
     private val invertRollers by pref(false)
 
