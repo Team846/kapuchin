@@ -103,7 +103,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
     class EscOdometry(val conversions: DrivetrainConversions) : Named by Named("ESC Odometry", conversions) {
         private var noTicksL = true
         private var noTicksR = true
-        val matrixTracking = RotationMatrixTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree), conversions.matrixCache)
+        val tracking = SimpleVectorTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree))
 
         private var lastL = 0
         private var lastR = 0
@@ -116,7 +116,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
                 "Received first right tick at $currentTime"
             }.also { noTicksR = false }
 
-            matrixTracking(
+            tracking(
                     toLeftPosition(
                             (totalEscTicksL - lastL) / nativeEncoderCountMultiplier
                     ),

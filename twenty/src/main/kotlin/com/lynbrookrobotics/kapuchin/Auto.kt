@@ -32,8 +32,8 @@ fun loadTempPath(): Path =
 
 
 suspend fun Subsystems.straightLine() = startChoreo("Straight line") {
-    val path = nSect(Waypt(0.Foot, 0.Foot), Waypt(0.Foot, 8.Foot), 3.Inch)
-    val trajectory = pathToTrajectory(path, 6.Foot / Second, 1.Radian / Second, 3.FootPerSecondSquared)
+    val path = nSect(Waypt(0.Foot, 0.Foot), Waypt(0.Foot, 16.Foot), 3.Inch)
+    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, 6.FootPerSecondSquared)
 
     System.gc()
 
@@ -48,12 +48,12 @@ suspend fun Subsystems.circle() = startChoreo("Circle") {
             .map { it / 50.0 }
             .map { Waypt((4 * cos(PI * it) - 4).Foot, (4 * sin(PI * it)).Foot) }
 
-    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, 3.FootPerSecondSquared)
+    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, 6.FootPerSecondSquared)
 
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 6.Inch, 6.Inch)
+        drivetrain.followTrajectory(trajectory, 6.Inch, 1.Inch)
         freeze()
     }
 }

@@ -102,7 +102,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
                 leftMasterEsc.getSelectedSensorPosition(idx),
                 rightMasterEsc.getSelectedSensorPosition(idx)
         )
-        conversions.escOdometry.matrixTracking.run { Position(x, y, bearing) } stampWith it
+        conversions.escOdometry.tracking.run { Position(x, y, bearing) } stampWith it
     }
             .with(graph("X Location", Foot, escNamed)) { it.x }
             .with(graph("Y Location", Foot, escNamed)) { it.y }

@@ -6,18 +6,26 @@ import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-/**
- * Private representation of a segment while generating trajectories
- */
 private data class Segment(
         val waypt: Waypt,
         var velocity: Velocity = 0.Foot / Second,
         var omega: AngularVelocity = 0.Radian / Second
 )
 
-typealias Waypt = UomVector<Length> // x and y location
-typealias Path = List<Waypt> // a list of points for a robot to follow
-typealias Trajectory = List<TimeStamped<Waypt>> // a path with timestamps at each point
+/**
+ * An x and y location.
+ */
+typealias Waypt = UomVector<Length>
+
+/**
+ *  A list of [Waypt]s for a robot to follow, with no information about speed/omega/timestmaps.
+ */
+typealias Path = List<Waypt>
+
+/**
+ * a [Path] with timestamps at each [Waypt].
+ */
+typealias Trajectory = List<TimeStamped<Waypt>>
 
 /**
  * Generates a [Trajectory] given a [Path].
@@ -35,7 +43,7 @@ typealias Trajectory = List<TimeStamped<Waypt>> // a path with timestamps at eac
  * @param maxOmega the maximum angular velocity of the robot.
  * @param maxAcceleration the maximum linear acceleration of the robot.
  *
- * @return a trajectory consisting of a list of segments.
+ * @return a trajectory containing [Waypt]s with timestamps.
  */
 fun pathToTrajectory(
         path: Path,
@@ -64,18 +72,26 @@ fun pathToTrajectory(
 
     // (3)
 
-    val mergedTrajectory = mutableListOf<TimeStamped<Waypt>>()
+    val mergedTrajectory = mutableListOf(path.first() stampWith 0.Second)
     var totalT = 0.Second
-    for (i in 1 until path.size - 1) {
+    for (i in 1 until path.size) {
         val f = forwardSegments[i]
         val r = reverseSegments[i]
         val betterSegment = if (f.velocity <= r.velocity) f else r
-        totalT += distance(path[i], path[i - 1]) / betterSegment.velocity
+
+        if (betterSegment.velocity > 0.Foot / Second)
+            totalT += distance(path[i], path[i - 1]) / betterSegment.velocity
+
         mergedTrajectory += betterSegment.waypt stampWith totalT
     }
 
     return mergedTrajectory
 }
+
+/**
+ * Given 3 points, find the angle between p3 and the line formed by p1 and p2.
+ */
+private fun dtheta(p1: Waypt, p2: Waypt, p3: Waypt): Angle = -((p2 - p1).bearing `coterminal -` (p3 - p2).bearing)
 
 /**
  * Generates a [Trajectory] with acceleration capped in 1 direction (left to right).
@@ -86,12 +102,12 @@ fun pathToTrajectory(
  *
  * @author Andy
  *
- * @param path a path consisting of a list of waypoints.
+ * @param path a path consisting of a list of [Waypt]s.
  * @param maxVelocity the maximum linear velocity of the robot.
  * @param maxOmega the maximum angular velocity of the robot.
  * @param maxAcceleration the maximum linear acceleration of the robot.
  *
- * @return a trajectory without timestamps generated yet.
+ * @return a list of [Segment]s, but no timestamps.
  */
 private fun oneWayAccelCap(
         path: Path,
@@ -113,12 +129,9 @@ private fun oneWayAccelCap(
         val p2 = path[i - 1]
         val p3 = path[i] // current
 
-        val d1 = distance(p1, p2)
         val dx = distance(p2, p3)
-        val d3 = distance(p1, p3)
 
-        // Use law of cosines to find Δtheta.
-        val dtheta = -((p2 - p1).bearing `coterminal -` (p3 - p2).bearing)
+        val dtheta = dtheta(p1, p2, p3)
         dthetas += dtheta
 
         // Find Δt based on region of feasibility.
@@ -145,13 +158,18 @@ private fun oneWayAccelCap(
         s2.omega = dthetas[i] / dt
 
         // Cap linear acceleration
-        val currentMaxAcceleration = maxAcceleration //currentMaxAcceleration(maxVelocity, maxAcceleration, s2.velocity)
+        val currentMaxAcceleration = maxAcceleration - (s1.velocity / maxVelocity) * maxAcceleration
         if ((s2.velocity - s1.velocity) / dt > currentMaxAcceleration) {
             // Find a new dt using acceleration and dx instead of a target velocity.
-            // Δx = v₀t + (1/2)at²
-            // t = (-v₀ ± sqrt(v₀² + 2aΔx)) / a -- quadratic formula
-            // t = (-v₀ + sqrt(v₀² + 2aΔx)) / a -- only need to consider positive t
-            dt = (-s1.velocity + v(currentMaxAcceleration, s1.velocity, dx)) / currentMaxAcceleration
+
+            dt = if (currentMaxAcceleration == 0.Foot / Second / Second) {
+                dx / s1.velocity
+            } else {
+                // Δx = v₀t + (1/2)at²
+                // t = (-v₀ ± sqrt(v₀² + 2aΔx)) / a -- quadratic formula
+                // t = (-v₀ + sqrt(v₀² + 2aΔx)) / a -- only need to consider positive t
+                (-s1.velocity + v(currentMaxAcceleration, s1.velocity, dx)) / currentMaxAcceleration
+            }
 
             s2.velocity = s1.velocity + currentMaxAcceleration * dt
             s2.omega = dthetas[i] / dt
@@ -160,8 +178,3 @@ private fun oneWayAccelCap(
 
     return trajectory
 }
-
-/**
- * Calculates the max acceleration given the current velocity.
- */
-private fun currentMaxAcceleration(maxV: Velocity, maxA: Acceleration, currentV: Velocity): Acceleration = maxA - (currentV / maxV) * maxA

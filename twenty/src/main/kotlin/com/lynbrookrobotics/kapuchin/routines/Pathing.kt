@@ -60,7 +60,7 @@ suspend fun DrivetrainComponent.followTrajectory(
     controller {
         val velocities = follower()
         if (velocities != null) {
-            println("${velocities.left.FootPerSecond}\t${velocities.right.FootPerSecond}")
+//            println("${velocities.left.FootPerSecond}\t${velocities.right.FootPerSecond}")
             val nativeL = hardware.conversions.nativeConversion.native(velocities.left)
             val nativeR = hardware.conversions.nativeConversion.native(velocities.right)
             TwoSided(

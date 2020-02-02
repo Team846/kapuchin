@@ -101,7 +101,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
         val (x1, y1, b1) = conv.t2sOdometry.matrixTracking.run {
             Position(x, y, bearing)
         }
-        val (x2, y2, b2) = conv.escOdometry.matrixTracking.run {
+        val (x2, y2, b2) = conv.escOdometry.tracking.run {
             Position(x, y, bearing)
         }
         val x = avg(x1, x2)

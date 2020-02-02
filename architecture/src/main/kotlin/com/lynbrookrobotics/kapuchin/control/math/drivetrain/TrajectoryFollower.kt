@@ -27,10 +27,17 @@ class TrajectoryFollower(
         origin: Position
 ) {
 
-    // Make segment waypoints relative to origin
+    // Make waypts relative to origin
+    private var lastTarget: Waypt
     private val waypts = with(RotationMatrix(origin.bearing)) {
         trajectory
-                .map { (t, waypt) -> rotate(waypt) + origin.vector stampWith t}
+                .map { (t, waypt) -> rotate(waypt) + origin.vector stampWith t }
+                .also {
+                    lastTarget = it.last().y
+                    println("LAST TARGETTTTTTTTTT:: ${lastTarget}")
+                }
+                .drop(1)
+                .dropLast(1)
                 .iterator()
     }
 
@@ -50,17 +57,18 @@ class TrajectoryFollower(
     /**
      * Calculate the next left and right velocity outputs given the current position.
      *
-     * For each side, the velocity is the current segment's linear velocity factored in with the current segment's
-     * angular velocity along with a PD loop for angular velocity.
+     * For each side, the velocity is the current segment's linear velocity factored in with a PD loop for angular
+     * velocity.
      *
      * @return the left and right velocities, null if the robot is at the target.
      */
     operator fun invoke(): TwoSided<Velocity>? {
-        val distanceToNext = distance(position.vector, target.y)
+        println("${distance(position.vector, lastTarget).Foot}")
+        if (!waypts.hasNext() && distance(position.vector, lastTarget) < endTolerance) {
+            println("DDONNNEEE WIIITTHHHH WELIFJEWLIFJLEKWFJ")
 
-        if (!waypts.hasNext() && distanceToNext < endTolerance) {
             done = true
-        } else if (waypts.hasNext() && distanceToNext < tolerance) {
+        } else if (waypts.hasNext() && distance(position.vector, target.y) < tolerance) {
             println("NNNNNNNEEEEEEEEWWWWWWWW WWWWWWAAAAAAAAYYYYYYYPPPPPPPPOOOOOOOIIIIIIIINNNNNNNNNTTTTTTT")
             val newTarget = waypts.next()
 

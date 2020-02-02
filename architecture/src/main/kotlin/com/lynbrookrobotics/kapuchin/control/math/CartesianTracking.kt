@@ -7,20 +7,45 @@ import info.kunalsheth.units.math.*
 fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
 fun s(sl: Length, sr: Length) = avg(sl, sr)
 
+interface CartesianTracking : (Length, Length) -> Unit {
+    var x: Length
+    var y: Length
+    var bearing: Angle
+}
+
+class SimpleVectorTracking(
+        private var trackLength: Length,
+        init: Position
+) : CartesianTracking {
+
+    override var x = init.x
+    override var y = init.y
+    override var bearing = init.bearing
+
+    override fun invoke(sl: Length, sr: Length) {
+        val s = s(sl, sr)
+        val theta = theta(sl, sr, trackLength)
+
+        x += s * sin(bearing)
+        y += s * cos(bearing)
+        bearing += theta
+    }
+}
+
 class RotationMatrixTracking(
         private var trackLength: Length,
         init: Position,
         private var cache: Map<Angle, RotationMatrix> = emptyMap()
-) : (Length, Length) -> Unit {
+) : CartesianTracking {
 
     private var leftX: Length
     private var leftY: Length
     private var rightX: Length
     private var rightY: Length
 
-    var x = init.x
-    var y = init.y
-    var bearing = init.bearing
+    override var x = init.x
+    override var y = init.y
+    override var bearing = init.bearing
 
     init {
         UomVector(-trackLength / 2, 0.Foot).let {
