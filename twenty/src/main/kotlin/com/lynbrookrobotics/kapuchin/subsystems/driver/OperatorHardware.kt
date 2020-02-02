@@ -35,4 +35,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val intakeUp = s { xButton && lt }
     val intakeDown = s { xButton && rt }
     val collect = s { yButton }
+    val shoot = s { xButton }
+    val turretTurnRight = s { xButton && lt }
+    val turretTurnLeft = s { xButton && rt }
 }

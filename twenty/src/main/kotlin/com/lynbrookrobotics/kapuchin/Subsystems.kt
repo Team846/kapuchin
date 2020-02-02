@@ -13,6 +13,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.control_panel.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -39,6 +40,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val carousel: CarouselComponent?,
                  val controlPanelPivot: ControlPanelPivotComponent?,
                  val controlPanelSpinner: ControlPanelSpinnerComponent?,
+                 val feederRoller: FeederRollerComponent?,
+                 val shooter: ShooterComponent?,
+                 val turret: TurretComponent?,
 
                  val limelight: LimelightComponent?
 ) : Named by Named("Subsystems") {
@@ -51,6 +55,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { climberTeleop() },
                 { intakeTeleop() },
                 { controlPanelTeleop() },
+                { shooterTeleop() },
                 { rumbleTeleop() },
                 { limelight?.autoZoom() }
         )
@@ -99,6 +104,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initCarousel by pref(true)
         private val initControlPanelPivot by pref(true)
         private val initControlPanelSpinner by pref(true)
+        private val initFeederRoller by pref(true)
+        private val initShooter by pref(true)
+        private val initTurret by pref(true)
         private val initLimelight by pref(true)
 
         var instance: Subsystems? = null
@@ -130,7 +138,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val intakePivotAsync = initAsync(initIntakePivot) { IntakePivotComponent(IntakePivotHardware()) }
                 val carouselAsync = initAsync(initCarousel) { CarouselComponent(CarouselHardware()) }
                 val controlPanelPivotAsync = initAsync(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
-                val controlPanelSpinnerAsync = initAsync(initControlPanelSpinner) { ControlPanelSpinnerComponent(ControlPanelSpinnerHarware()) }
+                val controlPanelSpinnerAsync = initAsync(initControlPanelSpinner) { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware()) }
+                val feederRollerAsync = initAsync(initFeederRoller) { FeederRollerComponent(FeederRollerHardware()) }
+                val shooterAsync = initAsync(initShooter) { FeederRollerComponent(FeederRollerHardware()) }
+                val turretAsync = initAsync(initTurret) { TurretComponent(TurretHardware()) }
                 val limelightAsync = initAsync(initLimelight) { LimelightComponent(LimelightHardware()) }
 
 
@@ -149,6 +160,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         safeInit { carouselAsync.await() },
                         safeInit { controlPanelPivotAsync.await() },
                         safeInit { controlPanelSpinnerAsync.await() },
+                        safeInit { feederRollerAsync.await() },
+                        safeInit { shooterAsync.await() },
+                        safeInit { turretAsync.await() },
 
                         safeInit { limelightAsync.await() }
                 )
@@ -181,6 +195,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     initOrNull(initCarousel) { safeInit { CarouselComponent(CarouselHardware()) } },
                     initOrNull(initControlPanelPivot) { safeInit { ControlPanelPivotComponent(ControlPanelPivotHardware()) } },
                     initOrNull(initControlPanelSpinner) { safeInit { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware()) } },
+                    initOrNull(initFeederRoller) { safeInit { FeederRollerComponent(FeederRollerHardware()) } },
+                    initOrNull(initShooter) { safeInit { ShooterComponent(ShooterHardware()) } },
+                    initOrNull(initTurret) { safeInit { TurretComponent(TurretHardware()) } },
                     initOrNull(initLimelight) { safeInit { LimelightComponent(LimelightHardware()) } }
             )
         }
