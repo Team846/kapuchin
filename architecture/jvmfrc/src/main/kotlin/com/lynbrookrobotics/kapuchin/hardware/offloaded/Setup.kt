@@ -11,7 +11,10 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.revrobotics.CANEncoder
 import com.revrobotics.CANError
+import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMax.IdleMode.kBrake
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.io.IOException
@@ -46,6 +49,18 @@ fun RobotHardware<*>.generalSetup(esc: BaseMotorController, config: OffloadedEsc
     if (esc is VictorSPX) config.writeTo(esc, configTimeout)
 }
 
+fun RobotHardware<*>.generalSetup(esc: CANSparkMax, config: OffloadedEscConfiguration): Unit {
+    +esc.setCANTimeout(configTimeout)
+    +esc.restoreFactoryDefaults()
+    +esc.setIdleMode(kBrake)
+
+    TODO("Enable the voltage compensation")
+
+    TODO("Enable the current limiting")
+
+    config.writeTo(esc, configTimeout)
+}
+
 fun SubsystemHardware<*, *>.setupMaster(master: TalonSRX, config: OffloadedEscConfiguration, vararg feedback: FeedbackDevice) {
     generalSetup(master, config)
 
@@ -54,4 +69,13 @@ fun SubsystemHardware<*, *>.setupMaster(master: TalonSRX, config: OffloadedEscCo
 
     +master.configVelocityMeasurementPeriod(Period_5Ms, configTimeout)
     +master.configVelocityMeasurementWindow(4, configTimeout)
+}
+
+fun SubsystemHardware<*, *>.setupMaster(master: CANSparkMax, config: OffloadedEscConfiguration, vararg feedback: CANEncoder) {
+    generalSetup(master, config)
+
+    master.setControlFramePeriodMs(syncThreshold.milli(Second).toInt())
+    feedback.forEachIndexed { i, sensor -> OffloadedEscConfiguration.sparkMaxControllerCache.getOrPut(master) { master.pidController }.setFeedbackDevice(sensor) }
+
+    TODO()
 }

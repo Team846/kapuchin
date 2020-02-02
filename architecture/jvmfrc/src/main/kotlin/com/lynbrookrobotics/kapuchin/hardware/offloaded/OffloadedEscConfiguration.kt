@@ -87,10 +87,12 @@ data class OffloadedEscConfiguration(
         victorCache[esc] = this
     }
 
-    fun writeTo(esc: CANSparkMax) {
+    fun writeTo(esc: CANSparkMax, timeoutMs: Int = this.timeoutMs) {
         val currentConfiguration = sparkCache[esc]
         if (this != currentConfiguration) currentConfiguration.also {
             println("Writing configurations to CANSparkMAX ${esc.deviceId}")
+
+            esc.setCANTimeout(timeoutMs)
 
             if (it == null || it.openloopRamp != openloopRamp)
                 +esc.setOpenLoopRampRate(openloopRamp.Second)
