@@ -40,8 +40,9 @@ class FunkyRobot : RobotBase() {
                     },
                     { isEnabled && isAutonomous } to choreography {
 //                         subsystems.straightLine()
-//                        subsystems.circle()
-                         subsystems.followJournal()
+//                        subsystems.figureEight()
+                        subsystems.circle()
+//                         subsystems.followJournal()
                     },
                     { isDisabled && !isTest } to choreography {
                         subsystems.warmup()

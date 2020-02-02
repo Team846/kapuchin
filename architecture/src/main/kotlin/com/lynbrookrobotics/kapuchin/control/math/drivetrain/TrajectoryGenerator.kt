@@ -7,6 +7,19 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 /**
+ * Private representation of a segment while generating trajectories
+ */
+private data class Segment(
+        val waypt: Waypt,
+        var velocity: Velocity = 0.Foot / Second,
+        var omega: AngularVelocity = 0.Radian / Second
+)
+
+typealias Waypt = UomVector<Length> // x and y location
+typealias Path = List<Waypt> // a list of points for a robot to follow
+typealias Trajectory = List<TimeStamped<Waypt>> // a path with timestamps at each point
+
+/**
  * Generates a [Trajectory] given a [Path].
  *
  * 1) Going left to right (forward in time), find a [Trajectory] capping acceleration.
@@ -38,24 +51,27 @@ fun pathToTrajectory(
     // (1)
 
     val forwardPath = path.toMutableList()
-    val forwardTrajectory = oneWayAccelCap(forwardPath, maxVelocity, maxOmega, maxAcceleration)
+    val forwardSegments = oneWayAccelCap(forwardPath, maxVelocity, maxOmega, maxAcceleration)
 
 
     // (2)
 
     val reversePath = path.toMutableList().reversed()
-    val reverseTrajectory = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration)
+    val reverseSegments = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration)
             .reversed()
             .map { it.copy(omega = -it.omega) }
 
 
     // (3)
 
-    val mergedTrajectory = mutableListOf<Segment>()
-    for (i in 0 until path.size) {
-        val f = forwardTrajectory[i]
-        val r = reverseTrajectory[i]
-        mergedTrajectory += if (f.velocity <= r.velocity) f else r
+    val mergedTrajectory = mutableListOf<TimeStamped<Waypt>>()
+    var totalT = 0.Second
+    for (i in 1 until path.size - 1) {
+        val f = forwardSegments[i]
+        val r = reverseSegments[i]
+        val betterSegment = if (f.velocity <= r.velocity) f else r
+        totalT += distance(path[i], path[i - 1]) / betterSegment.velocity
+        mergedTrajectory += betterSegment.waypt stampWith totalT
     }
 
     return mergedTrajectory
@@ -82,11 +98,11 @@ private fun oneWayAccelCap(
         maxVelocity: Velocity,
         maxOmega: AngularVelocity,
         maxAcceleration: Acceleration
-): Trajectory {
+): List<Segment> {
 
     val trajectory = mutableListOf(
-            MutableSegment(path[0]),
-            MutableSegment(path[1], velocity = maxVelocity)
+            Segment(path[0]),
+            Segment(path[1], velocity = maxVelocity)
     )
     val dthetas = mutableListOf(0.Degree, 0.Degree)
 
@@ -108,7 +124,7 @@ private fun oneWayAccelCap(
         // Find Δt based on region of feasibility.
         val dt = abs(dtheta / maxOmega) + dx / maxVelocity
 
-        trajectory += MutableSegment(path[i], velocity = dx / dt)
+        trajectory += Segment(path[i], velocity = dx / dt)
     }
 
 
@@ -117,7 +133,7 @@ private fun oneWayAccelCap(
     for (i in 1 until path.size) {
         val s1 = trajectory[i - 1]
         val s2 = trajectory[i] // current
-        val s3 = if (i != path.size - 1) trajectory[i + 1] else MutableSegment(Waypt(0.Metre, 0.Metre))
+        val s3 = if (i != path.size - 1) trajectory[i + 1] else Segment(Waypt(0.Metre, 0.Metre))
 
         // Find Δt based on the target velocity and Δx.
         // The target velocity is the minimum velocity cap of either the current or the next segment.
@@ -129,7 +145,7 @@ private fun oneWayAccelCap(
         s2.omega = dthetas[i] / dt
 
         // Cap linear acceleration
-        val currentMaxAcceleration = maxAcceleration//currentMaxAcceleration(maxVelocity, maxAcceleration, s2.velocity)
+        val currentMaxAcceleration = maxAcceleration //currentMaxAcceleration(maxVelocity, maxAcceleration, s2.velocity)
         if ((s2.velocity - s1.velocity) / dt > currentMaxAcceleration) {
             // Find a new dt using acceleration and dx instead of a target velocity.
             // Δx = v₀t + (1/2)at²
@@ -142,8 +158,7 @@ private fun oneWayAccelCap(
         }
     }
 
-    // MutableSegment to (immutable) Segment
-    return trajectory.map { Segment(it.waypt, it.velocity, it.omega) }
+    return trajectory
 }
 
 /**

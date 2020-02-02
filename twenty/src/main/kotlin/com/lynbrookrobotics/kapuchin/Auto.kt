@@ -1,13 +1,12 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import java.io.File
-import kotlin.math.sin
-import kotlin.math.cos
 import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 fun loadPath(name: String): Path =
         Thread.currentThread()
@@ -32,29 +31,45 @@ fun loadTempPath(): Path =
                 .toList()
 
 
-
 suspend fun Subsystems.straightLine() = startChoreo("Straight line") {
     val path = nSect(Waypt(0.Foot, 0.Foot), Waypt(0.Foot, 8.Foot), 3.Inch)
-    val trajectory = pathToTrajectory(path, 10.FootPerSecond, 1.Radian / Second, 3.FootPerSecondSquared)
+    val trajectory = pathToTrajectory(path, 6.Foot / Second, 1.Radian / Second, 3.FootPerSecondSquared)
 
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 6.Inch, 1.Inch)
+        drivetrain.followTrajectory(trajectory, 3.Inch, 4.Inch)
+        freeze()
     }
 }
 
 suspend fun Subsystems.circle() = startChoreo("Circle") {
-    val path = (0 until 300)
-            .map { it / 150.0 }
-            .map { Waypt((5 * cos(PI * it) - 5).Foot, (5 *sin(PI * it)).Foot) }
+    val path = (0 until 100)
+            .map { it / 50.0 }
+            .map { Waypt((4 * cos(PI * it) - 4).Foot, (4 * sin(PI * it)).Foot) }
 
-    val trajectory = pathToTrajectory(path, 10.FootPerSecond, 1.Radian / Second, 3.FootPerSecondSquared)
+    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, 3.FootPerSecondSquared)
 
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 10.Inch, 10.Inch)
+        drivetrain.followTrajectory(trajectory, 6.Inch, 6.Inch)
+        freeze()
+    }
+}
+
+suspend fun Subsystems.figureEight() = startChoreo("figure eight") {
+    val path = (0 until 100)
+            .map { it / 50.0 }
+            .map { Waypt((5 * cos(PI * it) - 5).Foot, (5 * cos(PI * it)).Foot) }
+
+    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, 3.FootPerSecondSquared)
+
+    System.gc()
+
+    choreography {
+        drivetrain.followTrajectory(trajectory, 6.Inch, 5.Inch)
+        freeze()
     }
 }
 

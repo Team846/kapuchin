@@ -28,15 +28,16 @@ class TrajectoryFollower(
 ) {
 
     // Make segment waypoints relative to origin
-    private val segments = with(RotationMatrix(origin.bearing)) {
+    private val waypts = with(RotationMatrix(origin.bearing)) {
         trajectory
-                .map { it.copy(waypt = rotate(it.waypt) + origin.vector)}
-                .drop(1)
+                .map { (t, waypt) -> rotate(waypt) + origin.vector stampWith t}
                 .iterator()
     }
 
-    private var target = segments.next()
+    private var target = waypts.next()
     private var done = false
+
+    private var speed = distance(Waypt(0.Foot, 0.Foot), target.y) / target.x
 
     private val uni = UnicycleDrive(drivetrain, scope)
     private val position by with(scope) { drivetrain.hardware.position.readOnTick.withoutStamps }
@@ -55,26 +56,24 @@ class TrajectoryFollower(
      * @return the left and right velocities, null if the robot is at the target.
      */
     operator fun invoke(): TwoSided<Velocity>? {
-        val distanceToNext = distance(position.vector, target.waypt)
+        val distanceToNext = distance(position.vector, target.y)
 
-        done = !segments.hasNext() && distanceToNext < endTolerance
-        if (segments.hasNext() && distanceToNext < tolerance) {
-            target = segments.next()
-            println("NNNNNNNNNNEEEEEXXXXXXXXXXXTTTTTTTTTTT WWWWWAYYYYPPOOINNNNNNTTT")
+        if (!waypts.hasNext() && distanceToNext < endTolerance) {
+            done = true
+        } else if (waypts.hasNext() && distanceToNext < tolerance) {
+            println("NNNNNNNEEEEEEEEWWWWWWWW WWWWWWAAAAAAAAYYYYYYYPPPPPPPPOOOOOOOIIIIIIIINNNNNNNNNTTTTTTT")
+            val newTarget = waypts.next()
+
+            val dist = distance(newTarget.y, target.y)
+            speed = dist / (newTarget.x - target.x)
+            target = newTarget
         }
 
-//        var velocityL = target.velocity
-//        var velocityR = target.velocity
-        var (velocityL, velocityR) = uni.speedAngleTarget(
-                target.velocity,
-                target(position.vector, target.waypt)
+        val targetA = target(position.vector, target.y)
+        val (velocityL, velocityR) = uni.speedAngleTarget(
+                speed,
+                targetA
         ).first
-
-        println("1: ${velocityL.FootPerSecond}\t${velocityR.FootPerSecond}")
-        val feedforward = ((target.omega / Radian) * drivetrain.hardware.conversions.trackLength) / 2
-        velocityL += feedforward
-        velocityR -= feedforward
-        println("2: ${velocityL.FootPerSecond}\t${velocityR.FootPerSecond}")
 
         return TwoSided(velocityL, velocityR).takeIf { !done }
     }
