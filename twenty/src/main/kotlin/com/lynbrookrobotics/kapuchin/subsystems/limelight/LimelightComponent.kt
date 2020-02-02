@@ -20,28 +20,26 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
 
         Position(x, distance, skew)
     }
-    private fun innerGoalPos(sample: LimelightReading, skew: Angle)
-    {
+
+    private fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
         val outerGoalPos = targetPosition(sample)
         val skew = skew
-            val offsetAngle = 90.Degree - skew
+        val offsetAngle = 90.Degree - skew
 
-            val innerGoal = DetectedTarget(Position(
-                    innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
-                    innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
-                    skew
-            ), outerGoalPos)
-            if (skew > skewTolerance)
-            {
-                DetectedTarget(null,targetPosition(sample))
-            }
-            else{
-                innerGoal
-            }
+        val innerGoal = DetectedTarget(Position(
+                innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
+                innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
+                skew
+        ), outerGoalPos)
+        if (skew > skewTolerance) {
+            return DetectedTarget(null, targetPosition(sample))
+        } else {
+            return innerGoal
+        }
 
     }
 
-    private val skewTolerance by pref(1,Degree)
+    private val skewTolerance by pref(1, Degree)
     private val innerGoalOffset by pref(29.25, Inch)
     private val targetHeight by pref(107, Inch)
     private val aspect0 by pref {
