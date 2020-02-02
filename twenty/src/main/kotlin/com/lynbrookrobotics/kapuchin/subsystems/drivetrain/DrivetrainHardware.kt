@@ -13,7 +13,6 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
@@ -23,8 +22,8 @@ import info.kunalsheth.units.math.*
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>(), GenericDrivetrainHardware {
     override val priority = Priority.RealTime
-    override val period = 10.milli(Second)
-    override val syncThreshold = 2.milli(Second)
+    override val period = 30.milli(Second)
+    override val syncThreshold = 4.milli(Second)
     override val name = "Drivetrain"
 
     private val idx = 0
@@ -76,6 +75,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
     }
+
+    private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
 
     private val ticksToSerialPort = "kUSB1"
     private val ticksToSerial by hardw<TicksToSerial?> {
@@ -158,7 +159,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             }
         }
 
-        EventLoop.runOnTick { time ->
+        odometryTicker.runOnTick { time ->
             t2sPosition?.optimizedRead(time, period)
             escPosition.optimizedRead(time, period)
         }
