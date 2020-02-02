@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.OffloadedEscConfiguration.Companion.sparkMaxControllerCache
 import com.revrobotics.CANSparkMax
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -51,7 +52,7 @@ data class OffloadedEscGains(
             println("Writing gains to CANSparkMax ${esc.deviceId}")
 
             if (cache == null || cache.kP != kP) {
-                +esc.pidController.setP(kP, idx)
+                +sparkMaxControllerCache.getOrPut(esc) { esc.pidController }.setP(kP, idx)
             }
             if (cache == null || cache.kI != kI) {
                 +esc.pidController.setI(kI, idx)

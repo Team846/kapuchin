@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -25,6 +26,8 @@ data class OffloadedEscConfiguration(
         val talonCache = ConcurrentHashMap<TalonSRX, OffloadedEscConfiguration>()
         val victorCache = ConcurrentHashMap<VictorSPX, OffloadedEscConfiguration>()
         val sparkCache = ConcurrentHashMap<CANSparkMax, OffloadedEscConfiguration>()
+
+        val sparkMaxControllerCache = ConcurrentHashMap<CANSparkMax, CANPIDController>()
     }
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
@@ -85,23 +88,26 @@ data class OffloadedEscConfiguration(
     }
 
     fun writeTo(esc: CANSparkMax) {
-        val cached = sparkCache[esc]
-        if (this != cached) sparkCache[esc].also {
+        val currentConfiguration = sparkCache[esc]
+        if (this != currentConfiguration) currentConfiguration.also {
             println("Writing configurations to CANSparkMAX ${esc.deviceId}")
 
             if (it == null || it.openloopRamp != openloopRamp)
                 +esc.setOpenLoopRampRate(openloopRamp.Second)
             if (it == null || it.closedloopRamp != closedloopRamp)
                 +esc.setClosedLoopRampRate(closedloopRamp.Second)
-            if (it == null || it.peakOutputForward != peakOutputForward)
-                TODO()
-            if (it == null || it.nominalOutputForward != nominalOutputForward)
-                TODO()
-            if (it == null || it.nominalOutputReverse != nominalOutputReverse)
-                TODO()
-            if (it == null || it.peakOutputReverse != peakOutputReverse)
+            if (it == null || it.peakOutputForward != peakOutputForward || it.peakOutputReverse != peakOutputReverse)
+                sparkMaxControllerCache.getOrPut(esc) { esc.pidController }
+                        .setOutputRange(peakOutputReverse, peakOutputForward)
+            if (it == null || it.nominalOutputForward != nominalOutputForward || it.nominalOutputReverse)
                 TODO()
             if (it == null || it.voltageCompSaturation != voltageCompSaturation)
+                +esc.enableVoltageCompensation(nominalOutputForward)
+            if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
+                +esc.setSmartCurrentLimit(continuousCurrentLimit.Ampere.toInt())
+            if (it == null || it.peakCurrentLimit != this.peakCurrentLimit)
+                TODO()
+            if (it == null || it.peakCurrentDuration != this.peakCurrentDuration)
                 TODO()
 
             sparkCache[esc] = this
