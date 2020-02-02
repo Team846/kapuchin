@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.EncoderType
 import edu.wpi.first.wpilibj.I2C
 import info.kunalsheth.units.generated.*
 
@@ -34,6 +35,7 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
     override val priority: Priority = Priority.Low
     override val name: String = "ControlPanel"
 
+    val ticksPerRevolution = 30
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
 
@@ -41,8 +43,12 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
             defaultPeakCurrentLimit = 35.Ampere
     )
 
+
     private val controlWheelEscId by pref(10)
-    val spinnerEsc by hardw { CANSparkMax(controlWheelEscId, kBrushless) }
+    val spinnerEsc by hardw { CANSparkMax(controlWheelEscId, kBrushless)}.configure {
+        generalSetup(it, escConfig)
+    }
+    val spinnerEncoder by hardw { spinnerEsc.getEncoder(EncoderType.kHallSensor, ticksPerRevolution) }
 
     private val leftColorSensorAddress by pref(6)
     val leftColorSensor = sensor(RevColorSensor(I2C.Port.kOnboard, leftColorSensorAddress), readColorSensor)
