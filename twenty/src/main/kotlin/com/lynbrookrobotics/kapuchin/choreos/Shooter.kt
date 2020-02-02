@@ -14,7 +14,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
     fun requiredVelocities(
             flywheel: FlywheelComponent, hood: HoodComponent,
-            hoodState: HoodState, targetHeight: Length
+            hoodState: HoodState
     ): Pair<Velocity, AngularVelocity> {
         val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
 
@@ -27,7 +27,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
 
         val flywheelOmega = with(flywheel) {
-            AngularVelocity(((momentFactor * ballMass + (2 * MomentOfInertia(momentOfInertia.toDouble()) / (rollerRadius * rollerRadius))) * ballVelocity * rollerRadius / MomentOfInertia(momentOfInertia.toDouble())).siValue)
+            AngularVelocity(((momentFactor * ballMass + (2 * momentOfInertia / (rollerRadius * rollerRadius))) * ballVelocity * rollerRadius / momentOfInertia).siValue)
         }
 
         return ballVelocity to flywheelOmega
@@ -45,7 +45,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
             hoodState: HoodState, target: Position
     ): Pair<AngularVelocity, Angle> {
         val targetHeight = 0.Foot //TODO
-        val (ballVelocity, flywheelOmega) = requiredVelocities(flywheel, hood, hoodState, targetHeight)
+        val (ballVelocity, flywheelOmega) = requiredVelocities(flywheel, hood, hoodState)
         val entryAngle = targetEntryAngle(hood, hoodState, ballVelocity)
         return flywheelOmega to entryAngle
     }
@@ -54,7 +54,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
         // TODO get target, do nothing if null
         if (limelight == null) return@choreography
         val target = DetectedTarget(Position(0.Foot, 0.Foot, 0.Degree), Position(0.Foot, 0.Foot, 0.Degree))
-        val targetHeight = 0.Foot
+        val targetHeight = flywheel?.targetHeight
 
         if (flywheel != null && hood != null) {
             // TODO check if target is physically impossible to shoot to
