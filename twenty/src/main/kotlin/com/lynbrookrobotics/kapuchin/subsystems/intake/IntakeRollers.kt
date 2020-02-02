@@ -37,5 +37,7 @@ class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRol
     )
 
     private val rollersEscId by pref(0)
-    val rollersEsc by hardw { TalonSRX(rollersEscId) }
+    val rollersEsc by hardw { TalonSRX(rollersEscId) }.configure {
+        it.inverted = invertRollers
+    }
 }
