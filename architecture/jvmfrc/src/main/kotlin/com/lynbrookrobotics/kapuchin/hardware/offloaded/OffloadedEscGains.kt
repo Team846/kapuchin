@@ -24,8 +24,8 @@ data class OffloadedEscGains(
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
     fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
-        val cached = talonCache[esc]
-        if (this != cached) cached.also {
+        val gainsFromCache = talonCache[esc]
+        if (this != gainsFromCache) gainsFromCache.also {
             println("Writing gains to TalonSRX ${esc.deviceID}")
 
             if (it == null || it.kP != this.kP)

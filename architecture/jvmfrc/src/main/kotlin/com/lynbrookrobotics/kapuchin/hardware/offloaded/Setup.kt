@@ -49,7 +49,7 @@ fun RobotHardware<*>.generalSetup(esc: BaseMotorController, config: OffloadedEsc
     if (esc is VictorSPX) config.writeTo(esc, configTimeout)
 }
 
-fun RobotHardware<*>.generalSetup(esc: CANSparkMax, config: OffloadedEscConfiguration): Unit {
+fun RobotHardware<*>.generalSetup(esc: CANSparkMax, config: OffloadedEscConfiguration) {
     +esc.setCANTimeout(configTimeout)
     +esc.restoreFactoryDefaults()
     +esc.setIdleMode(kBrake)

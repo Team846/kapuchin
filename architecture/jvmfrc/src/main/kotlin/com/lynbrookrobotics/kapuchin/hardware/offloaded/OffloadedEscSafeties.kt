@@ -21,8 +21,8 @@ data class OffloadedEscSafeties(
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
     fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
-        val cached = talonCache[esc]
-        if (this != cached) cached.also {
+        val safetiesFromCache = talonCache[esc]
+        if (this != safetiesFromCache) safetiesFromCache.also {
             println("Writing safeties to TalonSRX ${esc.deviceID}")
 
             if (it == null || it.min != this.min) {
@@ -38,8 +38,8 @@ data class OffloadedEscSafeties(
     }
 
     fun writeTo(esc: CANSparkMax) {
-        val cached = sparkMaxCache[esc]
-        if (this != cached) cached.also {
+        val safetiesFromCache = sparkMaxCache[esc]
+        if (this != safetiesFromCache) safetiesFromCache.also {
             println("Writing safeties to CANSparkMax ${esc.deviceId}")
 
             if (it == null || it.min != min) {

@@ -33,8 +33,8 @@ data class OffloadedEscConfiguration(
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
     fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
-        val cached = talonCache[esc]
-        if (this != cached) talonCache[esc].also {
+        val escConfiguration = talonCache[esc]
+        if (this != escConfiguration) talonCache[esc].also {
             println("Writing configurations to TalonSRX ${esc.deviceID}")
 
             if (it == null || it.openloopRamp != openloopRamp)
@@ -65,8 +65,8 @@ data class OffloadedEscConfiguration(
 
     fun writeTo(esc: VictorSPX, timeoutMs: Int = this.timeoutMs) {
         // copy and paste from `talon`
-        val cached = victorCache[esc]
-        if (this != cached) victorCache[esc].also {
+        val escConfiguration = victorCache[esc]
+        if (this != escConfiguration) victorCache[esc].also {
             println("Writing configurations to VictorSPX ${esc.deviceID}")
 
             if (it == null || it.openloopRamp != openloopRamp)
@@ -88,8 +88,8 @@ data class OffloadedEscConfiguration(
     }
 
     fun writeTo(esc: CANSparkMax, timeoutMs: Int = this.timeoutMs) {
-        val currentConfiguration = sparkCache[esc]
-        if (this != currentConfiguration) currentConfiguration.also {
+        val escConfiguration = sparkCache[esc]
+        if (this != escConfiguration) escConfiguration.also {
             println("Writing configurations to CANSparkMAX ${esc.deviceId}")
 
             esc.setCANTimeout(timeoutMs)
@@ -102,15 +102,15 @@ data class OffloadedEscConfiguration(
                 sparkMaxControllerCache.getOrPut(esc) { esc.pidController }
                         .setOutputRange(peakOutputReverse.Volt, peakOutputForward.Volt)
             if (it == null || it.nominalOutputForward != nominalOutputForward || it.nominalOutputReverse != nominalOutputReverse)
-                TODO()
+                TODO("Find nominal forward output function")
             if (it == null || it.voltageCompSaturation != voltageCompSaturation)
                 +esc.enableVoltageCompensation(nominalOutputForward.Volt)
             if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
                 +esc.setSmartCurrentLimit(continuousCurrentLimit.Ampere.toInt())
             if (it == null || it.peakCurrentLimit != this.peakCurrentLimit)
-                TODO()
+                TODO("Does this need to be implemented")
             if (it == null || it.peakCurrentDuration != this.peakCurrentDuration)
-                TODO()
+                TODO("Does this need to be implemented")
 
             sparkCache[esc] = this
         }
