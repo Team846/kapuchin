@@ -9,6 +9,17 @@ private val t = 1.Turn
 private val ht = 0.5.Turn
 
 /**
+ * Calculates the bearing of a x-y coordinate.
+ *
+ * Note that the parameters of atan2 are switched to get compass bearing instead of trig bearing.
+ *
+ * @author Kunal
+ *
+ * @return the compass bearing of a vector.
+ */
+val UomVector<Length>.bearing get() = atan2(x, y)
+
+/**
  * Calculates the difference between two angles
  *
  * Let C(θ) be the set of all co-terminal angles to θ.

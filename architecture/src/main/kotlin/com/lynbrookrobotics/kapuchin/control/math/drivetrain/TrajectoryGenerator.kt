@@ -102,12 +102,7 @@ private fun oneWayAccelCap(
         val d3 = distance(p1, p3)
 
         // Use law of cosines to find Δtheta.
-        val dtheta = {
-            val mag = 180.Degree - acos((d1 * d1 + dx * dx - d3 * d3) / (d1 * dx * 2))
-            val dir = -((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x)).signum
-            (mag * dir).takeUnless { dir == 0.0 } ?: 0.Degree
-        }()
-
+        val dtheta = -((p2 - p1).bearing `coterminal -` (p3 - p2).bearing)
         dthetas += dtheta
 
         // Find Δt based on region of feasibility.
@@ -134,14 +129,15 @@ private fun oneWayAccelCap(
         s2.omega = dthetas[i] / dt
 
         // Cap linear acceleration
-        if ((s2.velocity - s1.velocity) / dt > maxAcceleration) {
+        val currentMaxAcceleration = maxAcceleration//currentMaxAcceleration(maxVelocity, maxAcceleration, s2.velocity)
+        if ((s2.velocity - s1.velocity) / dt > currentMaxAcceleration) {
             // Find a new dt using acceleration and dx instead of a target velocity.
             // Δx = v₀t + (1/2)at²
             // t = (-v₀ ± sqrt(v₀² + 2aΔx)) / a -- quadratic formula
             // t = (-v₀ + sqrt(v₀² + 2aΔx)) / a -- only need to consider positive t
-            dt = (-s1.velocity + v(maxAcceleration, s1.velocity, dx)) / maxAcceleration
+            dt = (-s1.velocity + v(currentMaxAcceleration, s1.velocity, dx)) / currentMaxAcceleration
 
-            s2.velocity = s1.velocity + maxAcceleration * dt
+            s2.velocity = s1.velocity + currentMaxAcceleration * dt
             s2.omega = dthetas[i] / dt
         }
     }
@@ -149,3 +145,8 @@ private fun oneWayAccelCap(
     // MutableSegment to (immutable) Segment
     return trajectory.map { Segment(it.waypt, it.velocity, it.omega) }
 }
+
+/**
+ * Calculates the max acceleration given the current velocity.
+ */
+private fun currentMaxAcceleration(maxV: Velocity, maxA: Acceleration, currentV: Velocity): Acceleration = maxA - (currentV / maxV) * maxA
