@@ -28,7 +28,7 @@ val ErrorCode.checkOk: Unit
 operator fun CANError.unaryPlus() = checkOk
 val CANError.checkOk: Unit
     get() {
-        if (this != CANError.kOK && HardwareInit.crashOnFailure)
+        if (this != CANError.kOk && HardwareInit.crashOnFailure)
             throw IOException("REV Spark Max call returned $this")
     }
 
