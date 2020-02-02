@@ -13,17 +13,16 @@ import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.util.Scanner
 import kotlin.system.measureTimeMillis
 
-const val BASE_PATH = "com/lynbrookrobotics/kapuchin"
-const val ID_FILE = "$BASE_PATH/run_id"
 
 fun main() {
-    val runId = Thread.currentThread().contextClassLoader.getResource(ID_FILE)?.path?.let {
-        val runIdFile = File(it)
-        val runId = (runIdFile.readBytes().first() + 1).toByte()
-        runIdFile.writeBytes(ByteArray(1) { runId })
-        runId
+    val runId = File("/home/lvuser/run_id").takeIf { it.exists() }?.let { runIdFile ->
+        val scanner = Scanner(runIdFile)
+        val runId = scanner.nextInt() + 1
+        scanner.close()
+        runIdFile.writeText(runId.toString())
     } ?: -1
 
     println("Kapuchin Run ID $runId")

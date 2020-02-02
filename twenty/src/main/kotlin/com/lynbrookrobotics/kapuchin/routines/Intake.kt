@@ -4,16 +4,16 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import info.kunalsheth.units.generated.*
 
-suspend fun IntakePivotComponent.set(target: IntakePivotState) = startRoutine("Set") {
+suspend fun IntakePivotComponent.set(state: IntakePivotState) = startRoutine("Set") {
+    controller { state }
+}
+
+suspend fun CollectorRollersComponent.spin(target: OffloadedOutput) = startRoutine("Spin") {
     controller { target }
 }
 
-suspend fun CollectorRollersComponent.spin(speed: ElectricCurrent) = startRoutine("Spin") {
-    controller {
-        CurrentOutput(hardware.escConfig, speed)
-    }
+suspend fun CarouselComponent.spin(target: OffloadedOutput) = startRoutine("Spin") {
+    controller { target }
 }
 
-suspend fun CollectorRollersComponent.set(state: OffloadedOutput) = startRoutine("Set") {
-    controller { state }
-}
+

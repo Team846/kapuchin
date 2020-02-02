@@ -16,18 +16,27 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
     override val syncThreshold: Time = 20.Millisecond
     override val priority: Priority = Low
 
-    val escConfiguration by escConfigPref()
+    val escConfig by escConfigPref()
 
-    private val winchMotorId by pref(14)
-    val winch by hardw { CANSparkMax(winchMotorId, kBrushless) }
+    private val winchMasterEscId by pref(14)
+    private val winchSlaveEscId by pref(15)
+    val winchMasterEsc by hardw { CANSparkMax(winchMasterEscId, kBrushless) }.configure {
+        setupMaster(it, escConfig)
+
+    }
+    val winchSlaveEsc by hardw { CANSparkMax(winchSlaveEscId, kBrushless) }.configure {
+        generalSetup(it, escConfig)
+        it.follow(winchMasterEsc)
+    }
 }
 
 class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberWinchComponent, ClimberWinchHardware, OffloadedOutput>(hardware) {
     override val fallbackController: ClimberWinchComponent.(Time) -> OffloadedOutput = {
-        PercentOutput(hardware.escConfiguration, 0.Percent)
+        PercentOutput(hardware.escConfig, 0.Percent)
+
     }
 
     override fun ClimberWinchHardware.output(value: OffloadedOutput) {
-        value.writeTo(winch)
+        value.writeTo(winchMasterEsc)
     }
 }

@@ -13,7 +13,7 @@ import info.kunalsheth.units.math.*
 
 
 class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
-    val carouselSpeed by pref(6, Volt)
+    val carouselSpeed by pref(6, Percent)
 
     override val fallbackController: CarouselComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
@@ -29,16 +29,12 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     override val priority: Priority = Priority.Medium
     override val period: Time = 50.milli(Second)
     override val syncThreshold: Time = 20.milli(Second)
-    override val name: String = "StorageBelt"
+    override val name: String = "Carousel"
 
-    /**
-     * Detects the number of rotations the carousel has performed
-     */
+
     val rotationHallEffect by hardw { DigitalInput(2) }
 
-    /**
-     * Detects if there is a ball in the active carousel slot
-     */
+
     val proximity by hardw {
         DigitalInput(1)
     }
