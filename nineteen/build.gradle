@@ -8,9 +8,12 @@ dependencies {
 
     implementation project(':uoms:jvm')
 //    implementation project(":architecture:jvmfrc")
-    implementation 'com.github.Team846.2020-preseason:jvmfrc:28e6a04'
+    implementation 'com.github.Team846.2020-preseason:jvmfrc:dd44bc5'
 
     implementation wpi.deps.wpilib()
+    nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
+    nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
+
     implementation wpi.deps.vendor.java()
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)

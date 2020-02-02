@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2008-2018 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2008-2019 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -7,23 +7,33 @@
 
 package edu.wpi.first.wpilibj;
 
+import java.util.Collection;
+
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
-import edu.wpi.first.networktables.*;
+import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
-import java.util.Vector;
-
-import static java.util.Objects.requireNonNull;
+import static edu.wpi.first.wpilibj.util.ErrorMessages.requireNonNullParam;
 
 /**
- * Copy and paste of Preferences but changes the NetworkTable to public
+ * The preferences class provides a relatively simple way to save important values to the roboRIO to
+ * access the next time the roboRIO is booted.
  *
- * @author Andy
- * @see edu.wpi.first.wpilibj.Preferences
+ * <p> This class loads and saves from a file inside the roboRIO. The user can not access the file
+ * directly, but may modify values at specific fields which will then be automatically saved to the
+ * file by the NetworkTables server. </p>
+ *
+ * <p> This class is thread safe. </p>
+ *
+ * <p> This will also interact with {@link NetworkTable} by creating a table called "Preferences"
+ * with all the key-value pairs. </p>
  */
 public final class Preferences2 {
     /**
-     * The Preferences2 table name.
+     * The Preferences table name.
      */
     private static final String TABLE_NAME = "Preferences";
     /**
@@ -31,9 +41,9 @@ public final class Preferences2 {
      */
     private static Preferences2 instance;
     /**
-     * The network table. (now public)
+     * The network table.
      */
-    public final NetworkTable table;
+    public final NetworkTable m_table;
 
     /**
      * Returns the preferences instance.
@@ -51,24 +61,22 @@ public final class Preferences2 {
      * Creates a preference class.
      */
     private Preferences2() {
-        table = NetworkTableInstance.getDefault().getTable(TABLE_NAME);
-        table.getEntry(".type").setString("RobotPreferences");
-        // Listener to set all Preferences2 values to persistent
+        m_table = NetworkTableInstance.getDefault().getTable(TABLE_NAME);
+        m_table.getEntry(".type").setString("RobotPreferences");
+        // Listener to set all Preferences values to persistent
         // (for backwards compatibility with old dashboards).
-        table.addEntryListener(
+        m_table.addEntryListener(
                 (table, key, entry, value, flags) -> entry.setPersistent(),
                 EntryListenerFlags.kImmediate | EntryListenerFlags.kNew);
         HAL.report(tResourceType.kResourceType_Preferences, 0);
     }
 
     /**
-     * Gets the vector of keys.
-     *
-     * @return a vector of the keys
+     * Gets the preferences keys.
+     * @return a collection of the keys
      */
-    @SuppressWarnings({"PMD.LooseCoupling", "PMD.UseArrayListInsteadOfVector"})
-    public Vector<String> getKeys() {
-        return new Vector<>(table.getKeys());
+    public Collection<String> getKeys() {
+        return m_table.getKeys();
     }
 
     /**
@@ -79,9 +87,9 @@ public final class Preferences2 {
      * @throws NullPointerException if value is null
      */
     public void putString(String key, String value) {
-        requireNonNull(value, "Provided value was null");
+        requireNonNullParam(value, "value", "putString");
 
-        NetworkTableEntry entry = table.getEntry(key);
+        NetworkTableEntry entry = m_table.getEntry(key);
         entry.setString(value);
         entry.setPersistent();
     }
@@ -93,7 +101,7 @@ public final class Preferences2 {
      * @param value the value
      */
     public void putInt(String key, int value) {
-        NetworkTableEntry entry = table.getEntry(key);
+        NetworkTableEntry entry = m_table.getEntry(key);
         entry.setDouble(value);
         entry.setPersistent();
     }
@@ -105,7 +113,7 @@ public final class Preferences2 {
      * @param value the value
      */
     public void putDouble(String key, double value) {
-        NetworkTableEntry entry = table.getEntry(key);
+        NetworkTableEntry entry = m_table.getEntry(key);
         entry.setDouble(value);
         entry.setPersistent();
     }
@@ -117,7 +125,7 @@ public final class Preferences2 {
      * @param value the value
      */
     public void putFloat(String key, float value) {
-        NetworkTableEntry entry = table.getEntry(key);
+        NetworkTableEntry entry = m_table.getEntry(key);
         entry.setDouble(value);
         entry.setPersistent();
     }
@@ -129,7 +137,7 @@ public final class Preferences2 {
      * @param value the value
      */
     public void putBoolean(String key, boolean value) {
-        NetworkTableEntry entry = table.getEntry(key);
+        NetworkTableEntry entry = m_table.getEntry(key);
         entry.setBoolean(value);
         entry.setPersistent();
     }
@@ -141,7 +149,7 @@ public final class Preferences2 {
      * @param value the value
      */
     public void putLong(String key, long value) {
-        NetworkTableEntry entry = table.getEntry(key);
+        NetworkTableEntry entry = m_table.getEntry(key);
         entry.setDouble(value);
         entry.setPersistent();
     }
@@ -153,7 +161,7 @@ public final class Preferences2 {
      * @return if there is a value at the given key
      */
     public boolean containsKey(String key) {
-        return table.containsKey(key);
+        return m_table.containsKey(key);
     }
 
     /**
@@ -162,14 +170,14 @@ public final class Preferences2 {
      * @param key the key
      */
     public void remove(String key) {
-        table.delete(key);
+        m_table.delete(key);
     }
 
     /**
      * Remove all preferences.
      */
     public void removeAll() {
-        for (String key : table.getKeys()) {
+        for (String key : m_table.getKeys()) {
             if (!".type".equals(key)) {
                 remove(key);
             }
@@ -185,7 +193,7 @@ public final class Preferences2 {
      * @return either the value in the table, or the backup
      */
     public String getString(String key, String backup) {
-        return table.getEntry(key).getString(backup);
+        return m_table.getEntry(key).getString(backup);
     }
 
     /**
@@ -197,7 +205,7 @@ public final class Preferences2 {
      * @return either the value in the table, or the backup
      */
     public int getInt(String key, int backup) {
-        return (int) table.getEntry(key).getDouble(backup);
+        return (int) m_table.getEntry(key).getDouble(backup);
     }
 
     /**
@@ -209,7 +217,7 @@ public final class Preferences2 {
      * @return either the value in the table, or the backup
      */
     public double getDouble(String key, double backup) {
-        return table.getEntry(key).getDouble(backup);
+        return m_table.getEntry(key).getDouble(backup);
     }
 
     /**
@@ -221,7 +229,7 @@ public final class Preferences2 {
      * @return either the value in the table, or the backup
      */
     public boolean getBoolean(String key, boolean backup) {
-        return table.getEntry(key).getBoolean(backup);
+        return m_table.getEntry(key).getBoolean(backup);
     }
 
     /**
@@ -233,7 +241,7 @@ public final class Preferences2 {
      * @return either the value in the table, or the backup
      */
     public float getFloat(String key, float backup) {
-        return (float) table.getEntry(key).getDouble(backup);
+        return (float) m_table.getEntry(key).getDouble(backup);
     }
 
     /**
@@ -245,6 +253,6 @@ public final class Preferences2 {
      * @return either the value in the table, or the backup
      */
     public long getLong(String key, long backup) {
-        return (long) table.getEntry(key).getDouble(backup);
+        return (long) m_table.getEntry(key).getDouble(backup);
     }
 }

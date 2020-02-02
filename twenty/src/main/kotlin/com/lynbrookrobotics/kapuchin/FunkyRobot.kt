@@ -71,6 +71,8 @@ class FunkyRobot : RobotBase() {
                 println("Overran event loop by ${(eventLoopTime - eventLoopPeriod) withDecimals 3}")
         }
     }
+
+    override fun endCompetition() {}
 }
 
 val classPreloading = scope.launch {
