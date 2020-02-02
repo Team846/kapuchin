@@ -30,7 +30,7 @@ deploy {
     artifacts {
         frcJavaArtifact(project.name) {
             targets << "roborio"
-            jvmArgs /*<< '-XX:+UseG1GC'*/ << '-XX:MaxGCPauseMillis=75' << '-Xmx100M' << '-verbose:gc'
+            jvmArgs /*<< '-XX:+UseG1GC'*/ << '-XX:MaxGCPauseMillis=75' << '-Xmx100M'
 //          jvmArgs << '-verbose:class'
 //          jvmArgs << '-verbosegc'
 //          arguments << 'myCustomArgs'
