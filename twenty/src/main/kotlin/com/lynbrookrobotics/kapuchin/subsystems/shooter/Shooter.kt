@@ -1,12 +1,10 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
@@ -40,7 +38,7 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
     }
 
     private fun distance(target: DetectedTarget): L { // Returns distance to target
-        return sqrt(((target.estimate.x * target.estimate.x) + (target.estimate.y * target.estimate.y)).siValue) * 1.Foot
+        TODO("Return the distance to the target")
     }
 
     private fun shooterState(target: DetectedTarget) { // Sets the desired launch angle
@@ -52,9 +50,6 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
             }
             state2 > -1 * maximumAngle && state2 < -1 * minimumAngle -> { // Might need to double check the math on this condition
                 this.launchAngle = highLaunchAngle
-            }
-            else -> {
-                null
             }
         }
     }
