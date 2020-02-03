@@ -1,15 +1,20 @@
 package com.lynbrookrobotics.kapuchin.subsystems.storage
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.revrobotics.CANEncoder
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.EncoderType.kHallSensor
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.I2C
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import java.util.LinkedList
 
 
 class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
@@ -25,6 +30,7 @@ class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponen
 }
 
 
+@Suppress("EXPERIMENTAL_API_USAGE")
 class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>() {
     override val priority: Priority = Priority.Medium
     override val period: Time = 50.milli(Second)
@@ -34,10 +40,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
 
     val rotationHallEffect by hardw { DigitalInput(2) }
 
-
-    val proximity by hardw {
-        DigitalInput(1)
-    }
+    val colorSensor = sensor(RevColorSensor(I2C.Port.kOnboard, 0x52)) { getCurrentValue() stampWith it }
 
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
@@ -46,6 +49,19 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
             defaultPeakCurrentLimit = 35.Ampere
     )
 
-    private val carouselEscId by pref(10)
-    val carouselEsc by hardw { CANSparkMax(carouselEscId, kBrushless) }
+    private val ticksPerRevolution = 5
+
+    private val carouselEscId = 10
+    val carouselEsc by hardw { CANSparkMax(carouselEscId, kBrushless) }.configure {
+        generalSetup(it, escConfig)
+    }
+    val carouselEncoder: CANEncoder by hardw { carouselEsc.getEncoder(kHallSensor, ticksPerRevolution) }
+
+
+    private val magazineState = LinkedList<Boolean>(
+            listOf(false, false, false, false, false)
+    )
+    val magazine = sensor { magazineState stampWith it }
+
+    private val angleBySensor = sensor { carouselEncoder.position * 360.Degree stampWith it }
 }
