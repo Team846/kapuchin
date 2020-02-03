@@ -75,13 +75,13 @@ class TrajectoryFollower(
 
             val newTarget = waypts.next()
             count++
-            println("NEWWWW WAYYYYPOOOINNNNTTT || ${total- count} remaining")
+            println("NEWWWW WAYYYYPOOOINNNNTTT || ${total - count} remaining")
             val dist = distance(newTarget.y, target.y)
             speed = dist / (newTarget.x - target.x)
             println("SPEEEEEEED: ${speed.FootPerSecond}")
             speed = max(speed, 1.Foot / Second)
-            if (speed.siValue.isInfinity || speed.siValue.isNaN) {
-                    speed = 1.Foot / Second
+            if (!speed.siValue.isFinite()) {
+                speed = 1.Foot / Second
             }
             println("CAPPPEEEED: ${speed.FootPerSecond}")
             target = newTarget
