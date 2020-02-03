@@ -1,11 +1,8 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.control_panel.*
-import com.lynbrookrobotics.kapuchin.subsystems.control_panel.ControlPanelPivotState.*
-import info.kunalsheth.units.generated.*
+import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 

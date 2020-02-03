@@ -3,7 +3,7 @@ package com.lynbrookrobotics.kapuchin.choreos
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
@@ -49,7 +49,7 @@ suspend fun Subsystems.setIntakeUp() = supervisorScope {
 
         suspend fun Subsystems.collect() = supervisorScope() {
             try {
-                launch { collectorRollers?.spin(PercentOutput(collectorRollers.hardware.escConfig, collectorRollers.collectSpeed)) }
+                launch { intakeRollers?.spin(PercentOutput(intakeRollers.hardware.escConfig, intakeRollers.collectSpeed)) }
                 launch { carousel?.spin(PercentOutput(carousel.hardware.escConfig, carousel.carouselSpeed)) }
                 freeze()
             } finally {
