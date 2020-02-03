@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.kauailabs.navx.frc.AHRS
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
@@ -16,6 +17,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
+import edu.wpi.first.wpilibj.SPI
 import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -76,6 +78,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.inverted = rightEscInversion
     }
 
+    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }
+
     private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
 
     private val ticksToSerialPort = "kUSB1"
@@ -101,7 +105,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val escPosition = sensor {
         conversions.escOdometry(
                 leftMasterEsc.getSelectedSensorPosition(idx),
-                rightMasterEsc.getSelectedSensorPosition(idx)
+                rightMasterEsc.getSelectedSensorPosition(idx),
+                gyro.yaw.Degree
         )
         conversions.escOdometry.tracking.run { Position(x, y, bearing) } stampWith it
     }

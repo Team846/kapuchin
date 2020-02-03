@@ -17,7 +17,7 @@ fun target(current: Waypt, target: Waypt) = atan2(target.x - current.x, target.y
 suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = startChoreo("Journal") {
 
     val pos by dt.position.readEagerly(2.milli(Second)).withoutStamps
-    val log = File("/tmp/journal.tsv").printWriter().also {
+    val log = File("/home/lvuser/journal.tsv").printWriter().also {
         it.println("x\ty")
         it.println("0.0\t0.0")
         it.flush()

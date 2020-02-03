@@ -16,19 +16,22 @@ interface CartesianTracking : (Length, Length) -> Unit {
 class SimpleVectorTracking(
         private var trackLength: Length,
         init: Position
-) : CartesianTracking {
+) : (Length, Length, Angle?) -> Unit {
 
-    override var x = init.x
-    override var y = init.y
-    override var bearing = init.bearing
+    var x = init.x
+    var y = init.y
+    var bearing = init.bearing
 
-    override fun invoke(sl: Length, sr: Length) {
+    override fun invoke(sl: Length, sr: Length, externalBearing: Angle?) {
         val s = s(sl, sr)
-        val theta = theta(sl, sr, trackLength)
 
         x += s * sin(bearing)
         y += s * cos(bearing)
-        bearing += theta
+        if (externalBearing == null) {
+            bearing += theta(sl, sr, trackLength)
+        } else {
+            bearing = externalBearing
+        }
     }
 }
 

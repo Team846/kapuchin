@@ -107,7 +107,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
 
         private var lastL = 0
         private var lastR = 0
-        operator fun invoke(totalEscTicksL: Int, totalEscTicksR: Int) = conversions.run {
+        operator fun invoke(totalEscTicksL: Int, totalEscTicksR: Int, bearing: Angle? = null) = conversions.run {
             if (noTicksL && totalEscTicksL != 0) log(Level.Debug) {
                 "Received first left tick at $currentTime"
             }.also { noTicksL = false }
@@ -122,7 +122,8 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
                     ),
                     toRightPosition(
                             (totalEscTicksR - lastR) / nativeEncoderCountMultiplier
-                    )
+                    ),
+                    bearing
             )
             lastL = totalEscTicksL
             lastR = totalEscTicksR

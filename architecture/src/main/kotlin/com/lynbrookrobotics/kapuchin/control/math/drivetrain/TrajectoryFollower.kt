@@ -28,16 +28,18 @@ class TrajectoryFollower(
 ) {
 
     // Make waypts relative to origin
+    private var total = 0
+    private var count = 0
     private var lastTarget: Waypt
     private val waypts = with(RotationMatrix(origin.bearing)) {
         trajectory
                 .map { (t, waypt) -> rotate(waypt) + origin.vector stampWith t }
                 .also {
+                    total = it.size - 1
                     lastTarget = it.last().y
-                    println("LAST TARGETTTTTTTTTT:: ${lastTarget}")
                 }
                 .drop(1)
-                .dropLast(1)
+//                .dropLast(1)
                 .iterator()
     }
 
@@ -63,17 +65,25 @@ class TrajectoryFollower(
      * @return the left and right velocities, null if the robot is at the target.
      */
     operator fun invoke(): TwoSided<Velocity>? {
-        println("${distance(position.vector, lastTarget).Foot}")
         if (!waypts.hasNext() && distance(position.vector, lastTarget) < endTolerance) {
-            println("DDONNNEEE WIIITTHHHH WELIFJEWLIFJLEKWFJ")
-
+            println("-------------------------------------------------------")
+            println("CURRENT: ${position.vector}")
+            println("LAST: ${lastTarget}")
+            println("DISTANCE: ${distance(position.vector, lastTarget)}")
             done = true
         } else if (waypts.hasNext() && distance(position.vector, target.y) < tolerance) {
-            println("NNNNNNNEEEEEEEEWWWWWWWW WWWWWWAAAAAAAAYYYYYYYPPPPPPPPOOOOOOOIIIIIIIINNNNNNNNNTTTTTTT")
-            val newTarget = waypts.next()
 
+            val newTarget = waypts.next()
+            count++
+            println("NEWWWW WAYYYYPOOOINNNNTTT || ${total- count} remaining")
             val dist = distance(newTarget.y, target.y)
             speed = dist / (newTarget.x - target.x)
+            println("SPEEEEEEED: ${speed.FootPerSecond}")
+            speed = max(speed, 1.Foot / Second)
+            if (speed.siValue.isInfinity || speed.siValue.isNaN) {
+                    speed = 1.Foot / Second
+            }
+            println("CAPPPEEEED: ${speed.FootPerSecond}")
             target = newTarget
         }
 

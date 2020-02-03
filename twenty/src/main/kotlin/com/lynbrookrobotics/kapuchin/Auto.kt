@@ -21,7 +21,7 @@ fun loadPath(name: String): Path =
                 .toList()
 
 fun loadTempPath(): Path =
-        File("/tmp/journal.tsv")
+        File("/home/lvuser/journal.tsv")
                 .bufferedReader()
                 .lineSequence()
                 .drop(1)
@@ -81,7 +81,7 @@ suspend fun Subsystems.followJournal() = startChoreo("Follow journal") {
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 5.Inch, 3.Inch)
+        drivetrain.followTrajectory(trajectory, 12.Inch, 2.Inch)
         freeze()
     }
 }
