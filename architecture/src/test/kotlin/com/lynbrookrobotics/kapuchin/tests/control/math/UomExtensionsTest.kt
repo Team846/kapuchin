@@ -14,6 +14,11 @@ class UomExtensionsTest {
                     anyDouble.map { it.Foot }.forEach { d ->
                         val l = listOf(a, b, c, d).sorted()
                         b..c `⊆` a..d `is equal to?` true
+                        a..d `⊆` a..d `is equal to?` true
+                        a..c `⊆` b..d `is equal to?` false
+                        b..d `⊆` a..c `is equal to?` false
+                        a..d `⊆` b..c `is equal to?` false
+
                     }
                 }
             }
