@@ -17,17 +17,6 @@ import kotlin.math.sqrt
 
 class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, OffloadedOutput>(hardware) {
 
-    private val shooterHeight by pref(24, Inch)
-    private val maximumAngle by pref(33, Degree) // Maximum entry angle
-    private val minimumAngle by pref(17, Degree) // Minimum entry angle
-    private val lowLaunchAngle by pref(1,Degree)
-    private val highLaunchAngle by pref(2, Degree)
-    private var launchAngle = 0.Degree // Set to either low or high based on vision data
-    private val maxRPM by pref(5676, Rpm)
-    private val momentFactor by pref (1.4, Each)
-    private val rollerRadius by pref (2,Inch)
-    private val ballMass by pref(1, Kilogram)
-    private val rollerInertia by pref(1, Each)
 
     override val fallbackController: ShooterComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
@@ -39,44 +28,7 @@ class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, 
         }
     }
 
-    private fun distance(target: DetectedTarget): L { // Returns distance to target
-        return sqrt(((target.estimate.x * target.estimate.x) + (target.estimate.y * target.estimate.y)).siValue) * 1.Foot
-    }
 
-    private fun shooterState(target: DetectedTarget) { // Sets the desired launch angle
-        val state1 = this.slope(target, lowLaunchAngle)
-        val state2 = this.slope(target, highLaunchAngle)
-        when {
-            state1 < maximumAngle && state1 > minimumAngle -> {
-                this.launchAngle = lowLaunchAngle
-            }
-            state2 > -1 * maximumAngle && state2 < -1 * minimumAngle -> { // Might need to double check the math on this condition
-                this.launchAngle = highLaunchAngle
-            }
-            else -> {
-                null
-            }
-        }
-    }
-
-    private fun slope(target: DetectedTarget, launch: Angle): `∠` { // Returns entry slope of ball
-        val dist = this.distance(target)
-        val slope = (dist * 32.2 * 1.FootPerSecondSquared) / (this.ballVel(target) * this.ballVel(target) * cos(launch) * cos(launch)) // Slope formula
-        return atan(slope)
-    }
-
-    private fun ballVel(target: DetectedTarget): `L⋅T⁻¹` // Returns required ball velocity
-    {
-        this.shooterState(target)
-        val shooterAngle = launchAngle
-        val straightDist = this.distance(target)
-        return 1.FootPerSecond * sqrt(1.0/2.0) * sqrt((straightDist * straightDist * 32.2) / ((straightDist * tan(shooterAngle) - shooterHeight) * cos(shooterAngle))/1.Foot)
-    }
-
-    private fun rollerVel(target: DetectedTarget): `∠⋅T⁻¹` { // Returns required rpm
-        val ballVel = this.ballVel(target)
-        return 1.Rpm * ((ballVel* rollerRadius *(momentFactor * ballMass +(2*MomentOfInertia(rollerInertia.Each))/(rollerRadius * rollerRadius))/MomentOfInertia(rollerInertia.Each)).siValue)
-    }
 
 }
 
