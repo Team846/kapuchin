@@ -7,9 +7,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
-import com.revrobotics.ControlType
 import com.revrobotics.ControlType.*
-import edu.wpi.first.wpilibj.controller.PIDController
 import info.kunalsheth.units.generated.*
 
 sealed class OffloadedOutput {
@@ -38,14 +36,14 @@ sealed class OffloadedOutput {
         esc.set(mode, value)
     }
 
-    fun writeTo(esc: CANSparkMax, pidController: CANPIDController, timeoutMs: Int = 15) {
+    fun writeTo(esc: CANSparkMax, pidController: CANPIDController = esc.pidController, timeoutMs: Int = 15) {
         +esc.setCANTimeout(timeoutMs)
 
         safeties.writeTo(esc)
         gains?.writeTo(esc, pidController)
         config.writeTo(esc, pidController)
 
-        +pidController.setReference(value, when(mode) {
+        +pidController.setReference(value, when (mode) {
             Position -> kPosition
             Velocity -> kVelocity
             PercentOutput -> kDutyCycle
