@@ -25,7 +25,7 @@ import info.kunalsheth.units.math.*
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>(), GenericDrivetrainHardware {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
-    override val syncThreshold = 4.milli(Second)
+    override val syncThreshold = 2.milli(Second)
     override val name = "Drivetrain"
 
     private val idx = 0
@@ -165,8 +165,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         }
 
         odometryTicker.runOnTick { time ->
-            t2sPosition?.optimizedRead(time, period)
-            escPosition.optimizedRead(time, period)
+            t2sPosition?.optimizedRead(time, 5.milli(Second))
+            escPosition.optimizedRead(time, 5.milli(Second))
         }
     }
 }

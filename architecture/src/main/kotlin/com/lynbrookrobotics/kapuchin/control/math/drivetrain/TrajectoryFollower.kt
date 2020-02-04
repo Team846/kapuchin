@@ -2,9 +2,17 @@ package com.lynbrookrobotics.kapuchin.control.math.drivetrain
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.Direction.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+
+/**
+ * The direction the drivetrain should follow a [Trajectory]
+ *
+ * @author Andy
+ */
+enum class Direction { Forward, Backward }
 
 /**
  * Given a differential drivetrain and a [Trajectory], calculate the left and right velocity outputs.
@@ -14,6 +22,7 @@ import info.kunalsheth.units.math.*
  * @property drivetrain a tank drive drivetrain component.
  * @property tolerance the tolerance to move onto the next waypoint.
  * @property endTolerance the tolerance to end at the final waypoint.
+ * @property direction the direction the drivetrain should follow the trajectory.
  * @param scope sensor scope of the routine.
  * @param trajectory the trajectory to follow.
  * @param origin the starting position of the robot.
@@ -22,6 +31,7 @@ class TrajectoryFollower(
         private val drivetrain: GenericDrivetrainComponent,
         private val tolerance: Length,
         private val endTolerance: Length,
+        private val direction: Direction,
         scope: BoundSensorScope,
         trajectory: Trajectory,
         origin: Position
@@ -70,7 +80,6 @@ class TrajectoryFollower(
             println("DISTANCE: ${distance(position.vector, lastTarget)}")
             done = true
         } else if (waypts.hasNext() && distance(position.vector, target.y) < tolerance) {
-
             val newTarget = waypts.next()
             val dist = distance(newTarget.y, target.y)
             speed = dist / (newTarget.x - target.x)
@@ -82,11 +91,15 @@ class TrajectoryFollower(
         }
 
         val targetA = target(position.vector, target.y)
-        val (velocityL, velocityR) = uni.speedAngleTarget(
+        var (velocityL, velocityR) = uni.speedAngleTarget(
                 speed,
                 targetA
         ).first
 
+        if (direction == Backward) {
+            // negate and switch left and right
+            velocityL = -velocityR.also { velocityR = -velocityL }
+        }
         return TwoSided(velocityL, velocityR).takeIf { !done }
     }
 }

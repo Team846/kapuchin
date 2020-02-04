@@ -1,8 +1,11 @@
 package com.lynbrookrobotics.kapuchin.routines
 
+import com.ctre.phoenix.motorcontrol.NeutralMode.Brake
+import com.ctre.phoenix.motorcontrol.NeutralMode.Coast
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.Direction.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
@@ -30,6 +33,10 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = start
     val startTime = currentTime
 
     choreography {
+        setOf(dt.leftMasterEsc, dt.rightMasterEsc, dt.leftSlaveEsc, dt.rightSlaveEsc).forEach {
+            it.setNeutralMode(Coast)
+        }
+
         log.use {
             while (isActive) {
                 val (x, y) = startingRot.rotate(pos.vector - startingLoc)
@@ -40,13 +47,17 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = start
                     last = pos
                 }
 
-                delay(100.milli(Second))
+                delay(50.milli(Second))
             }
 
             val (x, y) = startingRot.rotate(pos.vector - startingLoc)
             it.println("${x.Foot}\t${y.Foot}")
         }
         log.close()
+
+        setOf(dt.leftMasterEsc, dt.rightMasterEsc, dt.leftSlaveEsc, dt.rightSlaveEsc).forEach {
+            it.setNeutralMode(Brake)
+        }
     }
 }
 
@@ -54,11 +65,12 @@ suspend fun DrivetrainComponent.followTrajectory(
         trajectory: Trajectory,
         tolerance: Length,
         endTolerance: Length,
+        direction: Direction = Forward,
         origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
 ) = startRoutine("Read Journal") {
 
     val follower = TrajectoryFollower(
-        this@followTrajectory, tolerance, endTolerance, this@startRoutine, trajectory, origin
+            this@followTrajectory, tolerance, endTolerance, direction, this@startRoutine, trajectory, origin
     )
 
     controller {

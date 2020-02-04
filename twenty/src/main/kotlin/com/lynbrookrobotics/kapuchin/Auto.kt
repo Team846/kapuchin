@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.Direction.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import java.io.File
