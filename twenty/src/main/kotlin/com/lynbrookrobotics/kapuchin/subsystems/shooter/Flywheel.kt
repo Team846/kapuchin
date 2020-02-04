@@ -16,18 +16,18 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val outerGoalEntryTolerance by pref(65, Degree) // The magnitude of entry tolerance is 65 Deg. if aiming for the middle
 
 
-    val hexagonHeight by pref(30, Inch) // "height" of outer goal
+    val hexagonHeight by pref(30, Inch) // "diameter" of outer goal
     val outerInnerDiff by pref(25.25, Inch) // Distance between outer and inner goal
 
     val boundingCircleRadius by pref(12.252, Inch) // Feasibility circle of outer goal
 
-    val height by pref(24, Inch)
+    val height by pref(24, Inch) // Turret height
     val maxOmega by pref(5676, Rpm)
     val momentFactor by pref(1.4)
     val ballMass by pref(0.141748, Kilogram)
     val rollerRadius by pref(2, Inch)
     val momentOfInertia by pref(1, PoundFootSquared) // TODO
-    val targetHeight by pref(98.25, Inch) // TODO
+    val targetHeight by pref(98.25, Inch) // Height from base to center of outer goal
 
     override val fallbackController: FlywheelComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
