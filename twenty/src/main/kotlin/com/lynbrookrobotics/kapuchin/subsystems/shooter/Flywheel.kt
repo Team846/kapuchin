@@ -13,22 +13,13 @@ import info.kunalsheth.units.math.*
 
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware) {
 
-    val outerGoalEntryTolerance by pref {
-        val min by pref(-50, Degree) // TODO
-        val max by pref(50, Degree) // TODO
-        ({min..max})
-    }
+    val outerGoalEntryTolerance by pref(65, Degree) // The magnitude of entry tolerance is 65 Deg. if aiming for the middle
 
-    val innerGoalEntryTolerance by pref {
-        val min by pref(-20, Degree) // TODO
-        val max by pref(20, Degree) // TODO
-        ({min..max})
-    }
 
-    val hexagonHeight by pref(30, Inch)
+    val hexagonHeight by pref(30, Inch) // "height" of outer goal
     val outerInnerDiff by pref(25.25, Inch) // Distance between outer and inner goal
 
-    val boundingCircle by pref(12.252, Inch) // Feasibility circle of outer goal
+    val boundingCircleRadius by pref(12.252, Inch) // Feasibility circle of outer goal
 
     val height by pref(24, Inch)
     val maxOmega by pref(5676, Rpm)
