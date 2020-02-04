@@ -14,6 +14,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -41,7 +42,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val hookSlider: HookSliderComponent?,
                  val lift: LiftComponent?,
                  val climber: ClimberComponent?,
-                 val limelight: LimelightHardware?
+                 val limelight: LimelightComponent?
 ) : Named by Named("Subsystems") {
 
     suspend fun teleop() {
@@ -52,7 +53,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { intakeTeleop() },
                 { liftTeleop() },
                 { climberTeleop() },
-                { rumbleTeleop() }
+                { rumbleTeleop() },
+                {limelight?.autoZoom()}
         )
         System.gc()
     }
@@ -137,7 +139,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val hookSliderAsync = i(initHookSlider) { HookSliderComponent(HookSliderHardware()) }
                 val liftAsync = i(initLift) { LiftComponent(LiftHardware()) }
                 val climberAsync = i(initClimber) { ClimberComponent(ClimberHardware()) }
-                val limelightAsync = i(initLimelight) { LimelightHardware() }
+                val limelightAsync = i(initLimelight) { LimelightComponent(LimelightHardware() )}
 
                 instance = Subsystems(
                         drivetrainAsync.await(),
@@ -190,7 +192,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     i(initHookSlider) { t { HookSliderComponent(HookSliderHardware()) } },
                     i(initLift) { t { LiftComponent(LiftHardware()) } },
                     i(initClimber) { t { ClimberComponent(ClimberHardware()) } },
-                    i(initLimelight) { t { LimelightHardware() } }
+                    i(initLimelight) { t { LimelightComponent(LimelightHardware()) } }
             )
         }
     }
