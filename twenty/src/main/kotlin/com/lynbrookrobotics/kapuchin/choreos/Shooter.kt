@@ -9,7 +9,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.sqrt
-import kotlin.math.atan
 
 suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") {
 
@@ -38,7 +37,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
         val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
         val dist = /*distanceToTarget(target)*/0.Foot // TODO
         val slope = ((-1 * dist * 1.EarthGravity) / (ballVelocity * ballVelocity * cos(launchA) * cos(launchA))) + tan(launchA)
-        return atan(slope)
+        return atan(slope).abs
     }
 
     fun shotState(
@@ -71,7 +70,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     fun innerGoalPossible(flywheel: FlywheelComponent): Boolean {
         val horizontal  = offsets(flywheel).first
         val vertical = offsets(flywheel).second
-        return ((horizontal * horizontal) + (vertical * vertical)) < flywheel.boundingCircle * flywheel.boundingCircle
+        return ((horizontal * horizontal) + (vertical * vertical)) < flywheel.boundingCircleRadius * flywheel.boundingCircleRadius
     }
 
     choreography {
@@ -84,19 +83,23 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
             // TODO check if target is physically impossible to shoot to
             val downInner = target.inner
                     ?.let { shotState(flywheel, hood, HoodState.Down, it) }
-                    ?.let { it.second in flywheel.innerGoalEntryTolerance && it.first < flywheel.maxOmega }
+                    ?.let { it.first < flywheel.maxOmega
+                            && it.second in entryAngleLimits(flywheel).first..entryAngleLimits(flywheel).second
+                            && innerGoalPossible(flywheel) }
                     ?: false
             val downOuter = target.outer
                     ?.let { shotState(flywheel, hood, HoodState.Down, it) }
-                    ?.let { it.second in flywheel.innerGoalEntryTolerance && it.first < flywheel.maxOmega }
+                    ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
                     ?: false
             val upInner = target.inner
                     ?.let { shotState(flywheel, hood, HoodState.Up, it) }
-                    ?.let { it.second in flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
+                    ?.let { it.first < flywheel.maxOmega
+                            && it.second in entryAngleLimits(flywheel).first..entryAngleLimits(flywheel).second
+                            && innerGoalPossible(flywheel) }
                     ?: false
             val upOuter = target.outer
                     ?.let { shotState(flywheel, hood, HoodState.Up, it) }
-                    ?.let { it.second in flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
+                    ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
                     ?: false
 
             /*
@@ -136,8 +139,6 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 }
 =======
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.routines.*
-import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
