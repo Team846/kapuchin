@@ -35,8 +35,8 @@ class LiftConversions(val hardware: LiftHardware) : Named by Named("Conversions"
 
             val safeties = OffloadedEscSafeties(
                     syncThreshold = hardware.syncThreshold,
-                    min = native.native(min.first).toInt(),
-                    max = native.native(max.first).toInt()
+                    min = native.native(min.first),
+                    max = native.native(max.first)
             )
 
             native to safeties

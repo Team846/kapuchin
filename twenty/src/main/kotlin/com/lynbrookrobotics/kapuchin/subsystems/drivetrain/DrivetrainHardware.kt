@@ -55,7 +55,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val conversions = DrivetrainConversions(this)
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
-        setupMaster(it, escConfig, QuadEncoder)
+        setupMaster(it, escConfig, QuadEncoder, true)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
@@ -67,7 +67,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
-        setupMaster(it, escConfig, QuadEncoder)
+        setupMaster(it, escConfig, QuadEncoder, true)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
