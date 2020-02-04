@@ -14,16 +14,21 @@ import info.kunalsheth.units.math.*
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware) {
 
     val outerGoalEntryTolerance by pref {
-        val min by pref(-50, Degree)
-        val max by pref(50, Degree)
+        val min by pref(-50, Degree) // TODO
+        val max by pref(50, Degree) // TODO
         ({min..max})
     }
 
     val innerGoalEntryTolerance by pref {
-        val min by pref(-20, Degree)
-        val max by pref(20, Degree)
+        val min by pref(-20, Degree) // TODO
+        val max by pref(20, Degree) // TODO
         ({min..max})
     }
+
+    val hexagonHeight by pref(30, Inch)
+    val outerInnerDiff by pref(25.25, Inch) // Distance between outer and inner goal
+
+    val boundingCircle by pref(12.252, Inch) // Feasibility circle of outer goal
 
     val height by pref(24, Inch)
     val maxOmega by pref(5676, Rpm)
@@ -31,7 +36,7 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val ballMass by pref(0.141748, Kilogram)
     val rollerRadius by pref(2, Inch)
     val momentOfInertia by pref(1, PoundFootSquared) // TODO
-    val targetHeight by pref(100, Inch) // TODO
+    val targetHeight by pref(98.25, Inch) // TODO
 
     override val fallbackController: FlywheelComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
