@@ -74,14 +74,19 @@ fun pathToTrajectory(
 
     val mergedTrajectory = mutableListOf(path.first() stampWith 0.Second)
     var totalT = 0.Second
+    var prevV = 0.Foot / Second
     for (i in 1 until path.size) {
         val f = forwardSegments[i]
         val r = reverseSegments[i]
         val betterSegment = if (f.velocity <= r.velocity) f else r
 
-        if (betterSegment.velocity > 0.Foot / Second)
-            totalT += distance(path[i], path[i - 1]) / betterSegment.velocity
+        totalT += if (betterSegment.velocity == 0.Foot / Second)
+            distance(path[i], path[i - 1]) / prevV
+        else
+            distance(path[i], path[i - 1]) / betterSegment.velocity
 
+
+        prevV = betterSegment.velocity
         mergedTrajectory += betterSegment.waypt stampWith totalT
     }
 
@@ -154,7 +159,7 @@ private fun oneWayAccelCap(
         val dx = distance(s2.waypt, s1.waypt)
         var dt = dx / (s1.velocity + (min(s2.velocity, s3.velocity) - s1.velocity) / 2)
 
-        s2.velocity = min(s2.velocity, s3.velocity)
+        s2.velocity = dx / dt
         s2.omega = dthetas[i] / dt
 
         // Cap linear acceleration

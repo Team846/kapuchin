@@ -38,15 +38,13 @@ class TrajectoryFollower(
                     total = it.size - 1
                     lastTarget = it.last().y
                 }
-                .drop(1)
-//                .dropLast(1)
                 .iterator()
     }
 
     private var target = waypts.next()
     private var done = false
 
-    private var speed = distance(Waypt(0.Foot, 0.Foot), target.y) / target.x
+    private var speed = 0.Foot / Second
 
     private val uni = UnicycleDrive(drivetrain, scope)
     private val position by with(scope) { drivetrain.hardware.position.readOnTick.withoutStamps }
@@ -74,16 +72,12 @@ class TrajectoryFollower(
         } else if (waypts.hasNext() && distance(position.vector, target.y) < tolerance) {
 
             val newTarget = waypts.next()
-            count++
-            println("NEWWWW WAYYYYPOOOINNNNTTT || ${total - count} remaining")
             val dist = distance(newTarget.y, target.y)
             speed = dist / (newTarget.x - target.x)
-            println("SPEEEEEEED: ${speed.FootPerSecond}")
-            speed = max(speed, 1.Foot / Second)
-            if (!speed.siValue.isFinite()) {
+
+            if (speed < 1.Foot / Second || !speed.siValue.isFinite()) {
                 speed = 1.Foot / Second
             }
-            println("CAPPPEEEED: ${speed.FootPerSecond}")
             target = newTarget
         }
 

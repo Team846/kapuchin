@@ -10,12 +10,12 @@ import kotlin.math.sin
 class DeleteMe {
 
     @Test
-    fun `awefeafdjwfffaeffefaw`() {
+    fun `awefefafdjwffffaeffefjaw`() {
         val vMax = 10.Foot / Second
         val omegaMax = 4.Radian / Second
         val aMax = 4.Foot / Second / Second
 
-        val path = Thread.currentThread()
+        val path1 = Thread.currentThread()
                 .contextClassLoader
                 .getResourceAsStream("path.tsv")
                 .bufferedReader()
