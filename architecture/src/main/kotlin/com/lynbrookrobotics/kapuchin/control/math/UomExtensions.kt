@@ -35,7 +35,11 @@ inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊆`(that: ClosedRange<Q>): Boole
 
 inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊂`(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive < that.endInclusive
 
+inline infix fun <Q : Quan<Q>> ClosedRange<Q>.minContact(that: ClosedRange<Q>): Boolean = this.start == that.start && this.endInclusive < that.endInclusive
+
+inline infix fun <Q : Quan<Q>> ClosedRange<Q>.maxContact(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive == that.endInclusive
 /**
+ *
  * Returns the closest, largest range to `current`
  *
  * @author Alvyn
