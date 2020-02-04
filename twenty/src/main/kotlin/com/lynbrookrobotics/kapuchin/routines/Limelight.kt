@@ -12,6 +12,9 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
     val visionTarget by hardware.readings.readEagerly.withoutStamps
     val currentPipeline by hardware.pipeline.readEagerly.withoutStamps
 
+    infix fun <Q : Quan<Q>> ClosedRange<Q>.minContact(that: ClosedRange<Q>): Boolean = this.start == that.start && this.endInclusive < that.endInclusive
+    infix fun <Q : Quan<Q>> ClosedRange<Q>.maxContact(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive == that.endInclusive
+
     controller {
         visionTarget?.run {
             if (currentPipeline == ZoomOut) {
@@ -46,7 +49,51 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
 
                 if (insideBoxBoundsX `⊆` targetBoxBoundsX && insideBoxBoundsY `⊆` targetBoxBoundsY) {
                     ZoomInPanMid
-                } else ZoomOut
+                } else if (insideBoxBoundsX `⊆` targetBoxBoundsX && targetBoxBoundsY.minContact(insideBoxBoundsY)) {
+                    ZoomInPanLow
+                } else if (insideBoxBoundsX `⊆` targetBoxBoundsX && targetBoxBoundsY.maxContact(insideBoxBoundsY)) {
+                    ZoomInPanHigh
+                } else {
+                    ZoomOut
+                }
+            } else if (currentPipeline == ZoomInPanHigh) {
+                val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
+                val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
+
+                val angleToPixelsX = zoomInResolution.x / zoomInFov.x
+                val centerInPixX = tx * angleToPixelsX
+                val targetBoxBoundsX = centerInPixX `±` (thor / 2)
+
+                val angleToPixelsY = zoomInResolution.y / zoomInFov.y
+                val centerInPixY = ty * angleToPixelsY
+                val targetBoxBoundsY = (centerInPixY) `±` (tvert / 2)
+
+                if (insideBoxBoundsX `⊆` targetBoxBoundsX && insideBoxBoundsY `⊆` targetBoxBoundsY) {
+                    ZoomInPanHigh
+                } else if (insideBoxBoundsX `⊆` targetBoxBoundsX && targetBoxBoundsY.minContact(insideBoxBoundsY)) {
+                    ZoomInPanMid
+                } else {
+                    ZoomOut
+                }
+            } else if (currentPipeline == ZoomInPanLow) {
+                val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
+                val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
+
+                val angleToPixelsX = zoomInResolution.x / zoomInFov.x
+                val centerInPixX = tx * angleToPixelsX
+                val targetBoxBoundsX = centerInPixX `±` (thor / 2)
+
+                val angleToPixelsY = zoomInResolution.y / zoomInFov.y
+                val centerInPixY = ty * angleToPixelsY
+                val targetBoxBoundsY = (centerInPixY) `±` (tvert / 2)
+
+                if (insideBoxBoundsX `⊆` targetBoxBoundsX && insideBoxBoundsY `⊆` targetBoxBoundsY) {
+                    ZoomInPanLow
+                } else if (insideBoxBoundsX `⊆` targetBoxBoundsX && targetBoxBoundsY.maxContact(insideBoxBoundsY)) {
+                    ZoomInPanMid
+                } else {
+                    ZoomOut
+                }
             } else ZoomOut
         } ?: ZoomOut
     }
