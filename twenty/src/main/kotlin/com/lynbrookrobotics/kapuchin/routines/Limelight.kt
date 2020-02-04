@@ -15,7 +15,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
     controller {
         visionTarget?.run {
             if (currentPipeline == ZoomOut) {
-                val insideBoxResolution = zoomOutResolution / zoomMultiplier
+                val insideBoxResolution = zoomOutResolution / (zoomMultiplier * 1.0)
 
                 val insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomOutSafetyZone)
                 val highInsideBoxBoundsY = 0.Pixel..(insideBoxResolution.y - zoomOutSafetyZone)
@@ -28,9 +28,9 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 val angleToPixelsY = zoomOutResolution.y / zoomOutFov.y
                 val targetBoxBoundsY = (ty * angleToPixelsY) `±` (tvert / 2)
 
-                if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in midInsideBoxBoundsY) ZoomInPanMid
-                else if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in highInsideBoxBoundsY) ZoomInPanHigh
-                else if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in lowInsideBoxBoundsY) ZoomInPanLow
+                if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` midInsideBoxBoundsY) ZoomInPanMid
+                else if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` highInsideBoxBoundsY) ZoomInPanHigh
+                else if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` lowInsideBoxBoundsY) ZoomInPanLow
                 else ZoomOut
             } else if (currentPipeline == ZoomInPanMid) {
                 val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
@@ -44,8 +44,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 val centerInPixY = ty * angleToPixelsY
                 val targetBoxBoundsY = (centerInPixY) `±` (tvert / 2)
 
-                if (targetBoxBoundsX in insideBoxBoundsX && targetBoxBoundsY in insideBoxBoundsY) {
-
+                if (insideBoxBoundsX `⊆` targetBoxBoundsX && insideBoxBoundsY `⊆` targetBoxBoundsY) {
                     ZoomInPanMid
                 } else ZoomOut
             } else ZoomOut
