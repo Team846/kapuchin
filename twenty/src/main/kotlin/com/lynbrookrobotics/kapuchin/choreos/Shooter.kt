@@ -45,10 +45,33 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
             flywheel: FlywheelComponent, hood: HoodComponent,
             hoodState: HoodState, target: Position
     ): Pair<AngularVelocity, Angle> {
-        val targetHeight = 0.Foot //TODO
+        val targetHeight = flywheel.targetHeight - flywheel.height
         val (ballVelocity, flywheelOmega) = requiredVelocities(flywheel, hood, hoodState)
         val entryAngle = targetEntryAngle(hood, hoodState, ballVelocity)
         return flywheelOmega to entryAngle
+    }
+
+    fun offsets(flywheel: FlywheelComponent): Pair<Length, Length> { // Pair(Horizontal, Vertical)
+        val skew = 0.Degree // TODO
+        val dist = 0.Inch // TODO
+
+        val horizontal =  flywheel.outerInnerDiff * tan(skew)
+        val vertical = with(flywheel) {
+            (outerInnerDiff * (targetHeight - height)) / (dist * cos(skew))
+        }
+        return horizontal to vertical
+    }
+
+    fun entryAngleLimits(flywheel: FlywheelComponent): Pair<Angle, Angle> {
+        val downward = atan(((flywheel.hexagonHeight / 2) + offsets(flywheel).second) / flywheel.outerInnerDiff) // approach from below
+        val upward = 90.Degree - atan(flywheel.outerInnerDiff / ((flywheel.hexagonHeight / 2) - offsets(flywheel).second)) // approach from upward
+        return downward to upward
+    }
+
+    fun innerGoalPossible(flywheel: FlywheelComponent): Boolean {
+        val horizontal  = offsets(flywheel).first
+        val vertical = offsets(flywheel).second
+        return ((horizontal * horizontal) + (vertical * vertical)) < flywheel.boundingCircle * flywheel.boundingCircle
     }
 
     choreography {
