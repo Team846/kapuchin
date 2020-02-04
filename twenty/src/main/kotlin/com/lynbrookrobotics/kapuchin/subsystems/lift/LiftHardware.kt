@@ -13,6 +13,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.roundToInt
 
 class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     override val name: String = "Lift"
@@ -37,7 +38,7 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
     )
 
     val esc by hardw { TalonSRX(escCanId) }.configure {
-        setupMaster(it, escConfig, FeedbackDevice.Analog)
+        setupMaster(it, escConfig, FeedbackDevice.Analog, false)
 
         it.inverted = invert
         it.setSensorPhase(invertSensor)
@@ -48,9 +49,9 @@ class LiftHardware : SubsystemHardware<LiftHardware, LiftComponent>() {
         it.getAllConfigs(configs, configTimeout)
 
         configs.reverseSoftLimitThreshold ==
-                conversions.safeties.min &&
+                conversions.safeties.min?.roundToInt() &&
                 configs.forwardSoftLimitThreshold ==
-                conversions.safeties.max
+                conversions.safeties.max?.roundToInt()
     }
 
     val nativeGrapher = graph("Native", Each)
