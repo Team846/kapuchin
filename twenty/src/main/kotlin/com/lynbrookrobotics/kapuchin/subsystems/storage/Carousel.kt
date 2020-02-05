@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.I2C
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import java.util.LinkedList
 
 
 class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
@@ -25,7 +24,7 @@ class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponen
     }
 
     override fun CarouselHardware.output(value: OffloadedOutput) {
-        value.writeTo(carouselEsc)
+        value.writeTo(carouselEsc, carouselEscPidController)
     }
 }
 
@@ -55,13 +54,13 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val carouselEsc by hardw { CANSparkMax(carouselEscId, kBrushless) }.configure {
         generalSetup(it, escConfig)
     }
-    val carouselEncoder: CANEncoder by hardw { carouselEsc.getEncoder(kHallSensor, ticksPerRevolution) }
+    val carouselEscPidController by hardw { carouselEsc.pidController }
+    val carouselEncoder: CANEncoder by hardw { carouselEsc.getEncoder(kHallSensor, ticksPerRevolution) }.configure {
+        it.positionConversionFactor = 360.0
+    }
 
-
-    private val magazineState = LinkedList<Boolean>(
-            listOf(false, false, false, false, false)
-    )
+    private val magazineState = booleanArrayOf(false, false, false, false, false)
     val magazine = sensor { magazineState stampWith it }
 
-    private val angleBySensor = sensor { carouselEncoder.position * 360.Degree stampWith it }
+    private val angleBySensor = sensor { carouselEncoder.position.Degree stampWith it }
 }

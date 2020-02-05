@@ -7,9 +7,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
-import com.revrobotics.ControlType
 import com.revrobotics.ControlType.*
-import edu.wpi.first.wpilibj.controller.PIDController
 import info.kunalsheth.units.generated.*
 
 sealed class OffloadedOutput {
