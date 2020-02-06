@@ -7,6 +7,6 @@ suspend fun ControlPanelPivotComponent.set(state: ControlPanelPivotState) = star
     controller { state }
 }
 
-suspend fun ControlPanelSpinnerComponent.spin(target: OffloadedOutput) = startRoutine("Spin") {
+suspend fun ControlPanelSpinnerComponent.spinForThreeTurns(target: OffloadedOutput) = startRoutine("Spin") {
     controller { target }
 }

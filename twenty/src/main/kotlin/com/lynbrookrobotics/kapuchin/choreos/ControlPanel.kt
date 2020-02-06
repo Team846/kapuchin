@@ -16,13 +16,12 @@ suspend fun Subsystems.controlPanelTeleop() = startChoreo("Control Panel Teleop"
     }
 }
 
-suspend fun Subsystems.spin() = coroutineScope {
+suspend fun Subsystems.firstStage() = coroutineScope {
+
     try {
-        launch {
-            controlPanelPivot?.set(ControlPanelPivotState.Up)
-
-
-        }
+        launch { controlPanelPivot?.set(ControlPanelPivotState.Up) }
+        controlPanelSpinner.spinForThreeTurns()
+        freeze()
     } finally {
 
     }
