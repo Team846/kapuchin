@@ -19,13 +19,11 @@ class SimpleVectorTracking(
     override fun invoke(sl: Length, sr: Length, externalBearing: Angle?) {
         val s = s(sl, sr)
 
+        if (externalBearing != null) bearing = externalBearing
+
         x += s * sin(bearing)
         y += s * cos(bearing)
-        if (externalBearing == null) {
-            bearing += theta(sl, sr, trackLength)
-        } else {
-            bearing = externalBearing
-        }
+        bearing += theta(sl, sr, trackLength)
     }
 }
 

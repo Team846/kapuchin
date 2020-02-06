@@ -6,11 +6,13 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.kauailabs.navx.frc.AHRS
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -25,7 +27,7 @@ import info.kunalsheth.units.math.*
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>(), GenericDrivetrainHardware {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
-    override val syncThreshold = 2.milli(Second)
+    override val syncThreshold = 3.milli(Second)
     override val name = "Drivetrain"
 
     private val idx = 0
@@ -78,7 +80,16 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.inverted = rightEscInversion
     }
 
-    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }
+    val driftTolerance by pref(0.2, DegreePerSecond)
+    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
+        while(it.isCalibrating()) {
+            log(Debug) { "Navx is calibrating" }
+            Thread.sleep(1000)
+        }
+        it.zeroYaw()
+    }.verify("Gyro should not drift after calibration") {
+        it.rate.DegreePerSecond in `±`(driftTolerance)
+    }
 
     private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
 
