@@ -11,7 +11,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, Subsystems.uiBaselineTicker) {
+class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware) {
 
     private fun targetPosition(sample: LimelightReading) = sample.run {
         val aspect = thor / tvert
