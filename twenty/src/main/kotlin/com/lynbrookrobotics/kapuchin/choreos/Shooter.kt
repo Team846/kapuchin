@@ -17,7 +17,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
             hoodState: HoodState, target: DetectedTarget
     ): Pair<Velocity, AngularVelocity> {
 
-        target.outer?.let {
+        target.outerGoalPos?.let {
             val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
 
 
@@ -39,7 +39,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     }
 
     fun targetEntryAngle(hood: HoodComponent, hoodState: HoodState, ballVelocity: Velocity, target: DetectedTarget): Angle {
-        target.outer?.let {
+        target.outerGoalPos?.let {
             val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
             val dist = Length(sqrt((it.x * it.x + it.y * it.y).siValue))
             val slope = ((-1 * dist * 1.EarthGravity) / (ballVelocity * ballVelocity * cos(launchA) * cos(launchA))) + tan(launchA)
@@ -61,7 +61,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
     fun offsets(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Length, Length> { // Inner goal offsets
 
-        target.outer?.let {
+        target.outerGoalPos?.let {
             val dist = Length(sqrt((it.x * it.x + (it.y * it.y)).siValue))
             val horizontal = flywheel.outerInnerDiff * tan(it.bearing)
             val vertical = with(flywheel)   {
@@ -88,37 +88,45 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     }
 
 
-
-
     choreography {
         // TODO get target, do nothing if null
         if (limelight == null) return@choreography
-        val target = DetectedTarget(Position(0.Foot, 0.Foot, 0.Degree), Position(0.Foot, 0.Foot, 0.Degree))
+        val reading by limelight.hardware.readings.readEagerly().withoutStamps
 
-        if (flywheel != null && hood != null) {
-            // TODO check if target is physically impossible to shoot to
-            val downInner = target.inner
-                    ?.let { shotState(flywheel, hood, HoodState.Down, it, target) }
-                    ?.let { it.first < flywheel.maxOmega
-                            && it.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
-                            && innerGoalPossible(flywheel, target) }
-                    ?: false
-            val downOuter = target.outer
-                    ?.let { shotState(flywheel, hood, HoodState.Down, it, target) }
-                    ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
-                    ?: false
-            val upInner = target.inner
-                    ?.let { shotState(flywheel, hood, HoodState.Up, it, target) }
-                    ?.let { it.first < flywheel.maxOmega
-                            && it.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
-                            && innerGoalPossible(flywheel, target) }
-                    ?: false
-            val upOuter = target.outer
-                    ?.let { shotState(flywheel, hood, HoodState.Up, it, target) }
-                    ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
-                    ?: false
+        reading?.let {
+            val skew = it.tx
+            val limelight = LimelightComponent(limelight.hardware)
+            val target = limelight.innerGoalPos(it, skew)
 
-            /*
+
+            if (flywheel != null && hood != null) {
+                // TODO check if target is physically impossible to shoot to
+                val downInner = target.innerGoalPos
+                        ?.let { shotState(flywheel, hood, HoodState.Down, it, target) }
+                        ?.let {
+                            it.first < flywheel.maxOmega
+                                    && it.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
+                                    && innerGoalPossible(flywheel, target)
+                        }
+                        ?: false
+                val downOuter = target.outerGoalPos
+                        ?.let { shotState(flywheel, hood, HoodState.Down, it, target) }
+                        ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
+                        ?: false
+                val upInner = target.innerGoalPos
+                        ?.let { shotState(flywheel, hood, HoodState.Up, it, target) }
+                        ?.let {
+                            it.first < flywheel.maxOmega
+                                    && it.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
+                                    && innerGoalPossible(flywheel, target)
+                        }
+                        ?: false
+                val upOuter = target.outerGoalPos
+                        ?.let { shotState(flywheel, hood, HoodState.Up, it, target) }
+                        ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
+                        ?: false
+
+                /*
             DownInner | UpInner | DownOuter | UpOuter || Hood |  Goal |
             ----------|---------|-----------|---------||------|-------|
                 n     |    n    |     n     |    n    ||      |       |
@@ -139,9 +147,9 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
                 y     |    y    |     y     |    y    ||  <∠  | inner | choose better entry angle
              */
 
-        }
+            }
 
-        /*
+            /*
          * Launch flywheel spinup
          * Launch turret position set
          * Launch hood state set
@@ -150,6 +158,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
          *
          * If shooting multiple
          */
+        }
     }
 
 }
