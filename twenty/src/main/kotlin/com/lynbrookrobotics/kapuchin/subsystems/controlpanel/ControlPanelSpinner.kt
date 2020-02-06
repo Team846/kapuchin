@@ -8,6 +8,8 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.revrobotics.CANEncoder
+import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.EncoderType
@@ -16,12 +18,13 @@ import info.kunalsheth.units.generated.*
 
 class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, OffloadedOutput>(hardware) {
     override val fallbackController: ControlPanelSpinnerComponent.(Time) -> OffloadedOutput = {
-        PercentOutput(hardware.escConfig, 0.Percent) }
+        PercentOutput(hardware.escConfig, 0.Percent)
+    }
 
     val spinSpeed by pref(6, Volt)
 
     override fun ControlPanelSpinnerHardware.output(value: OffloadedOutput) {
-        value.writeTo(spinnerEsc)
+        value.writeTo(spinnerEsc, spinnerPidController)
     }
 }
 
@@ -45,10 +48,11 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
 
 
     private val controlWheelEscId by pref(10)
-    val spinnerEsc by hardw { CANSparkMax(controlWheelEscId, kBrushless)}.configure {
+    val spinnerEsc by hardw { CANSparkMax(controlWheelEscId, kBrushless) }.configure {
         generalSetup(it, escConfig)
     }
-    val spinnerEncoder by hardw { spinnerEsc.getEncoder(EncoderType.kHallSensor, ticksPerRevolution) }
+    val spinnerEncoder: CANEncoder by hardw { spinnerEsc.getEncoder(EncoderType.kHallSensor, ticksPerRevolution) }
+    val spinnerPidController: CANPIDController by hardw { spinnerEsc.pidController }
 
     private val leftColorSensorAddress by pref(6)
     val leftColorSensor = sensor(RevColorSensor(I2C.Port.kOnboard, leftColorSensorAddress), readColorSensor)

@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANEncoder
+import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.EncoderType.kHallSensor
@@ -18,6 +19,8 @@ import info.kunalsheth.units.math.*
 
 class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
     val carouselSpeed by pref(6, Percent)
+
+    val slotDetectTolerance by pref(2, Degree)
 
     override val fallbackController: CarouselComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
@@ -48,19 +51,26 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
             defaultPeakCurrentLimit = 35.Ampere
     )
 
+    val positionGains by pref {
+        val kP by pref(1.0)
+        val kI by pref(1.0)
+        val kD by pref(1.0)
+        ({ OffloadedEscGains(30.Millisecond, kP, kI, kD) })
+    }
+
     private val ticksPerRevolution = 5
 
     private val carouselEscId = 10
     val carouselEsc by hardw { CANSparkMax(carouselEscId, kBrushless) }.configure {
         generalSetup(it, escConfig)
     }
-    val carouselEscPidController by hardw { carouselEsc.pidController }
-    val carouselEncoder: CANEncoder by hardw { carouselEsc.getEncoder(kHallSensor, ticksPerRevolution) }.configure {
+    val carouselEscPidController: CANPIDController by hardw { carouselEsc.pidController }
+    private val carouselEncoder: CANEncoder by hardw { carouselEsc.getEncoder(kHallSensor, ticksPerRevolution) }.configure {
         it.positionConversionFactor = 360.0
     }
 
     private val magazineState = booleanArrayOf(false, false, false, false, false)
     val magazine = sensor { magazineState stampWith it }
 
-    private val angleBySensor = sensor { carouselEncoder.position.Degree stampWith it }
+    val angle = sensor { carouselEncoder.position.Degree stampWith it }
 }

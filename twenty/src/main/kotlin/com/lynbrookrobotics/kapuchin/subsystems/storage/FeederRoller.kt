@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
+import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel
 import info.kunalsheth.units.generated.*
@@ -15,7 +16,7 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
         PercentOutput(hardware.escConfig, 0.Percent)
     }
     override fun FeederRollerHardware.output(value: OffloadedOutput) {
-        value.writeTo(feederRollerEsc)
+        value.writeTo(feederRollerEsc, feederRollerPidController)
     }
 }
 
@@ -34,4 +35,5 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
     )
 
     val feederRollerEsc by hardw { CANSparkMax(feederRollerEscId, CANSparkMaxLowLevel.MotorType.kBrushless) }
+    val feederRollerPidController: CANPIDController by hardw { feederRollerEsc.pidController }
 }
