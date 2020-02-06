@@ -31,7 +31,7 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = start
 
     choreography {
         try {
-            drivetrainEascs.forEach { it.setNeutralMode(Coast) }
+            drivetrainEscs.forEach { it.setNeutralMode(Coast) }
             while (isActive) {
                 val (x, y) = startingRot.rotate(pos.vector - startingLoc)
 
