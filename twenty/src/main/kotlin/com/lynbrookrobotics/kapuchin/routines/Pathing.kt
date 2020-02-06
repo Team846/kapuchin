@@ -20,7 +20,6 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = start
     val log = File("/home/lvuser/journal.tsv").printWriter().also {
         it.println("x\ty")
         it.println("0.0\t0.0")
-        it.flush()
     }
 
     val startingLoc = pos.vector
@@ -28,31 +27,27 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = start
 
     var last = pos
 
-    choreography {
-        setOf(dt.leftMasterEsc, dt.rightMasterEsc, dt.leftSlaveEsc, dt.rightSlaveEsc).forEach {
-            it.setNeutralMode(Coast)
-        }
+    val drivetrainEscs = setOf(dt.leftMasterEsc, dt.rightMasterEsc, dt.leftSlaveEsc, dt.rightSlaveEsc)
 
-        log.use {
+    choreography {
+        try {
+            drivetrainEscs.forEach { it.setNeutralMode(Coast) }
             while (isActive) {
                 val (x, y) = startingRot.rotate(pos.vector - startingLoc)
 
                 if (distance(pos.vector, last.vector) > ptDistance) {
-                    it.println("${x.Foot}\t${y.Foot}")
-                    it.flush()
+                    log.println("${x.Foot}\t${y.Foot}")
                     last = pos
                 }
 
                 delay(50.milli(Second))
             }
-
+        } finally {
             val (x, y) = startingRot.rotate(pos.vector - startingLoc)
-            it.println("${x.Foot}\t${y.Foot}")
-        }
-        log.close()
+            log.println("${x.Foot}\t${y.Foot}")
+            log.close()
 
-        setOf(dt.leftMasterEsc, dt.rightMasterEsc, dt.leftSlaveEsc, dt.rightSlaveEsc).forEach {
-            it.setNeutralMode(Brake)
+            drivetrainEscs.forEach { it.setNeutralMode(Brake) }
         }
     }
 }

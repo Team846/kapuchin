@@ -53,13 +53,19 @@ fun pathToTrajectory(
     // (1)
 
     val forwardPath = path.toMutableList()
-    val forwardSegments = oneWayAccelCap(forwardPath, maxVelocity, maxOmega, maxAcceleration)
+    val forwardSegments = oneWayAccelCap(
+            forwardPath, maxVelocity, maxOmega,
+            f = { curVelocity -> maxAcceleration - (curVelocity / maxVelocity) * maxAcceleration }
+    )
 
 
     // (2)
 
     val reversePath = path.toMutableList().reversed()
-    val reverseSegments = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration).reversed()
+    val reverseSegments = oneWayAccelCap(
+            reversePath, maxVelocity, maxOmega,
+            f = { curVelocity -> maxAcceleration + (curVelocity / maxVelocity) * maxAcceleration }
+    ).reversed()
 
 
     // (3)
@@ -101,7 +107,7 @@ fun pathToTrajectory(
  * @param path a path consisting of a list of [Waypoint]s.
  * @param maxVelocity the maximum linear velocity of the robot.
  * @param maxOmega the maximum angular velocity of the robot.
- * @param maxAcceleration the maximum linear acceleration of the robot.
+ * @param f function to calculate current max acceleration based on current velocity.
  *
  * @return a list of [Waypoint]s along with their respective velocities.
  */
@@ -109,7 +115,7 @@ private fun oneWayAccelCap(
         path: Path,
         maxVelocity: Velocity,
         maxOmega: AngularVelocity,
-        maxAcceleration: Acceleration
+        f: (Velocity) -> Acceleration
 ): List<Pair<Waypoint, Velocity>> {
 
     // First point always as 0 velocity and the second point always has max velocity.
@@ -148,21 +154,21 @@ private fun oneWayAccelCap(
         velocities[i] = dx / dt
 
         // Cap linear acceleration
-        val currentMaxAcceleration = maxAcceleration - (velocities[i - 1] / maxVelocity) * maxAcceleration
-        if ((velocities[i] - velocities[i - 1]) / dt > currentMaxAcceleration) {
+        val maxAcceleration = f(velocities[i - 1])
+        if ((velocities[i] - velocities[i - 1]) / dt > maxAcceleration) {
             // Find a new dt using acceleration and dx instead of a target velocity.
 
-            dt = if (currentMaxAcceleration == 0.Foot / Second / Second) {
+            dt = if (maxAcceleration == 0.Foot / Second / Second) {
                 // Δx = v₀t
                 dx / velocities[i - 1]
             } else {
                 // Δx = v₀t + (1/2)at²
                 // t = (-v₀ ± sqrt(v₀² + 2aΔx)) / a -- quadratic formula
                 // t = (-v₀ + sqrt(v₀² + 2aΔx)) / a -- only need to consider positive t
-                (-velocities[i - 1] + v(currentMaxAcceleration, velocities[i - 1], dx)) / currentMaxAcceleration
+                (-velocities[i - 1] + v(maxAcceleration, velocities[i - 1], dx)) / maxAcceleration
             }
 
-            velocities[i] = velocities[i - 1] + currentMaxAcceleration * dt
+            velocities[i] = velocities[i - 1] + maxAcceleration * dt
         }
     }
 
