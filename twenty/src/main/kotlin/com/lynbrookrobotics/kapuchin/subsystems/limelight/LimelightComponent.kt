@@ -62,24 +62,24 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
     val zoomMultiplier by pref(2)
 
     val zoomInResolution by pref {
-        val x by pref(320, Pixel)
-        val y by pref(240, Pixel)
+        val x by pref(240, Pixel)
+        val y by pref(320, Pixel)
         ({ UomVector(x, y) })
     }
     val zoomInFov by pref {
-        val x by pref(28, Degree)
-        val y by pref(20.5, Degree)
+        val x by pref(20.5, Degree)
+        val y by pref(28, Degree)
         ({ UomVector(x, y) })
     }
 
     val zoomOutResolution by pref {
-        val x by pref(960, Pixel)
-        val y by pref(720, Pixel)
+        val x by pref(720, Pixel)
+        val y by pref(960, Pixel)
         ({ UomVector(x, y) })
     }
     val zoomOutFov by pref {
-        val x by pref(56, Degree)
-        val y by pref(41, Degree)
+        val x by pref(41, Degree)
+        val y by pref(56, Degree)
         ({ UomVector(x, y) })
     }
 
