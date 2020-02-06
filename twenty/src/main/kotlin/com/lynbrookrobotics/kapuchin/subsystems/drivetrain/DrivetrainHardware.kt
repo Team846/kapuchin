@@ -165,8 +165,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         }
 
         odometryTicker.runOnTick { time ->
-            t2sPosition?.optimizedRead(time, 5.milli(Second))
-            escPosition.optimizedRead(time, 5.milli(Second))
+            escPosition.optimizedRead(time, syncThreshold)
         }
     }
 }
