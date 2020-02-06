@@ -28,9 +28,9 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
     val readings = sensor {
         when {
             l("tv").roundToInt() == 1 -> LimelightReading(
-                    l("tx").Degree, l("ty").Degree,
-                    l("tx0").Pixel, l("ty0").Pixel,
-                    l("thor").Pixel, l("tvert").Pixel,
+                    l("ty").Degree, l("tx").Degree,
+                    l("ty0").Pixel, l("tx0").Pixel,
+                    l("tvert").Pixel, l("thor").Pixel,
                     l("ta").Pixel// this is actually Pixels Squared
             )
             else -> null
