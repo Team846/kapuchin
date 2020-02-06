@@ -14,22 +14,24 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
 
     infix fun <Q : Quan<Q>> ClosedRange<Q>.minContact(that: ClosedRange<Q>): Boolean = this.start == that.start && this.endInclusive < that.endInclusive
     infix fun <Q : Quan<Q>> ClosedRange<Q>.maxContact(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive == that.endInclusive
-
+    infix fun <Q : Quan<Q>> ClosedRange<Q>.more(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive > that.endInclusive
+    infix fun <Q : Quan<Q>> ClosedRange<Q>.less(that: ClosedRange<Q>): Boolean = this.start < that.start && this.endInclusive < that.endInclusive
     controller {
         visionTarget?.run {
             if (currentPipeline == ZoomOut) {
                 val insideBoxResolution = zoomOutResolution / (zoomMultiplier * 1.0)
 
                 val insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomOutSafetyZone)
-                val highInsideBoxBoundsY = 0.Pixel..(insideBoxResolution.y - zoomOutSafetyZone)
+                val highInsideBoxBoundsY = 0.0.Pixel..(insideBoxResolution.y - zoomOutSafetyZone)
                 val midInsideBoxBoundsY = `±`(insideBoxResolution.y / 2 - zoomOutSafetyZone)
-                val lowInsideBoxBoundsY = 0.Pixel..-(insideBoxResolution.y - zoomOutSafetyZone)
+                val lowInsideBoxBoundsY = -(insideBoxResolution.y - zoomOutSafetyZone)..0.0.Pixel
 
-                val angleToPixelsX = (zoomOutResolution.x / zoomOutFov.x.Degree).Pixel
-                val targetBoxBoundsX = (tx * angleToPixelsX) `±` (thor / 2).Pixel
+                val angleToPixelsX = (zoomOutResolution.x / zoomOutFov.x.Degree)
+                val targetBoxBoundsX = (tx * angleToPixelsX / 1.0.Degree) `±` (thor / 2)
 
-                val angleToPixelsY = (zoomOutResolution.y / zoomOutFov.y.Degree).Pixel
-                val targetBoxBoundsY = (ty * angleToPixelsY) `±` (tvert / 2).Pixel
+                val angleToPixelsY = (zoomOutResolution.y / zoomOutFov.y.Degree)
+                val targetBoxBoundsY = (ty * angleToPixelsY / 1.0.Degree) `±` (tvert / 2)
+
 
                 if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` midInsideBoxBoundsY) ZoomInPanMid
                 else if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` highInsideBoxBoundsY) ZoomInPanHigh
@@ -39,20 +41,22 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
-                val angleToPixelsX = (zoomInResolution.x / zoomInFov.x.Degree).Pixel
-                val centerInPixX = tx * angleToPixelsX
+                val angleToPixelsX = zoomInResolution.x / zoomInFov.x.Degree
+                val centerInPixX = tx * angleToPixelsX / 1.0.Degree
                 val targetBoxBoundsX = centerInPixX `±` (thor / 2)
 
                 val angleToPixelsY = zoomInResolution.y / zoomInFov.y.Degree
-                val centerInPixY = ty * angleToPixelsY
+                val centerInPixY = ty * angleToPixelsY / 1.0.Degree
                 val targetBoxBoundsY = (centerInPixY) `±` (tvert / 2)
 
-                if (insideBoxBoundsX `⊆` targetBoxBoundsX && insideBoxBoundsY `⊆` targetBoxBoundsY) {
-                    ZoomInPanMid
-                } else if (insideBoxBoundsX `⊆` targetBoxBoundsX && targetBoxBoundsY.minContact(insideBoxBoundsY)) {
-                    ZoomInPanLow
-                } else if (insideBoxBoundsX `⊆` targetBoxBoundsX && targetBoxBoundsY.maxContact(insideBoxBoundsY)) {
-                    ZoomInPanHigh
+                if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
+                    if (targetBoxBoundsY.less(insideBoxBoundsY)) {
+                        ZoomInPanLow
+                    } else if (targetBoxBoundsY.more(insideBoxBoundsY)) {
+                        ZoomInPanHigh
+                    } else {
+                        ZoomInPanMid
+                    }
                 } else {
                     ZoomOut
                 }
@@ -61,17 +65,21 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
                 val angleToPixelsX = zoomInResolution.x / zoomInFov.x.Degree
-                val centerInPixX = tx * angleToPixelsX
+                val centerInPixX = tx * angleToPixelsX / 1.0.Degree
                 val targetBoxBoundsX = centerInPixX `±` (thor / 2)
 
                 val angleToPixelsY = zoomInResolution.y / zoomInFov.y.Degree
-                val centerInPixY = ty * angleToPixelsY
+                val centerInPixY = ty * angleToPixelsY / 1.0.Degree
                 val targetBoxBoundsY = (centerInPixY) `±` (tvert / 2)
 
-                if (insideBoxBoundsX `⊆` targetBoxBoundsX && insideBoxBoundsY `⊆` targetBoxBoundsY) {
-                    ZoomInPanHigh
-                } else if (insideBoxBoundsX `⊆` targetBoxBoundsX && targetBoxBoundsY.minContact(insideBoxBoundsY)) {
-                    ZoomInPanMid
+                if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
+                    if (targetBoxBoundsY.less(insideBoxBoundsY)) {
+                        ZoomInPanMid
+                    } else if (targetBoxBoundsY.more(insideBoxBoundsY)) {
+                        ZoomOut
+                    } else {
+                        ZoomInPanHigh
+                    }
                 } else {
                     ZoomOut
                 }
@@ -80,17 +88,21 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
                 val angleToPixelsX = zoomInResolution.x / zoomInFov.x.Degree
-                val centerInPixX = tx * angleToPixelsX
+                val centerInPixX = tx * angleToPixelsX / 1.0.Degree
                 val targetBoxBoundsX = centerInPixX `±` (thor / 2)
 
                 val angleToPixelsY = zoomInResolution.y / zoomInFov.y.Degree
-                val centerInPixY = ty * angleToPixelsY
+                val centerInPixY = ty * angleToPixelsY / 1.0.Degree
                 val targetBoxBoundsY = (centerInPixY) `±` (tvert / 2)
 
-                if (insideBoxBoundsX `⊆` targetBoxBoundsX && insideBoxBoundsY `⊆` targetBoxBoundsY) {
-                    ZoomInPanLow
-                } else if (insideBoxBoundsX `⊆` targetBoxBoundsX && targetBoxBoundsY.maxContact(insideBoxBoundsY)) {
-                    ZoomInPanMid
+                if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
+                    if (targetBoxBoundsY.less(insideBoxBoundsY)) {
+                        ZoomOut
+                    } else if (targetBoxBoundsY.more(insideBoxBoundsY)) {
+                        ZoomInPanMid
+                    } else {
+                        ZoomInPanLow
+                    }
                 } else {
                     ZoomOut
                 }

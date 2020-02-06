@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -9,7 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, EventLoop) {
+class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, Subsystems.uiBaselineTicker) {
 
     private fun targetPosition(sample: LimelightReading) = sample.run {
         val aspect = thor / tvert

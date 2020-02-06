@@ -32,7 +32,6 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
                     l("tx0").Pixel, l("ty0").Pixel,
                     l("thor").Pixel, l("tvert").Pixel,
                     l("ta").Pixel// this is actually Pixels Squared
-                    //l("panX"), l("panY")
             )
             else -> null
         } lstamp it

@@ -63,6 +63,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         System.gc()
         runAll(
                 { drivetrain.warmup() },
+                {limelight?.autoZoom()},
                 {
                     while (isActive) {
                         delay(0.3.Second)
