@@ -11,7 +11,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import info.kunalsheth.units.generated.*
 
-class DrivetrainComponent(hardware: DrivetrainHardware) : 
+class DrivetrainComponent(hardware: DrivetrainHardware) :
         Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware),
         GenericDrivetrainComponent {
 

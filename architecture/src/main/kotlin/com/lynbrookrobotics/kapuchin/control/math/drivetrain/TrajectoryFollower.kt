@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 /**
  * Given a differential drivetrain and a [Trajectory], calculate the left and right velocity outputs.
