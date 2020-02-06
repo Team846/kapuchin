@@ -14,8 +14,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
 
     infix fun <Q : Quan<Q>> ClosedRange<Q>.minContact(that: ClosedRange<Q>): Boolean = this.start == that.start && this.endInclusive < that.endInclusive
     infix fun <Q : Quan<Q>> ClosedRange<Q>.maxContact(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive == that.endInclusive
-    infix fun <Q : Quan<Q>> ClosedRange<Q>.more(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive > that.endInclusive
-    infix fun <Q : Quan<Q>> ClosedRange<Q>.less(that: ClosedRange<Q>): Boolean = this.start < that.start && this.endInclusive < that.endInclusive
+
     controller {
         visionTarget?.run {
             if (currentPipeline == ZoomOut) {

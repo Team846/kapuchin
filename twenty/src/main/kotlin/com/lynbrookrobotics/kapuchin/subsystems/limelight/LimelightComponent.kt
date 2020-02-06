@@ -9,17 +9,28 @@ import com.lynbrookrobotics.kapuchin.subsystems.limelight.DetectedTarget.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.roundToInt
 
 class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, Subsystems.uiBaselineTicker) {
 
     private fun targetPosition(sample: LimelightReading) = sample.run {
         val aspect = thor / tvert
-
+        val pipe = hardware.pipelineEntry.getDouble(0.0).roundToInt()
         val skew = acos(aspect / aspect0 minMag 1.Each)
-        val distance = (targetHeight - mounting.z) / tan(mountingIncline + ty)
-        val x = tan(tx) * distance
 
-        Position(x, distance, skew)
+        val targetDistance: Length
+
+        if (pipe == 1) {
+            targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty + zoomOutFov.y / 2)
+        } else if (pipe == 3) {
+            targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty - zoomOutFov.y / 2)
+        } else {
+            targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty)
+        }
+
+        val x = tan(tx) * targetDistance
+
+        Position(x, targetDistance, skew)
     }
 
     private fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
