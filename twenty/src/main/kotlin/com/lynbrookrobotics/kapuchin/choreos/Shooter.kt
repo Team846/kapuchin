@@ -30,6 +30,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
             val flywheelOmega = with(flywheel) {
                 AngularVelocity(((momentFactor * ballMass + (2 * momentOfInertia / (rollerRadius * rollerRadius))) * ballVelocity * rollerRadius / momentOfInertia).siValue)
+                + slippage
             }
 
             return ballVelocity to flywheelOmega
@@ -44,14 +45,13 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
             val slope = ((-1 * dist * 1.EarthGravity) / (ballVelocity * ballVelocity * cos(launchA) * cos(launchA))) + tan(launchA)
             return atan(slope).abs
         }
-        return Angle(0.0)
+        return 0.Degree
     }
 
     fun shotState(
             flywheel: FlywheelComponent, hood: HoodComponent,
             hoodState: HoodState, pos: Position, target: DetectedTarget
             ): Pair<AngularVelocity, Angle> {
-        val targetHeight = flywheel.targetHeight - flywheel.height
         val (ballVelocity, flywheelOmega) = requiredVelocities(flywheel, hood, hoodState, target)
         val entryAngle = targetEntryAngle(hood, hoodState, ballVelocity, target)
         return flywheelOmega to entryAngle
@@ -62,10 +62,10 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     fun offsets(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Length, Length> { // Inner goal offsets
 
         target.outer?.let {
-            val dist = Length(sqrt(((target.outer.x * target.outer.x) + (target.outer.y * target.outer.y)).siValue))
-            val horizontal = flywheel.outerInnerDiff * tan(target.outer.bearing)
+            val dist = Length(sqrt((it.x * it.x + (it.y * it.y)).siValue))
+            val horizontal = flywheel.outerInnerDiff * tan(it.bearing)
             val vertical = with(flywheel)   {
-                (outerInnerDiff * (targetHeight - height)) / (dist * cos(target.outer.bearing))
+                (outerInnerDiff * (targetHeight - height)) / (dist * cos(it.bearing))
             }
             return horizontal to vertical
         }
@@ -73,7 +73,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
     }
 
-    fun entryAngleLimits(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Angle, Angle> { // Entry angle tolerance for inner ogoal
+    fun entryAngleLimits(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Angle, Angle> { // Entry angle tolerance for inner outer goal
 
         val downward = atan(((flywheel.hexagonHeight / 2) + offsets(flywheel, target).second) / flywheel.outerInnerDiff) // approach from below
         val upward = 90.Degree - atan(flywheel.outerInnerDiff / ((flywheel.hexagonHeight / 2) - offsets(flywheel, target).second)) // approach from upward
@@ -94,7 +94,6 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
         // TODO get target, do nothing if null
         if (limelight == null) return@choreography
         val target = DetectedTarget(Position(0.Foot, 0.Foot, 0.Degree), Position(0.Foot, 0.Foot, 0.Degree))
-        val targetHeight = flywheel?.targetHeight
 
         if (flywheel != null && hood != null) {
             // TODO check if target is physically impossible to shoot to

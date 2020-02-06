@@ -20,6 +20,7 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val outerInnerDiff by pref(25.25, Inch) // Distance between outer and inner goal
 
     val boundingCircleRadius by pref(12.252, Inch) // Feasibility circle of outer goal
+    val slippage by pref(0, Rpm)
 
     val height by pref(24, Inch) // Turret height
     val maxOmega by pref(5676, Rpm)
