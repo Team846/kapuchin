@@ -20,6 +20,11 @@ allprojects {
     version '1.0.0'
     repositories.jcenter()
 
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
     tasks.withType(Test) { // https://guides.gradle.org/performance/#parallel_test_execution
         maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     }
