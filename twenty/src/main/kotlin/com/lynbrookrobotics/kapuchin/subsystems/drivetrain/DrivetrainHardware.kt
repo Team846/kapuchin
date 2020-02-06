@@ -82,7 +82,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val driftTolerance by pref(0.2, DegreePerSecond)
     val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
-        while(it.isCalibrating()) {
+        while(it.isCalibrating) {
             log(Debug) { "Navx is calibrating" }
             Thread.sleep(1000)
         }
