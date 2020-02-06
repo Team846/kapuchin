@@ -39,9 +39,6 @@ class FunkyRobot : RobotBase() {
                         subsystems.teleop()
                     },
                     { isEnabled && isAutonomous } to choreography {
-//                         subsystems.straightLine()
-//                        subsystems.figureEight()
-//                        subsystems.circle()
                          subsystems.followJournal()
                     },
                     { isDisabled && !isTest } to choreography {

@@ -5,7 +5,6 @@ import com.ctre.phoenix.motorcontrol.NeutralMode.Coast
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
-import com.lynbrookrobotics.kapuchin.control.math.drivetrain.Direction.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
@@ -14,8 +13,6 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
 import java.io.File
-
-fun target(current: Waypt, target: Waypt) = atan2(target.x - current.x, target.y - current.y)
 
 suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = startChoreo("Journal") {
 
@@ -30,7 +27,6 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = start
     val startingRot = RotationMatrix(-pos.bearing)
 
     var last = pos
-    val startTime = currentTime
 
     choreography {
         setOf(dt.leftMasterEsc, dt.rightMasterEsc, dt.leftSlaveEsc, dt.rightSlaveEsc).forEach {
@@ -65,18 +61,16 @@ suspend fun DrivetrainComponent.followTrajectory(
         trajectory: Trajectory,
         tolerance: Length,
         endTolerance: Length,
-        direction: Direction = Forward,
         origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
 ) = startRoutine("Read Journal") {
 
     val follower = TrajectoryFollower(
-            this@followTrajectory, tolerance, endTolerance, direction, this@startRoutine, trajectory, origin
+            this@followTrajectory, tolerance, endTolerance, this@startRoutine, trajectory, origin
     )
 
     controller {
         val velocities = follower()
         if (velocities != null) {
-//            println("${velocities.left.FootPerSecond}\t${velocities.right.FootPerSecond}")
             val nativeL = hardware.conversions.nativeConversion.native(velocities.left)
             val nativeR = hardware.conversions.nativeConversion.native(velocities.right)
             TwoSided(
@@ -101,7 +95,7 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
 
         val distance = distance(location, target).also { waypointDistance(t, it) }
 
-        val targetA = target(location, target)
+        val targetA = (target - location).bearing
         val speed = motionProfile(distance)
         val (targVels, _) = uni.speedAngleTarget(speed, targetA)
 

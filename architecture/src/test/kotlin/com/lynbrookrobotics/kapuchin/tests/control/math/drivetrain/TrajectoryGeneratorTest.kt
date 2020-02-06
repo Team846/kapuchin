@@ -18,13 +18,13 @@ class TrajectoryGeneratorTest {
     // https://www.desmos.com/calculator/ihzjjn1gzh
     private val path = (0 until 1000)
             .map { it / 500.0 }
-            .map { Waypt(sin(5 * PI * it).Foot, (cos(7 * PI * it) - 1).Foot) }
+            .map { Waypoint(sin(5 * PI * it).Foot, (cos(7 * PI * it) - 1).Foot) }
 
     @Test
     fun `trajectories never exceed max velocity`() {
         val trajectory = pathToTrajectory(path, maxVelocity, maxOmega, maxAcceleration)
 
-        for (i in 1 until trajectory.size - 1) {
+        for (i in 1 until trajectory.size - 2) {
             val dx = distance(trajectory[i].y, trajectory[i - 1].y)
             val dt = trajectory[i].x - trajectory[i - 1].x
             val v = dx / dt
@@ -34,28 +34,11 @@ class TrajectoryGeneratorTest {
     }
 
     @Test
-    fun `trajectories never exceed max omega`() {
-        val trajectory = pathToTrajectory(path, maxVelocity, maxOmega, maxAcceleration)
-
-        for (i in 2 until trajectory.size - 1) {
-            val p1 = trajectory[i - 2].y
-            val p2 = trajectory[i - 1].y
-            val p3 = trajectory[i].y // current
-
-            val dtheta = -((p2 - p1).bearing `coterminal -` (p3 - p2).bearing)
-            val dt = trajectory[i].x - trajectory[i - 1].x
-            val omega = dtheta / dt
-
-            102.Percent * maxOmega `is greater than?` omega.abs
-        }
-    }
-
-    @Test
     fun `trajectories never exceed max acceleration`() {
         val trajectory = pathToTrajectory(path, maxVelocity, maxOmega, maxAcceleration)
 
         var oldV = 0.Foot / Second
-        for (i in 1 until trajectory.size - 1) {
+        for (i in 1 until trajectory.size - 2) {
             val dx = distance(trajectory[i].y, trajectory[i - 1].y)
             val dt = trajectory[i].x - trajectory[i - 1].x
             val v = dx / dt

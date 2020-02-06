@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math.drivetrain
 
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.tests.*
@@ -21,8 +20,8 @@ class PathGeneratorTest {
                             .forEach { y2 ->
 
                                 anyDouble.map { it.Metre }.forEach { len ->
-                                    val a = Waypt(x1.Metre, y1.Metre)
-                                    val b = Waypt(x2.Metre, y2.Metre)
+                                    val a = Waypoint(x1.Metre, y1.Metre)
+                                    val b = Waypoint(x2.Metre, y2.Metre)
 
                                     val path = nSect(a, b, len)
 
@@ -52,10 +51,10 @@ class PathGeneratorTest {
     @Test
     fun `interpolatePath smooths waypoints`() {
         val path = listOf(
-                Waypt(-1.Metre, -1.Metre),
-                Waypt(-1.Metre, 0.Metre),
-                Waypt(1.Metre, 0.Metre),
-                Waypt(1.Metre, 1.Metre)
+                Waypoint(-1.Metre, -1.Metre),
+                Waypoint(-1.Metre, 0.Metre),
+                Waypoint(1.Metre, 0.Metre),
+                Waypoint(1.Metre, 1.Metre)
         )
 
         val len = 0.1.Metre

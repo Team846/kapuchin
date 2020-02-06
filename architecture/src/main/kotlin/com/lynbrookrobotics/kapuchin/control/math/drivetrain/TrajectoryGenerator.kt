@@ -6,44 +6,38 @@ import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-private data class Segment(
-        val waypt: Waypt,
-        var velocity: Velocity = 0.Foot / Second,
-        var omega: AngularVelocity = 0.Radian / Second
-)
-
 /**
  * An x and y location.
  */
-typealias Waypt = UomVector<Length>
+typealias Waypoint = UomVector<Length>
 
 /**
- *  A list of [Waypt]s for a robot to follow, with no information about speed/omega/timestmaps.
+ *  A list of [Waypoint]s for a robot to follow, with no information about speed/omega/timestmaps.
  */
-typealias Path = List<Waypt>
+typealias Path = List<Waypoint>
 
 /**
- * a [Path] with timestamps at each [Waypt].
+ * a [Path] with timestamps at each [Waypoint].
  */
-typealias Trajectory = List<TimeStamped<Waypt>>
+typealias Trajectory = List<TimeStamped<Waypoint>>
 
 /**
  * Generates a [Trajectory] given a [Path].
  *
  * 1) Going left to right (forward in time), find a [Trajectory] capping acceleration.
  * 2) Going right to left (reverse in time), find a [Trajectory] capping deceleration.
- * 3) Merge the two trajectories by always taking the smaller velocity at each [Segment].
+ * 3) Merge the two trajectories by always taking the smaller velocity.
  *
  * (any variable starting with "d" is a finite change Δ, not an infinitely small calculus "d")
  *
  * @author Andy
  *
- * @param path a path consisting of a list of waypoints.
+ * @param path a path consisting of a list of [Waypoint]s.
  * @param maxVelocity the maximum linear velocity of the robot.
  * @param maxOmega the maximum angular velocity of the robot.
  * @param maxAcceleration the maximum linear acceleration of the robot.
  *
- * @return a trajectory containing [Waypt]s with timestamps.
+ * @return a trajectory containing [Waypoint]s with timestamps.
  */
 fun pathToTrajectory(
         path: Path,
@@ -52,8 +46,8 @@ fun pathToTrajectory(
         maxAcceleration: Acceleration
 ): Trajectory {
 
-    check(maxVelocity > 0.Metre / Second)
-    check(maxAcceleration > 0.Metre / Second / Second)
+    check(maxVelocity > 0.Foot / Second)
+    check(maxAcceleration > 0.Foot / Second / Second)
     check(maxOmega > 0.Radian / Second)
 
     // (1)
@@ -65,9 +59,7 @@ fun pathToTrajectory(
     // (2)
 
     val reversePath = path.toMutableList().reversed()
-    val reverseSegments = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration)
-            .reversed()
-            .map { it.copy(omega = -it.omega) }
+    val reverseSegments = oneWayAccelCap(reversePath, maxVelocity, maxOmega, maxAcceleration).reversed()
 
 
     // (3)
@@ -78,54 +70,50 @@ fun pathToTrajectory(
     for (i in 1 until path.size) {
         val f = forwardSegments[i]
         val r = reverseSegments[i]
-        val betterSegment = if (f.velocity <= r.velocity) f else r
+        val betterSegment = if (f.second <= r.second) f else r
 
-        totalT += if (betterSegment.velocity == 0.Foot / Second)
+        /*
+        Theoretically a segment can have 0 velocity since in generation we assume a segment has constant acceleration,
+        but our following code assumes constant velocity so if the segment's velocity is 0, just set it to the previous.
+         */
+        totalT += if (betterSegment.second == 0.Foot / Second)
             distance(path[i], path[i - 1]) / prevV
         else
-            distance(path[i], path[i - 1]) / betterSegment.velocity
+            distance(path[i], path[i - 1]) / betterSegment.second
 
 
-        prevV = betterSegment.velocity
-        mergedTrajectory += betterSegment.waypt stampWith totalT
+        prevV = betterSegment.second
+        mergedTrajectory += betterSegment.first stampWith totalT
     }
 
     return mergedTrajectory
 }
 
 /**
- * Given 3 points, find the angle between p3 and the line formed by p1 and p2.
- */
-private fun dtheta(p1: Waypt, p2: Waypt, p3: Waypt): Angle = -((p2 - p1).bearing `coterminal -` (p3 - p2).bearing)
-
-/**
  * Generates a [Trajectory] with acceleration capped in 1 direction (left to right).
  *
- * 1) Find the velocity cap of each [Segment] by using region of feasibility.
+ * 1) Find the velocity cap of each segment by using region of feasibility.
  *    https://www.desmos.com/calculator/qcpfvixfvg
  * 2) Going from left to right, cap linear acceleration.
  *
  * @author Andy
  *
- * @param path a path consisting of a list of [Waypt]s.
+ * @param path a path consisting of a list of [Waypoint]s.
  * @param maxVelocity the maximum linear velocity of the robot.
  * @param maxOmega the maximum angular velocity of the robot.
  * @param maxAcceleration the maximum linear acceleration of the robot.
  *
- * @return a list of [Segment]s, but no timestamps.
+ * @return a list of [Waypoint]s along with their respective velocities.
  */
 private fun oneWayAccelCap(
         path: Path,
         maxVelocity: Velocity,
         maxOmega: AngularVelocity,
         maxAcceleration: Acceleration
-): List<Segment> {
+): List<Pair<Waypoint, Velocity>> {
 
-    val trajectory = mutableListOf(
-            Segment(path[0]),
-            Segment(path[1], velocity = maxVelocity)
-    )
-    val dthetas = mutableListOf(0.Degree, 0.Degree)
+    // First point always as 0 velocity and the second point always has max velocity.
+    val velocities = mutableListOf(0.Foot / Second, maxVelocity)
 
     // (1)
 
@@ -136,50 +124,47 @@ private fun oneWayAccelCap(
 
         val dx = distance(p2, p3)
 
-        val dtheta = dtheta(p1, p2, p3)
-        dthetas += dtheta
+        // Angle between p3 and the line formed by p1 and p2
+        val dtheta = -((p2 - p1).bearing `coterminal -` (p3 - p2).bearing)
 
         // Find Δt based on region of feasibility.
         val dt = abs(dtheta / maxOmega) + dx / maxVelocity
 
-        trajectory += Segment(path[i], velocity = dx / dt)
+        velocities += dx / dt
     }
 
 
     // (2)
 
     for (i in 1 until path.size) {
-        val s1 = trajectory[i - 1]
-        val s2 = trajectory[i] // current
-        val s3 = if (i != path.size - 1) trajectory[i + 1] else Segment(Waypt(0.Metre, 0.Metre))
-
         // Find Δt based on the target velocity and Δx.
         // The target velocity is the minimum velocity cap of either the current or the next segment.
+        // (if we are at the last waypoint, the "next segment" has 0 velocity.
         // The area under the segment in a velocity vs. time graph must equal Δx.
-        val dx = distance(s2.waypt, s1.waypt)
-        var dt = dx / (s1.velocity + (min(s2.velocity, s3.velocity) - s1.velocity) / 2)
+        val dx = distance(path[i], path[i - 1])
+        val minVelocity = if (i != path.size - 1) min(velocities[i], velocities[i + 1]) else 0.Foot / Second
+        var dt = dx / (velocities[i - 1] + (minVelocity - velocities[i - 1]) / 2)
 
-        s2.velocity = dx / dt
-        s2.omega = dthetas[i] / dt
+        velocities[i] = dx / dt
 
         // Cap linear acceleration
-        val currentMaxAcceleration = maxAcceleration - (s1.velocity / maxVelocity) * maxAcceleration
-        if ((s2.velocity - s1.velocity) / dt > currentMaxAcceleration) {
+        val currentMaxAcceleration = maxAcceleration - (velocities[i - 1] / maxVelocity) * maxAcceleration
+        if ((velocities[i] - velocities[i - 1]) / dt > currentMaxAcceleration) {
             // Find a new dt using acceleration and dx instead of a target velocity.
 
             dt = if (currentMaxAcceleration == 0.Foot / Second / Second) {
-                dx / s1.velocity
+                // Δx = v₀t
+                dx / velocities[i - 1]
             } else {
                 // Δx = v₀t + (1/2)at²
                 // t = (-v₀ ± sqrt(v₀² + 2aΔx)) / a -- quadratic formula
                 // t = (-v₀ + sqrt(v₀² + 2aΔx)) / a -- only need to consider positive t
-                (-s1.velocity + v(currentMaxAcceleration, s1.velocity, dx)) / currentMaxAcceleration
+                (-velocities[i - 1] + v(currentMaxAcceleration, velocities[i - 1], dx)) / currentMaxAcceleration
             }
 
-            s2.velocity = s1.velocity + currentMaxAcceleration * dt
-            s2.omega = dthetas[i] / dt
+            velocities[i] = velocities[i - 1] + currentMaxAcceleration * dt
         }
     }
 
-    return trajectory
+    return path.zip(velocities) { p, v -> p to v }
 }
