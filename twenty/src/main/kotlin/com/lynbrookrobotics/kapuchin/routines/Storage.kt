@@ -6,8 +6,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.storage.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-suspend fun CarouselComponent.spin(target: OffloadedOutput) = startRoutine("Spin") {
-    controller { target }
+suspend fun CarouselComponent.spin(target: DutyCycle) = startRoutine("Spin") {
+    controller { PercentOutput(hardware.escConfig, target) }
 }
 
 suspend fun CarouselComponent.spinToEmptySlot() = startRoutine("Spin to Empty Slot") {
@@ -28,6 +28,6 @@ suspend fun CarouselComponent.spinFullSlotToShooter() = startRoutine("Spin to Fu
     controller { PositionOutput(hardware.escConfig, hardware.positionGains, target.Degree) }
 }
 
-suspend fun FeederRollerComponent.spin(target: Rpm) = startRoutine("Spin") {
-    controller { VelocityOutput(hardware.escConfig, hardware.escGains, target.siValue) }
+suspend fun FeederRollerComponent.spin(target: AngularVelocity) = startRoutine("Spin") {
+    controller { VelocityOutput(hardware.escConfig, hardware.escGains, target.Rpm) }
 }

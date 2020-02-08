@@ -49,13 +49,13 @@ suspend fun Subsystems.setIntakeUp() = supervisorScope {
 
         suspend fun Subsystems.collect() = supervisorScope() {
             try {
-                launch { intakeRollers?.spin(PercentOutput(intakeRollers.hardware.escConfig, intakeRollers.collectSpeed)) }
-                launch { carousel?.spin(PercentOutput(carousel.hardware.escConfig, carousel.carouselSpeed)) }
+                launch { intakeRollers?.spin(intakeRollers.collectSpeed) }
+                launch { carousel?.spin(carousel.carouselSpeed) }
                 freeze()
             } finally {
                 withContext(NonCancellable) {
                     withTimeout(1.Second) {
-                        launch { carousel?.spin(PercentOutput(carousel.hardware.escConfig, 50.Percent)) }
+                        launch { carousel?.spin(50.Percent) }
                     }
                 }
             }

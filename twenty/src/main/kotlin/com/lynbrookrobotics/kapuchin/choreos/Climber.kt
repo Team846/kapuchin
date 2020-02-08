@@ -23,7 +23,7 @@ suspend fun Subsystems.climb() = coroutineScope {
     try {
         climbPivot = launch { climberPivot?.set(Deployed) }
         delay(0.1.Second)
-        launch { climberWinch?.spin(PercentOutput(climberWinch.hardware.escConfig, 30.Percent)) }
+        launch { climberWinch?.spin(30.Percent) }
         freeze()
     } finally {
         withContext(NonCancellable) {
