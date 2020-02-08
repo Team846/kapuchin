@@ -15,6 +15,7 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
     override val fallbackController: FeederRollerComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
     }
+
     override fun FeederRollerHardware.output(value: OffloadedOutput) {
         value.writeTo(feederRollerEsc, feederRollerPidController)
     }
@@ -33,6 +34,16 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
             defaultContinuousCurrentLimit = 25.Ampere,
             defaultPeakCurrentLimit = 35.Ampere
     )
+
+    val escGains by pref {
+        val kP by pref(0.0)
+        val kI by pref(0.0)
+        val kD by pref(0.0)
+        val kF by pref(0.0)
+        val maxIntegralAccumulator by pref(0.0)
+
+        ({ OffloadedEscGains(syncThreshold, kP, kI, kD, kF, maxIntegralAccumulator) })
+    }
 
     val feederRollerEsc by hardw { CANSparkMax(feederRollerEscId, CANSparkMaxLowLevel.MotorType.kBrushless) }
     val feederRollerPidController: CANPIDController by hardw { feederRollerEsc.pidController }

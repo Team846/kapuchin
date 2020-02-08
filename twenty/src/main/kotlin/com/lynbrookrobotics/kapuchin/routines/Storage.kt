@@ -28,6 +28,6 @@ suspend fun CarouselComponent.spinFullSlotToShooter() = startRoutine("Spin to Fu
     controller { PositionOutput(hardware.escConfig, hardware.positionGains, target.Degree) }
 }
 
-suspend fun FeederRollerComponent.spin(target: OffloadedOutput) = startRoutine("Spin") {
-    controller { target }
+suspend fun FeederRollerComponent.spin(target: Rpm) = startRoutine("Spin") {
+    controller { VelocityOutput(hardware.escConfig, hardware.escGains, target.siValue) }
 }
