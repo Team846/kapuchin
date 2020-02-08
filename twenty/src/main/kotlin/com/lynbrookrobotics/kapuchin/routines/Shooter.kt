@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
-import com.lynbrookrobotics.kapuchin.subsystems.storage.*
 
 suspend fun ShooterComponent.set(state: OffloadedOutput) = startRoutine("Set") {
     controller { state }

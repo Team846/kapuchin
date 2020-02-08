@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import info.kunalsheth.units.generated.*
@@ -29,34 +28,34 @@ suspend fun Subsystems.setIntakeUp() = supervisorScope {
         freeze()
     } finally {
         withContext(NonCancellable) {
-                intakeUp?.cancel()
+            intakeUp?.cancel()
+        }
+    }
+}
+
+suspend fun Subsystems.setIntakeDown() = supervisorScope {
+    var intakeDown: Job? = null
+    try {
+        launch { intakePivot?.set(IntakePivotState.Down) }
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            intakeDown?.cancel()
+
+        }
+    }
+}
+
+suspend fun Subsystems.collect() = supervisorScope() {
+    try {
+        launch { intakeRollers?.spin(intakeRollers.collectSpeed) }
+        launch { carousel?.spin(carousel.carouselSpeed) }
+        freeze()
+    } finally {
+        withContext(NonCancellable) {
+            withTimeout(1.Second) {
+                launch { carousel?.spin(50.Percent) }
             }
         }
     }
-
-    suspend fun Subsystems.setIntakeDown() = supervisorScope {
-        var intakeDown: Job? = null
-        try {
-            launch { intakePivot?.set(IntakePivotState.Down) }
-            freeze()
-        } finally {
-            withContext(NonCancellable) {
-                    intakeDown?.cancel()
-
-                }
-            }
-        }
-
-        suspend fun Subsystems.collect() = supervisorScope() {
-            try {
-                launch { intakeRollers?.spin(intakeRollers.collectSpeed) }
-                launch { carousel?.spin(carousel.carouselSpeed) }
-                freeze()
-            } finally {
-                withContext(NonCancellable) {
-                    withTimeout(1.Second) {
-                        launch { carousel?.spin(50.Percent) }
-                    }
-                }
-            }
-        }
+}
