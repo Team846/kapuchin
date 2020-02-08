@@ -54,7 +54,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { liftTeleop() },
                 { climberTeleop() },
                 { rumbleTeleop() },
-                {limelight?.autoZoom()}
+                { limelight?.autoZoom() }
         )
         System.gc()
     }
@@ -63,7 +63,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         System.gc()
         runAll(
                 { drivetrain.warmup() },
-                {limelight?.autoZoom()},
+                { limelight?.autoZoom() },
                 {
                     while (isActive) {
                         delay(0.3.Second)
@@ -140,7 +140,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val hookSliderAsync = i(initHookSlider) { HookSliderComponent(HookSliderHardware()) }
                 val liftAsync = i(initLift) { LiftComponent(LiftHardware()) }
                 val climberAsync = i(initClimber) { ClimberComponent(ClimberHardware()) }
-                val limelightAsync = i(initLimelight) { LimelightComponent(LimelightHardware() )}
+                val limelightAsync = i(initLimelight) { LimelightComponent(LimelightHardware()) }
 
                 instance = Subsystems(
                         drivetrainAsync.await(),
