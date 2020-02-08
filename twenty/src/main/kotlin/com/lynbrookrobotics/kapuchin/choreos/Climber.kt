@@ -1,9 +1,7 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.ClimberPivotState.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
@@ -23,7 +21,7 @@ suspend fun Subsystems.climb() = coroutineScope {
     try {
         climbPivot = launch { climberPivot?.set(Deployed) }
         delay(0.1.Second)
-        launch { climberWinch?.spin(PercentOutput(climberWinch.hardware.escConfig, 30.Percent)) }
+        launch { climberWinch?.spin(30.Percent) }
         freeze()
     } finally {
         withContext(NonCancellable) {

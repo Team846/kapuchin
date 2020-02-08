@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -9,7 +10,7 @@ import info.kunalsheth.units.math.*
 
 enum class HoodState(val output: Boolean) { Up(true), Down(false) }
 
-class HoodComponent(hardware: HoodHardware) : Component<HoodComponent, HoodHardware, HoodState>(hardware) {
+class HoodComponent(hardware: HoodHardware) : Component<HoodComponent, HoodHardware, HoodState>(hardware, Subsystems.pneumaticTicker) {
 
     val launchAngles by pref {
         val hoodDown by pref(50, Degree)

@@ -1,8 +1,13 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.ControlMode.*
+import com.ctre.phoenix.motorcontrol.ControlMode.Velocity
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.revrobotics.CANPIDController
+import com.revrobotics.CANSparkMax
+import com.revrobotics.ControlType.*
 import info.kunalsheth.units.generated.*
 
 sealed class OffloadedOutput {
@@ -30,6 +35,22 @@ sealed class OffloadedOutput {
         config.writeTo(esc, timeoutMs)
         esc.set(mode, value)
     }
+
+    fun writeTo(esc: CANSparkMax, pidController: CANPIDController, timeoutMs: Int = 15) {
+        +esc.setCANTimeout(timeoutMs)
+
+        safeties.writeTo(esc)
+        gains?.writeTo(esc, pidController)
+        config.writeTo(esc, pidController)
+
+        +pidController.setReference(value, when(mode) {
+            Position -> kPosition
+            Velocity -> kVelocity
+            PercentOutput -> kDutyCycle
+            Current -> kCurrent
+            else -> TODO("Implement fancy control types for SparkMAX")
+        })
+    }
 }
 
 data class VelocityOutput(
@@ -38,7 +59,7 @@ data class VelocityOutput(
         override val value: Double,
         override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
-    override val mode = ControlMode.Velocity
+    override val mode = Velocity
 }
 
 data class PositionOutput(
@@ -47,7 +68,7 @@ data class PositionOutput(
         override val value: Double,
         override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
-    override val mode = ControlMode.Position
+    override val mode = Position
 }
 
 data class PercentOutput(
@@ -55,7 +76,7 @@ data class PercentOutput(
         val dutyCycle: DutyCycle,
         override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
-    override val mode = ControlMode.PercentOutput
+    override val mode = PercentOutput
     override val value = dutyCycle.Each
     override val gains = null
 }
@@ -65,7 +86,7 @@ data class CurrentOutput(
         val current: ElectricCurrent,
         override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
-    override val mode = ControlMode.Current
+    override val mode = Current
     override val value = current.Ampere
     override val gains = null
 }

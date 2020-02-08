@@ -1,19 +1,16 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.*
+import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import info.kunalsheth.units.generated.*
 
 suspend fun IntakePivotComponent.set(state: IntakePivotState) = startRoutine("Set") {
     controller { state }
 }
 
-suspend fun CollectorRollersComponent.spin(target: OffloadedOutput) = startRoutine("Spin") {
-    controller { target }
+suspend fun IntakeRollersComponent.spin(target: DutyCycle) = startRoutine("Spin") {
+    controller { PercentOutput(hardware.escConfig, target) }
 }
 
-suspend fun CarouselComponent.spin(target: OffloadedOutput) = startRoutine("Spin") {
-    controller { target }
-}
 
 
