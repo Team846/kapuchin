@@ -10,7 +10,6 @@ import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.revrobotics.CANDigitalInput
 import com.revrobotics.CANDigitalInput.LimitSwitchPolarity.kNormallyClosed
 import com.revrobotics.CANDigitalInput.LimitSwitchPolarity.kNormallyOpen
-import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel
 import info.kunalsheth.units.generated.*
@@ -27,7 +26,7 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
         val atRight = rightLimit.optimizedRead(currentTime, 0.Second).y
         when {
             atLeft || atRight -> turretEsc.set(0.0)
-            else -> value.writeTo(turretEsc, turretPidController)
+            else -> value.writeTo(turretEsc)
         }
     }
 }
@@ -48,8 +47,6 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     )
 
     val turretEsc by hardw { CANSparkMax(turretEscId, CANSparkMaxLowLevel.MotorType.kBrushless) }
-
-    val turretPidController: CANPIDController by hardw { turretEsc.pidController }
 
     private val switchNormallyOpen by pref(true)
 

@@ -1,9 +1,9 @@
-package com.lynbrookrobotics.kapuchin.subsystems.controlpanel
+package com.lynbrookrobotics.kapuchin.subsystems.control_panel
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.ControlPanelPivotState.*
+import com.lynbrookrobotics.kapuchin.subsystems.control_panel.ControlPanelPivotState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*

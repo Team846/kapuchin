@@ -1,11 +1,10 @@
-package com.lynbrookrobotics.kapuchin.subsystems.storage
+package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import info.kunalsheth.units.generated.*
@@ -18,7 +17,8 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
     }
 
     override fun FeederRollerHardware.output(value: OffloadedOutput) {
-        value.writeTo(feederRollerEsc, feederRollerPidController)
+        println(value.value)
+        // TODO output offloaded sparkmax output
     }
 }
 
@@ -38,16 +38,4 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
     )
 
     val feederRollerEsc by hardw { CANSparkMax(feederRollerEscId, MotorType.kBrushless) } // 550?
-    val feederRollerPidController: CANPIDController by hardw { feederRollerEsc.pidController }
-
-    val escGains by pref {
-        val kP by pref(0.0)
-        val kI by pref(0.0)
-        val kD by pref(0.0)
-        val kF by pref(0.0)
-        val maxIntegralAccumulator by pref(0.0)
-
-        ({ OffloadedEscGains(syncThreshold, kP, kI, kD, kF, maxIntegralAccumulator) })
-    }
-
 }
