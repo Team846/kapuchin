@@ -72,7 +72,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
     class TicksToSerialOdometry(val conversions: DrivetrainConversions) : Named by Named("T2S Odometry", conversions) {
         private var noTicksL = true
         private var noTicksR = true
-        val matrixTracking = RotationMatrixTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree), conversions.matrixCache)
+        val matrixTracking = HighFrequencyTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree), conversions.matrixCache)
 
         val flipOdometrySides by pref(true)
         val flipLeftOdometry by pref(true)
