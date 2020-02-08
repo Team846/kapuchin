@@ -20,10 +20,10 @@ class SimpleVectorTracking(
         val s = s(sl, sr)
 
         if (externalBearing != null) bearing = externalBearing
+        else bearing += theta(sl, sr, trackLength)
 
         x += s * sin(bearing)
         y += s * cos(bearing)
-        bearing += theta(sl, sr, trackLength)
     }
 }
 
