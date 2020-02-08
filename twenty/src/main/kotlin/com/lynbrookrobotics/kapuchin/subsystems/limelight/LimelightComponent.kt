@@ -6,23 +6,24 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.DetectedTarget.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware) {
+class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware) {
 
-    private fun targetPosition(sample: LimelightReading) = sample.run {
+    fun targetPosition(sample: LimelightReading) = sample.run {
         val aspect = thor / tvert
-        val pipe = hardware.pipelineEntry.getDouble(0.0).roundToInt()
         val skew = acos(aspect / aspect0 minMag 1.Each)
 
         val targetDistance: Length
 
-        if (pipe == 1) {
+        if (pipeline == ZoomInPanHigh) {
             targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty + zoomOutFov.y / 2)
-        } else if (pipe == 3) {
+        } else if (pipeline == ZoomInPanLow) {
             targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty - zoomOutFov.y / 2)
         } else {
             targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty)
@@ -94,9 +95,9 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         ({ UomVector(x, y) })
     }
 
-    override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.ZoomOut }
+    override val fallbackController: LimelightComponent.(Time) -> Pipeline? = { Pipeline.ZoomOut }
 
-    override fun LimelightHardware.output(value: Pipeline) {
-        pipelineEntry.setNumber(value.number)
+    override fun LimelightHardware.output(value: Pipeline?) {
+        pipelineEntry.setNumber(value?.number)
     }
 }

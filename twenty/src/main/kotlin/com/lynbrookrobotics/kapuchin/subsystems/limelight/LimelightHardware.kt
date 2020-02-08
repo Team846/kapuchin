@@ -6,9 +6,12 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import java.lang.Double.NaN
+import kotlin.Double.Companion
 import kotlin.math.roundToInt
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponent>() {
@@ -17,12 +20,16 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
     override val period = 30.milli(Second)
     override val syncThreshold = 4.milli(Second)
 
-    val table by hardw { NetworkTableInstance.getDefault().getTable("/limelight") }
+    val table: NetworkTable by hardw {
+        NetworkTableInstance.getDefault().getTable("/limelight")
+    }.verify("limelight connected") {
+        !it.getEntry("tx").getDouble(NaN).isNaN()
+    }
     val pipelineEntry by hardw { table.getEntry("pipeline") }
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private infix fun <Q> Q.lstamp(withTime: Time) = TimeStamped(
-            withTime - l("tl").milli(Second) - 11.milli(Second), this
+            withTime - l("tl").milli(Second) - 11.milli(Second), this //11 is limelight internal latency
     )
 
     val readings = sensor {
@@ -31,21 +38,18 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
                     l("ty").Degree, l("tx").Degree,
                     l("ty0").Pixel, l("tx0").Pixel,
                     l("tvert").Pixel, l("thor").Pixel,
-                    l("ta").Pixel// this is actually Pixels Squared
+                    l("ta").Pixel,// this is actually Pixels Squared
+                    l("getpipe").roundToInt().let { rawpipe ->
+                        Pipeline.values().firstOrNull { it.number == rawpipe }
+                    }
             )
             else -> null
         } lstamp it
     }
 
-    val pipeline = sensor {
-        val getpipe = l("getpipe").roundToInt()
-        Pipeline.values().firstOrNull() { getpipe == it.number } lstamp it
-    }
-            .with(graph("pipeline", Each)) { it?.number?.Each ?: -1.Each }
-
     init {
         uiBaselineTicker.runOnTick { time ->
-            setOf(readings, pipeline).forEach {
+            setOf(readings).forEach {
                 it.optimizedRead(time, .5.Second)
             }
         }

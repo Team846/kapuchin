@@ -10,14 +10,14 @@ import info.kunalsheth.units.math.*
 suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
 
     val visionTarget by hardware.readings.readEagerly.withoutStamps
-    val currentPipeline by hardware.pipeline.readEagerly.withoutStamps
 
-    infix fun <Q : Quan<Q>> ClosedRange<Q>.minContact(that: ClosedRange<Q>): Boolean = this.start == that.start && this.endInclusive < that.endInclusive
-    infix fun <Q : Quan<Q>> ClosedRange<Q>.maxContact(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive == that.endInclusive
+    infix fun <Q : Quan<Q>> ClosedRange<Q>.more(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive > that.endInclusive
+    infix fun <Q : Quan<Q>> ClosedRange<Q>.less(that: ClosedRange<Q>): Boolean = this.start < that.start && this.endInclusive < that.endInclusive
 
     controller {
         visionTarget?.run {
-            if (currentPipeline == ZoomOut) {
+            
+            if (pipeline == ZoomOut) {
                 val insideBoxResolution = zoomOutResolution / (zoomMultiplier * 1.0)
 
                 val insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomOutSafetyZone)
@@ -36,7 +36,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 else if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` highInsideBoxBoundsY) ZoomInPanHigh
                 else if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` lowInsideBoxBoundsY) ZoomInPanLow
                 else ZoomOut
-            } else if (currentPipeline == ZoomInPanMid) {
+            } else if (pipeline == ZoomInPanMid) {
                 val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
@@ -59,7 +59,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 } else {
                     ZoomOut
                 }
-            } else if (currentPipeline == ZoomInPanHigh) {
+            } else if (pipeline == ZoomInPanHigh) {
                 val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
@@ -82,7 +82,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
                 } else {
                     ZoomOut
                 }
-            } else if (currentPipeline == ZoomInPanLow) {
+            } else if (pipeline == ZoomInPanLow) {
                 val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
