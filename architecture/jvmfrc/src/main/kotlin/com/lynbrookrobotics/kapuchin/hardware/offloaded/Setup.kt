@@ -7,10 +7,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced.Status_2_Feedback0
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod.Period_5Ms
-import com.ctre.phoenix.motorcontrol.can.BaseMotorController
-import com.ctre.phoenix.motorcontrol.can.BaseTalon
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.ctre.phoenix.motorcontrol.can.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.revrobotics.CANError
@@ -48,8 +45,11 @@ fun RobotHardware<*>.generalSetup(esc: BaseMotorController, config: OffloadedEsc
     if (esc is TalonSRX) esc.enableCurrentLimit(true)
     // TalonFX current limiting is already enabled in OffloadedEscConfiguration
 
-    if (esc is BaseTalon) config.writeTo(esc, configTimeout)
-    if (esc is VictorSPX) config.writeTo(esc, configTimeout)
+    when (esc) {
+        is TalonSRX -> config.writeTo(esc, configTimeout)
+        is TalonFX -> config.writeTo(esc, configTimeout)
+        is VictorSPX -> config.writeTo(esc, configTimeout)
+    }
 }
 
 fun RobotHardware<*>.generalSetup(esc: CANSparkMax, config: OffloadedEscConfiguration) {
