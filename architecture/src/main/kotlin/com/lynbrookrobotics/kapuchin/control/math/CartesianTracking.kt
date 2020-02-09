@@ -44,14 +44,14 @@ class RotationMatrixTracking(
 
     init {
         UomVector(-trackLength / 2, 0.Foot).let {
-            (RotationMatrix(init.bearing).rotate(it)) + init.vector
+            (RotationMatrix(init.bearing) rz it) + init.vector
         }.let { (leftX, leftY) ->
             this.leftX = leftX
             this.leftY = leftY
         }
 
         UomVector(trackLength / 2, 0.Foot).let {
-            (RotationMatrix(init.bearing).rotate(it)) + init.vector
+            (RotationMatrix(init.bearing) rz it) + init.vector
         }.let { (rightX, rightY) ->
             this.rightX = rightX
             this.rightY = rightY
@@ -75,11 +75,11 @@ class RotationMatrixTracking(
         val olpxMorpx = prevLeftX - prevRightX
         val olpyMorpy = prevLeftY - prevRightY
 
-        leftX = leftMatrix.rotateX(olpxMorpx, olpyMorpy) + prevRightX
-        leftY = leftMatrix.rotateY(olpxMorpx, olpyMorpy) + prevRightY
+        leftX = leftMatrix.rzCoordinateX(olpxMorpx, olpyMorpy) + prevRightX
+        leftY = leftMatrix.rzCoordinateY(olpxMorpx, olpyMorpy) + prevRightY
 
-        rightX = rightMatrix.rotateX(-olpxMorpx, -olpyMorpy) + prevLeftX
-        rightY = rightMatrix.rotateY(-olpxMorpx, -olpyMorpy) + prevLeftY
+        rightX = rightMatrix.rzCoordinateX(-olpxMorpx, -olpyMorpy) + prevLeftX
+        rightY = rightMatrix.rzCoordinateY(-olpxMorpx, -olpyMorpy) + prevLeftY
 
         x = avg(leftX, rightX)
         y = avg(leftY, rightY)
