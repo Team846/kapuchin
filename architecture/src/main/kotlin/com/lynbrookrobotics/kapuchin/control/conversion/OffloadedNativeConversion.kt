@@ -46,7 +46,7 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
         private val d1: (Q, `÷`, T) -> D,
         private val t1: (D, `*`, T) -> Q,
         private val t2: (DD, `*`, T) -> D,
-        val nativeOutputUnits: Int, val perOutputQuantity: O,
+        val nativeOutputUnits: Double, val perOutputQuantity: O,
         val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
         val feedbackZero: Q = perFeedbackQuantity * 0,
         val nativeTimeUnit: Time = 100.milli(Second),
