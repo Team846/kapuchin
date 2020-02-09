@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
-import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -10,11 +9,10 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
-    override val name = "Operator"
     override val priority = Priority.RealTime
+    override val name = "Operator"
 
     val xbox by hardw { XboxController(1) }.verify("the operator controller is connected") {
         it.name == "Controller (Xbox One For Windows)"
@@ -31,11 +29,4 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val rb get() = xbox.getBumper(kRight)
     private val start get() = xbox.startButton
     private val back get() = xbox.backButton
-
-    val intakeUp = s { xButton && lt }
-    val intakeDown = s { xButton && rt }
-    val collect = s { yButton }
-    val shoot = s { xButton }
-    val turretTurnRight = s { xButton && lt }
-    val turretTurnLeft = s { xButton && rt }
 }

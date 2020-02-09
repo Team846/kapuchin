@@ -18,6 +18,7 @@ generateUnitsOfMeasure {
             u("Foot", 0.3048, d(L: 1)),
             u("FootPerSecond", 0.3048, d(L: 1, T: -1)),
             u("FootPerSecondSquared", 0.3048, d(L: 1, T: -2)),
+            u("PoundFootSquared", 23.73036, d(M: 1, L: 2)),
             u("EarthGravity", 9.80665, d(L: 1, T: -2)),
 
             u("Turn", 2 * PI, d(A: 1)),

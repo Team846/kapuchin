@@ -8,37 +8,36 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.Priority.*
-import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.I2C.Port.kOnboard
+import edu.wpi.first.wpilibj.I2C.Port
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import java.lang.Integer.signum
 
+enum class Colors(val color: String) { Blue("blue"), Green("green"), Red("red"), Yellow("yellow") }
+
 class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, OffloadedOutput>(hardware) {
+
+    val spinSpeed by pref(6, Volt)
+
     override val fallbackController: ControlPanelSpinnerComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
     }
-
-    val spinSpeed by pref(6, Volt)
 
     override fun ControlPanelSpinnerHardware.output(value: OffloadedOutput) {
         value.writeTo(spinnerEsc, spinnerPidController)
     }
 }
 
-val readColorSensor: RevColorSensor.(Time) -> TimeStamped<String> = {
-    getCurrentValue() stampWith currentTime
-}
-
 class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardware, ControlPanelSpinnerComponent>() {
-    override val period: Time = 30.Millisecond
-    override val syncThreshold: Time = 30.Millisecond
-    override val priority: Priority = Low
-    override val name: String = "ControlPanel"
+    override val period: Time = 30.milli(Second)
+    override val syncThreshold: Time = 30.milli(Second)
+    override val priority: Priority = Priority.Low
+    override val name: String = "Control Panel"
 
+    private val invert by pref(false)
 
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
@@ -47,21 +46,22 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
             defaultPeakCurrentLimit = 35.Ampere
     )
 
+    private val escId = 20
+    private val colorSensorAddress = 6
 
-    private val controlWheelEscId by pref(10)
-    val spinnerEsc by hardw { CANSparkMax(controlWheelEscId, kBrushless) }.configure {
-        generalSetup(it, escConfig)
+    val spinnerEsc by hardw { CANSparkMax(escId, kBrushless) }.configure {
+        setupMaster(it, escConfig, false)
+        it.inverted = invert
     }
 
-    val spinnerPidController: CANPIDController by hardw { spinnerEsc.pidController }
+    val spinnerPidController by hardw { spinnerEsc.pidController!! }
 
-    private val colorSensorAddress by pref(6)
-    private val revColorSensor by hardw { RevColorSensor(kOnboard, colorSensorAddress) }
+    private val revColorSensor by hardw { RevColorSensor(Port.kOnboard, colorSensorAddress) }
+
     val currentColor = sensor { Colors.valueOf(revColorSensor.getCurrentValue()) stampWith it }
 
     val gameData = sensor { DriverStation.getInstance().gameSpecificMessage stampWith it }
     val controlPanelAngle = sensor { getControlPanelAngle(currentColor.optimizedRead(it, 0.Second).y) stampWith it }
-    val direction = sensor { lastDirectionSignum stampWith it }
 
     var lastColorOrdinal: Int? = null
     private var controlPanelSpinnerAngle: Angle = 0.Degree
@@ -80,7 +80,3 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
         return controlPanelSpinnerAngle
     }
 }
-
-
-enum class Colors(val color: String) { Blue("blue"), Green("green"), Red("red"), Yellow("yellow") }
-

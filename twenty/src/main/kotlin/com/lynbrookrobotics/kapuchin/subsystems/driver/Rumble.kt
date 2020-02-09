@@ -32,8 +32,8 @@ class RumbleHardware(
         val driver: DriverHardware,
         val operator: OperatorHardware
 ) : SubsystemHardware<RumbleHardware, RumbleComponent>() {
-    override val name = "Feedback System"
     override val period = 20.milli(Second)
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
+    override val name = "Rumble"
 }
