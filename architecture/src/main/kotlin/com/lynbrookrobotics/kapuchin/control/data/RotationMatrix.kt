@@ -23,7 +23,7 @@ data class RotationMatrix(val theta: Angle) {
      * @param y y coordinate of vector to rotate
      * @return y coordinate of rotated vector
      */
-    fun rzCoordinateY(x: Length, y: Length) = x * cos + y * sin
+    fun rzCoordinateY(x: Length, y: Length) = -x * sin + y * cos
 
     /**
      * Rotate a vector about the Z-axis
@@ -33,7 +33,7 @@ data class RotationMatrix(val theta: Angle) {
      * @param y y coordinate of vector to rotate
      * @return x coordinate of rotated vector
      */
-    fun rzCoordinateX(x: Length, y: Length) = -x * sin + y * cos
+    fun rzCoordinateX(x: Length, y: Length) = x * cos + y * sin
 
     /**
      * Rotate a vector about the Z-axis
@@ -43,8 +43,8 @@ data class RotationMatrix(val theta: Angle) {
      */
     infix fun rz(that: UomVector<Length>) = that.run {
         UomVector(
-                rzCoordinateY(x, y),
                 rzCoordinateX(x, y),
+                rzCoordinateY(x, y),
                 z
         )
     }

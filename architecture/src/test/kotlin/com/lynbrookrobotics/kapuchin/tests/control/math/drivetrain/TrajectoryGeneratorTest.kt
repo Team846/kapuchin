@@ -45,7 +45,7 @@ class TrajectoryGeneratorTest {
 
             // v² = v₀² + 2aΔx
             val a = (v * v - oldV * oldV) / 2 / dx
-            a `is within?` `±`(maxAcceleration * 1.05)
+            a `is within?` (-maxAcceleration * 2.05..maxAcceleration * 1.05)
 
             oldV = v
         }
