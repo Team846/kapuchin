@@ -11,6 +11,6 @@ suspend fun TurretComponent.spin(target: OffloadedOutput) = startRoutine("Spin")
     controller { target }
 }
 
-suspend fun ShooterHoodComponent.set(state: ShooterHoodState) = startRoutine("Set") {
+suspend fun ShooterHoodComponent.set(state: HoodState) = startRoutine("Set") {
     controller { state }
 }

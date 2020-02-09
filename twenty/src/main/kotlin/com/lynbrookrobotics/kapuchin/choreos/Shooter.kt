@@ -1,13 +1,18 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
-<<<<<<< HEAD
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.sqrt
+
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 
 suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") {
 
@@ -128,10 +133,10 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
                 if (downInner && downOuter && upInner && upOuter) return@choreography // Exits choreo if all states are impossible
 
-                if (!downInner) ShooterHoodState(shotState(flywheel, hood, HoodState.Down, target).first, HoodState.Down)
-                else if (!upInner) ShooterHoodState(shotState(flywheel, hood, HoodState.Up, target).first, HoodState.Up)
-                else if (!downOuter) ShooterHoodState(shotState(flywheel, hood, HoodState.Down, target).first, HoodState.Down)
-                else ShooterHoodState(shotState(flywheel, hood, HoodState.Up, target).first, HoodState.Up)
+                if (!downInner) ShooterState(shotState(flywheel, hood, HoodState.Down, target).first, HoodState.Down)
+                else if (!upInner) ShooterState(shotState(flywheel, hood, HoodState.Up, target).first, HoodState.Up)
+                else if (!downOuter) ShooterState(shotState(flywheel, hood, HoodState.Down, target).first, HoodState.Down)
+                else ShooterState(shotState(flywheel, hood, HoodState.Up, target).first, HoodState.Up)
 
                 /*
             DownInner | UpInner | DownOuter | UpOuter || Hood |  Goal |
@@ -171,12 +176,6 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     }
 
 }
-=======
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.withContext
 
 suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
     val shoot by operator.shoot.readEagerly().withoutStamps
@@ -191,9 +190,10 @@ suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
         )
     }
 }
+
 suspend fun Subsystems.shoot() = supervisorScope() {
     try {
-        launch { feederRoller?.spin(PercentOutput(feederRoller.hardware.escConfig, 30.Percent)) }
+        launch { feederRoller?.spin(30.Rpm) }
         launch { shooter?.set(PercentOutput(shooter.hardware.escConfig, 30.Percent)) }
     } finally {
         withContext(NonCancellable) {
@@ -206,20 +206,18 @@ suspend fun Subsystems.turretTurnRight() = supervisorScope() {
         launch { turret?.spin(PercentOutput(turret.hardware.escConfig, 30.Percent)) }
 
     } finally {
-        withContext(NonCancellable){
+        withContext(NonCancellable) {
 
         }
     }
 }
+
 suspend fun Subsystems.turretTurnLeft() = supervisorScope() {
     try {
         launch { turret?.spin(PercentOutput(turret.hardware.escConfig, 30.Percent)) }
     } finally {
-        withContext(NonCancellable){
+        withContext(NonCancellable) {
 
         }
     }
 }
-
-
->>>>>>> teleop2020
