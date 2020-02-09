@@ -50,7 +50,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
     fun shotState(
             flywheel: FlywheelComponent, hood: HoodComponent,
-            hoodState: HoodState, pos: Position, target: DetectedTarget
+            hoodState: HoodState, target: DetectedTarget
             ): Pair<AngularVelocity, Angle> {
         val (ballVelocity, flywheelOmega) = requiredVelocities(flywheel, hood, hoodState, target)
         val entryAngle = targetEntryAngle(hood, hoodState, ballVelocity, target)
@@ -92,6 +92,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
         // TODO get target, do nothing if null
         if (limelight == null) return@choreography
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
+        
 
         reading?.let {
             val skew = it.tx
@@ -102,7 +103,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
             if (flywheel != null && hood != null) {
                 // TODO check if target is physically impossible to shoot to
                 val downInner = target.innerGoalPos
-                        ?.let { shotState(flywheel, hood, HoodState.Down, it, target) }
+                        ?.let { shotState(flywheel, hood, HoodState.Down, target) }
                         ?.let {
                             it.first < flywheel.maxOmega
                                     && it.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
@@ -110,11 +111,11 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
                         }
                         ?: false
                 val downOuter = target.outerGoalPos
-                        ?.let { shotState(flywheel, hood, HoodState.Down, it, target) }
+                        ?.let { shotState(flywheel, hood, HoodState.Down, target) }
                         ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
                         ?: false
                 val upInner = target.innerGoalPos
-                        ?.let { shotState(flywheel, hood, HoodState.Up, it, target) }
+                        ?.let { shotState(flywheel, hood, HoodState.Up, target) }
                         ?.let {
                             it.first < flywheel.maxOmega
                                     && it.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
@@ -122,9 +123,16 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
                         }
                         ?: false
                 val upOuter = target.outerGoalPos
-                        ?.let { shotState(flywheel, hood, HoodState.Up, it, target) }
+                        ?.let { shotState(flywheel, hood, HoodState.Up, target) }
                         ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
                         ?: false
+
+                if (downInner && downOuter && upInner && upOuter) return@choreography // Exits choreo if all states are impossible
+
+                if (!downInner) ShooterHoodState(shotState(flywheel, hood, HoodState.Down, target).first, HoodState.Down)
+                else if (!upInner) ShooterHoodState(shotState(flywheel, hood, HoodState.Up, target).first, HoodState.Up)
+                else if (!downOuter) ShooterHoodState(shotState(flywheel, hood, HoodState.Down, target).first, HoodState.Down)
+                else ShooterHoodState(shotState(flywheel, hood, HoodState.Up, target).first, HoodState.Up)
 
                 /*
             DownInner | UpInner | DownOuter | UpOuter || Hood |  Goal |
@@ -152,6 +160,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
             /*
          * Launch flywheel spinup
          * Launch turret position set
+         * Check which state works
          * Launch hood state set
          * Wait until flywheel and turret are set
          * Spin feeder roller
@@ -159,6 +168,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
          * If shooting multiple
          */
         }
+
     }
 
 }
