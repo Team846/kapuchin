@@ -35,7 +35,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
             )
 
             val nat = LinearOffloadedNativeConversion(::p, ::p, ::p, ::p,
-                    nativeOutputUnits = 1023.0, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
+                    nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = nativeResolution,
                     perFeedbackQuantity = avg(
                             toLeftPosition(resolution, enc).abs,

@@ -28,7 +28,7 @@ class LiftConversions(val hardware: LiftHardware) : Named by Named("Conversions"
             val pfq = max.first - min.first
 
             val native = LinearOffloadedNativeConversion(::p, ::p, ::p, ::p,
-                    nativeOutputUnits = 1023.0, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
+                    nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = nfu, perFeedbackQuantity = pfq,
                     feedbackZero = zeroOffset
             )
