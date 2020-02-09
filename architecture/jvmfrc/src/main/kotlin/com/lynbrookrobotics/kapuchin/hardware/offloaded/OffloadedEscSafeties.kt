@@ -14,14 +14,13 @@ data class OffloadedEscSafeties(
 ) {
     companion object {
         val NoSafeties = OffloadedEscSafeties(0.Second, null, null)
-        val talonCache = ConcurrentHashMap<BaseTalon, OffloadedEscSafeties>()
-        val sparkCache = ConcurrentHashMap<CANSparkMax, OffloadedEscSafeties>()
+        val cache = ConcurrentHashMap<Any, OffloadedEscSafeties>()
     }
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
     fun writeTo(esc: BaseTalon, timeoutMs: Int = this.timeoutMs) {
-        val cached = talonCache[esc]
+        val cached = cache[esc]
         if (this != cached) cached.also {
             println("Writing safeties to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")
 
@@ -34,11 +33,11 @@ data class OffloadedEscSafeties(
                 if (max != null) +esc.configForwardSoftLimitThreshold(max.toInt(), timeoutMs)
             }
         }
-        talonCache[esc] = this
+        cache[esc] = this
     }
 
     fun writeTo(esc: CANSparkMax) {
-        val cached = sparkCache[esc]
+        val cached = cache[esc]
         if (this != cached) cached.also {
             println("Writing safeties to SparkMAX ${esc.deviceId}")
 
@@ -51,6 +50,6 @@ data class OffloadedEscSafeties(
                 if (max != null) +esc.setSoftLimit(SoftLimitDirection.kForward, max.toFloat())
             }
         }
-        sparkCache[esc] = this
+        cache[esc] = this
     }
 }

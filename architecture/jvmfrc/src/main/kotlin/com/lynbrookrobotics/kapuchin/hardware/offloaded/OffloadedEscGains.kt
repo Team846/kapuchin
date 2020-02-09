@@ -18,14 +18,13 @@ data class OffloadedEscGains(
 ) {
     companion object {
         const val idx = 0
-        val talonCache = ConcurrentHashMap<BaseTalon, OffloadedEscGains>()
-        val sparkCache = ConcurrentHashMap<CANSparkMax, OffloadedEscGains>()
+        val cache = ConcurrentHashMap<Any, OffloadedEscGains>()
     }
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
     fun writeTo(esc: BaseTalon, timeoutMs: Int = this.timeoutMs) {
-        val cached = talonCache[esc]
+        val cached = cache[esc]
         if (this != cached) cached.also {
             println("Writing gains to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")
 
@@ -44,11 +43,11 @@ data class OffloadedEscGains(
             if (it == null || it.maxIntegralAccumulator != this.maxIntegralAccumulator)
                 +esc.configMaxIntegralAccumulator(idx, maxIntegralAccumulator, timeoutMs)
         }
-        talonCache[esc] = this
+        cache[esc] = this
     }
 
     fun writeTo(esc: CANSparkMax, pidController: CANPIDController) {
-        val cached = sparkCache[esc]
+        val cached = cache[esc]
         if (this != cached) cached.also {
             println("Writing gains to SparkMAX ${esc.deviceId}")
 
@@ -67,6 +66,6 @@ data class OffloadedEscGains(
             if (it == null || it.maxIntegralAccumulator != this.maxIntegralAccumulator)
                 +pidController.setIMaxAccum(maxIntegralAccumulator, timeoutMs)
         }
-        sparkCache[esc] = this
+        cache[esc] = this
     }
 }
