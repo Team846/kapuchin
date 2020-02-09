@@ -16,32 +16,6 @@ import kotlinx.coroutines.withContext
 
 suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") {
 
-//    fun requiredVelocities(
-//            flywheel: FlywheelComponent, hood: ShooterHoodComponent,
-//            hoodState: HoodState, target: DetectedTarget
-//    ): Pair<Velocity, AngularVelocity> { // Returns a pair of the ball velocity and the required rpm to spin it to that velocity
-//
-//        target.outerGoalPos?.let {
-//            val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
-//
-//
-//            val dist = Length(sqrt((it.x * it.x + it.y * it.y).siValue))
-//            val deltaHeight = flywheel.targetHeight - flywheel.height
-//
-//            val expression = ((dist * 1.EarthGravity) / (((dist * tan(launchA)) - deltaHeight) * cos(launchA) * cos(launchA))) * dist
-//            val ballVelocity = Velocity(sqrt(expression.siValue / 2))
-//
-//
-//            val flywheelOmega = with(flywheel) {
-//                AngularVelocity(((momentFactor * ballMass + (2 * momentOfInertia / (rollerRadius * rollerRadius))) * ballVelocity * rollerRadius / momentOfInertia).siValue)
-//                + slippage
-//            }
-//
-//            return ballVelocity to flywheelOmega
-//        }
-//        return Velocity(0.0) to AngularVelocity(0.0)
-//    }
-
     fun requiredVelocities(
             flywheel: FlywheelComponent, hood: ShooterHoodComponent,
             hoodState: HoodState, target: DetectedTarget
