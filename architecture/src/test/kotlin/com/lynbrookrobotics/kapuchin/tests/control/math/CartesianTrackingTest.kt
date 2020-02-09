@@ -89,15 +89,10 @@ class CartesianTrackingTest {
     fun `high frequency tracking figure 8`() {
         var pos = Position(0.Foot, 0.Foot, 0.Degree)
 
-        println(pos)
         pos = highFreqArc(pos, 10.Foot, 180.Degree, Left)
-        println(pos)
         pos = highFreqArc(pos, 10.Foot, 180.Degree, Right)
-        println(pos)
         pos = highFreqArc(pos, 10.Foot, 180.Degree, Right)
-        println(pos)
         pos = highFreqArc(pos, 10.Foot, 180.Degree, Left)
-        println(pos)
 
         pos.x `is within?` (0.Foot `±` 0.1.Inch)
         pos.y `is within?` (0.Foot `±` 0.1.Inch)
@@ -108,19 +103,55 @@ class CartesianTrackingTest {
     fun `circular arc tracking figure 8`() {
         var pos = Position(0.Foot, 0.Foot, 0.Degree)
 
-        println(pos)
         pos = circArcArc(pos, 10.Foot, 180.Degree, Left)
-        println(pos)
         pos = circArcArc(pos, 10.Foot, 180.Degree, Right)
-        println(pos)
         pos = circArcArc(pos, 10.Foot, 180.Degree, Right)
-        println(pos)
         pos = circArcArc(pos, 10.Foot, 180.Degree, Left)
-        println(pos)
 
-        pos.x `is within?` (0.Foot `±` 0.1.Inch)
-        pos.y `is within?` (0.Foot `±` 0.1.Inch)
+        pos.x `is within?` (0.Foot `±` 1.Inch)
+        pos.y `is within?` (0.Foot `±` 1.Inch)
         pos.bearing `is within?` (0.Degree `±` 1.Degree)
+    }
+
+    @Test
+    fun `all tracking algorithms behave identically`() {
+        val track = 2.Foot
+
+        val init = Position(-8.Foot, 46.Foot, -84.6.Degree)
+
+        val svet = SimpleVectorTracking(track, init)
+        val svit = SimpleVectorTracking(track, init)
+        val cat = CircularArcTracking(init)
+        val hft = HighFrequencyTracking(track, init)
+
+        var Σθ = init.bearing
+
+        val random = Random(846)
+        val sideTravelLengths = anyDouble.map { it.milli(Metre) }.filter { it.abs < 6.Inch }
+
+        sideTravelLengths.shuffled(random).forEach { sl ->
+            sideTravelLengths.shuffled(random).forEach { sr ->
+                Σθ += theta(sl, sr, track)
+
+                svet(sl, sr, Σθ)
+                svit(sl, sr, null)
+                cat(sl, sr, Σθ)
+                repeat(10) { hft(sl / 10, sr / 10) }
+
+                svit.x `is within?` (svet.x `±` 1.Inch)
+                svit.y `is within?` (svet.y `±` 1.Inch)
+                svit.bearing `coterminal -` Σθ `is within?` `±`(1.Degree)
+
+                cat.y `is within?` (svet.y `±` 8.Inch)
+                cat.x `is within?` (svet.x `±` 8.Inch)
+                cat.bearing `coterminal -` Σθ `is within?` `±`(1.Degree)
+
+                hft.x `is within?` (svet.x `±` 8.Inch)
+                hft.y `is within?` (svet.y `±` 8.Inch)
+                hft.bearing `coterminal -` Σθ `is within?` `±`(1.Degree)
+
+            }
+        }
     }
 
     enum class Direction {
@@ -161,20 +192,19 @@ class CartesianTrackingTest {
 
         while (sum < angle) {
             anyDouble.filter { it.absoluteValue > 1.0 }.forEach { constant ->
-                val dist = 1.centi(Metre) + (1 / constant).centi(Metre)
+                val dist = 1.milli(Metre) + (1 / constant).milli(Metre)
                 val theta = dist / r * Radian
 
                 val track = when (direction) {
-                    Left -> 1.Foot
-                    Right -> -1.Foot
+                    Left -> -1.Foot
+                    Right -> +1.Foot
                 }
 
-                val distl = theta * (r - track) / Radian
-                val distr = theta * (r + track) / Radian
+                val distl = theta * (r + track) / Radian
+                val distr = theta * (r - track) / Radian
 
+                tracking(distl, distr, init.bearing + sum * track.signum)
                 sum += theta
-
-                tracking(distl, distr, init.bearing + sum)
             }
         }
 

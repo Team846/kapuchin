@@ -35,7 +35,7 @@ class CircularArcTracking(
     var bearing = init.bearing
 
     override fun invoke(sl: Length, sr: Length, newBearing: Angle) {
-        val `Δθ` = newBearing - bearing
+        val `Δθ` = newBearing `coterminal -` bearing
         val s = avg(sl, sr)
 
         if (`Δθ` == 0.Degree) {
@@ -45,14 +45,14 @@ class CircularArcTracking(
             val r = s / `Δθ`.Radian
 
             val mtrx = RotationMatrix(`Δθ`)
-            val ox = x + r * cos(bearing + 90.Degree)
-            val oy = y + r * sin(bearing + 90.Degree)
+            val ox = x + r * sin(bearing + 90.Degree)
+            val oy = y + r * cos(bearing + 90.Degree)
 
             val `x - ox` = x - ox
             val `y - oy` = y - oy
 
-            x = mtrx.rotateX(`x - ox`, `y - oy`) + ox
-            y = mtrx.rotateY(`x - ox`, `y - oy`) + oy
+            x = mtrx.rzCoordinateX(`x - ox`, `y - oy`) + ox
+            y = mtrx.rzCoordinateY(`x - ox`, `y - oy`) + oy
         }
 
         bearing = newBearing

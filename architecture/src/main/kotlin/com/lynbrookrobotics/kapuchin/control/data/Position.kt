@@ -12,7 +12,6 @@ import info.kunalsheth.units.generated.*
  * @property y robot cartesian coordinate
  * @property bearing robot bearing
  */
-// todo: unit test!
 data class Position(val x: Length, val y: Length, val bearing: Angle) {
 
     operator fun plus(that: Position) = Position(
