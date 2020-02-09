@@ -16,10 +16,39 @@ import kotlinx.coroutines.withContext
 
 suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") {
 
+//    fun requiredVelocities(
+//            flywheel: FlywheelComponent, hood: ShooterHoodComponent,
+//            hoodState: HoodState, target: DetectedTarget
+//    ): Pair<Velocity, AngularVelocity> { // Returns a pair of the ball velocity and the required rpm to spin it to that velocity
+//
+//        target.outerGoalPos?.let {
+//            val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
+//
+//
+//            val dist = Length(sqrt((it.x * it.x + it.y * it.y).siValue))
+//            val deltaHeight = flywheel.targetHeight - flywheel.height
+//
+//            val expression = ((dist * 1.EarthGravity) / (((dist * tan(launchA)) - deltaHeight) * cos(launchA) * cos(launchA))) * dist
+//            val ballVelocity = Velocity(sqrt(expression.siValue / 2))
+//
+//
+//            val flywheelOmega = with(flywheel) {
+//                AngularVelocity(((momentFactor * ballMass + (2 * momentOfInertia / (rollerRadius * rollerRadius))) * ballVelocity * rollerRadius / momentOfInertia).siValue)
+//                + slippage
+//            }
+//
+//            return ballVelocity to flywheelOmega
+//        }
+//        return Velocity(0.0) to AngularVelocity(0.0)
+//    }
+
     fun requiredVelocities(
             flywheel: FlywheelComponent, hood: ShooterHoodComponent,
             hoodState: HoodState, target: DetectedTarget
-    ): Pair<Velocity, AngularVelocity> { // Returns a pair of the ball velocity and the required rpm to spin it to that velocity
+    ): Pair<Pair<Velocity, Velocity>, Pair<AngularVelocity, AngularVelocity>> { // Returns a pair of pairs of the ball velocity and the required rpm to spin it to that velocity
+
+        var outerPair = Pair(Velocity(0.0), AngularVelocity(0.0))
+        var innerPair = Pair(Velocity(0.0), AngularVelocity(0.0))
 
         target.outerGoalPos?.let {
             val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
@@ -37,9 +66,28 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
                 + slippage
             }
 
-            return ballVelocity to flywheelOmega
+            outerPair = ballVelocity to flywheelOmega
+
         }
-        return Velocity(0.0) to AngularVelocity(0.0)
+        target.innerGoalPos?.let {
+            val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
+
+
+            val dist = Length(sqrt((it.x * it.x + it.y * it.y).siValue))
+            val deltaHeight = flywheel.targetHeight - flywheel.height
+
+            val expression = ((dist * 1.EarthGravity) / (((dist * tan(launchA)) - deltaHeight) * cos(launchA) * cos(launchA))) * dist
+            val ballVelocity = Velocity(sqrt(expression.siValue / 2))
+
+
+            val flywheelOmega = with(flywheel) {
+                AngularVelocity(((momentFactor * ballMass + (2 * momentOfInertia / (rollerRadius * rollerRadius))) * ballVelocity * rollerRadius / momentOfInertia).siValue)
+                + slippage
+            }
+
+            innerPair =  ballVelocity to flywheelOmega
+        }
+        return (outerPair.first to innerPair.first) to (outerPair.second to innerPair.second)
     }
 
     fun targetEntryAngle(hood: ShooterHoodComponent, hoodState: HoodState, ballVelocity: Velocity, target: DetectedTarget): Angle { // Returns the entry angle of the ball at outer goal
@@ -55,10 +103,13 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     fun shotState(
             flywheel: FlywheelComponent, hood: ShooterHoodComponent,
             hoodState: HoodState, target: DetectedTarget
-            ): Pair<AngularVelocity, Angle> { // Returns a pair of the required ang. vel and the entry angle of the ball
+            ): Pair< Pair<AngularVelocity, Angle>, Pair<AngularVelocity, Angle> > { // Returns a pair of the pair of required ang. vel and the entry angle of the ball
         val (ballVelocity, flywheelOmega) = requiredVelocities(flywheel, hood, hoodState, target)
-        val entryAngle = targetEntryAngle(hood, hoodState, ballVelocity, target)
-        return flywheelOmega to entryAngle
+
+        val entryAngleOuter = targetEntryAngle(hood, hoodState, ballVelocity.first, target)
+        val entryAngleInner = targetEntryAngle(hood, hoodState, ballVelocity.second, target)
+
+        return (flywheelOmega.first to entryAngleOuter) to (flywheelOmega.second to entryAngleInner)
     }
 
 
@@ -77,7 +128,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
     }
 
-    fun entryAngleLimits(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Angle, Angle> { // Entry angle tolerance for inner outer goal
+    fun entryAngleLimits(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Angle, Angle> { // Entry angle tolerance for inner goal
 
         val downward = atan(((flywheel.hexagonHeight / 2) + offsets(flywheel, target).second) / flywheel.outerInnerDiff) // angle of approach from below
         val upward = 90.Degree - atan(flywheel.outerInnerDiff / ((flywheel.hexagonHeight / 2) - offsets(flywheel, target).second)) // angle of approach from upward
@@ -109,34 +160,34 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
                 val downInner = target.innerGoalPos
                         ?.let { shotState(flywheel, hood, HoodState.Down, target) }
                         ?.let {
-                            it.first < flywheel.maxOmega
-                                    && it.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
+                            it.second.first < flywheel.maxOmega
+                                    && it.second.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
                                     && innerGoalPossible(flywheel, target)
                         }
                         ?: false
                 val downOuter = target.outerGoalPos
                         ?.let { shotState(flywheel, hood, HoodState.Down, target) }
-                        ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
+                        ?.let { it.first.second.abs < flywheel.outerGoalEntryTolerance && it.first.first < flywheel.maxOmega }
                         ?: false
                 val upInner = target.innerGoalPos
                         ?.let { shotState(flywheel, hood, HoodState.Up, target) }
                         ?.let {
-                            it.first < flywheel.maxOmega
-                                    && it.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
+                            it.second.first < flywheel.maxOmega
+                                    && it.second.second in entryAngleLimits(flywheel, target).first..entryAngleLimits(flywheel, target).second
                                     && innerGoalPossible(flywheel, target)
                         }
                         ?: false
                 val upOuter = target.outerGoalPos
                         ?.let { shotState(flywheel, hood, HoodState.Up, target) }
-                        ?.let { it.second.abs < flywheel.outerGoalEntryTolerance && it.first < flywheel.maxOmega }
+                        ?.let { it.first.second.abs < flywheel.outerGoalEntryTolerance && it.first.first < flywheel.maxOmega }
                         ?: false
 
                 if (downInner && downOuter && upInner && upOuter) return@choreography // Exits choreo if all states are impossible
 
-                if (!downInner) ShooterState(shotState(flywheel, hood, HoodState.Down, target).first, HoodState.Down)
-                else if (!upInner) ShooterState(shotState(flywheel, hood, HoodState.Up, target).first, HoodState.Up)
-                else if (!downOuter) ShooterState(shotState(flywheel, hood, HoodState.Down, target).first, HoodState.Down)
-                else ShooterState(shotState(flywheel, hood, HoodState.Up, target).first, HoodState.Up)
+                if (!downInner) ShooterState(shotState(flywheel, hood, HoodState.Down, target).second.first, HoodState.Down, target.innerGoalPos!!.bearing)
+                else if (!upInner) ShooterState(shotState(flywheel, hood, HoodState.Up, target).second.first, HoodState.Up, target.innerGoalPos!!.bearing)
+                else if (!downOuter) ShooterState(shotState(flywheel, hood, HoodState.Down, target).first.first, HoodState.Down, target.outerGoalPos!!.bearing)
+                else ShooterState(shotState(flywheel, hood, HoodState.Up, target).first.first, HoodState.Up, target.outerGoalPos!!.bearing)
 
                 /*
             DownInner | UpInner | DownOuter | UpOuter || Hood |  Goal |
