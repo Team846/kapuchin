@@ -14,7 +14,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 
+
+
+
 suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") {
+
+    // TODO unit tests for all methods
 
     fun requiredVelocities(
             flywheel: FlywheelComponent, hood: ShooterHoodComponent,
@@ -218,7 +223,7 @@ suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
 
 suspend fun Subsystems.shoot() = supervisorScope() {
     try {
-        launch { feederRoller?.spin(30.Rpm) }
+//        launch { feederRoller?.spin(30.Rpm) }
         launch { shooter?.set(PercentOutput(shooter.hardware.escConfig, 30.Percent)) }
     } finally {
         withContext(NonCancellable) {
