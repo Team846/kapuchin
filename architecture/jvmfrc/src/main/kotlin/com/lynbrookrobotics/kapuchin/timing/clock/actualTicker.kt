@@ -1,3 +1,5 @@
+@file:Suppress("EXPERIMENTAL_UNSIGNED_LITERALS")
+
 package com.lynbrookrobotics.kapuchin.timing.clock
 
 import com.lynbrookrobotics.kapuchin.logging.*
