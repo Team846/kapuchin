@@ -19,7 +19,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     fun requiredVelocities(
             flywheel: FlywheelComponent, hood: ShooterHoodComponent,
             hoodState: HoodState, target: DetectedTarget
-    ): Pair<Velocity, AngularVelocity> {
+    ): Pair<Velocity, AngularVelocity> { // Returns a pair of the ball velocity and the required rpm to spin it to that velocity
 
         target.outerGoalPos?.let {
             val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
@@ -42,7 +42,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
         return Velocity(0.0) to AngularVelocity(0.0)
     }
 
-    fun targetEntryAngle(hood: ShooterHoodComponent, hoodState: HoodState, ballVelocity: Velocity, target: DetectedTarget): Angle {
+    fun targetEntryAngle(hood: ShooterHoodComponent, hoodState: HoodState, ballVelocity: Velocity, target: DetectedTarget): Angle { // Returns the entry angle of the ball at outer goal
         target.outerGoalPos?.let {
             val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
             val dist = Length(sqrt((it.x * it.x + it.y * it.y).siValue))
@@ -55,7 +55,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     fun shotState(
             flywheel: FlywheelComponent, hood: ShooterHoodComponent,
             hoodState: HoodState, target: DetectedTarget
-            ): Pair<AngularVelocity, Angle> {
+            ): Pair<AngularVelocity, Angle> { // Returns a pair of the required ang. vel and the entry angle of the ball
         val (ballVelocity, flywheelOmega) = requiredVelocities(flywheel, hood, hoodState, target)
         val entryAngle = targetEntryAngle(hood, hoodState, ballVelocity, target)
         return flywheelOmega to entryAngle
@@ -63,7 +63,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
 
 
-    fun offsets(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Length, Length> { // Inner goal offsets
+    fun offsets(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Length, Length> { // Horizontal and Vertical offsets of inner goal with respect to outer goal
 
         target.outerGoalPos?.let {
             val dist = Length(sqrt((it.x * it.x + (it.y * it.y)).siValue))
@@ -79,21 +79,21 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
     fun entryAngleLimits(flywheel: FlywheelComponent, target: DetectedTarget): Pair<Angle, Angle> { // Entry angle tolerance for inner outer goal
 
-        val downward = atan(((flywheel.hexagonHeight / 2) + offsets(flywheel, target).second) / flywheel.outerInnerDiff) // approach from below
-        val upward = 90.Degree - atan(flywheel.outerInnerDiff / ((flywheel.hexagonHeight / 2) - offsets(flywheel, target).second)) // approach from upward
+        val downward = atan(((flywheel.hexagonHeight / 2) + offsets(flywheel, target).second) / flywheel.outerInnerDiff) // angle of approach from below
+        val upward = 90.Degree - atan(flywheel.outerInnerDiff / ((flywheel.hexagonHeight / 2) - offsets(flywheel, target).second)) // angle of approach from upward
         return downward to upward
 
     }
 
     fun innerGoalPossible(flywheel: FlywheelComponent, target: DetectedTarget): Boolean {
-        val horizontal  = offsets(flywheel, target).first
-        val vertical = offsets(flywheel, target).second
+        val horizontal  = offsets(flywheel, target).first // horizontal offset of inner goal with respect to outer goal
+        val vertical = offsets(flywheel, target).second // vertical offset of inner goal with respect to outer goal
         return ((horizontal * horizontal) + (vertical * vertical)) < flywheel.boundingCircleRadius * flywheel.boundingCircleRadius
     }
 
 
     choreography {
-        // TODO get target, do nothing if null
+
         if (limelight == null) return@choreography
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
 
@@ -105,7 +105,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
 
             if (flywheel != null && hood != null) {
-                // TODO check if target is physically impossible to shoot to
+
                 val downInner = target.innerGoalPos
                         ?.let { shotState(flywheel, hood, HoodState.Down, target) }
                         ?.let {
