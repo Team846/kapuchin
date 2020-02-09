@@ -43,7 +43,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
         if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
 
-        val (target, _) = uni.speedAngleTarget(forwardVelocity, absSteering + startingAngle)
+        val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, absSteering + startingAngle)
 
         val nativeL = hardware.conversions.nativeConversion.native(
                 target.left + steeringVelocity
@@ -71,7 +71,7 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     val uni = UnicycleDrive(this@turn, this@startRoutine)
 
     controller {
-        val (targVels, error) = uni.speedAngleTarget(0.FootPerSecond, target)
+        val (targVels, error) = uni.speedTargetAngleTarget(0.FootPerSecond, target)
 
         val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)

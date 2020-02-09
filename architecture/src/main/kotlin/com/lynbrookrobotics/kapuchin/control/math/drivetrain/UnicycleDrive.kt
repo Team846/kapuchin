@@ -22,7 +22,7 @@ class UnicycleDrive(private val drivetrain: GenericDrivetrainComponent, scope: B
     val targetGraph = drivetrain.graph("Target Angle", Degree)
     val speedGraph = drivetrain.graph("Target Speed", FootPerSecond)
 
-    fun speedAngleTarget(speed: Velocity, angle: Angle): Pair<TwoSided<Velocity>, Angle> {
+    fun speedTargetAngleTarget(speed: Velocity, angle: Angle): Pair<TwoSided<Velocity>, Angle> {
         val error = (angle `coterminal -` position.y.bearing)
         return speedTargetAngleError(speed, error) to error
     }

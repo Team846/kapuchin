@@ -29,7 +29,7 @@ class TrajectoryGeneratorTest {
             val dt = trajectory[i].x - trajectory[i - 1].x
             val v = dx / dt
 
-            102.Percent * maxVelocity `is greater than?` v
+            v `is within?` `±`(maxVelocity * 1.05)
         }
     }
 
@@ -45,7 +45,7 @@ class TrajectoryGeneratorTest {
 
             // v² = v₀² + 2aΔx
             val a = (v * v - oldV * oldV) / 2 / dx
-            102.Percent * maxAcceleration `is greater than?` a
+            a `is within?` `±`(maxAcceleration * 1.05)
 
             oldV = v
         }

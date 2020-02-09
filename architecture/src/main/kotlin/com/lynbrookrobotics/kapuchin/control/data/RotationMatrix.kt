@@ -5,24 +5,46 @@ import info.kunalsheth.units.math.*
 
 /**
  * Represents a rotation matrix
+ * Uses compass bearing, not trigonometric angle!
  *
  * @author Kunal
  *
  * @property theta rotation about the origin
  */
-// todo: unit test!
 data class RotationMatrix(val theta: Angle) {
     internal val sin = sin(theta)
     internal val cos = cos(theta)
 
-    fun rotateX(x: Length, y: Length) = x * cos + y * sin
+    /**
+     * Rotate a vector about the Z-axis
+     * Intended for high-performance applications like high-frequency odometry
+     *
+     * @param x x coordinate of vector to rotate
+     * @param y y coordinate of vector to rotate
+     * @return y coordinate of rotated vector
+     */
+    fun rzCoordinateY(x: Length, y: Length) = x * cos + y * sin
 
-    fun rotateY(x: Length, y: Length) = -x * sin + cos * y
+    /**
+     * Rotate a vector about the Z-axis
+     * Intended for high-performance applications like high-frequency odometry
+     *
+     * @param x x coordinate of vector to rotate
+     * @param y y coordinate of vector to rotate
+     * @return x coordinate of rotated vector
+     */
+    fun rzCoordinateX(x: Length, y: Length) = -x * sin + y * cos
 
-    fun rotate(that: UomVector<Length>) = that.run {
+    /**
+     * Rotate a vector about the Z-axis
+     *
+     * @param that vector to rotate
+     * @return rotated vector
+     */
+    infix fun rz(that: UomVector<Length>) = that.run {
         UomVector(
-                rotateX(x, y),
-                rotateY(x, y),
+                rzCoordinateY(x, y),
+                rzCoordinateX(x, y),
                 z
         )
     }

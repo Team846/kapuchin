@@ -33,7 +33,7 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = start
         try {
             drivetrainEscs.forEach { it.setNeutralMode(Coast) }
             while (isActive) {
-                val (x, y) = startingRot.rotate(pos.vector - startingLoc)
+                val (x, y) = startingRot rz (pos.vector - startingLoc)
 
                 if (distance(pos.vector, last.vector) > ptDistance) {
                     log.println("${x.Foot}\t${y.Foot}")
@@ -43,7 +43,7 @@ suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = start
                 delay(50.milli(Second))
             }
         } finally {
-            val (x, y) = startingRot.rotate(pos.vector - startingLoc)
+            val (x, y) = startingRot rz (pos.vector - startingLoc)
             log.println("${x.Foot}\t${y.Foot}")
             log.close()
 
@@ -92,7 +92,7 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
 
         val targetA = (target - location).bearing
         val speed = motionProfile(distance)
-        val (targVels, _) = uni.speedAngleTarget(speed, targetA)
+        val (targVels, _) = uni.speedTargetAngleTarget(speed, targetA)
 
         val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)

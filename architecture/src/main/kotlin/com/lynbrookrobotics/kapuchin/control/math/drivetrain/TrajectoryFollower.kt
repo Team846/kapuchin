@@ -27,9 +27,9 @@ class TrajectoryFollower(
 ) {
 
     // Make waypoints relative to origin
-    private val waypoints = with(RotationMatrix(origin.bearing)) {
+    private val waypoints = RotationMatrix(origin.bearing).let { mtrx ->
         trajectory
-                .map { (t, waypoint) -> rotate(waypoint) + origin.vector stampWith t }
+                .map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
                 .iterator()
     }
 
@@ -61,9 +61,8 @@ class TrajectoryFollower(
         }
 
         val targetA = (target.y - position.vector).bearing
-        val (velocityL, velocityR) = uni.speedAngleTarget(
-                speed,
-                targetA
+        val (velocityL, velocityR) = uni.speedTargetAngleTarget(
+                speed, targetA
         ).first
 
         return TwoSided(velocityL, velocityR).takeIf { !done }
