@@ -21,14 +21,14 @@ data class OffloadedEscSafeties(
 
     fun writeTo(esc: BaseTalon, timeoutMs: Int = this.timeoutMs) {
         val cached = cache[esc]
-        if (this != cached) cached.also {
+        if (this != cached) {
             println("Writing safeties to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")
 
-            if (it == null || it.min != this.min) {
+            if (cached?.min != this.min) {
                 +esc.configReverseSoftLimitEnable(min != null, timeoutMs)
                 if (min != null) +esc.configReverseSoftLimitThreshold(min.toInt(), timeoutMs)
             }
-            if (it == null || it.max != this.max) {
+            if (cached?.max != this.max) {
                 +esc.configForwardSoftLimitEnable(max != null, timeoutMs)
                 if (max != null) +esc.configForwardSoftLimitThreshold(max.toInt(), timeoutMs)
             }
@@ -38,14 +38,14 @@ data class OffloadedEscSafeties(
 
     fun writeTo(esc: CANSparkMax) {
         val cached = cache[esc]
-        if (this != cached) cached.also {
+        if (this != cached) {
             println("Writing safeties to SparkMAX ${esc.deviceId}")
 
-            if (it == null || it.min != this.min) {
+            if (cached?.min != this.min) {
                 +esc.enableSoftLimit(SoftLimitDirection.kReverse, min != null)
                 if (min != null) +esc.setSoftLimit(SoftLimitDirection.kReverse, min.toFloat())
             }
-            if (it == null || it.max != this.max) {
+            if (cached?.max != this.max) {
                 +esc.enableSoftLimit(SoftLimitDirection.kForward, max != null)
                 if (max != null) +esc.setSoftLimit(SoftLimitDirection.kForward, max.toFloat())
             }
