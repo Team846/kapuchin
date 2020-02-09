@@ -59,12 +59,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     }
 }
 
-suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open loop") {
-    controller {
-        TwoSided(
-                PercentOutput(hardware.escConfig, power)
-        )
-    }
+suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
+    controller { TwoSided(PercentOutput(hardware.escConfig, target)) }
 }
 
 suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRoutine("Turn") {

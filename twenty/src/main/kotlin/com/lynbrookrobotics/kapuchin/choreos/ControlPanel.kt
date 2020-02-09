@@ -5,16 +5,10 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import kotlinx.coroutines.coroutineScope
 
 suspend fun Subsystems.controlPanelTeleop() = startChoreo("Control Panel Teleop") {
-
-
     choreography {
-        runWhenever(
 
-        )
     }
 }
 
-suspend fun Subsystems.firstStage() = coroutineScope {
-
-
-}
+// TODO control panel stage 2
+// TODO control panel stage 3

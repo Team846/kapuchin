@@ -52,12 +52,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         System.gc()
         HAL.observeUserProgramTeleop()
         runAll(
-                { drivetrainTeleop() },
                 { climberTeleop() },
-                { intakeTeleop() },
                 { controlPanelTeleop() },
-                { shooterTeleop() },
+                { intakeTeleop() },
                 { rumbleTeleop() },
+                { shooterTeleop() },
+                { drivetrain.teleop(driver) },
                 { limelight?.autoZoom() }
         )
         System.gc()
