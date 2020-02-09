@@ -1,13 +1,33 @@
 package com.lynbrookrobotics.kapuchin.tests.control.math
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.absoluteValue
+import kotlin.math.sqrt
 import kotlin.test.Test
 
 class GeometryTest {
+
+    @Test
+    fun `bearing outputs compass bearing angles`() {
+        val point = UomVector((sqrt(3.0)).Foot, 1.Foot) // 30 "trig degrees"
+        point.bearing `is equal to?` 60.Degree
+    }
+
+    @Test
+    fun `bearing outputs zero for a vertical line`() {
+        val point = UomVector(0.Foot, 5.Foot)
+        point.bearing `is equal to?` 0.Degree
+    }
+
+    @Test
+    fun `bearing outputs ninety for a horizontal line`() {
+        val point = UomVector(5.Foot, 0.Foot)
+        point.bearing `is equal to?` 90.Degree
+    }
 
     @Test
     fun `coterminal difference of the same angle is zero`() {
