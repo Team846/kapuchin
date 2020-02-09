@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
+import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
@@ -17,16 +18,16 @@ data class OffloadedEscGains(
 ) {
     companion object {
         const val idx = 0
-        val talonCache = ConcurrentHashMap<TalonSRX, OffloadedEscGains>()
+        val talonCache = ConcurrentHashMap<BaseTalon, OffloadedEscGains>()
         val sparkCache = ConcurrentHashMap<CANSparkMax, OffloadedEscGains>()
     }
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
-    fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
+    fun writeTo(esc: BaseTalon, timeoutMs: Int = this.timeoutMs) {
         val cached = talonCache[esc]
         if (this != cached) cached.also {
-            println("Writing gains to TalonSRX ${esc.deviceID}")
+            println("Writing gains to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")
 
             if (it == null || it.kP != this.kP)
                 +esc.config_kP(idx, kP, timeoutMs)

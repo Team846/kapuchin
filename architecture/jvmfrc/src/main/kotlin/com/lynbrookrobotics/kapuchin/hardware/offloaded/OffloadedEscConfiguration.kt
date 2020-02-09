@@ -1,5 +1,8 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration
+import com.ctre.phoenix.motorcontrol.can.BaseTalon
+import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.revrobotics.CANPIDController
@@ -23,17 +26,17 @@ data class OffloadedEscConfiguration(
 ) {
 
     companion object {
-        val talonCache = ConcurrentHashMap<TalonSRX, OffloadedEscConfiguration>()
+        val talonCache = ConcurrentHashMap<BaseTalon, OffloadedEscConfiguration>()
         val victorCache = ConcurrentHashMap<VictorSPX, OffloadedEscConfiguration>()
         val sparkCache = ConcurrentHashMap<CANSparkMax, OffloadedEscConfiguration>()
     }
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
-    fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
+    fun writeTo(esc: BaseTalon, timeoutMs: Int = this.timeoutMs) {
         val cached = talonCache[esc]
         if (this != cached) talonCache[esc].also {
-            println("Writing configurations to TalonSRX ${esc.deviceID}")
+            println("Writing configurations to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")
 
             if (it == null || it.openloopRamp != this.openloopRamp)
                 +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
@@ -56,14 +59,29 @@ data class OffloadedEscConfiguration(
             if (it == null || it.voltageCompSaturation != this.voltageCompSaturation)
                 +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
 
-            if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
-                +esc.configContinuousCurrentLimit(continuousCurrentLimit.Ampere.toInt(), timeoutMs)
-
-            if (it == null || it.peakCurrentLimit != this.peakCurrentLimit)
-                +esc.configPeakCurrentLimit(peakCurrentLimit.Ampere.toInt(), timeoutMs)
-
-            if (it == null || it.peakCurrentDuration != this.peakCurrentDuration)
-                +esc.configPeakCurrentDuration(peakCurrentDuration.milli(Second).toInt(), timeoutMs)
+            when (esc) {
+                is TalonSRX -> {
+                    if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
+                        +esc.configContinuousCurrentLimit(continuousCurrentLimit.Ampere.toInt(), timeoutMs)
+                    if (it == null || it.peakCurrentLimit != this.peakCurrentLimit)
+                        +esc.configPeakCurrentLimit(peakCurrentLimit.Ampere.toInt(), timeoutMs)
+                    if (it == null || it.peakCurrentDuration != this.peakCurrentDuration)
+                        +esc.configPeakCurrentDuration(peakCurrentDuration.milli(Second).toInt(), timeoutMs)
+                }
+                is TalonFX -> {
+                    if (it == null ||
+                            it.continuousCurrentLimit != this.continuousCurrentLimit ||
+                            it.peakCurrentLimit != this.peakCurrentLimit ||
+                            it.peakCurrentDuration != this.peakCurrentDuration) {
+                        +esc.configSupplyCurrentLimit(SupplyCurrentLimitConfiguration(
+                                true,
+                                continuousCurrentLimit.Ampere,
+                                peakCurrentLimit.Ampere,
+                                peakCurrentDuration.milli(Second)
+                        ), timeoutMs)
+                    }
+                }
+            }
         }
         talonCache[esc] = this
     }
