@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.lynbrookrobotics.kapuchin.control.math
 
 import info.kunalsheth.units.generated.*
@@ -5,6 +7,7 @@ import info.kunalsheth.units.math.*
 
 typealias `÷` = div
 typealias `*` = times
+
 operator fun <Q : Quan<Q>> Q.div(that: Q): Double = this.siValue / that.siValue
 
 infix fun <Q : Quan<Q>> Q.minMag(that: Q) = if (this.abs < that.abs) this else that

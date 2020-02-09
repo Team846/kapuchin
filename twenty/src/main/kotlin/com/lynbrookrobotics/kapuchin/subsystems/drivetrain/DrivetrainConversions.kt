@@ -3,18 +3,21 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware) {
+class DrivetrainConversions(val hardware: DrivetrainHardware) :
+        Named by Named("Conversions", hardware),
+        GenericDrivetrainConversions {
     private val wheelRadius by pref(3, Inch)
 
     private val leftTrim by pref(1.0)
     private val rightTrim by pref(1.0)
-    val trackLength by pref(2, Foot)
+    override val trackLength by pref(2, Foot)
 
     val nativeEncoderCountMultiplier by pref(4)
 
@@ -100,11 +103,11 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     class EscOdometry(val conversions: DrivetrainConversions) : Named by Named("ESC Odometry", conversions) {
         private var noTicksL = true
         private var noTicksR = true
-        val matrixTracking = RotationMatrixTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree), conversions.matrixCache)
+        val tracking = SimpleVectorTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree))
 
         private var lastL = 0
         private var lastR = 0
-        operator fun invoke(totalEscTicksL: Int, totalEscTicksR: Int) = conversions.run {
+        operator fun invoke(totalEscTicksL: Int, totalEscTicksR: Int, bearing: Angle? = null) = conversions.run {
             if (noTicksL && totalEscTicksL != 0) log(Level.Debug) {
                 "Received first left tick at $currentTime"
             }.also { noTicksL = false }
@@ -113,13 +116,14 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
                 "Received first right tick at $currentTime"
             }.also { noTicksR = false }
 
-            matrixTracking(
+            tracking(
                     toLeftPosition(
                             (totalEscTicksL - lastL) / nativeEncoderCountMultiplier
                     ),
                     toRightPosition(
                             (totalEscTicksR - lastR) / nativeEncoderCountMultiplier
-                    )
+                    ),
+                    bearing
             )
             lastL = totalEscTicksL
             lastR = totalEscTicksR

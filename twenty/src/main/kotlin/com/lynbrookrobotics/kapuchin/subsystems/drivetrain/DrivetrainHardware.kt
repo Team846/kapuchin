@@ -3,27 +3,31 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.kauailabs.navx.frc.AHRS
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.Debug
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
+import edu.wpi.first.wpilibj.SPI
 import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>() {
+class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>(), GenericDrivetrainHardware {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
-    override val syncThreshold = 4.milli(Second)
+    override val syncThreshold = 3.milli(Second)
     override val name = "Drivetrain"
 
     private val idx = 0
@@ -50,7 +54,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             defaultPeakCurrentLimit = 35.Ampere
     )
 
-    val conversions = DrivetrainConversions(this)
+    override val conversions = DrivetrainConversions(this)
 
     val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder, true)
@@ -76,6 +80,19 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.inverted = rightEscInversion
     }
 
+    val driftTolerance by pref(0.2, DegreePerSecond)
+    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
+        while(it.isCalibrating) {
+            log(Debug) { "Navx is calibrating" }
+            Thread.sleep(1000)
+        }
+        it.zeroYaw()
+    }.verify("Gyro should not drift after calibration") {
+        it.rate.DegreePerSecond in `±`(driftTolerance)
+    }
+
+    private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
+
     private val ticksToSerialPort = "kUSB1"
     private val ticksToSerial by hardw<TicksToSerial?> {
         TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort))
@@ -99,15 +116,16 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val escPosition = sensor {
         conversions.escOdometry(
                 leftMasterEsc.getSelectedSensorPosition(idx),
-                rightMasterEsc.getSelectedSensorPosition(idx)
+                rightMasterEsc.getSelectedSensorPosition(idx),
+                gyro.yaw.Degree
         )
-        conversions.escOdometry.matrixTracking.run { Position(x, y, bearing) } stampWith it
+        conversions.escOdometry.tracking.run { Position(x, y, bearing) } stampWith it
     }
             .with(graph("X Location", Foot, escNamed)) { it.x }
             .with(graph("Y Location", Foot, escNamed)) { it.y }
             .with(graph("Bearing", Degree, escNamed)) { it.bearing }
 
-    val position = /*t2sPosition ?:*/ escPosition
+    override val position = /*t2sPosition ?:*/ escPosition
 
     val leftPosition = sensor {
         conversions.toLeftPosition(
@@ -157,9 +175,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             }
         }
 
-        EventLoop.runOnTick { time ->
-            t2sPosition?.optimizedRead(time, period)
-            escPosition.optimizedRead(time, period)
+        odometryTicker.runOnTick { time ->
+            escPosition.optimizedRead(time, syncThreshold)
         }
     }
 }

@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.choreos
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
@@ -130,7 +131,7 @@ suspend fun DrivetrainComponent.visionSnapshotTracking(speed: Velocity, limeligh
 
     controller {
         if (target != null) {
-            val (targs, _) = uni.speedAngleTarget(speed, target)
+            val (targs, _) = uni.speedTargetAngleTarget(speed, target)
 
             val nativeL = hardware.conversions.nativeConversion.native(targs.left)
             val nativeR = hardware.conversions.nativeConversion.native(targs.right)
@@ -153,7 +154,7 @@ suspend fun DrivetrainComponent.visionActiveTracking(motionProfile: (Length) -> 
         targetAngle?.let { targetSnapshot ->
             val distance = targetPosition!!.vector.abs
 
-            val (targs, _) = uni.speedAngleTarget(motionProfile(distance), targetSnapshot + robotPosition.bearing)
+            val (targs, _) = uni.speedTargetAngleTarget(motionProfile(distance), targetSnapshot + robotPosition.bearing)
 
             val nativeL = hardware.conversions.nativeConversion.native(targs.left)
             val nativeR = hardware.conversions.nativeConversion.native(targs.right)

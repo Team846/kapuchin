@@ -3,3 +3,6 @@ CTRE:
 
 REV:
     `wget -N "https://www.revrobotics.com/content/sw/max/sdk/REVRobotics.json"`
+
+NAVX:
+    `wget -N "https://www.kauailabs.com/dist/frc/2020/navx_frc.json"`
