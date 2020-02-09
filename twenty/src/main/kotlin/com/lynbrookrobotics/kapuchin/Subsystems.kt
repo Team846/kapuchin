@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin
 
-import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
@@ -43,7 +42,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 <<<<<<< HEAD
 
                  val flywheel: FlywheelComponent?,
-                 val hood: HoodComponent?,
+                 val hood: ShooterHoodComponent?,
 =======
                  val carousel: CarouselComponent?,
                  val controlPanelPivot: ControlPanelPivotComponent?,
@@ -154,7 +153,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val climberIntakeAsync = initAsync(initClimberIntake) { ClimberIntakeComponent(ClimberIntakeHardware()) }
 
                 val flywheelAsync = initAsync(initFlywheel) { FlywheelComponent(FlywheelHardware()) }
-                val hoodAsync = initAsync(initHood) { HoodComponent(HoodHardware) }
+                val hoodAsync = initAsync(initHood) { ShooterHoodComponent(HoodHardware) }
 
                 val limelightAsync = initAsync(initLimelight) { LimelightComponent(LimelightHardware()) }
 =======
@@ -225,7 +224,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 <<<<<<< HEAD
                     initOrNull(initClimberIntake) { safeInit { ClimberIntakeComponent(ClimberIntakeHardware()) } },
                     initOrNull(initFlywheel) { safeInit { FlywheelComponent(FlywheelHardware()) } },
-                    initOrNull(initHood) { safeInit { HoodComponent(HoodHardware()) } },
+                    initOrNull(initHood) { safeInit { ShooterHoodComponent(HoodHardware()) } },
 =======
                     initOrNull(initClimberPivot) { safeInit { ClimberPivotComponent(ClimberPivotHardware()) } },
                     initOrNull(initCarousel) { safeInit { CarouselComponent(CarouselHardware()) } },

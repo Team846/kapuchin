@@ -9,7 +9,7 @@ import info.kunalsheth.units.math.*
 
 enum class HoodState(val output: Boolean) { Up(true), Down(false) }
 
-class HoodComponent(hardware: HoodHardware) : Component<HoodComponent, HoodHardware, HoodState>(hardware) {
+class ShooterHoodComponent(hardware: HoodHardware) : Component<ShooterHoodComponent, HoodHardware, HoodState>(hardware) {
 
     val launchAngles by pref {
         val hoodDown by pref(50, Degree)
@@ -17,14 +17,14 @@ class HoodComponent(hardware: HoodHardware) : Component<HoodComponent, HoodHardw
         ({hoodDown to hoodUp})
     }
 
-    override val fallbackController: HoodComponent.(Time) -> HoodState = { HoodState.Down }
+    override val fallbackController: ShooterHoodComponent.(Time) -> HoodState = { HoodState.Down }
 
     override fun HoodHardware.output(value: HoodState) {
         solenoid.set(value.output)
     }
 }
 
-class HoodHardware : SubsystemHardware<HoodHardware, HoodComponent>() {
+class HoodHardware : SubsystemHardware<HoodHardware, ShooterHoodComponent>() {
     override val priority = Priority.Low
     override val period = 100.milli(Second)
     override val syncThreshold = 20.milli(Second)

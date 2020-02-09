@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 <<<<<<< HEAD
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
@@ -13,7 +12,7 @@ import kotlin.math.sqrt
 suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") {
 
     fun requiredVelocities(
-            flywheel: FlywheelComponent, hood: HoodComponent,
+            flywheel: FlywheelComponent, hood: ShooterHoodComponent,
             hoodState: HoodState, target: DetectedTarget
     ): Pair<Velocity, AngularVelocity> {
 
@@ -38,7 +37,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
         return Velocity(0.0) to AngularVelocity(0.0)
     }
 
-    fun targetEntryAngle(hood: HoodComponent, hoodState: HoodState, ballVelocity: Velocity, target: DetectedTarget): Angle {
+    fun targetEntryAngle(hood: ShooterHoodComponent, hoodState: HoodState, ballVelocity: Velocity, target: DetectedTarget): Angle {
         target.outerGoalPos?.let {
             val launchA = if (hoodState == HoodState.Down) hood.launchAngles.first else hood.launchAngles.second
             val dist = Length(sqrt((it.x * it.x + it.y * it.y).siValue))
@@ -49,7 +48,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
     }
 
     fun shotState(
-            flywheel: FlywheelComponent, hood: HoodComponent,
+            flywheel: FlywheelComponent, hood: ShooterHoodComponent,
             hoodState: HoodState, target: DetectedTarget
             ): Pair<AngularVelocity, Angle> {
         val (ballVelocity, flywheelOmega) = requiredVelocities(flywheel, hood, hoodState, target)
@@ -92,7 +91,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
         // TODO get target, do nothing if null
         if (limelight == null) return@choreography
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
-        
+
 
         reading?.let {
             val skew = it.tx
