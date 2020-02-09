@@ -11,7 +11,6 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 @ExperimentalUnsignedTypes
-@Suppress("EXPERIMENTAL_UNSIGNED_LITERALS")
 actual class Ticker internal actual constructor(
         parent: Named,
         priority: Priority,
