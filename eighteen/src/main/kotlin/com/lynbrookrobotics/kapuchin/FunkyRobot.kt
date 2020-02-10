@@ -44,6 +44,8 @@ class FunkyRobot : RobotBase() {
         }
     }
 
+    override fun endCompetition() {}
+
     private fun loadClasses() = scope.launch {
         val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
         Thread.currentThread()

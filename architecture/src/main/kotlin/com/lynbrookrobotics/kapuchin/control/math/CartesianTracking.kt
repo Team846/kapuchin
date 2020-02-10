@@ -5,7 +5,6 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
-fun s(sl: Length, sr: Length) = avg(sl, sr)
 
 class SimpleVectorTracking(
         private var trackLength: Length,
@@ -17,7 +16,7 @@ class SimpleVectorTracking(
     var bearing = init.bearing
 
     override fun invoke(sl: Length, sr: Length, externalBearing: Angle?) {
-        val s = s(sl, sr)
+        val s = avg(sl, sr)
 
         if (externalBearing != null) bearing = externalBearing
         else bearing += theta(sl, sr, trackLength)
@@ -27,7 +26,40 @@ class SimpleVectorTracking(
     }
 }
 
-class RotationMatrixTracking(
+class CircularArcTracking(
+        init: Position
+) : (Length, Length, Angle) -> Unit {
+
+    var x = init.x
+    var y = init.y
+    var bearing = init.bearing
+
+    override fun invoke(sl: Length, sr: Length, newBearing: Angle) {
+        val `Δθ` = newBearing `coterminal -` bearing
+        val s = avg(sl, sr)
+
+        if (`Δθ` == 0.Degree) {
+            x += s * sin(bearing)
+            y += s * cos(bearing)
+        } else {
+            val r = s / `Δθ`.Radian
+
+            val mtrx = RotationMatrix(`Δθ`)
+            val ox = x + r * sin(bearing + 90.Degree)
+            val oy = y + r * cos(bearing + 90.Degree)
+
+            val `x - ox` = x - ox
+            val `y - oy` = y - oy
+
+            x = mtrx.rzCoordinateX(`x - ox`, `y - oy`) + ox
+            y = mtrx.rzCoordinateY(`x - ox`, `y - oy`) + oy
+        }
+
+        bearing = newBearing
+    }
+}
+
+class HighFrequencyTracking(
         private var trackLength: Length,
         init: Position,
         private var cache: Map<Angle, RotationMatrix> = emptyMap()
