@@ -8,6 +8,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.*
 import info.kunalsheth.units.generated.*
 
+@ExperimentalUnsignedTypes
 class RealtimeChecker private constructor(parent: Ticker, private val setJitterPin: (Boolean) -> Unit, private val getPeriod: () -> Time)
     : Named by Named("Real-time Checker", parent) {
 
