@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
+import com.lynbrookrobotics.kapuchin.logging.*
 import info.kunalsheth.units.generated.*
 
 /**
@@ -11,7 +12,6 @@ import info.kunalsheth.units.generated.*
  * @property y robot cartesian coordinate
  * @property bearing robot bearing
  */
-// todo: unit test!
 data class Position(val x: Length, val y: Length, val bearing: Angle) {
 
     operator fun plus(that: Position) = Position(
@@ -28,4 +28,6 @@ data class Position(val x: Length, val y: Length, val bearing: Angle) {
 
     val vector get() = UomVector(x, y)
 
+    override fun toString() =
+            "(x, y, bearing) = (${x.Foot withDecimals 2}, ${y.Foot withDecimals 2}, ${bearing.Degree withDecimals 0}˚)"
 }
