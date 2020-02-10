@@ -9,11 +9,11 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class IntakePivotState(val output: Boolean) { Up(true), Down(false) }
+enum class IntakePivotState(val output: Boolean) { Out(true), In(false) }
 
 class IntakePivotComponent(hardware: IntakePivotHardware) : Component<IntakePivotComponent, IntakePivotHardware, IntakePivotState>(hardware, pneumaticTicker) {
 
-    override val fallbackController: IntakePivotComponent.(Time) -> IntakePivotState = { Down }
+    override val fallbackController: IntakePivotComponent.(Time) -> IntakePivotState = { In }
 
     override fun IntakePivotHardware.output(value: IntakePivotState) {
         solenoid.set(value.output)
