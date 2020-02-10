@@ -18,16 +18,12 @@ import java.lang.Integer.signum
 
 enum class Colors(val color: String) { Blue("blue"), Green("green"), Red("red"), Yellow("yellow") }
 
-class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, OffloadedOutput>(hardware) {
+class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware) {
+    val kP by pref(10, Volt, 1440, Degree)
+    override val fallbackController: ControlPanelSpinnerComponent.(Time) -> DutyCycle = { 0.Percent }
 
-    val spinSpeed by pref(6, Volt)
-
-    override val fallbackController: ControlPanelSpinnerComponent.(Time) -> OffloadedOutput = {
-        PercentOutput(hardware.escConfig, 0.Percent)
-    }
-
-    override fun ControlPanelSpinnerHardware.output(value: OffloadedOutput) {
-        value.writeTo(spinnerEsc, spinnerPidController)
+    override fun ControlPanelSpinnerHardware.output(value: DutyCycle) {
+        spinnerEsc.set(value.Each)
     }
 }
 
@@ -36,6 +32,7 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
     override val syncThreshold: Time = 30.milli(Second)
     override val priority: Priority = Priority.Low
     override val name: String = "Control Panel"
+
 
     private val invert by pref(false)
 
@@ -56,17 +53,32 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
 
     val spinnerPidController by hardw { spinnerEsc.pidController!! }
 
+    // Use ColorSensorV3(I2C.Port)
     private val revColorSensor by hardw { RevColorSensor(Port.kOnboard, colorSensorAddress) }
 
     val currentColor = sensor { Colors.valueOf(revColorSensor.getCurrentValue()) stampWith it }
 
     val gameData = sensor { DriverStation.getInstance().gameSpecificMessage stampWith it }
+    val targetColorOrdinal = sensor { convertGameMessage() stampWith it }
     val controlPanelAngle = sensor { getControlPanelAngle(currentColor.optimizedRead(it, 0.Second).y) stampWith it }
 
     var lastColorOrdinal: Int? = null
     private var controlPanelSpinnerAngle: Angle = 0.Degree
 
     private var lastDirectionSignum = 0
+    private var gameDataOrdinal: Int? = null
+    private fun convertGameMessage(): Int? {
+
+        gameDataOrdinal = when (gameData.toString()) {
+            "B" -> Colors.Blue.ordinal - 2
+            "G" -> Colors.Green.ordinal - 2
+            "R" -> Colors.Red.ordinal - 2
+            "Y" -> Colors.Yellow.ordinal - 2
+            else -> null
+        }
+        return gameDataOrdinal
+    }
+
     private fun getControlPanelAngle(color: Colors): Angle {
         val currentColorOrdinal = Colors.valueOf(color.color).ordinal
 
