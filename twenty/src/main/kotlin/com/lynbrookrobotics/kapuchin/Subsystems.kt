@@ -38,7 +38,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val climberWinch: ClimberWinchComponent?,
                  val controlPanelPivot: ControlPanelPivotComponent?,
                  val controlPanelSpinner: ControlPanelSpinnerComponent?,
-                 val intakePivot: IntakePivotComponent?,
+                 val intakeSlider: IntakeSliderComponent?,
                  val intakeRollers: IntakeRollersComponent?,
                  val limelight: LimelightComponent?,
                  val flywheel: FlywheelComponent?,
@@ -103,7 +103,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initClimberWinch by pref(true)
         private val initControlPanelPivot by pref(true)
         private val initControlPanelSpinner by pref(true)
-        private val initIntakePivot by pref(true)
+        private val initIntakeSlider by pref(true)
         private val initIntakeRollers by pref(true)
         private val initLimelight by pref(true)
         private val initFlywheel by pref(true)
@@ -139,7 +139,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val climberWinchAsync = initAsync(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
                 val controlPanelPivotAsync = initAsync(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
                 val controlPanelSpinnerAsync = initAsync(initControlPanelSpinner) { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware()) }
-                val intakePivotAsync = initAsync(initIntakePivot) { IntakePivotComponent(IntakePivotHardware()) }
+                val intakeSliderAsync = initAsync(initIntakeSlider) { IntakeSliderComponent(IntakeSliderHardware()) }
                 val intakeRollersAsync = initAsync(initIntakeRollers) { IntakeRollersComponent(IntakeRollersHardware()) }
                 val limelightAsync = initAsync(initLimelight) { LimelightComponent(LimelightHardware()) }
                 val flywheelAsync = initAsync(initFlywheel) { FlywheelComponent(FlywheelHardware()) }
@@ -160,7 +160,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         safeInit { climberWinchAsync.await() },
                         safeInit { controlPanelPivotAsync.await() },
                         safeInit { controlPanelSpinnerAsync.await() },
-                        safeInit { intakePivotAsync.await() },
+                        safeInit { intakeSliderAsync.await() },
                         safeInit { intakeRollersAsync.await() },
                         safeInit { limelightAsync.await() },
                         safeInit { flywheelAsync.await() },
@@ -197,7 +197,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     initOrNull(initClimberWinch) { safeInit { ClimberWinchComponent(ClimberWinchHardware()) } },
                     initOrNull(initControlPanelPivot) { safeInit { ControlPanelPivotComponent(ControlPanelPivotHardware()) } },
                     initOrNull(initControlPanelSpinner) { safeInit { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware()) } },
-                    initOrNull(initIntakePivot) { safeInit { IntakePivotComponent(IntakePivotHardware()) } },
+                    initOrNull(initIntakeSlider) { safeInit { IntakeSliderComponent(IntakeSliderHardware()) } },
                     initOrNull(initIntakeRollers) { safeInit { IntakeRollersComponent(IntakeRollersHardware()) } },
                     initOrNull(initLimelight) { safeInit { LimelightComponent(LimelightHardware()) } },
                     initOrNull(initFlywheel) { safeInit { FlywheelComponent(FlywheelHardware()) } },
