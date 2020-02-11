@@ -15,18 +15,19 @@ import kotlin.math.roundToInt
 
 class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware) {
 
-    fun targetPosition(sample: LimelightReading) = sample.run {
+    fun targetPosition(sample: LimelightReading) = with(sample) {
         val aspect = thor / tvert
         val skew = acos(aspect / aspect0 minMag 1.Each)
 
         val targetDistance: Length
 
-        if (pipeline == ZoomInPanHigh) {
-            targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty + zoomOutFov.y / 2)
-        } else if (pipeline == ZoomInPanLow) {
-            targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty - zoomOutFov.y / 2)
-        } else {
-            targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty)
+        when (pipeline) {
+            ZoomInPanHigh ->
+                targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty + zoomOutFov.y / 2)
+            ZoomInPanLow ->
+                targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty - zoomOutFov.y / 2)
+            else ->
+                targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty)
         }
 
         val x = tan(tx) * targetDistance
