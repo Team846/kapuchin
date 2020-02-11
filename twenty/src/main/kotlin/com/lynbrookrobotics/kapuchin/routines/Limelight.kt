@@ -18,7 +18,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("auto zoom") {
         visionTarget?.run {
             when (pipeline) {
                 ZoomOut -> {
-                    val insideBoxResolution = zoomOutResolution / (zoomMultiplier * 1.0)
+                    val insideBoxResolution = zoomOutResolution / zoomMultiplier.toDouble()
 
                     val insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomOutSafetyZone)
                     val highInsideBoxBoundsY = 0.0.Each..(insideBoxResolution.y - zoomOutSafetyZone)
