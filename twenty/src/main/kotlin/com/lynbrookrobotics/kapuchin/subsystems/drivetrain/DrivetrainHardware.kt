@@ -63,7 +63,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
     }
-    val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
+    val leftSlaveEsc by hardw { TalonFX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
@@ -75,7 +75,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
     }
-    val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
+    val rightSlaveEsc by hardw { TalonFX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
