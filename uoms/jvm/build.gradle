@@ -8,6 +8,3 @@ dependencies {
 compileKotlin {
     kotlinOptions.suppressWarnings = true
 }
-compileTestKotlin {
-    kotlinOptions.suppressWarnings = true
-}
