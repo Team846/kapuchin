@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.driver.ThrustmasterButtons.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
@@ -76,6 +77,9 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     val absSteering = s { (-180).Degree * absoluteWheel.x }
             .with(graph("Absolute Steering", Degree))
+
+    val intakeBalls = s { stick[Trigger] }
+    val unjamBalls = s { stick[Trigger] && stick[BottomTrigger] }
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

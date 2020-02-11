@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
+import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -9,10 +10,33 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val priority = Priority.RealTime
     override val name = "Operator"
+
+    val flywheelMapping by pref {
+        val exponent by pref(1)
+        val deadband by pref(10, Percent)
+        val sensitivity by pref(100, Percent)
+
+        ({
+            val db = horizontalDeadband(deadband, 100.Percent)
+            (fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)) to sensitivity
+        })
+    }
+
+    val turretMapping by pref {
+        val exponent by pref(1)
+        val deadband by pref(10, Percent)
+        val sensitivity by pref(100, Percent)
+
+        ({
+            val db = horizontalDeadband(deadband, 100.Percent)
+            (fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)) to sensitivity
+        })
+    }
 
     val xbox by hardw { XboxController(1) }.verify("the operator controller is connected") {
         it.name == "Controller (Xbox One For Windows)"
@@ -29,4 +53,19 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val rb get() = xbox.getBumper(kRight)
     private val start get() = xbox.startButton
     private val back get() = xbox.backButton
+
+    val aim = s { lt }
+    val aimClose = s { lb }
+    val shoot = s { rt }
+    val shootOverride = s { rb }
+
+    val flywheelPrecision = s { flywheelMapping.first(getY(kLeft).Each) * flywheelMapping.second }
+    val turretPrescision = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
+
+    val extendClimber = s { back }
+    val retractClimber = s { start }
+
+    val extendControlPanelPivot = s { pov == 0 }
+    val controlPanelStage2 = s { pov == 0 && aButton }
+    val controlPanelStage3 = s { pov == 0 && bButton }
 }
