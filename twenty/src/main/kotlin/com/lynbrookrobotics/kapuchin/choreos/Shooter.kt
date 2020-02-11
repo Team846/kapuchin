@@ -121,22 +121,21 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
         return ((horizontal * horizontal) + (vertical * vertical)) < flywheel.boundingCircleRadius * flywheel.boundingCircleRadius
     }
 
+    fun getIdealShot(): ShooterState? { // THIS is the function to get shooter-state data from
+        if (limelight == null) return null
 
-    choreography {
-
-        if (limelight == null) return@choreography
-        val reading by limelight.hardware.readings.readEagerly().withoutStamps
+        val reading by limelight.hardware.readings.readEagerly().withoutStamps // Get a limelight reading
 
 
         reading?.let {
             val skew = it.tx
             val limelight = LimelightComponent(limelight.hardware)
-            val target = limelight.innerGoalPos(it, skew)
+            val target = limelight.innerGoalPos(it, skew) // Get the position of inner goal
 
 
             if (flywheel != null && hood != null) {
 
-                val downInner = target.innerGoalPos
+                val downInner = target.innerGoalPos // Checks if the hood-down and inner goal state is impossible
                         ?.let { shotState(flywheel, hood, HoodState.Down, target) }
                         ?.let {
                             it.second.first < flywheel.maxOmega
@@ -144,11 +143,11 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
                                     && innerGoalPossible(flywheel, target)
                         }
                         ?: false
-                val downOuter = target.outerGoalPos
+                val downOuter = target.outerGoalPos // Checks if the hood-down and outer goal state is impossible
                         ?.let { shotState(flywheel, hood, HoodState.Down, target) }
                         ?.let { it.first.second.abs < flywheel.outerGoalEntryTolerance && it.first.first < flywheel.maxOmega }
                         ?: false
-                val upInner = target.innerGoalPos
+                val upInner = target.innerGoalPos // Checks if the hood-up and inner goal state is impossible
                         ?.let { shotState(flywheel, hood, HoodState.Up, target) }
                         ?.let {
                             it.second.first < flywheel.maxOmega
@@ -156,17 +155,28 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
                                     && innerGoalPossible(flywheel, target)
                         }
                         ?: false
-                val upOuter = target.outerGoalPos
+                val upOuter = target.outerGoalPos // Checks if the hood-up and outer goal state is impossible
                         ?.let { shotState(flywheel, hood, HoodState.Up, target) }
                         ?.let { it.first.second.abs < flywheel.outerGoalEntryTolerance && it.first.first < flywheel.maxOmega }
                         ?: false
 
-                if (downInner && downOuter && upInner && upOuter) return@choreography // Exits choreo if all states are impossible
+                if (downInner && downOuter && upInner && upOuter) return null // Returns null if all states are impossible
 
-                if (!downInner) ShooterState(shotState(flywheel, hood, HoodState.Down, target).second.first, HoodState.Down, target.innerGoalPos!!.bearing)
-                else if (!upInner) ShooterState(shotState(flywheel, hood, HoodState.Up, target).second.first, HoodState.Up, target.innerGoalPos!!.bearing)
-                else if (!downOuter) ShooterState(shotState(flywheel, hood, HoodState.Down, target).first.first, HoodState.Down, target.outerGoalPos!!.bearing)
-                else ShooterState(shotState(flywheel, hood, HoodState.Up, target).first.first, HoodState.Up, target.outerGoalPos!!.bearing)
+                // This is where the function returns a data class of shooter rpm, hood state, and angle to turn
+                if (!downInner) return ShooterState(shotState(flywheel, hood, HoodState.Down, target).second.first, HoodState.Down, target.innerGoalPos!!.bearing)
+                else if (!upInner) return ShooterState(shotState(flywheel, hood, HoodState.Up, target).second.first, HoodState.Up, target.innerGoalPos!!.bearing)
+                else if (!downOuter) return ShooterState(shotState(flywheel, hood, HoodState.Down, target).first.first, HoodState.Down, target.outerGoalPos!!.bearing)
+                else return ShooterState(shotState(flywheel, hood, HoodState.Up, target).first.first, HoodState.Up, target.outerGoalPos!!.bearing)
+
+            }
+        }
+        return null
+    }
+
+
+    choreography {
+
+
 
                 /*
             DownInner | UpInner | DownOuter | UpOuter || Hood |  Goal |
@@ -203,9 +213,6 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
          */
         }
 
-    }
-
-}
 
 suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
     val shoot by operator.shoot.readEagerly().withoutStamps

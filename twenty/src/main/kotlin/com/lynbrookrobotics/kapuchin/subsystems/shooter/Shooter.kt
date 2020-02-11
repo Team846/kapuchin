@@ -15,6 +15,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.sqrt
 
+
 class ShooterComponent(hardware: ShooterHardware) : Component<ShooterComponent, ShooterHardware, OffloadedOutput>(hardware) {
 
 
