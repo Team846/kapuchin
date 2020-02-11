@@ -1,5 +1,9 @@
 package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration
+import com.ctre.phoenix.motorcontrol.can.BaseMotorController
+import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.revrobotics.CANPIDController
@@ -23,127 +27,142 @@ data class OffloadedEscConfiguration(
 ) {
 
     companion object {
-        val talonCache = ConcurrentHashMap<TalonSRX, OffloadedEscConfiguration>()
-        val victorCache = ConcurrentHashMap<VictorSPX, OffloadedEscConfiguration>()
-        val sparkCache = ConcurrentHashMap<CANSparkMax, OffloadedEscConfiguration>()
+        val cache = ConcurrentHashMap<Any, OffloadedEscConfiguration>()
     }
 
     private val timeoutMs = syncThreshold.milli(Second).toInt()
 
+    private fun writeTo(esc: BaseMotorController, timeoutMs: Int, cached: OffloadedEscConfiguration? = null) {
+        if (cached?.openloopRamp != this.openloopRamp)
+            +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
+
+        if (cached?.closedloopRamp != this.closedloopRamp)
+            +esc.configClosedloopRamp(closedloopRamp.Second, timeoutMs)
+
+        if (cached?.peakOutputForward != this.peakOutputForward)
+            +esc.configPeakOutputForward((peakOutputForward / voltageCompSaturation).Each, timeoutMs)
+
+        if (cached?.nominalOutputForward != this.nominalOutputForward)
+            +esc.configNominalOutputForward((nominalOutputForward / voltageCompSaturation).Each, timeoutMs)
+
+        if (cached?.nominalOutputReverse != this.nominalOutputReverse)
+            +esc.configNominalOutputReverse((nominalOutputReverse / voltageCompSaturation).Each, timeoutMs)
+
+        if (cached?.peakOutputReverse != this.peakOutputReverse)
+            +esc.configPeakOutputReverse((peakOutputReverse / voltageCompSaturation).Each, timeoutMs)
+
+        if (cached?.voltageCompSaturation != this.voltageCompSaturation)
+            +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
+    }
+
     fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
-        val cached = talonCache[esc]
-        if (this != cached) talonCache[esc].also {
+        val cached = cache[esc]
+        if (this != cached) {
             println("Writing configurations to TalonSRX ${esc.deviceID}")
 
-            if (it == null || it.openloopRamp != this.openloopRamp)
-                +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
+            writeTo(esc, timeoutMs, cached)
 
-            if (it == null || it.closedloopRamp != this.closedloopRamp)
-                +esc.configClosedloopRamp(closedloopRamp.Second, timeoutMs)
-
-            if (it == null || it.peakOutputForward != this.peakOutputForward)
-                +esc.configPeakOutputForward((peakOutputForward / voltageCompSaturation).Each, timeoutMs)
-
-            if (it == null || it.nominalOutputForward != this.nominalOutputForward)
-                +esc.configNominalOutputForward((nominalOutputForward / voltageCompSaturation).Each, timeoutMs)
-
-            if (it == null || it.nominalOutputReverse != this.nominalOutputReverse)
-                +esc.configNominalOutputReverse((nominalOutputReverse / voltageCompSaturation).Each, timeoutMs)
-
-            if (it == null || it.peakOutputReverse != this.peakOutputReverse)
-                +esc.configPeakOutputReverse((peakOutputReverse / voltageCompSaturation).Each, timeoutMs)
-
-            if (it == null || it.voltageCompSaturation != this.voltageCompSaturation)
-                +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
-
-            if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
+            if (cached?.continuousCurrentLimit != this.continuousCurrentLimit)
                 +esc.configContinuousCurrentLimit(continuousCurrentLimit.Ampere.toInt(), timeoutMs)
 
-            if (it == null || it.peakCurrentLimit != this.peakCurrentLimit)
+            if (cached?.peakCurrentLimit != this.peakCurrentLimit)
                 +esc.configPeakCurrentLimit(peakCurrentLimit.Ampere.toInt(), timeoutMs)
 
-            if (it == null || it.peakCurrentDuration != this.peakCurrentDuration)
+            if (cached?.peakCurrentDuration != this.peakCurrentDuration)
                 +esc.configPeakCurrentDuration(peakCurrentDuration.milli(Second).toInt(), timeoutMs)
         }
-        talonCache[esc] = this
+        cache[esc] = this
+    }
+
+    fun writeTo(esc: TalonFX, timeoutMs: Int = this.timeoutMs) {
+        val cached = cache[esc]
+        if (this != cached) {
+            println("Writing configurations to TalonFX ${esc.deviceID}")
+
+            writeTo(esc, timeoutMs, cached)
+
+            if (cached == null ||
+                    cached.continuousCurrentLimit != this.continuousCurrentLimit ||
+                    cached.peakCurrentLimit != this.peakCurrentLimit ||
+                    cached.peakCurrentDuration != this.peakCurrentDuration
+            ) {
+                +esc.configStatorCurrentLimit(
+                        StatorCurrentLimitConfiguration(
+                                true,
+                                continuousCurrentLimit.Ampere,
+                                peakCurrentLimit.Ampere,
+                                peakCurrentDuration.Second
+                        ), timeoutMs
+                )
+                +esc.configSupplyCurrentLimit(
+                        SupplyCurrentLimitConfiguration(
+                                true,
+                                continuousCurrentLimit.Ampere,
+                                peakCurrentLimit.Ampere,
+                                peakCurrentDuration.Second
+                        ), timeoutMs
+                )
+            }
+        }
+        cache[esc] = this
     }
 
     fun writeTo(esc: VictorSPX, timeoutMs: Int = this.timeoutMs) {
-        // copy and paste from `talon`
-        val cached = victorCache[esc]
-        if (this != cached) victorCache[esc].also {
+        val cached = cache[esc]
+        if (this != cached) {
             println("Writing configurations to VictorSPX ${esc.deviceID}")
 
-            if (it == null || it.openloopRamp != this.openloopRamp)
-                +esc.configOpenloopRamp(openloopRamp.Second, timeoutMs)
+            writeTo(esc, timeoutMs, cached)
 
-            if (it == null || it.closedloopRamp != this.closedloopRamp)
-                +esc.configClosedloopRamp(closedloopRamp.Second, timeoutMs)
-
-            if (it == null || it.peakOutputForward != this.peakOutputForward)
-                +esc.configPeakOutputForward((peakOutputForward / voltageCompSaturation).Each, timeoutMs)
-
-            if (it == null || it.nominalOutputForward != this.nominalOutputForward)
-                +esc.configNominalOutputForward((nominalOutputForward / voltageCompSaturation).Each, timeoutMs)
-
-            if (it == null || it.nominalOutputReverse != this.nominalOutputReverse)
-                +esc.configNominalOutputReverse((nominalOutputReverse / voltageCompSaturation).Each, timeoutMs)
-
-            if (it == null || it.peakOutputReverse != this.peakOutputReverse)
-                +esc.configPeakOutputReverse((peakOutputReverse / voltageCompSaturation).Each, timeoutMs)
-
-            if (it == null || it.voltageCompSaturation != this.voltageCompSaturation)
-                +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
-
-            if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
+            if (cached?.continuousCurrentLimit != this.continuousCurrentLimit)
                 println("Cannot write `continuousCurrentLimit` to VictorSPX ${esc.deviceID}")
 
-            if (it == null || it.peakCurrentLimit != this.peakCurrentLimit)
+            if (cached?.peakCurrentLimit != this.peakCurrentLimit)
                 println("Cannot write `peakCurrentLimit` to VictorSPX ${esc.deviceID}")
 
-            if (it == null || it.peakCurrentDuration != this.peakCurrentDuration)
+            if (cached?.peakCurrentDuration != this.peakCurrentDuration)
                 println("Cannot write `peakCurrentDuration` to VictorSPX ${esc.deviceID}")
         }
-        victorCache[esc] = this
+        cache[esc] = this
     }
 
     fun writeTo(esc: CANSparkMax, pidController: CANPIDController) {
-        val cached = sparkCache[esc]
-        if (this != cached) sparkCache[esc].also {
+        val cached = cache[esc]
+        if (this != cached) {
             println("Writing configurations to SparkMAX ${esc.deviceId}")
 
-            if (it == null || it.openloopRamp != this.openloopRamp)
+            if (cached?.openloopRamp != this.openloopRamp)
                 +esc.setOpenLoopRampRate(openloopRamp.Second)
 
-            if (it == null || it.closedloopRamp != this.closedloopRamp)
+            if (cached?.closedloopRamp != this.closedloopRamp)
                 +esc.setClosedLoopRampRate(closedloopRamp.Second)
 
-            if (it == null || it.nominalOutputForward != this.nominalOutputForward)
+            if (cached?.nominalOutputForward != this.nominalOutputForward)
                 println("Cannot write `nominalOutputForward` to SparkMAX ${esc.deviceId}")
 
-            if (it == null || it.nominalOutputReverse != this.nominalOutputReverse)
+            if (cached?.nominalOutputReverse != this.nominalOutputReverse)
                 println("Cannot write `nominalOutputReverse` to SparkMAX ${esc.deviceId}")
 
-            if (it == null ||
-                    it.peakOutputReverse != this.peakOutputReverse ||
-                    it.peakOutputForward != this.peakOutputForward
+            if (cached == null ||
+                    cached.peakOutputReverse != this.peakOutputReverse ||
+                    cached.peakOutputForward != this.peakOutputForward
             ) +pidController.setOutputRange(
                     (peakOutputReverse / voltageCompSaturation).Each,
                     (peakOutputForward / voltageCompSaturation).Each
             )
 
-            if (it == null || it.voltageCompSaturation != this.voltageCompSaturation)
+            if (cached?.voltageCompSaturation != this.voltageCompSaturation)
                 +esc.enableVoltageCompensation(voltageCompSaturation.Volt)
 
-            if (it == null || it.continuousCurrentLimit != this.continuousCurrentLimit)
+            if (cached?.continuousCurrentLimit != this.continuousCurrentLimit)
                 +esc.setSmartCurrentLimit(continuousCurrentLimit.Ampere.toInt())
 
-            if (it == null || it.peakCurrentLimit != this.peakCurrentLimit)
+            if (cached?.peakCurrentLimit != this.peakCurrentLimit)
                 +esc.setSecondaryCurrentLimit(peakCurrentLimit.Ampere)
 
-            if (it == null || it.peakCurrentDuration != this.peakCurrentDuration)
+            if (cached?.peakCurrentDuration != this.peakCurrentDuration)
                 println("Cannot write `peakCurrentDuration` to SparkMAX ${esc.deviceId}")
         }
-        sparkCache[esc] = this
+        cache[esc] = this
     }
 }
