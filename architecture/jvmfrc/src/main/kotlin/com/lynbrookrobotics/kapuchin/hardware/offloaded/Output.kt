@@ -3,6 +3,8 @@ package com.lynbrookrobotics.kapuchin.hardware.offloaded
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.ControlMode.*
 import com.ctre.phoenix.motorcontrol.ControlMode.Velocity
+import com.ctre.phoenix.motorcontrol.can.BaseTalon
+import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.revrobotics.CANPIDController
@@ -30,6 +32,13 @@ sealed class OffloadedOutput {
     }
 
     fun writeTo(esc: TalonSRX, timeoutMs: Int = 15) {
+        safeties.writeTo(esc, timeoutMs)
+        gains?.writeTo(esc, timeoutMs)
+        config.writeTo(esc, timeoutMs)
+        esc.set(mode, value)
+    }
+
+    fun writeTo(esc: TalonFX, timeoutMs: Int = 15) {
         safeties.writeTo(esc, timeoutMs)
         gains?.writeTo(esc, timeoutMs)
         config.writeTo(esc, timeoutMs)
