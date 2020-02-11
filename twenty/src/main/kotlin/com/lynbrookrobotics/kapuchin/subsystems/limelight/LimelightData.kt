@@ -5,7 +5,7 @@ import info.kunalsheth.units.generated.*
 data class LimelightReading(
         val tx: Angle, val ty: Angle,
         val tx0: Dimensionless, val ty0: Dimensionless,
-        val thor: Dimensionless, val tvert: Dimensionless,
+        val thor: Pixel, val tvert: Pixel,
         val ta: Dimensionless, val pipeline: Pipeline?
 )
 

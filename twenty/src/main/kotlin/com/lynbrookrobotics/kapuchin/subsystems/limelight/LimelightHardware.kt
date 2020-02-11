@@ -36,9 +36,9 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
         when {
             l("tv").toInt() == 1 -> LimelightReading(
                     l("ty").Degree, l("tx").Degree,
-                    l("ty0").Pixel, l("tx0").Pixel,
-                    l("tvert").Pixel, l("thor").Pixel,
-                    l("ta").Pixel,// this is actually Pixels Squared
+                    l("ty0").Each, l("tx0").Each,
+                    l("tvert").Each, l("thor").Each,
+                    l("ta").Each,// this is actually Pixels Squared
                     l("getpipe").toInt().let { rawpipe ->
                         Pipeline.values().firstOrNull { it.number == rawpipe }
                     }
