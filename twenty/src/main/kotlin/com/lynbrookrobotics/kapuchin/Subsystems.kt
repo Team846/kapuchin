@@ -55,7 +55,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { climberTeleop() },
                 { controlPanelTeleop() },
                 { intakeTeleop() },
-                { rumbleTeleop() },
                 { shooterTeleop() },
                 { drivetrain.teleop(driver) },
                 { limelight?.autoZoom() }

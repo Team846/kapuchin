@@ -12,6 +12,9 @@ import info.kunalsheth.units.math.*
 
 class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberWinchComponent, ClimberWinchHardware, OffloadedOutput>(hardware) {
 
+    val extendSpeed by pref(80, Percent)
+    val retractSpeed by pref(80, Percent)
+
     override val fallbackController: ClimberWinchComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
     }

@@ -13,7 +13,7 @@ enum class ClimberChodeState(val output: Boolean) { On(true), Off(false) }
 
 class ClimberChodeComponent(hardware: ClimberChodeHardware) : Component<ClimberChodeComponent, ClimberChodeHardware, ClimberChodeState>(hardware, pneumaticTicker) {
 
-    override val fallbackController: ClimberChodeComponent.(Time) -> ClimberChodeState = { Off }
+    override val fallbackController: ClimberChodeComponent.(Time) -> ClimberChodeState = { On }
 
     override fun ClimberChodeHardware.output(value: ClimberChodeState) {
         solenoid.set(value.output)
