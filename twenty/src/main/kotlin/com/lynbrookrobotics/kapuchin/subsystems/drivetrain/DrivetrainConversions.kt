@@ -8,64 +8,41 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class DrivetrainConversions(val hardware: DrivetrainHardware) :
         Named by Named("Conversions", hardware),
         GenericDrivetrainConversions {
-    private val wheelRadius by pref(3, Inch)
 
-    private val leftTrim by pref(1.0)
-    private val rightTrim by pref(1.0)
     override val trackLength by pref(2, Foot)
-
-    val nativeEncoderCountMultiplier by pref(4)
+    private val wheelRadius by pref {
+        val left by pref(3, Inch)
+        val right by pref(3, Inch)
+        ({ TwoSided(left, right) })
+    }
 
     val encoder by pref {
         val encoderGear by pref(22)
         val wheelGear by pref(72)
         val resolution by pref(256)
+        val nativeEncoderCountMultiplier by pref(4)
         ({
-            val gearing = GearTrain(encoderGear, wheelGear)
-            val nativeResolution = nativeEncoderCountMultiplier * resolution
-
+            val nativeResolution = resolution * nativeEncoderCountMultiplier
             val enc = EncoderConversion(
-                    resolution,
-                    gearing.inputToOutput(1.Turn)
+                    nativeResolution,
+                    GearTrain(encoderGear, wheelGear).inputToOutput(1.Turn)
             )
 
-            val nat = LinearOffloadedNativeConversion(::p, ::p, ::p, ::p,
+            val left = LinearOffloadedNativeConversion(::p, ::p, ::p, ::p,
                     nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = nativeResolution,
-                    perFeedbackQuantity = avg(
-                            toLeftPosition(resolution, enc).abs,
-                            toRightPosition(resolution, enc).abs
-                    )
+                    perFeedbackQuantity = wheelRadius.left * enc.angle(nativeResolution) / Radian
             )
-
-            enc to nat
+            val right = left.copy(
+                    perFeedbackQuantity = wheelRadius.right * enc.angle(nativeResolution) / Radian
+            )
+            TwoSided(left, right)
         })
     }
-    val encoderConversion get() = encoder.first
-    val nativeConversion get() = encoder.second
-
-    fun toLeftPosition(
-            ticks: Int, conv: EncoderConversion = encoderConversion
-    ): Length = wheelRadius * conv.angle(ticks.toDouble()) * leftTrim / Radian
-
-    fun toRightPosition(
-            ticks: Int, conv: EncoderConversion = encoderConversion
-    ): Length = wheelRadius * conv.angle(ticks.toDouble()) * rightTrim / Radian
-
-    private val matrixCache = (-8..8)
-            .flatMap {
-                setOf(
-                        theta(toLeftPosition(it), 0.Foot, trackLength),
-                        theta(0.Foot, toRightPosition(it), trackLength)
-                )
-            }
-            .map { it to RotationMatrix(it) }
-            .toMap()
 
     val escOdometry = EscOdometry(this)
 
@@ -74,28 +51,24 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
         private var noTicksR = true
         val tracking = CircularArcTracking(Position(0.Foot, 0.Foot, 0.Degree))
 
-        private var lastL = 0
-        private var lastR = 0
-        operator fun invoke(totalEscTicksL: Int, totalEscTicksR: Int, bearing: Angle) = conversions.run {
-            if (noTicksL && totalEscTicksL != 0) log(Level.Debug) {
-                "Received first left tick at $currentTime"
+        private var lastLeft = 0.Foot
+        private var lastRight = 0.Foot
+        operator fun invoke(totalLeft: Length, totalRight: Length, bearing: Angle) = conversions.run {
+            if (noTicksL && totalLeft != 0.Foot) log(Level.Debug) {
+                "Received first left tick at ${currentTime withDecimals 2}"
             }.also { noTicksL = false }
 
-            if (noTicksR && totalEscTicksR != 0) log(Level.Debug) {
-                "Received first right tick at $currentTime"
+            if (noTicksR && totalRight != 0.Foot) log(Level.Debug) {
+                "Received first right tick at ${currentTime withDecimals 2}"
             }.also { noTicksR = false }
 
             tracking(
-                    toLeftPosition(
-                            (totalEscTicksL - lastL) / nativeEncoderCountMultiplier
-                    ),
-                    toRightPosition(
-                            (totalEscTicksR - lastR) / nativeEncoderCountMultiplier
-                    ),
+                    totalLeft - lastLeft,
+                    totalRight - lastRight,
                     bearing
             )
-            lastL = totalEscTicksL
-            lastR = totalEscTicksR
+            lastLeft = totalLeft
+            lastRight = totalRight
         }
     }
 }

@@ -31,7 +31,7 @@ private fun loadTempPath(): Path =
 suspend fun Subsystems.followJournal() = startChoreo("Follow journal") {
     val path = loadTempPath()
 
-    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.maxOmega, drivetrain.maxAcceleration)
+    val trajectory = pathToTrajectory(path, drivetrain.maxSpeed, drivetrain.percentMaxOmega * drivetrain.maxOmega, drivetrain.maxAcceleration)
 
     System.gc()
 

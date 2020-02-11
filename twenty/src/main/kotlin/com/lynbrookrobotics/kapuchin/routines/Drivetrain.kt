@@ -4,12 +4,10 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
@@ -45,16 +43,16 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
         val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, absSteering + startingAngle)
 
-        val nativeL = hardware.conversions.nativeConversion.native(
+        val nativeL = hardware.conversions.encoder.left.native(
                 target.left + steeringVelocity
         )
-        val nativeR = hardware.conversions.nativeConversion.native(
+        val nativeR = hardware.conversions.encoder.right.native(
                 target.right - steeringVelocity
         )
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         )
     }
 }
@@ -69,12 +67,12 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     controller {
         val (targVels, error) = uni.speedTargetAngleTarget(0.FootPerSecond, target)
 
-        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
-        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+        val nativeL = hardware.conversions.encoder.left.native(targVels.left)
+        val nativeR = hardware.conversions.encoder.right.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         ).takeUnless {
             error.abs < tolerance
         }

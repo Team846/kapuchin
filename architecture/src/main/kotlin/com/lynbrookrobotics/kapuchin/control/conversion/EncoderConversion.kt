@@ -25,7 +25,7 @@ class EncoderConversion(ticks: Int, perRevolution: Angle) {
     fun ticks(x: AngularAcceleration) = ticks(x * t) * Hertz
 
     fun angle(x: Time): AngularAbsement = angle((x / t).Each) * t
-    fun angle(x: Double): Angle = x * anglePerTick
+    fun angle(x: Number): Angle = x.toDouble() * anglePerTick
     fun angle(x: Frequency) = angle((x * t).Each) * Hertz
     fun angle(x: `T⁻²`) = angle(x * t) * Hertz
 }

@@ -11,9 +11,8 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -49,7 +48,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val rightSensorInversion by pref(false)
 
     val escConfig by escConfigPref(
-            defaultNominalOutput = 0.5.Volt,
+            defaultNominalOutput = 1.5.Volt,
 
             defaultContinuousCurrentLimit = 25.Ampere,
             defaultPeakCurrentLimit = 35.Ampere
@@ -57,25 +56,25 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     override val conversions = DrivetrainConversions(this)
 
-    val leftMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
+    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder, true)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
     }
-    val leftSlaveEsc by hardw { TalonFX(leftSlaveEscId) }.configure {
+    val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
     }
 
-    val rightMasterEsc by hardw { TalonFX(rightMasterEscId) }.configure {
+    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder, true)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
     }
-    val rightSlaveEsc by hardw { TalonFX(rightSlaveEscId) }.configure {
+    val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
@@ -83,12 +82,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val driftTolerance by pref(0.2, DegreePerSecond)
     val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
-        while(it.isCalibrating) {
+        while (it.isCalibrating) {
             log(Debug) { "Navx is calibrating" }
             Thread.sleep(1000)
         }
         it.zeroYaw()
     }.verify("Gyro should not drift after calibration") {
+        it.yaw.Degree in `±`(0.5.Degree)
         it.rate.DegreePerSecond in `±`(driftTolerance)
     }
 
@@ -97,8 +97,8 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     private val escNamed = Named("ESC Odometry", this)
     val escPosition = sensor {
         conversions.escOdometry(
-                leftMasterEsc.getSelectedSensorPosition(idx),
-                rightMasterEsc.getSelectedSensorPosition(idx),
+                leftPosition.optimizedRead(it, syncThreshold).y,
+                rightPosition.optimizedRead(it, syncThreshold).y,
                 gyro.yaw.Degree
         )
         conversions.escOdometry.tracking.run { Position(x, y, bearing) } stampWith it
@@ -110,45 +110,28 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val position = /*t2sPosition ?:*/ escPosition
 
     val leftPosition = sensor {
-        conversions.toLeftPosition(
-                leftMasterEsc.getSelectedSensorPosition(idx) /
-                        conversions.nativeEncoderCountMultiplier
+        conversions.encoder.right.realPosition(
+                rightMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Left Position", Foot))
 
     val rightPosition = sensor {
-        conversions.toRightPosition(
-                rightMasterEsc.getSelectedSensorPosition(idx) /
-                        conversions.nativeEncoderCountMultiplier
+        conversions.encoder.left.realPosition(
+                leftMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Right Position", Foot))
 
     val leftSpeed = sensor {
-        conversions.nativeConversion.realVelocity(
+        conversions.encoder.left.realVelocity(
                 leftMasterEsc.getSelectedSensorVelocity(idx)
         ) stampWith it
     }.with(graph("Left Speed", FootPerSecond))
 
     val rightSpeed = sensor {
-        conversions.nativeConversion.realVelocity(
+        conversions.encoder.right.realVelocity(
                 rightMasterEsc.getSelectedSensorVelocity(idx)
         ) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
-
-
-// todo: Causes major lag on the v13 RoboRIO image. DO NOT USE.
-//    private val driftTolerance by pref(1, DegreePerSecond)
-//    private var startingAngle = 0.Degree
-//    val imu by hardw { ADIS16448_IMU() }
-//            .configure { startingAngle = it.angle.Degree }
-//            .verify("Gyro should not drift after calibration") {
-//                it.rate.DegreePerSecond in 0.DegreePerSecond `±` driftTolerance
-//            }
-//    val gyroInput = sensor(imu) {
-//        GyroInput(angleZ.Degree - startingAngle, rate.DegreePerSecond, accelZ.DegreePerSecondSquared) stampWith it // lastSampleTime returns 0 ?
-//    }
-//            .with(graph("Bearing", Degree)) { it.angle }
-//            .with(graph("Angular Velocity", DegreePerSecond)) { it.velocity }
 
     init {
         uiBaselineTicker.runOnTick { time ->
@@ -158,7 +141,11 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         }
 
         odometryTicker.runOnTick { time ->
-            escPosition.optimizedRead(time, syncThreshold)
+            conversions.escOdometry(
+                    leftPosition.optimizedRead(time, syncThreshold).y,
+                    rightPosition.optimizedRead(time, syncThreshold).y,
+                    gyro.yaw.Degree
+            )
         }
     }
 }

@@ -66,11 +66,11 @@ suspend fun DrivetrainComponent.followTrajectory(
     controller {
         val velocities = follower()
         if (velocities != null) {
-            val nativeL = hardware.conversions.nativeConversion.native(velocities.left)
-            val nativeR = hardware.conversions.nativeConversion.native(velocities.right)
+            val nativeL = hardware.conversions.encoder.left.native(velocities.left)
+            val nativeR = hardware.conversions.encoder.right.native(velocities.right)
             TwoSided(
-                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                    VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                    VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
             )
         } else {
             null
@@ -94,12 +94,12 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
         val speed = motionProfile(distance)
         val (targVels, _) = uni.speedTargetAngleTarget(speed, targetA)
 
-        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
-        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+        val nativeL = hardware.conversions.encoder.left.native(targVels.left)
+        val nativeR = hardware.conversions.encoder.right.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         ).takeUnless {
             distance < tolerance
         }
