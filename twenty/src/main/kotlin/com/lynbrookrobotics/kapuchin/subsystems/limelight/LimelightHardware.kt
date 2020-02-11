@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponent>() {
     override val name = "Limelight"
-    override val priority = Priority.Lowest
+    override val priority = Priority.Medium
     override val period = 30.milli(Second)
     override val syncThreshold = 4.milli(Second)
 
@@ -34,12 +34,12 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
 
     val readings = sensor {
         when {
-            l("tv").roundToInt() == 1 -> LimelightReading(
+            l("tv").toInt() == 1 -> LimelightReading(
                     l("ty").Degree, l("tx").Degree,
                     l("ty0").Pixel, l("tx0").Pixel,
                     l("tvert").Pixel, l("thor").Pixel,
                     l("ta").Pixel,// this is actually Pixels Squared
-                    l("getpipe").roundToInt().let { rawpipe ->
+                    l("getpipe").toInt().let { rawpipe ->
                         Pipeline.values().firstOrNull { it.number == rawpipe }
                     }
             )
