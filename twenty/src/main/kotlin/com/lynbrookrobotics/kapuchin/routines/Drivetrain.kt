@@ -81,46 +81,6 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     }
 }
 
-
-suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
-
-    fun r() = Math.random()
-    val conv = DrivetrainConversions(hardware)
-
-    controller {
-        val startTime = currentTime
-        while (currentTime - startTime < hardware.period * 60.Percent) {
-            val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
-            conv.t2sOdometry(l, r)
-            conv.escOdometry(l * 50, r * 50)
-        }
-        val (x1, y1, b1) = conv.t2sOdometry.matrixTracking.run {
-            Position(x, y, bearing)
-        }
-        val (x2, y2, b2) = conv.escOdometry.tracking.run {
-            Position(x, y, bearing)
-        }
-        val x = avg(x1, x2)
-        val y = avg(y1, y2)
-        val b = avg(b1, b2)
-
-        val targetA = 1.Turn * r()
-        val errorA = targetA `coterminal -` 1.Turn * r()
-        val pA = bearingKp * errorA
-
-        val targetL = maxSpeed * r() + pA + x / Second - (b * Foot / Second / Degree)
-        val targetR = maxSpeed * r() - pA + y / Second + (b * Foot / Second / Degree)
-
-        val nativeL = hardware.conversions.nativeConversion.native(targetL cap `±`(3.Inch / Second))
-        val nativeR = hardware.conversions.nativeConversion.native(targetR cap `±`(1.Inch / Second))
-
-        TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-        )
-    }
-}
-
 //suspend fun DrivetrainComponent.arcTo(
 //        bearing: Angle, radius: Length,
 //        angleTolerance: Angle, distanceTolerance: Length,

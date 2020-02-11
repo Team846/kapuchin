@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
+import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.kauailabs.navx.frc.AHRS
@@ -56,7 +57,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     override val conversions = DrivetrainConversions(this)
 
-    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
+    val leftMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder, true)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
@@ -68,7 +69,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.inverted = leftEscInversion
     }
 
-    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
+    val rightMasterEsc by hardw { TalonFX(rightMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder, true)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
@@ -92,25 +93,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
-
-    private val ticksToSerialPort = "kUSB1"
-    private val ticksToSerial by hardw<TicksToSerial?> {
-        TicksToSerial(SerialPort.Port.valueOf(ticksToSerialPort))
-    }.verify("ticks-to-serial is connected") {
-        it!!().forEach {}
-        true
-    }.otherwise(hardw { null })
-
-    private val t2sNamed = Named("T2S Odometry", this)
-    val t2sPosition = ticksToSerial?.let { t2s ->
-        sensor {
-            t2s().forEach { (l, r) -> conversions.t2sOdometry(l, r) }
-            conversions.t2sOdometry.matrixTracking.run { Position(x, y, bearing) } stampWith it
-        }
-                .with(graph("X Location", Foot, t2sNamed)) { it.x }
-                .with(graph("Y Location", Foot, t2sNamed)) { it.y }
-                .with(graph("Bearing", Degree, t2sNamed)) { it.bearing }
-    }
 
     private val escNamed = Named("ESC Odometry", this)
     val escPosition = sensor {

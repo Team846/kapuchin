@@ -66,7 +66,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     suspend fun warmup() {
         System.gc()
         runAll(
-                { drivetrain.warmup() },
                 {
                     while (isActive) {
                         delay(0.3.Second)

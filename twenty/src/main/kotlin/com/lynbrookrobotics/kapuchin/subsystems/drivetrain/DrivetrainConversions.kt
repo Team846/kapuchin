@@ -67,47 +67,16 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
             .map { it to RotationMatrix(it) }
             .toMap()
 
-    val t2sOdometry = TicksToSerialOdometry(this)
-
-    class TicksToSerialOdometry(val conversions: DrivetrainConversions) : Named by Named("T2S Odometry", conversions) {
-        private var noTicksL = true
-        private var noTicksR = true
-        val matrixTracking = HighFrequencyTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree), conversions.matrixCache)
-
-        val flipOdometrySides by pref(true)
-        val flipLeftOdometry by pref(true)
-        val flipRightOdometry by pref(false)
-        operator fun invoke(deltaT2sTicksL: Int, deltaT2sTicksR: Int) {
-            if (noTicksL && deltaT2sTicksL != 0) log(Level.Debug) {
-                "Received first left tick at $currentTime"
-            }.also { noTicksL = false }
-
-            if (noTicksR && deltaT2sTicksR != 0) log(Level.Debug) {
-                "Received first right tick at $currentTime"
-            }.also { noTicksR = false }
-
-            val fl = if (flipLeftOdometry) -deltaT2sTicksL else deltaT2sTicksL
-            val fr = if (flipRightOdometry) -deltaT2sTicksR else deltaT2sTicksR
-            val l = if (flipOdometrySides) fr else fl
-            val r = if (flipOdometrySides) fl else fr
-
-            matrixTracking(
-                    conversions.toLeftPosition(l),
-                    conversions.toRightPosition(r)
-            )
-        }
-    }
-
     val escOdometry = EscOdometry(this)
 
     class EscOdometry(val conversions: DrivetrainConversions) : Named by Named("ESC Odometry", conversions) {
         private var noTicksL = true
         private var noTicksR = true
-        val tracking = SimpleVectorTracking(conversions.trackLength, Position(0.Foot, 0.Foot, 0.Degree))
+        val tracking = CircularArcTracking(Position(0.Foot, 0.Foot, 0.Degree))
 
         private var lastL = 0
         private var lastR = 0
-        operator fun invoke(totalEscTicksL: Int, totalEscTicksR: Int, bearing: Angle? = null) = conversions.run {
+        operator fun invoke(totalEscTicksL: Int, totalEscTicksR: Int, bearing: Angle) = conversions.run {
             if (noTicksL && totalEscTicksL != 0) log(Level.Debug) {
                 "Received first left tick at $currentTime"
             }.also { noTicksL = false }
