@@ -1,33 +1,23 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
-import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.limelight.DetectedTarget.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
-import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.roundToInt
 
 class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware) {
 
-    fun targetPosition(sample: LimelightReading) = with(sample) {
+    private fun targetPosition(sample: LimelightReading) = with(sample) {
         val aspect = thor / tvert
         val skew = acos(aspect / aspect0 minMag 1.Each)
 
-        val targetDistance: Length
-
-        when (pipeline) {
-            ZoomInPanHigh ->
-                targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty + zoomOutFov.y / 2)
-            ZoomInPanLow ->
-                targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty - zoomOutFov.y / 2)
-            else ->
-                targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty)
+        val targetDistance = when (pipeline) {
+            ZoomInPanHigh -> (targetHeight - mounting.z) / tan(mountingIncline + ty + zoomOutFov.y / 2)
+            ZoomInPanLow -> (targetHeight - mounting.z) / tan(mountingIncline + ty - zoomOutFov.y / 2)
+            else -> (targetHeight - mounting.z) / tan(mountingIncline + ty)
         }
 
         val x = tan(tx) * targetDistance
@@ -35,9 +25,8 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         Position(x, targetDistance, skew)
     }
 
-    private fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
+    fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
         val outerGoalPos = targetPosition(sample)
-        val skew = skew
         val offsetAngle = 90.Degree - skew
 
         val innerGoal = DetectedTarget(Position(
@@ -45,10 +34,11 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
                 innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                 skew
         ), outerGoalPos)
-        if (skew > skewTolerance) {
-            return DetectedTarget(null, targetPosition(sample))
+
+        return if (skew > skewTolerance) {
+            DetectedTarget(null, targetPosition(sample))
         } else {
-            return innerGoal
+            innerGoal
         }
 
     }

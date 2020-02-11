@@ -1,9 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
-import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.NetworkTable
@@ -11,14 +9,12 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.lang.Double.NaN
-import kotlin.Double.Companion
-import kotlin.math.roundToInt
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponent>() {
-    override val name = "Limelight"
-    override val priority = Priority.Medium
     override val period = 30.milli(Second)
     override val syncThreshold = 4.milli(Second)
+    override val priority = Priority.Medium
+    override val name = "Limelight"
 
     val table: NetworkTable by hardw {
         NetworkTableInstance.getDefault().getTable("/limelight")
@@ -45,13 +41,5 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
             )
             else -> null
         } lstamp it
-    }
-
-    init {
-        uiBaselineTicker.runOnTick { time ->
-            setOf(readings).forEach {
-                it.optimizedRead(time, .5.Second)
-            }
-        }
     }
 }

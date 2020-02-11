@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import info.kunalsheth.units.generated.*
 
 data class LimelightReading(
@@ -12,3 +13,5 @@ data class LimelightReading(
 enum class Pipeline(val number: Int) {
     ZoomOut(0), ZoomInPanHigh(1), ZoomInPanMid(2), ZoomInPanLow(3), DriverStream(4)
 }
+
+data class DetectedTarget(val inner: Position?, val outer: Position?)

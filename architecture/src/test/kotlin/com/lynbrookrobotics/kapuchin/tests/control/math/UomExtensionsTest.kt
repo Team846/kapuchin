@@ -7,7 +7,7 @@ import kotlin.test.Test
 
 class UomExtensionsTest {
     @Test
-    fun `Finite subsets are subsets`() {
+    fun `finite subsets are subsets`() {
         anyDouble.map { it.Each }.forEach { a ->
             anyDouble.map { it.Each }.forEach { b ->
                 anyDouble.map { it.Each }.forEach { c ->
