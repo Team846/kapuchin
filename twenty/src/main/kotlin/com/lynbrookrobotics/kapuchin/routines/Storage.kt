@@ -11,8 +11,13 @@ suspend fun CarouselComponent.set(target: DutyCycle) = startRoutine("Set") {
 suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Collect Position") {
     val magazine by hardware.magazine.readOnTick.withoutStamps
     val position by hardware.position.readOnTick.withoutStamps
+    val isHallEffect by hardware.isHallEffect.readOnTick.withoutStamps
+    val slotAtCollect by hardware.slotAtCollect.readOnTick.withoutStamps
 
     controller {
+        if (isHallEffect) {
+            hardware.encoder.position = (360.Degree / 5 * slotAtCollect).Turn
+        }
         val target = magazine.withIndex()
                 .map { (i, slotHasBall) -> Pair(360.Degree / 5 * i, slotHasBall) }
                 .filter { (_, slotHasBall) -> !slotHasBall }

@@ -15,11 +15,11 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.I2C.Port.kOnboard
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.roundToInt
 
 class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
 
     // TODO position gains
-    // TODO "rezero" when hall effect is on
 
     override val fallbackController: CarouselComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
@@ -55,7 +55,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         it.inverted = invert
     }
     val encoder: CANEncoder by hardw { esc.getEncoder(kHallSensor, 5) }.configure { encoder ->
-        encoder.positionConversionFactor = wheelRadius / carouselRadius // TODO check if this is correct
+        encoder.positionConversionFactor = (wheelRadius / carouselRadius).Each // TODO check if this is correct
     }
     val pidController: CANPIDController by hardw { esc.pidController }
 
@@ -64,6 +64,9 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val isHallEffect = sensor(hallEffect) { get() stampWith it }
 
     val position = sensor(encoder) { encoder.position.Turn stampWith it }
+    val slotAtCollect = sensor {
+        (encoder.position * 5).roundToInt() stampWith it
+    }
 
     val colorSensor = sensor(RevColorSensor(kOnboard, 0x52)) { getCurrentValue() stampWith it }
 
