@@ -6,8 +6,11 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.revrobotics.CANEncoder
+import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.EncoderType.kHallSensor
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.I2C.Port.kOnboard
 import info.kunalsheth.units.generated.*
@@ -15,11 +18,7 @@ import info.kunalsheth.units.math.*
 
 class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
 
-    private val carouselRadius by pref(10, Inch)
-    private val wheelRadius by pref(1, Inch)
-
     // TODO position gains
-    // TODO native encoder to carousel position conversions
     // TODO "rezero" when hall effect is on
 
     override val fallbackController: CarouselComponent.(Time) -> OffloadedOutput = {
@@ -47,20 +46,27 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
             defaultPeakCurrentLimit = 35.Ampere
     )
 
+    private val carouselRadius by pref(10, Inch)
+    private val wheelRadius by pref(1, Inch)
+
     private val escId = 60
-    private val hallEffectPort = 0
-
-    private val magazineState = booleanArrayOf(false, false, false, false, false)
-
     val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invert
     }
+    val encoder: CANEncoder by hardw { esc.getEncoder(kHallSensor, 5) }.configure { encoder ->
+        encoder.positionConversionFactor = wheelRadius / carouselRadius // TODO check if this is correct
+    }
+    val pidController: CANPIDController by hardw { esc.pidController }
 
-    val pidController by hardw { esc.pidController!! }
-    val hallEffect by hardw { DigitalInput(hallEffectPort) }
+    private val hallEffectPort = 0
+    private val hallEffect by hardw { DigitalInput(hallEffectPort) }
+    val isHallEffect = sensor(hallEffect) { get() stampWith it }
 
-    // TODO position sensor
+    val position = sensor(encoder) { encoder.position.Turn stampWith it }
+
     val colorSensor = sensor(RevColorSensor(kOnboard, 0x52)) { getCurrentValue() stampWith it }
+
+    val magazineState = booleanArrayOf(false, false, false, false, false)
     val magazine = sensor { magazineState stampWith it }
 }
