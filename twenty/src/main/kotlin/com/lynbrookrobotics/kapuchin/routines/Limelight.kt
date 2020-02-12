@@ -7,7 +7,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-@Suppress("NAME_SHADOWING")
 suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
 
     val visionTarget by hardware.readings.readEagerly.withoutStamps
@@ -43,9 +42,14 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
                     val angleToPixelsY = (zoomOutResolution.y / zoomOutFov.y.Degree)
                     val targetBoxBoundsY = (ty * angleToPixelsY / Degree) `±` (tvert / 2)
 
-                    if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` lowInsideBoxBoundsY) ZoomInPanLow
-                    else if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` midInsideBoxBoundsY) ZoomInPanMid
-                    else if (targetBoxBoundsX `⊆` insideBoxBoundsX && targetBoxBoundsY `⊆` highInsideBoxBoundsY) ZoomInPanHigh
+                    if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
+                        when {
+                            targetBoxBoundsY `⊆` lowInsideBoxBoundsY -> ZoomInPanLow
+                            targetBoxBoundsY `⊆` midInsideBoxBoundsY -> ZoomInPanMid
+                            targetBoxBoundsY `⊆` highInsideBoxBoundsY -> ZoomInPanHigh
+                            else -> ZoomOut
+                        }
+                    }
                     else ZoomOut
                 }
                 ZoomInPanMid -> {
