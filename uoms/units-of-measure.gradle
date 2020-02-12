@@ -8,6 +8,7 @@ generateUnitsOfMeasure {
             q("V", d(M: 1, L: 2, T: -3, I: -1)), // volts
             q("R", d(M: 1, L: 2, T: -3, I: -2)), // ohms
             q("DutyCycle", d()),
+            q("Pixel", d())
     ].toSet()
 
     unitsOfMeasure += [
