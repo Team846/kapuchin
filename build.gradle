@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -23,6 +25,16 @@ allprojects {
     tasks.withType(JavaCompile) {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    tasks.withType(KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = "11"
+            freeCompilerArgs += [
+                    "-XXLanguage:+InlineClasses",
+                    "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
+            ]
+        }
     }
 
     tasks.withType(Test) { // https://guides.gradle.org/performance/#parallel_test_execution

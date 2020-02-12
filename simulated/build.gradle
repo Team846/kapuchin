@@ -17,15 +17,6 @@ dependencies {
 group 'com.lynbrookrobotics'
 version '1.0.0'
 
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.freeCompilerArgs += ["-XXLanguage:+InlineClasses"]
-}
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.freeCompilerArgs += ["-XXLanguage:+InlineClasses"]
-}
-
 test {
     // on the RoboRIO, we get ~100m of heap to run our code
     jvmArgs '-Xmx100m', '-XX:+UseG1GC', '-XX:MaxGCPauseMillis=50'

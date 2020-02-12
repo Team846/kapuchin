@@ -39,7 +39,7 @@ class ChoreographyTest {
         checkCount(6, six, tolerance)
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `choreographies run sequentially by ending themselves`() = threadDumpOnFailure {
         runBlocking {
             val c = ChoreographyTestC()
@@ -53,11 +53,11 @@ class ChoreographyTest {
         }
     }
 
-    @Test(timeout = 4 * 1000)
+    @Test(timeout = 5 * 1000)
     fun `choreographies can still run after one times out`() = threadDumpOnFailure {
         runBlocking {
             val c = ChoreographyTestC()
-
+            delay(1.Second)
 
             withTimeout(1.Second) { countTo(c, 8, Int.MAX_VALUE) }
             c.checkCount(8, 8, 1)
@@ -131,7 +131,7 @@ class ChoreographyTest {
         c.check(1, 4, 6, 1)
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `choreographies can be cancelled internally`() = threadDumpOnFailure {
         val c = ChoreographyTestC()
 
