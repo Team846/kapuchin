@@ -96,20 +96,20 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
         it.zeroYaw()
-    }.verify("NavX should be connect") {
+    }.verify("NavX should be connected") {
         waitUntilTrue() { it.isConnected }
-    }.verify("Gyro should be finished calibrating on startup") {
+    }.verify("NavX should be finished calibrating on startup") {
         waitUntilTrue() { !it.isCalibrating }
-    }/*.verify("Gyro magnetometer should be calibrated") {
+    }/*.verify("NavX magnetometer should be calibrated") {
         it.isMagnetometerCalibrated
-    }*/.verify("Gyro should be configured to update at 200hz") {
+    }*/.verify("NavX should be configured to update at 200hz") {
         it.actualUpdateRate == 200
-    }.verify("RoboRIO is recieving gyro updates at 200hz") {
+    }.verify("RoboRIO should receive NavX updates at 200hz") {
         val desiredUpdates = 10
         val startingIndex = it.updateCount
         blockingDelay(desiredUpdates.Each / 200.Hertz * 1.1)
         it.updateCount > startingIndex + desiredUpdates
-    }.verify("Gyro should not drift after calibration") {
+    }.verify("NavX yaw should not drift after calibration") {
         it.rate.DegreePerSecond in `±`(driftTolerance)
     }
 
