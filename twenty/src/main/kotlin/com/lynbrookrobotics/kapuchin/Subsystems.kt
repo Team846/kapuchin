@@ -12,9 +12,14 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+<<<<<<< HEAD
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.storage.*
+=======
+import com.lynbrookrobotics.kapuchin.subsystems.lift.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
+>>>>>>> master
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -65,6 +70,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     suspend fun warmup() {
         System.gc()
         runAll(
+                { limelight?.autoZoom() },
                 {
                     while (isActive) {
                         delay(0.3.Second)

@@ -4,26 +4,29 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.limelight.DetectedTarget.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline>(hardware, EventLoop) {
+class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware) {
 
-    private fun targetPosition(sample: LimelightReading) = sample.run {
+    private fun targetPosition(sample: LimelightReading) = with(sample) {
         val aspect = thor / tvert
-
         val skew = acos(aspect / aspect0 minMag 1.Each)
-        val distance = (targetHeight - mounting.z) / tan(mountingIncline + ty)
-        val x = tan(tx) * distance
 
-        Position(x, distance, skew)
+        val targetDistance = when (pipeline) {
+            ZoomInPanHigh -> (targetHeight - mounting.z) / tan(mountingIncline + ty + zoomOutFov.y / 2)
+            ZoomInPanLow -> (targetHeight - mounting.z) / tan(mountingIncline + ty - zoomOutFov.y / 2)
+            else -> (targetHeight - mounting.z) / tan(mountingIncline + ty)
+        }
+
+        val x = tan(tx) * targetDistance
+
+        Position(x, targetDistance, skew)
     }
 
-    private fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
+    fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
         val outerGoalPos = targetPosition(sample)
-        val skew = skew
         val offsetAngle = 90.Degree - skew
 
         val innerGoal = DetectedTarget(Position(
@@ -31,10 +34,11 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
                 innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
                 skew
         ), outerGoalPos)
-        if (skew > skewTolerance) {
-            return DetectedTarget(null, targetPosition(sample))
+
+        return if (skew > skewTolerance) {
+            DetectedTarget(null, targetPosition(sample))
         } else {
-            return innerGoal
+            innerGoal
         }
 
     }
@@ -56,35 +60,35 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         ({ UomVector(x, y, z) })
     }
 
-    val zoomOutSafetyZone by pref(40, Pixel)
-    val zoomInSafetyZone by pref(10, Pixel)
+    val zoomOutSafetyZone by pref(40, Each)
+    val zoomInSafetyZone by pref(10, Each)
     val zoomMultiplier by pref(2)
 
     val zoomInResolution by pref {
-        val x by pref(320, Pixel)
-        val y by pref(240, Pixel)
+        val x by pref(240, Each)
+        val y by pref(320, Each)
         ({ UomVector(x, y) })
     }
     val zoomInFov by pref {
-        val x by pref(28, Degree)
-        val y by pref(20.5, Degree)
+        val x by pref(20.5, Degree)
+        val y by pref(28, Degree)
         ({ UomVector(x, y) })
     }
 
     val zoomOutResolution by pref {
-        val x by pref(960, Pixel)
-        val y by pref(720, Pixel)
+        val x by pref(720, Each)
+        val y by pref(960, Each)
         ({ UomVector(x, y) })
     }
     val zoomOutFov by pref {
-        val x by pref(56, Degree)
-        val y by pref(41, Degree)
+        val x by pref(41, Degree)
+        val y by pref(56, Degree)
         ({ UomVector(x, y) })
     }
 
-    override val fallbackController: LimelightComponent.(Time) -> Pipeline = { Pipeline.ZoomOut }
+    override val fallbackController: LimelightComponent.(Time) -> Pipeline? = { Pipeline.ZoomOut }
 
-    override fun LimelightHardware.output(value: Pipeline) {
-        pipelineEntry.setNumber(value.number)
+    override fun LimelightHardware.output(value: Pipeline?) {
+        pipelineEntry.setNumber(value?.number)
     }
 }
