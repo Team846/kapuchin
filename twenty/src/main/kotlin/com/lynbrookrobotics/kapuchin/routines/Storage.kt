@@ -15,9 +15,12 @@ suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Co
     val slotAtCollect by hardware.slotAtCollect.readOnTick.withoutStamps
 
     controller {
+        // reset the carousel encoder on passing the hall effect
         if (isHallEffect) {
             hardware.encoder.position = (360.Degree / 5 * slotAtCollect).Turn
         }
+
+        // calculate the closest empty slot
         val target = magazine.withIndex()
                 .map { (i, slotHasBall) -> Pair(360.Degree / 5 * i, slotHasBall) }
                 .filter { (_, slotHasBall) -> !slotHasBall }
@@ -25,9 +28,14 @@ suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Co
                     // https://stackoverflow.com/a/7869457/7267809
                     val a = angle - position
                     a + if (a > 180.Degree) (-360).Degree else if (a < 180.Degree) 360.Degree else 0.Degree
-                }!!
-                .first
-        PositionOutput(hardware.escConfig, TODO("Position gains for carousel"), target.Turn)
+                }
+                ?.first
+        if (target == null) {
+            TODO("Vibrate the controller")
+            null
+        } else {
+            PositionOutput(hardware.escConfig, TODO("Position gains for carousel"), target.Turn)
+        }
     }
 }
 
