@@ -12,7 +12,7 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -81,12 +81,31 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     val driftTolerance by pref(0.2, DegreePerSecond)
-    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
-        while(it.isCalibrating) {
-            log(Debug) { "Navx is calibrating" }
-            Thread.sleep(1000)
+    private fun waitUntilTrue(timeout: Time = 10.Second, poll: Time = 0.5.Second, f: () -> Boolean): Boolean {
+        val startTime = currentTime
+        if (!f()) {
+            log(Debug) { "Waiting for predicated to return true..." }
+            while (!f() && currentTime - startTime < timeout)
+                blockingDelay(poll)
         }
+        return f()
+    }
+
+    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
         it.zeroYaw()
+    }.verify("NavX should be connect") {
+        waitUntilTrue() { it.isConnected }
+    }.verify("Gyro should be finished calibrating on startup") {
+        waitUntilTrue() { !it.isCalibrating }
+    }/*.verify("Gyro magnetometer should be calibrated") {
+        it.isMagnetometerCalibrated
+    }*/.verify("Gyro should be configured to update at 200hz") {
+        it.actualUpdateRate == 200
+    }.verify("RoboRIO is recieving gyro updates at 200hz") {
+        val desiredUpdates = 10
+        val startingIndex = it.updateCount
+        blockingDelay(desiredUpdates.Each / 200.Hertz * 1.1)
+        it.updateCount > startingIndex + desiredUpdates
     }.verify("Gyro should not drift after calibration") {
         it.rate.DegreePerSecond in `±`(driftTolerance)
     }
