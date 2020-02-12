@@ -33,7 +33,10 @@ fun <Q : Number> `±`(radius: Q) = 0.0 `±` radius
 
 inline fun <Q : Quan<Q>> `±`(radius: Q) = radius.new(0.0) `±` radius
 
+inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊆`(that: ClosedRange<Q>): Boolean = this.start >= that.start && this.endInclusive <= that.endInclusive
+
 /**
+ *
  * Returns the closest, largest range to `current`
  *
  * @author Alvyn
