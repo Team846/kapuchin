@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.storage.*
 import info.kunalsheth.units.generated.*
 
@@ -13,11 +14,17 @@ suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Co
     val position by hardware.position.readOnTick.withoutStamps
     val isHallEffect by hardware.isHallEffect.readOnTick.withoutStamps
     val slotAtCollect by hardware.slotAtCollect.readOnTick.withoutStamps
+    val colorSensor by hardware.colorSensor.readOnTick.withoutStamps
 
     controller {
         // reset the carousel encoder on passing the hall effect
         if (isHallEffect) {
             hardware.encoder.position = (360.Degree / 5 * slotAtCollect).Turn
+        }
+
+        // not marking otherwise in case they're just not visible
+        if (colorSensor == Colors.Yellow.name) {
+            hardware.magazineState[slotAtCollect] = true
         }
 
         // calculate the closest empty slot
