@@ -58,7 +58,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
                             targetBoxBoundsY.less(insideBoxBoundsY) -> ZoomInPanLow
                             targetBoxBoundsY.more(insideBoxBoundsY) -> ZoomInPanHigh
                             else -> ZoomInPanMid
-                        } 
+                        }
                     } else ZoomOut
                 }
                 ZoomInPanLow -> {
@@ -81,6 +81,7 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
                 }
                 else -> ZoomOut
             }
+
         } ?: ZoomOut
     }
 }
