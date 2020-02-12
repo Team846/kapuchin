@@ -10,13 +10,16 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.ColorSensorV3
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.I2C.Port
+import edu.wpi.first.wpilibj.util.Color
+import edu.wpi.first.wpilibj.util.Color.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.lang.Integer.signum
 
-enum class Colors(val color: String) { Blue("blue"), Green("green"), Red("red"), Yellow("yellow") }
+enum class Colors(val color: Color) { Blue(kBlue), Green(kLime), Red(kRed), Yellow(kYellow) }
 
 class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware) {
     val kP by pref(10, Volt, 1440, Degree)
@@ -53,14 +56,13 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
 
     val spinnerPidController by hardw { spinnerEsc.pidController!! }
 
-    // Use ColorSensorV3(I2C.Port)
-    private val revColorSensor by hardw { RevColorSensor(Port.kOnboard, colorSensorAddress) }
 
-    val currentColor = sensor { Colors.valueOf(revColorSensor.getCurrentValue()) stampWith it }
+    private val revColorSensor by hardw { ColorSensorV3(Port.kOnboard) }
+    val currentColor = sensor { revColorSensor.color stampWith it }
 
     val gameData = sensor { DriverStation.getInstance().gameSpecificMessage stampWith it }
     val targetColorOrdinal = sensor { convertGameMessage() stampWith it }
-    val controlPanelAngle = sensor { getControlPanelAngle(currentColor.optimizedRead(it, 0.Second).y) stampWith it }
+    val controlPanelAngle = sensor { getControlPanelAngle() stampWith it }
 
     var lastColorOrdinal: Int? = null
     private var controlPanelSpinnerAngle: Angle = 0.Degree
@@ -79,16 +81,26 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
         return gameDataOrdinal
     }
 
-    private fun getControlPanelAngle(color: Colors): Angle {
-        val currentColorOrdinal = Colors.valueOf(color.color).ordinal
-
-        lastColorOrdinal?.also {
-            controlPanelSpinnerAngle += (((it - currentColorOrdinal) % 2) * 45).Degree
-            lastDirectionSignum = signum((it - currentColorOrdinal) % 2)
+    private fun getControlPanelAngle(): Angle {
+        val currentColorOrdinal = when(currentColor) {
+            kBlue -> Colors.Blue.ordinal
+            kLime -> Colors.Green.ordinal
+            kRed -> Colors.Red.ordinal
+            kYellow -> Colors.Yellow.ordinal
+            else -> null
         }
 
-        lastColorOrdinal = currentColorOrdinal
+        if (currentColorOrdinal == null || lastColorOrdinal == null) {
 
-        return controlPanelSpinnerAngle
+            controlPanelSpinnerAngle = 0.Degree
+        } else {
+            lastColorOrdinal?.also {
+                controlPanelSpinnerAngle += (((it - currentColorOrdinal) % 2) * 45).Degree
+                lastDirectionSignum = signum((it - currentColorOrdinal) % 2)
+            }
+        }
+                    lastColorOrdinal = currentColorOrdinal
+
+                    return controlPanelSpinnerAngle
+        }
     }
-}
