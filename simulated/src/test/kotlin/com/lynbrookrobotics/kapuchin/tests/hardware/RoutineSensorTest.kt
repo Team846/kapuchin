@@ -24,7 +24,7 @@ class RoutineSensorTest {
 
     private class RoutineSensorTestC : TC<RoutineSensorTestC, RoutineSensorTestSH>(RoutineSensorTestSH())
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `sensors read on tick are in sync`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors read on tick are in sync"
@@ -72,7 +72,7 @@ class RoutineSensorTest {
         }
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `sensors read eagerly are eager and efficient`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors read eagerly are eager and efficient"
@@ -98,7 +98,7 @@ class RoutineSensorTest {
         }
     }
 
-    @Test(timeout = 1 * 1000)
+    @Test(timeout = 2 * 1000)
     fun `sensors are updated once before controller initialization`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors are updated once before controller initialization"
@@ -125,7 +125,7 @@ class RoutineSensorTest {
         }
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `sensors are read efficiently`() = threadDumpOnFailure {
         runBlocking {
             val name = "sensors are read efficiently"

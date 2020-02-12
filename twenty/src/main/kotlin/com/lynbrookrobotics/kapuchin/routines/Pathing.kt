@@ -1,8 +1,10 @@
 package com.lynbrookrobotics.kapuchin.routines
 
+import com.ctre.phoenix.motorcontrol.NeutralMode.Brake
+import com.ctre.phoenix.motorcontrol.NeutralMode.Coast
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.kapuchin.control.math.kinematics.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
@@ -12,98 +14,67 @@ import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
 import java.io.File
 
-fun target(current: Waypt, target: Waypt) = atan2(target.x - current.x, target.y - current.y)
+suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 3.Inch) = startChoreo("Journal") {
 
-suspend fun journal(dt: DrivetrainHardware, ptDistance: Length = 6.Inch) = startChoreo("Journal") {
-
-    val pos by dt.position.readEagerly(2.milli(Second)).withStamps
-    val log = File("/tmp/journal.tsv").printWriter().also {
-        it.println("time\tx\ty")
+    val pos by dt.position.readEagerly(2.milli(Second)).withoutStamps
+    val log = File("/home/lvuser/journal.tsv").printWriter().also {
+        it.println("x\ty")
+        it.println("0.0\t0.0")
     }
 
-    val startingLoc = pos.y.vector
-    val startingRot = RotationMatrix(-pos.y.bearing)
+    val startingLoc = pos.vector
+    val startingRot = RotationMatrix(-pos.bearing)
 
-    var last = pos.y
+    var last = pos
+
+    val drivetrainEscs = setOf(dt.leftMasterEsc, dt.rightMasterEsc, dt.leftSlaveEsc, dt.rightSlaveEsc)
 
     choreography {
-        log.use {
+        try {
+            drivetrainEscs.forEach { it.setNeutralMode(Coast) }
             while (isActive) {
-                val (t, loc) = pos
-                val (x, y) = startingRot rz (loc.vector - startingLoc)
+                val (x, y) = startingRot rz (pos.vector - startingLoc)
 
-                if (distance(loc.vector, last.vector) > ptDistance) {
-                    it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
-                    last = loc
+                if (distance(pos.vector, last.vector) > ptDistance) {
+                    log.println("${x.Foot}\t${y.Foot}")
+                    last = pos
                 }
 
-                delay(100.milli(Second))
+                delay(50.milli(Second))
             }
+        } finally {
+            val (x, y) = startingRot rz (pos.vector - startingLoc)
+            log.println("${x.Foot}\t${y.Foot}")
+            log.close()
 
-            val (t, loc) = pos
-            val (x, y) = startingRot rz (loc.vector - startingLoc)
-            it.println("${t.Second}\t${x.Foot}\t${y.Foot}")
+            drivetrainEscs.forEach { it.setNeutralMode(Brake) }
         }
     }
 }
 
 suspend fun DrivetrainComponent.followTrajectory(
-        tolerance: Length, endTolerance: Length,
-        deceleration: Acceleration, waypts: List<TimeStamped<Waypt>>,
+        trajectory: Trajectory,
+        tolerance: Length,
+        endTolerance: Length,
         origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
 ) = startRoutine("Read Journal") {
-    val position by hardware.position.readOnTick.withStamps
-    val uni = UnicycleDrive(this@followTrajectory, this@startRoutine)
 
-    val waypointDistance = graph("Distance to Waypoint", Foot)
+    val follower = TrajectoryFollower(
+            this@followTrajectory, tolerance, endTolerance, this@startRoutine, trajectory, origin
+    )
 
-    val startingLoc = origin.vector
-    val mtrx = RotationMatrix(origin.bearing)
-
-    var remainingDistance = waypts
-            .zipWithNext { a, b -> distance(a.y, b.y) }
-            .reduce { a, b -> a + b }
-
-    val targIter = waypts
-            .map { (t, pt) -> (mtrx rz pt) + startingLoc stampWith t }
-            .iterator()
-
-    var target = targIter.next()
-    var speed = 1.FootPerSecond
-    var isDone = false
-
-    controller { t ->
-        val (_, p) = position
-        val location = p.vector
-
-        val distanceToNext = distance(location, target.y).also { waypointDistance(t, it) }
-        if (!targIter.hasNext() && distanceToNext < endTolerance) {
-            isDone = true
-            speed = 0.FootPerSecond
-        } else if (targIter.hasNext() && distanceToNext < tolerance) {
-            val newTarget = targIter.next()
-
-            val dist = distance(newTarget.y, target.y)
-            speed = avg(
-                    speed, dist / (newTarget.x - target.x)
+    controller {
+        val velocities = follower()
+        if (velocities != null) {
+            val nativeL = hardware.conversions.nativeConversion.native(velocities.left)
+            val nativeR = hardware.conversions.nativeConversion.native(velocities.right)
+            TwoSided(
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeL),
+                    VelocityOutput(hardware.escConfig, velocityGains, nativeR)
             )
-            remainingDistance -= dist
-            target = newTarget
+        } else {
+            null
         }
-
-        val targetA = target(location, target.y)
-        val (targVels, _) = uni.speedAngleTarget(
-                speed min v(deceleration, 0.FootPerSecond, remainingDistance + distanceToNext),
-                targetA
-        )
-
-        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
-        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
-
-        TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-        ).takeUnless { isDone }
     }
 }
 
@@ -119,9 +90,9 @@ suspend fun DrivetrainComponent.waypoint(motionProfile: (Length) -> Velocity, ta
 
         val distance = distance(location, target).also { waypointDistance(t, it) }
 
-        val targetA = target(location, target)
+        val targetA = (target - location).bearing
         val speed = motionProfile(distance)
-        val (targVels, _) = uni.speedAngleTarget(speed, targetA)
+        val (targVels, _) = uni.speedTargetAngleTarget(speed, targetA)
 
         val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)

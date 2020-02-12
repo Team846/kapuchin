@@ -30,7 +30,7 @@ class RoutineTest {
         checkCount(6, six, tolerance)
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `routines run sequentially by ending themselves`() = threadDumpOnFailure {
         runBlocking {
             val c = RoutineTestC()
@@ -69,7 +69,7 @@ class RoutineTest {
         }
     }
 
-    @Test(timeout = 2 * 1000)
+    @Test(timeout = 3 * 1000)
     fun `routines can be cancelled externally`() = threadDumpOnFailure {
         val c = RoutineTestC()
 

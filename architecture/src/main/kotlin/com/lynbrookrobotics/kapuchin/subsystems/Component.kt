@@ -109,13 +109,12 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
     protected abstract fun H.output(value: Output)
 
     init {
-        @Suppress("LeakingThis")
-        clock.runOnTick(Last) { tickStart ->
-            try {
-                @Suppress("UNNECESSARY_SAFE_CALL")
+        val subsystemBirth = currentTime
+        clock.runOnTick(Last) { tickStart: Time ->
+            if (tickStart - subsystemBirth > 1.Second) try {
                 (routine ?: fallbackController)
-                        ?.invoke(thisAsThis, tickStart)
-                        ?.let { hardware?.output(it) }
+                        .invoke(thisAsThis, tickStart)
+                        .let { hardware.output(it) }
             } catch (t: Throwable) {
                 routine?.resumeWithException(t) ?: log(Error, t)
             }

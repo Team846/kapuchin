@@ -2,45 +2,14 @@ package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
-import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-
-class UnicycleDrive(private val c: DrivetrainComponent, scope: BoundSensorScope) {
-    val position by with(scope) { c.hardware.position.readOnTick.withStamps }
-    val dadt = differentiator(::p, position.x, position.y.bearing)
-
-    val errorGraph = c.graph("Error Angle", Degree)
-    val targetGraph = c.graph("Target Angle", Degree)
-    val speedGraph = c.graph("Target Speed", FootPerSecond)
-
-    fun speedAngleTarget(speed: Velocity, angle: Angle): Pair<TwoSided<Velocity>, Angle> {
-        val error = (angle `coterminal -` position.y.bearing)
-        return speedTargetAngleError(speed, error) to error
-    }
-
-    fun speedTargetAngleError(speed: Velocity, error: Angle) = with(c) {
-        val (t, p) = position
-
-        val angularVelocity = dadt(t, p.bearing)
-
-        val pA = bearingKp * error - bearingKd * angularVelocity
-
-        val targetL = speed + pA
-        val targetR = speed - pA
-
-        TwoSided(targetL, targetR).also {
-            speedGraph(t, speed)
-            targetGraph(t, error `coterminal +` p.bearing)
-            errorGraph(t, error)
-        }
-    }
-}
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
@@ -74,7 +43,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
         if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
 
-        val (target, _) = uni.speedAngleTarget(forwardVelocity, absSteering + startingAngle)
+        val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, absSteering + startingAngle)
 
         val nativeL = hardware.conversions.nativeConversion.native(
                 target.left + steeringVelocity
@@ -102,7 +71,7 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     val uni = UnicycleDrive(this@turn, this@startRoutine)
 
     controller {
-        val (targVels, error) = uni.speedAngleTarget(0.FootPerSecond, target)
+        val (targVels, error) = uni.speedTargetAngleTarget(0.FootPerSecond, target)
 
         val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
         val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
@@ -132,7 +101,7 @@ suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
         val (x1, y1, b1) = conv.t2sOdometry.matrixTracking.run {
             Position(x, y, bearing)
         }
-        val (x2, y2, b2) = conv.escOdometry.matrixTracking.run {
+        val (x2, y2, b2) = conv.escOdometry.tracking.run {
             Position(x, y, bearing)
         }
         val x = avg(x1, x2)

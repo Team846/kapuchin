@@ -5,4 +5,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
 }
 
+compileKotlinCommon {
+    kotlinOptions.suppressWarnings = true
+}
+
 apply from: 'units-of-measure.gradle'
