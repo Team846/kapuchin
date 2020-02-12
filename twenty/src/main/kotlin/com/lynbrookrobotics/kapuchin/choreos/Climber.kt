@@ -24,8 +24,8 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
 suspend fun Subsystems.extendClimber() = startChoreo("Extend Climber") {
 
     choreography {
-        launch { climberChode?.set(Off) }
         scope.launch { climberPivot?.set(Up) }
+        launch { climberChode?.set(Off) }
         launch { climberWinch?.set(climberWinch.extendSpeed) }
         freeze()
     }
@@ -35,8 +35,9 @@ suspend fun Subsystems.retractClimber() = startChoreo("Retract Climber") {
 
     choreography {
         launch { climberChode?.set(Off) }
-        scope.launch { climberPivot?.set(Down) }
         launch { climberWinch?.set(climberWinch.retractSpeed) }
+        delay(1.Second)
+        scope.launch { climberPivot?.set(Down) }
         freeze()
     }
 }

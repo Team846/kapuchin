@@ -16,7 +16,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val priority = Priority.RealTime
     override val name = "Operator"
 
-    val flywheelMapping by pref {
+    private val flywheelMapping by pref {
         val exponent by pref(1)
         val deadband by pref(10, Percent)
         val sensitivity by pref(100, Percent)
@@ -27,7 +27,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         })
     }
 
-    val turretMapping by pref {
+    private val turretMapping by pref {
         val exponent by pref(1)
         val deadband by pref(10, Percent)
         val sensitivity by pref(100, Percent)
@@ -55,17 +55,18 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val back get() = xbox.backButton
 
     val aim = s { lt }
-    val aimClose = s { lb }
+    val aimPreset = s { lb }
     val shoot = s { rt }
     val shootOverride = s { rb }
 
-    val flywheelPrecision = s { flywheelMapping.first(getY(kLeft).Each) * flywheelMapping.second }
-    val turretPrescision = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
+    val flywheelManual = s { flywheelMapping.first(getY(kLeft).Each) * flywheelMapping.second }
+    val turretManual = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
+    val shooterHoodManual = s { pov == 0 }
 
     val extendClimber = s { back }
     val retractClimber = s { start }
 
-    val extendControlPanelPivot = s { pov == 0 }
-    val controlPanelStage2 = s { pov == 0 && aButton }
-    val controlPanelStage3 = s { pov == 0 && bButton }
+    val extendControlPanelPivot = s { pov == 180 }
+    val controlPanelStage2 = s { pov == 180 && aButton }
+    val controlPanelStage3 = s { pov == 180 && bButton }
 }
