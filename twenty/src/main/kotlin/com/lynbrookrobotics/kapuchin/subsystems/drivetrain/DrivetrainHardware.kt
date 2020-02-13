@@ -95,11 +95,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
+        blockUntilTrue() { it.isConnected }
+        blockUntilTrue() { !it.isCalibrating }
         it.zeroYaw()
     }.verify("NavX should be connected") {
-        blockUntilTrue() { it.isConnected }
+        it.isConnected
     }.verify("NavX should be finished calibrating on startup") {
-        blockUntilTrue() { !it.isCalibrating }
+        !it.isCalibrating
     }/*.verify("NavX magnetometer should be calibrated") {
         it.isMagnetometerCalibrated
     }*/.verify("NavX should be configured to update at 200hz") {
