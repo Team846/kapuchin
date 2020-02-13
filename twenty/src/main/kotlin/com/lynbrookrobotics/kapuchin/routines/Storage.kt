@@ -22,9 +22,10 @@ suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Co
             hardware.encoder.position = (360.Degree / 5 * slotAtCollect).Turn
         }
 
-        // not marking otherwise in case they're just not visible
         if (colorSensor == Colors.Yellow.name) {
             hardware.magazineState[slotAtCollect] = true
+        } else if (isHallEffect) {
+            hardware.magazineState[slotAtCollect] = false
         }
 
         // calculate the closest empty slot
@@ -35,14 +36,9 @@ suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Co
                     // https://stackoverflow.com/a/7869457/7267809
                     val a = angle - position
                     a + if (a > 180.Degree) (-360).Degree else if (a < 180.Degree) 360.Degree else 0.Degree
-                }
-                ?.first
-        if (target == null) {
-            TODO("Vibrate the controller")
-            null
-        } else {
-            PositionOutput(hardware.escConfig, TODO("Position gains for carousel"), target.Turn)
-        }
+                }!!
+                .first
+        PositionOutput(hardware.escConfig, TODO("Position gains for carousel"), target.Turn)
     }
 }
 

@@ -1,11 +1,11 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.IntakeSliderState.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake Teleop") {
 
@@ -20,18 +20,23 @@ suspend fun Subsystems.intakeTeleop() = startChoreo("Intake Teleop") {
     }
 }
 
-suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
+suspend fun Subsystems.intakeBalls() = if (carousel != null)
+    startChoreo("Intake Balls") {
 
-    choreography {
-        launch { intakeSlider?.set(Out) }
-        launch { intakeRollers?.set(intakeRollers.intakeSpeed) }
-        runWhenever(
-                 /*ball in slot and empty slots available --> spin to empty slot*/
-                 /*ball in slot but everythings full --> ???*/
-        )
-        freeze()
-    }
-}
+        val magazine by carousel.hardware.magazine.readEagerly().withoutStamps
+
+        choreography {
+            val isMagazineFull = magazine.all { it }
+            launch { intakeSlider?.set(Out) }
+            delay(500.Millisecond)
+            launch { intakeRollers?.set(intakeRollers.intakeSpeed) }
+            runWhenever(
+                    { !isMagazineFull } to choreography { carousel.spinToCollectPosition() },
+                    { isMagazineFull } to choreography { rumble.set(TwoSided(50.Percent, 50.Percent)) }
+            )
+            freeze()
+        }
+    } else Unit
 
 suspend fun Subsystems.unjamBalls() = startChoreo("Unjam Balls") {
 
