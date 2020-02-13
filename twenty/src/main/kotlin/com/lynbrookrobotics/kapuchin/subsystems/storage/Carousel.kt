@@ -5,14 +5,15 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.revrobotics.CANEncoder
-import com.revrobotics.CANPIDController
-import com.revrobotics.CANSparkMax
+import com.revrobotics.*
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.EncoderType.kHallSensor
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.I2C.Port
 import edu.wpi.first.wpilibj.I2C.Port.kOnboard
+import edu.wpi.first.wpilibj.util.Color
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
@@ -68,7 +69,17 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         (encoder.position * 5).roundToInt() stampWith it
     }
 
-    val colorSensor = sensor(RevColorSensor(kOnboard, 0x52)) { getCurrentValue() stampWith it }
+    private val colorMatcher = ColorMatch()
+    init {
+        colorMatcher.addColorMatch(Colors.BallYellow.color)
+    }
+
+    private val colorSensorV3 by hardw { ColorSensorV3(Port.kMXP) }
+    val isBall = sensor { colorMatcher stampWith it }
+
+    private fun colorMatcher(color: Color): Boolean {
+        return color == Colors.BallYellow.color
+    }
 
     val magazineState = booleanArrayOf(false, false, false, false, false)
     val magazine = sensor { magazineState stampWith it }
