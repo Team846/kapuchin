@@ -81,7 +81,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     val driftTolerance by pref(0.2, DegreePerSecond)
-    private fun waitUntilTrue(
+    private fun blockUntilTrue(
             timeout: Time = 10.Second,
             poll: Time = 0.5.Second,
             f: () -> Boolean
@@ -97,9 +97,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
         it.zeroYaw()
     }.verify("NavX should be connected") {
-        waitUntilTrue() { it.isConnected }
+        blockUntilTrue() { it.isConnected }
     }.verify("NavX should be finished calibrating on startup") {
-        waitUntilTrue() { !it.isCalibrating }
+        blockUntilTrue() { !it.isCalibrating }
     }/*.verify("NavX magnetometer should be calibrated") {
         it.isMagnetometerCalibrated
     }*/.verify("NavX should be configured to update at 200hz") {
