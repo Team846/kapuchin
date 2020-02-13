@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines
 
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.storage.*
@@ -30,14 +31,12 @@ suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Co
 
         // calculate the closest empty slot
         val target = magazine.withIndex()
-                .map { (i, slotHasBall) -> Pair(360.Degree / 5 * i, slotHasBall) }
                 .filter { (_, slotHasBall) -> !slotHasBall }
-                .minBy { (angle, _) ->
+                .map { (i, _) -> 360.Degree / 5 * i }
+                .minBy { angle ->
                     // https://stackoverflow.com/a/7869457/7267809
-                    val a = angle - position
-                    a + if (a > 180.Degree) (-360).Degree else if (a < 180.Degree) 360.Degree else 0.Degree
+                    angle `coterminal -` position
                 }!!
-                .first
         PositionOutput(hardware.escConfig, TODO("Position gains for carousel"), target.Turn)
     }
 }
