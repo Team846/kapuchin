@@ -12,7 +12,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.EncoderType.kHallSensor
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.I2C.Port
-import edu.wpi.first.wpilibj.I2C.Port.kOnboard
 import edu.wpi.first.wpilibj.util.Color
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -70,15 +69,18 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     }
 
     private val colorMatcher = ColorMatch()
+
     init {
         colorMatcher.addColorMatch(Colors.BallYellow.color)
     }
 
     private val colorSensorV3 by hardw { ColorSensorV3(Port.kMXP) }
-    val isBall = sensor { colorMatcher stampWith it }
+    val isBallInCollect = sensor { isBall(colorMatcher.matchClosestColor(colorSensorV3.color).color) stampWith it }
 
-    private fun colorMatcher(color: Color): Boolean {
-        return color == Colors.BallYellow.color
+    private fun isBall(color: Color): Boolean {
+        return color.red == Colors.BallYellow.color.red &&
+                color.green == Colors.BallYellow.color.green &&
+                color.blue == Colors.BallYellow.color.blue;
     }
 
     val magazineState = booleanArrayOf(false, false, false, false, false)

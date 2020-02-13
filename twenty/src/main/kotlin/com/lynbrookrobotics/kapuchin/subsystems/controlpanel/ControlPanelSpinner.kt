@@ -68,7 +68,7 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
     private val gameData = sensor { DriverStation.getInstance().gameSpecificMessage stampWith it }
     val targetColorOrdinal = sensor { convertGameMessage() stampWith it }
     val controlPanelAngle = sensor { getControlPanelAngle() stampWith it }
-    private var lastColorOrdinal: Int? = null
+    var lastColorOrdinal: Int? = null
     private var controlPanelSpinnerAngle: Angle = 0.Degree
     private var lastDirectionSignum = 0
     private var gameDataOrdinal: Int? = null
