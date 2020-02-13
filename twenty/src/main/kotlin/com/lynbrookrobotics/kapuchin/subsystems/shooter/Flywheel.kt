@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -70,4 +71,13 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     val pidController by hardw { masterEsc.pidController!! }
 
     // TODO current omega sensor
+    val encoder by hardw {masterEsc.getEncoder()}
+
+    val omega = sensor {
+        {
+            Velocity(encoder.velocity)
+        } stampWith it
+    }
+
 }
+
