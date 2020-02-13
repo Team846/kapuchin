@@ -40,14 +40,14 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
     override val syncThreshold: Time = 30.milli(Second)
     override val priority: Priority = Priority.Low
     override val name: String = "Control Panel"
-    private val invert by pref(false)
+
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
             defaultContinuousCurrentLimit = 25.Ampere,
             defaultPeakCurrentLimit = 35.Ampere
     )
+    private val invert by pref(false)
     private val escId = 20
-    private val colorSensorAddress = 6
     val spinnerEsc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invert
@@ -63,7 +63,6 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
         colorMatcher.addColorMatch(Colors.Red.color)
         colorMatcher.addColorMatch(Colors.Yellow.color)
     }
-
 
     private val gameData = sensor { DriverStation.getInstance().gameSpecificMessage stampWith it }
     val targetColorOrdinal = sensor { convertGameMessage() stampWith it }

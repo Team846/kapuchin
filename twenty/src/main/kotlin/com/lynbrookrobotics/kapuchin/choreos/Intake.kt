@@ -1,10 +1,8 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.IntakeSliderState.*
-import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 
 suspend fun Subsystems.intakeTeleop() = startChoreo("Intake Teleop") {
@@ -26,13 +24,11 @@ suspend fun Subsystems.intakeBalls() = if (carousel != null)
         val magazine by carousel.hardware.magazine.readEagerly().withoutStamps
 
         choreography {
-            val isMagazineFull = magazine.all { it }
             launch { intakeSlider?.set(Out) }
-            delay(500.Millisecond)
             launch { intakeRollers?.set(intakeRollers.intakeSpeed) }
             runWhenever(
-                    { !isMagazineFull } to choreography { carousel.spinToCollectPosition() },
-                    { isMagazineFull } to choreography { rumble.set(TwoSided(50.Percent, 50.Percent)) }
+                    { magazine.any { !it } } to choreography { carousel.spinToCollectPosition() },
+                    { magazine.all { it } } to choreography { TODO("Notify the operators that the storage is full") }
             )
             freeze()
         }
