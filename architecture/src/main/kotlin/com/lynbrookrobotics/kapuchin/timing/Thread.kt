@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.*
+import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -40,5 +41,6 @@ expect class PlatformThread internal constructor(parent: Named, name: String, pr
 fun Named.platformThread(name: String, priority: Priority, run: () -> Unit) = PlatformThread(this, name, priority, run)
 
 expect inline fun <R> blockingMutex(lock: Any, block: () -> R): R
+expect fun blockingDelay(time: Time)
 
 expect val scope: CoroutineScope

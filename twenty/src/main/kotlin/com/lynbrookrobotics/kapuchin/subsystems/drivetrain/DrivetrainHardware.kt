@@ -12,9 +12,8 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.Debug
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -24,9 +23,6 @@ import edu.wpi.first.wpilibj.SPI
 import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.NonCancellable.isActive
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
 
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>(), GenericDrivetrainHardware {
     override val priority = Priority.RealTime
@@ -85,13 +81,37 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     val driftTolerance by pref(0.2, DegreePerSecond)
-    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
-        while(it.isCalibrating) {
-            log(Debug) { "Navx is calibrating" }
-            Thread.sleep(1000)
+    private fun blockUntilTrue(
+            timeout: Time = 10.Second,
+            poll: Time = 0.5.Second,
+            f: () -> Boolean
+    ): Boolean {
+        if (!f()) {
+            log(Debug) { "Waiting for predicated to return true..." }
+            val startTime = currentTime
+            while (!f() && currentTime - startTime < timeout) blockingDelay(poll)
         }
+        return f()
+    }
+
+    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
+        blockUntilTrue() { it.isConnected }
+        blockUntilTrue() { !it.isCalibrating }
         it.zeroYaw()
-    }.verify("Gyro should not drift after calibration") {
+    }.verify("NavX should be connected") {
+        it.isConnected
+    }.verify("NavX should be finished calibrating on startup") {
+        !it.isCalibrating
+    }/*.verify("NavX magnetometer should be calibrated") {
+        it.isMagnetometerCalibrated
+    }*/.verify("NavX should be configured to update at 200hz") {
+        it.actualUpdateRate == 200
+    }.verify("RoboRIO should receive NavX updates at 200hz") {
+        val desiredUpdates = 10
+        val startingIndex = it.updateCount
+        blockingDelay(desiredUpdates.Each / 200.Hertz * 1.1)
+        it.updateCount > startingIndex + desiredUpdates
+    }.verify("NavX yaw should not drift after calibration") {
         it.rate.DegreePerSecond in `±`(driftTolerance)
     }
 
