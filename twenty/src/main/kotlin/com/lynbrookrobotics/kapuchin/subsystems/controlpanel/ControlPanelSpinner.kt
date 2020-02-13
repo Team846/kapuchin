@@ -64,10 +64,10 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
         colorMatcher.addColorMatch(Colors.Yellow.color)
     }
 
-    val currentColor = sensor { colorMatcher.matchClosestColor(colorSensorV3.color).color stampWith it }
+
     private val gameData = sensor { DriverStation.getInstance().gameSpecificMessage stampWith it }
     val targetColorOrdinal = sensor { convertGameMessage() stampWith it }
-    val controlPanelAngle = sensor { getControlPanelAngle() stampWith it }
+    val controlPanelAngle = sensor { getControlPanelAngle(colorMatcher.matchClosestColor(colorSensorV3.color).color) stampWith it }
     var lastColorOrdinal: Int? = null
     private var controlPanelSpinnerAngle: Angle = 0.Degree
     private var lastDirectionSignum = 0
@@ -83,8 +83,8 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
         return gameDataOrdinal
     }
 
-    private fun getControlPanelAngle(): Angle {
-        val currentColorOrdinal = when (currentColor) {
+    private fun getControlPanelAngle(color: Color): Angle {
+        val currentColorOrdinal = when (color) {
             Colors.Blue.color -> Colors.Blue.ordinal
             Colors.Green.color -> Colors.Green.ordinal
             Colors.Red.color -> Colors.Red.ordinal
