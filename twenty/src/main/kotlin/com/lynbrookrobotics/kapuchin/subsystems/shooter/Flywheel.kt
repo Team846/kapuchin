@@ -10,6 +10,8 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import com.lynbrookrobotics.kapuchin.control.conversion.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware) {
 
@@ -28,6 +30,8 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val rollerRadius by pref(2, Inch)
     val momentOfInertia by pref(1, PoundFootSquared) // TODO
     val targetHeight by pref(98.25, Inch) // Height from base to center of outer goal
+
+
 
     // TODO velocity gains
     // TODO native encoder units to flywheel omega conversion
@@ -50,6 +54,9 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     private val invertMaster by pref(false)
     private val invertSlave by pref(false)
 
+    private val motorGear by pref(45)
+    private val flywheelGear by pref(24)
+
     val escConfig by escConfigPref(
             defaultContinuousCurrentLimit = 30.Ampere,
             defaultPeakCurrentLimit = 60.Ampere
@@ -71,12 +78,11 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     val pidController by hardw { masterEsc.pidController!! }
 
     // TODO current omega sensor
-    val encoder by hardw {masterEsc.getEncoder()}
+    val encoder by hardw {masterEsc.encoder}
 
     val omega = sensor {
-        {
-            Velocity(encoder.velocity)
-        } stampWith it
+        (GearTrain(motorGear, flywheelGear).inputToOutput(encoder.velocity * 1.Rpm)
+        stampWith it)
     }
 
 }
