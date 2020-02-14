@@ -25,6 +25,14 @@ suspend fun ControlPanelSpinnerComponent.spinStage2(electrical: ElectricalSystem
     }
 }
 
-suspend fun ControlPanelSpinnerComponent.spinStage3(electrical: ElectricalSystemHardware) = startRoutine("Stage 3") {
-    TODO("Spin to the color specified by the FMS")
+suspend fun ControlPanelSpinnerComponent.spinStage3() = startRoutine("Stage 3") {
+    val currentColorOrdinal by hardware.currentColorOrdinal.readEagerly.withoutStamps
+    val targetColorOrdinal by hardware.targetColorOrdinal.readEagerly.withoutStamps
+    controller {
+        if (currentColorOrdinal == targetColorOrdinal) {
+            100.Percent
+        } else {
+            0.Percent
+        }
+    }
 }

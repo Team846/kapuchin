@@ -28,11 +28,9 @@ suspend fun Subsystems.stage3() = coroutineScope {
     var controlPanelPivotUp: Job? = null
     try {
         controlPanelPivotUp = launch { controlPanelPivot?.set(Up) }
-        launch { controlPanelSpinner?.spinStage3(electrical) }
+        launch { controlPanelSpinner?.spinStage3() }
         freeze()
     } finally {
         controlPanelPivotUp?.cancel()
     }
 }
-// TODO control panel stage 2
-// TODO control panel stage 3
