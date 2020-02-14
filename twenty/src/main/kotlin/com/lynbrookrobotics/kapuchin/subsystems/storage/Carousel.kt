@@ -71,16 +71,16 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     private val colorMatcher = ColorMatch()
 
     init {
-        colorMatcher.addColorMatch(Colors.BallYellow.color)
+        colorMatcher.addColorMatch(FieldColors.BallYellow.color)
     }
 
     private val colorSensorV3 by hardw { ColorSensorV3(Port.kMXP) }
     val isBallInCollect = sensor { isBall(colorMatcher.matchClosestColor(colorSensorV3.color).color) stampWith it }
 
     private fun isBall(color: Color): Boolean {
-        return color.red == Colors.BallYellow.color.red &&
-                color.green == Colors.BallYellow.color.green &&
-                color.blue == Colors.BallYellow.color.blue;
+        return color.red == FieldColors.BallYellow.color.red &&
+                color.green == FieldColors.BallYellow.color.green &&
+                color.blue == FieldColors.BallYellow.color.blue;
     }
 
     val magazineState = booleanArrayOf(false, false, false, false, false)
