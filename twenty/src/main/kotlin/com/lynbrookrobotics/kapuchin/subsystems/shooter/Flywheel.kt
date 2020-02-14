@@ -13,21 +13,22 @@ import info.kunalsheth.units.math.*
 
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware) {
 
-    val outerGoalEntryTolerance by pref(65, Degree) // The magnitude of entry tolerance is 65 Deg. if aiming for the middle
-
+    val outerEntryAngleLimit by pref(65, Degree) // The magnitude of entry tolerance is 65 Deg. if aiming for the middle
     val hexagonHeight by pref(30, Inch) // "diameter" of outer goal
     val outerInnerDiff by pref(25.25, Inch) // Distance between outer and inner goal
-
     val boundingCircleRadius by pref(12.252, Inch) // Feasibility circle of outer goal
-    val slippage by pref(0, Rpm)
 
-    val height by pref(24, Inch) // Turret height
+    val targetHeight by pref(98.25, Inch) // Height from base to center of outer goal
+    val shooterHeight by pref(24, Inch) // Turret height
+
+
     val maxOmega by pref(5676, Rpm)
     val momentFactor by pref(1.4)
     val ballMass by pref(0.141748, Kilogram)
     val rollerRadius by pref(2, Inch)
     val momentOfInertia by pref(1, PoundFootSquared) // TODO
-    val targetHeight by pref(98.25, Inch) // Height from base to center of outer goal
+    val fudgeFactor by pref(100, Percent)
+
 
     // TODO velocity gains
     // TODO native encoder units to flywheel omega conversion
