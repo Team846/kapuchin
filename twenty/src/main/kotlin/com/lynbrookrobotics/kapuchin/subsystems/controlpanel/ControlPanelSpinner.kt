@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.Colors.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
@@ -64,6 +65,7 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
 
     private val gameData = sensor { DriverStation.getInstance().gameSpecificMessage stampWith it }
     val targetColorOrdinal = sensor { convertGameMessage() stampWith it }
+    val currentColorOrdinal = sensor { currentColorOrdinal(colorMatcher.matchClosestColor(colorSensorV3.color).color) stampWith it }
     val controlPanelAngle = sensor { getControlPanelAngle(colorMatcher.matchClosestColor(colorSensorV3.color).color) stampWith it }
     var lastColorOrdinal: Int? = null
     private var controlPanelSpinnerAngle: Angle = 0.Degree
@@ -80,23 +82,26 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
         return gameDataOrdinal
     }
 
-    private fun getControlPanelAngle(color: Color): Angle {
-        val currentColorOrdinal = when (color) {
-            Colors.Blue.color -> Colors.Blue.ordinal
-            Colors.Green.color -> Colors.Green.ordinal
-            Colors.Red.color -> Colors.Red.ordinal
-            Colors.Yellow.color -> Colors.Yellow.ordinal
+    private fun currentColorOrdinal(color: Color): Int? {
+        return when (color) {
+            Blue.color -> Blue.ordinal
+            Green.color -> Green.ordinal
+            Red.color -> Red.ordinal
+            Yellow.color -> Yellow.ordinal
             else -> null
         }
-        if (currentColorOrdinal == null || lastColorOrdinal == null) {
+    }
+    private fun getControlPanelAngle(color: Color): Angle {
+        val currentColor = currentColorOrdinal(color)
+        if (currentColor == null || lastColorOrdinal == null) {
             controlPanelSpinnerAngle = 0.Degree
         } else {
             lastColorOrdinal?.also {
-                controlPanelSpinnerAngle += (((it - currentColorOrdinal) % 2) * 45).Degree
-                lastDirectionSignum = signum((it - currentColorOrdinal) % 2)
+                controlPanelSpinnerAngle += (((it - currentColor) % 2) * 45).Degree
+//                lastDirectionSignum = signum((it - currentColor) % 2)
             }
         }
-        lastColorOrdinal = currentColorOrdinal
+        lastColorOrdinal = currentColor
         return controlPanelSpinnerAngle
     }
 }

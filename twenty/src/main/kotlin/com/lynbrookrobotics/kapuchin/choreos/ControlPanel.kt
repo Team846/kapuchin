@@ -34,5 +34,3 @@ suspend fun Subsystems.stage3() = coroutineScope {
         controlPanelPivotUp?.cancel()
     }
 }
-// TODO control panel stage 2
-// TODO control panel stage 3
