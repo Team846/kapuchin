@@ -8,15 +8,6 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.sqrt
 
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.withContext
-
-
-
-
 suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") {
 
     // TODO unit tests for all methods
@@ -215,46 +206,7 @@ suspend fun Subsystems.aimAndShootPowerCell() = startChoreo("Shoot power cell") 
 
 
 suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
-    val shoot by operator.shoot.readEagerly().withoutStamps
-    val turretTurnRight by operator.turretTurnRight.readEagerly().withoutStamps
-    val turretTurnLeft by operator.turretTurnLeft.readEagerly().withoutStamps
-
     choreography {
-        runWhenever(
-                { shoot } to choreography { shoot() },
-                { turretTurnRight } to choreography { turretTurnRight() },
-                { turretTurnLeft } to choreography { turretTurnLeft() }
-        )
-    }
-}
 
-suspend fun Subsystems.shoot() = supervisorScope() {
-    try {
-//        launch { feederRoller?.spin(30.Rpm) }
-        launch { shooter?.set(PercentOutput(shooter.hardware.escConfig, 30.Percent)) }
-    } finally {
-        withContext(NonCancellable) {
-        }
-    }
-}
-
-suspend fun Subsystems.turretTurnRight() = supervisorScope() {
-    try {
-        launch { turret?.spin(PercentOutput(turret.hardware.escConfig, 30.Percent)) }
-
-    } finally {
-        withContext(NonCancellable) {
-
-        }
-    }
-}
-
-suspend fun Subsystems.turretTurnLeft() = supervisorScope() {
-    try {
-        launch { turret?.spin(PercentOutput(turret.hardware.escConfig, 30.Percent)) }
-    } finally {
-        withContext(NonCancellable) {
-
-        }
     }
 }

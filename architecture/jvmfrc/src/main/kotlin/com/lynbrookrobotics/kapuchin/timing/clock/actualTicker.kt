@@ -1,3 +1,5 @@
+@file:Suppress("EXPERIMENTAL_UNSIGNED_LITERALS")
+
 package com.lynbrookrobotics.kapuchin.timing.clock
 
 import com.lynbrookrobotics.kapuchin.logging.*
@@ -8,6 +10,7 @@ import edu.wpi.first.hal.NotifierJNI
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
+@ExperimentalUnsignedTypes
 actual class Ticker internal actual constructor(
         parent: Named,
         priority: Priority,

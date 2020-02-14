@@ -41,7 +41,7 @@ import kotlin.jvm.JvmName
  * @property nativeTimeUnit denominator used in ESC velocity measurements
  * @property nativeRateUnit factor used in ESC derivative and integral calculations
  */
-class OffloadedNativeConversion<O, I, Q, D, DD>(
+data class OffloadedNativeConversion<O, I, Q, D, DD>(
         private val d2: (I, `÷`, T) -> Q,
         private val d1: (Q, `÷`, T) -> D,
         private val t1: (D, `*`, T) -> Q,

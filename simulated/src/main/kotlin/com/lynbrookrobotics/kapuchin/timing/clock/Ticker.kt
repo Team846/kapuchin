@@ -41,7 +41,7 @@ actual class Ticker internal actual constructor(
 
     actual fun waitOnTick(): Time {
         // todo do this correctly
-        Thread.sleep(period.milli(Second).toLong())
+        blockingDelay(period)
         return currentTime
     }
 

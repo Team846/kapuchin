@@ -12,6 +12,7 @@ generateUnitsOfMeasure {
             q("V", d(M: 1, L: 2, T: -3, I: -1)), // volts
             q("R", d(M: 1, L: 2, T: -3, I: -2)), // ohms
             q("DutyCycle", d()),
+            q("Pixel", d())
     ].toSet()
 
     unitsOfMeasure += [
@@ -36,7 +37,6 @@ generateUnitsOfMeasure {
             u("Percent", 0.01, d()),
             u("PercentPerSecond", 0.01, d(T: -1)),
             u("Each", 1.0, d()),
-            u("Pixel", 1.0, d()),
 
             u("VoltPerSecond", 1.0, d(L: 2, M: 1, T: -4, I: -1)),
     ].toSet()
