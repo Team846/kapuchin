@@ -80,13 +80,19 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
 
     val encoder by hardw {masterEsc.encoder}
 
-    val conversion = GearTrain(motorGear, flywheelGear)
+    val conversion = GearTrain(motorGear, flywheelGear, 1)
 
     val omega = sensor {
         (conversion.inputToOutput(encoder.velocity * 1.Rpm)
         stampWith it)
     }
-    
+
+    // https://www.chiefdelphi.com/t/detecting-dips-in-flywheel-motor-speed/377310/5
+
+    fun isRpmDipped(omega: AngularVelocity) : Boolean {
+
+    }
+
 
 
 }
