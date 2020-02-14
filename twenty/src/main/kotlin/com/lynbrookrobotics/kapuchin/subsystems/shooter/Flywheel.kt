@@ -86,12 +86,7 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
         (conversion.inputToOutput(encoder.velocity * 1.Rpm)
         stampWith it)
     }
-
-    // https://www.chiefdelphi.com/t/detecting-dips-in-flywheel-motor-speed/377310/5
-
-    fun isRpmDipped(omega: AngularVelocity) : Boolean {
-
-    }
+    
 
 
 
