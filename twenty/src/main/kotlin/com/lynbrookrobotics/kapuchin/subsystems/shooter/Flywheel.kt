@@ -58,6 +58,11 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     private val motorGear by pref(45)
     private val flywheelGear by pref(24)
 
+    private val armLevel by pref(0.9)
+    private val triggerLevel by pref(0.8)
+
+    private var targetOmega  = 1.Rpm // Change this value to the target omega every time you call the choreo
+
     val escConfig by escConfigPref(
             defaultContinuousCurrentLimit = 30.Ampere,
             defaultPeakCurrentLimit = 60.Ampere
@@ -86,7 +91,20 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
         (conversion.inputToOutput(encoder.velocity * 1.Rpm)
         stampWith it)
     }
-    
+
+    private fun isRpmDipped(current: AngularVelocity, target: AngularVelocity) : Boolean {
+        if (current < target * triggerLevel) return true
+        else if (current >= target * armLevel) return false
+        return false
+    }
+        
+    fun setTarget(target: AngularVelocity) { targetOmega = target } // Set targetOmega every time you launch the choreo
+
+    val rpmDipped = sensor {
+        val omega = this.omega.optimizedRead(it, 0.Second).y
+        (isRpmDipped(omega, targetOmega)
+        stampWith it)
+    }
 
 
 
