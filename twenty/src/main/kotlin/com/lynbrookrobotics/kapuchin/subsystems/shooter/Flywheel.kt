@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import com.lynbrookrobotics.kapuchin.control.conversion.*
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware) {
@@ -77,13 +78,16 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
 
     val pidController by hardw { masterEsc.pidController!! }
 
-    // TODO current omega sensor
     val encoder by hardw {masterEsc.encoder}
 
+    val conversion = GearTrain(motorGear, flywheelGear)
+
     val omega = sensor {
-        (GearTrain(motorGear, flywheelGear).inputToOutput(encoder.velocity * 1.Rpm)
+        (conversion.inputToOutput(encoder.velocity * 1.Rpm)
         stampWith it)
     }
+    
+
 
 }
 
