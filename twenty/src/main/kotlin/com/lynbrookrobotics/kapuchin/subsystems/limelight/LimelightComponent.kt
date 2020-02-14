@@ -10,7 +10,7 @@ import info.kunalsheth.units.math.*
 
 class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware) {
 
-    private fun targetPosition(sample: LimelightReading) = with(sample) {
+    private fun outerGoalPosition(sample: LimelightReading) = with(sample) {
         val aspect = thor / tvert
         val skew = acos(aspect / aspect0 minMag 1.Each)
 
@@ -25,22 +25,17 @@ class LimelightComponent(hardware: LimelightHardware) : Component<LimelightCompo
         Position(x, targetDistance, skew)
     }
 
-    fun innerGoalPos(sample: LimelightReading, skew: Angle): DetectedTarget {
-        val outerGoalPos = targetPosition(sample)
+    fun goalPositions(sample: LimelightReading, skew: Angle = sample.tx): DetectedTarget {
+        val outerGoal = outerGoalPosition(sample)
         val offsetAngle = 90.Degree - skew
 
-        val innerGoal = DetectedTarget(Position(
-                innerGoalOffset * cos(offsetAngle) + outerGoalPos.x,
-                innerGoalOffset * sin(offsetAngle) + outerGoalPos.y,
+        val innerGoal = Position(
+                innerGoalOffset * cos(offsetAngle) + outerGoal.x,
+                innerGoalOffset * sin(offsetAngle) + outerGoal.y,
                 skew
-        ), outerGoalPos)
+        )
 
-        return if (skew > skewTolerance) {
-            DetectedTarget(null, targetPosition(sample))
-        } else {
-            innerGoal
-        }
-
+        return DetectedTarget(innerGoal.takeUnless { skew > skewTolerance}, outerGoal)
     }
 
     private val skewTolerance by pref(1, Degree)

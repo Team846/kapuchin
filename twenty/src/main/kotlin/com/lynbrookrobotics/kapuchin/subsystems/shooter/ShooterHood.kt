@@ -17,7 +17,9 @@ class ShooterHoodComponent(hardware: ShooterHoodHardware) : Component<ShooterHoo
     val launchAngles by pref {
         val hoodDown by pref(50, Degree)
         val hoodUp by pref(20, Degree)
-        ({ hoodDown to hoodUp })
+        ({
+            fun(state: ShooterHoodState) = if (state == Up) hoodUp else hoodDown
+        })
     }
 
     override val fallbackController: ShooterHoodComponent.(Time) -> ShooterHoodState = { Down }

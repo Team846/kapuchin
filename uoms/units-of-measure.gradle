@@ -1,7 +1,9 @@
 import static java.lang.Math.PI
 
 generateUnitsOfMeasure {
-    relationships += r(d(A: 1), d())
+    relationships += r(d(A: 1), d()) +
+            r(d(L: 2), d(L: 1, T: -2)) +
+            r(d(L: 3, T: -2), d(L: 1))
 
     quantities += [
             q("Absement", d(L: 1, T: 1)),
