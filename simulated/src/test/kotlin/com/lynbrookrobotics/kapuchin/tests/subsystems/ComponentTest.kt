@@ -17,7 +17,7 @@ class ComponentTest {
     @Test(timeout = 2 * 1000)
     fun `event loop components only update on event loop ticks`() = threadDumpOnFailure {
         val c = ComponentTestElc()
-        Thread.sleep(1000)
+        blockingDelay(1.Second)
 
         val j = scope.launch { c.countTo(10) }
         while (c.routine == null) Thread.sleep(1)

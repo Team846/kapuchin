@@ -15,7 +15,7 @@ suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Co
     val position by hardware.position.readOnTick.withoutStamps
     val isHallEffect by hardware.isHallEffect.readOnTick.withoutStamps
     val slotAtCollect by hardware.slotAtCollect.readOnTick.withoutStamps
-    val colorSensor by hardware.colorSensor.readOnTick.withoutStamps
+    val isBallInCollect by hardware.isBallInCollect.readOnTick.withoutStamps
 
     controller {
         // reset the carousel encoder on passing the hall effect
@@ -23,7 +23,7 @@ suspend fun CarouselComponent.spinToCollectPosition() = startRoutine("Spin to Co
             hardware.encoder.position = (360.Degree / 5 * slotAtCollect).Turn
         }
 
-        if (colorSensor == Colors.Yellow.name) {
+        if (isBallInCollect) {
             hardware.magazineState[slotAtCollect] = true
         } else if (isHallEffect) {
             hardware.magazineState[slotAtCollect] = false
