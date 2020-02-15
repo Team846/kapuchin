@@ -43,6 +43,8 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
             defaultPeakCurrentLimit = 35.Ampere
     )
 
+    val conversions = TurretConversions(this)
+
     private val escId = 52
 
     val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
@@ -57,5 +59,16 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     }
 
     val atZero = sensor(limitSwitch) { get() stampWith it }
-    // TODO position sensor
+    val encoder by hardw { esc.encoder }
+    val position = sensor(encoder) { position stampWith it }
+
+    var isZeroed = false
+        private set
+
+    private val limitSwitchPos by pref(45, Degree)
+
+    fun zero() = with(conversions) {
+        encoder.position = turretToMotor(limitSwitchPos).Turn
+        isZeroed = true
+    }
 }
