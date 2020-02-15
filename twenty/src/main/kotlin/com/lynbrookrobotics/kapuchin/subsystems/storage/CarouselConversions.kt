@@ -9,8 +9,8 @@ import kotlin.math.roundToInt
 
 class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversions", hardware) {
 
-    val rubberWheel by pref(1)
-    val bigWheel by pref(10)
+    val rubberWheel by pref(1.0)
+    val bigWheel by pref(10.0)
     val round by pref(72, Degree)
     val degreesPerRev by pref(360, Degree)
 
