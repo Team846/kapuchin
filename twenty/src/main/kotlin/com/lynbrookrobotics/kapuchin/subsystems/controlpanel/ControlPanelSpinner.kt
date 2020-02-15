@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.I2C.Port
 import edu.wpi.first.wpilibj.util.Color
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import java.lang.Integer.signum
 
 enum class FieldColors(val color: Color) {
     Blue(Color(0.3044677734375, 0.54288330078125, 0.15262451171875)),
@@ -73,10 +72,10 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
     private var gameDataOrdinal: Int? = null
     private fun convertGameMessage(): Int? {
         gameDataOrdinal = when (gameData.toString()) {
-            "B" -> Blue.ordinal - 2
-            "G" -> Green.ordinal - 2
-            "R" -> Red.ordinal - 2
-            "Y" -> Yellow.ordinal - 2
+            "B" -> (Blue.ordinal + 2) % 4
+            "G" -> (Green.ordinal + 2) % 4
+            "R" -> (Red.ordinal + 2) % 4
+            "Y" -> (Yellow.ordinal + 2) % 4
             else -> null
         }
         return gameDataOrdinal
@@ -91,6 +90,7 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
             else -> null
         }
     }
+
     private fun getControlPanelAngle(color: Color): Angle {
         val currentColor = currentColorOrdinal(color)
         if (currentColor == null || lastColorOrdinal == null) {
