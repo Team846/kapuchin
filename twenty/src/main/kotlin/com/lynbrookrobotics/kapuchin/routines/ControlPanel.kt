@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 suspend fun ControlPanelPivotComponent.set(state: ControlPanelPivotState) = startRoutine("Set") {
     controller { state }
@@ -14,7 +15,7 @@ suspend fun ControlPanelSpinnerComponent.spinStage2(electrical: ElectricalSystem
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
     controller {
-        if (controlPanelAngle < 4.Turn) {
+        if (abs(controlPanelAngle) < 4.Turn) {
             val error = 4.Turn - controlPanelAngle
             val voltage = kP * error
 
