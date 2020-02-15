@@ -85,4 +85,5 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
 
     val magazineState = booleanArrayOf(false, false, false, false, false)
     val magazine = sensor { magazineState stampWith it }
+
 }
