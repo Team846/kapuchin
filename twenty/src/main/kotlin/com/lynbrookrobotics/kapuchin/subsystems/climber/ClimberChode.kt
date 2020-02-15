@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class ClimberChodeState(val output: Boolean) { Erect(true), Flaccid(false) }
+enum class ClimberChodeState(val output: Boolean) { Erect(false), Flaccid(true) }
 
 class ClimberChodeComponent(hardware: ClimberChodeHardware) : Component<ClimberChodeComponent, ClimberChodeHardware, ClimberChodeState>(hardware, pneumaticTicker) {
 
