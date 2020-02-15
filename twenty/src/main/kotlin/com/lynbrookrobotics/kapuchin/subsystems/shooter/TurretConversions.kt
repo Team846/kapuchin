@@ -21,11 +21,12 @@ class TurretConversions(hardware: TurretHardware) : Named by Named("Conversions"
                     resolution,
                     gearing.inputToOutput(1.Turn)
             )
-
+            val nativeResolution = nativeEncoderCountMultiplier * resolution
             val nat = LinearOffloadedNativeConversion(::p, ::p, ::p, ::p,
                     nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = nativeResolution,
-
+                    perFeedbackQuantity = TODO())
+            enc to nat
         })
     }
 }
