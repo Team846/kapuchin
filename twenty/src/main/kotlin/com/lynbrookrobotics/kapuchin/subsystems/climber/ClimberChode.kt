@@ -9,11 +9,11 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class ClimberChodeState(val output: Boolean) { On(true), Off(false) }
+enum class ClimberChodeState(val output: Boolean) { Erect(true), Flaccid(false) }
 
 class ClimberChodeComponent(hardware: ClimberChodeHardware) : Component<ClimberChodeComponent, ClimberChodeHardware, ClimberChodeState>(hardware, pneumaticTicker) {
 
-    override val fallbackController: ClimberChodeComponent.(Time) -> ClimberChodeState = { On }
+    override val fallbackController: ClimberChodeComponent.(Time) -> ClimberChodeState = { Erect }
 
     override fun ClimberChodeHardware.output(value: ClimberChodeState) {
         solenoid.set(value.output)
