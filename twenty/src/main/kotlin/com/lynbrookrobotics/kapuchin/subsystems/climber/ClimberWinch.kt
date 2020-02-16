@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.climber
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -20,7 +21,7 @@ sealed class ClimberWinchOutput() {
     object Stopped : ClimberWinchOutput()
 }
 
-class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberWinchComponent, ClimberWinchHardware, ClimberWinchOutput>(hardware, Subsystems.pneumaticTicker) {
+class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberWinchComponent, ClimberWinchHardware, ClimberWinchOutput>(hardware, pneumaticTicker) {
 
     val extendSpeed by pref(80, Percent)
     val retractSpeed by pref(80, Percent)
