@@ -33,7 +33,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val operator: OperatorHardware,
                  val rumble: RumbleComponent,
 
-                 val climberChode: ClimberChodeComponent?,
                  val climberPivot: ClimberPivotComponent?,
                  val climberWinch: ClimberWinchComponent?,
                  val controlPanelPivot: ControlPanelPivotComponent?,

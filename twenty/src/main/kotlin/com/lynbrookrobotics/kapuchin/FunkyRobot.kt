@@ -13,20 +13,10 @@ import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.util.Scanner
 import kotlin.system.measureTimeMillis
 
-
 fun main() {
-    val runId = File("/home/lvuser/run_id").takeIf { it.exists() }?.let { runIdFile ->
-        val scanner = Scanner(runIdFile)
-        val runId = scanner.nextInt() + 1
-        scanner.close()
-        runIdFile.writeText(runId.toString())
-    } ?: -1
-
-    println("Kapuchin Run ID $runId")
-
+    printRunID()
     RobotBase.startRobot(::FunkyRobot)
 }
 
@@ -101,4 +91,15 @@ val classPreloading = scope.launch {
                     }
                 }
             }
+}
+
+private fun printRunID() {
+    val runId = try {
+        File("/home/lvuser/run_id").readText().trim().toInt() + 1
+    } catch (e: Exception) {
+        System.err.println(e)
+        -1
+    }
+    println("Kapuchin Run ID $runId")
+    file.writeText(runId.toString())
 }
