@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.storage
+package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
