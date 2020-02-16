@@ -1,11 +1,11 @@
 package com.lynbrookrobotics.kapuchin.subsystems.storage
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.FieldColors.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.*
@@ -86,4 +86,11 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val magazineState = booleanArrayOf(false, false, false, false, false)
     val magazine = sensor { magazineState stampWith it }
 
+    init {
+        Subsystems.uiBaselineTicker.runOnTick { time ->
+            setOf(isHallEffect, position, slotAtCollect, isBallInCollect, magazine).forEach {
+                it.optimizedRead(time, .5.Second)
+            }
+        }
+    }
 }

@@ -14,7 +14,6 @@ enum class ControlPanelPivotState(val output: Boolean) { Up(true), Down(false) }
 class ControlPanelPivotComponent(hardware: ControlPanelPivotHardware) : Component<ControlPanelPivotComponent, ControlPanelPivotHardware, ControlPanelPivotState>(hardware, pneumaticTicker) {
 
     override val fallbackController: ControlPanelPivotComponent.(Time) -> ControlPanelPivotState = { Down }
-
     override fun ControlPanelPivotHardware.output(value: ControlPanelPivotState) {
         pivotSolenoid.set(value.output)
     }
@@ -24,7 +23,7 @@ class ControlPanelPivotHardware : SubsystemHardware<ControlPanelPivotHardware, C
     override val period = sharedTickerTiming()
     override val syncThreshold = sharedTickerTiming()
     override val priority = Priority.Low
-    override val name: String = "Control Panel Pivot"
+    override val name = "Control Panel Pivot"
 
     private val pivotSolenoidChannel = 2
     val pivotSolenoid by hardw { Solenoid(pivotSolenoidChannel) }

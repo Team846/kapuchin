@@ -1,8 +1,10 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -58,10 +60,12 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     private val limitSwitch: CANDigitalInput by hardw { esc.getForwardLimitSwitch(kNormallyOpen) }.configure {
         +it.enableLimitSwitch(true)
     }
-
     val atZero = sensor(limitSwitch) { get() stampWith it }
+            .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
+
     val encoder by hardw { esc.encoder }
     val position = sensor(encoder) { position stampWith it }
+            .with(graph("Angle", Degree))
 
     var isZeroed = false
         private set
@@ -71,5 +75,13 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     fun zero() = with(conversions) {
         encoder.position = turretToMotor(limitSwitchPos).Turn
         isZeroed = true
+    }
+
+    init {
+        Subsystems.uiBaselineTicker.runOnTick { time ->
+            setOf(atZero, position).forEach {
+                it.optimizedRead(time, .5.Second)
+            }
+        }
     }
 }

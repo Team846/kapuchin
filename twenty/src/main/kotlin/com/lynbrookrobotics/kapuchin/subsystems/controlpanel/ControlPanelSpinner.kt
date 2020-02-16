@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.controlpanel
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.control.data.*
@@ -66,5 +67,13 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
             "R" -> conversions.red
             "Y" -> conversions.yellow
         } stampWith it
+    }.with(graph("Target Color", Each)) { (it?.run(conversions::indexColor) ?: -1).Each }
+
+    init {
+        Subsystems.uiBaselineTicker.runOnTick { time ->
+            setOf(color, proximity, targetColor).forEach {
+                it.optimizedRead(time, .5.Second)
+            }
+        }
     }
 }

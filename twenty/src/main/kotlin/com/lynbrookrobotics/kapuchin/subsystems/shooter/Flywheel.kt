@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -13,6 +14,7 @@ import info.kunalsheth.units.math.*
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.logging.*
 
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware) {
 
@@ -89,9 +91,8 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     val conversion = GearTrain(motorGear, flywheelGear, 1)
 
     val omega = sensor {
-        (conversion.inputToOutput(encoder.velocity * 1.Rpm)
-        stampWith it)
-    }
+        conversion.inputToOutput(encoder.velocity * 1.Rpm) stampWith it
+    }.with(graph("Speed", Rpm))
 
     private fun isRpmDipped(current: AngularVelocity, target: AngularVelocity) : Boolean {
         if (current < target * triggerLevel) return true
@@ -107,7 +108,12 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
         stampWith it)
     }
 
-
-
+    init {
+        Subsystems.uiBaselineTicker.runOnTick { time ->
+            setOf(omega).forEach {
+                it.optimizedRead(time, .5.Second)
+            }
+        }
+    }
 }
 
