@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
+import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.FieldColors.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.*
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
@@ -76,9 +77,10 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val isBallInCollect = sensor { isBall(colorMatcher.matchClosestColor(colorSensorV3.color).color) stampWith it }
 
     private fun isBall(color: Color): Boolean {
-        return color.red == FieldColors.BallYellow.color.red &&
-                color.green == FieldColors.BallYellow.color.green &&
-                color.blue == FieldColors.BallYellow.color.blue;
+        val epsilon = 1e-5
+        return kotlin.math.abs(color.red - BallYellow.color.red) <= epsilon &&
+                kotlin.math.abs(color.green - BallYellow.color.green) <= epsilon &&
+                kotlin.math.abs(color.blue - BallYellow.color.blue) <= epsilon
     }
 
     val magazineState = booleanArrayOf(false, false, false, false, false)
