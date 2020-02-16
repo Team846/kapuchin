@@ -8,6 +8,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class DrivetrainConversions(val hardware: DrivetrainHardware) :
         Named by Named("Conversions", hardware),
@@ -35,7 +36,8 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
             val left = LinearOffloadedNativeConversion(::p, ::p, ::p, ::p,
                     nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = nativeResolution,
-                    perFeedbackQuantity = wheelRadius.left * enc.angle(nativeResolution) / Radian
+                    perFeedbackQuantity = wheelRadius.left * enc.angle(nativeResolution) / Radian,
+                    nativeTimeUnit = 100.milli(Second), nativeRateUnit = 1.Second
             )
             val right = left.copy(
                     perFeedbackQuantity = wheelRadius.right * enc.angle(nativeResolution) / Radian

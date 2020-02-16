@@ -49,8 +49,7 @@ data class OffloadedNativeConversion<O, I, Q, D, DD>(
         val nativeOutputUnits: Int, val perOutputQuantity: O,
         val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
         val feedbackZero: Q = perFeedbackQuantity * 0,
-        val nativeTimeUnit: Time = 100.milli(Second),
-        val nativeRateUnit: Time = 1.Second
+        val nativeTimeUnit: Time, val nativeRateUnit: Time
 )
         where O : Quan<O>,
               Q : Quan<Q>,
