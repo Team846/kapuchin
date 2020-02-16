@@ -56,11 +56,11 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         val aspect = thor / tvert
         val skew = acos(aspect / aspect0 minMag 1.Each)
 
-        val targetDistance = when (pipeline) {
-            ZoomInPanHigh -> (targetHeight - mounting.z) / tan(mountingIncline + ty + zoomOutFov.y / 2)
-            ZoomInPanLow -> (targetHeight - mounting.z) / tan(mountingIncline + ty - zoomOutFov.y / 2)
-            else -> (targetHeight - mounting.z) / tan(mountingIncline + ty)
-        }
+        val targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty + when (pipeline) {
+            ZoomInPanHigh -> zoomOutFov.y / 2
+            ZoomInPanLow -> -zoomOutFov.y / 2
+            else -> 0.Degree
+        })
 
         val x = tan(tx) * targetDistance
 
