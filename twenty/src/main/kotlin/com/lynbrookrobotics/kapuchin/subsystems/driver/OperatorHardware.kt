@@ -13,7 +13,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
-    override val priority = Priority.RealTime
+    override val priority = Priority.High
     override val name = "Operator"
 
     private val flywheelMapping by pref {
