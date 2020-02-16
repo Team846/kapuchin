@@ -25,6 +25,6 @@ class IntakeSliderHardware : SubsystemHardware<IntakeSliderHardware, IntakeSlide
     override val priority = Priority.Low
     override val name = "Intake Slider"
 
-    private val sliderSolenoidPort = 3
-    val sliderSolenoid by hardw { Solenoid(sliderSolenoidPort) }
+    private val sliderSolenoidChannel = 3
+    val sliderSolenoid by hardw { Solenoid(sliderSolenoidChannel) }
 }
