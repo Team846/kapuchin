@@ -30,7 +30,7 @@ class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Comp
 class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<ControlPanelSpinnerHardware, ControlPanelSpinnerComponent>() {
     override val period = sharedTickerTiming()
     override val syncThreshold = sharedTickerTiming()
-    override val priority = Priority.Medium
+    override val priority = Priority.High
     override val name = "Control Panel"
 
     val escConfig by escConfigPref()

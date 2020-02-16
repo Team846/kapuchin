@@ -26,7 +26,7 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) : Component<Intake
 class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRollersComponent>() {
     override val period: Time = 50.milli(Second)
     override val syncThreshold: Time = 20.milli(Second)
-    override val priority: Priority = Priority.Medium
+    override val priority: Priority = Priority.Low
     override val name: String = "Intake Rollers"
 
     private val invert by pref(false)
