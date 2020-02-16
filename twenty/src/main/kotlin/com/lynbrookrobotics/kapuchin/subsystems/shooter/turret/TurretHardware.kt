@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.shooter
+package com.lynbrookrobotics.kapuchin.subsystems.shooter.turret
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
@@ -14,22 +14,6 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-
-class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware) {
-
-    // TODO position gains
-    // TODO native encoder to position conversions
-    // TODO zeroing
-
-    override val fallbackController: TurretComponent.(Time) -> OffloadedOutput = {
-        PercentOutput(hardware.escConfig, 0.Percent)
-    }
-
-    override fun TurretHardware.output(value: OffloadedOutput) {
-        value.writeTo(esc, pidController)
-    }
-
-}
 
 class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     override val period: Time = 50.milli(Second)
