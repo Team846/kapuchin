@@ -31,7 +31,7 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val momentFactor by pref(1.4)
     val ballMass by pref(0.141748, Kilogram)
     val rollerRadius by pref(2, Inch)
-    val momentOfInertia by pref(1, PoundFootSquared) // TODO
+    val momentOfInertia by pref(1, PoundFootSquared) // TODO ask Sam P. for the correct value
     val fudgeFactor by pref(100, Percent)
 
 
