@@ -3,14 +3,43 @@ package com.lynbrookrobotics.kapuchin.subsystems.storage
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
+import edu.wpi.first.wpilibj.util.Color
+import kotlin.math.pow
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.roundToInt
-import kotlin.math.roundToInt
+import info.kunalsheth.units.math.*
 
 class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversions", hardware) {
+    val encoder by pref {
+        val complianceWheelRadius by pref(1.0, Inch)
+        val carouselRadius by pref(10.0, Inch)
+        ({
+            AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
+                    nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
+                    nativeFeedbackUnits = 1,
+                    perFeedbackQuantity = 1.Turn * complianceWheelRadius / carouselRadius,
+                    nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
+            )
+        })
+    }
 
-    val rubberWheel by pref(1.0, Inch)
-    val bigWheel by pref(10.0, Inch)
+    val ballIrRange by pref {
+        val min by pref(50, Percent)
+        val max by pref(90, Percent)
+        ({ min..max })
+    }
+    val ballColor by pref {
+        val r by pref(0.301)
+        val g by pref(0.532)
+        val b by pref(0.167)
+        ({ Color(r, g, b) })
+    }
+    val ballColorTolerance by pref(0.1)
 
-    val conversionFactor = rubberWheel / bigWheel
+    fun accuracy(colorA:Color, colorB:Color = ballColor) =
+            (colorA.red - colorB.red).pow(2) +
+            (colorA.green - colorB.green).pow(2) +
+            (colorA.blue - colorB.blue).pow(2)
+
+    fun detectingBall(proximity: Dimensionless, color: Color) =
+            proximity in ballIrRange && accuracy(color) < ballColorTolerance
 }

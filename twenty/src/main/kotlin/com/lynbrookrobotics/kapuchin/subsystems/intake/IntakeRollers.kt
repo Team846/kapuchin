@@ -33,7 +33,6 @@ class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRol
 
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
-
             defaultContinuousCurrentLimit = 10.Ampere,
             defaultPeakCurrentLimit = 25.Ampere
     )
