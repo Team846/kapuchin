@@ -45,7 +45,6 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
     }
 
     val escOdometry = EscOdometry(this)
-
     class EscOdometry(val conversions: DrivetrainConversions) : Named by Named("ESC Odometry", conversions) {
         private var noTicksL = true
         private var noTicksR = true
