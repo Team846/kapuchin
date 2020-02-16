@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -11,21 +12,21 @@ import info.kunalsheth.units.math.*
 import java.lang.Double.NaN
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponent>() {
-    override val period = 30.milli(Second)
-    override val syncThreshold = 4.milli(Second)
-    override val priority = Priority.Medium
+    override val period = sharedTickerTiming()
+    override val syncThreshold = sharedTickerTiming()
+    override val priority = Priority.High
     override val name = "Limelight"
 
     val table: NetworkTable by hardw {
         NetworkTableInstance.getDefault().getTable("/limelight")
-    }.verify("limelight connected") {
+    }.verify("Limelight is connected") {
         !it.getEntry("tx").getDouble(NaN).isNaN()
     }
     val pipelineEntry by hardw { table.getEntry("pipeline") }
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private infix fun <Q> Q.lstamp(withTime: Time) = TimeStamped(
-            withTime - l("tl").milli(Second) - 11.milli(Second), this //11 is limelight internal latency
+            withTime - l("tl").milli(Second) - 11.milli(Second), this
     )
 
     val readings = sensor {
