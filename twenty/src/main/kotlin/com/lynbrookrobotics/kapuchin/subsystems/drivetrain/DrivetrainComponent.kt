@@ -15,10 +15,12 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
         Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware),
         GenericDrivetrainComponent {
 
+    // TODO correct these for the 2020 bot if hardware team finishes it
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
     val maxAcceleration by pref(10, FootPerSecondSquared)
     val percentMaxOmega by pref(75, Percent)
+
     val maxSpeed get() = maxLeftSpeed min maxRightSpeed
     val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian
 
@@ -44,8 +46,9 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
         })
     }
 
-    override val bearingKp by pref(5, FootPerSecond, 45, Degree)
-    override val bearingKd by pref(3, FootPerSecond, 360, DegreePerSecond)
+    private val bearingGainsNamed = Named("bearingGains", this)
+    override val bearingKp by bearingGainsNamed.pref(5, FootPerSecond, 45, Degree)
+    override val bearingKd by bearingGainsNamed.pref(3, FootPerSecond, 360, DegreePerSecond)
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         TwoSided(PercentOutput(hardware.escConfig, 0.Percent))
