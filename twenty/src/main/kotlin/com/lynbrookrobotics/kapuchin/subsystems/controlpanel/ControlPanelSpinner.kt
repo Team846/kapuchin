@@ -50,16 +50,13 @@ class ControlPanelSpinnerHardware : SubsystemHardware<ControlPanelSpinnerHardwar
         setupMaster(it, escConfig, false)
         it.inverted = invert
     }
-    val spinnerPidController by hardw { spinnerEsc.pidController!! }
 
     private val colorSensorV3 by hardw { ColorSensorV3(Port.kOnboard) }
-    private val colorMatcher = ColorMatch()
-
-    init {
-        colorMatcher.addColorMatch(Blue.color)
-        colorMatcher.addColorMatch(Green.color)
-        colorMatcher.addColorMatch(Red.color)
-        colorMatcher.addColorMatch(Yellow.color)
+    private val colorMatcher = ColorMatch().apply {
+        addColorMatch(Blue.color)
+        addColorMatch(Green.color)
+        addColorMatch(Red.color)
+        addColorMatch(Yellow.color)
     }
 
     private val gameData = sensor { DriverStation.getInstance().gameSpecificMessage stampWith it }

@@ -68,10 +68,8 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         (encoder.position * 5).roundToInt() stampWith it
     }
 
-    private val colorMatcher = ColorMatch()
-
-    init {
-        colorMatcher.addColorMatch(FieldColors.BallYellow.color)
+    private val colorMatcher = ColorMatch().apply {
+        addColorMatch(FieldColors.BallYellow.color)
     }
 
     private val colorSensorV3 by hardw { ColorSensorV3(Port.kMXP) }
