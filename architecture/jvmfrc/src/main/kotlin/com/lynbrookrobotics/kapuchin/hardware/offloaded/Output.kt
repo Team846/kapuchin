@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.hardware.offloaded
 
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.ControlMode.*
+import com.ctre.phoenix.motorcontrol.ControlMode.PercentOutput
 import com.ctre.phoenix.motorcontrol.ControlMode.Velocity
 import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
@@ -18,12 +19,8 @@ sealed class OffloadedOutput {
     abstract val mode: ControlMode
     abstract val value: Double
 
-    fun with(safeties: OffloadedEscSafeties) = when (this) {
-        is PositionOutput -> copy(safeties = safeties)
-        is VelocityOutput -> copy(safeties = safeties)
-        is PercentOutput -> copy(safeties = safeties)
-        is CurrentOutput -> copy(safeties = safeties)
-    }
+    abstract fun with(safeties: OffloadedEscSafeties): OffloadedOutput
+    abstract fun with(config: OffloadedEscConfiguration): OffloadedOutput
 
     fun writeTo(esc: VictorSPX, timeoutMs: Int = 15) {
         config.writeTo(esc, timeoutMs)
@@ -51,7 +48,7 @@ sealed class OffloadedOutput {
         gains?.writeTo(esc, pidController)
         config.writeTo(esc, pidController)
 
-        +pidController.setReference(value, when(mode) {
+        +pidController.setReference(value, when (mode) {
             Position -> kPosition
             Velocity -> kVelocity
             PercentOutput -> kDutyCycle
@@ -68,6 +65,8 @@ data class VelocityOutput(
         override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
     override val mode = Velocity
+    override fun with(safeties: OffloadedEscSafeties) = copy(safeties = safeties)
+    override fun with(config: OffloadedEscConfiguration) = copy(config = config)
 }
 
 data class PositionOutput(
@@ -77,6 +76,8 @@ data class PositionOutput(
         override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
     override val mode = Position
+    override fun with(safeties: OffloadedEscSafeties) = copy(safeties = safeties)
+    override fun with(config: OffloadedEscConfiguration) = copy(config = config)
 }
 
 data class PercentOutput(
@@ -87,6 +88,9 @@ data class PercentOutput(
     override val mode = PercentOutput
     override val value = dutyCycle.Each
     override val gains = null
+
+    override fun with(safeties: OffloadedEscSafeties) = copy(safeties = safeties)
+    override fun with(config: OffloadedEscConfiguration) = copy(config = config)
 }
 
 data class CurrentOutput(
@@ -97,4 +101,7 @@ data class CurrentOutput(
     override val mode = Current
     override val value = current.Ampere
     override val gains = null
+
+    override fun with(safeties: OffloadedEscSafeties) = copy(safeties = safeties)
+    override fun with(config: OffloadedEscConfiguration) = copy(config = config)
 }
