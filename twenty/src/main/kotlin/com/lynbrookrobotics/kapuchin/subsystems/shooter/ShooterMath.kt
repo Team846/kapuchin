@@ -84,8 +84,8 @@ private fun calculateShot(
 private fun innerGoalOffsets(outer: Position, flywheel: FlywheelComponent): Pair<Length, Length> {
     val distToBase = sqrt(outer.x.squared + outer.y.squared)
 
-    val horizontal = flywheel.outerInnerDiff * tan(outer.bearing)
-    val vertical = with(flywheel) { (outerInnerDiff * (targetHeight - shooterHeight)) / (distToBase * cos(outer.bearing)) }
+    val horizontal = flywheel.innerGoalDepth * tan(outer.bearing)
+    val vertical = with(flywheel) { (innerGoalDepth * (targetHeight - shooterHeight)) / (distToBase * cos(outer.bearing)) }
 
     return horizontal to vertical
 }
@@ -98,7 +98,7 @@ private fun innerGoalOffsets(outer: Position, flywheel: FlywheelComponent): Pair
 private fun innerEntryAngleLimits(target: DetectedTarget, flywheel: FlywheelComponent): ClosedRange<Angle> = target.outer?.let { outer ->
     val horizontalOffset = innerGoalOffsets(outer, flywheel).first
 
-    val downward = atan(((flywheel.hexagonHeight / 2) + horizontalOffset) / flywheel.outerInnerDiff)
-    val upward = 90.Degree - atan(flywheel.outerInnerDiff / ((flywheel.hexagonHeight / 2) - horizontalOffset))
+    val downward = atan(((flywheel.targetDiameter / 2) + horizontalOffset) / flywheel.innerGoalDepth)
+    val upward = 90.Degree - atan(flywheel.innerGoalDepth / ((flywheel.targetDiameter / 2) - horizontalOffset))
     return downward..upward
 } ?: 0.Degree..0.Degree

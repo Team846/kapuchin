@@ -19,13 +19,12 @@ import com.lynbrookrobotics.kapuchin.logging.*
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware) {
 
     val outerEntryAngleLimit by pref(65, Degree) // The magnitude of entry tolerance is 65 Deg. if aiming for the middle
-    val hexagonHeight by pref(30, Inch) // "diameter" of outer goal
-    val outerInnerDiff by pref(25.25, Inch) // Distance between outer and inner goal
+    val targetDiameter by pref(30, Inch) // "diameter" of outer goal
+    val innerGoalDepth by pref(25.25, Inch) // Distance between outer and inner goal
     val boundingCircleRadius by pref(12.252, Inch) // Feasibility circle of outer goal
 
     val targetHeight by pref(98.25, Inch) // Height from base to center of outer goal
     val shooterHeight by pref(24, Inch) // Turret height
-
 
     val maxOmega by pref(5676, Rpm)
     val momentFactor by pref(1.4)
