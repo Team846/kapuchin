@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -59,7 +60,7 @@ private fun calculateShot(
 ): ShotState? {
     if (target == null) return null
 
-    val launchAngle = shooterHood.launchAngles(shooterHoodState)
+    val launchAngle = shooterHoodState.launchAngle(shooterHood)
     val distToBase = sqrt(target.x.squared + target.y.squared)
     val height = flywheel.targetHeight - flywheel.shooterHeight
 
