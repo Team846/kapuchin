@@ -5,7 +5,13 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 
 suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
+
+    val zeroing = false // Set a button for zeroing here
+
     choreography {
+        runWhenever(
+                { zeroing } to choreography { turret.zeroing() }
+        )
 
     }
 }

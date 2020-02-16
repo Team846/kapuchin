@@ -26,6 +26,7 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
     override fun TurretHardware.output(value: OffloadedOutput) {
         value.writeTo(esc, pidController)
     }
+
 }
 
 class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
