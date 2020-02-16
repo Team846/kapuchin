@@ -116,6 +116,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
         val pneumaticTicker = ticker(Medium, 50.milli(Second), "Pneumatic System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
+        fun sharedTickerTiming() = error("Subsystem should use shared ticker!")
 
         fun concurrentInit() = scope.launch {
             supervisorScope {
