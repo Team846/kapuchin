@@ -14,7 +14,6 @@ enum class IntakeSliderState(val output: Boolean) { Out(true), In(false) }
 class IntakeSliderComponent(hardware: IntakeSliderHardware) : Component<IntakeSliderComponent, IntakeSliderHardware, IntakeSliderState>(hardware, pneumaticTicker) {
 
     override val fallbackController: IntakeSliderComponent.(Time) -> IntakeSliderState = { In }
-
     override fun IntakeSliderHardware.output(value: IntakeSliderState) {
         solenoid.set(value.output)
     }
