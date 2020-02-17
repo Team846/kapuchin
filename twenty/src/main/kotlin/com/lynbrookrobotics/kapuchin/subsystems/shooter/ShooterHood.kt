@@ -15,7 +15,7 @@ enum class ShooterHoodState(val output: Boolean, val launchAngle: (ShooterHoodCo
     Down(false, ShooterHoodComponent::hoodDownLaunch)
 }
 
-class ShooterHoodComponent(hardware: ShooterHoodHardware) : Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, pneumaticTicker) {
+class ShooterHoodComponent(hardware: ShooterHoodHardware) : Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, shooterTicker) {
     val hoodUpLaunch by pref(20, Degree)
     val hoodDownLaunch by pref(50, Degree)
 

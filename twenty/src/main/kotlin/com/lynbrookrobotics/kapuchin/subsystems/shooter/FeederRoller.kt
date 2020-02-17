@@ -14,7 +14,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRollerComponent, FeederRollerHardware, OffloadedOutput>(hardware, pneumaticTicker) {
+class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRollerComponent, FeederRollerHardware, OffloadedOutput>(hardware, shooterTicker) {
 
     val maxSpeed by pref(5676, Rpm)
 

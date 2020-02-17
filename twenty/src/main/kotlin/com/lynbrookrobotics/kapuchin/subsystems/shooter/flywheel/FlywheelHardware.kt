@@ -14,8 +14,8 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>() {
-    override val period = 30.milli(Second)
-    override val syncThreshold = 5.milli(Second)
+    override val period = sharedTickerTiming()
+    override val syncThreshold = sharedTickerTiming()
     override val priority = Priority.High
     override val name = "Shooter Flywheel"
 

@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import info.kunalsheth.units.generated.*
 
-class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware) {
+class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, shooterTicker) {
 
     val positionGains by pref {
         val kP by pref(12, Volt, 45, Degree)

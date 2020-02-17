@@ -8,7 +8,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware) {
+class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
 
     private val fieldConstants = Named("fieldConstants", this)
 
