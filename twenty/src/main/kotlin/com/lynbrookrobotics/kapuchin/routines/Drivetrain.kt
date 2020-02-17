@@ -4,10 +4,15 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
+
+suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
+    controller { TwoSided(PercentOutput(hardware.escConfig, target)) }
+}
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
@@ -57,10 +62,6 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     }
 }
 
-suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
-    controller { TwoSided(PercentOutput(hardware.escConfig, target)) }
-}
-
 suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRoutine("Turn") {
     val uni = UnicycleDrive(this@turn, this@startRoutine)
 
@@ -75,6 +76,64 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
                 VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         ).takeUnless {
             error.abs < tolerance
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.followTrajectory(
+        trajectory: Trajectory,
+        tolerance: Length,
+        endTolerance: Length,
+        origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
+) = startRoutine("Follow Trajectory") {
+
+    val follower = TrajectoryFollower(
+            this@followTrajectory, tolerance, endTolerance, this@startRoutine, trajectory, origin
+    )
+
+    controller {
+        val velocities = follower()
+        if (velocities != null) {
+            val nativeL = hardware.conversions.encoder.left.native(velocities.left)
+            val nativeR = hardware.conversions.encoder.right.native(velocities.right)
+            TwoSided(
+                    VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                    VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+            )
+        } else {
+            null
+        }
+    }
+}
+
+suspend fun DrivetrainComponent.waypoint(
+        motionProfile: (Length) -> Velocity,
+        target: Waypoint,
+        tolerance: Length
+) = startRoutine("Waypoint") {
+    val position by hardware.position.readOnTick.withStamps
+    val uni = UnicycleDrive(this@waypoint, this@startRoutine)
+
+    val waypointDistance = graph("Distance to Waypoint", Foot)
+
+    controller { t ->
+        val (_, p) = position
+        val location = p.vector
+
+        val distance = distance(location, target).also { waypointDistance(t, it) }
+
+        val targetA = (target - location).bearing
+        val speed = motionProfile(distance)
+        val (targVels, _) = uni.speedTargetAngleTarget(speed, targetA)
+
+        val nativeL = hardware.conversions.encoder.left.native(targVels.left)
+        val nativeR = hardware.conversions.encoder.right.native(targVels.right)
+
+        TwoSided(
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+        ).takeUnless {
+            distance < tolerance
         }
     }
 }

@@ -11,6 +11,3 @@ suspend fun IntakeSliderComponent.set(target: IntakeSliderState) = startRoutine(
 suspend fun IntakeRollersComponent.set(target: DutyCycle) = startRoutine("Set") {
     controller { PercentOutput(hardware.escConfig, target) }
 }
-
-
-

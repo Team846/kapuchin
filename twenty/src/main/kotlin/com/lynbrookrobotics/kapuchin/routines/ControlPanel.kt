@@ -9,31 +9,31 @@ import info.kunalsheth.units.math.*
 suspend fun ControlPanelPivotComponent.set(state: ControlPanelPivotState) = startRoutine("Set") {
     controller { state }
 }
-
-suspend fun ControlPanelSpinnerComponent.spinStage2(electrical: ElectricalSystemHardware) = startRoutine("Stage 2") {
-    val controlPanelAngle by hardware.controlPanelAngle.readEagerly.withoutStamps
-    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
-
-    controller {
-        if (abs(controlPanelAngle) < 4.Turn) {
-            val error = 4.Turn - controlPanelAngle
-            val voltage = kP * error
-
-            voltageToDutyCycle(voltage, vBat)
-        } else {
-            0.Percent
-        }
-    }
-}
-
-suspend fun ControlPanelSpinnerComponent.spinStage3() = startRoutine("Stage 3") {
-    val currentColorOrdinal by hardware.currentColorOrdinal.readEagerly.withoutStamps
-    val targetColorOrdinal by hardware.targetColorOrdinal.readEagerly.withoutStamps
-    controller {
-        if (currentColorOrdinal == targetColorOrdinal) {
-            100.Percent
-        } else {
-            0.Percent
-        }
-    }
-}
+//
+//suspend fun ControlPanelSpinnerComponent.spinStage2(electrical: ElectricalSystemHardware) = startRoutine("Stage 2") {
+//    val controlPanelAngle by hardware.controlPanelAngle.readEagerly.withoutStamps
+//    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+//
+//    controller {
+//        if (abs(controlPanelAngle) < 4.Turn) {
+//            val error = 4.Turn - controlPanelAngle
+//            val voltage = kP * error
+//
+//            voltageToDutyCycle(voltage, vBat)
+//        } else {
+//            0.Percent
+//        }
+//    }
+//}
+//
+//suspend fun ControlPanelSpinnerComponent.spinStage3() = startRoutine("Stage 3") {
+//    val currentColorOrdinal by hardware.currentColorOrdinal.readEagerly.withoutStamps
+//    val targetColorOrdinal by hardware.targetColorOrdinal.readEagerly.withoutStamps
+//    controller {
+//        if (currentColorOrdinal == targetColorOrdinal) {
+//            100.Percent
+//        } else {
+//            0.Percent
+//        }
+//    }
+//}

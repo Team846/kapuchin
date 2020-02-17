@@ -1,28 +1,31 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.turret.*
 import info.kunalsheth.units.generated.*
 
-// TODO flywheel set to goal
-// TODO flywheel set angular velocity
+suspend fun FlywheelComponent.set(target: AngularVelocity, tolerance: AngularVelocity = 30.Rpm) = startRoutine("Set") {
 
-// TODO turret set position
-suspend fun TurretComponent.set() = startRoutine("Set")
-{
-    val limelight by limelihardware.
-    controller{
-        val offset = limelightReading.tx
+    val current by hardware.speed.readOnTick.withoutStamps
 
+    controller {
+        VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.encoder.native(target))
+                .takeUnless { (target - current).abs < tolerance }
     }
 }
+
+suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 2.Degree) = startRoutine("Set") {
+
+    val current by hardware.position.readOnTick.withoutStamps
+
+    controller {
+        PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+                .takeUnless { (target - current).abs < tolerance }
+    }
+}
+
 suspend fun ShooterHoodComponent.set(target: ShooterHoodState) = startRoutine("Set") {
     controller { target }
-}
-
-suspend fun TurretComponent.zeroing() = startChoreo("Zero") {
-    hardware.zero()
-    choreography {
-        while (hardware.isZeroed) delay(0.2.Second)
-    }
 }
