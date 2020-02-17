@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import info.kunalsheth.units.generated.*
 
-suspend fun CarouselComponent.set(targetPosition: Angle, targetState: CarouselMagazineState, tolerance: Angle = 2.Degree) = startRoutine("Set") {
+suspend fun CarouselComponent.set(targetPosition: Angle, targetState: CarouselMagazineState, tolerance: Angle = 5.Degree) = startRoutine("Set") {
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {

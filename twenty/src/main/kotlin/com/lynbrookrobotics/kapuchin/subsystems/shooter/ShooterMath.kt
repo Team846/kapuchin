@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
@@ -30,7 +31,7 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? {
     if (flywheel == null || shooterHood == null) return null
 
     val innerLimits = innerEntryAngleLimits(target, flywheel)
-    val outerLimits = -flywheel.outerEntryAngleLimit..flywheel.outerEntryAngleLimit
+    val outerLimits = `±`(flywheel.outerEntryAngleLimit)
     val innerGoalPossible = target.outer
             ?.let { innerGoalOffsets(it, flywheel) }
             ?.let { (hor, vert) -> (hor.squared + vert.squared) < flywheel.boundingCircleRadius.squared }

@@ -29,17 +29,6 @@ suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
     }
 }
 
-suspend fun Subsystems.aim() = startChoreo("Aim") {
-    choreography {
-        flywheel?.set(2000.Rpm)
-    }
-}
-
-suspend fun Subsystems.hoodUp() = coroutineScope {
-    shooterHood?.set(Up)
-    freeze()
-}
-
 //suspend fun Subsystems.aim() = if (flywheel != null && limelight != null && shooterHood != null) startChoreo("Aim") {
 //
 //    val reading by limelight.hardware.readings.readEagerly().withoutStamps
