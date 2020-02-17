@@ -8,11 +8,11 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.revrobotics.*
+import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.ColorSensorV3
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.I2C.Port.kMXP
-import edu.wpi.first.wpilibj.util.Color
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -44,6 +44,9 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val pidController by hardw { esc.pidController }
 
     val encoder by hardw { esc.encoder }
+    val position = sensor(encoder) {
+        conversions.encoder.realPosition(position) stampWith it
+    }.with(graph("Angle", Degree))
 
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
         dio.setUpSourceEdge(true, false)
@@ -55,16 +58,10 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         }
         dio.enableInterrupts()
     }
-
-    private val colorSensor by hardw { ColorSensorV3(kMXP) }
-
-    val alignedToSlot = sensor(hallEffect) {get() stampWith it}
+    val alignedToSlot = sensor(hallEffect) { get() stampWith it }
             .with(graph("Aligned to Slot", Each)) { (if (it) 1 else 0).Each }
 
-    val position = sensor(encoder) {
-        conversions.encoder.realPosition(position) stampWith it
-    }.with(graph("Angle", Degree))
-
+    private val colorSensor by hardw { ColorSensorV3(kMXP) }
     private val colorNamed = Named("Color Sensor", this)
     val color = sensor(colorSensor) { color stampWith it }
             .with(graph("R", Percent, colorNamed)) { it.red.Each }
