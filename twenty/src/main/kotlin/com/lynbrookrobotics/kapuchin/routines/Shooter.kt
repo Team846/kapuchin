@@ -10,10 +10,14 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.turret.*
 import info.kunalsheth.units.generated.*
 
 suspend fun FlywheelComponent.set(target: AngularVelocity) = startRoutine("Set") {
-    val current by hardware.speed.readOnTick.withoutStamps
-
     controller {
         VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.encoder.native(target))
+    }
+}
+
+suspend fun FeederRollerComponent.set(target: AngularVelocity) = startRoutine("Set") {
+    controller {
+        VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.native(target))
     }
 }
 
@@ -22,13 +26,12 @@ suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 2.Degree) = st
 
     controller {
         PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
-                .takeUnless { (target - current).abs < tolerance }
+                .takeUnless { target - current in `±`(tolerance) }
     }
 }
 
 suspend fun TurretComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
     val precision by operator.turretManual.readOnTick.withoutStamps
-
     controller { PercentOutput(hardware.escConfig, precision) }
 }
 
@@ -40,10 +43,9 @@ suspend fun TurretComponent.trackTarget(limelight: LimelightComponent, tolerance
         reading?.let { r ->
             val target = current + r.tx
             PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
-                    .takeUnless { r.tx.abs < tolerance }
+                    .takeUnless { r.tx in `±`(tolerance) }
         }
     }
-
 }
 
 suspend fun ShooterHoodComponent.set(target: ShooterHoodState) = startRoutine("Set") {
