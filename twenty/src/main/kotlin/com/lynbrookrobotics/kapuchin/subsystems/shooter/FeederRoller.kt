@@ -51,7 +51,6 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
     override val name = "Feeder Roller"
 
     private val invert by pref(false)
-
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
             defaultContinuousCurrentLimit = 25.Ampere,
@@ -60,11 +59,14 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
     )
 
     private val escId = 61
+
     val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         generalSetup(it, escConfig)
         it.inverted = invert
     }
+
     val encoder by hardw { esc.encoder }
+
     val pidController by hardw { esc.pidController }
 
     val velocity = sensor(encoder) { conversions.realVelocity(encoder.velocity) stampWith it }

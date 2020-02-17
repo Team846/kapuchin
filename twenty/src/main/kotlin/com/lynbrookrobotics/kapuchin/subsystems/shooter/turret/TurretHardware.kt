@@ -13,7 +13,6 @@ import com.revrobotics.CANDigitalInput.LimitSwitchPolarity.kNormallyOpen
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     override val period = sharedTickerTiming()
@@ -21,37 +20,40 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     override val priority = Priority.High
     override val name = "Shooter Turret"
 
+    private val invert by pref(false)
+    private val limitSwitchMount by pref(90, Degree)
     val escConfig by escConfigPref(
             defaultNominalOutput = 1.Volt,
             defaultContinuousCurrentLimit = 15.Ampere,
             defaultPeakCurrentLimit = 25.Ampere
     )
 
+    val conversions = TurretConversions(this)
+    var isZeroed = false
+        private set
+
     private val escId = 52
-    private val invert by pref(false)
+
     val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invert
     }
+
     val pidController by hardw { esc.pidController }
 
-    val conversions = TurretConversions(this)
-
     val encoder by hardw { esc.encoder }
-    val position = sensor(encoder) {
-        conversions.encoder.realPosition(position) stampWith it
-    }.with(graph("Angle", Degree))
 
     private val limitSwitch by hardw { esc.getForwardLimitSwitch(kNormallyOpen) }.configure {
         +it.enableLimitSwitch(true)
     }
+
+    val position = sensor(encoder) {
+        conversions.encoder.realPosition(position) stampWith it
+    }.with(graph("Angle", Degree))
+
     val atZero = sensor(limitSwitch) { get() stampWith it }
             .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
 
-    var isZeroed = false
-        private set
-
-    private val limitSwitchMount by pref(90, Degree)
     fun zero() {
         encoder.position = conversions.encoder.native(limitSwitchMount)
         isZeroed = true

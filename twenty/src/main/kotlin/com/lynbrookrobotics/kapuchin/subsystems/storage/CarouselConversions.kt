@@ -4,9 +4,9 @@ import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import edu.wpi.first.wpilibj.util.Color
-import kotlin.math.pow
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.pow
 
 class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversions", hardware) {
     val encoder by pref {
@@ -35,10 +35,10 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
     }
     val ballColorTolerance by pref(0.1)
 
-    fun accuracy(colorA:Color, colorB:Color = ballColor) =
+    fun accuracy(colorA: Color, colorB: Color = ballColor) =
             (colorA.red - colorB.red).pow(2) +
-            (colorA.green - colorB.green).pow(2) +
-            (colorA.blue - colorB.blue).pow(2)
+                    (colorA.green - colorB.green).pow(2) +
+                    (colorA.blue - colorB.blue).pow(2)
 
     fun detectingBall(proximity: Dimensionless, color: Color) =
             proximity in ballIrRange && accuracy(color) < ballColorTolerance

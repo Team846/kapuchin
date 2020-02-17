@@ -22,6 +22,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     override val priority = Priority.High
     override val name = "Carousel"
 
+    private val invert by pref(false)
     val escConfig by escConfigPref(
             defaultNominalOutput = 1.Volt,
             defaultContinuousCurrentLimit = 15.Ampere,
@@ -29,7 +30,12 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     )
 
     private val escId = 60
-    private val invert by pref(false)
+    private val hallEffectChannel = 0
+
+    val conversions = CarouselConversions(this)
+    var isZeroed = false
+        private set
+
     val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invert
@@ -37,13 +43,8 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     }
     val pidController by hardw { esc.pidController }
 
-    val conversions = CarouselConversions(this)
     val encoder by hardw { esc.encoder }
 
-    var isZeroed = false
-        private set
-
-    private val hallEffectChannel = 0
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
         dio.setUpSourceEdge(true, false)
         dio.requestInterrupts {
@@ -54,6 +55,9 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         }
         dio.enableInterrupts()
     }
+
+    private val colorSensor by hardw { ColorSensorV3(kMXP) }
+
     val alignedToSlot = sensor(hallEffect) {get() stampWith it}
             .with(graph("Aligned to Slot", Each)) { (if (it) 1 else 0).Each }
 
@@ -61,14 +65,13 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         conversions.encoder.realPosition(position) stampWith it
     }.with(graph("Angle", Degree))
 
-    private val colorSensor by hardw { ColorSensorV3(kMXP) }
-
     private val colorNamed = Named("Color Sensor", this)
     val color = sensor(colorSensor) { color stampWith it }
             .with(graph("R", Percent, colorNamed)) { it.red.Each }
             .with(graph("G", Percent, colorNamed)) { it.green.Each }
             .with(graph("B", Percent, colorNamed)) { it.blue.Each }
             .with(graph("Accuracy", Each, colorNamed)) { conversions.accuracy(it).Each }
+
     val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
             .with(graph("IR", Percent, colorNamed))
 

@@ -17,7 +17,8 @@ import com.revrobotics.ColorSensorV3
 import edu.wpi.first.wpilibj.I2C.Port
 import info.kunalsheth.units.generated.*
 
-class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware, pneumaticTicker) {
+class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware) {
+
     val kP by pref(10, Volt, 1, Turn)
 
     override val fallbackController: ControlPanelSpinnerComponent.(Time) -> DutyCycle = { 0.Percent }
@@ -33,10 +34,13 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
     override val priority = Priority.High
     override val name = "Control Panel"
 
-    val escConfig by escConfigPref()
     private val invert by pref(false)
+    val escConfig by escConfigPref()
+
+    val conversions = ControlPanelConversions(this)
 
     private val escId = 20
+
     val spinnerEsc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.idleMode = CANSparkMax.IdleMode.kCoast
@@ -55,10 +59,10 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
             .with(graph("R", Percent, colorNamed)) { it.red.Each }
             .with(graph("G", Percent, colorNamed)) { it.green.Each }
             .with(graph("B", Percent, colorNamed)) { it.blue.Each }
+
     val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
             .with(graph("IR", Percent, colorNamed))
 
-    val conversions = ControlPanelConversions(this)
     val targetColor = sensor {
         when (driver.station.gameSpecificMessage.trim()) {
             "" -> null
@@ -67,7 +71,8 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
             "R" -> conversions.red
             "Y" -> conversions.yellow
         } stampWith it
-    }.with(graph("Target Color", Each)) { (it?.run(conversions::indexColor) ?: -1).Each }
+    }
+            .with(graph("Target Color", Each)) { (it?.run(conversions::indexColor) ?: -1).Each }
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

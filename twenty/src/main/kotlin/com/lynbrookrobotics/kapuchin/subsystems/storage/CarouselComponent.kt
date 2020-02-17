@@ -1,21 +1,9 @@
 package com.lynbrookrobotics.kapuchin.subsystems.storage
 
-import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.timing.*
-import com.revrobotics.*
-import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
-import com.revrobotics.EncoderType.kHallSensor
-import edu.wpi.first.wpilibj.DigitalInput
-import edu.wpi.first.wpilibj.I2C.Port
-import edu.wpi.first.wpilibj.util.Color
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
-import kotlin.math.roundToInt
 
 class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
 

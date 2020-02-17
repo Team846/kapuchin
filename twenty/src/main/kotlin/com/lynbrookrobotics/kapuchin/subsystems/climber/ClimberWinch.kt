@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems.climber
 
-import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -30,6 +29,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberW
 
     private val flaccid = true
     private val erect = false
+
     override fun ClimberWinchHardware.output(value: ClimberWinchOutput) = when (value) {
         is Stopped -> {
             if (masterEsc.appliedOutput == 0.0 && slaveEsc.appliedOutput == 0.0)
@@ -60,7 +60,6 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
     override val name = "Climber Winch"
 
     private val invert by pref(false)
-
     val escConfig by escConfigPref(
             defaultContinuousCurrentLimit = 40.Ampere
     )

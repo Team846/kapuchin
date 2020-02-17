@@ -8,6 +8,8 @@ import info.kunalsheth.units.generated.*
 
 class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, shooterTicker) {
 
+    private val safeSpeed by pref(3, Volt)
+
     val positionGains by pref {
         val kP by pref(12, Volt, 45, Degree)
         val kD by pref(0, Volt, 60, DegreePerSecond)
@@ -24,7 +26,6 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
         PercentOutput(hardware.escConfig, 0.Percent)
     }
 
-    private val safeSpeed by pref(3, Volt)
     override fun TurretHardware.output(value: OffloadedOutput) = with(hardware.conversions) {
         val safeValue = if (!isZeroed) value.with(value.config.copy(
                 peakOutputForward = safeSpeed,

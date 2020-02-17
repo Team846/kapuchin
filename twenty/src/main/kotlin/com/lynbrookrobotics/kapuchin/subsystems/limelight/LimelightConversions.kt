@@ -52,7 +52,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         ({ UomVector(x, y) })
     }
 
-    fun outerGoalPosition(sample: LimelightReading) = with(sample) {
+    private fun outerGoalPosition(sample: LimelightReading) = with(sample) {
         val aspect = thor / tvert
         val skew = acos(aspect / aspect0 minMag 1.Each)
 

@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import info.kunalsheth.units.generated.*

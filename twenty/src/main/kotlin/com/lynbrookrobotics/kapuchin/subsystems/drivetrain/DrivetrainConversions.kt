@@ -10,9 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainConversions(val hardware: DrivetrainHardware) :
-        Named by Named("Conversions", hardware),
-        GenericDrivetrainConversions {
+class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware), GenericDrivetrainConversions {
 
     override val trackLength by pref(2, Foot)
     private val wheelRadius by pref {
@@ -46,30 +44,28 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) :
         })
     }
 
-    val escOdometry = EscOdometry(this)
-    class EscOdometry(val conversions: DrivetrainConversions) : Named by Named("ESC Odometry", conversions) {
-        private var noTicksL = true
-        private var noTicksR = true
-        val tracking = CircularArcTracking(Position(0.Foot, 0.Foot, 0.Degree))
+    private var noTicksL = true
+    private var noTicksR = true
+    private var lastLeft = 0.Foot
+    private var lastRight = 0.Foot
 
-        private var lastLeft = 0.Foot
-        private var lastRight = 0.Foot
-        operator fun invoke(totalLeft: Length, totalRight: Length, bearing: Angle) = conversions.run {
-            if (noTicksL && totalLeft != 0.Foot) log(Level.Debug) {
-                "Received first left tick at ${currentTime withDecimals 2}"
-            }.also { noTicksL = false }
+    val tracking = CircularArcTracking(Position(0.Foot, 0.Foot, 0.Degree))
 
-            if (noTicksR && totalRight != 0.Foot) log(Level.Debug) {
-                "Received first right tick at ${currentTime withDecimals 2}"
-            }.also { noTicksR = false }
+    fun odometry(totalLeft: Length, totalRight: Length, bearing: Angle) {
+        if (noTicksL && totalLeft != 0.Foot) log(Level.Debug) {
+            "Received first left tick at ${currentTime withDecimals 2}"
+        }.also { noTicksL = false }
 
-            tracking(
-                    totalLeft - lastLeft,
-                    totalRight - lastRight,
-                    bearing
-            )
-            lastLeft = totalLeft
-            lastRight = totalRight
-        }
+        if (noTicksR && totalRight != 0.Foot) log(Level.Debug) {
+            "Received first right tick at ${currentTime withDecimals 2}"
+        }.also { noTicksR = false }
+
+        tracking(
+                totalLeft - lastLeft,
+                totalRight - lastRight,
+                bearing
+        )
+        lastLeft = totalLeft
+        lastRight = totalRight
     }
 }

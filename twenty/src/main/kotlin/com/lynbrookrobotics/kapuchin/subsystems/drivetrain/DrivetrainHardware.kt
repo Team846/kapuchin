@@ -2,8 +2,6 @@ package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.can.TalonFX
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import com.kauailabs.navx.frc.AHRS
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
@@ -20,7 +18,6 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SPI
-import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -30,22 +27,15 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     override val syncThreshold = 3.milli(Second)
     override val name = "Drivetrain"
 
-    private val idx = 0
-
     private val jitterPulsePinNumber by pref(8)
     private val jitterReadPinNumber by pref(9)
-    val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
-    val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
-    val leftMasterEscId = 10
-    val leftSlaveEscId = 11
-    val rightMasterEscId = 12
-    val rightSlaveEscId = 13
+    private val leftEscInversion by pref(false)
+    private val rightEscInversion by pref(true)
+    private val leftSensorInversion by pref(true)
+    private val rightSensorInversion by pref(false)
 
-    val leftEscInversion by pref(false)
-    val rightEscInversion by pref(true)
-    val leftSensorInversion by pref(true)
-    val rightSensorInversion by pref(false)
+    private val driftTolerance by pref(0.2, DegreePerSecond)
 
     val escConfig by escConfigPref(
             defaultNominalOutput = 1.5.Volt,
@@ -54,33 +44,41 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             defaultPeakCurrentLimit = 35.Ampere
     )
 
+    private val idx = 0
+    private val leftMasterEscId = 10
+    private val leftSlaveEscId = 11
+    private val rightMasterEscId = 12
+    private val rightSlaveEscId = 13
+
     override val conversions = DrivetrainConversions(this)
 
-    val leftMasterEsc by hardw { TalonSRX(leftMasterEscId) }.configure {
+    val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
+    val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
+
+    val leftMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder, true)
         it.selectedSensorPosition = 0
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
     }
-    val leftSlaveEsc by hardw { VictorSPX(leftSlaveEscId) }.configure {
+    val leftSlaveEsc by hardw { TalonFX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
     }
 
-    val rightMasterEsc by hardw { TalonSRX(rightMasterEscId) }.configure {
+    val rightMasterEsc by hardw { TalonFX(rightMasterEscId) }.configure {
         setupMaster(it, escConfig, QuadEncoder, true)
         it.selectedSensorPosition = 0
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
     }
-    val rightSlaveEsc by hardw { VictorSPX(rightSlaveEscId) }.configure {
+    val rightSlaveEsc by hardw { TalonFX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
     }
 
-    val driftTolerance by pref(0.2, DegreePerSecond)
     private fun blockUntilTrue(
             timeout: Time = 10.Second,
             poll: Time = 0.5.Second,
@@ -94,7 +92,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         return f()
     }
 
-    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
+    private val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
         blockUntilTrue() { it.isConnected }
         blockUntilTrue() { !it.isCalibrating }
         it.zeroYaw()
@@ -118,19 +116,18 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
 
     private val escNamed = Named("ESC Odometry", this)
-    val escPosition = sensor {
-        conversions.escOdometry(
+    override val position = sensor {
+        conversions.odometry(
                 leftPosition.optimizedRead(it, syncThreshold).y,
                 rightPosition.optimizedRead(it, syncThreshold).y,
                 gyro.yaw.Degree
         )
-        conversions.escOdometry.tracking.run { Position(x, y, bearing) } stampWith it
+        conversions.tracking.run { Position(x, y, bearing) } stampWith it
     }
             .with(graph("X Location", Foot, escNamed)) { it.x }
             .with(graph("Y Location", Foot, escNamed)) { it.y }
             .with(graph("Bearing", Degree, escNamed)) { it.bearing }
 
-    override val position = /*t2sPosition ?:*/ escPosition
 
     val leftPosition = sensor {
         conversions.encoder.right.realPosition(
@@ -164,7 +161,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         }
 
         odometryTicker.runOnTick { time ->
-            conversions.escOdometry(
+            conversions.odometry(
                     leftPosition.optimizedRead(time, syncThreshold).y,
                     rightPosition.optimizedRead(time, syncThreshold).y,
                     gyro.yaw.Degree

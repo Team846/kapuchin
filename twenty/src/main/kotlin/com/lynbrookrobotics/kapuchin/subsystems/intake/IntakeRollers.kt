@@ -30,7 +30,6 @@ class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRol
     override val name: String = "Intake Rollers"
 
     private val invert by pref(false)
-
     val escConfig by escConfigPref(
             defaultNominalOutput = 0.5.Volt,
             defaultContinuousCurrentLimit = 10.Ampere,

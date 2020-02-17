@@ -12,7 +12,6 @@ import info.kunalsheth.units.math.*
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
 
     private val fieldConstants = Named("fieldConstants", this)
-
     val targetDiameter by fieldConstants.pref(30, Inch) // "diameter" of the inscribed circle of the outer goal
     val innerGoalDepth by fieldConstants.pref(25.25, Inch) // Distance between outer and inner goal
     val targetHeight by fieldConstants.pref(98.25, Inch) // height from floor to center of outer goal

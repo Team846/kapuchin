@@ -27,5 +27,6 @@ class ClimberPivotHardware : SubsystemHardware<ClimberPivotHardware, ClimberPivo
     override val name = "Climber Pivot"
 
     private val pivotSolenoidChannel = 1
+
     val pivotSolenoid by hardw { Solenoid(pivotSolenoidChannel) }
 }

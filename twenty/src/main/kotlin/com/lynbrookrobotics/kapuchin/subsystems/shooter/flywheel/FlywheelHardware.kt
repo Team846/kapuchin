@@ -9,26 +9,25 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>() {
     override val period = sharedTickerTiming()
     override val syncThreshold = sharedTickerTiming()
-    override val priority = High
+    override val priority = Priority.High
     override val name = "Shooter Flywheel"
 
     private val invertMaster by pref(false)
     private val invertSlave by pref(true)
-
     val escConfig by escConfigPref(
             defaultContinuousCurrentLimit = 30.Ampere,
             defaultPeakCurrentLimit = 60.Ampere,
             defaultVoltageCompSaturation = 11.Volt
     )
+
+    val conversions = FlywheelConversions(this)
 
     private val masterEscId = 50
     private val slaveEscId = 51
@@ -45,11 +44,10 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
         it.idleMode = CANSparkMax.IdleMode.kCoast
     }
 
-    val conversions = FlywheelConversions(this)
-
     val pidController by hardw { masterEsc.pidController }
 
     val encoder by hardw { masterEsc.encoder }
+
     val speed = sensor(encoder) {
         conversions.encoder.realVelocity(velocity) stampWith it
     }.with(graph("Speed", Rpm))

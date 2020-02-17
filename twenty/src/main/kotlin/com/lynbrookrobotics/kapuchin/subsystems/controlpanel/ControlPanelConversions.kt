@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.revrobotics.ColorMatch
-import com.revrobotics.ColorMatchResult
 import edu.wpi.first.wpilibj.util.Color
 import info.kunalsheth.units.generated.*
 
