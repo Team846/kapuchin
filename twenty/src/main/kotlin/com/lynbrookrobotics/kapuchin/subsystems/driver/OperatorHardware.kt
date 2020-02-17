@@ -55,18 +55,16 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val back get() = xbox.backButton
 
     val aim = s { lt }
-    val aimPreset = s { lb }
     val shoot = s { rt }
-    val shootOverride = s { rb }
 
     val flywheelManual = s { flywheelMapping.first(getY(kLeft).Each) * flywheelMapping.second }
     val turretManual = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
-    val shooterHoodManual = s { pov == 0 }
+    val shooterHoodManual = s { lb }
 
     val extendClimber = s { back }
     val retractClimber = s { start }
 
-    val extendControlPanel = s { pov == 180 }
-    val controlPanelStage2 = s { pov == 180 && aButton }
-    val controlPanelStage3 = s { pov == 180 && bButton }
+    val extendControlPanel = s { pov == 0 }
+    val controlPanelStage2 = s { pov == 0 && aButton }
+    val controlPanelStage3 = s { pov == 0 && bButton }
 }
