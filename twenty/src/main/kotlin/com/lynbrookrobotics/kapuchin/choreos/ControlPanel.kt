@@ -8,29 +8,21 @@ import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
 suspend fun Subsystems.controlPanelTeleop() = startChoreo("Control Panel Teleop") {
+
+    val extend by operator.extendControlPanel.readEagerly().withoutStamps
+    val stage2 by operator.controlPanelStage2.readEagerly().withoutStamps
+    val stage3 by operator.controlPanelStage3.readEagerly().withoutStamps
+
     choreography {
-
+        runWhenever(
+                { extend } to choreography { extendControlPanel() },
+                { stage2 } to choreography { TODO("stage2") },
+                { stage3 } to choreography { TODO("stage3") }
+        )
     }
 }
 
-suspend fun Subsystems.stage2() = coroutineScope {
-    var controlPanelPivotUp: Job? = null
-    try {
-        controlPanelPivotUp = launch { controlPanelPivot?.set(Up) }
-        launch { controlPanelSpinner?.spinStage2(electrical) }
-        freeze()
-    } finally {
-        controlPanelPivotUp?.cancel()
-    }
-}
-
-suspend fun Subsystems.stage3() = coroutineScope {
-    var controlPanelPivotUp: Job? = null
-    try {
-        controlPanelPivotUp = launch { controlPanelPivot?.set(Up) }
-        launch { controlPanelSpinner?.spinStage3() }
-        freeze()
-    } finally {
-        controlPanelPivotUp?.cancel()
-    }
+suspend fun Subsystems.extendControlPanel() = coroutineScope {
+    controlPanelPivot?.set(Up)
+    freeze()
 }

@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter.turret
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*

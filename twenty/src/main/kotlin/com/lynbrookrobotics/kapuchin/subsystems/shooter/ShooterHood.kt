@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
-import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.shooterTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*

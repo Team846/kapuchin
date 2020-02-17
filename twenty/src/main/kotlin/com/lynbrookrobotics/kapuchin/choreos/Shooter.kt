@@ -2,41 +2,50 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
+import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
 
-    val zeroing = false // Set a button for zeroing here
+    val aim by operator.aim.readEagerly().withoutStamps
+    val aimPreset by operator.aimPreset.readEagerly().withoutStamps
+    val shoot by operator.shoot.readEagerly().withoutStamps
+    val shootOverride by operator.shootOverride.readEagerly().withoutStamps
+
+    val shooterHoodManual by operator.shooterHoodManual.readEagerly().withoutStamps
 
     choreography {
+        launch { turret?.manualOverride(operator) }
         runWhenever(
-                { zeroing } to choreography { turret.zeroing() }
+                { aim } to choreography { aim() },
+                { aimPreset } to choreography { },
+                { shoot } to choreography { TODO("shoot") },
+                { shootOverride } to choreography { },
+                { shooterHoodManual } to choreography { hoodUp() }
         )
 
     }
 }
 
-suspend fun Subsystems.aim() = if (flywheel != null && limelight != null && shooterHood != null) startChoreo("Aim") {
-
-    val target by limelight.hardware.readings.readEagerly().withoutStamps
-
+suspend fun Subsystems.aim() = startChoreo("Aim") {
     choreography {
-        val snapshot1 = limelight.goalPositions(target ?: run {
-            println("Target snapshot 1 not found")
-            return@choreography
-        })
-        
-        // TODO rotate turret with snapshot 1
-
-        val snapshot2 = limelight.goalPositions(target ?: run {
-            println("Target snapshot 2 not found")
-            return@choreography
-        })
-
-        val (flywheelVelocity, _, shooterHoodState) = bestShot(snapshot2) ?: run {
-            println("No shots possible")
-            return@choreography
-        }
+        flywheel?.set(2000.Rpm)
     }
+}
 
-} else println("Couldn't run aim choreo because of null subsystems")
+suspend fun Subsystems.hoodUp() = coroutineScope {
+    shooterHood?.set(Up)
+    freeze()
+}
+
+//suspend fun Subsystems.aim() = if (flywheel != null && limelight != null && shooterHood != null) startChoreo("Aim") {
+//
+//    val reading by limelight.hardware.readings.readEagerly().withoutStamps
+//
+//    choreography {
+//        turret?.trackTarget(limelight)
+//    }
+//
+//} else println("Couldn't aim because of null subsystems")

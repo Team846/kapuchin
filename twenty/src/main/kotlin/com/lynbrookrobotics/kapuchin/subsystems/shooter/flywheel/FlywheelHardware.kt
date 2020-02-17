@@ -1,12 +1,14 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
@@ -16,7 +18,7 @@ import info.kunalsheth.units.math.*
 class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>() {
     override val period = sharedTickerTiming()
     override val syncThreshold = sharedTickerTiming()
-    override val priority = Priority.High
+    override val priority = High
     override val name = "Shooter Flywheel"
 
     private val invertMaster by pref(false)

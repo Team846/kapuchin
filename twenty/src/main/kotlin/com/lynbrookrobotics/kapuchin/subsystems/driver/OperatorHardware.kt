@@ -66,7 +66,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val extendClimber = s { back }
     val retractClimber = s { start }
 
-    val extendControlPanelPivot = s { pov == 180 }
+    val extendControlPanel = s { pov == 180 }
     val controlPanelStage2 = s { pov == 180 && aButton }
     val controlPanelStage3 = s { pov == 180 && bButton }
 }

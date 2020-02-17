@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -49,7 +50,7 @@ class FunkyRobot : RobotBase() {
                     },
                     { isTest } to choreography {
                         System.gc()
-                        launch { journal(subsystems.drivetrain.hardware) }
+                        launch { subsystems.journalPath() }
                         subsystems.teleop()
                     }
             )

@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter.turret
 
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.shooterTicker
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*

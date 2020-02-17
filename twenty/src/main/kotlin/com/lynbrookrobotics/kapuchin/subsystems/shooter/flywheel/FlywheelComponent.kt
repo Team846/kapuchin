@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel
 
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.shooterTicker
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
