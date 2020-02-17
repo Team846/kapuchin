@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.storage
+package com.lynbrookrobotics.kapuchin.subsystems.carousel
 
 inline class CarouselMagazineState(private val underlying: Int) {
     val fullSlots get() = Integer.bitCount(underlying and full.underlying)

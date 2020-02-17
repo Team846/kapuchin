@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.storage
+package com.lynbrookrobotics.kapuchin.subsystems.carousel
 
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*

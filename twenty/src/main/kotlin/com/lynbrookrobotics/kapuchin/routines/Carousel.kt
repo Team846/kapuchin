@@ -1,9 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
-import com.lynbrookrobotics.kapuchin.subsystems.storage.*
-import info.kunalsheth.units.generated.*
+import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 
 suspend fun CarouselComponent.collect(state: CarouselMagazineState) = startRoutine("Collect") {
     val position by hardware.position.readOnTick.withoutStamps
