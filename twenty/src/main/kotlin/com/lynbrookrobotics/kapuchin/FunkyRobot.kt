@@ -37,15 +37,18 @@ class FunkyRobot : RobotBase() {
         scope.launch {
             runWhenever(
                     { isEnabled && isOperatorControl } to choreography {
+                        System.gc()
                         subsystems.teleop()
                     },
                     { isEnabled && isAutonomous } to choreography {
+                        System.gc()
                         subsystems.followJournal()
                     },
                     { isDisabled && !isTest } to choreography {
                         subsystems.warmup()
                     },
                     { isTest } to choreography {
+                        System.gc()
                         launch { journal(subsystems.drivetrain.hardware) }
                         subsystems.teleop()
                     }
@@ -94,8 +97,9 @@ val classPreloading = scope.launch {
 }
 
 private fun printRunID() {
+    val file = File("/home/lvuser/run_id")
     val runId = try {
-        File("/home/lvuser/run_id").readText().trim().toInt() + 1
+        file.readText().trim().toInt() + 1
     } catch (e: Exception) {
         System.err.println(e)
         -1

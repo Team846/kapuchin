@@ -44,7 +44,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val limelight: LimelightComponent?,
                  val flywheel: FlywheelComponent?,
                  val turret: TurretComponent?,
-                 val feederRoller: FeederRollerComponent?
+                 val feederRoller: FeederRollerComponent?,
                  val shooterHood: ShooterHoodComponent?,
                  val carousel: CarouselComponent?
 ) : Named by Named("Subsystems") {
