@@ -10,13 +10,11 @@ import kotlin.math.pow
 
 class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversions", hardware) {
     val encoder by pref {
-        val complianceWheelRadius by pref(1.0, Inch)
-        val carouselRadius by pref(10.0, Inch)
         ({
             AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
                     nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
-                    nativeFeedbackUnits = 1,
-                    perFeedbackQuantity = 1.Turn * complianceWheelRadius / carouselRadius,
+                    nativeFeedbackUnits = 20,
+                    perFeedbackQuantity = 1.Turn,
                     nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
             )
         })
