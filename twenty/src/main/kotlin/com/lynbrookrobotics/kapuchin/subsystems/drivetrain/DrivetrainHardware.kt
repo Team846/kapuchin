@@ -10,8 +10,8 @@ import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -79,22 +79,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.inverted = rightEscInversion
     }
 
-    private fun blockUntilTrue(
-            timeout: Time = 10.Second,
-            poll: Time = 0.5.Second,
-            f: () -> Boolean
-    ): Boolean {
-        if (!f()) {
-            log(Debug) { "Waiting for predicated to return true..." }
-            val startTime = currentTime
-            while (!f() && currentTime - startTime < timeout) blockingDelay(poll)
-        }
-        return f()
-    }
-
     private val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
-        blockUntilTrue() { it.isConnected }
-        blockUntilTrue() { !it.isCalibrating }
+        blockUntil() { it.isConnected }
+        blockUntil() { !it.isCalibrating }
         it.zeroYaw()
     }.verify("NavX should be connected") {
         it.isConnected

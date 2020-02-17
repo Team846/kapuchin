@@ -1,15 +1,17 @@
 package com.lynbrookrobotics.kapuchin.subsystems.carousel
 
+import info.kunalsheth.units.generated.Angle
+
 inline class CarouselMagazineState(private val underlying: Int) {
     val fullSlots get() = Integer.bitCount(underlying and full.underlying)
     val emptySlots get() = 5 - fullSlots
 
     fun closestOpenSlot(center: Int) = closestSlot(center) { !it }
     fun closestClosedSlot(center: Int) = closestSlot(center) { it }
-    fun closestSlot(center: Int, f: (Boolean) -> Boolean): Int? {
+    fun closestSlot(center: Int, f: (Boolean) -> Boolean): Angle? {
         for (i in 0..3) when {
-            f(this[center + i]) -> return +i
-            f(this[center - i]) -> return -i
+            f(this[center + i]) -> return +i.CarouselSlot
+            f(this[center - i]) -> return -i.CarouselSlot
         }
         return null
     }
