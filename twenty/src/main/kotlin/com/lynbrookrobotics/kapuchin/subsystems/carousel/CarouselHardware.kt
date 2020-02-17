@@ -67,7 +67,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
             .with(graph("R", Percent, colorNamed)) { it.red.Each }
             .with(graph("G", Percent, colorNamed)) { it.green.Each }
             .with(graph("B", Percent, colorNamed)) { it.blue.Each }
-            .with(graph("Accuracy", Each, colorNamed)) { conversions.accuracy(it).Each }
+            .with(graph("Similarity", Each, colorNamed)) { conversions.similarity(it).Each }
 
     val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
             .with(graph("IR", Percent, colorNamed))

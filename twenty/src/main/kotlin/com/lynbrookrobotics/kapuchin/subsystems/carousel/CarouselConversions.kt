@@ -33,11 +33,11 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
     }
     val ballColorTolerance by pref(0.1)
 
-    fun accuracy(colorA: Color, colorB: Color = ballColor) =
+    fun similarity(colorA: Color, colorB: Color = ballColor) =
             (colorA.red - colorB.red).pow(2) +
                     (colorA.green - colorB.green).pow(2) +
                     (colorA.blue - colorB.blue).pow(2)
 
     fun detectingBall(proximity: Dimensionless, color: Color) =
-            proximity in ballIrRange && accuracy(color) < ballColorTolerance
+            proximity in ballIrRange && similarity(color) < ballColorTolerance
 }
