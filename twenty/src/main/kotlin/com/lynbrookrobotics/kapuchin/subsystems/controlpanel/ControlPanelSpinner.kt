@@ -12,6 +12,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.ColorSensorV3
 import edu.wpi.first.wpilibj.I2C.Port
@@ -43,7 +44,7 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
 
     val spinnerEsc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
-        it.idleMode = CANSparkMax.IdleMode.kCoast
+        +it.setIdleMode(IdleMode.kCoast)
         it.inverted = invert
     }
 

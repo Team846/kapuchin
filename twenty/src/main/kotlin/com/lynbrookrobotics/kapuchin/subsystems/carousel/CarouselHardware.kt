@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.ColorSensorV3
 import edu.wpi.first.wpilibj.DigitalInput
@@ -39,7 +40,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invert
-        it.idleMode = CANSparkMax.IdleMode.kCoast
+        +it.setIdleMode(IdleMode.kCoast)
     }
     val pidController by hardw { esc.pidController }
 

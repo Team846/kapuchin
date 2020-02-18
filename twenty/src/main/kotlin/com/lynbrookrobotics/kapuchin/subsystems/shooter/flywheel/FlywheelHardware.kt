@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 
@@ -35,13 +36,13 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     val masterEsc by hardw { CANSparkMax(masterEscId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invertMaster
-        it.idleMode = CANSparkMax.IdleMode.kCoast
+        +it.setIdleMode(IdleMode.kCoast)
     }
 
     val slaveEsc by hardw { CANSparkMax(slaveEscId, kBrushless) }.configure {
         generalSetup(it, escConfig)
-        it.follow(masterEsc, invertMaster != invertSlave)
-        it.idleMode = CANSparkMax.IdleMode.kCoast
+        +it.follow(masterEsc, invertMaster != invertSlave)
+        +it.setIdleMode(IdleMode.kCoast)
     }
 
     val pidController by hardw { masterEsc.pidController }
