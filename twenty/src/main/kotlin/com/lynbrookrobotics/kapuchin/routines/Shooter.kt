@@ -65,3 +65,10 @@ suspend fun TurretComponent.trackTarget(limelight: LimelightComponent, tolerance
 suspend fun ShooterHoodComponent.set(target: ShooterHoodState) = startRoutine("Set") {
     controller { target }
 }
+
+//suspend fun TurretComponent.fieldOriented(limelight: LimelightComponent, tolerance: Angle = 2.Degree) = startRoutine("Maintain position") {
+//    val reading by limelight.hardware.readings.readOnTick.withoutStamps
+//    val current by hardware.position.readOnTick.withoutStamps
+//    
+//    val differential = reading + current
+//}
