@@ -55,8 +55,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { climberTeleop() },
                 { controlPanelTeleop() },
                 { drivetrain.teleop(driver) },
-                { limelight?.autoZoom() },
-                { shooterTeleop() }
+                { digestionTeleop() },
+                { limelight?.autoZoom() }
         )
     }
 
@@ -64,7 +64,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         runAll(
                 { drivetrain.teleop(driver) },
                 { limelight?.autoZoom() },
-                { shooterTeleop() },
                 {
                     while (isActive) {
                         delay(0.3.Second)
@@ -95,18 +94,18 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             }
         }
 
-        private val initClimberPivot by pref(true)
-        private val initClimberWinch by pref(true)
-        private val initControlPanelPivot by pref(true)
-        private val initControlPanelSpinner by pref(true)
-        private val initIntakeRollers by pref(true)
-        private val initIntakeSlider by pref(true)
-        private val initLimelight by pref(true)
-        private val initFlywheel by pref(true)
-        private val initTurret by pref(true)
-        private val initFeederRoller by pref(true)
-        private val initShooterHood by pref(true)
-        private val initCarousel by pref(true)
+        private val initClimberPivot by pref(false)
+        private val initClimberWinch by pref(false)
+        private val initControlPanelPivot by pref(false)
+        private val initControlPanelSpinner by pref(false)
+        private val initIntakeRollers by pref(false)
+        private val initIntakeSlider by pref(false)
+        private val initLimelight by pref(false)
+        private val initFlywheel by pref(false)
+        private val initTurret by pref(false)
+        private val initFeederRoller by pref(false)
+        private val initShooterHood by pref(false)
+        private val initCarousel by pref(false)
 
         var instance: Subsystems? = null
             private set
