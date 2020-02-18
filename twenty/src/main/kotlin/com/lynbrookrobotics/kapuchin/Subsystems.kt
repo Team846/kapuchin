@@ -7,6 +7,7 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
@@ -16,7 +17,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.turret.*
-import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -27,6 +27,8 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.io.File
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
 
 class Subsystems(val drivetrain: DrivetrainComponent,
@@ -113,7 +115,14 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         val pneumaticTicker = ticker(Low, 50.milli(Second), "Pneumatic System Ticker")
         val shooterTicker = ticker(Highest, 30.milli(Second), "Shooter System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
-        fun sharedTickerTiming(): Time = error("Subsystem should use shared ticker values!")
+
+        val SubsystemHardware<*, *>.sharedTickerTiming
+            get() = object : ReadOnlyProperty<SubsystemHardware<*, *>, Time> {
+                override fun getValue(thisRef: SubsystemHardware<*, *>, property: KProperty<*>): Time {
+                    thisRef.log(Error) { "Subsystem should use shared ticker values!" }
+                    return 20.milli(Second)
+                }
+            }
 
         fun concurrentInit() = scope.launch {
             supervisorScope {

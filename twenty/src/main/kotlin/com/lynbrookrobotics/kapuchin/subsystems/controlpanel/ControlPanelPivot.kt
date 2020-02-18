@@ -22,7 +22,7 @@ class ControlPanelPivotComponent(hardware: ControlPanelPivotHardware) : Componen
 }
 
 class ControlPanelPivotHardware : SubsystemHardware<ControlPanelPivotHardware, ControlPanelPivotComponent>() {
-    override val period = sharedTickerTiming()
+    override val period by sharedTickerTiming
     override val syncThreshold = 50.milli(Second)
     override val priority = Priority.Low
     override val name = "Control Panel Pivot"

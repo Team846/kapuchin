@@ -45,7 +45,7 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
 }
 
 class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRollerComponent>() {
-    override val period = sharedTickerTiming()
+    override val period by sharedTickerTiming
     override val syncThreshold = 15.milli(Second)
     override val priority = Priority.Medium
     override val name = "Feeder Roller"

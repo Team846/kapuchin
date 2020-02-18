@@ -22,7 +22,7 @@ class IntakeSliderComponent(hardware: IntakeSliderHardware) : Component<IntakeSl
 }
 
 class IntakeSliderHardware : SubsystemHardware<IntakeSliderHardware, IntakeSliderComponent>() {
-    override val period = sharedTickerTiming()
+    override val period by sharedTickerTiming
     override val syncThreshold = 50.milli(Second)
     override val priority = Priority.Low
     override val name = "Intake Slider"

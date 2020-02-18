@@ -1,6 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems.intake
 
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -9,7 +11,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class IntakeRollersComponent(hardware: IntakeRollersHardware) : Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware) {
+class IntakeRollersComponent(hardware: IntakeRollersHardware) : Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, pneumaticTicker) {
 
     val eatSpeed by pref(50, Percent)
     val pukeSpeed by pref(50, Percent)
@@ -24,10 +26,10 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) : Component<Intake
 }
 
 class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRollersComponent>() {
-    override val period: Time = 50.milli(Second)
-    override val syncThreshold: Time = 20.milli(Second)
-    override val priority: Priority = Priority.Low
-    override val name: String = "Intake Rollers"
+    override val period by sharedTickerTiming
+    override val syncThreshold = 20.milli(Second)
+    override val priority = Priority.Low
+    override val name = "Intake Rollers"
 
     private val invert by pref(false)
     val escConfig by escConfigPref(
