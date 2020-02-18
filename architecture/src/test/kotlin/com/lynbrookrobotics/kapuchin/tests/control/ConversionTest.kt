@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlin.test.Test
 
 class ConversionTest {
@@ -32,7 +33,8 @@ class ConversionTest {
         anyInt.filter { it != 0 }.map { resolution ->
             LinearOffloadedNativeConversion(
                     ::p, ::p, ::p, ::p,
-                    1023, 12.Volt, resolution, 8.46.Metre, 1.Foot
+                    1023, 12.Volt, resolution, 8.46.Metre, 1.Foot,
+                    100.milli(Second), 1.Second
             )
         }.forEach { conversion ->
             anyDouble.map { it.Foot }.forEach { x ->
@@ -49,7 +51,8 @@ class ConversionTest {
         anyInt.filter { it != 0 }.map { resolution ->
             OffloadedNativeConversion<V, Absement, Length, Velocity, Acceleration>(
                     ::p, ::p, ::p, ::p,
-                    1023, 12.Volt, resolution, 8.46.Metre
+                    1023, 12.Volt, resolution, 8.46.Metre,
+                    1.Minute, 1.milli(Second)
             )
         }.forEach { conversion ->
             anyDouble.map { it.Foot }.forEach { x ->
