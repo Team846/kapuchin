@@ -26,21 +26,21 @@ suspend fun Subsystems.aim() = if (flywheel != null && limelight != null && shoo
             return@choreography
         })
 
-        snapshot1?.outer.run {
-            turret.set(this.bearing)
-        }
-
-        // TODO rotate turret with snapshot 1
-
-        val snapshot2 = limelight.conversions.goalPositions(target ?: run {
-            println("Target snapshot 2 not found")
-            return@choreography
-        })
-
-        val (flywheelVelocity, _, shooterHoodState) = bestShot(snapshot2) ?: run {
+        val (flywheelOmega, shooterHood, _, goal) = bestShot(snapshot1) ?: run {
             println("No shots possible")
             return@choreography
         }
+
+        if (goal == 0) {
+            snapshot1.outer?.run {
+                turret.set(this.bearing)
+            }
+        } else {
+            snapshot1.inner?.run {
+                turret.set(this.bearing)
+            }
+        }
+
     }
 
 } else println("Couldn't run aim choreo because of null subsystems")

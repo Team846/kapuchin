@@ -9,14 +9,16 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.sqrt
 
+data class ShotState(val flywheelVelocity: AngularVelocity, val shooterHoodState: ShooterHoodState, val entryAngle: Angle, var goal: Int) // 0 for outer, 1 for inner
+
 // UOM extension functions to make shooter math cleaner
 private val Length.squared: `L²` get() = this * this
 private val Dimensionless.squared: Dimensionless get() = this * this
 private val Velocity.squared: `L²⋅T⁻²` get() = this * this
 private fun sqrt(a: `L²⋅T⁻²`): Velocity = Velocity(sqrt(a.siValue))
 private fun sqrt(a: `L²`): Length = Length(sqrt(a.siValue))
+private fun ShotState.set(a: Int) { this.goal = a }
 
-data class ShotState(val flywheelVelocity: AngularVelocity, val shooterHoodState: ShooterHoodState, val entryAngle: Angle)
 
 /**
  * Calculate the best shot state given the current target.
@@ -36,8 +38,8 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? {
             ?.let { (hor, vert) -> (hor.squared + vert.squared) < flywheel.boundingCircleRadius.squared }
             ?: false
 
-    val innerUp = target.inner?.let { calculateShot(it, Up, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
-    val innerDown = target.inner?.let { calculateShot(it, Down, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
+    val innerUp = target.inner?.let { calculateShot(it, Up, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }.also { it?.set(1) }
+    val innerDown = target.inner?.let { calculateShot(it, Down, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }.also { it?.set(1) }
     val outerUp = target.outer?.let { calculateShot(it, Up, outerLimits, flywheel, shooterHood) }
     val outerDown = target.outer?.let { calculateShot(it, Down, outerLimits, flywheel, shooterHood) }
 
@@ -76,7 +78,7 @@ private fun calculateShot(
     val shotEntrySlope = -((distToBase * 1.EarthGravity) / (ballVelocity.squared * cos(launchAngle).squared)) + tan(launchAngle)
     val shotEntryAngle = atan(shotEntrySlope)
 
-    return ShotState(flywheelVelocity, shooterHoodState, shotEntryAngle)
+    return ShotState(flywheelVelocity, shooterHoodState, shotEntryAngle, 0)
             .takeIf { shotEntryAngle in entryAngleLimits }
             .takeIf { flywheelVelocity <= flywheel.maxSpeed }
 }
