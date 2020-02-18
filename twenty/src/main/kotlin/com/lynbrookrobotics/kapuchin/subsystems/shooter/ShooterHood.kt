@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 enum class ShooterHoodState(val output: Boolean, val launchAngle: (ShooterHoodComponent) -> Angle) {
     Up(true, ShooterHoodComponent::hoodUpLaunch),
@@ -29,7 +30,7 @@ class ShooterHoodComponent(hardware: ShooterHoodHardware) : Component<ShooterHoo
 
 class ShooterHoodHardware : SubsystemHardware<ShooterHoodHardware, ShooterHoodComponent>() {
     override val period = sharedTickerTiming()
-    override val syncThreshold = sharedTickerTiming()
+    override val syncThreshold = 15.milli(Second)
     override val priority = Priority.Low
     override val name = "Shooter Hood"
 

@@ -14,6 +14,7 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 sealed class ClimberWinchOutput() {
     data class Running(val esc: OffloadedOutput) : ClimberWinchOutput()
@@ -55,7 +56,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberW
 
 class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinchComponent>() {
     override val period = sharedTickerTiming()
-    override val syncThreshold = sharedTickerTiming()
+    override val syncThreshold = 10.milli(Second)
     override val priority = Priority.Medium
     override val name = "Climber Winch"
 

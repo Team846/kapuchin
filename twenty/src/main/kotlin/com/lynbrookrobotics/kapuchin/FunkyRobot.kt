@@ -26,7 +26,7 @@ class FunkyRobot : RobotBase() {
         println("Initializing hardware...")
 
         Compressor()
-        Subsystems.concurrentInit()
+        Subsystems.sequentialInit()
         val subsystems = Subsystems.instance!!
 
         println("Printing key list to `keylist.txt`...")
@@ -105,6 +105,6 @@ private fun printRunID() {
         System.err.println(e)
         -1
     }
-    println("Episode ${runId} — Rohan Awakens")
+    println("Episode ${runId} - Rohan Awakens")
     file.writeText(runId.toString())
 }

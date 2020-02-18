@@ -34,7 +34,7 @@ class RumbleHardware(
         val operator: OperatorHardware
 ) : SubsystemHardware<RumbleHardware, RumbleComponent>() {
     override val period = sharedTickerTiming()
-    override val syncThreshold = sharedTickerTiming()
+    override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
     override val name = "Rumble"
 }

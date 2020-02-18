@@ -8,6 +8,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.ControlPanelPivotSt
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 enum class ControlPanelPivotState(val output: Boolean) { Up(true), Down(false) }
 
@@ -22,7 +23,7 @@ class ControlPanelPivotComponent(hardware: ControlPanelPivotHardware) : Componen
 
 class ControlPanelPivotHardware : SubsystemHardware<ControlPanelPivotHardware, ControlPanelPivotComponent>() {
     override val period = sharedTickerTiming()
-    override val syncThreshold = sharedTickerTiming()
+    override val syncThreshold = 50.milli(Second)
     override val priority = Priority.Low
     override val name = "Control Panel Pivot"
 

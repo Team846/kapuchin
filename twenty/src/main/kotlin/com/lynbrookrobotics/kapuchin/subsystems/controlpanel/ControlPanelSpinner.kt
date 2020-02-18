@@ -17,6 +17,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.ColorSensorV3
 import edu.wpi.first.wpilibj.I2C.Port
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware) {
 
@@ -31,7 +32,7 @@ class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Comp
 
 class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<ControlPanelSpinnerHardware, ControlPanelSpinnerComponent>() {
     override val period = sharedTickerTiming()
-    override val syncThreshold = sharedTickerTiming()
+    override val syncThreshold = 20.milli(Second)
     override val priority = Priority.High
     override val name = "Control Panel"
 

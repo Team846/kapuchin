@@ -8,6 +8,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.IntakeSliderState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 enum class IntakeSliderState(val output: Boolean) { Out(true), In(false) }
 
@@ -22,7 +23,7 @@ class IntakeSliderComponent(hardware: IntakeSliderHardware) : Component<IntakeSl
 
 class IntakeSliderHardware : SubsystemHardware<IntakeSliderHardware, IntakeSliderComponent>() {
     override val period = sharedTickerTiming()
-    override val syncThreshold = sharedTickerTiming()
+    override val syncThreshold = 50.milli(Second)
     override val priority = Priority.Low
     override val name = "Intake Slider"
 

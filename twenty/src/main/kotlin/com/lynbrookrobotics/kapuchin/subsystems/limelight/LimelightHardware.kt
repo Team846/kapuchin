@@ -13,7 +13,7 @@ import java.lang.Double.NaN
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponent>() {
     override val period = sharedTickerTiming()
-    override val syncThreshold = sharedTickerTiming()
+    override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
     override val name = "Limelight"
 
