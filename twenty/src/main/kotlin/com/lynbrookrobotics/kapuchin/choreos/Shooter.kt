@@ -12,9 +12,10 @@ suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
     val aim by operator.aim.readEagerly().withoutStamps
     val aimPreset by operator.aimPreset.readEagerly().withoutStamps
     val shoot by operator.shoot.readEagerly().withoutStamps
-    val shootOverride by operator.shootOverride.readEagerly().withoutStamps
+    val hoodUp by operator.hoodUp.readEagerly().withoutStamps
 
-    val shooterHoodManual by operator.shooterHoodManual.readEagerly().withoutStamps
+    val flywheelManual by operator.flywheelManual.readEagerly().withoutStamps
+    val turretManual by operator.turretManual.readEagerly().withoutStamps
 
     choreography {
         launch { turret?.manualOverride(operator) }
@@ -22,8 +23,9 @@ suspend fun Subsystems.shooterTeleop() = startChoreo("Shooter Teleop") {
                 { aim } to choreography { aim() },
                 { aimPreset } to choreography { },
                 { shoot } to choreography { TODO("shoot") },
-                { shootOverride } to choreography { },
-                { shooterHoodManual } to choreography { hoodUp() }
+                { hoodUp } to choreography { shooterHood?.set(Up) },
+                { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) },
+                { !turretManual.isZero } to choreography { turret?.manualOverride(operator) }
         )
 
     }

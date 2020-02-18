@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.driver
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -11,20 +12,25 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.atan2
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val priority = Priority.High
     override val name = "Operator"
 
-    private val flywheelMapping by pref {
-        val exponent by pref(1)
-        val deadband by pref(10, Percent)
-        val sensitivity by pref(100, Percent)
+    private val flywheelMappingNamed = Named("flywheelMapping", this)
+    private val deadband by flywheelMappingNamed.pref(80, Percent)
+    private val min by flywheelMappingNamed.pref(20, Percent)
+    private val max by flywheelMappingNamed.pref(100, Percent)
+    private val minAngle by flywheelMappingNamed.pref(-90, Degree)
+    private val maxAngle by flywheelMappingNamed.pref(90, Degree)
+    private val minSetpointAngle by flywheelMappingNamed.pref(-135, Degree)
+    private val maxSetpointAngle by flywheelMappingNamed.pref(135, Degree)
 
-        ({
-            val db = horizontalDeadband(deadband, 100.Percent)
-            (fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)) to sensitivity
-        })
+    private val db = horizontalDeadband(deadband, 100.Percent)
+    private fun flywheelMapping(x: Dimensionless, y: Dimensionless): Angle? {
+        if (db(x) == 0.Percent && db(y) == 0.Percent) return null
+        return atan2(db(x).Each, db(y).Each).Radian
     }
 
     private val turretMapping by pref {
@@ -55,11 +61,25 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val back get() = xbox.backButton
 
     val aim = s { lt }
+    val aimPreset = s {
+        val angle = flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)
+        angle?.let { it in minSetpointAngle..-180.Degree || it in 180.Degree..maxSetpointAngle } ?: false
+    }
     val shoot = s { rt }
+    val hoodUp = s { lb }
 
-    val flywheelManual = s { flywheelMapping.first(getY(kLeft).Each) * flywheelMapping.second }
+    val flywheelManual = s {
+        val angle = flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)
+        angle?.let { a ->
+            val percent = ((a - minAngle) / (maxAngle - minAngle))
+                    .takeIf { a in minAngle..0.Degree || a in 0.Degree..maxAngle }
+                    ?: return@s 0.Percent
+
+            (max - min) * percent - min
+        } ?: 0.Percent
+    }
     val turretManual = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
-    val shooterHoodManual = s { lb }
+
 
     val extendClimber = s { back }
     val retractClimber = s { start }

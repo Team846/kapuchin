@@ -15,6 +15,15 @@ suspend fun FlywheelComponent.set(target: AngularVelocity) = startRoutine("Set")
     }
 }
 
+suspend fun FlywheelComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
+    val precision by operator.flywheelManual.readOnTick.withoutStamps
+
+    controller {
+        val target = maxSpeed * precision
+        VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.encoder.native(target))
+    }
+}
+
 suspend fun FeederRollerComponent.set(target: AngularVelocity) = startRoutine("Set") {
     controller {
         VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.native(target))
@@ -32,6 +41,7 @@ suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 2.Degree) = st
 
 suspend fun TurretComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
     val precision by operator.turretManual.readOnTick.withoutStamps
+
     controller { PercentOutput(hardware.escConfig, precision) }
 }
 
