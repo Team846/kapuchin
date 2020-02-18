@@ -29,3 +29,4 @@ suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 2.Degree) = st
 suspend fun ShooterHoodComponent.set(target: ShooterHoodState) = startRoutine("Set") {
     controller { target }
 }
+
