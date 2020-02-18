@@ -14,17 +14,17 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
     infix fun <Q : Quan<Q>> ClosedRange<Q>.less(that: ClosedRange<Q>): Boolean = this.start < that.start && this.endInclusive < that.endInclusive
 
     controller {
-        with(conversions) {
+        with(hardware.conversions) {
             visionTarget?.let { t ->
                 val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
-                val angleToPixelsX = zoomInResolution.x / zoomInFov.x.Degree
-                val centerInPixX = t.tx * angleToPixelsX / Degree
+                val angleToPixelsX = zoomInResolution.x / zoomInFov.x
+                val centerInPixX = t.tx * angleToPixelsX
                 val targetBoxBoundsX = centerInPixX `±` (t.thor / 2)
 
-                val angleToPixelsY = zoomInResolution.y / zoomInFov.y.Degree
-                val centerInPixY = t.ty * angleToPixelsY / Degree
+                val angleToPixelsY = zoomInResolution.y / zoomInFov.y
+                val centerInPixY = t.ty * angleToPixelsY
                 val targetBoxBoundsY = (centerInPixY) `±` (t.tvert / 2)
 
                 when (t.pipeline) {
@@ -36,11 +36,11 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
                         val midInsideBoxBoundsY = `±`(insideBoxResolution.y / 2 - zoomOutSafetyZone)
                         val lowInsideBoxBoundsY = -(insideBoxResolution.y - zoomOutSafetyZone)..0.0.Each
 
-                        val angleToPixelsX = (zoomOutResolution.x / zoomOutFov.x.Degree)
-                        val targetBoxBoundsX = (t.tx * angleToPixelsX / Degree) `±` (t.thor / 2)
+                        val angleToPixelsX = (zoomOutResolution.x / zoomOutFov.x)
+                        val targetBoxBoundsX = (t.tx * angleToPixelsX) `±` (t.thor / 2)
 
-                        val angleToPixelsY = (zoomOutResolution.y / zoomOutFov.y.Degree)
-                        val targetBoxBoundsY = (t.ty * angleToPixelsY / Degree) `±` (t.tvert / 2)
+                        val angleToPixelsY = (zoomOutResolution.y / zoomOutFov.y)
+                        val targetBoxBoundsY = (t.ty * angleToPixelsY) `±` (t.tvert / 2)
 
                         if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
                             when {

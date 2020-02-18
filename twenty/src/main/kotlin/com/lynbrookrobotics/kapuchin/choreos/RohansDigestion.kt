@@ -76,7 +76,7 @@ suspend fun Subsystems.adjustForOptimalFart() {
 
                 runWhenever({
                     feederCheck() && flywheelCheck()
-                } to {
+                } to choreography {
                     rumble.set(TwoSided(0.Percent, 100.Percent))
                 })
             }
