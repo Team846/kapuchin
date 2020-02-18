@@ -38,9 +38,7 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
         setupMaster(it, escConfig, false)
         it.inverted = invert
     }
-
     val pidController by hardw { esc.pidController }
-
     val encoder by hardw { esc.encoder }
 
     private val limitSwitch by hardw { esc.getForwardLimitSwitch(kNormallyOpen) }.configure {

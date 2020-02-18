@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.Subsystems.Companion.shooterTicker
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
 class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, shooterTicker) {
@@ -27,6 +28,8 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
     }
 
     override fun TurretHardware.output(value: OffloadedOutput) = with(hardware.conversions) {
+        if (atZero.optimizedRead(currentTime, 0.Second).y && !isZeroed) zero()
+
         val safeValue = if (!isZeroed) value.with(value.config.copy(
                 peakOutputForward = safeSpeed,
                 peakOutputReverse = -safeSpeed
