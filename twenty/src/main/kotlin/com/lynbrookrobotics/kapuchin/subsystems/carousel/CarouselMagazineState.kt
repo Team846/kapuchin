@@ -4,12 +4,18 @@ inline class CarouselMagazineState(private val underlying: Int) {
     val fullSlots get() = Integer.bitCount(underlying and full.underlying)
     val emptySlots get() = 5 - fullSlots
 
-    fun closestOpenSlot(center: Int) = closestSlot(center) { !it }
-    fun closestClosedSlot(center: Int) = closestSlot(center) { it }
-    fun closestSlot(center: Int, f: (Boolean) -> Boolean): Int? {
+    fun closestOpenSlot(): Int? {
         for (i in 0..3) when {
-            f(this[center + i]) -> return +i
-            f(this[center - i]) -> return -i
+            !this[collectSlot + i] -> return +i
+            !this[collectSlot - i] -> return -i
+        }
+        return null
+    }
+
+    fun closestClosedSlot(): Int? {
+        for (i in 0..3) when {
+            this[ccwChamber - i] -> return -i - 1
+            this[cwChamber + i] -> return +i + 1
         }
         return null
     }
@@ -23,7 +29,7 @@ inline class CarouselMagazineState(private val underlying: Int) {
         const val ccwChamber = 1
     }
 
-    operator fun get(slot: Int) = underlying shr (slot % 5) and 0b1 == 1
+    operator fun get(slot: Int) = underlying shr (5 + slot % 5) and 0b1 == 1
     operator fun set(slot: Int, value: Boolean) = CarouselMagazineState(
             (0b1 shl (slot % 5)).let { bit ->
                 if (value == true) bit or underlying

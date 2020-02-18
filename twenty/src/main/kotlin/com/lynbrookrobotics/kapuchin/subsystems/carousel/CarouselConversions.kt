@@ -10,11 +10,19 @@ import kotlin.math.pow
 
 class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversions", hardware) {
     val encoder by pref {
+        val gearbox by pref {
+            val motor by pref(20)
+            val output by pref(1)
+            ({ GearTrain(motor, output) })
+        }
+        val complianceWheelRadius by pref(1.25, Inch)
+        val carouselRadius by pref(10, Inch)
+
         ({
             AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
                     nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
-                    nativeFeedbackUnits = 20,
-                    perFeedbackQuantity = 1.Turn,
+                    nativeFeedbackUnits = 1,
+                    perFeedbackQuantity = gearbox.inputToOutput(1.Turn) * complianceWheelRadius / carouselRadius,
                     nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
             )
         })

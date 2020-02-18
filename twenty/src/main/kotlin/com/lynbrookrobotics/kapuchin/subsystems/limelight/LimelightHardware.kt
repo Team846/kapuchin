@@ -43,4 +43,6 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
             else -> null
         } lstamp it
     }
+
+    val conversions = LimelightConversions(this)
 }

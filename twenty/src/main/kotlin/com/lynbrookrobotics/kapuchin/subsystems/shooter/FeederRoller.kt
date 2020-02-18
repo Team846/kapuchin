@@ -69,7 +69,7 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
 
     val pidController by hardw { esc.pidController }
 
-    val velocity = sensor(encoder) { conversions.realVelocity(encoder.velocity) stampWith it }
+    val speed = sensor(encoder) { conversions.realVelocity(encoder.velocity) stampWith it }
 
     val conversions = AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
             nativeOutputUnits = 1, perOutputQuantity = escConfig.voltageCompSaturation,

@@ -17,7 +17,7 @@ private val Velocity.squared: `L²⋅T⁻²` get() = this * this
 private fun sqrt(a: `L²⋅T⁻²`): Velocity = Velocity(sqrt(a.siValue))
 private fun sqrt(a: `L²`): Length = Length(sqrt(a.siValue))
 
-data class ShotState(val flywheelVelocity: AngularVelocity, val shooterHoodState: ShooterHoodState, val entryAngle: Angle)
+data class ShotState(val flywheel: AngularVelocity, val hood: ShooterHoodState, val entryAngle: Angle)
 
 /**
  * Calculate the best shot state given the current target.

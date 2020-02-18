@@ -45,15 +45,19 @@ suspend fun TurretComponent.manualOverride(operator: OperatorHardware) = startRo
     controller { PercentOutput(hardware.escConfig, precision) }
 }
 
-suspend fun TurretComponent.trackTarget(limelight: LimelightComponent, tolerance: Angle = 2.Degree) = startRoutine("Track Target") {
+suspend fun TurretComponent.trackTarget(limelight: LimelightComponent, tolerance: Angle? = null) = startRoutine("Track Target") {
     val reading by limelight.hardware.readings.readOnTick.withoutStamps
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {
-        reading?.let { r ->
-            val target = current + r.tx
-            PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
-                    .takeUnless { r.tx in `±`(tolerance) }
+        reading?.let { snapshot ->
+            val target = current + snapshot.tx
+
+            PositionOutput(
+                    hardware.escConfig, positionGains, hardware.conversions.encoder.native(target)
+            ).takeUnless {
+                snapshot.tx.abs < tolerance ?: -1.Degree
+            }
         }
     }
 }

@@ -67,7 +67,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         Position(x, targetDistance, skew)
     }
 
-    fun goalPositions(sample: LimelightReading, skew: Angle = sample.tx): DetectedTarget {
+    fun goalPositions(sample: LimelightReading, skew: Angle): DetectedTarget {
         val outerGoal = outerGoalPosition(sample)
         val offsetAngle = 90.Degree - skew
 

@@ -26,6 +26,7 @@ generateUnitsOfMeasure {
 
             u("Turn", 2 * PI, d(A: 1)),
             u("Rpm", 2 * PI / 60, d(A: 1, T: -1)),
+            u("RpmPerSecond", 2 * PI / 60, d(A: 1, T: -2)),
             u("DegreeSecond", PI / 180, d(A: 1, T: 1)),
             u("Degree", PI / 180, d(A: 1)),
             u("DegreePerSecond", PI / 180, d(A: 1, T: -1)),

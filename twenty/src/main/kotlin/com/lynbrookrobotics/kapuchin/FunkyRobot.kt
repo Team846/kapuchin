@@ -105,6 +105,6 @@ private fun printRunID() {
         System.err.println(e)
         -1
     }
-    println("Kapuchin Run ID $runId")
+    println("Episode ${runId} — Rohan Awakens")
     file.writeText(runId.toString())
 }
