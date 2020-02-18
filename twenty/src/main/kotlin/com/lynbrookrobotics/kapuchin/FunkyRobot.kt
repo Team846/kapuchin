@@ -26,7 +26,7 @@ class FunkyRobot : RobotBase() {
         println("Initializing hardware...")
 
         Compressor()
-        Subsystems.sequentialInit()
+        Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
         println("Printing key list to `keylist.txt`...")
