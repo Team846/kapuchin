@@ -34,7 +34,7 @@ class ConversionTest {
             LinearOffloadedNativeConversion(
                     ::p, ::p, ::p, ::p,
                     1023, 12.Volt, resolution, 8.46.Metre, 1.Foot,
-                    100.milli(Second), 1.Second
+                    nativeTimeUnit = 100.milli(Second), nativeRateUnit= 1.Second
             )
         }.forEach { conversion ->
             anyDouble.map { it.Foot }.forEach { x ->
@@ -52,7 +52,7 @@ class ConversionTest {
             OffloadedNativeConversion<V, Absement, Length, Velocity, Acceleration>(
                     ::p, ::p, ::p, ::p,
                     1023, 12.Volt, resolution, 8.46.Metre,
-                    1.Minute, 1.milli(Second)
+                    nativeTimeUnit = 1.Minute, nativeRateUnit= 1.milli(Second)
             )
         }.forEach { conversion ->
             anyDouble.map { it.Foot }.forEach { x ->
