@@ -72,6 +72,7 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
             "G" -> conversions.green
             "R" -> conversions.red
             "Y" -> conversions.yellow
+            else -> null
         } stampWith it
     }
             .with(graph("Target Color", Each)) { (it?.run(conversions::indexColor) ?: -1).Each }
