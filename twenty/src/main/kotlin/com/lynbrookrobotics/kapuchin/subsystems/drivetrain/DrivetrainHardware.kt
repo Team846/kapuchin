@@ -41,7 +41,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             defaultNominalOutput = 1.5.Volt,
 
             defaultContinuousCurrentLimit = 25.Ampere,
-            defaultPeakCurrentLimit = 35.Ampere
+            defaultPeakCurrentLimit = 35.Ampere,
+
+            defaultPeakOutput = 3.Volt // TODO: remove extra safe default
     )
 
     private val idx = 0

@@ -61,7 +61,8 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
 
     private val invert by pref(false)
     val escConfig by escConfigPref(
-            defaultContinuousCurrentLimit = 40.Ampere
+            defaultContinuousCurrentLimit = 40.Ampere,
+            defaultPeakOutput = 3.Volt // TODO: remove extra safe default
     )
 
     private val masterEscId = 10

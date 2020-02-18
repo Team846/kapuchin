@@ -25,7 +25,9 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     val escConfig by escConfigPref(
             defaultNominalOutput = 1.Volt,
             defaultContinuousCurrentLimit = 15.Ampere,
-            defaultPeakCurrentLimit = 25.Ampere
+            defaultPeakCurrentLimit = 25.Ampere,
+
+            defaultPeakOutput = 3.Volt // TODO: remove extra safe default
     )
 
     val conversions = TurretConversions(this)
