@@ -11,7 +11,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -66,6 +65,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect") {
             log(Warning) { "I'm full. No open slots in carousel magazine." }
             rumble.set(TwoSided(100.Percent, 0.Percent))
         } else {
+            launch { feederRoller?.set(0.Rpm) }
             carousel.set(emptySlot - carousel.collectSlot, 0.1.CarouselSlot)
             launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
 
