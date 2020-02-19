@@ -18,34 +18,34 @@ import kotlin.math.abs
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
-        var state = CarouselMagazineState.empty
+    var state = CarouselMagazineState.empty
 
-        val intakeBalls by driver.intakeBalls.readEagerly().withoutStamps
-        val unjamBalls by driver.unjamBalls.readEagerly().withoutStamps
+    val intakeBalls by driver.intakeBalls.readEagerly().withoutStamps
+    val unjamBalls by driver.unjamBalls.readEagerly().withoutStamps
 
-        val aim by operator.aim.readEagerly().withoutStamps
-        val aimPreset by operator.aimPreset.readEagerly().withoutStamps
-        val shoot by operator.shoot.readEagerly().withoutStamps
-        val hoodUp by operator.hoodUp.readEagerly().withoutStamps
+    val aim by operator.aim.readEagerly().withoutStamps
+    val aimPreset by operator.aimPreset.readEagerly().withoutStamps
+    val shoot by operator.shoot.readEagerly().withoutStamps
+    val hoodUp by operator.hoodUp.readEagerly().withoutStamps
 
-        val flywheelManual by operator.flywheelManual.readEagerly().withoutStamps
-        val turretManual by operator.turretManual.readEagerly().withoutStamps
+    val flywheelManual by operator.flywheelManual.readEagerly().withoutStamps
+    val turretManual by operator.turretManual.readEagerly().withoutStamps
 
-        choreography {
-            runWhenever(
-                    { intakeBalls } to choreography { state = eat(state) },
-                    { unjamBalls } to choreography { puke() },
+    choreography {
+        runWhenever(
+                { intakeBalls } to choreography { state = eat(state) },
+                { unjamBalls } to choreography { puke() },
 
-                    { aim } to choreography { adjustForOptimalFart() },
-                    { aimPreset } to choreography { println("unimplemented") },
-                    { shoot } to choreography { state = accidentallyShart(state) },
-                    { hoodUp } to choreography { shooterHood?.set(Up) },
+                { aim } to choreography { adjustForOptimalFart() },
+                { aimPreset } to choreography { println("unimplemented") },
+                { shoot } to choreography { state = accidentallyShart(state) },
+                { hoodUp } to choreography { shooterHood?.set(Up) },
 
-                    { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) },
-                    { !turretManual.isZero } to choreography { turret?.manualOverride(operator) }
-            )
+                { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) },
+                { !turretManual.isZero } to choreography { turret?.manualOverride(operator) }
+        )
 
-        }
+    }
 }
 
 suspend fun Subsystems.eat(init: CarouselMagazineState): CarouselMagazineState = coroutineScope {
@@ -91,6 +91,7 @@ suspend fun Subsystems.adjustForOptimalFart() {
             readings?.let { snapshot ->
                 bestShot(limelight.hardware.conversions.goalPositions(snapshot, robotPosition.bearing))
             }?.let { shot ->
+                launch { shooterHood?.set(shot.hood) }
                 launch { flywheel.set(shot.flywheel) }
                 launch { feederRoller.set(feederRoller.feedSpeed) }
 
