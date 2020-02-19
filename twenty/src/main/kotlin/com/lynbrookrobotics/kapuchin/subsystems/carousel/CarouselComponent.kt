@@ -22,6 +22,7 @@ class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponen
     }
 
     val collectSlot by pref(0, CarouselSlot)
+    val colorSensor by pref(0, CarouselSlot)
     val shootSlot by pref(0.5, CarouselSlot)
 
     val state = CarouselState(this)

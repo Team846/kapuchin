@@ -11,6 +11,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -49,7 +50,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { !turretManual.isZero } to choreography { turret?.manualOverride(operator) },
 
                 { rezeroTurret } to choreography { turret?.rezero(electrical) },
-                { reindexCarousel } to choreography { }
+                { reindexCarousel } to choreography { carousel.whereAreMyBalls() }
         )
     }
 
