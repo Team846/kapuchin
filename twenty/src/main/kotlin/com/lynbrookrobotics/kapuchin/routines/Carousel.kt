@@ -24,9 +24,9 @@ suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Carousel Reindex"
     choreography {
         val start = carouselAngle.roundToInt(CarouselSlot)
         for (i in 0 until state.size) {
-            set(start + i.CarouselSlot - sensorSlot)
+            set(start + i.CarouselSlot - collectSlot)
             state.set(
-                    carouselAngle + sensorSlot,
+                    carouselAngle + collectSlot,
                     hardware.conversions.detectingBall(proximity, color)
             )
         }
