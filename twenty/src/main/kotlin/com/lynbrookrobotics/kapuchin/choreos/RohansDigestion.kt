@@ -47,7 +47,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) },
                 { !turretManual.isZero } to choreography { turret?.manualOverride(operator) },
 
-                { rezeroTurret } to choreography { turret?.hardware?.zero() },
+                { rezeroTurret } to choreography { turret?.rezero(electrical) },
                 { reindexCarousel } to choreography { }
         )
 

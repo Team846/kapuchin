@@ -1,7 +1,9 @@
 package com.lynbrookrobotics.kapuchin.routines
 
+import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
@@ -59,6 +61,14 @@ suspend fun TurretComponent.trackTarget(limelight: LimelightComponent, tolerance
                 snapshot.tx.abs < tolerance ?: -1.Degree
             }
         }
+    }
+}
+
+suspend fun TurretComponent.rezero(electrical: ElectricalSystemHardware) = startRoutine("Re-zero") {
+    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+
+    controller {
+        PercentOutput(hardware.escConfig, voltageToDutyCycle(safeSpeed, vBat)).takeUnless { hardware.isZeroed }
     }
 }
 

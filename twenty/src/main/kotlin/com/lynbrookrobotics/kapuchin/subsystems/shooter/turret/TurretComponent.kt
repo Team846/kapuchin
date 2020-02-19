@@ -9,7 +9,7 @@ import info.kunalsheth.units.generated.*
 
 class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, shooterTicker) {
 
-    private val safeSpeed by pref(3, Volt)
+    val safeSpeed by pref(3, Volt)
 
     val positionGains by pref {
         val kP by pref(12, Volt, 45, Degree)
