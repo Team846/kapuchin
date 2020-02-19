@@ -35,6 +35,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
 
     choreography {
+        launch { turret?.rezero(electrical) }
         runWhenever(
                 { intakeBalls } to choreography { state = eat(state) },
                 { unjamBalls } to choreography { puke() },
