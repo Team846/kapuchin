@@ -21,6 +21,7 @@ class TrajectoryFollower(
         private val drivetrain: GenericDrivetrainComponent,
         private val tolerance: Length,
         private val endTolerance: Length,
+        private val reverse: Boolean,
         scope: BoundSensorScope,
         trajectory: Trajectory,
         origin: Position
@@ -60,10 +61,15 @@ class TrajectoryFollower(
             target = newTarget
         }
 
-        val targetA = (target.y - position.vector).bearing
-        val (velocityL, velocityR) = uni.speedTargetAngleTarget(
+        var targetA = (target.y - position.vector).bearing
+        // If going reverse, find opposite target angle
+        if (reverse) targetA = (180.Degree - targetA.abs) * -targetA.signum
+
+        var (velocityL, velocityR) = uni.speedTargetAngleTarget(
                 speed, targetA
         ).first
+        // If going reverse, switch and negate left and right side
+        if (reverse) velocityL = -velocityR.also { velocityR = -velocityL }
 
         return TwoSided(velocityL, velocityR).takeIf { !done }
     }
