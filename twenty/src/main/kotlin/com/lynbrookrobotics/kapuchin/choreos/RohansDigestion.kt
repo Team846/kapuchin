@@ -109,7 +109,6 @@ suspend fun Subsystems.adjustForOptimalFart() {
             readings?.let { snapshot ->
                 bestShot(limelight.hardware.conversions.goalPositions(snapshot, robotPosition.bearing))
             }?.let { shot ->
-                launch { shooterHood?.set(shot.hood) }
                 launch { flywheel.set(shot.flywheel) }
                 launch { feederRoller.set(feederRoller.feedSpeed) }
 
@@ -121,6 +120,8 @@ suspend fun Subsystems.adjustForOptimalFart() {
 
                 log(Debug) { "Waiting for flywheel to get up to speed" }
                 delayUntil(f = ::flywheelCheck)
+
+                launch { shooterHood?.set(shot.hood) }
 
                 runWhenever({
                     feederCheck() && flywheelCheck()
