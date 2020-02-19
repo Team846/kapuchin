@@ -13,6 +13,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -83,6 +84,9 @@ suspend fun Subsystems.puke() = coroutineScope {
 
 suspend fun Subsystems.adjustForOptimalFart() {
     if (limelight != null && flywheel != null && feederRoller != null) startChoreo("Aim") {
+
+        val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+
         val readings by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
 
@@ -91,6 +95,16 @@ suspend fun Subsystems.adjustForOptimalFart() {
 
         choreography {
             launch { turret?.trackTarget(limelight) }
+
+            launch {
+                val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
+                if (fullSlot != null) supervisorScope {
+                    val target = fullSlot - carousel.shootSlot
+                    if (target > carouselAngle) carousel.set(target - 1.CarouselSlot)
+                    if (target < carouselAngle) carousel.set(target + 1.CarouselSlot)
+                }
+            }
+
             readings?.let { snapshot ->
                 bestShot(limelight.hardware.conversions.goalPositions(snapshot, robotPosition.bearing))
             }?.let { shot ->
@@ -98,18 +112,14 @@ suspend fun Subsystems.adjustForOptimalFart() {
                 launch { flywheel.set(shot.flywheel) }
                 launch { feederRoller.set(feederRoller.feedSpeed) }
 
-                val feederCheck: () -> Boolean = {
-                    feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-                }
-                val flywheelCheck: () -> Boolean = {
-                    flywheelSpeed in shot.flywheel `±` flywheel.tolerance
-                }
+                fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+                fun flywheelCheck() = flywheelSpeed in shot.flywheel `±` flywheel.tolerance
 
                 log(Debug) { "Waiting for feeder roller to get up to speed" }
-                delayUntil(f = feederCheck)
+                delayUntil(f = ::feederCheck)
 
                 log(Debug) { "Waiting for flywheel to get up to speed" }
-                delayUntil(f = flywheelCheck)
+                delayUntil(f = ::flywheelCheck)
 
                 runWhenever({
                     feederCheck() && flywheelCheck()
