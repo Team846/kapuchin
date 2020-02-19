@@ -36,6 +36,9 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     choreography {
         launch { turret?.rezero(electrical) }
+        launch {
+            launchWhenever({ turret?.routine == null } to { turret?.fieldOrientedPosition(drivetrain) })
+        }
         runWhenever(
                 { intakeBalls } to choreography { state = eat(state) },
                 { unjamBalls } to choreography { puke() },
@@ -51,8 +54,9 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { rezeroTurret } to choreography { turret?.rezero(electrical) },
                 { reindexCarousel } to choreography { }
         )
-
     }
+
+}
 }
 
 suspend fun Subsystems.eat(init: CarouselMagazineState): CarouselMagazineState = coroutineScope {

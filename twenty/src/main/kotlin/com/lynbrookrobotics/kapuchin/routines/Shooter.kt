@@ -5,10 +5,12 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
+import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.turret.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
 suspend fun FlywheelComponent.set(target: AngularVelocity) = startRoutine("Set") {
@@ -63,6 +65,22 @@ suspend fun TurretComponent.trackTarget(limelight: LimelightComponent, tolerance
         }
     }
 }
+
+suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponent) = startRoutine("Field Oriented Position") {
+    val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
+
+    // Initial field oriented bearing of the turret
+    val initial = drivetrainPosition.bearing + hardware.position.optimizedRead(currentTime, 0.Second).y
+
+    controller {
+        val target = initial `coterminal -` drivetrainPosition.bearing
+        if (target in hardware.conversions.min..hardware.conversions.max)
+            PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+        else
+            PercentOutput(hardware.escConfig, 0.Percent) // Output 0 instead of cancelling when in dead zone
+    }
+}
+
 
 suspend fun TurretComponent.rezero(electrical: ElectricalSystemHardware) = startRoutine("Re-zero") {
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
