@@ -31,6 +31,9 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val flywheelManual by operator.flywheelManual.readEagerly().withoutStamps
     val turretManual by operator.turretManual.readEagerly().withoutStamps
 
+    val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
+    val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
+
     choreography {
         runWhenever(
                 { intakeBalls } to choreography { state = eat(state) },
@@ -42,7 +45,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { hoodUp } to choreography { shooterHood?.set(Up) },
 
                 { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) },
-                { !turretManual.isZero } to choreography { turret?.manualOverride(operator) }
+                { !turretManual.isZero } to choreography { turret?.manualOverride(operator) },
+
+                { rezeroTurret } to choreography { turret?.hardware?.zero() },
+                { reindexCarousel } to choreography { }
         )
 
     }

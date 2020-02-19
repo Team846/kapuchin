@@ -80,6 +80,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     }
     val turretManual = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
 
+    val rezeroTurret = s { pov == 90 }
+    val reindexCarousel = s { pov == 270 }
 
     val extendClimber = s { back }
     val retractClimber = s { start }
