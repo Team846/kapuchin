@@ -7,18 +7,14 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
-import com.lynbrookrobotics.kapuchin.subsystems.carousel.CarouselMagazineState.Companion.collectSlot
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
-
-    var state = CarouselMagazineState.empty
 
     val intakeBalls by driver.intakeBalls.readEagerly().withoutStamps
     val unjamBalls by driver.unjamBalls.readEagerly().withoutStamps
@@ -40,12 +36,12 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             launchWhenever({ turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) })
         }
         runWhenever(
-                { intakeBalls } to choreography { state = eat(state) },
+                { intakeBalls } to choreography { eat() },
                 { unjamBalls } to choreography { puke() },
 
                 { aim } to choreography { adjustForOptimalFart() },
                 { aimPreset } to choreography { println("unimplemented") },
-                { shoot } to choreography { state = accidentallyShart(state) },
+                { shoot } to choreography { accidentallyShart() },
                 { hoodUp } to choreography { shooterHood?.set(Up) },
 
                 { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) },
@@ -58,29 +54,26 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
 }
 
-suspend fun Subsystems.eat(init: CarouselMagazineState): CarouselMagazineState = coroutineScope {
-    var state = init
+suspend fun Subsystems.eat() = startChoreo("Collect") {
+    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
-    val target = init.closestOpenSlot()
+    choreography {
+        val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
 
-    if (target == null) {
-        log(Warning) { "I'm full. No open slots in carousel magazine." }
-        rumble.set(TwoSided(100.Percent, 0.Percent))
-        init
-    } else {
-        repeat(abs(target)) {
-            if (target > 0) state = state.rotateCW(false)
-            if (target < 0) state = state.rotateCCW(false)
+        if (emptySlot == null) {
+            log(Warning) { "I'm full. No open slots in carousel magazine." }
+            rumble.set(TwoSided(100.Percent, 0.Percent))
+        } else {
+            carousel.set(emptySlot - carousel.collectSlot, 0.1.CarouselSlot)
+            launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
+
+            launch { intakeSlider?.set(IntakeSliderState.Out) }
+            launch { intakeRollers?.set(intakeRollers.eatSpeed) }
+
+            log(Debug) { "Waiting for a yummy mouthfuls of balls." }
+            carousel.delayUntilBall()
+            carousel.state.set(carouselAngle + carousel.collectSlot, true)
         }
-        carousel?.set(target.CarouselSlot, state, 10.Degree)
-        launch { carousel?.set(target.CarouselSlot, state, 0.Degree) }
-
-        launch { intakeSlider?.set(IntakeSliderState.Out) }
-        launch { intakeRollers?.set(intakeRollers.eatSpeed) }
-
-        log(Debug) { "Waiting for a yummy mouthfuls of balls." }
-        carousel?.delayUntilBall()
-        state.set(collectSlot, true)
     }
 }
 
@@ -128,32 +121,23 @@ suspend fun Subsystems.adjustForOptimalFart() {
     } else log(Error) { "Need limelight, flywheel, and feeder to aim" }
 }
 
-suspend fun Subsystems.accidentallyShart(init: CarouselMagazineState): CarouselMagazineState = coroutineScope {
-    var state = init
+suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
+    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
-    val target = init.closestClosedSlot()
+    choreography {
+        val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
 
-    if (target == null) {
-        log(Warning) { "I feel empty. I want to eat some balls." }
-        rumble.set(TwoSided(100.Percent, 0.Percent))
-        init
-    } else {
-        var targetState = state
-        repeat(abs(target) - 1) {
-            if (target > 0) targetState = targetState.rotateCW(false)
-            if (target < 0) targetState = targetState.rotateCCW(false)
+        if (fullSlot == null) {
+            log(Warning) { "I feel empty. I want to eat some balls." }
+            rumble.set(TwoSided(100.Percent, 0.Percent))
+        } else {
+            launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
+
+            log(Debug) { "Waiting for fart to crown." }
+            withTimeout(3.Second) {
+                flywheel?.delayUntilBall()
+                carousel.state.set(carouselAngle + carousel.shootSlot, true)
+            }
         }
-        if (target > 0) targetState = targetState.rotateCW(true)
-        if (target < 0) targetState = targetState.rotateCCW(true)
-
-        launch { carousel?.set(target.CarouselSlot, targetState) }
-
-        log(Debug) { "Waiting for fart to crown." }
-        withTimeout(3.Second) {
-            flywheel?.delayUntilBall()
-            state.set(collectSlot, true)
-        }
-
-        targetState
     }
 }

@@ -36,6 +36,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val driver: DriverHardware,
                  val operator: OperatorHardware,
                  val rumble: RumbleComponent,
+                 val carousel: CarouselComponent,
 
                  val climberPivot: ClimberPivotComponent?,
                  val climberWinch: ClimberWinchComponent?,
@@ -47,8 +48,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val flywheel: FlywheelComponent?,
                  val turret: TurretComponent?,
                  val feederRoller: FeederRollerComponent?,
-                 val shooterHood: ShooterHoodComponent?,
-                 val carousel: CarouselComponent?
+                 val shooterHood: ShooterHoodComponent?
 ) : Named by Named("Subsystems") {
 
     suspend fun teleop() {
@@ -107,7 +107,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initTurret by pref(false)
         private val initFeederRoller by pref(false)
         private val initShooterHood by pref(false)
-        private val initCarousel by pref(false)
 
         var instance: Subsystems? = null
             private set
@@ -139,6 +138,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val driverAsync = async { DriverHardware() }
                 val operatorAsync = async { OperatorHardware() }
                 val rumbleAsync = async { RumbleComponent(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
+                val carouselAsync = async { CarouselComponent(CarouselHardware()) }
 
                 val climberPivotAsync = i(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
                 val climberWinchAsync = i(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
@@ -151,7 +151,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val turretAsync = i(initTurret) { TurretComponent(TurretHardware()) }
                 val feederRollerAsync = i(initFeederRoller) { FeederRollerComponent(FeederRollerHardware()) }
                 val shooterHoodAsync = i(initShooterHood) { ShooterHoodComponent(ShooterHoodHardware()) }
-                val carouselAsync = i(initCarousel) { CarouselComponent(CarouselHardware()) }
 
                 instance = Subsystems(
                         drivetrainAsync.await(),
@@ -159,6 +158,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         driverAsync.await(),
                         operatorAsync.await(),
                         rumbleAsync.await(),
+                        carouselAsync.await(),
 
                         t { climberPivotAsync.await() },
                         t { climberWinchAsync.await() },
@@ -170,8 +170,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         t { flywheelAsync.await() },
                         t { turretAsync.await() },
                         t { feederRollerAsync.await() },
-                        t { shooterHoodAsync.await() },
-                        t { carouselAsync.await() }
+                        t { shooterHoodAsync.await() }
                 )
             }
         }.also { runBlocking { it.join() } }
@@ -193,6 +192,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     driver,
                     operator,
                     RumbleComponent(RumbleHardware(driver, operator)),
+                    CarouselComponent(CarouselHardware()),
 
                     i(initClimberPivot) { t { ClimberPivotComponent(ClimberPivotHardware()) } },
                     i(initClimberWinch) { t { ClimberWinchComponent(ClimberWinchHardware()) } },
@@ -204,8 +204,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     i(initFlywheel) { t { FlywheelComponent(FlywheelHardware()) } },
                     i(initTurret) { t { TurretComponent(TurretHardware()) } },
                     i(initFeederRoller) { t { FeederRollerComponent(FeederRollerHardware()) } },
-                    i(initShooterHood) { t { ShooterHoodComponent(ShooterHoodHardware()) } },
-                    i(initCarousel) { t { CarouselComponent(CarouselHardware()) } }
+                    i(initShooterHood) { t { ShooterHoodComponent(ShooterHoodHardware()) } }
             )
         }
     }

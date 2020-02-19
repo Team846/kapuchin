@@ -7,7 +7,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
-class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, Pair<OffloadedOutput, CarouselMagazineState>>(hardware) {
+class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
 
     val positionGains by pref {
         val kP by pref(12, Volt, 90, Degree)
@@ -21,15 +21,18 @@ class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponen
         })
     }
 
-    private var magazineState = CarouselMagazineState.empty
-    override val fallbackController: CarouselComponent.(Time) -> Pair<OffloadedOutput, CarouselMagazineState> = {
-        PercentOutput(hardware.escConfig, 0.Percent) to magazineState
+    val collectSlot by pref(0, CarouselSlot)
+    val shootSlot by pref(0.5, CarouselSlot)
+
+    val state = CarouselState(this)
+
+    override val fallbackController: CarouselComponent.(Time) -> OffloadedOutput = {
+        PercentOutput(hardware.escConfig, 0.Percent)
     }
 
     private val ammoGraph = graph("Ammo", Each)
-    override fun CarouselHardware.output(value: Pair<OffloadedOutput,CarouselMagazineState>) {
-        value.first.writeTo(esc, pidController)
-        magazineState = value.second
-        ammoGraph(currentTime, magazineState.fullSlots.Each)
+    override fun CarouselHardware.output(value: OffloadedOutput) {
+        value.writeTo(esc, pidController)
+        ammoGraph(currentTime, state.ammo.Each)
     }
 }
