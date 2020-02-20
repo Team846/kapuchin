@@ -133,6 +133,10 @@ suspend fun Subsystems.adjustForOptimalFart() {
     } else log(Error) { "Need limelight, flywheel, and feeder to aim" }
 }
 
+suspend fun Subsystems.targetZoneAim() = couroutineScope {
+    launch { flywheel?.set(flywheel.target) }
+}
+
 suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 

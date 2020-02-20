@@ -11,16 +11,6 @@ import info.kunalsheth.units.math.*
 
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
 
-    private val fieldConstants = Named("fieldConstants", this)
-    val targetDiameter by fieldConstants.pref(30, Inch) // "diameter" of the inscribed circle of the outer goal
-    val innerGoalDepth by fieldConstants.pref(25.25, Inch) // Distance between outer and inner goal
-    val targetHeight by fieldConstants.pref(98.25, Inch) // height from floor to center of outer goal
-    val ballMass by fieldConstants.pref(0.141748, Kilogram)
-    val ballDiameter by fieldConstants.pref(7, Inch)
-
-    val outerEntryAngleLimit get() = 90.Degree - atan2(ballDiameter, targetDiameter / 2)
-    val boundingCircleRadius get() = (targetDiameter / 2) - (ballDiameter / 2)
-
     val maxSpeed by pref(5676, Rpm)
     val momentFactor by pref(1.4)
     val rollerRadius by pref(2, Inch)

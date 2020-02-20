@@ -1,6 +1,11 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.Field.ballDiameter
+import com.lynbrookrobotics.kapuchin.Field.ballMass
+import com.lynbrookrobotics.kapuchin.Field.innerGoalDepth
+import com.lynbrookrobotics.kapuchin.Field.targetDiameter
+import com.lynbrookrobotics.kapuchin.Field.targetHeight
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
@@ -31,10 +36,11 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? {
     if (flywheel == null || shooterHood == null) return null
 
     val innerLimits = innerEntryAngleLimits(target, flywheel)
-    val outerLimits = `±`(flywheel.outerEntryAngleLimit)
+    val outerLimits = `±`(90.Degree - atan2(ballDiameter, targetDiameter / 2))
+    val boundingCircleRadius = (targetDiameter / 2) - (ballDiameter / 2)
     val innerGoalPossible = target.outer
             ?.let { innerGoalOffsets(it, flywheel) }
-            ?.let { (hor, vert) -> (hor.squared + vert.squared) < flywheel.boundingCircleRadius.squared }
+            ?.let { (hor, vert) -> (hor.squared + vert.squared) < boundingCircleRadius.squared }
             ?: false
 
     val innerUp = target.inner?.let { calculateShot(it, Up, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
@@ -66,7 +72,7 @@ private fun calculateShot(
 ): ShotState? {
     val launchAngle = shooterHoodState.launchAngle(shooterHood)
     val distToBase = sqrt(target.x.squared + target.y.squared)
-    val height = flywheel.targetHeight - flywheel.shooterHeight
+    val height = targetHeight - flywheel.shooterHeight
 
     val ballVelocity = sqrt(0.5) * sqrt((distToBase.squared * 1.EarthGravity) / ((distToBase * tan(launchAngle) - height) * cos(launchAngle).squared))
 
@@ -90,7 +96,7 @@ private fun calculateShot(
 private fun innerGoalOffsets(outer: Position, flywheel: FlywheelComponent): Pair<Length, Length> {
     val distToBase = sqrt(outer.x.squared + outer.y.squared)
 
-    val horizontal = flywheel.innerGoalDepth * tan(outer.bearing)
+    val horizontal = innerGoalDepth * tan(outer.bearing)
     val vertical = with(flywheel) { (innerGoalDepth * (targetHeight - shooterHeight)) / (distToBase * cos(outer.bearing)) }
 
     return horizontal to vertical
@@ -104,7 +110,7 @@ private fun innerGoalOffsets(outer: Position, flywheel: FlywheelComponent): Pair
 private fun innerEntryAngleLimits(target: DetectedTarget, flywheel: FlywheelComponent): ClosedRange<Angle> = target.outer?.let { outer ->
     val horizontalOffset = innerGoalOffsets(outer, flywheel).first
 
-    val downward = atan(((flywheel.targetDiameter / 2) + horizontalOffset) / flywheel.innerGoalDepth)
-    val upward = 90.Degree - atan(flywheel.innerGoalDepth / ((flywheel.targetDiameter / 2) - horizontalOffset))
+    val downward = atan(((targetDiameter / 2) + horizontalOffset) / innerGoalDepth)
+    val upward = 90.Degree - atan(innerGoalDepth / ((targetDiameter / 2) - horizontalOffset))
     return downward..upward
 } ?: 0.Degree..0.Degree
