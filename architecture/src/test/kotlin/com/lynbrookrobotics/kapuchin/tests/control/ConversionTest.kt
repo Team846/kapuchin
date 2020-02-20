@@ -83,7 +83,7 @@ class ConversionTest {
         anyInt.filter { it > 0 }.forEach { input ->
             anyInt.filter { it > 0 }.forEach { idlers ->
                 anyInt.filter { it > 0 }
-                        .map { output -> GearTrain(input, idlers, output) }
+                        .map { output -> GearTrain(input, output, idlers) }
                         .forEach { gearTrain ->
                             anyDouble.map { it.Degree }.forEach { x ->
                                 x `is equal to?` gearTrain.outputToInput(gearTrain.inputToOutput(x))
