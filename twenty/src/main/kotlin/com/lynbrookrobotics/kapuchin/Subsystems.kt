@@ -48,6 +48,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val flywheel: FlywheelComponent?,
                  val turret: TurretComponent?,
                  val feederRoller: FeederRollerComponent?,
+                 val flashlight: FlashlightComponent?,
                  val shooterHood: ShooterHoodComponent?
 ) : Named by Named("Subsystems") {
 
@@ -106,6 +107,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initFlywheel by pref(false)
         private val initTurret by pref(false)
         private val initFeederRoller by pref(false)
+        private val initFlashlight by pref(false)
         private val initShooterHood by pref(false)
 
         var instance: Subsystems? = null
@@ -150,6 +152,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val flywheelAsync = i(initFlywheel) { FlywheelComponent(FlywheelHardware()) }
                 val turretAsync = i(initTurret) { TurretComponent(TurretHardware()) }
                 val feederRollerAsync = i(initFeederRoller) { FeederRollerComponent(FeederRollerHardware()) }
+                val flashlightAsync = i(initFlashlight) { FlashlightComponent(FlashlightHardware()) }
                 val shooterHoodAsync = i(initShooterHood) { ShooterHoodComponent(ShooterHoodHardware()) }
 
                 instance = Subsystems(
@@ -170,6 +173,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         t { flywheelAsync.await() },
                         t { turretAsync.await() },
                         t { feederRollerAsync.await() },
+                        t { flashlightAsync.await() },
                         t { shooterHoodAsync.await() }
                 )
             }
@@ -204,6 +208,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     i(initFlywheel) { t { FlywheelComponent(FlywheelHardware()) } },
                     i(initTurret) { t { TurretComponent(TurretHardware()) } },
                     i(initFeederRoller) { t { FeederRollerComponent(FeederRollerHardware()) } },
+                    i(initFlashlight) { t { FlashlightComponent(FlashlightHardware()) } },
                     i(initShooterHood) { t { ShooterHoodComponent(ShooterHoodHardware()) } }
             )
         }

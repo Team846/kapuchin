@@ -1,6 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
-import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -11,7 +11,7 @@ import info.kunalsheth.units.math.*
 
 typealias FlashlightState = Relay.Value
 
-class FlashlightComponent(hardware: FlashlightHardware) : Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, Subsystems.pneumaticTicker) {
+class FlashlightComponent(hardware: FlashlightHardware) : Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, pneumaticTicker) {
 
     override val fallbackController: FlashlightComponent.(Time) -> FlashlightState = { FlashlightState.kOff }
 

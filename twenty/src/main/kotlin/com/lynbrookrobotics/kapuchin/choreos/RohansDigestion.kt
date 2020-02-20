@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
+import edu.wpi.first.wpilibj.Relay.Value.kOn
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -50,7 +51,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { hoodUp } to choreography { shooterHood?.set(Up) },
 
                 { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) },
-                { !turretManual.isZero } to choreography { turret?.manualOverride(operator) },
+                { !turretManual.isZero } to choreography {
+                    launch { flashlight?.set(kOn) }
+                    turret?.manualOverride(operator)
+                },
 
                 { rezeroTurret } to choreography { turret?.rezero(electrical) },
                 { reindexCarousel } to choreography { carousel.whereAreMyBalls() }
@@ -110,6 +114,9 @@ suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
 
         if (fullSlot == null) {
             log(Warning) { "I feel empty. I want to eat some balls." }
+            launch {
+                withTimeout(2.Second) { flashlight?.strobe() }
+            }
             rumble.set(TwoSided(100.Percent, 0.Percent))
         } else {
             launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
@@ -133,6 +140,8 @@ private suspend fun Subsystems.generalAim(flywheelTarget: AngularVelocity, hoodT
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
+            launch { flashlight?.set(kOn) }
+
             launch {
                 val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
                 if (fullSlot != null) supervisorScope {
