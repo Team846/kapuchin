@@ -14,7 +14,7 @@ class FlywheelConversions(hardware: FlywheelHardware) : Named by Named("Conversi
             AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
                     nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = 1,
-                    perFeedbackQuantity = GearTrain(motorSprocket, flywheelSprocket).inputToOutput(1.Turn),
+                    perFeedbackQuantity = GearTrain(motorSprocket, flywheelSprocket, 1).inputToOutput(1.Turn),
                     nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
             )
         })
