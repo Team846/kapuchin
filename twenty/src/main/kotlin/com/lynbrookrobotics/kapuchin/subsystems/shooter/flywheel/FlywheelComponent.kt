@@ -19,6 +19,7 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val shooterHeight by pref(24, Inch) // shooter height from the floor
 
     val idleOutput by pref(50, Percent)
+    val preset by pref(3000, Rpm)
     val tolerance by pref(10, Rpm)
     val ballThreshold by pref(-1000, RpmPerSecond)
 

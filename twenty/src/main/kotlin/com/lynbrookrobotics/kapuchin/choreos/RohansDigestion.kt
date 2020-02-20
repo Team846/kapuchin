@@ -11,7 +11,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
@@ -32,16 +31,21 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
 
     choreography {
-        launch { turret?.rezero(electrical) }
+        // In case turret wasn't zeroed during autonomous
+        if (turret?.hardware?.isZeroed == true) launch { turret.rezero(electrical) }
+
         launch {
-            launchWhenever({ turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) })
+            launchWhenever(
+                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) }
+            )
         }
+
         runWhenever(
                 { intakeBalls } to choreography { eat() },
-                { unjamBalls } to choreography { puke() },
+                { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) },
 
                 { aim } to choreography { adjustForOptimalFart() },
-                { aimPreset } to choreography { println("unimplemented") },
+                { aimPreset } to choreography { flywheel?.let { generalAim(it.preset, Down) } },
                 { shoot } to choreography { accidentallyShart() },
                 { hoodUp } to choreography { shooterHood?.set(Up) },
 
@@ -55,7 +59,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
 }
 
-suspend fun Subsystems.eat() = startChoreo("Collect") {
+suspend fun Subsystems.eat() = startChoreo("Intake Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
@@ -79,62 +83,22 @@ suspend fun Subsystems.eat() = startChoreo("Collect") {
     }
 }
 
-suspend fun Subsystems.puke() = coroutineScope {
-    intakeRollers?.set(intakeRollers.pukeSpeed)
-}
-
 suspend fun Subsystems.adjustForOptimalFart() {
-    if (limelight != null && flywheel != null && feederRoller != null) startChoreo("Aim") {
-
-        val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+    if (limelight != null) startChoreo("Aim") {
 
         val readings by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
 
-        val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
-        val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
-
         choreography {
             launch { turret?.trackTarget(limelight) }
-
-            launch {
-                val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-                if (fullSlot != null) supervisorScope {
-                    val target = fullSlot - carousel.shootSlot
-                    if (target > carouselAngle) carousel.set(target - 1.CarouselSlot)
-                    if (target < carouselAngle) carousel.set(target + 1.CarouselSlot)
-                }
-            }
 
             readings?.let { snapshot ->
                 bestShot(limelight.hardware.conversions.goalPositions(snapshot, robotPosition.bearing))
             }?.let { shot ->
-                launch { flywheel.set(shot.flywheel) }
-                launch { feederRoller.set(feederRoller.feedSpeed) }
-
-                fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-                fun flywheelCheck() = flywheelSpeed in shot.flywheel `±` flywheel.tolerance
-
-                log(Debug) { "Waiting for feeder roller to get up to speed" }
-                delayUntil(f = ::feederCheck)
-
-                log(Debug) { "Waiting for flywheel to get up to speed" }
-                delayUntil(f = ::flywheelCheck)
-
-                launch { shooterHood?.set(shot.hood) }
-
-                runWhenever({
-                    feederCheck() && flywheelCheck()
-                } to choreography {
-                    rumble.set(TwoSided(0.Percent, 100.Percent))
-                })
+                generalAim(shot.flywheel, shot.hood)
             }
         }
-    } else log(Error) { "Need limelight, flywheel, and feeder to aim" }
-}
-
-suspend fun Subsystems.targetZoneAim() = couroutineScope {
-    launch { flywheel?.set(flywheel.target) }
+    } else log(Error) { "Need limelight to aim" }
 }
 
 suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
@@ -156,4 +120,45 @@ suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
             }
         }
     }
+}
+
+private suspend fun Subsystems.generalAim(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
+    if (limelight != null && flywheel != null && feederRoller != null) startChoreo("General Aim") {
+
+        val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+
+        val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
+        val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
+
+        choreography {
+            launch {
+                val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
+                if (fullSlot != null) supervisorScope {
+                    val target = fullSlot - carousel.shootSlot
+                    if (target > carouselAngle) carousel.set(target - 1.CarouselSlot)
+                    if (target < carouselAngle) carousel.set(target + 1.CarouselSlot)
+                }
+            }
+
+            launch { flywheel.set(flywheelTarget) }
+            launch { feederRoller.set(feederRoller.feedSpeed) }
+
+            fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+            fun flywheelCheck() = flywheelSpeed in flywheelTarget `±` flywheel.tolerance
+
+            log(Debug) { "Waiting for feeder roller to get up to speed" }
+            delayUntil(f = ::feederCheck)
+
+            log(Debug) { "Waiting for flywheel to get up to speed" }
+            delayUntil(f = ::flywheelCheck)
+
+            launch { shooterHood?.set(hoodTarget) }
+
+            runWhenever({
+                feederCheck() && flywheelCheck()
+            } to choreography {
+                rumble.set(TwoSided(0.Percent, 100.Percent))
+            })
+        }
+    } else log(Error) { "Need flywheel and feeder to aim" }
 }
