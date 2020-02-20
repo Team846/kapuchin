@@ -43,20 +43,20 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         runWhenever(
                 { intakeBalls } to choreography { eat() },
-                { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) },
+                { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
                 { aim } to choreography { visionAim() },
-                { aimPreset } to choreography { flywheel?.let { generalAim(flywheel.preset, Down) } },
+                { aimPreset } to choreography { flywheel?.let { generalAim(flywheel.preset, Down) } ?: freeze() },
                 { shoot } to choreography { accidentallyShart() },
-                { hoodUp } to choreography { shooterHood?.set(Up) },
+                { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
-                { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) },
+                { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) ?: freeze() },
                 { !turretManual.isZero } to choreography {
                     launch { flashlight?.set(kOn) }
-                    turret?.manualOverride(operator)
+                    turret?.manualOverride(operator) ?: freeze()
                 },
 
-                { rezeroTurret } to choreography { turret?.rezero(electrical) },
+                { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
                 { reindexCarousel } to choreography { carousel.whereAreMyBalls() }
         )
     }
