@@ -3,10 +3,8 @@ package com.lynbrookrobotics.kapuchin.control.conversion
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.math.*
 import kotlin.jvm.JvmName
 
 /**

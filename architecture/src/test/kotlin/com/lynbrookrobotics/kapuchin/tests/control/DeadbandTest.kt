@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.tests.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 import kotlin.test.Test
 
 class DeadbandTest {
