@@ -61,15 +61,12 @@ class TrajectoryFollower(
             target = newTarget
         }
 
-        var targetA = (target.y - position.vector).bearing
-        // If going reverse, find opposite target angle
-        if (reverse) targetA = (180.Degree - targetA.abs) * -targetA.signum
+        val targetA = (target.y - position.vector).bearing
 
-        var (velocityL, velocityR) = uni.speedTargetAngleTarget(
-                speed, targetA
+        val (velocityL, velocityR) = uni.speedTargetAngleTarget(
+                if (reverse) -speed else speed,
+                if (reverse) 180.Degree `coterminal +` targetA else targetA
         ).first
-        // If going reverse, switch and negate left and right side
-        if (reverse) velocityL = -velocityR.also { velocityR = -velocityL }
 
         return TwoSided(velocityL, velocityR).takeIf { !done }
     }

@@ -36,7 +36,7 @@ suspend fun Subsystems.followJournal() = startChoreo("Follow journal") {
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 12.Inch, 2.Inch, true)
+        drivetrain.followTrajectory(trajectory, 12.Inch, 2.Inch, drivetrain.reverse)
         freeze()
     }
 }
