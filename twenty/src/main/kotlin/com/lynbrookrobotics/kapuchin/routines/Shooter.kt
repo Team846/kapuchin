@@ -66,12 +66,12 @@ suspend fun TurretComponent.trackTarget(
     controller {
         reading?.let { snapshot ->
             val target = when (goal) {
-                Inner -> current + snapshot.tx
-                Outer -> with(limelight.hardware.conversions) {
+                Outer -> current + snapshot.tx
+                Inner -> with(limelight.hardware.conversions) {
                     val llTarget = goalPositions(snapshot, robotPosition.bearing)
                     val horizontalOffset = innerGoalOffsets(llTarget, flywheel.shooterHeight).first
-                    val dtheta = atan2(innerGoalDepth, horizontalOffset) - (90.Degree - (snapshot.tx + robotPosition.bearing))
-                    current + snapshot.tx + dtheta
+                    val dtheta = atan(innerGoalDepth / horizontalOffset) - (90.Degree - (snapshot.tx + robotPosition.bearing))
+                    current + snapshot.tx - dtheta
                 }
             }
 
