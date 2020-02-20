@@ -70,14 +70,12 @@ suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponen
     val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
 
     // Initial field oriented bearing of the turret
-    val initial = drivetrainPosition.bearing + hardware.position.optimizedRead(currentTime, 0.Second).y
+    val initial = drivetrainPosition.bearing `coterminal +` hardware.position.optimizedRead(currentTime, 0.Second).y
 
     controller {
         val target = initial `coterminal -` drivetrainPosition.bearing
-        if (target in hardware.conversions.min..hardware.conversions.max)
-            PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
-        else
-            PercentOutput(hardware.escConfig, 0.Percent) // Output 0 instead of cancelling when in dead zone
+        PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+                .takeIf { target in hardware.conversions.min..hardware.conversions.max }
     }
 }
 
