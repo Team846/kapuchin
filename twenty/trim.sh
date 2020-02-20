@@ -1,53 +1,73 @@
 #!/bin/bash
 
-ini="./networktables.ini"
-keylist="./keylist.txt"
-out="./output.txt"
-# ini="/home/lvuser/networktables.ini"
-# keylist="/home/lvuser/keylist.txt"
-# out="/home/lvuser/output.txt"
-f=false
+# @author Andy
+#
+# When booting up the robot, the file `keylist.txt` will be written to with all the preferences currently in use.
+# Copy this script to the RoboRIO then run it to delete all unused preferences off of `networktables.ini`.
+# Running this script with no flags will do a dry run. Pass `-f` to modify networktables.ini.
+# To prevent the robot from starting up, `killall java` is run in various places.
+
+# Mark 1 if testing on your own machine.
+DEBUG=0
+
+
+ini=$( (($DEBUG)) && echo "./networktables.ini" || echo "/home/lvuser/networktables.ini" )
+keylist=$( (($DEBUG)) && echo "./keylist.txt" || echo "/home/lvuser/keylist.txt" )
+out=$( (($DEBUG)) && echo "./output.txt" || echo "/home/lvuser/output.txt" )
 
 #Check if -f was passed
+f=0
 while getopts ":f" opt; do
   case ${opt} in
-  f)
-    f=true
-    ;;
+    f )
+      f=1
+      ;;
   esac
 done
 
-while read -r line; do
-  killall java
-  if grep -q 'NetworkTables' <<<"$line"; then
-    continue
-  fi
 
-  key=$(grep -o '".*"' <<<"$line" | sed 's/"//g' | cut -c 14-)
+touch output.txt
 
-  if grep -q "$key" "$keylist"; then
-    if [ $f = false ]; then
-      echo "$line" >>"$out"
-    fi
-  else
-    if [ $f = true ]; then
-      echo "Trimming $key"
+# For each line in networktables.ini
+while read -r line
+do
+    ! (($DEBUG)) && killall java
+
+    # Get rid of type in the beginning (first word)
+    # Get rid of quotations in front and end
+    # Delete `/Preferences/` (first 14 characters)
+    key=`grep -o '".*"' <<< "$line" | sed 's/"//g' | cut -c 14-`
+
+    # If key is found in the keylist
+    if grep -q "$key" "$keylist"
+    then
+        if (($f))
+        then
+            echo "$line" >> "$out"
+        fi
     else
-      echo "Would trim $line"
+        if (($f))
+        then
+            echo "Trimming $key"
+        else
+            echo "Would trim $key"
+        fi
     fi
-  fi
-done <"$ini" | sed '1d'
+done < "$ini"
 
-killall java
-if [ $f = true ]; then
-  echo "Copying output.txt to networktables.ini"
 
-  cp -f "$out" "$ini"
-  echo "[NetworkTables Storage 3.0]
-$(cat $ini)" >"$ini"
-  echo "Deleting output.txt"
-  rm "$out"
+! (($DEBUG)) && killall java
+
+if (($f))
+then
+    echo "
+Copying output.txt to networktables.ini"
+    cp -f "$out" "$ini"
+    echo "Deleting output.txt"
+    rm "$out"
 else
-  echo "Run with -f to trim"
+    echo "
+Run with -f to actually trim entries"
 fi
-killall java
+
+! (($DEBUG)) && killall java
