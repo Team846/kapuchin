@@ -96,9 +96,11 @@ suspend fun Subsystems.visionAim() {
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            reading?.let { snapshot ->
-                bestShot(limelight.hardware.conversions.goalPositions(snapshot, robotPosition.bearing))
-            }?.let { shot ->
+            val shot = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
+            if (shot == null) withTimeout(.5.Second) {
+                log(Debug) { "Cannot find target or no shots possible" }
+                rumble.error()
+            } else {
                 launch { turret?.trackTarget(limelight, flywheel, drivetrain, shot.goal) }
                 generalAim(shot.flywheel, shot.hood)
             }
