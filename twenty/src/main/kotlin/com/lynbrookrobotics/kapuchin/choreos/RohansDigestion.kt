@@ -44,8 +44,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { intakeBalls } to choreography { eat() },
                 { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) },
 
-                { aim } to choreography { adjustForOptimalFart() },
-                { aimPreset } to choreography { flywheel?.let { generalAim(it.preset, Down) } },
+                { aim } to choreography { visionAim() },
+                { aimPreset } to choreography { flywheel?.let { generalAim(flywheel.preset, Down) } },
                 { shoot } to choreography { accidentallyShart() },
                 { hoodUp } to choreography { shooterHood?.set(Up) },
 
@@ -83,8 +83,9 @@ suspend fun Subsystems.eat() = startChoreo("Intake Balls") {
     }
 }
 
-suspend fun Subsystems.adjustForOptimalFart() {
-    if (limelight != null) startChoreo("Aim") {
+suspend fun Subsystems.visionAim() {
+    if (limelight == null) log(Error) { "Need limelight for vision aiming" }
+    else startChoreo("Aim") {
 
         val readings by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
@@ -98,7 +99,7 @@ suspend fun Subsystems.adjustForOptimalFart() {
                 generalAim(shot.flywheel, shot.hood)
             }
         }
-    } else log(Error) { "Need limelight to aim" }
+    }
 }
 
 suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
@@ -123,7 +124,8 @@ suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
 }
 
 private suspend fun Subsystems.generalAim(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
-    if (limelight != null && flywheel != null && feederRoller != null) startChoreo("General Aim") {
+    if (flywheel == null || feederRoller == null) log(Error) { "Need flywheel and feeder to spin up shooter" }
+    else startChoreo("General Aim") {
 
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
@@ -160,5 +162,5 @@ private suspend fun Subsystems.generalAim(flywheelTarget: AngularVelocity, hoodT
                 rumble.set(TwoSided(0.Percent, 100.Percent))
             })
         }
-    } else log(Error) { "Need flywheel and feeder to aim" }
+    }
 }
