@@ -3,12 +3,12 @@ package com.lynbrookrobotics.kapuchin.subsystems.shooter
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Field.ballDiameter
 import com.lynbrookrobotics.kapuchin.Field.ballMass
-import com.lynbrookrobotics.kapuchin.Field.innerGoalDepth
 import com.lynbrookrobotics.kapuchin.Field.targetDiameter
 import com.lynbrookrobotics.kapuchin.Field.targetHeight
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.Goal.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
 import info.kunalsheth.units.generated.*
@@ -16,13 +16,14 @@ import info.kunalsheth.units.math.*
 import kotlin.math.sqrt
 
 // UOM extension functions to make shooter math cleaner
-private val Length.squared: `L²` get() = this * this
-private val Dimensionless.squared: Dimensionless get() = this * this
-private val Velocity.squared: `L²⋅T⁻²` get() = this * this
-private fun sqrt(a: `L²⋅T⁻²`): Velocity = Velocity(sqrt(a.siValue))
-private fun sqrt(a: `L²`): Length = Length(sqrt(a.siValue))
+val Length.squared: `L²` get() = this * this
+val Dimensionless.squared: Dimensionless get() = this * this
+val Velocity.squared: `L²⋅T⁻²` get() = this * this
+fun sqrt(a: `L²⋅T⁻²`): Velocity = Velocity(sqrt(a.siValue))
+fun sqrt(a: `L²`): Length = Length(sqrt(a.siValue))
 
-data class ShotState(val flywheel: AngularVelocity, val hood: ShooterHoodState, val entryAngle: Angle)
+enum class Goal { Inner, Outer }
+data class ShotState(val flywheel: AngularVelocity, val hood: ShooterHoodState, val goal: Goal, val entryAngle: Angle)
 
 /**
  * Calculate the best shot state given the current target.
@@ -33,18 +34,18 @@ data class ShotState(val flywheel: AngularVelocity, val hood: ShooterHoodState, 
  * @return the best shot state, null if shot is impossible.
  */
 fun Subsystems.bestShot(target: DetectedTarget): ShotState? {
-    if (flywheel == null || shooterHood == null) return null
+    if (limelight == null || flywheel == null || shooterHood == null) return null
 
-    val innerLimits = innerEntryAngleLimits(target, flywheel)
+    val innerLimits = limelight.hardware.conversions.innerEntryAngleLimits(target, flywheel.shooterHeight)
     val outerLimits = `±`(90.Degree - atan2(ballDiameter, targetDiameter / 2))
-    val boundingCircleRadius = (targetDiameter / 2) - (ballDiameter / 2) // TODO maybe use slightly larger bounding circle radisu? sid r
-    val innerGoalPossible = innerGoalOffsets(target.outer, flywheel)
+    val boundingCircleRadius = (targetDiameter / 2) - (ballDiameter / 2) // TODO maybe use slightly larger bounding circle radius? sid r
+    val innerGoalPossible = limelight.hardware.conversions.innerGoalOffsets(target, flywheel.shooterHeight)
             .let { (hor, vert) -> (hor.squared + vert.squared) < boundingCircleRadius.squared }
 
-    val innerUp = target.inner?.let { calculateShot(it, Up, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
-    val innerDown = target.inner?.let { calculateShot(it, Down, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
-    val outerUp = calculateShot(target.outer, Up, outerLimits, flywheel, shooterHood)
-    val outerDown = calculateShot(target.outer, Down, outerLimits, flywheel, shooterHood)
+    val innerUp = target.inner?.let { calculateShot(it, Up, Inner, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
+    val innerDown = target.inner?.let { calculateShot(it, Down, Inner, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
+    val outerUp = calculateShot(target.outer, Up, Outer, outerLimits, flywheel, shooterHood)
+    val outerDown = calculateShot(target.outer, Down, Outer, outerLimits, flywheel, shooterHood)
 
     // If both hood states are possible, choose the one with the better entry angle
     // Otherwise, choose the first target that works prioritizing inner goal
@@ -64,6 +65,7 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? {
 private fun calculateShot(
         target: Position,
         shooterHoodState: ShooterHoodState,
+        goal: Goal,
         entryAngleLimits: ClosedRange<Angle>,
         flywheel: FlywheelComponent,
         shooterHood: ShooterHoodComponent
@@ -81,34 +83,7 @@ private fun calculateShot(
     val shotEntrySlope = -((distToBase * 1.EarthGravity) / (ballVelocity.squared * cos(launchAngle).squared)) + tan(launchAngle)
     val shotEntryAngle = atan(shotEntrySlope)
 
-    return ShotState(flywheelVelocity, shooterHoodState, shotEntryAngle)
+    return ShotState(flywheelVelocity, shooterHoodState, goal, shotEntryAngle)
             .takeIf { shotEntryAngle in entryAngleLimits }
             .takeIf { flywheelVelocity <= flywheel.maxSpeed }
-}
-
-/**
- * Calculate the horizontal and vertical offsets of the inner goal relative to the outer goal based on a "2D" view of the target.
- *
- * @author Sid R
- */
-private fun innerGoalOffsets(outer: Position, flywheel: FlywheelComponent): Pair<Length, Length> {
-    val distToBase = sqrt(outer.x.squared + outer.y.squared)
-
-    val horizontal = innerGoalDepth * tan(outer.bearing)
-    val vertical = with(flywheel) { (innerGoalDepth * (targetHeight - shooterHeight)) / (distToBase * cos(outer.bearing)) }
-
-    return horizontal to vertical
-}
-
-/**
- * Calculate the range of vertical angles a ball could enter the inner goal.
- *
- * @author Sid R
- */
-private fun innerEntryAngleLimits(target: DetectedTarget, flywheel: FlywheelComponent): ClosedRange<Angle> {
-    val horizontalOffset = innerGoalOffsets(target.outer, flywheel).first
-
-    val downward = atan(((targetDiameter / 2) + horizontalOffset) / innerGoalDepth)
-    val upward = 90.Degree - atan(innerGoalDepth / ((targetDiameter / 2) - horizontalOffset))
-    return downward..upward
 }

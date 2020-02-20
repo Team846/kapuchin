@@ -84,18 +84,18 @@ suspend fun Subsystems.eat() = startChoreo("Intake Balls") {
 }
 
 suspend fun Subsystems.visionAim() {
-    if (limelight == null) log(Error) { "Need limelight for vision aiming" }
+    if (limelight == null || flywheel == null || feederRoller == null)
+        log(Error) { "Need limelight, flywheel, and feederRoller for vision aiming" }
     else startChoreo("Aim") {
 
-        val readings by limelight.hardware.readings.readEagerly().withoutStamps
+        val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            launch { turret?.trackTarget(limelight) }
-
-            readings?.let { snapshot ->
+            reading?.let { snapshot ->
                 bestShot(limelight.hardware.conversions.goalPositions(snapshot, robotPosition.bearing))
             }?.let { shot ->
+                launch { turret?.trackTarget(limelight, flywheel, drivetrain, shot.goal) }
                 generalAim(shot.flywheel, shot.hood)
             }
         }

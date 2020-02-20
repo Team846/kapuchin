@@ -1,10 +1,13 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
+import com.lynbrookrobotics.kapuchin.Field.innerGoalDepth
+import com.lynbrookrobotics.kapuchin.Field.targetDiameter
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -79,4 +82,32 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
 
         return DetectedTarget(innerGoal.takeUnless { skew > skewTolerance }, outerGoal)
     }
+
+    /**
+     * Calculate the horizontal and vertical offsets of the inner goal relative to the outer goal based on a "2D" view of the target.
+     *
+     * @author Sid R
+     */
+    fun innerGoalOffsets(target: DetectedTarget, shooterHeight: Length): Pair<Length, Length> {
+        val distToBase = sqrt(target.outer.x.squared + target.outer.y.squared)
+
+        val horizontal = innerGoalDepth * tan(target.outer.bearing)
+        val vertical = (innerGoalDepth * (targetHeight - shooterHeight)) / (distToBase * cos(target.outer.bearing))
+
+        return horizontal to vertical
+    }
+
+    /**
+     * Calculate the range of vertical angles a ball could enter the inner goal.
+     *
+     * @author Sid R
+     */
+    fun innerEntryAngleLimits(target: DetectedTarget, shooterHeight: Length): ClosedRange<Angle> {
+        val horizontalOffset = innerGoalOffsets(target, shooterHeight).first
+
+        val downward = atan(((targetDiameter / 2) + horizontalOffset) / innerGoalDepth)
+        val upward = 90.Degree - atan(innerGoalDepth / ((targetDiameter / 2) - horizontalOffset))
+        return downward..upward
+    }
+
 }
