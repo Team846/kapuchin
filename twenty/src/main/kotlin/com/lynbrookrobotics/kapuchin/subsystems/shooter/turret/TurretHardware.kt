@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -33,7 +34,10 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
 
     val conversions = TurretConversions(this)
     var isZeroed = false
-        private set
+        set(value) {
+            log(Debug) { "Setting isZeroed to $value" }
+            field = value
+        }
 
     private val escId = 52
 
@@ -56,8 +60,14 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
             .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
 
     fun zero() {
-        encoder.position = conversions.encoder.native(limitSwitchMount)
-        isZeroed = true
+        if (isZeroed) log(Error) { "Already zeroed!" }
+        else {
+            val originalPosition = encoder.position
+            val zeroedPosition = conversions.encoder.native(limitSwitchMount)
+            log(Warning) { "Zeroing ESC position from ${originalPosition withDecimals 2} to ${zeroedPosition withDecimals 2}" }
+            encoder.position = zeroedPosition
+            isZeroed = true
+        }
     }
 
     init {

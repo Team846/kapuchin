@@ -102,6 +102,7 @@ suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponen
 suspend fun TurretComponent.rezero(electrical: ElectricalSystemHardware) = startRoutine("Re-zero") {
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 
+    hardware.isZeroed = false
     controller {
         PercentOutput(hardware.escConfig, voltageToDutyCycle(safeSpeed, vBat)).takeUnless { hardware.isZeroed }
     }

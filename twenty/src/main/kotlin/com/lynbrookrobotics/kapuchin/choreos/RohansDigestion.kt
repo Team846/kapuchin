@@ -88,9 +88,10 @@ suspend fun Subsystems.eat() = startChoreo("Intake Balls") {
 }
 
 suspend fun Subsystems.visionAim() {
-    if (limelight == null || flywheel == null || feederRoller == null)
+    if (limelight == null || flywheel == null || feederRoller == null) {
         log(Error) { "Need limelight, flywheel, and feederRoller for vision aiming" }
-    else startChoreo("Aim") {
+        freeze()
+    } else startChoreo("Aim") {
 
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
@@ -133,8 +134,10 @@ suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
 }
 
 private suspend fun Subsystems.generalAim(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
-    if (flywheel == null || feederRoller == null) log(Error) { "Need flywheel and feeder to spin up shooter" }
-    else startChoreo("General Aim") {
+    if (flywheel == null || feederRoller == null) {
+        log(Error) { "Need flywheel and feeder to spin up shooter" }
+        freeze()
+    } else startChoreo("General Aim") {
 
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
