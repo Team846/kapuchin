@@ -37,16 +37,14 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? {
 
     val innerLimits = innerEntryAngleLimits(target, flywheel)
     val outerLimits = `±`(90.Degree - atan2(ballDiameter, targetDiameter / 2))
-    val boundingCircleRadius = (targetDiameter / 2) - (ballDiameter / 2)
-    val innerGoalPossible = target.outer
-            ?.let { innerGoalOffsets(it, flywheel) }
-            ?.let { (hor, vert) -> (hor.squared + vert.squared) < boundingCircleRadius.squared }
-            ?: false
+    val boundingCircleRadius = (targetDiameter / 2) - (ballDiameter / 2) // TODO maybe use slightly larger bounding circle radisu? sid r
+    val innerGoalPossible = innerGoalOffsets(target.outer, flywheel)
+            .let { (hor, vert) -> (hor.squared + vert.squared) < boundingCircleRadius.squared }
 
     val innerUp = target.inner?.let { calculateShot(it, Up, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
     val innerDown = target.inner?.let { calculateShot(it, Down, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
-    val outerUp = target.outer?.let { calculateShot(it, Up, outerLimits, flywheel, shooterHood) }
-    val outerDown = target.outer?.let { calculateShot(it, Down, outerLimits, flywheel, shooterHood) }
+    val outerUp = calculateShot(target.outer, Up, outerLimits, flywheel, shooterHood)
+    val outerDown = calculateShot(target.outer, Down, outerLimits, flywheel, shooterHood)
 
     // If both hood states are possible, choose the one with the better entry angle
     // Otherwise, choose the first target that works prioritizing inner goal
@@ -107,10 +105,10 @@ private fun innerGoalOffsets(outer: Position, flywheel: FlywheelComponent): Pair
  *
  * @author Sid R
  */
-private fun innerEntryAngleLimits(target: DetectedTarget, flywheel: FlywheelComponent): ClosedRange<Angle> = target.outer?.let { outer ->
-    val horizontalOffset = innerGoalOffsets(outer, flywheel).first
+private fun innerEntryAngleLimits(target: DetectedTarget, flywheel: FlywheelComponent): ClosedRange<Angle> {
+    val horizontalOffset = innerGoalOffsets(target.outer, flywheel).first
 
     val downward = atan(((targetDiameter / 2) + horizontalOffset) / innerGoalDepth)
     val upward = 90.Degree - atan(innerGoalDepth / ((targetDiameter / 2) - horizontalOffset))
     return downward..upward
-} ?: 0.Degree..0.Degree
+}
