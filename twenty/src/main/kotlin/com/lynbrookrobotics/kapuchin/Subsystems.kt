@@ -32,11 +32,12 @@ import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
 
 class Subsystems(val drivetrain: DrivetrainComponent,
+                 val carousel: CarouselComponent,
                  val electrical: ElectricalSystemHardware,
+
                  val driver: DriverHardware,
                  val operator: OperatorHardware,
                  val rumble: RumbleComponent,
-                 val carousel: CarouselComponent,
 
                  val climberPivot: ClimberPivotComponent?,
                  val climberWinch: ClimberWinchComponent?,
@@ -136,11 +137,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 suspend fun <R> i(shouldInit: Boolean, producer: suspend () -> R) = async { if (shouldInit) producer() else null }
 
                 val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
+                val carouselAsync = async { CarouselComponent(CarouselHardware()) }
                 val electricalAsync = async { ElectricalSystemHardware() }
+
                 val driverAsync = async { DriverHardware() }
                 val operatorAsync = async { OperatorHardware() }
                 val rumbleAsync = async { RumbleComponent(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
-                val carouselAsync = async { CarouselComponent(CarouselHardware()) }
 
                 val climberPivotAsync = i(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
                 val climberWinchAsync = i(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
@@ -157,11 +159,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
                 instance = Subsystems(
                         drivetrainAsync.await(),
+                        carouselAsync.await(),
                         electricalAsync.await(),
+
                         driverAsync.await(),
                         operatorAsync.await(),
                         rumbleAsync.await(),
-                        carouselAsync.await(),
 
                         t { climberPivotAsync.await() },
                         t { climberWinchAsync.await() },
@@ -192,11 +195,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val operator = OperatorHardware()
             instance = Subsystems(
                     DrivetrainComponent(DrivetrainHardware()),
+                    CarouselComponent(CarouselHardware()),
                     ElectricalSystemHardware(),
+
                     driver,
                     operator,
                     RumbleComponent(RumbleHardware(driver, operator)),
-                    CarouselComponent(CarouselHardware()),
 
                     i(initClimberPivot) { t { ClimberPivotComponent(ClimberPivotHardware()) } },
                     i(initClimberWinch) { t { ClimberWinchComponent(ClimberWinchHardware()) } },
