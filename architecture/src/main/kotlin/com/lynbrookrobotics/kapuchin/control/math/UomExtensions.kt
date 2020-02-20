@@ -33,11 +33,8 @@ fun <Q : Number> `±`(radius: Q) = 0.0 `±` radius
 
 inline fun <Q : Quan<Q>> `±`(radius: Q) = radius.new(0.0) `±` radius
 
-operator fun <Q : Quan<Q>> ClosedRange<Q>.contains(subset: ClosedRange<Q>) =
-        this.start <= subset.start && subset.endInclusive <= this.endInclusive
-
-inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊆`(that: ClosedRange<Q>): Boolean = this.start >= that.start && this.endInclusive <= that.endInclusive
-
+inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊆`(that: ClosedRange<Q>): Boolean =
+        that.start <= this.start && this.endInclusive <= that.endInclusive
 
 /**
  *
