@@ -125,11 +125,11 @@ suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
         } else {
             launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
 
-            log(Debug) { "Waiting for fart to crown." }
+            log(Debug) { "Waiting for ball to launch." }
             withTimeout(3.Second) {
                 flywheel?.delayUntilBall()
-                carousel.state.set(carouselAngle + carousel.shootSlot, true)
-            }
+            } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
+            carousel.state.set(carouselAngle + carousel.shootSlot, false)
         }
     }
 }
