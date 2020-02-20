@@ -2,10 +2,8 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.ControlPanelPivotState.*
-import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.coroutineScope
 
 suspend fun Subsystems.controlPanelTeleop() = startChoreo("Control Panel Teleop") {
 

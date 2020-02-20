@@ -74,7 +74,9 @@ class FunkyRobot : RobotBase() {
         }
     }
 
-    override fun endCompetition() { println("Rohan has fallen") }
+    override fun endCompetition() {
+        println("Rohan has fallen")
+    }
 }
 
 val classPreloading = scope.launch {

@@ -65,7 +65,7 @@ suspend fun TurretComponent.trackTarget(
 
     controller {
         reading?.let { snapshot ->
-            val target = when(goal) {
+            val target = when (goal) {
                 Inner -> current + snapshot.tx
                 Outer -> with(limelight.hardware.conversions) {
                     val llTarget = goalPositions(snapshot, robotPosition.bearing)

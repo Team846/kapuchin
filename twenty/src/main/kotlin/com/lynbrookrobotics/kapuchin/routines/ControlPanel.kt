@@ -1,10 +1,6 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.electrical.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.controlpanel.*
-import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 
 suspend fun ControlPanelPivotComponent.set(state: ControlPanelPivotState) = startRoutine("Set") {
     controller { state }

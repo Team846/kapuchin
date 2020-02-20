@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.controlpanel
 
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*

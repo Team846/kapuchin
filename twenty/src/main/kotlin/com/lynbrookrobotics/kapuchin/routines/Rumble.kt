@@ -9,7 +9,7 @@ suspend fun RumbleComponent.set(target: Rumble) = startRoutine("Set") {
     controller { target }
 }
 
-suspend fun RumbleComponent.error(period: Time = 250.milli(Second)) = startRoutine("Error"){
+suspend fun RumbleComponent.error(period: Time = 250.milli(Second)) = startRoutine("Error") {
     var prevTime = currentTime
     var state = true
 

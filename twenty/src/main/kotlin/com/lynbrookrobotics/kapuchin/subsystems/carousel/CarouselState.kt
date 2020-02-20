@@ -28,7 +28,7 @@ class CarouselState(component: CarouselComponent) : Named by Named("State", comp
             .minBy { it.abs }
             ?.roundToInt(CarouselSlot)
 
-    fun closestFull(robotBearing : Angle) = iterateAround(robotBearing)
+    fun closestFull(robotBearing: Angle) = iterateAround(robotBearing)
             .filter { get(it) }
             .minBy { it.abs }
             ?.roundToInt(CarouselSlot)
