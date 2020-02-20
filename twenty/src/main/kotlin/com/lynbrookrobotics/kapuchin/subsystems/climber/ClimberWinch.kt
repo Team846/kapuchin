@@ -26,17 +26,26 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberW
     val extendSpeed by pref(80, Percent)
     val retractSpeed by pref(80, Percent)
 
+    val chodeDelaySafety by pref(1, Second)
+
     override val fallbackController: ClimberWinchComponent.(Time) -> ClimberWinchOutput = { Stopped }
 
     private val flaccid = true
     private val erect = false
 
+    private var lastErection = currentTime
+    private var lastWinchRun = currentTime
     override fun ClimberWinchHardware.output(value: ClimberWinchOutput) = when (value) {
         is Stopped -> {
-            if (masterEsc.appliedOutput == 0.0 && slaveEsc.appliedOutput == 0.0)
+            if (currentTime - lastWinchRun >= chodeDelaySafety &&
+                    masterEsc.appliedOutput == 0.0 &&
+                    slaveEsc.appliedOutput == 0.0
+            ) {
                 chodeSolenoid.set(erect)
-            else log(Warning) {
+                lastErection = currentTime
+            } else log(Warning) {
                 "Cannot brake while \n" +
+                        "currentTime - lastWinch == ${currentTime - lastWinchRun withDecimals 2}\n" +
                         "masterEsc.appliedOutput == ${masterEsc.appliedOutput withDecimals 2}\n" +
                         "slaveEsc.appliedOutput == ${slaveEsc.appliedOutput withDecimals 2}"
             }
@@ -44,10 +53,14 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberW
             PercentOutput(escConfig, 0.Percent).writeTo(masterEsc, pidController)
         }
         is Running -> {
-            if (chodeSolenoid.get() == erect) log(Warning) {
-                "Cannot run while chodeSolenoid.get() == erect"
-            } else
+            if (currentTime - lastErection >= chodeDelaySafety && chodeSolenoid.get() != erect) {
                 value.esc.writeTo(masterEsc, pidController)
+                lastWinchRun = currentTime
+            } else log(Warning) {
+                "Cannot run while \n" +
+                        "currentTime - lastErection == ${currentTime - lastErection withDecimals 2}\n" +
+                        "chodeSolenoid.get() == erect"
+            }
 
             chodeSolenoid.set(flaccid)
         }
