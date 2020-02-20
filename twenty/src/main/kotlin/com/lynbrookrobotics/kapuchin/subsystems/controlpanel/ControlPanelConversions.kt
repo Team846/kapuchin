@@ -37,14 +37,14 @@ class ControlPanelConversions(hardware: ControlPanelSpinnerHardware) : Named by 
             ?.let(panelPattern::indexOf)
             .takeIf { it in 0..3 }
 
-    fun colorPositionDelta(lastIndex: Int, currentIndex: Int) {
+    fun colorPositionDelta(lastIndex: Int, currentIndex: Int): Angle {
         require(lastIndex in 0..3)
         require(currentIndex in 0..3)
 
         val positiveIndex = (lastIndex + 1) % 4
         val negativeIndex = (4 + lastIndex - 1) % 4
 
-        when (currentIndex) {
+        return when (currentIndex) {
             positiveIndex -> 45.Degree
             negativeIndex -> -45.Degree
             else -> {

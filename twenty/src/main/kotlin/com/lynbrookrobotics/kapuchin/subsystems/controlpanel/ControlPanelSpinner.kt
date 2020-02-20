@@ -21,6 +21,7 @@ import info.kunalsheth.units.math.*
 class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware) {
 
     val kP by pref(10, Volt, 1, Turn)
+    val kD by pref(10, Volt, 60, Rpm)
 
     override val fallbackController: ControlPanelSpinnerComponent.(Time) -> DutyCycle = { 0.Percent }
 
@@ -47,6 +48,9 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
         +it.setIdleMode(IdleMode.kCoast)
         it.inverted = invert
     }
+    val encoder by hardw { spinnerEsc.encoder }
+
+    val encoderPosition = sensor(encoder) { conversions.encoderPositionDelta(position.Turn) stampWith it }
 
     val colorSensor by hardw { ColorSensorV3(Port.kOnboard) }.configure {
         // TODO: Wesley, what color and proximity settings should we use here?
