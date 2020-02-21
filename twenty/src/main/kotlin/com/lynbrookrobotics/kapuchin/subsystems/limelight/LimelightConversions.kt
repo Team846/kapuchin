@@ -39,8 +39,8 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         ({ UomVector(x, y) })
     }
     val zoomInFov by pref {
-        val x by pref(20.5, Degree)
-        val y by pref(28, Degree)
+        val x by pref(22.85, Degree)
+        val y by pref(29.8, Degree)
         ({ UomVector(x, y) })
     }
 
@@ -50,8 +50,8 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         ({ UomVector(x, y) })
     }
     val zoomOutFov by pref {
-        val x by pref(41, Degree)
-        val y by pref(56, Degree)
+        val x by pref(45.7, Degree)
+        val y by pref(59.6, Degree)
         ({ UomVector(x, y) })
     }
 
