@@ -15,11 +15,6 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
     private val skewTolerance by pref(1, Degree)
     private val innerGoalOffset by pref(29.25, Inch)
     private val targetHeight by pref(107, Inch)
-    private val aspect0 by pref {
-        val thor by pref(226)
-        val tvert by pref(94)
-        ({ thor / tvert.toDouble() })
-    }
 
     private val mountingIncline by pref(38, Degree)
     private val mounting by pref {
@@ -55,9 +50,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         ({ UomVector(x, y) })
     }
 
-    private fun outerGoalPosition(sample: LimelightReading) = with(sample) {
-        val aspect = thor / tvert
-        val skew = acos(aspect / aspect0 minMag 1.Each)
+    private fun outerGoalPosition(sample: LimelightReading, skew: Angle) = with(sample) {
 
         val targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty + when (pipeline) {
             ZoomInPanHigh -> zoomOutFov.y / 2
@@ -71,7 +64,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
     }
 
     fun goalPositions(sample: LimelightReading, skew: Angle): DetectedTarget {
-        val outerGoal = outerGoalPosition(sample)
+        val outerGoal = outerGoalPosition(sample, skew)
         val offsetAngle = 90.Degree - skew
 
         val innerGoal = Position(
