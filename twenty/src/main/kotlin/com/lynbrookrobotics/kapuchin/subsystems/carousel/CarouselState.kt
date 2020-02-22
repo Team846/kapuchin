@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.carousel
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
 
 class CarouselState(component: Named) : Named by Named("State", component) {
@@ -30,8 +31,13 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         return null
     }
 
-    fun closestEmpty(robotBearing: Angle) = closest(robotBearing, false) { !get(it) }
-    fun closestFull(robotBearing: Angle) = closest(robotBearing, true) { get(it) }
+    fun closestEmpty(robotBearing: Angle) = closest(robotBearing, false) {
+        !get(it)
+    }?.roundToInt(CarouselSlot)
+
+    fun closestFull(robotBearing: Angle) = closest(robotBearing, true) {
+        get(it)
+    }?.roundToInt(CarouselSlot)
 
     val ammo get() = internal.count { it }
     val size = internal.size

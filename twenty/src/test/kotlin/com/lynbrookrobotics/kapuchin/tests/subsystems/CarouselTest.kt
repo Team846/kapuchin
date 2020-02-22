@@ -139,7 +139,9 @@ class CarouselTest : Named by Named("Carousel Test") {
 
     fun CarouselState.assertClosest(
             to: Angle, expected: Angle, f: KFunction1<Angle, `∠`?>
-    ) = assert(f(to)!! in expected `±` 1.Degree) {
-        "${f.name}(${to.Degree withDecimals 0}˚)!! == ${f(to)!!.Degree withDecimals 0}˚ != ${expected.Degree withDecimals 0}"
+    ) = defaultOffsets.forEach { offset ->
+        assert(f(to + offset)!! in expected `±` 1.Degree) {
+            "${f.name}(${(offset + offset).Degree withDecimals 0}˚)!! == ${f(to)!!.Degree withDecimals 0}˚ != ${expected.Degree withDecimals 0}"
+        }
     }
 }
