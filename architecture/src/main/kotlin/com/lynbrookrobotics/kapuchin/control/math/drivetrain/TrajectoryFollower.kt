@@ -28,11 +28,14 @@ class TrajectoryFollower(
 ) {
 
     // Make waypoints relative to origin
-    private val waypoints = RotationMatrix(origin.bearing).let { mtrx ->
-        trajectory
-                .map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
-                .iterator()
-    }
+    private val waypoints = origin.bearing
+            .let { if (reverse) 180.Degree `coterminal +` it else it }
+            .let { RotationMatrix(it) }
+            .let { mtrx ->
+                trajectory
+                        .map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
+                        .iterator()
+            }
 
     private var target = waypoints.next()
     private var done = false
