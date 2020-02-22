@@ -46,8 +46,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
                 { aim } to choreography { visionAim() },
-                { aimPreset } to choreography { flywheel?.let { generalAim(flywheel.preset, Down) } ?: freeze() },
-                { shoot } to choreography { accidentallyShart() },
+                { aimPreset } to choreography { flywheel?.let { spinUpShooter(flywheel.preset, Down) } ?: freeze() },
+                { shoot } to choreography { fire() },
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
                 { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) ?: freeze() },
@@ -63,7 +63,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
 }
 
-suspend fun Subsystems.eat() = startChoreo("Intake Balls") {
+suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
@@ -80,7 +80,7 @@ suspend fun Subsystems.eat() = startChoreo("Intake Balls") {
             launch { intakeSlider?.set(IntakeSliderState.Out) }
             launch { intakeRollers?.set(intakeRollers.eatSpeed) }
 
-            log(Debug) { "Waiting for a yummy mouthfuls of balls." }
+            log(Debug) { "Waiting for a yummy mouthful of balls." }
             carousel.delayUntilBall()
             carousel.state.set(carouselAngle + carousel.collectSlot, true)
         }
@@ -91,7 +91,7 @@ suspend fun Subsystems.visionAim() {
     if (limelight == null || flywheel == null || feederRoller == null) {
         log(Error) { "Need limelight, flywheel, and feederRoller for vision aiming" }
         freeze()
-    } else startChoreo("Aim") {
+    } else startChoreo("Vision Aim") {
 
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
@@ -103,13 +103,13 @@ suspend fun Subsystems.visionAim() {
                 rumble.error()
             } else {
                 launch { turret?.trackTarget(limelight, flywheel, drivetrain, shot.goal) }
-                generalAim(shot.flywheel, shot.hood)
+                spinUpShooter(shot.flywheel, shot.hood)
             }
         }
     }
 }
 
-suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
+suspend fun Subsystems.fire() = startChoreo("Fire") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
@@ -133,11 +133,11 @@ suspend fun Subsystems.accidentallyShart() = startChoreo("Shoot") {
     }
 }
 
-private suspend fun Subsystems.generalAim(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
+private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to spin up shooter" }
         freeze()
-    } else startChoreo("General Aim") {
+    } else startChoreo("Spin Up Shooter") {
 
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
