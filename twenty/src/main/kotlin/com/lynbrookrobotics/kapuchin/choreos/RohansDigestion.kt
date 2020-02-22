@@ -33,7 +33,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     choreography {
         supervisorScope {
-            if (turret?.hardware?.isZeroed == true) launch { turret.rezero(electrical) }
+            if (turret != null && !turret.hardware.isZeroed) launch { turret.rezero(electrical) }
             if (!carousel.hardware.isZeroed) launch { carousel.rezero() }
         }
 
