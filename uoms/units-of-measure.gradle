@@ -1,6 +1,10 @@
 import static java.lang.Math.PI
 
 generateUnitsOfMeasure {
+    relationships += r(d(A: 1), d()) +
+            r(d(L: 2), d(L: 1, T: -2)) +
+            r(d(L: 3, T: -2), d(L: 1))
+
     quantities += [
             q("Absement", d(L: 1, T: 1)),
             q("AngularAbsement", d(A: 1, T: 1)),
@@ -17,10 +21,12 @@ generateUnitsOfMeasure {
             u("Foot", 0.3048, d(L: 1)),
             u("FootPerSecond", 0.3048, d(L: 1, T: -1)),
             u("FootPerSecondSquared", 0.3048, d(L: 1, T: -2)),
+            u("PoundFootSquared", 0.04214011, d(M: 1, L: 2)),
             u("EarthGravity", 9.80665, d(L: 1, T: -2)),
 
             u("Turn", 2 * PI, d(A: 1)),
             u("Rpm", 2 * PI / 60, d(A: 1, T: -1)),
+            u("RpmPerSecond", 2 * PI / 60, d(A: 1, T: -2)),
             u("DegreeSecond", PI / 180, d(A: 1, T: 1)),
             u("Degree", PI / 180, d(A: 1)),
             u("DegreePerSecond", PI / 180, d(A: 1, T: -1)),

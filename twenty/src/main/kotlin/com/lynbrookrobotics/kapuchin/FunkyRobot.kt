@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -12,10 +13,11 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.File
 import kotlin.system.measureTimeMillis
 
-fun main(args: Array<String>) {
-    println("Kapuchin Run ID ${System.currentTimeMillis() / 60000 - 25896084}")
+fun main() {
+    printRunID()
     RobotBase.startRobot(::FunkyRobot)
 }
 
@@ -36,16 +38,19 @@ class FunkyRobot : RobotBase() {
         scope.launch {
             runWhenever(
                     { isEnabled && isOperatorControl } to choreography {
+                        System.gc()
                         subsystems.teleop()
                     },
                     { isEnabled && isAutonomous } to choreography {
+                        System.gc()
                         subsystems.followJournal(false)
                     },
                     { isDisabled && !isTest } to choreography {
                         subsystems.warmup()
                     },
                     { isTest } to choreography {
-                        launch { journal(subsystems.drivetrain.hardware) }
+                        System.gc()
+                        launch { subsystems.journalPath() }
                         subsystems.teleop()
                     }
             )
@@ -69,7 +74,9 @@ class FunkyRobot : RobotBase() {
         }
     }
 
-    override fun endCompetition() {}
+    override fun endCompetition() {
+        println("Rohan has fallen")
+    }
 }
 
 val classPreloading = scope.launch {
@@ -77,7 +84,7 @@ val classPreloading = scope.launch {
     val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
     Thread.currentThread()
             .contextClassLoader
-            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
+            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")!!
             .bufferedReader()
             .lineSequence()
             .filter { it.matches(classNameRegex) }
@@ -90,4 +97,16 @@ val classPreloading = scope.launch {
                     }
                 }
             }
+}
+
+private fun printRunID() {
+    val file = File("/home/lvuser/run_id")
+    val runId = try {
+        file.readText().trim().toInt() + 1
+    } catch (e: Exception) {
+        System.err.println(e)
+        -1
+    }
+    println("Episode ${runId} - Rohan Awakens")
+    file.writeText(runId.toString())
 }

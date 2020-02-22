@@ -4,12 +4,15 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.hardware.tickstoserial.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
+
+suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
+    controller { TwoSided(PercentOutput(hardware.escConfig, target)) }
+}
 
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
@@ -45,24 +48,16 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
 
         val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, absSteering + startingAngle)
 
-        val nativeL = hardware.conversions.nativeConversion.native(
+        val nativeL = hardware.conversions.encoder.left.native(
                 target.left + steeringVelocity
         )
-        val nativeR = hardware.conversions.nativeConversion.native(
+        val nativeR = hardware.conversions.encoder.right.native(
                 target.right - steeringVelocity
         )
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-        )
-    }
-}
-
-suspend fun DrivetrainComponent.openLoop(power: DutyCycle) = startRoutine("open loop") {
-    controller {
-        TwoSided(
-                PercentOutput(hardware.escConfig, power)
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         )
     }
 }
@@ -73,55 +68,73 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     controller {
         val (targVels, error) = uni.speedTargetAngleTarget(0.FootPerSecond, target)
 
-        val nativeL = hardware.conversions.nativeConversion.native(targVels.left)
-        val nativeR = hardware.conversions.nativeConversion.native(targVels.right)
+        val nativeL = hardware.conversions.encoder.left.native(targVels.left)
+        val nativeR = hardware.conversions.encoder.right.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         ).takeUnless {
             error.abs < tolerance
         }
     }
 }
 
+suspend fun DrivetrainComponent.followTrajectory(
+        trajectory: Trajectory,
+        tolerance: Length,
+        endTolerance: Length,
+        origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
+) = startRoutine("Follow Trajectory") {
 
-suspend fun DrivetrainComponent.warmup() = startRoutine("Warmup") {
-
-    fun r() = Math.random()
-    val conv = DrivetrainConversions(hardware)
+    val follower = TrajectoryFollower(
+            this@followTrajectory, tolerance, endTolerance, this@startRoutine, trajectory, origin
+    )
 
     controller {
-        val startTime = currentTime
-        while (currentTime - startTime < hardware.period * 60.Percent) {
-            val (l, r) = TicksToSerialValue((r() * 0xFF).toInt())
-            conv.t2sOdometry(l, r)
-            conv.escOdometry(l * 50, r * 50)
+        val velocities = follower()
+        if (velocities != null) {
+            val nativeL = hardware.conversions.encoder.left.native(velocities.left)
+            val nativeR = hardware.conversions.encoder.right.native(velocities.right)
+            TwoSided(
+                    VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                    VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+            )
+        } else {
+            null
         }
-        val (x1, y1, b1) = conv.t2sOdometry.matrixTracking.run {
-            Position(x, y, bearing)
-        }
-        val (x2, y2, b2) = conv.escOdometry.tracking.run {
-            Position(x, y, bearing)
-        }
-        val x = avg(x1, x2)
-        val y = avg(y1, y2)
-        val b = avg(b1, b2)
+    }
+}
 
-        val targetA = 1.Turn * r()
-        val errorA = targetA `coterminal -` 1.Turn * r()
-        val pA = bearingKp * errorA
+suspend fun DrivetrainComponent.waypoint(
+        motionProfile: (Length) -> Velocity,
+        target: Waypoint,
+        tolerance: Length
+) = startRoutine("Waypoint") {
+    val position by hardware.position.readOnTick.withStamps
+    val uni = UnicycleDrive(this@waypoint, this@startRoutine)
 
-        val targetL = maxSpeed * r() + pA + x / Second - (b * Foot / Second / Degree)
-        val targetR = maxSpeed * r() - pA + y / Second + (b * Foot / Second / Degree)
+    val waypointDistance = graph("Distance to Waypoint", Foot)
 
-        val nativeL = hardware.conversions.nativeConversion.native(targetL cap `±`(3.Inch / Second))
-        val nativeR = hardware.conversions.nativeConversion.native(targetR cap `±`(1.Inch / Second))
+    controller { t ->
+        val (_, p) = position
+        val location = p.vector
+
+        val distance = distance(location, target).also { waypointDistance(t, it) }
+
+        val targetA = (target - location).bearing
+        val speed = motionProfile(distance)
+        val (targVels, _) = uni.speedTargetAngleTarget(speed, targetA)
+
+        val nativeL = hardware.conversions.encoder.left.native(targVels.left)
+        val nativeR = hardware.conversions.encoder.right.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains, nativeR)
-        )
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+        ).takeUnless {
+            distance < tolerance
+        }
     }
 }
 

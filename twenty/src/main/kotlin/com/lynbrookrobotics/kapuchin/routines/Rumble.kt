@@ -1,23 +1,17 @@
 package com.lynbrookrobotics.kapuchin.routines
 
-import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.slider.*
 import com.lynbrookrobotics.kapuchin.subsystems.driver.*
-import com.lynbrookrobotics.kapuchin.subsystems.drivetrain.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
+import kotlin.math.roundToInt
 
-suspend fun RumbleComponent.set(rumble: Rumble) = startRoutine("Set") {
-    controller { rumble }
+suspend fun RumbleComponent.set(target: Rumble) = startRoutine("Set") {
+    controller { target }
 }
 
-suspend fun RumbleComponent.trackLineFeedback(lineScanner: LineScannerHardware, collectorSlider: CollectorSliderComponent) = startRoutine("Track line") {
-
-    val target by lineScanner.linePosition.readEagerly.withoutStamps
-    val current by collectorSlider.hardware.position.readEagerly.withoutStamps
-
+suspend fun RumbleComponent.error(rate: Frequency = 4.Hertz) = startRoutine("Error") {
     controller {
-        target?.takeIf { (it - current).abs < 1.5.Inch }?.let {
-            TwoSided(0.Percent, 100.Percent)
-        } ?: TwoSided(0.Percent)
+        Rumble((currentTime * rate * 2).roundToInt(Each))
     }
 }

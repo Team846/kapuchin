@@ -3,10 +3,8 @@ package com.lynbrookrobotics.kapuchin.control.conversion
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import info.kunalsheth.units.generated.Quan
-import info.kunalsheth.units.generated.Second
 import info.kunalsheth.units.generated.T
 import info.kunalsheth.units.generated.Time
-import info.kunalsheth.units.math.*
 import kotlin.jvm.JvmName
 
 /**
@@ -41,7 +39,7 @@ import kotlin.jvm.JvmName
  * @property nativeTimeUnit denominator used in ESC velocity measurements
  * @property nativeRateUnit factor used in ESC derivative and integral calculations
  */
-class OffloadedNativeConversion<O, I, Q, D, DD>(
+data class OffloadedNativeConversion<O, I, Q, D, DD>(
         private val d2: (I, `÷`, T) -> Q,
         private val d1: (Q, `÷`, T) -> D,
         private val t1: (D, `*`, T) -> Q,
@@ -49,8 +47,7 @@ class OffloadedNativeConversion<O, I, Q, D, DD>(
         val nativeOutputUnits: Int, val perOutputQuantity: O,
         val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
         val feedbackZero: Q = perFeedbackQuantity * 0,
-        val nativeTimeUnit: Time = 100.milli(Second),
-        val nativeRateUnit: Time = 1.Second
+        val nativeTimeUnit: Time, val nativeRateUnit: Time
 )
         where O : Quan<O>,
               Q : Quan<Q>,

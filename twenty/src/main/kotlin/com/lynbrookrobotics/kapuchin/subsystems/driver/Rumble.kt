@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.driver
 
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -32,8 +33,8 @@ class RumbleHardware(
         val driver: DriverHardware,
         val operator: OperatorHardware
 ) : SubsystemHardware<RumbleHardware, RumbleComponent>() {
-    override val name = "Feedback System"
-    override val period = 20.milli(Second)
+    override val period by sharedTickerTiming
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
+    override val name = "Rumble"
 }
