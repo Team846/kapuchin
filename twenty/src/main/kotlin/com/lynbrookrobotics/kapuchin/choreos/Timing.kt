@@ -3,9 +3,13 @@ package com.lynbrookrobotics.kapuchin.choreos
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+
+fun FeederRollerComponent.check(current: AngularVelocity) = current in feedSpeed `±` tolerance
+fun FlywheelComponent.check(current: AngularVelocity) = current in wantedSpeed `±` tolerance
 
 suspend fun CarouselComponent.delayUntilBall() = startChoreo("Delay Until Ball") {
     val color by hardware.color.readEagerly().withoutStamps

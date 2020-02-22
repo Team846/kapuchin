@@ -2,7 +2,6 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -151,36 +150,39 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-            launch { flashlight?.set(kOn) }
+            try {
+                flywheel.wantedSpeed = flywheelTarget
 
-            launch {
-                val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-                if (fullSlot != null) supervisorScope {
-                    val target = fullSlot - carousel.shootSlot
-                    if (target > carouselAngle) carousel.set(target - 1.CarouselSlot)
-                    if (target < carouselAngle) carousel.set(target + 1.CarouselSlot)
+                launch { flashlight?.set(kOn) }
+
+                launch {
+                    val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
+                    if (fullSlot != null) supervisorScope {
+                        val target = fullSlot - carousel.shootSlot
+                        if (target > carouselAngle) carousel.set(target - 1.CarouselSlot)
+                        if (target < carouselAngle) carousel.set(target + 1.CarouselSlot)
+                    }
                 }
+
+                launch { flywheel.set(flywheelTarget) }
+                launch { feederRoller.set(feederRoller.feedSpeed) }
+
+                log(Debug) { "Waiting for feeder roller to get up to speed" }
+                delayUntil { feederRoller.check(feederSpeed) }
+
+                log(Debug) { "Waiting for flywheel to get up to speed" }
+                delayUntil { flywheel.check(flywheelSpeed) }
+
+                launch { shooterHood?.set(hoodTarget) }
+
+                runWhenever({
+                    feederRoller.check(feederSpeed) && flywheel.check(flywheelSpeed)
+                } to choreography {
+                    rumble.set(TwoSided(0.Percent, 100.Percent))
+                })
+            } finally {
+                flywheel.wantedSpeed = 0.Rpm
             }
-
-            launch { flywheel.set(flywheelTarget) }
-            launch { feederRoller.set(feederRoller.feedSpeed) }
-
-            fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-            fun flywheelCheck() = flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-
-            log(Debug) { "Waiting for feeder roller to get up to speed" }
-            delayUntil(f = ::feederCheck)
-
-            log(Debug) { "Waiting for flywheel to get up to speed" }
-            delayUntil(f = ::flywheelCheck)
-
-            launch { shooterHood?.set(hoodTarget) }
-
-            runWhenever({
-                feederCheck() && flywheelCheck()
-            } to choreography {
-                rumble.set(TwoSided(0.Percent, 100.Percent))
-            })
         }
     }
 }
