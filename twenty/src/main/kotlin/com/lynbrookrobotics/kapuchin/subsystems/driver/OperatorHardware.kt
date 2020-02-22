@@ -18,7 +18,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val priority = Priority.High
     override val name = "Operator"
 
-    private val flywheelMappingNamed = Named("flywheelMapping", this)
+    private val flywheelMappingNamed = Named("Flywheel Mapping", this)
     private val deadband by flywheelMappingNamed.pref(80, Percent)
     private val min by flywheelMappingNamed.pref(20, Percent)
     private val max by flywheelMappingNamed.pref(100, Percent)

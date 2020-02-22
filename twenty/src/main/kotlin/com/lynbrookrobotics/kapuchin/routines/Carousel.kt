@@ -26,7 +26,7 @@ suspend fun CarouselComponent.set(targetPosition: Angle, tolerance: Angle = 5.De
     }
 }
 
-suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Carousel Reindex") {
+suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
     val carouselAngle by hardware.position.readEagerly().withoutStamps
     val color by hardware.color.readEagerly().withoutStamps
     val proximity by hardware.proximity.readEagerly().withoutStamps
