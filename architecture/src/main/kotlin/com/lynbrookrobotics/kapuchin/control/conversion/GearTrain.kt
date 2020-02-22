@@ -20,7 +20,7 @@ import info.kunalsheth.units.generated.*
  * @property idlers number of gears between the input and output gears
  */
 data class GearTrain(val inputTeeth: Int, val outputTeeth: Int, val idlers: Int = 0) {
-    private val flip = if (idlers % 2 == 0) 1 else -1
+    private val flip = if (idlers % 2 == 1) 1 else -1
 
     private val inOverOut = inputTeeth.toDouble() / outputTeeth
     private val outOverIn = outputTeeth.toDouble() / inputTeeth

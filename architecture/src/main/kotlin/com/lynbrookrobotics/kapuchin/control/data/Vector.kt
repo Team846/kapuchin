@@ -43,10 +43,10 @@ data class UomVector<Q : Quan<Q>>(
             this.z * that
     )
 
-    operator fun div(that: Double) = UomVector(
-            this.x / that,
-            this.y / that,
-            this.z / that
+    operator fun div(that: Number) = UomVector(
+            this.x / that.toDouble(),
+            this.y / that.toDouble(),
+            this.z / that.toDouble()
     )
 
 }

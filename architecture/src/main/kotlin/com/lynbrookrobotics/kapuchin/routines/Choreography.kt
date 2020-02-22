@@ -131,7 +131,7 @@ suspend fun runWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervisorS
 }
 
 /**
- * Shortcut for a bunch of runWhiles in a whenever
+ * Shortcut for a bunch of launches in a whenever
  *
  * @param blocks List of pairs of a predicate and a function
  */

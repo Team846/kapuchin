@@ -2,30 +2,34 @@ package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.subsystems.climber.ClimberPivotState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-suspend fun Subsystems.climberTeleop() = startChoreo("Climber teleop") {
+suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
 
-    val unleashTheCobra by operator.unleashTheCobra.readEagerly().withoutStamps
-    val oShitSnekGoBack by operator.oShitSnekGoBack.readEagerly().withoutStamps
+    val extendClimber by operator.extendClimber.readEagerly().withoutStamps
+    val retractClimber by operator.retractClimber.readEagerly().withoutStamps
 
     choreography {
         runWhenever(
-                { unleashTheCobra } to choreography { unleashTheCobra() },
-                { oShitSnekGoBack } to choreography { climber?.spin(-climber.maxOutput / 2) ?: freeze() }
+                { extendClimber } to choreography { extendClimber() },
+                { retractClimber } to choreography { retractClimber() }
         )
     }
 }
 
-suspend fun Subsystems.unleashTheCobra() = coroutineScope {
-    launch {
-        delay(0.5.Second)
-        scope.launch { leds?.rainbow() }
-        drivetrain.openLoop(30.Percent)
-    }
-    launch { leds?.rainbow() }
-    climber?.spin(climber.maxOutput) ?: freeze()
+suspend fun Subsystems.extendClimber() = coroutineScope {
+    scope.launch { climberPivot?.set(Up) }
+    launch { climberWinch?.set(climberWinch.extendSpeed) }
+    freeze()
+}
+
+suspend fun Subsystems.retractClimber() = coroutineScope {
+    launch { climberWinch?.set(climberWinch.retractSpeed) }
+    delay(1.Second)
+    scope.launch { climberPivot?.set(Down) }
+    freeze()
 }

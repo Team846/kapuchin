@@ -15,7 +15,7 @@ import info.kunalsheth.units.generated.*
  * @param vBat battery voltage
  * @return duty cycle
  */
-fun Named.voltageToDutyCycle(target: V, vBat: V, logLowVoltage: Boolean = true): Dimensionless {
+fun Named.voltageToDutyCycle(target: V, vBat: V, logLowVoltage: Boolean = false): Dimensionless {
     if (target > vBat && logLowVoltage) log(Warning) {
         "${target withDecimals 1} target cannot be reached with a ${vBat withDecimals 1} battery."
     }

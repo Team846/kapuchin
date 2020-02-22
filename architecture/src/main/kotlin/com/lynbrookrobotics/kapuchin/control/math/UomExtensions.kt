@@ -10,8 +10,8 @@ typealias `*` = times
 
 operator fun <Q : Quan<Q>> Q.div(that: Q): Double = this.siValue / that.siValue
 
-infix fun <Q : Quan<Q>> Q.minMag(that: Q) = if (this.abs < that.abs) this else that
-infix fun <Q : Quan<Q>> Q.maxMag(that: Q) = if (this.abs > that.abs) this else that
+inline infix fun <Q : Quan<Q>> Q.minMag(that: Q) = if (this.abs < that.abs) this else that
+inline infix fun <Q : Quan<Q>> Q.maxMag(that: Q) = if (this.abs > that.abs) this else that
 
 infix fun <Q : Quan<Q>> Q.cap(rng: ClosedRange<Q>) = when {
     this > rng.endInclusive -> rng.endInclusive
@@ -33,7 +33,8 @@ fun <Q : Number> `±`(radius: Q) = 0.0 `±` radius
 
 inline fun <Q : Quan<Q>> `±`(radius: Q) = radius.new(0.0) `±` radius
 
-inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊆`(that: ClosedRange<Q>): Boolean = this.start >= that.start && this.endInclusive <= that.endInclusive
+inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊆`(that: ClosedRange<Q>): Boolean =
+        that.start <= this.start && this.endInclusive <= that.endInclusive
 
 /**
  *

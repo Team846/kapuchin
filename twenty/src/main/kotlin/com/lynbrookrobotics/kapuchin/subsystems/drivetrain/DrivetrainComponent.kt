@@ -11,33 +11,42 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import info.kunalsheth.units.generated.*
 
-class DrivetrainComponent(hardware: DrivetrainHardware) :
-        Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware),
-        GenericDrivetrainComponent {
+class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware), GenericDrivetrainComponent {
 
+    // TODO correct these for the 2020 bot if hardware team finishes it
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
     val maxAcceleration by pref(10, FootPerSecondSquared)
-    val percentMaxOmega by pref(100, Percent)
+    val percentMaxOmega by pref(75, Percent)
+
     val maxSpeed get() = maxLeftSpeed min maxRightSpeed
-    val maxOmega get() = percentMaxOmega * (maxSpeed / hardware.conversions.trackLength / 2 * Radian)
+    val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian
 
     val velocityGains by pref {
         val kP by pref(5, Volt, 2, FootPerSecond)
         val kF by pref(110, Percent)
         ({
-            OffloadedEscGains(
+            val left = OffloadedEscGains(
                     syncThreshold = hardware.syncThreshold,
-                    kP = hardware.conversions.nativeConversion.native(kP),
-                    kF = hardware.conversions.nativeConversion.native(
-                            Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
+                    kP = hardware.conversions.encoder.left.native(kP),
+                    kF = hardware.conversions.encoder.left.native(
+                            Gain(hardware.escConfig.voltageCompSaturation, maxLeftSpeed)
                     ) * kF.Each
             )
+            val right = OffloadedEscGains(
+                    syncThreshold = hardware.syncThreshold,
+                    kP = hardware.conversions.encoder.right.native(kP),
+                    kF = hardware.conversions.encoder.right.native(
+                            Gain(hardware.escConfig.voltageCompSaturation, maxRightSpeed)
+                    ) * kF.Each
+            )
+            TwoSided(left, right)
         })
     }
 
-    override val bearingKp by pref(5, FootPerSecond, 45, Degree)
-    override val bearingKd by pref(3, FootPerSecond, 360, DegreePerSecond)
+    private val bearingGainsNamed = Named("bearingGains", this)
+    override val bearingKp by bearingGainsNamed.pref(5, FootPerSecond, 45, Degree)
+    override val bearingKd by bearingGainsNamed.pref(3, FootPerSecond, 360, DegreePerSecond)
 
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         TwoSided(PercentOutput(hardware.escConfig, 0.Percent))
@@ -61,6 +70,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
     }
 
     init {
-        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set, { hardware.jitterReadPin.period.Second })
+        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set) { hardware.jitterReadPin.period.Second }
     }
 }

@@ -1,44 +1,50 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
+import com.ctre.phoenix.motorcontrol.NeutralMode.Brake
+import com.ctre.phoenix.motorcontrol.NeutralMode.Coast
 import com.lynbrookrobotics.kapuchin.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
+import java.io.File
 
-suspend fun Subsystems.drivetrainTeleop() = startChoreo("Drivetrain teleop") {
+suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal Path") {
 
-    val autoAlign by driver.autoAlign.readEagerly().withoutStamps
+    val pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
+    val log = File("/home/lvuser/journal.tsv").printWriter().also {
+        it.println("x\ty")
+        it.println("0.0\t0.0")
+    }
+
+    val startingLoc = pos.vector
+    val startingRot = RotationMatrix(-pos.bearing)
+
+    var last = pos
+
+    val drivetrainEscs = with(drivetrain.hardware) { setOf(leftMasterEsc, rightMasterEsc, leftSlaveEsc, rightSlaveEsc) }
 
     choreography {
         try {
-            launch {
-                launchWhenever(
-                        { drivetrain.routine == null } to choreography {
-                            drivetrain.teleop(driver)
-                        }
-                )
+            drivetrainEscs.forEach { it.setNeutralMode(Coast) }
+            while (isActive) {
+                val (x, y) = startingRot rz (pos.vector - startingLoc)
+
+                if (distance(pos.vector, last.vector) > cut) {
+                    log.println("${x.Foot}\t${y.Foot}")
+                    last = pos
+                }
+
+                delay(50.milli(Second))
             }
-            launch {
-                runWhenever(
-                        { autoAlign } to choreography {
-                            launch { collectorSlider?.trackLine(lineScanner, electrical) }
-                            drivetrain.lineActiveTracking(
-                                    2.FootPerSecond,
-                                    collectorSlider
-                                            ?.run { (min - 0.5.Inch)..(max + 0.5.Inch) }
-                                            ?: -5.Inch..5.Inch,
-                                    lineScanner
-                            )
-                        }
-                )
-            }
-            freeze()
-        } catch (t: Throwable) {
-            log(Error, t) { "The drivetrain teleop control is exiting!!!" }
-            throw t
+        } finally {
+            val (x, y) = startingRot rz (pos.vector - startingLoc)
+            log.println("${x.Foot}\t${y.Foot}")
+            log.close()
+
+            drivetrainEscs.forEach { it.setNeutralMode(Brake) }
         }
     }
 }
