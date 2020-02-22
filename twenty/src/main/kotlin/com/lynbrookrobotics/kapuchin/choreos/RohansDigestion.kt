@@ -37,8 +37,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         launch {
             launchWhenever(
-                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
-                    { limelight?.routine == null } to choreography { limelight?.autoZoom() }
+                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) }
             )
         }
 
