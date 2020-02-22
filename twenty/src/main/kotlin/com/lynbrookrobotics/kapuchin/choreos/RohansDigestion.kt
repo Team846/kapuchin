@@ -32,8 +32,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
 
     choreography {
-        // In case turret wasn't zeroed during autonomous
-        if (turret?.hardware?.isZeroed == true) launch { turret.rezero(electrical) }
+        supervisorScope {
+            if (turret?.hardware?.isZeroed == true) launch { turret.rezero(electrical) }
+            if (!carousel.hardware.isZeroed) launch { carousel.rezero() }
+        }
 
         launch {
             launchWhenever(
@@ -46,11 +48,15 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
                 { aim } to choreography { visionAim() },
-                { aimPreset } to choreography { flywheel?.let { spinUpShooter(flywheel.preset, Down) } ?: freeze() },
+                { aimPreset } to choreography {
+                    flywheel?.let { spinUpShooter(flywheel.preset, Down) } ?: freeze()
+                },
                 { shoot } to choreography { fire() },
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
-                { !flywheelManual.isZero } to choreography { flywheel?.manualOverride(operator) ?: freeze() },
+                { !flywheelManual.isZero } to choreography {
+                    flywheel?.manualOverride(operator) ?: freeze()
+                },
                 { !turretManual.isZero } to choreography {
                     launch { flashlight?.set(kOn) }
                     turret?.manualOverride(operator) ?: freeze()

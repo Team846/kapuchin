@@ -21,6 +21,8 @@ class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponen
         })
     }
 
+    val zeroSpeed by pref(30, Percent)
+
     val collectSlot by pref(0, CarouselSlot)
     val shootSlot by pref(0.5, CarouselSlot)
 

@@ -1,10 +1,20 @@
 package com.lynbrookrobotics.kapuchin.routines
 
+import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.turret.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+
+suspend fun CarouselComponent.rezero() = startRoutine("Set") {
+    hardware.isZeroed = false
+    controller {
+        PercentOutput(hardware.escConfig, zeroSpeed).takeUnless { hardware.isZeroed }
+    }
+}
 
 suspend fun CarouselComponent.set(targetPosition: Angle, tolerance: Angle = 5.Degree) = startRoutine("Set") {
     val current by hardware.position.readOnTick.withoutStamps
