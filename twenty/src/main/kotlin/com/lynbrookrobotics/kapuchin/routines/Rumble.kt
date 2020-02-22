@@ -10,7 +10,7 @@ suspend fun RumbleComponent.set(target: Rumble) = startRoutine("Set") {
     controller { target }
 }
 
-suspend fun RumbleComponent.error(rate: Frequency) = startRoutine("Error") {
+suspend fun RumbleComponent.error(rate: Frequency = 4.Hertz) = startRoutine("Error") {
     controller {
         Rumble((currentTime * rate * 2).roundToInt(Each))
     }
