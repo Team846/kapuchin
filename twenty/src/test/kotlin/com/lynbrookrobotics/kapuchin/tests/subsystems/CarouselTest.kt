@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.tests.subsystems.carousel
+package com.lynbrookrobotics.kapuchin.tests.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
