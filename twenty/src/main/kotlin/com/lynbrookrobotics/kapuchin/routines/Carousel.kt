@@ -9,7 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.turret.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-suspend fun CarouselComponent.rezero() = startRoutine("Set") {
+suspend fun CarouselComponent.rezero() = startRoutine("Re-Zero") {
     hardware.isZeroed = false
     controller {
         PercentOutput(hardware.escConfig, zeroSpeed).takeUnless { hardware.isZeroed }
