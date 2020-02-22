@@ -58,9 +58,13 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         runAll(
                 { climberTeleop() },
                 { controlPanelTeleop() },
-                { drivetrain.teleop(driver) },
                 { digestionTeleop() },
-                { limelight?.autoZoom() }
+                {
+                    launchWhenever(
+                            { limelight?.routine == null } to choreography { limelight?.autoZoom() },
+                            { drivetrain.routine == null } to choreography { drivetrain.teleop(driver) }
+                    )
+                }
         )
     }
 

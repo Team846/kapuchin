@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -35,7 +36,10 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
 
     val conversions = CarouselConversions(this)
     var isZeroed = false
-        private set
+        set(value) {
+            log(Debug) { "Setting isZeroed to $value" }
+            field = value
+        }
 
     val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)
