@@ -25,7 +25,7 @@ private fun loadTempPath() = File("/home/lvuser/journal.tsv")
         .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
         .toList()
 
-suspend fun Subsystems.followJournal() = startChoreo("Follow Journal") {
+suspend fun Subsystems.followJournal(reverse: Boolean) = startChoreo("Follow Journal") {
     val path = loadTempPath()
 
     val trajectory = pathToTrajectory(path,
@@ -37,7 +37,7 @@ suspend fun Subsystems.followJournal() = startChoreo("Follow Journal") {
     System.gc()
 
     choreography {
-        drivetrain.followTrajectory(trajectory, 12.Inch, 2.Inch)
+        drivetrain.followTrajectory(trajectory, 12.Inch, 2.Inch, reverse)
         freeze()
     }
 }

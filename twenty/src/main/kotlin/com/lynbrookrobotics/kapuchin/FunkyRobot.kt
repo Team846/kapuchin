@@ -43,7 +43,7 @@ class FunkyRobot : RobotBase() {
                     },
                     { isEnabled && isAutonomous } to choreography {
                         System.gc()
-                        subsystems.followJournal()
+                        subsystems.followJournal(false)
                     },
                     { isDisabled && !isTest } to choreography {
                         subsystems.warmup()
