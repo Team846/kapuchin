@@ -21,8 +21,6 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val tolerance by pref(10, Rpm)
     val ballThreshold by pref(-1000, RpmPerSecond)
 
-    var wantedSpeed = 0.Rpm
-
     val velocityGains by pref {
         val kP by pref(10, Volt, 100, Rpm)
         val kF by pref(110, Percent)
