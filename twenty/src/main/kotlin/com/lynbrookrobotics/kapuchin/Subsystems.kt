@@ -23,6 +23,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
@@ -54,6 +55,21 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val shooterHood: ShooterHoodComponent?
 ) : Named by Named("Subsystems") {
 
+    private val autos = listOf(
+            choreography { `shoot wall`() },
+            choreography { `I1 shoot C1`() },
+            choreography { `I2 shoot C1`() },
+            choreography { `I3 shoot C5`() },
+            choreography { `I1 shoot C1 I2 shoot`() },
+            choreography { `I3 shoot C5 I3 shoot`() }
+    )
+
+    private val autoIdGraph = graph("Auto ID", Each)
+    private val autoId
+        get() = SmartDashboard.getEntry("DB/slider 0").getDouble(-1.0).roundToInt().also {
+            if (it !in autos.indices) log(Error) { "No auto with ID $it!!!!!!" }
+        }
+
     suspend fun teleop() {
         HAL.observeUserProgramTeleop()
         runAll(
@@ -70,23 +86,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     }
 
     suspend fun auto() = coroutineScope {
-        val table = NetworkTableInstance.getDefault().getTable("/SmartDashboard")
-        val autoID = table.getEntry("DB/slider 0").getDouble(0.0).roundToInt()
-
-        val autos = listOf(
-                choreography { `shoot wall`() },
-                choreography { `I1 shoot C1`() },
-                choreography { `I2 shoot C1`() },
-                choreography { `I3 shoot C5`() },
-                choreography { `I1 shoot C1 I2 shoot`() },
-                choreography { `I3 shoot C5 I3 shoot`() }
-        )
-
-        if (autoID !in autos.indices) {
-            log(Error) { "No auto with ID $autoID"}
+        if (autoId !in autos.indices) {
+            log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
             freeze()
-        }
-        else autos[autoID]()
+        } else autos[autoId].invoke(this@coroutineScope)
     }
 
     suspend fun warmup() {
@@ -100,6 +103,12 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     }
                 }
         )
+    }
+
+    init {
+        uiBaselineTicker.runOnTick { time ->
+            autoIdGraph(time, autoId.Each)
+        }
     }
 
     companion object : Named by Named("Subsystems") {
