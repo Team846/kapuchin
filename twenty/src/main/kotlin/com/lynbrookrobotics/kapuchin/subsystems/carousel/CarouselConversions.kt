@@ -29,15 +29,15 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
     }
 
     val ballIrRange by pref {
-        val min by pref(50, Percent)
-        val max by pref(90, Percent)
+        val min by pref(87.5, Percent)
+        val max by pref(100, Percent)
         ({ min..max })
     }
     val ballColor by pref {
-        val r by pref(0.301)
-        val g by pref(0.532)
-        val b by pref(0.167)
-        ({ Color(r, g, b) })
+        val r by pref(29.8, Percent)
+        val g by pref(53.2, Percent)
+        val b by pref(16.8, Percent)
+        ({ Color(r.Each, g.Each, b.Each) })
     }
     val ballColorTolerance by pref(0.1)
 

@@ -13,6 +13,7 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.ColorSensorV3
+import com.revrobotics.ColorSensorV3.*
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.I2C.Port.kMXP
 import info.kunalsheth.units.generated.*
@@ -32,7 +33,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     )
 
     private val escId = 60
-    private val hallEffectChannel = 0
+    private val hallEffectChannel = 1
 
     val conversions = CarouselConversions(this)
     var isZeroed = false
@@ -54,19 +55,26 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     }.with(graph("Angle", Degree))
 
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
-        dio.setUpSourceEdge(true, false)
         dio.requestInterrupts {
             encoder.position = position.optimizedRead(
                     dio.readRisingTimestamp().Second, syncThreshold
             ).y.roundToInt(CarouselSlot).let(conversions.encoder::native)
             isZeroed = true
         }
+        dio.setUpSourceEdge(true, false)
         dio.enableInterrupts()
     }
     val alignedToSlot = sensor(hallEffect) { get() stampWith it }
             .with(graph("Aligned to Slot", Each)) { (if (it) 1 else 0).Each }
 
-    private val colorSensor by hardw { ColorSensorV3(kMXP) }
+    private val colorSensor by hardw { ColorSensorV3(kMXP) }.configure {
+//        it.configureColorSensor(ColorSensorResolution.kColorSensorRes18bit, ColorSensorMeasurementRate.kColorRate25ms, GainFactor.kGain3x)
+//        it.configureProximitySensor(ProximitySensorResolution.kProxRes11bit, ProximitySensorMeasurementRate.kProxRate6ms)
+//        it.configureProximitySensorLED(LEDPulseFrequency.kFreq60kHz, LEDCurrent.kPulse125mA, 8)
+    }.verify("the color sensor is connected") {
+//        it.proximity.Each / 2047 > 50.Percent
+        true
+    }
     private val colorNamed = Named("Color Sensor", this)
     val color = sensor(colorSensor) { color stampWith it }
             .with(graph("R", Percent, colorNamed)) { it.red.Each }
