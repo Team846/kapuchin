@@ -13,9 +13,8 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.ColorSensorV3
-import com.revrobotics.ColorSensorV3.*
 import edu.wpi.first.wpilibj.DigitalInput
-import edu.wpi.first.wpilibj.I2C.Port.kMXP
+import edu.wpi.first.wpilibj.I2C.Port.kOnboard
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -67,7 +66,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val alignedToSlot = sensor(hallEffect) { get() stampWith it }
             .with(graph("Aligned to Slot", Each)) { (if (it) 1 else 0).Each }
 
-    private val colorSensor by hardw { ColorSensorV3(kMXP) }.configure {
+    private val colorSensor by hardw { ColorSensorV3(kOnboard) }.configure {
 //        it.configureColorSensor(ColorSensorResolution.kColorSensorRes18bit, ColorSensorMeasurementRate.kColorRate25ms, GainFactor.kGain3x)
 //        it.configureProximitySensor(ProximitySensorResolution.kProxRes11bit, ProximitySensorMeasurementRate.kProxRate6ms)
 //        it.configureProximitySensorLED(LEDPulseFrequency.kFreq60kHz, LEDCurrent.kPulse125mA, 8)

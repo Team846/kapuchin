@@ -61,7 +61,7 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
     private val escId = 61
 
     val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
-        generalSetup(it, escConfig)
+        setupMaster(it, escConfig, false)
         it.inverted = invert
     }
 
