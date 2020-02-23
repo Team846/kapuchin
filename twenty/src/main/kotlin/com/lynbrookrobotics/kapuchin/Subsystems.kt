@@ -34,7 +34,7 @@ import kotlin.system.exitProcess
 class Subsystems(val drivetrain: DrivetrainComponent,
                  val carousel: CarouselComponent,
                  val electrical: ElectricalSystemHardware,
-                 val limelight: LimelightComponent?,
+                 val limelight: LimelightComponent,
 
                  val driver: DriverHardware,
                  val operator: OperatorHardware,
@@ -61,7 +61,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 { digestionTeleop() },
                 {
                     launchWhenever(
-                            { limelight?.routine == null } to choreography { limelight?.autoZoom() },
+                            { limelight.routine == null } to choreography { limelight.autoZoom() },
                             { drivetrain.routine == null } to choreography { drivetrain.teleop(driver) }
                     )
                 }
@@ -71,7 +71,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     suspend fun warmup() {
         runAll(
                 { drivetrain.teleop(driver) },
-                { limelight?.autoZoom() },
+                { limelight.autoZoom() },
                 {
                     while (isActive) {
                         delay(0.3.Second)

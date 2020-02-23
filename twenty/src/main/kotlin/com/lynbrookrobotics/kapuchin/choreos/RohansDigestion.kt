@@ -12,6 +12,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import edu.wpi.first.wpilibj.Relay.Value.kOn
 import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
@@ -73,29 +74,31 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
-        val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
+        while (isActive) {
+            val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
 
-        if (emptySlot == null) {
-            log(Warning) { "I'm full. No open slots in carousel magazine." }
-            rumble.set(TwoSided(100.Percent, 0.Percent))
-        } else {
-            launch { feederRoller?.set(0.Rpm) }
-            carousel.set(emptySlot - carousel.collectSlot, 0.1.CarouselSlot)
-            launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
+            if (emptySlot == null) {
+                log(Warning) { "I'm full. No open slots in carousel magazine." }
+                rumble.set(TwoSided(100.Percent, 0.Percent))
+            } else {
+                launch { feederRoller?.set(0.Rpm) }
+                carousel.set(emptySlot - carousel.collectSlot, 0.1.CarouselSlot)
+                launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
 
-            launch { intakeSlider?.set(IntakeSliderState.Out) }
-            launch { intakeRollers?.set(intakeRollers.eatSpeed) }
+                launch { intakeSlider?.set(IntakeSliderState.Out) }
+                launch { intakeRollers?.set(intakeRollers.eatSpeed) }
 
-            log(Debug) { "Waiting for a yummy mouthful of balls." }
-            carousel.delayUntilBall()
-            carousel.state.set(carouselAngle + carousel.collectSlot, true)
+                log(Debug) { "Waiting for a yummy mouthful of balls." }
+                carousel.delayUntilBall()
+                carousel.state.set(carouselAngle + carousel.collectSlot, true)
+            }
         }
     }
 }
 
 suspend fun Subsystems.visionAim() {
-    if (limelight == null || flywheel == null || feederRoller == null) {
-        log(Error) { "Need limelight, flywheel, and feederRoller for vision aiming" }
+    if (flywheel == null || feederRoller == null) {
+        log(Error) { "Need flywheel and feederRoller for vision aiming" }
         freeze()
     } else startChoreo("Vision Aim") {
 

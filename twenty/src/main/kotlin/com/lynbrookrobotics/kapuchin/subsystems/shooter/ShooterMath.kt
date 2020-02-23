@@ -26,7 +26,7 @@ enum class Goal { Inner, Outer }
 data class ShotState(val flywheel: AngularVelocity, val hood: ShooterHoodState, val goal: Goal, val entryAngle: Angle)
 
 fun Subsystems.bestShot(target: DetectedTarget): ShotState? =
-        if (limelight == null || flywheel == null || shooterHood == null) null
+        if (flywheel == null || shooterHood == null) null
         else with(flywheel) {
             bestShot(
                     target,
