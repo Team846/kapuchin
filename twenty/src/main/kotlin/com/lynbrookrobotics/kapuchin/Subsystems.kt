@@ -34,6 +34,7 @@ import kotlin.system.exitProcess
 class Subsystems(val drivetrain: DrivetrainComponent,
                  val carousel: CarouselComponent,
                  val electrical: ElectricalSystemHardware,
+                 val limelight: LimelightComponent?,
 
                  val driver: DriverHardware,
                  val operator: OperatorHardware,
@@ -45,7 +46,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val controlPanelSpinner: ControlPanelSpinnerComponent?,
                  val intakeRollers: IntakeRollersComponent?,
                  val intakeSlider: IntakeSliderComponent?,
-                 val limelight: LimelightComponent?,
                  val flywheel: FlywheelComponent?,
                  val turret: TurretComponent?,
                  val feederRoller: FeederRollerComponent?,
@@ -108,7 +108,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         private val initControlPanelSpinner by pref(false)
         private val initIntakeRollers by pref(false)
         private val initIntakeSlider by pref(false)
-        private val initLimelight by pref(false)
         private val initFlywheel by pref(false)
         private val initTurret by pref(false)
         private val initFeederRoller by pref(false)
@@ -143,6 +142,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
                 val carouselAsync = async { CarouselComponent(CarouselHardware()) }
                 val electricalAsync = async { ElectricalSystemHardware() }
+                val limelightAsync = async { LimelightComponent(LimelightHardware()) }
 
                 val driverAsync = async { DriverHardware() }
                 val operatorAsync = async { OperatorHardware() }
@@ -154,7 +154,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val controlPanelSpinnerAsync = i(initControlPanelSpinner) { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware(driverAsync.await())) }
                 val intakeRollersAsync = i(initIntakeRollers) { IntakeRollersComponent(IntakeRollersHardware()) }
                 val intakeSliderAsync = i(initIntakeSlider) { IntakeSliderComponent(IntakeSliderHardware()) }
-                val limelightAsync = i(initLimelight) { LimelightComponent(LimelightHardware()) }
                 val flywheelAsync = i(initFlywheel) { FlywheelComponent(FlywheelHardware()) }
                 val turretAsync = i(initTurret) { TurretComponent(TurretHardware()) }
                 val feederRollerAsync = i(initFeederRoller) { FeederRollerComponent(FeederRollerHardware()) }
@@ -165,6 +164,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         drivetrainAsync.await(),
                         carouselAsync.await(),
                         electricalAsync.await(),
+                        limelightAsync.await(),
 
                         driverAsync.await(),
                         operatorAsync.await(),
@@ -176,7 +176,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                         t { controlPanelSpinnerAsync.await() },
                         t { intakeRollersAsync.await() },
                         t { intakeSliderAsync.await() },
-                        t { limelightAsync.await() },
                         t { flywheelAsync.await() },
                         t { turretAsync.await() },
                         t { feederRollerAsync.await() },
@@ -201,6 +200,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     DrivetrainComponent(DrivetrainHardware()),
                     CarouselComponent(CarouselHardware()),
                     ElectricalSystemHardware(),
+                    LimelightComponent(LimelightHardware()),
 
                     driver,
                     operator,
@@ -212,7 +212,6 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     i(initControlPanelSpinner) { t { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware(driver)) } },
                     i(initIntakeRollers) { t { IntakeRollersComponent(IntakeRollersHardware()) } },
                     i(initIntakeSlider) { t { IntakeSliderComponent(IntakeSliderHardware()) } },
-                    i(initLimelight) { t { LimelightComponent(LimelightHardware()) } },
                     i(initFlywheel) { t { FlywheelComponent(FlywheelHardware()) } },
                     i(initTurret) { t { TurretComponent(TurretHardware()) } },
                     i(initFeederRoller) { t { FeederRollerComponent(FeederRollerHardware()) } },
