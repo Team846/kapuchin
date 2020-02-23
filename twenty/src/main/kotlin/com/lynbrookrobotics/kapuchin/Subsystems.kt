@@ -27,6 +27,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.io.File
+import kotlin.math.roundToInt
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
@@ -66,6 +67,26 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     )
                 }
         )
+    }
+
+    suspend fun auto() = coroutineScope {
+        val table = NetworkTableInstance.getDefault().getTable("/SmartDashboard")
+        val autoID = table.getEntry("DB/slider 0").getDouble(0.0).roundToInt()
+
+        val autos = listOf(
+                choreography { `shoot wall`() },
+                choreography { `I1 shoot C1`() },
+                choreography { `I2 shoot C1`() },
+                choreography { `I3 shoot C5`() },
+                choreography { `I1 shoot C1 I2 shoot`() },
+                choreography { `I3 shoot C5 I3 shoot`() }
+        )
+
+        if (autoID !in autos.indices) {
+            log(Error) { "No auto with ID $autoID"}
+            freeze()
+        }
+        else autos[autoID]()
     }
 
     suspend fun warmup() {
