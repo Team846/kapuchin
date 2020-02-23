@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import edu.wpi.first.wpilibj.Relay.Value.kOn
 import info.kunalsheth.units.generated.*
@@ -58,7 +59,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                     flywheel?.manualOverride(operator) ?: freeze()
                 },
                 { !turretManual.isZero } to choreography {
-                    launch { flashlight?.set(kOn) }
+                    launch { flashlight?.set(On) }
                     turret?.manualOverride(operator) ?: freeze()
                 },
 
@@ -151,7 +152,7 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-            launch { flashlight?.set(kOn) }
+            launch { flashlight?.set(On) }
 
             launch {
                 val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
