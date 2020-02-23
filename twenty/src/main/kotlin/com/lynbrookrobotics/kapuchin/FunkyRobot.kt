@@ -2,8 +2,10 @@ package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
@@ -13,6 +15,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.isActive
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -43,12 +46,34 @@ class FunkyRobot : RobotBase() {
                     },
                     { isEnabled && isAutonomous } to choreography {
                         System.gc()
+//                      subsystems.carousel.whereAreMyBalls()
+//                      subsystems.carousel.log(Debug) { subsystems.carousel.state.toString() }
 
-//                        subsystems.feederRoller?.hardware?.esc?.set(0.1)
-//                        subsystems.flywheel?.set(1000.Rpm)
-//                        subsystems.flywheel?.hardware?.slaveEsc?.set(0.05)
+//                        while(isActive) {
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(1.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(5.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(-1.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                        }
+                        subsystems.carousel.rezero()
+                        subsystems.carousel.whereAreMyBalls()
+                        println(subsystems.carousel.state.toString())
+                        subsystems.carousel.log(Debug) { subsystems.carousel.state.toString() }
+                        println(subsystems.carousel.state.toString())
+
+//                      subsystems.feederRoller?.hardware?.esc?.set(0.1)
+//                      subsystems.flywheel?.set(1000.Rpm)
+//                      subsystems.flywheel?.hardware?.slaveEsc?.set(0.05)
                         freeze()
-//                        subsystems.drivetrain.set(0.Percent)
+//                      subsystems.drivetrain.set(0.Percent)
                     },
                     { isDisabled && !isTest } to choreography {
                         subsystems.warmup()

@@ -11,8 +11,8 @@ import kotlin.math.pow
 class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversions", hardware) {
     val encoder by pref {
         val gearbox by pref {
-            val motor by pref(20)
-            val output by pref(1)
+            val motor by pref(1)
+            val output by pref(20)
             ({ GearTrain(motor, output) })
         }
         val complianceWheelRadius by pref(1.25, Inch)

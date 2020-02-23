@@ -34,7 +34,7 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
                 peakOutputForward = safeSpeed,
                 peakOutputReverse = -safeSpeed
         ))
-        else value.with(OffloadedEscSafeties(hardware.syncThreshold,
+        else value.with(OffloadedEscSafeties(
                 min = encoder.native(min),
                 max = encoder.native(max)
         ))

@@ -13,7 +13,6 @@ import info.kunalsheth.units.math.*
 import java.util.concurrent.ConcurrentHashMap
 
 data class OffloadedEscConfiguration(
-        val syncThreshold: Time,
         val openloopRamp: Time = 0.Second,
         val closedloopRamp: Time = 0.Second,
         val peakOutputForward: V = 12.Volt,
@@ -29,8 +28,6 @@ data class OffloadedEscConfiguration(
     companion object {
         val cache = ConcurrentHashMap<Any, OffloadedEscConfiguration>()
     }
-
-    private val timeoutMs = syncThreshold.milli(Second).toInt()
 
     private fun writeTo(esc: BaseMotorController, timeoutMs: Int, cached: OffloadedEscConfiguration? = null) {
         if (cached?.openloopRamp != this.openloopRamp)
@@ -55,7 +52,7 @@ data class OffloadedEscConfiguration(
             +esc.configVoltageCompSaturation(voltageCompSaturation.Volt, timeoutMs)
     }
 
-    fun writeTo(esc: TalonSRX, timeoutMs: Int = this.timeoutMs) {
+    fun writeTo(esc: TalonSRX, timeoutMs: Int = 15) {
         val cached = cache[esc]
         if (this != cached) {
             println("Writing configurations to TalonSRX ${esc.deviceID}")
@@ -74,7 +71,7 @@ data class OffloadedEscConfiguration(
         cache[esc] = this
     }
 
-    fun writeTo(esc: TalonFX, timeoutMs: Int = this.timeoutMs) {
+    fun writeTo(esc: TalonFX, timeoutMs: Int = 15) {
         val cached = cache[esc]
         if (this != cached) {
             println("Writing configurations to TalonFX ${esc.deviceID}")
@@ -107,7 +104,7 @@ data class OffloadedEscConfiguration(
         cache[esc] = this
     }
 
-    fun writeTo(esc: VictorSPX, timeoutMs: Int = this.timeoutMs) {
+    fun writeTo(esc: VictorSPX, timeoutMs: Int = 15) {
         val cached = cache[esc]
         if (this != cached) {
             println("Writing configurations to VictorSPX ${esc.deviceID}")
