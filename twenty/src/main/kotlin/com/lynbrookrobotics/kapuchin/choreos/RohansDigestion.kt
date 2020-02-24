@@ -13,6 +13,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import edu.wpi.first.wpilibj.Relay.Value.kOn
 import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
@@ -37,10 +39,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             if (turret != null && !turret.hardware.isZeroed) launch { turret.rezero(electrical) }
             if (!carousel.hardware.isZeroed) launch { carousel.rezero() }
         }
+        carousel.whereAreMyBalls() // TODO ^ reorganize
 
         launch {
             launchWhenever(
-                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) }
+//                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) } //TODO FIX
             )
         }
 
@@ -64,7 +67,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 },
 
                 { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
-                { reindexCarousel } to choreography { carousel.whereAreMyBalls() }
+                { reindexCarousel } to choreography { carousel.whereAreMyBalls() } //TODO VIBRATE WHEN DONE
         )
     }
 
@@ -74,22 +77,24 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
-        val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
+        while(isActive) {
+            val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
 
-        if (emptySlot == null) {
-            log(Warning) { "I'm full. No open slots in carousel magazine." }
-            rumble.set(TwoSided(100.Percent, 0.Percent))
-        } else {
-            launch { feederRoller?.set(0.Rpm) }
-            carousel.set(emptySlot - carousel.collectSlot, 0.1.CarouselSlot)
-            launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
+            if (emptySlot == null) {
+                log(Warning) { "I'm full. No open slots in carousel magazine." }
+                rumble.set(TwoSided(100.Percent, 0.Percent))
+            } else {
+                launch { feederRoller?.set(0.Rpm) }
+                carousel.set(emptySlot - carousel.collectSlot)
+                launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
 
-            launch { intakeSlider?.set(IntakeSliderState.Out) }
-            launch { intakeRollers?.set(intakeRollers.eatSpeed) }
+                launch { intakeSlider?.set(IntakeSliderState.Out) }
+                launch { intakeRollers?.set(intakeRollers.eatSpeed) }
 
-            log(Debug) { "Waiting for a yummy mouthful of balls." }
-            carousel.delayUntilBall()
-            carousel.state.set(carouselAngle + carousel.collectSlot, true)
+                log(Debug) { "Waiting for a yummy mouthful of balls." }
+                carousel.delayUntilBall()
+                carousel.state.set(carouselAngle + carousel.collectSlot, true)
+            }
         }
     }
 }
@@ -158,8 +163,8 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
                 val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
                 if (fullSlot != null) supervisorScope {
                     val target = fullSlot - carousel.shootSlot
-                    if (target > carouselAngle) carousel.set(target - 1.CarouselSlot)
-                    if (target < carouselAngle) carousel.set(target + 1.CarouselSlot)
+                    if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
+                    if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
                 }
             }
 

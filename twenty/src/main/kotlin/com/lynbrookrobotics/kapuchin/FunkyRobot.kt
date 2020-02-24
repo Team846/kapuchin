@@ -70,7 +70,24 @@ class FunkyRobot : RobotBase() {
 //                        delay(2.Second)
 //                        launch { subsystems.carousel.whereAreMyBalls() }
 
-                        subsystems.turret?.rezero(subsystems.electrical)
+//                        subsystems.turret?.rezero(subsystems.electrical)
+
+//                        launch {
+//                           subsystems.intakeSlider?.set(IntakeSliderState.Out)
+//                        }
+//                        launch {
+//                            subsystems.intakeRollers?.set(subsystems.intakeRollers.eatSpeed)
+//                        }
+//
+//                        repeat(60) {
+//                            withTimeout(1.Second) { subsystems.shooterHood?.set(ShooterHoodState.Up) }
+//                            withTimeout(1.Second) { subsystems.shooterHood?.set(ShooterHoodState.Down) }
+//                        }
+
+                        subsystems.carousel.rezero()
+                        subsystems.carousel.whereAreMyBalls()
+                        subsystems.eat()
+
                         freeze()
 //                      subsystems.drivetrain.set(0.Percent)
                     },

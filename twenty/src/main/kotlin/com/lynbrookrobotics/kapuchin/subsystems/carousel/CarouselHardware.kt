@@ -38,7 +38,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val conversions = CarouselConversions(this)
     var isZeroed = false
         set(value) {
-            log(Debug) { "Setting isZeroed to $value" }
+//          log(Debug) { "Setting isZeroed to $value" }
             field = value
         }
 

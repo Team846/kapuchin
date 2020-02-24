@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Relay
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class FlashlightState(val output: Boolean) { Off(true), On(false) }
+enum class FlashlightState(val output: Boolean) { Off(false), On(true) }
 
 class FlashlightComponent(hardware: FlashlightHardware) : Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, pneumaticTicker) {
 

@@ -12,13 +12,13 @@ class CarouselState(component: Named) : Named by Named("State", component) {
     private fun index(robotBearing: Angle) =
             Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
 
-    operator fun get(robotBearing: Angle) = internal.get(index(robotBearing))
+    operator fun get(robotBearing: Angle) = internal[index(robotBearing)]
 
-    operator fun set(robotBearing: Angle, state: Boolean) {
+    operator fun set(robotBearing: Angle, newState: Boolean) {
         val index = index(robotBearing)
-        log(Debug) { "Setting state of slot #$index @ ${robotBearing.Degree withDecimals 0}˚ from ${internal.get(index)} to $state" }
-        if (internal[index] && state) log(Error) { "#$index was assumed to be full. Setting to full again." }
-        internal.set(index, state)
+        log(Debug) { "Setting state of slot #$index @ ${robotBearing.Degree withDecimals 0}˚ from ${internal[index]} to $newState" }
+        if (internal[index] && newState) log(Error) { "#$index was assumed to be full. Setting to full again." }
+        internal[index] = newState
     }
 
     private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
