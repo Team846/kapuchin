@@ -118,14 +118,25 @@ suspend fun Subsystems.visionAim() {
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            val shot = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
-            if (shot == null) withTimeout(.5.Second) {
-                log(Debug) { "Cannot find target or no shots possible" }
-                rumble.error()
-            } else {
-                launch { turret?.trackTarget(limelight, flywheel, drivetrain, shot.goal) }
-                spinUpShooter(shot.flywheel, shot.hood)
+            val snapshot1 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
+            if (snapshot1 == null) {
+                log(Debug) { "Couldn't find snapshot1 or no shots possible" }
+                withTimeout(.5.Second) { rumble.error() }
+                return@choreography
             }
+
+            turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 2.Degree)
+            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
+
+            val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
+            if (snapshot2 == null) {
+                log(Warning) { "Couldn't find snapshot2 or no shots possible" }
+                withTimeout(.5.Second) { rumble.error() }
+                return@choreography
+            }
+
+            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
+            spinUpShooter(snapshot2.flywheel, snapshot2.hood)
         }
     }
 }
