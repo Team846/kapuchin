@@ -65,9 +65,12 @@ class FunkyRobot : RobotBase() {
 //                        subsystems.carousel.log(Debug) { subsystems.carousel.state.toString() }
 //                        println(subsystems.carousel.state.toString())
 
-                        launch { subsystems.feederRoller?.set(subsystems.feederRoller.feedSpeed) }
-                        launch { subsystems.flywheel?.set(7000.Rpm) }
-//                      subsystems.flywheel?.hardware?.slaveEsc?.set(0.05)
+//                        launch { subsystems.feederRoller?.set(subsystems.feederRoller.feedSpeed) }
+//                        launch { subsystems.flywheel?.set(4000.Rpm) }
+//                        delay(2.Second)
+//                        launch { subsystems.carousel.whereAreMyBalls() }
+
+                        subsystems.turret?.rezero(subsystems.electrical)
                         freeze()
 //                      subsystems.drivetrain.set(0.Percent)
                     },

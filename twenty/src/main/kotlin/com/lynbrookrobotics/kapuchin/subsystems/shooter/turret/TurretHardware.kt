@@ -18,12 +18,12 @@ import info.kunalsheth.units.math.*
 
 class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     override val period by sharedTickerTiming
-    override val syncThreshold = 5.milli(Second)
+    override val syncThreshold = 15.milli(Second)
     override val priority = Priority.High
     override val name = "Shooter Turret"
 
     private val invert by pref(false)
-    private val limitSwitchMount by pref(90, Degree)
+    private val limitSwitchOffset by pref(116 + 78.8, Degree)
     val escConfig by escConfigPref(
             defaultNominalOutput = 1.Volt,
             defaultContinuousCurrentLimit = 15.Ampere,
@@ -63,7 +63,7 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
         if (isZeroed) log(Error) { "Already zeroed!" }
         else {
             val originalPosition = encoder.position
-            val zeroedPosition = conversions.encoder.native(limitSwitchMount)
+            val zeroedPosition = conversions.encoder.native(limitSwitchOffset)
             log(Warning) { "Zeroing ESC position from ${originalPosition withDecimals 2} to ${zeroedPosition withDecimals 2}" }
             encoder.position = zeroedPosition
             isZeroed = true
