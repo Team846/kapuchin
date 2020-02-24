@@ -22,26 +22,26 @@ sealed class OffloadedOutput {
     abstract fun with(safeties: OffloadedEscSafeties): OffloadedOutput
     abstract fun with(config: OffloadedEscConfiguration): OffloadedOutput
 
-    fun writeTo(esc: VictorSPX, timeoutMs: Int = 15) {
+    fun writeTo(esc: VictorSPX, timeoutMs: Int = config.timeoutMs) {
         config.writeTo(esc, timeoutMs)
         esc.set(mode, value)
     }
 
-    fun writeTo(esc: TalonSRX, timeoutMs: Int = 15) {
+    fun writeTo(esc: TalonSRX, timeoutMs: Int = config.timeoutMs) {
         safeties.writeTo(esc, timeoutMs)
         gains?.writeTo(esc, timeoutMs)
         config.writeTo(esc, timeoutMs)
         esc.set(mode, value)
     }
 
-    fun writeTo(esc: TalonFX, timeoutMs: Int = 15) {
+    fun writeTo(esc: TalonFX, timeoutMs: Int = config.timeoutMs) {
         safeties.writeTo(esc, timeoutMs)
         gains?.writeTo(esc, timeoutMs)
         config.writeTo(esc, timeoutMs)
         esc.set(mode, value)
     }
 
-    fun writeTo(esc: CANSparkMax, pidController: CANPIDController, timeoutMs: Int = 15) {
+    fun writeTo(esc: CANSparkMax, pidController: CANPIDController, timeoutMs: Int = config.timeoutMs) {
         +esc.setCANTimeout(timeoutMs)
 
         safeties.writeTo(esc)

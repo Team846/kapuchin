@@ -63,7 +63,7 @@ fun RobotHardware<*>.generalSetup(esc: CANSparkMax, config: OffloadedEscConfigur
 
     config.writeTo(esc, esc.pidController)
 
-    +esc.setCANTimeout(15)
+    +esc.setCANTimeout(config.timeoutMs)
 }
 
 fun SubsystemHardware<*, *>.setupMaster(master: BaseTalon, config: OffloadedEscConfiguration, sensor: FeedbackDevice, fastOnboard: Boolean) {
@@ -99,5 +99,5 @@ fun SubsystemHardware<*, *>.setupMaster(master: CANSparkMax, config: OffloadedEs
         +setAverageDepth(4)
     }
 
-    +master.setCANTimeout(15)
+    +master.setCANTimeout(config.timeoutMs)
 }

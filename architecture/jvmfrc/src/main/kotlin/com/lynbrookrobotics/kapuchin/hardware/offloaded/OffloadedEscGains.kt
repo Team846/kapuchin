@@ -4,12 +4,9 @@ import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.revrobotics.CANPIDController
 import com.revrobotics.CANSparkMax
-import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 import java.util.concurrent.ConcurrentHashMap
 
 data class OffloadedEscGains(
-        val syncThreshold: Time,
         var kP: Double = 0.0,
         var kI: Double = 0.0,
         var kD: Double = 0.0,
@@ -17,11 +14,12 @@ data class OffloadedEscGains(
         var maxIntegralAccumulator: Double = 0.0
 ) {
     init {
-        if (kP < 0 || !kP.isFinite()) throw IllegalArgumentException("kP = $kP")
-        if (kI < 0 || !kI.isFinite()) throw IllegalArgumentException("kI = $kI")
-        if (kD < 0 || !kD.isFinite()) throw IllegalArgumentException("kD = $kD")
-        if (kF < 0 || !kF.isFinite()) throw IllegalArgumentException("kF = $kF")
-        if (maxIntegralAccumulator < 0 || !maxIntegralAccumulator.isFinite())
+        fun illegal(k: Double) = k < 0 || !k.isFinite()
+        if (illegal(kP)) throw IllegalArgumentException("kP = $kP")
+        if (illegal(kI)) throw IllegalArgumentException("kI = $kI")
+        if (illegal(kD)) throw IllegalArgumentException("kD = $kD")
+        if (illegal(kF)) throw IllegalArgumentException("kF = $kF")
+        if (illegal(maxIntegralAccumulator))
             throw IllegalArgumentException("maxIntegralAccumulator = $maxIntegralAccumulator")
     }
 
@@ -30,7 +28,7 @@ data class OffloadedEscGains(
         val cache = ConcurrentHashMap<Any, OffloadedEscGains>()
     }
 
-    fun writeTo(esc: BaseTalon, timeoutMs: Int = 15) {
+    fun writeTo(esc: BaseTalon, timeoutMs: Int) {
         val cached = cache[esc]
         if (this != cached) {
             println("Writing gains to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")

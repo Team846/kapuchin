@@ -27,14 +27,12 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val kF by pref(110, Percent)
         ({
             val left = OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.left.native(kP),
                     kF = hardware.conversions.encoder.left.native(
                             Gain(hardware.escConfig.voltageCompSaturation, maxLeftSpeed)
                     ) * kF.Each
             )
             val right = OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.right.native(kP),
                     kF = hardware.conversions.encoder.right.native(
                             Gain(hardware.escConfig.voltageCompSaturation, maxRightSpeed)

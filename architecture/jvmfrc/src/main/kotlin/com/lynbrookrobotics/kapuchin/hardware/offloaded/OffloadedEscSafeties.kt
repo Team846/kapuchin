@@ -4,8 +4,6 @@ import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.SoftLimitDirection
-import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 import java.util.concurrent.ConcurrentHashMap
 
 data class OffloadedEscSafeties(
@@ -16,7 +14,7 @@ data class OffloadedEscSafeties(
         val cache = ConcurrentHashMap<Any, OffloadedEscSafeties>()
     }
 
-    fun writeTo(esc: BaseTalon, timeoutMs: Int = 15) {
+    fun writeTo(esc: BaseTalon, timeoutMs: Int) {
         val cached = cache[esc]
         if (this != cached) {
             println("Writing safeties to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")

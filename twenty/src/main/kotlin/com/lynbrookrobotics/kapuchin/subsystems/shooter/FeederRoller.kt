@@ -28,7 +28,6 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
         val kF by pref(110, Percent)
         ({
             OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.native(kP),
                     kF = hardware.conversions.native(
                             Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)

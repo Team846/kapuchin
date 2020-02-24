@@ -16,7 +16,6 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
         val kD by pref(0, Volt, 60, DegreePerSecond)
         ({
             OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.native(kP),
                     kD = hardware.conversions.encoder.native(kD)
             )

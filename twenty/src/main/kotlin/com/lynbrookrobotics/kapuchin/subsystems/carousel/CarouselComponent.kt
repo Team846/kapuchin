@@ -14,7 +14,6 @@ class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponen
         val kD by pref(0, Volt, 60, DegreePerSecond)
         ({
             OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.native(kP),
                     kD = hardware.conversions.encoder.native(kD)
             )

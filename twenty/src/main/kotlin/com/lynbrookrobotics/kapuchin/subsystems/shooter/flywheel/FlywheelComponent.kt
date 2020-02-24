@@ -26,7 +26,6 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
         val kF by pref(110, Percent)
         ({
             OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.native(kP),
                     kF = hardware.conversions.encoder.native(
                             Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
