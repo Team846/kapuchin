@@ -1,6 +1,8 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice.IntegratedSensor
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
+import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.kauailabs.navx.frc.AHRS
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
@@ -24,7 +26,7 @@ import info.kunalsheth.units.math.*
 class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainComponent>(), GenericDrivetrainHardware {
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
-    override val syncThreshold = 3.milli(Second)
+    override val syncThreshold = 5.milli(Second)
     override val name = "Drivetrain"
 
     private val jitterPulsePinNumber by pref(8)
@@ -41,16 +43,14 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             defaultNominalOutput = 1.5.Volt,
 
             defaultContinuousCurrentLimit = 25.Ampere,
-            defaultPeakCurrentLimit = 35.Ampere,
-
-            defaultPeakOutput = 3.Volt // TODO: remove extra safe default
+            defaultPeakCurrentLimit = 35.Ampere
     )
 
     private val idx = 0
-    private val leftMasterEscId = 30
-    private val leftSlaveEscId = 31
-    private val rightMasterEscId = 32
-    private val rightSlaveEscId = 33
+    private val leftMasterEscId = 32
+    private val leftSlaveEscId = 33
+    private val rightMasterEscId = 30
+    private val rightSlaveEscId = 31
 
     override val conversions = DrivetrainConversions(this)
 
@@ -58,27 +58,31 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
     val leftMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
-        setupMaster(it, escConfig, QuadEncoder, true)
+        setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0)
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
+        it.setNeutralMode(NeutralMode.Coast)
     }
     val leftSlaveEsc by hardw { TalonFX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
+        it.setNeutralMode(NeutralMode.Coast)
     }
 
     val rightMasterEsc by hardw { TalonFX(rightMasterEscId) }.configure {
-        setupMaster(it, escConfig, QuadEncoder, true)
+        setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0)
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
+        it.setNeutralMode(NeutralMode.Coast)
     }
     val rightSlaveEsc by hardw { TalonFX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
+        it.setNeutralMode(NeutralMode.Coast)
     }
 
     private val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
@@ -120,13 +124,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val leftPosition = sensor {
         conversions.encoder.right.realPosition(
-                rightMasterEsc.getSelectedSensorPosition(idx)
+                leftMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Left Position", Foot))
 
     val rightPosition = sensor {
         conversions.encoder.left.realPosition(
-                leftMasterEsc.getSelectedSensorPosition(idx)
+                rightMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Right Position", Foot))
 

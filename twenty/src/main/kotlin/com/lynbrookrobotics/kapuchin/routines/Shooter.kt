@@ -18,9 +18,15 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-suspend fun FlywheelComponent.set(target: AngularVelocity) = startRoutine("Set") {
+suspend fun FlywheelComponent.set(target: AngularVelocity) = startRoutine("Set Omega") {
     controller {
         VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.encoder.native(target))
+    }
+}
+
+suspend fun FlywheelComponent.set(target: DutyCycle) = startRoutine("Set Duty Cycle") {
+    controller {
+        PercentOutput(hardware.escConfig, target)
     }
 }
 
@@ -33,9 +39,15 @@ suspend fun FlywheelComponent.manualOverride(operator: OperatorHardware) = start
     }
 }
 
-suspend fun FeederRollerComponent.set(target: AngularVelocity) = startRoutine("Set") {
+suspend fun FeederRollerComponent.set(target: AngularVelocity) = startRoutine("Set Omega") {
     controller {
         VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.native(target))
+    }
+}
+
+suspend fun FeederRollerComponent.set(target: DutyCycle) = startRoutine("Set Duty Cycle") {
+    controller {
+        PercentOutput(hardware.escConfig, target)
     }
 }
 

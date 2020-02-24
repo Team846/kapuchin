@@ -43,7 +43,54 @@ class FunkyRobot : RobotBase() {
                     },
                     { isEnabled && isAutonomous } to choreography {
                         System.gc()
-                        subsystems.auto()
+//                        subsystems.auto()
+
+//                        while(isActive) {
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(1.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(5.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(-1.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                        }
+
+//                        subsystems.carousel.rezero()
+//                        subsystems.carousel.whereAreMyBalls()
+//                        println(subsystems.carousel.state.toString())
+//                        subsystems.carousel.log(Debug) { subsystems.carousel.state.toString() }
+//                        println(subsystems.carousel.state.toString())
+
+//                        launch { subsystems.feederRoller?.set(subsystems.feederRoller.feedSpeed) }
+//                        launch { subsystems.flywheel?.set(4000.Rpm) }
+//                        delay(2.Second)
+//                        launch { subsystems.carousel.whereAreMyBalls() }
+
+//                        subsystems.turret?.rezero(subsystems.electrical)
+
+//                        launch {
+//                           subsystems.intakeSlider?.set(IntakeSliderState.Out)
+//                        }
+//                        launch {
+//                            subsystems.intakeRollers?.set(subsystems.intakeRollers.eatSpeed)
+//                        }
+//
+//                        repeat(60) {
+//                            withTimeout(1.Second) { subsystems.shooterHood?.set(ShooterHoodState.Up) }
+//                            withTimeout(1.Second) { subsystems.shooterHood?.set(ShooterHoodState.Down) }
+//                        }
+
+                        subsystems.carousel.rezero()
+                        subsystems.carousel.whereAreMyBalls()
+                        subsystems.eat()
+
+                        freeze()
+//                      subsystems.drivetrain.set(0.Percent)
                     },
                     { isDisabled && !isTest } to choreography {
                         subsystems.warmup()

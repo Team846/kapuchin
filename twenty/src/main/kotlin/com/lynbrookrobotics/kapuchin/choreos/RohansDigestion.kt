@@ -9,8 +9,8 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
-import edu.wpi.first.wpilibj.Relay.Value.kOn
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -31,19 +31,20 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
+    val centerTurret by operator.centerTurret.readEagerly().withoutStamps
 
     choreography {
         supervisorScope {
             if (turret != null && !turret.hardware.isZeroed) launch { turret.rezero(electrical) }
             if (!carousel.hardware.isZeroed) launch { carousel.rezero() }
         }
+        carousel.whereAreMyBalls() // TODO ^ reorganize
 
         launch {
             launchWhenever(
-                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) }
+//                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) } //TODO FIX
             )
         }
-
         runWhenever(
                 { intakeBalls } to choreography { eat() },
                 { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
@@ -56,15 +57,26 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
                 { !flywheelManual.isZero } to choreography {
-                    flywheel?.manualOverride(operator) ?: freeze()
+                    flywheel?.let {
+                        spinUpShooter(
+                                flywheelManual * it.maxSpeed,
+                                if (hoodUp) Up else Down
+                        )
+                    } ?: freeze()
+                    // TODO verify this is controllable -andy
                 },
                 { !turretManual.isZero } to choreography {
-                    launch { flashlight?.set(kOn) }
+                    launch { flashlight?.set(On) }
                     turret?.manualOverride(operator) ?: freeze()
                 },
 
                 { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
-                { reindexCarousel } to choreography { carousel.whereAreMyBalls() }
+                { reindexCarousel } to choreography {
+                    carousel.rezero()
+                    carousel.whereAreMyBalls()
+                    rumble.set(TwoSided(0.Percent, 100.Percent))
+                },
+                { centerTurret } to choreography { turret?.set(0.Degree) }
         )
     }
 
@@ -82,7 +94,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 rumble.set(TwoSided(100.Percent, 0.Percent))
             } else {
                 launch { feederRoller?.set(0.Rpm) }
-                carousel.set(emptySlot - carousel.collectSlot, 0.1.CarouselSlot)
+                carousel.set(emptySlot - carousel.collectSlot)
                 launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
@@ -154,14 +166,14 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-            launch { flashlight?.set(kOn) }
+            launch { flashlight?.set(On) }
 
             launch {
                 val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
                 if (fullSlot != null) supervisorScope {
                     val target = fullSlot - carousel.shootSlot
-                    if (target > carouselAngle) carousel.set(target - 1.CarouselSlot)
-                    if (target < carouselAngle) carousel.set(target + 1.CarouselSlot)
+                    if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
+                    if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
                 }
             }
 

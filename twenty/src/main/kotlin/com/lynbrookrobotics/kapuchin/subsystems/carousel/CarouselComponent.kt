@@ -33,8 +33,16 @@ class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponen
     }
 
     private val ammoGraph = graph("Ammo", Each)
+    private val isBallGraph = graph("isBall", Each)
     override fun CarouselHardware.output(value: OffloadedOutput) {
         value.writeTo(esc, pidController)
         ammoGraph(currentTime, state.ammo.Each)
+
+        with(hardware) {
+            isBallGraph(currentTime, conversions.detectingBall(
+                    proximity.optimizedRead(currentTime, syncThreshold).y,
+                    color.optimizedRead(currentTime, syncThreshold).y
+            ).let { if (it) 1.Each else 0.Each })
+        }
     }
 }

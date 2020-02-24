@@ -63,7 +63,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val aim = s { lt }
     val aimPreset = s {
         val angle = flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)
-        angle?.let { it in minSetpointAngle..-180.Degree || it in 180.Degree..maxSetpointAngle } ?: false
+        (angle?.let { it in -180.Degree..minSetpointAngle || it in maxSetpointAngle..180.Degree } ?: false) // TODO verify this works propertly
     }
     val shoot = s { rt }
     val hoodUp = s { lb }
@@ -82,6 +82,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val rezeroTurret = s { pov == 90 }
     val reindexCarousel = s { pov == 270 }
+    val centerTurret = s { pov == 180 }
 
     val extendClimber = s { back }
     val retractClimber = s { start }

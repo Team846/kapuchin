@@ -14,6 +14,7 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import com.revrobotics.ColorSensorV3
+import com.revrobotics.ColorSensorV3.*
 import edu.wpi.first.wpilibj.I2C.Port
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -53,6 +54,9 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
     val encoderPosition = sensor(encoder) { conversions.encoderPositionDelta(position.Turn) stampWith it }
 
     val colorSensor by hardw { ColorSensorV3(Port.kOnboard) }.configure {
+        it.configureColorSensor(ColorSensorResolution.kColorSensorRes18bit, ColorSensorMeasurementRate.kColorRate25ms, GainFactor.kGain3x)
+        it.configureProximitySensor(ProximitySensorResolution.kProxRes11bit, ProximitySensorMeasurementRate.kProxRate6ms)
+        it.configureProximitySensorLED(LEDPulseFrequency.kFreq60kHz, LEDCurrent.kPulse125mA, 8)
         // TODO: Wesley, what color and proximity settings should we use here?
     }.verify("the color sensor is connected") {
         // TODO: Must test empirically

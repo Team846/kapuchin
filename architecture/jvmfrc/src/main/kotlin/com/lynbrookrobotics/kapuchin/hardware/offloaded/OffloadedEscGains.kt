@@ -16,14 +16,21 @@ data class OffloadedEscGains(
         var kF: Double = 0.0,
         var maxIntegralAccumulator: Double = 0.0
 ) {
+    init {
+        if (kP < 0 || !kP.isFinite()) throw IllegalArgumentException("kP = $kP")
+        if (kI < 0 || !kI.isFinite()) throw IllegalArgumentException("kI = $kI")
+        if (kD < 0 || !kD.isFinite()) throw IllegalArgumentException("kD = $kD")
+        if (kF < 0 || !kF.isFinite()) throw IllegalArgumentException("kF = $kF")
+        if (maxIntegralAccumulator < 0 || !maxIntegralAccumulator.isFinite())
+            throw IllegalArgumentException("maxIntegralAccumulator = $maxIntegralAccumulator")
+    }
+
     companion object {
         const val idx = 0
         val cache = ConcurrentHashMap<Any, OffloadedEscGains>()
     }
 
-    private val timeoutMs = syncThreshold.milli(Second).toInt()
-
-    fun writeTo(esc: BaseTalon, timeoutMs: Int = this.timeoutMs) {
+    fun writeTo(esc: BaseTalon, timeoutMs: Int = 15) {
         val cached = cache[esc]
         if (this != cached) {
             println("Writing gains to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")
@@ -64,7 +71,7 @@ data class OffloadedEscGains(
                 +pidController.setFF(kF)
 
             if (cached?.maxIntegralAccumulator != this.maxIntegralAccumulator)
-                +pidController.setIMaxAccum(maxIntegralAccumulator, timeoutMs)
+                +pidController.setIMaxAccum(maxIntegralAccumulator, 0)
         }
         cache[esc] = this
     }

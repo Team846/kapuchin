@@ -11,8 +11,8 @@ import kotlin.math.pow
 class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversions", hardware) {
     val encoder by pref {
         val gearbox by pref {
-            val motor by pref(20)
-            val output by pref(1)
+            val motor by pref(1)
+            val output by pref(20)
             ({ GearTrain(motor, output) })
         }
         val complianceWheelRadius by pref(1.25, Inch)
@@ -29,15 +29,15 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
     }
 
     val ballIrRange by pref {
-        val min by pref(50, Percent)
-        val max by pref(90, Percent)
+        val min by pref(87.5, Percent)
+        val max by pref(100, Percent)
         ({ min..max })
     }
     val ballColor by pref {
-        val r by pref(0.301)
-        val g by pref(0.532)
-        val b by pref(0.167)
-        ({ Color(r, g, b) })
+        val r by pref(29.8, Percent)
+        val g by pref(53.2, Percent)
+        val b by pref(16.8, Percent)
+        ({ Color(r.Each, g.Each, b.Each) })
     }
     val ballColorTolerance by pref(0.1)
 
