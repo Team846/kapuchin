@@ -34,11 +34,17 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val centerTurret by operator.centerTurret.readEagerly().withoutStamps
 
     choreography {
-        supervisorScope {
-            if (turret != null && !turret.hardware.isZeroed) launch { turret.rezero(electrical) }
-            if (!carousel.hardware.isZeroed) launch { carousel.rezero() }
+        withTimeout(15.Second) {
+            supervisorScope {
+                if (turret != null && !turret.hardware.isZeroed) launch {
+                    turret.rezero(electrical)
+                }
+                launch {
+                    if (!carousel.hardware.isZeroed) carousel.rezero()
+                    carousel.whereAreMyBalls()
+                }
+            }
         }
-        carousel.whereAreMyBalls() // TODO ^ reorganize
 
         launch {
             launchWhenever(
