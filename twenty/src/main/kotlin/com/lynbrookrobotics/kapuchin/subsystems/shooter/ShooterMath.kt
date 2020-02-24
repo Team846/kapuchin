@@ -29,7 +29,7 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? =
         if (flywheel == null || shooterHood == null) null
         else with(flywheel) {
             bestShot(
-                    target,
+                    target, limelight.allowInnerGoal,
                     shooterHood.hoodUpLaunch, shooterHood.hoodDownLaunch,
                     maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
             )
@@ -45,6 +45,8 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? =
  */
 fun bestShot(
         target: DetectedTarget,
+
+        allowInnerGoal: Boolean,
 
         launchAngleUp: Angle,
         launchAngleDown: Angle,
@@ -67,14 +69,14 @@ fun bestShot(
         calculateShot(
                 it, Up, Inner, innerLimits,
                 launchAngleUp, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
-        ).takeIf { innerGoalPossible }
+        ).takeIf { innerGoalPossible && allowInnerGoal }
     }
 
     val innerDown = target.inner?.let {
         calculateShot(
                 it, Down, Inner, innerLimits,
                 launchAngleDown, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
-        ).takeIf { innerGoalPossible }
+        ).takeIf { innerGoalPossible && allowInnerGoal }
     }
 
     val outerUp = calculateShot(
