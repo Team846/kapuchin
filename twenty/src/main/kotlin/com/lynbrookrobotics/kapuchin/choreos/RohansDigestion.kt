@@ -46,7 +46,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 //                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) } //TODO FIX
             )
         }
-
         runWhenever(
                 { intakeBalls } to choreography { eat() },
                 { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
@@ -67,7 +66,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 },
 
                 { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
-                { reindexCarousel } to choreography { carousel.whereAreMyBalls() } //TODO VIBRATE WHEN DONE
+                { reindexCarousel } to choreography {
+                    carousel.whereAreMyBalls()
+                    rumble.set(TwoSided(0.Percent, 100.Percent))
+                }
         )
     }
 
