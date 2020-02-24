@@ -60,10 +60,10 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val start get() = xbox.startButton
     private val back get() = xbox.backButton
 
-    val aim = s { /*lt*/false }
+    val aim = s { lt }
     val aimPreset = s {
         val angle = flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)
-        /*(angle?.let { it in minSetpointAngle..-180.Degree || it in 180.Degree..maxSetpointAngle } ?: false) || */yButton //TODO FOR TESTINGGLKWEJGLKEWFJLEW -ANDY
+        (angle?.let { it in -180.Degree..minSetpointAngle || it in maxSetpointAngle..180.Degree } ?: false) // TODO verify this works propertly
     }
     val shoot = s { rt }
     val hoodUp = s { lb }
@@ -77,7 +77,6 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
             (max - min) * percent - min
         } ?: 0.Percent
-        0.Percent
     }
     val turretManual = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
 
