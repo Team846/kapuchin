@@ -66,6 +66,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
                 { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
                 { reindexCarousel } to choreography {
+                    carousel.rezero()
                     carousel.whereAreMyBalls()
                     rumble.set(TwoSided(0.Percent, 100.Percent))
                 },
