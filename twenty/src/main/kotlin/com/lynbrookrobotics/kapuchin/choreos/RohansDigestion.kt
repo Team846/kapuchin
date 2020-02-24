@@ -109,8 +109,8 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
 }
 
 suspend fun Subsystems.visionAim() {
-    if (limelight == null || flywheel == null || feederRoller == null) {
-        log(Error) { "Need limelight, flywheel, and feederRoller for vision aiming" }
+    if (flywheel == null || feederRoller == null) {
+        log(Error) { "Need flywheel and feederRoller for vision aiming" }
         freeze()
     } else startChoreo("Vision Aim") {
 

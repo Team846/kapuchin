@@ -11,10 +11,7 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class ShooterHoodState(val output: Boolean, val launchAngle: (ShooterHoodComponent) -> Angle) {
-    Up(true, ShooterHoodComponent::hoodUpLaunch),
-    Down(false, ShooterHoodComponent::hoodDownLaunch)
-}
+enum class ShooterHoodState(val output: Boolean) { Up(true), Down(false) }
 
 class ShooterHoodComponent(hardware: ShooterHoodHardware) : Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, shooterTicker) {
 

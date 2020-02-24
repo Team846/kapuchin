@@ -43,6 +43,7 @@ class FunkyRobot : RobotBase() {
                     },
                     { isEnabled && isAutonomous } to choreography {
                         System.gc()
+//                        subsystems.auto()
 
 //                        while(isActive) {
 //                            withTimeout(5.Second) {
