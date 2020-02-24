@@ -57,7 +57,13 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
                 { !flywheelManual.isZero } to choreography {
-                    flywheel?.manualOverride(operator) ?: freeze()
+                    flywheel?.let {
+                        spinUpShooter(
+                                flywheelManual * it.maxSpeed,
+                                if (hoodUp) Up else Down
+                        )
+                    } ?: freeze()
+                    // TODO verify this is controllable -andy
                 },
                 { !turretManual.isZero } to choreography {
                     launch { flashlight?.set(On) }
