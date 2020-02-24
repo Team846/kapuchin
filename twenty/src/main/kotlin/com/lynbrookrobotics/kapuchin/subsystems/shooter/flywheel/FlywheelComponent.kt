@@ -9,7 +9,7 @@ import info.kunalsheth.units.generated.*
 
 class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
 
-    val maxSpeed by pref(5676, Rpm)
+    val maxSpeed by pref(9632, Rpm)
     val momentFactor by pref(1.4)
     val rollerRadius by pref(2, Inch)
     val momentOfInertia by pref(1.2, PoundFootSquared)
@@ -29,7 +29,7 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
                     syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.native(kP),
                     kF = hardware.conversions.encoder.native(
-                            Gain(12.Volt, maxSpeed)
+                            Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
                     ) * kF.Each
             )
         })

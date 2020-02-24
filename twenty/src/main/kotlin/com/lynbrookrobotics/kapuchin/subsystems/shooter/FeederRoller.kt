@@ -1,11 +1,13 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.shooterTicker
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -18,7 +20,7 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
 
     val maxSpeed by pref(11000, Rpm)
 
-    val feedSpeed by pref(1000, Rpm)
+    val feedSpeed by pref(2500, Rpm)
     val tolerance by pref(10, Rpm)
 
     val velocityGains by pref {
@@ -29,7 +31,7 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
                     syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.native(kP),
                     kF = hardware.conversions.native(
-                            Gain(12.Volt, maxSpeed)
+                            Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
                     ) * kF.Each
             )
         })
@@ -69,11 +71,21 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
 
     val pidController by hardw { esc.pidController }
 
-    val speed = sensor(encoder) { conversions.realVelocity(encoder.velocity) stampWith it }
+    val speed = sensor(encoder) {
+        conversions.realVelocity(encoder.velocity) stampWith it
+    }.with(graph("Speed", Rpm))
 
     val conversions = AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
             nativeOutputUnits = 1, perOutputQuantity = escConfig.voltageCompSaturation,
             nativeFeedbackUnits = 1, perFeedbackQuantity = 1.Turn,
             nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
     )
+
+    init {
+        Subsystems.shooterTicker.runOnTick { time ->
+            setOf(speed).forEach {
+                it.optimizedRead(time, .5.Second)
+            }
+        }
+    }
 }
