@@ -82,6 +82,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val rezeroTurret = s { pov == 90 }
     val reindexCarousel = s { pov == 270 }
+    val centerTurret = s { pov == 180 }
 
     val extendClimber = s { back }
     val retractClimber = s { start }

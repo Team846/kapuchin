@@ -22,12 +22,14 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
 }
 
 suspend fun Subsystems.extendClimber() = coroutineScope {
+    // TODO set turret to position to get igus out of the way??
     scope.launch { climberPivot?.set(Up) }
     launch { climberWinch?.set(climberWinch.extendSpeed) }
     freeze()
 }
 
 suspend fun Subsystems.retractClimber() = coroutineScope {
+    // TODO set turret to position to get igus out of the way??
     launch { climberWinch?.set(climberWinch.retractSpeed) }
     delay(1.Second)
     scope.launch { climberPivot?.set(Down) }

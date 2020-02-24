@@ -11,9 +11,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
-import edu.wpi.first.wpilibj.Relay.Value.kOn
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -33,6 +31,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
+    val centerTurret by operator.centerTurret.readEagerly().withoutStamps
 
     choreography {
         supervisorScope {
@@ -69,7 +68,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { reindexCarousel } to choreography {
                     carousel.whereAreMyBalls()
                     rumble.set(TwoSided(0.Percent, 100.Percent))
-                }
+                },
+                { centerTurret } to choreography { turret?.set(0.Degree) }
         )
     }
 
@@ -79,7 +79,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
-        while(isActive) {
+        while (isActive) {
             val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
 
             if (emptySlot == null) {
