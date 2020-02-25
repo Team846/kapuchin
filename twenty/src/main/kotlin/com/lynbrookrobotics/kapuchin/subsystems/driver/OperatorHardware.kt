@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.driver
 
 import com.lynbrookrobotics.kapuchin.control.conversion.deadband.*
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -12,7 +13,6 @@ import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.atan2
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val priority = Priority.High
@@ -20,17 +20,14 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     private val flywheelMappingNamed = Named("Flywheel Mapping", this)
     private val deadband by flywheelMappingNamed.pref(80, Percent)
-    private val min by flywheelMappingNamed.pref(20, Percent)
-    private val max by flywheelMappingNamed.pref(100, Percent)
-    private val minAngle by flywheelMappingNamed.pref(-90, Degree)
-    private val maxAngle by flywheelMappingNamed.pref(90, Degree)
-    private val minSetpointAngle by flywheelMappingNamed.pref(-135, Degree)
-    private val maxSetpointAngle by flywheelMappingNamed.pref(135, Degree)
+    private val minRpm by flywheelMappingNamed.pref(20, Percent)
+    private val maxRpm by flywheelMappingNamed.pref(100, Percent)
+    private val presetRange by flywheelMappingNamed.pref(45, Degree)
 
-    private val db = horizontalDeadband(deadband, 100.Percent)
+    private val withDeadband = horizontalDeadband(deadband, 100.Percent)
     private fun flywheelMapping(x: Dimensionless, y: Dimensionless): Angle? {
-        if (db(x) == 0.Percent && db(y) == 0.Percent) return null
-        return atan2(db(x).Each, db(y).Each).Radian
+        if (withDeadband(x).isZero && withDeadband(y).isZero) return null
+        return atan2(withDeadband(y) * Metre, withDeadband(x) * Metre) // don't worry about it lol `* Metre`
     }
 
     private val turretMapping by pref {
@@ -62,21 +59,21 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val aim = s { lt }
     val aimPreset = s {
-        val angle = flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)
-        (angle?.let { it in -180.Degree..minSetpointAngle || it in maxSetpointAngle..180.Degree } ?: false) // TODO verify this works propertly
+        flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)?.takeIf {
+            it in 270.Degree `±` (presetRange)
+        } != null
     }
     val shoot = s { rt }
     val hoodUp = s { lb }
 
     val flywheelManual = s {
-        val angle = flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)
-        angle?.let { a ->
-            val percent = ((a - minAngle) / (maxAngle - minAngle))
-                    .takeIf { a in minAngle..0.Degree || a in 0.Degree..maxAngle }
-                    ?: return@s 0.Percent
-
-            (max - min) * percent - min
-        } ?: 0.Percent
+        flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)?.takeIf {
+            it in 0.Degree..180.Degree
+        }?.let {
+            val normalized = (180.Degree - it) / 180.Degree
+            val slope = (maxRpm - minRpm) / (100.Percent - 0.Percent)
+            normalized * slope + minRpm
+        }
     }
     val turretManual = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
 
