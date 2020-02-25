@@ -55,20 +55,20 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                  val shooterHood: ShooterHoodComponent?
 ) : Named by Named("Subsystems") {
 
-    private val autos = listOf(
-            choreography { `shoot wall`() },
-            choreography { `I1 shoot C1`() },
-            choreography { `I2 shoot C1`() },
-            choreography { `I3 shoot C5`() },
-            choreography { `I1 shoot C1 I2 shoot`() },
-            choreography { `I3 shoot C5 I3 shoot`() }
-    )
-
-    private val autoIdGraph = graph("Auto ID", Each)
-    private val autoId
-        get() = SmartDashboard.getEntry("DB/slider 0").getDouble(-1.0).roundToInt().also {
-            if (it !in autos.indices) log(Error) { "No auto with ID $it!!!!!!" }
-        }
+//    private val autos = listOf(
+//            choreography { `shoot wall`() },
+//            choreography { `I1 shoot C1`() },
+//            choreography { `I2 shoot C1`() },
+//            choreography { `I3 shoot C5`() },
+//            choreography { `I1 shoot C1 I2 shoot`() },
+//            choreography { `I3 shoot C5 I3 shoot`() }
+//    )
+//
+//    private val autoIdGraph = graph("Auto ID", Each)
+//    private val autoId
+//        get() = SmartDashboard.getEntry("DB/slider 0").getDouble(-1.0).roundToInt().also {
+//            if (it !in autos.indices) log(Error) { "No auto with ID $it!!!!!!" }
+//        }
 
     suspend fun teleop() {
         HAL.observeUserProgramTeleop()
@@ -86,10 +86,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     }
 
     suspend fun auto() = coroutineScope {
-        if (autoId !in autos.indices) {
-            log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
-            freeze()
-        } else autos[autoId].invoke(this@coroutineScope)
+//        if (autoId !in autos.indices) {
+//            log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
+//            freeze()
+//        } else autos[autoId].invoke(this@coroutineScope)
     }
 
     suspend fun warmup() {
@@ -107,7 +107,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     init {
         uiBaselineTicker.runOnTick { time ->
-            autoIdGraph(time, autoId.Each)
+//            autoIdGraph(time, autoId.Each)
         }
     }
 
