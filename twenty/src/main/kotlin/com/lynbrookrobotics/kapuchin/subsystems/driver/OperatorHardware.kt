@@ -37,7 +37,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
         ({
             val db = horizontalDeadband(deadband, 100.Percent)
-            (fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x)) to sensitivity
+            fun(x: Dimensionless) = db(x).abs.pow(exponent.Each).withSign(x) * sensitivity
         })
     }
 
@@ -75,7 +75,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
             normalized * slope + minRpm
         }
     }
-    val turretManual = s { turretMapping.first(getX(kRight).Each) * turretMapping.second }
+    val turretManual = s { turretMapping(getX(kRight).Each) }
 
     val rezeroTurret = s { pov == 90 }
     val reindexCarousel = s { pov == 270 }
