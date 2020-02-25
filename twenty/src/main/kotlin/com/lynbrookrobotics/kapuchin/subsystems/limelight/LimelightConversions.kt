@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
+import com.lynbrookrobotics.kapuchin.Field.ballDiameter
 import com.lynbrookrobotics.kapuchin.Field.innerGoalDepth
 import com.lynbrookrobotics.kapuchin.Field.targetDiameter
 import com.lynbrookrobotics.kapuchin.control.data.*
@@ -8,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -76,16 +78,17 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         return DetectedTarget(innerGoal.takeUnless { skew > skewTolerance }, outerGoal)
     }
 
+
+
     /**
      * Calculate the horizontal and vertical offsets of the inner goal relative to the outer goal based on a "2D" view of the target.
      *
      * @author Sid R
      */
     fun innerGoalOffsets(target: DetectedTarget, shooterHeight: Length): Pair<Length, Length> {
-        val distToBase = sqrt(target.outer.x.squared + target.outer.y.squared)
 
-        val horizontal = innerGoalDepth * tan(target.outer.bearing)
-        val vertical = (innerGoalDepth * (targetHeight - shooterHeight)) / (distToBase * cos(target.outer.bearing))
+        val horizontal = (innerGoalDepth * target.outer.x) / (target.outer.y + innerGoalDepth)
+        val vertical = (innerGoalDepth * targetHeight) / (target.outer.y + innerGoalDepth)
 
         return horizontal to vertical
     }
@@ -95,12 +98,26 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
      *
      * @author Sid R
      */
-    fun innerEntryAngleLimits(target: DetectedTarget, shooterHeight: Length): ClosedRange<Angle> {
+    fun innerEntryAngleLimits(target: DetectedTarget, shooterHeight: Length, flywheel: FlywheelComponent): Pair<Angle, Angle> {
         val horizontalOffset = innerGoalOffsets(target, shooterHeight).first
+        val verticalOffset = innerGoalOffsets(target, shooterHeight).second
 
-        val downward = atan(((targetDiameter / 2) + horizontalOffset) / innerGoalDepth)
-        val upward = 90.Degree - atan(innerGoalDepth / ((targetDiameter / 2) - horizontalOffset))
-        return downward..upward
+        val hBot = sqrt(flywheel.hexagonCircleRadius.squared - horizontalOffset.squared) - verticalOffset
+        val hTop = sqrt(flywheel.hexagonCircleRadius.squared - horizontalOffset.squared) + verticalOffset
+
+        val downward = atan( (hTop + (2*verticalOffset) - (ballDiameter / 2 )) / innerGoalDepth)
+        val upward = atan( (hBot - (ballDiameter / 2)) / (innerGoalDepth))
+        return upward to downward
+    }
+
+    fun isWithinLimits(entryAngle: Angle, target: DetectedTarget, shooterHeight: Length, flywheel: FlywheelComponent): Boolean {
+        if (entryAngle < 0.Degree) {
+            if (entryAngle.abs <= innerEntryAngleLimits(target, shooterHeight, flywheel).second) return true
+        }
+        else {
+            if (entryAngle.abs <= innerEntryAngleLimits(target, shooterHeight, flywheel).first) return true
+        }
+        return false
     }
 
 }

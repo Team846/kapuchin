@@ -36,16 +36,16 @@ data class ShotState(val flywheel: AngularVelocity, val hood: ShooterHoodState, 
 fun Subsystems.bestShot(target: DetectedTarget): ShotState? {
     if (limelight == null || flywheel == null || shooterHood == null) return null
 
-    val innerLimits = limelight.hardware.conversions.innerEntryAngleLimits(target, flywheel.shooterHeight)
+    val innerLimits = limelight.hardware.conversions.innerEntryAngleLimits(target, flywheel.shooterHeight, flywheel)
     val outerLimits = `±`(90.Degree - atan2(ballDiameter, targetDiameter / 2))
-    val boundingCircleRadius = (targetDiameter / 2) - (ballDiameter / 2) // TODO maybe use slightly larger bounding circle radius? sid r
+    val boundingCircleRadius = (flywheel.hexagonCircleRadius) - (ballDiameter / 2)
     val innerGoalPossible = limelight.hardware.conversions.innerGoalOffsets(target, flywheel.shooterHeight)
             .let { (hor, vert) -> (hor.squared + vert.squared) < boundingCircleRadius.squared }
 
-    val innerUp = target.inner?.let { calculateShot(it, Up, Inner, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
-    val innerDown = target.inner?.let { calculateShot(it, Down, Inner, innerLimits, flywheel, shooterHood).takeIf { innerGoalPossible } }
-    val outerUp = calculateShot(target.outer, Up, Outer, outerLimits, flywheel, shooterHood)
-    val outerDown = calculateShot(target.outer, Down, Outer, outerLimits, flywheel, shooterHood)
+    val innerUp = target.inner?.let { calculateShot(it, Up, Inner, flywheel, shooterHood, limelight, target).takeIf { innerGoalPossible } }
+    val innerDown = target.inner?.let { calculateShot(it, Down, Inner, flywheel, shooterHood, limelight, target).takeIf { innerGoalPossible } }
+    val outerUp = calculateShot(target.outer, Up, Outer, flywheel, shooterHood, limelight, target)
+    val outerDown = calculateShot(target.outer, Down, Outer, flywheel, shooterHood, limelight, target)
 
     // If both hood states are possible, choose the one with the better entry angle
     // Otherwise, choose the first target that works prioritizing inner goal
@@ -63,15 +63,16 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? {
  * @return a pair of flywheel velocity to entry angle.
  */
 private fun calculateShot(
-        target: Position,
+        pos: Position,
         shooterHoodState: ShooterHoodState,
         goal: Goal,
-        entryAngleLimits: ClosedRange<Angle>,
         flywheel: FlywheelComponent,
-        shooterHood: ShooterHoodComponent
+        shooterHood: ShooterHoodComponent,
+        limelight: LimelightComponent,
+        target: DetectedTarget
 ): ShotState? {
     val launchAngle = shooterHoodState.launchAngle(shooterHood)
-    val distToBase = sqrt(target.x.squared + target.y.squared)
+    val distToBase = sqrt(pos.x.squared + pos.y.squared)
     val height = targetHeight - flywheel.shooterHeight
 
     val ballVelocity = sqrt(0.5) * sqrt((distToBase.squared * 1.EarthGravity) / ((distToBase * tan(launchAngle) - height) * cos(launchAngle).squared))
@@ -84,6 +85,6 @@ private fun calculateShot(
     val shotEntryAngle = atan(shotEntrySlope)
 
     return ShotState(flywheelVelocity, shooterHoodState, goal, shotEntryAngle)
-            .takeIf { shotEntryAngle in entryAngleLimits }
+            .takeIf { limelight.hardware.conversions.isWithinLimits(shotEntryAngle, target, height, flywheel) }
             .takeIf { flywheelVelocity <= flywheel.maxSpeed }
 }

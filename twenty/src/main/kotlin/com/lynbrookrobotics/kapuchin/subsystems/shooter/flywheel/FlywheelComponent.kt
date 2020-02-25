@@ -15,6 +15,7 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val momentOfInertia by pref(1.2, PoundFootSquared)
     val fudgeFactor by pref(100, Percent)
     val shooterHeight by pref(24, Inch) // shooter height from the floor
+    val hexagonCircleRadius by pref(15.752, Inch)
 
     val idleOutput by pref(50, Percent)
     val preset by pref(3000, Rpm)
