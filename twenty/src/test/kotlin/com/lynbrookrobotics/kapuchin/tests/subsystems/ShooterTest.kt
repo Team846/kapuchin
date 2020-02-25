@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
-import com.lynbrookrobotics.kapuchin.subsystems.shooter.Goal.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
 import org.junit.Test

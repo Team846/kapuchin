@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
-import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -8,7 +7,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.DigitalOutput
-import edu.wpi.first.wpilibj.Relay
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

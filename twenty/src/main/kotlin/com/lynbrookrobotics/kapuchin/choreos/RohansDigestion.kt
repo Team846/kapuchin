@@ -158,6 +158,7 @@ suspend fun Subsystems.visionAim() {
             }
 
             launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
+            // TODO hood not automatically getting set
             spinUpShooter(snapshot2.flywheel, snapshot2.hood)
         }
     }
