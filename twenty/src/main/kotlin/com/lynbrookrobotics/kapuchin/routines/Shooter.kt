@@ -106,7 +106,6 @@ suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponen
     controller {
         val target = initial `coterminal -` drivetrainPosition.bearing
         PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
-                .takeIf { target in hardware.conversions.min..hardware.conversions.max }
     }
 }
 

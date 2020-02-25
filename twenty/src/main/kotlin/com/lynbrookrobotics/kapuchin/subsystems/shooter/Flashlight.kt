@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
+import com.lynbrookrobotics.kapuchin.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
@@ -13,7 +14,7 @@ import info.kunalsheth.units.math.*
 
 enum class FlashlightState(val output: Boolean) { Off(false), On(true) }
 
-class FlashlightComponent(hardware: FlashlightHardware) : Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, pneumaticTicker) {
+class FlashlightComponent(hardware: FlashlightHardware) : Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, uiBaselineTicker) {
 
     override val fallbackController: FlashlightComponent.(Time) -> FlashlightState = { Off }
 

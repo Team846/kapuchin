@@ -48,7 +48,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         launch {
             launchWhenever(
-//                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) } //TODO FIX
+                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) } //TODO FIX
             )
         }
         runWhenever(
@@ -127,7 +127,7 @@ suspend fun Subsystems.visionAim() {
             val snapshot1 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
             if (snapshot1 == null) {
                 log(Debug) { "Couldn't find snapshot1 or no shots possible" }
-                withTimeout(.5.Second) { rumble.error() }
+                withTimeout(.5.Second) { flashlight?.strobe() }
                 return@choreography
             }
 
@@ -137,7 +137,7 @@ suspend fun Subsystems.visionAim() {
             val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
             if (snapshot2 == null) {
                 log(Warning) { "Couldn't find snapshot2 or no shots possible" }
-                withTimeout(.5.Second) { rumble.error() }
+                withTimeout(.5.Second) { flashlight?.strobe() }
                 return@choreography
             }
 

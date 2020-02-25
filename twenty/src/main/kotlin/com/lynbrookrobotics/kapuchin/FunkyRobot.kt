@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -86,9 +87,16 @@ class FunkyRobot : RobotBase() {
 //                            withTimeout(1.Second) { subsystems.shooterHood?.set(ShooterHoodState.Down) }
 //                        }
 
-                        subsystems.carousel.rezero()
-                        subsystems.carousel.whereAreMyBalls()
-                        subsystems.eat()
+//                        subsystems.carousel.rezero()
+//                        subsystems.carousel.whereAreMyBalls()
+//                        subsystems.eat()
+
+                        subsystems.turret?.rezero(subsystems.electrical)
+                        while (isActive) {
+                            withTimeout(3.Second) { subsystems.turret?.set(-90.Degree, 0.Degree) }
+                            withTimeout(3.Second) { subsystems.turret?.set(0.Degree, 0.Degree) }
+                            withTimeout(3.Second) { subsystems.turret?.set(90.Degree, 0.Degree) }
+                        }
 
                         freeze()
 //                      subsystems.drivetrain.set(0.Percent)
