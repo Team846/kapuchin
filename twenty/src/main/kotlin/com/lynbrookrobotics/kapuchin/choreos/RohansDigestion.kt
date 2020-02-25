@@ -8,6 +8,7 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
@@ -48,7 +49,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         launch {
             launchWhenever(
-                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) } //TODO FIX
+                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
+                    { shoot } to choreography { fire() }
             )
         }
         runWhenever(
@@ -59,7 +61,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { aimPreset } to choreography {
                     flywheel?.let { spinUpShooter(flywheel.preset, Down) } ?: freeze()
                 },
-                { shoot } to choreography { fire() },
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
                 { !flywheelManual.isZero } to choreography {
@@ -135,8 +136,11 @@ suspend fun Subsystems.visionAim() {
             launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
 
             val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
-            if (snapshot2 == null) {
-                log(Warning) { "Couldn't find snapshot2 or no shots possible" }
+            if (snapshot2 == null || reading?.pipeline == ZoomOut || reading?.pipeline == null) {
+                if (snapshot2 == null)
+                    log(Warning) { "Couldn't find snapshot2 - no reading or no best shot" }
+                if (reading?.pipeline == ZoomOut || reading?.pipeline == null)
+                    log(Warning) { "Couldn't find snapshot2 - pipeline is ZoomOut or null"}
                 withTimeout(.5.Second) { flashlight?.strobe() }
                 return@choreography
             }
