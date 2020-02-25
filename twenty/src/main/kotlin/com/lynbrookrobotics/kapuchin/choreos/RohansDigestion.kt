@@ -63,10 +63,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 },
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
-                { !flywheelManual.isZero } to choreography {
+                { flywheelManual != null } to choreography {
                     flywheel?.let {
                         spinUpShooter(
-                                flywheelManual * it.maxSpeed,
+                                flywheelManual!! * it.maxSpeed,
                                 if (hoodUp) Up else Down
                         )
                     } ?: freeze()
