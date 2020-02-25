@@ -8,18 +8,20 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.PI
 
 class OperatorHardware : RobotHardware<OperatorHardware>() {
     override val priority = Priority.High
     override val name = "Operator"
 
     private val flywheelMappingNamed = Named("Flywheel Mapping", this)
-    private val deadband by flywheelMappingNamed.pref(80, Percent)
+    private val deadband by flywheelMappingNamed.pref(15, Percent)
     private val minRpm by flywheelMappingNamed.pref(20, Percent)
     private val maxRpm by flywheelMappingNamed.pref(100, Percent)
     private val presetRange by flywheelMappingNamed.pref(45, Degree)
@@ -27,7 +29,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val withDeadband = horizontalDeadband(deadband, 100.Percent)
     private fun flywheelMapping(x: Dimensionless, y: Dimensionless): Angle? {
         if (withDeadband(x).isZero && withDeadband(y).isZero) return null
-        return atan2(withDeadband(y) * Metre, withDeadband(x) * Metre) // don't worry about it lol `* Metre`
+        return (atan2(y * Metre, x * Metre) + PI.Radian)
     }
 
     private val turretMapping by pref {
@@ -62,7 +64,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)?.takeIf {
             it in 270.Degree `±` (presetRange)
         } != null
-    }
+    }.with(graph("Flywheel Preset", Each)) { if (it) 1.Each else 0.Each }
     val shoot = s { rt }
     val hoodUp = s { lb }
 
@@ -70,11 +72,11 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         flywheelMapping(getX(kLeft).Each, getY(kLeft).Each)?.takeIf {
             it in 0.Degree..180.Degree
         }?.let {
-            val normalized = (180.Degree - it) / 180.Degree
+            val normalized = it / 180.Degree
             val slope = (maxRpm - minRpm) / (100.Percent - 0.Percent)
             normalized * slope + minRpm
         }
-    }
+    }.with(graph("Flywheel Manual", Percent)) { it ?: Double.NaN.Each }
     val turretManual = s { turretMapping(getX(kRight).Each) }
 
     val rezeroTurret = s { pov == 90 }
@@ -87,4 +89,12 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val extendControlPanel = s { pov == 0 }
     val controlPanelStage2 = s { pov == 0 && aButton }
     val controlPanelStage3 = s { pov == 0 && bButton }
+
+    init {
+        EventLoop.runOnTick { time ->
+            setOf(flywheelManual, aimPreset).forEach {
+                it.optimizedRead(time, 0.1.Second)
+            }
+        }
+    }
 }

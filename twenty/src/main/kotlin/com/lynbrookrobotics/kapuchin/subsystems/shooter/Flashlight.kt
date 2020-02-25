@@ -16,7 +16,7 @@ enum class FlashlightState(val output: Boolean) { Off(false), On(true) }
 
 class FlashlightComponent(hardware: FlashlightHardware) : Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, uiBaselineTicker) {
 
-    override val fallbackController: FlashlightComponent.(Time) -> FlashlightState = { Off }
+    override val fallbackController: FlashlightComponent.(Time) -> FlashlightState = { On }
 
     override fun FlashlightHardware.output(value: FlashlightState) {
         flashlightRelay.set(value.output)

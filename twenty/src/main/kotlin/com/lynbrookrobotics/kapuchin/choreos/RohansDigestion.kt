@@ -8,14 +8,13 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
-import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -35,22 +34,20 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val centerTurret by operator.centerTurret.readEagerly().withoutStamps
 
     choreography {
-        withTimeout(15.Second) {
-            supervisorScope {
-                if (turret != null && !turret.hardware.isZeroed) launch {
-                    turret.rezero(electrical)
-                }
-                launch {
-                    if (!carousel.hardware.isZeroed) carousel.rezero()
-                    carousel.whereAreMyBalls()
-                }
-            }
+        if (turret != null && !turret.hardware.isZeroed) launch {
+            turret.rezero(electrical)
         }
+
+        carousel.rezero()
+        carousel.whereAreMyBalls()
 
         launch {
             launchWhenever(
-                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
-                    { shoot } to choreography { fire() }
+//                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
+                    { shoot } to choreography {
+                        fire()
+                        delay(250.milli(Second))
+                    }
             )
         }
         runWhenever(
@@ -66,7 +63,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { flywheelManual != null } to choreography {
                     flywheel?.let {
                         spinUpShooter(
-                                flywheelManual!! * it.maxSpeed,
+                                (flywheelManual ?: 0.Percent) * it.maxSpeed,
                                 if (hoodUp) Up else Down
                         )
                     } ?: freeze()
@@ -93,6 +90,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
+        carousel.rezero()
         while (isActive) {
             val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
 
@@ -125,22 +123,30 @@ suspend fun Subsystems.visionAim() {
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            val snapshot1 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
+            val reading1 = reading
+            if (reading1?.pipeline == null) {
+                log(Error) { "Limelight pipeline is null!!" }
+                return@choreography
+            }
+
+            launch { limelight.set(reading1.pipeline) }
+            val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
             if (snapshot1 == null) {
                 log(Debug) { "Couldn't find snapshot1 or no shots possible" }
                 withTimeout(.5.Second) { flashlight?.strobe() }
                 return@choreography
             }
 
-            turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 2.Degree)
-            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
+            withTimeout(2.Second) {
+                turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree)
+            }
+            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, null) }
+
+            withTimeout(1.Second) { limelight.autoZoom() }
 
             val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
-            if (snapshot2 == null || reading?.pipeline == ZoomOut || reading?.pipeline == null) {
-                if (snapshot2 == null)
-                    log(Warning) { "Couldn't find snapshot2 - no reading or no best shot" }
-                if (reading?.pipeline == ZoomOut || reading?.pipeline == null)
-                    log(Warning) { "Couldn't find snapshot2 - pipeline is ZoomOut or null"}
+            if (snapshot2 == null) {
+                log(Warning) { "Couldn't find snapshot2 - no reading or no best shot" }
                 withTimeout(.5.Second) { flashlight?.strobe() }
                 return@choreography
             }
@@ -159,18 +165,20 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 
         if (fullSlot == null) {
             log(Warning) { "I feel empty. I want to eat some balls." }
-            launch {
-                withTimeout(2.Second) { flashlight?.strobe() }
+            withTimeout(2.Second) {
+                launch { rumble.set(TwoSided(100.Percent, 0.Percent)) }
+                launch { flashlight?.strobe() }
             }
-            rumble.set(TwoSided(100.Percent, 0.Percent))
         } else {
-            launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
+            val j = launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
 
             log(Debug) { "Waiting for ball to launch." }
             withTimeout(3.Second) {
                 flywheel?.delayUntilBall()
             } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
             carousel.state.set(carouselAngle + carousel.shootSlot, false)
+
+            j.cancel()
         }
     }
 }
@@ -189,13 +197,12 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
         choreography {
             launch { flashlight?.set(On) }
 
-            launch {
-                val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-                if (fullSlot != null) supervisorScope {
-                    val target = fullSlot - carousel.shootSlot
-                    if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
-                    if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
-                }
+            launch { feederRoller.set(0.Rpm) }
+            val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
+            if (fullSlot != null) {
+                val target = fullSlot - carousel.shootSlot
+                if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
+                if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
             }
 
             launch { flywheel.set(flywheelTarget) }

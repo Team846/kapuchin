@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.subsystems.drivetrain
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.IntegratedSensor
-import com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.kauailabs.navx.frc.AHRS
@@ -97,12 +96,12 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.isMagnetometerCalibrated
     }*/.verify("NavX should be configured to update at 200hz") {
         it.actualUpdateRate == 200
-    }.verify("RoboRIO should receive NavX updates at 200hz") {
+    }/*.verify("RoboRIO should receive NavX updates at 200hz") {
         val desiredUpdates = 10
         val startingIndex = it.updateCount
         blockingDelay(desiredUpdates.Each / 200.Hertz * 1.1)
         it.updateCount > startingIndex + desiredUpdates
-    }.verify("NavX yaw should not drift after calibration") {
+    }*/.verify("NavX yaw should not drift after calibration") {
         it.rate.DegreePerSecond in `±`(driftTolerance)
     }
 

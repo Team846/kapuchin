@@ -6,6 +6,10 @@ import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
+suspend fun LimelightComponent.set(target: Pipeline) = startRoutine("Set") {
+    controller { target }
+}
+
 suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
 
     val visionTarget by hardware.readings.readEagerly.withoutStamps
