@@ -1,13 +1,9 @@
 package com.lynbrookrobotics.kapuchin.subsystems.limelight
 
-import com.lynbrookrobotics.kapuchin.Field.innerGoalDepth
-import com.lynbrookrobotics.kapuchin.Field.targetDiameter
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.limelight.Pipeline.*
-import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -17,6 +13,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
     private val targetHeight by pref(107, Inch)
 
     private val mountingIncline by pref(38, Degree)
+    val mountingBearing by pref(-0.35, Degree)
     private val mounting by pref {
         val x by pref(0, Inch)
         val y by pref(0, Inch)
@@ -58,7 +55,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
             else -> 0.Degree
         })
 
-        val x = tan(tx) * targetDistance
+        val x = tan(tx + mountingBearing) * targetDistance
 
         Position(x, targetDistance, skew)
     }

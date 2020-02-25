@@ -68,18 +68,18 @@ suspend fun TurretComponent.trackTarget(
     controller {
         reading?.let { snapshot ->
             val target = when (goal) {
-                Outer -> current + snapshot.tx
+                Outer -> current + snapshot.tx + limelight.hardware.conversions.mountingBearing
                 Inner -> with(limelight.hardware.conversions) {
                     val llTarget = goalPositions(snapshot, robotPosition.bearing)
                     val horizontalOffset = innerGoalOffsets(llTarget, flywheel.shooterHeight).first
-                    val dtheta = atan(innerGoalDepth / horizontalOffset) - (90.Degree - (snapshot.tx + robotPosition.bearing))
-                    current + snapshot.tx - dtheta
+                    val dtheta = atan(innerGoalDepth / horizontalOffset) - (90.Degree - (snapshot.tx + limelight.hardware.conversions.mountingBearing + robotPosition.bearing))
+                    current + snapshot.tx + limelight.hardware.conversions.mountingBearing - dtheta
                 }
             }
 
             PositionOutput(
                     hardware.escConfig, positionGains, hardware.conversions.encoder.native(target)
-            ).takeUnless { snapshot.tx.abs < tolerance ?: -1.Degree }
+            ).takeUnless { (snapshot.tx + limelight.hardware.conversions.mountingBearing).abs < tolerance ?: -1.Degree }
         } ?: run {
             log(Debug) { "Lost sight of target!" }
             null
