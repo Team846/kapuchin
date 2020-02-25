@@ -43,10 +43,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         launch {
             launchWhenever(
-//                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
+                    // TODO check if field oriented position is why the turret randomly spins on enable
+                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
                     { shoot } to choreography {
                         fire()
-                        delay(250.milli(Second))
+                        delay(250.milli(Second)) // TODO change delay or find better solution
                     }
             )
         }
@@ -61,13 +62,18 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
                 { flywheelManual != null } to choreography {
+                    // TODO figure out which one is easier to control
+
                     flywheel?.let {
                         spinUpShooter(
                                 (flywheelManual ?: 0.Percent) * it.maxSpeed,
                                 if (hoodUp) Up else Down
                         )
                     } ?: freeze()
-                    // TODO verify this is controllable -andy
+
+//                    flywheel?.let {
+//                        set((flywheelManual ?: 0.Percent) * it.maxSpeed)
+//                    } ?: freeze()
                 },
                 { !turretManual.isZero } to choreography {
                     launch { flashlight?.set(On) }
@@ -219,6 +225,7 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
 
             launch { shooterHood?.set(hoodTarget) }
 
+            // TODO never seems to vibrate
             runWhenever({
                 feederCheck() && flywheelCheck()
             } to choreography {
