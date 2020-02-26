@@ -9,10 +9,10 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
-import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -55,33 +55,14 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
                 { aim } to choreography { visionAim() },
-                { aimPreset } to choreography {
-                    flywheel?.let { spinUpShooter(flywheel.preset, Down) } ?: freeze()
-                },
+                { aimPreset } to choreography { flywheel?.let { spinUpShooter(flywheel.preset, Down) } ?: freeze() },
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
-                { flywheelManual != null } to choreography {
-                    // TODO figure out which one is easier to control
-
-                    flywheel?.let {
-                        spinUpShooter(
-                                (flywheelManual ?: 0.Percent) * it.maxSpeed,
-                                if (hoodUp) Up else Down
-                        )
-                    } ?: freeze()
-
-//                    flywheel?.let {
-//                        set((flywheelManual ?: 0.Percent) * it.maxSpeed)
-//                    } ?: freeze()
-                },
-                { !turretManual.isZero } to choreography {
-                    launch { flashlight?.set(On) }
-                    turret?.manualOverride(operator) ?: freeze()
-                },
+                { flywheelManual != null } to choreography { flywheel?.manualOverride(operator) ?: freeze() },
+                { !turretManual.isZero } to choreography { turret?.manualOverride(operator) ?: freeze() },
 
                 { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
                 { reindexCarousel } to choreography {
-                    carousel.rezero()
                     carousel.whereAreMyBalls()
                     rumble.set(TwoSided(0.Percent, 100.Percent))
                 },
@@ -101,6 +82,9 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
 
             if (emptySlot == null) {
                 log(Warning) { "I'm full. No open slots in carousel magazine." }
+
+                launch { intakeSlider?.set(IntakeSliderState.In) }
+                launch { intakeRollers?.set(0.Percent) }
                 rumble.set(TwoSided(100.Percent, 0.Percent))
             } else {
                 launch { feederRoller?.set(0.Rpm) }
@@ -129,31 +113,25 @@ suspend fun Subsystems.visionAim() {
 
         choreography {
             val reading1 = reading
-            if (reading1?.pipeline == null) {
-                log(Error) { "Limelight pipeline is null." }
-                return@choreography
-            }
+            if (reading1?.pipeline == null)
+                throw CancellationException("Limelight pipeline is null!!")
 
             launch { limelight.set(reading1.pipeline) }
+
             val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
             if (snapshot1 == null) {
-                log(Debug) { "Couldn't find snapshot1 or no shots possible" }
                 withTimeout(2.Second) { flashlight?.strobe() }
-                return@choreography
+                throw CancellationException("Couldn't find snapshot1 or no shots possible")
             }
 
-            withTimeout(2.Second) {
-                turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree)
-            }
-            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, null) }
-
+            withTimeout(2.Second) { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree) }
+            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
             withTimeout(1.Second) { limelight.autoZoom() }
 
             val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
             if (snapshot2 == null) {
-                log(Error) { "Couldn't find snapshot2 or no shots possible" }
                 withTimeout(2.Second) { flashlight?.strobe() }
-                return@choreography
+                throw CancellationException("Couldn't find snapshot2 or no shots possible")
             }
 
             launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
@@ -170,10 +148,7 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 
         if (fullSlot == null) {
             log(Warning) { "I feel empty. I want to eat some balls." }
-            withTimeout(2.Second) {
-                launch { rumble.set(TwoSided(100.Percent, 0.Percent)) }
-                launch { flashlight?.strobe() }
-            }
+            withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
         } else {
             val j = launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
 
@@ -184,11 +159,13 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
             carousel.state.set(carouselAngle + carousel.shootSlot, false)
 
             j.cancel()
+
+            delay(250.milli(Second)) // Prevent accidentally shooting twice
         }
     }
 }
 
-private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
+suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to spin up shooter" }
         freeze()
@@ -200,9 +177,8 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-            launch { flashlight?.set(On) }
-
             launch { feederRoller.set(0.Rpm) }
+
             val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
             if (fullSlot != null) {
                 val target = fullSlot - carousel.shootSlot
@@ -238,6 +214,7 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
                 })"
             }
 
+            log(Debug) { "Feeder roller and flywheel set" }
             launch { shooterHood?.set(hoodTarget) }
 
             runWhenever({
