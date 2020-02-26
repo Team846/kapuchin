@@ -63,6 +63,23 @@ suspend fun runAll(vararg blocks: Block) = supervisorScope {
     blocks.forEach { launch { it() } }
 }
 
+suspend fun delayUntil(predicate: () -> Boolean) {
+    var runOnTick: Cancel? = null
+
+    if (!predicate()) try {
+        suspendCancellableCoroutine<Unit> { cont ->
+            runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
+                if (predicate()) {
+                    runOnTick?.cancel()
+                    cont.resume(Unit)
+                }
+            }
+        }
+    } finally {
+        runOnTick?.cancel()
+    }
+}
+
 /**
  * Create a new coroutine running the function while the predicate is met
  *
@@ -73,16 +90,12 @@ suspend fun runAll(vararg blocks: Block) = supervisorScope {
 suspend fun runWhile(predicate: () -> Boolean, block: Block) = coroutineScope {
     if (predicate()) {
         val job = launch { block() }
-
-        var runOnTick: Cancel? = null
-        runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-            if (!predicate()) {
-                runOnTick?.cancel()
-                job.cancel()
-            }
+        val delay = launch {
+            delayUntil { !predicate() || !job.isActive }
+            job.cancel()
         }
-
         job.join()
+        delay.cancelAndJoin()
     }
 }
 
@@ -94,24 +107,9 @@ suspend fun runWhile(predicate: () -> Boolean, block: Block) = coroutineScope {
  * @return coroutine which runs code whenever `predicate` returns false
  */
 suspend fun whenever(predicate: () -> Boolean, block: Block) = coroutineScope {
-    var cont: CancellableContinuation<Unit>? = null
-
-    val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-        if (predicate() && cont?.isActive == true) {
-            try {
-                cont?.resume(Unit)
-            } catch (e: IllegalStateException) {
-            }
-        }
-    }
-
-    try {
-        while (isActive) {
-            suspendCancellableCoroutine<Unit> { cont = it }
-            block()
-        }
-    } finally {
-        runOnTick.cancel()
+    while (isActive) {
+        delayUntil(predicate)
+        block()
     }
 }
 
