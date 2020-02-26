@@ -57,7 +57,6 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
         it.configureColorSensor(ColorSensorResolution.kColorSensorRes18bit, ColorSensorMeasurementRate.kColorRate25ms, GainFactor.kGain3x)
         it.configureProximitySensor(ProximitySensorResolution.kProxRes11bit, ProximitySensorMeasurementRate.kProxRate6ms)
         it.configureProximitySensorLED(LEDPulseFrequency.kFreq60kHz, LEDCurrent.kPulse125mA, 8)
-        // TODO: Wesley, what color and proximity settings should we use here?
     }.verify("the color sensor is connected") {
         // TODO: Must test empirically
         true

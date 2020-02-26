@@ -47,10 +47,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
         launch {
             launchWhenever(
                     { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
-                    { shoot } to choreography {
-                        fire()
-                        delay(250.milli(Second)) // TODO change delay or find better solution
-                    }
+                    { shoot } to choreography { fire() }
             )
         }
         runWhenever(

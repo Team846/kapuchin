@@ -65,7 +65,12 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
             it in 270.Degree `±` (presetRange)
         } != null
     }.with(graph("Flywheel Preset", Each)) { if (it) 1.Each else 0.Each }
-    val shoot = s { rt }
+
+    private var lastRt = false
+    val shoot = s {
+        (!lastRt && rt).also { lastRt = it }
+    }
+
     val hoodUp = s { lb }
 
     val flywheelManual = s {

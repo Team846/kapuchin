@@ -13,7 +13,6 @@ import info.kunalsheth.units.generated.*
 
 class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware), GenericDrivetrainComponent {
 
-    // TODO correct these for the 2020 bot if hardware team finishes it
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
     val maxAcceleration by pref(10, FootPerSecondSquared)
