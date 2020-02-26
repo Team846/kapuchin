@@ -63,12 +63,12 @@ suspend fun runAll(vararg blocks: Block) = supervisorScope {
     blocks.forEach { launch { it() } }
 }
 
-suspend fun delayUntil(predicate: () -> Boolean) {
+suspend fun delayUntil(clock: Clock = EventLoop, predicate: () -> Boolean) {
     var runOnTick: Cancel? = null
 
     if (!predicate()) try {
         suspendCancellableCoroutine<Unit> { cont ->
-            runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
+            runOnTick = clock.runOnTick {
                 if (predicate()) {
                     runOnTick?.cancel()
                     cont.resume(Unit)

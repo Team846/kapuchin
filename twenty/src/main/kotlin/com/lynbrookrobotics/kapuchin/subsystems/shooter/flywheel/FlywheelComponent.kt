@@ -19,7 +19,6 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
     val idleOutput by pref(50, Percent)
     val preset by pref(3000, Rpm)
     val tolerance by pref(10, Rpm)
-    val ballThreshold by pref(-1000, RpmPerSecond)
 
     val velocityGains by pref {
         val kP by pref(10, Volt, 100, Rpm)
