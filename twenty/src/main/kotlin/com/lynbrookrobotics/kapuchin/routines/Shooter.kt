@@ -30,6 +30,17 @@ suspend fun FlywheelComponent.set(target: DutyCycle) = startRoutine("Set Duty Cy
     }
 }
 
+suspend fun FlywheelComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
+    val precision by operator.flywheelManual.readOnTick.withoutStamps
+
+    controller {
+        precision?.let {
+            val target = it * maxSpeed
+            VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.native(target))
+        }
+    }
+}
+
 suspend fun FeederRollerComponent.set(target: AngularVelocity) = startRoutine("Set Omega") {
     controller {
         VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.native(target))
