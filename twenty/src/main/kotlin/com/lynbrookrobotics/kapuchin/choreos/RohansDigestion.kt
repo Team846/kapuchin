@@ -218,7 +218,7 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
 
             log(Debug) { "Waiting for feeder roller to get up to speed" }
             withTimeout(5.Second) {
-                delayUntil(::feederCheck)
+                delayUntil(predicate = ::feederCheck)
             } ?: log(Error) {
                 "Feeder roller never got up to speed (target = ${
                 feederRoller.feedSpeed.Rpm withDecimals 0
@@ -229,7 +229,7 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
 
             log(Debug) { "Waiting for flywheel to get up to speed" }
             withTimeout(5.Second) {
-                delayUntil(::flywheelCheck)
+                delayUntil(predicate = ::flywheelCheck)
             } ?: log(Error) {
                 "Flywheel never got up to speed (target = ${
                 flywheelTarget.Rpm withDecimals 0
