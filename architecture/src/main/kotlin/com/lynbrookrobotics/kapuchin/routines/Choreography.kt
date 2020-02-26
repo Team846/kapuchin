@@ -8,6 +8,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop as KapuchinEventLoop
 
 private typealias Block = suspend CoroutineScope.() -> Unit
 
@@ -63,7 +64,13 @@ suspend fun runAll(vararg blocks: Block) = supervisorScope {
     blocks.forEach { launch { it() } }
 }
 
-suspend fun delayUntil(clock: Clock = EventLoop, predicate: () -> Boolean) {
+/**
+ * Create a new coroutine which suspends until the predicate is met
+ *
+ * @param predicate function to check if the coroutine should still be suspended
+ * @return coroutine which suspends until `predicate` returns true
+ */
+suspend fun delayUntil(clock: Clock = KapuchinEventLoop, predicate: () -> Boolean) {
     var runOnTick: Cancel? = null
 
     if (!predicate()) try {
@@ -108,7 +115,7 @@ suspend fun runWhile(predicate: () -> Boolean, block: Block) = coroutineScope {
  */
 suspend fun whenever(predicate: () -> Boolean, block: Block) = coroutineScope {
     while (isActive) {
-        delayUntil(predicate)
+        delayUntil(predicate = predicate)
         block()
     }
 }
