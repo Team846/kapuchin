@@ -36,7 +36,7 @@ suspend fun FlywheelComponent.manualOverride(operator: OperatorHardware) = start
     controller {
         precision?.let {
             val target = it * maxSpeed
-            VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.native(target))
+            VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.encoder.native(target))
         }
     }
 }

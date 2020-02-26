@@ -161,7 +161,7 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
     }
 }
 
-private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
+suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to spin up shooter" }
         freeze()
