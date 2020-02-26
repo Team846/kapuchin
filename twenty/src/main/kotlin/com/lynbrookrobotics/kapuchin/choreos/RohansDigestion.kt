@@ -218,10 +218,26 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
             fun flywheelCheck() = flywheelSpeed in flywheelTarget `±` flywheel.tolerance
 
             log(Debug) { "Waiting for feeder roller to get up to speed" }
-            delayUntil(::feederCheck)
+            withTimeout(5.Second) {
+                delayUntil(::feederCheck)
+            } ?: log(Error) {
+                "Feeder roller never got up to speed (target = ${
+                feederRoller.feedSpeed.Rpm withDecimals 0
+                } RPM, current = ${
+                feederSpeed.Rpm withDecimals 0
+                })"
+            }
 
             log(Debug) { "Waiting for flywheel to get up to speed" }
-            delayUntil(::flywheelCheck)
+            withTimeout(5.Second) {
+                delayUntil(::flywheelCheck)
+            } ?: log(Error) {
+                "Flywheel never got up to speed (target = ${
+                flywheelTarget.Rpm withDecimals 0
+                } RPM, current = ${
+                flywheelSpeed.Rpm withDecimals 0
+                })"
+            }
 
             launch { shooterHood?.set(hoodTarget) }
             runWhenever({
