@@ -62,7 +62,6 @@ class FunkyRobot : RobotBase() {
 //                            delay(1.Second)
 //                        }
 
-//                        subsystems.carousel.rezero()
 //                        subsystems.carousel.whereAreMyBalls()
 //                        println(subsystems.carousel.state.toString())
 //                        subsystems.carousel.log(Debug) { subsystems.carousel.state.toString() }
@@ -87,7 +86,6 @@ class FunkyRobot : RobotBase() {
 //                            withTimeout(1.Second) { subsystems.shooterHood?.set(ShooterHoodState.Down) }
 //                        }
 
-//                        subsystems.carousel.rezero()
 //                        subsystems.carousel.whereAreMyBalls()
 //                        subsystems.eat()
 

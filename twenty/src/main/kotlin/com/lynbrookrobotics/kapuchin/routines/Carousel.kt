@@ -30,6 +30,7 @@ suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
     val proximity by hardware.proximity.readEagerly().withoutStamps
 
     choreography {
+        rezero()
         val start = carouselAngle.roundToInt(CarouselSlot)
         for (i in 0 until state.size) {
             set(start + i.CarouselSlot - collectSlot)
