@@ -23,7 +23,7 @@ suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball")
     val dvdt = differentiator(::p, speed.x, speed.y)
 
     choreography {
-        delayUntil(poll = 10.milli(Second)) {
+        delayUntil {
             dvdt(speed.x, speed.y) < ballThreshold
         }
     }
