@@ -240,6 +240,7 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
             }
 
             launch { shooterHood?.set(hoodTarget) }
+
             runWhenever({
                 feederCheck() && flywheelCheck()
             } to choreography {
