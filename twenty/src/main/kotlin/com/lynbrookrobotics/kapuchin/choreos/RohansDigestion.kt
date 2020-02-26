@@ -131,7 +131,7 @@ suspend fun Subsystems.visionAim() {
         choreography {
             val reading1 = reading
             if (reading1?.pipeline == null) {
-                log(Error) { "Limelight pipeline is null!!" }
+                log(Error) { "Limelight pipeline is null." }
                 return@choreography
             }
 
@@ -139,7 +139,7 @@ suspend fun Subsystems.visionAim() {
             val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
             if (snapshot1 == null) {
                 log(Debug) { "Couldn't find snapshot1 or no shots possible" }
-                withTimeout(.5.Second) { flashlight?.strobe() }
+                withTimeout(2.Second) { flashlight?.strobe() }
                 return@choreography
             }
 
@@ -152,13 +152,12 @@ suspend fun Subsystems.visionAim() {
 
             val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
             if (snapshot2 == null) {
-                log(Warning) { "Couldn't find snapshot2 - no reading or no best shot" }
-                withTimeout(.5.Second) { flashlight?.strobe() }
+                log(Error) { "Couldn't find snapshot2 or no shots possible" }
+                withTimeout(2.Second) { flashlight?.strobe() }
                 return@choreography
             }
 
             launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
-            // TODO hood not automatically getting set
             spinUpShooter(snapshot2.flywheel, snapshot2.hood)
         }
     }
@@ -225,8 +224,6 @@ private suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, ho
             delayUntil(::flywheelCheck)
 
             launch { shooterHood?.set(hoodTarget) }
-
-            // TODO never seems to vibrate
             runWhenever({
                 feederCheck() && flywheelCheck()
             } to choreography {
