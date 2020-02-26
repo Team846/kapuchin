@@ -36,14 +36,16 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     choreography {
         if (turret != null && !turret.hardware.isZeroed) launch {
             turret.rezero(electrical)
+            withTimeout(2.Second) { turret.set(0.Degree) }
         }
 
-        carousel.rezero()
-        carousel.whereAreMyBalls()
+        withTimeout(15.Second) {
+            carousel.rezero()
+            carousel.whereAreMyBalls()
+        }
 
         launch {
             launchWhenever(
-                    // TODO check if field oriented position is why the turret randomly spins on enable
                     { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
                     { shoot } to choreography {
                         fire()

@@ -77,7 +77,10 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
             normalized * slope + minRpm
         }
     }.with(graph("Flywheel Manual", Percent)) { it ?: Double.NaN.Each }
-    val turretManual = s { turretMapping(getX(kRight).Each) }
+
+    val turretManual = s {
+        turretMapping(getX(kRight).Each)
+    }.with(graph("Turret Manual", Percent))
 
     val rezeroTurret = s { pov == 90 }
     val reindexCarousel = s { pov == 270 }
@@ -92,7 +95,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     init {
         EventLoop.runOnTick { time ->
-            setOf(flywheelManual, aimPreset).forEach {
+            setOf(flywheelManual, aimPreset, turretManual).forEach {
                 it.optimizedRead(time, 0.1.Second)
             }
         }
