@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 
 suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal Path") {
 
-    val ,pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
+    val pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
 
     val logDir = "/home/lvuser/"
 

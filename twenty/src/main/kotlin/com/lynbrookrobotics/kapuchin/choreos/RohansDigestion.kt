@@ -12,6 +12,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -123,6 +125,8 @@ suspend fun Subsystems.visionAim() {
             if (snapshot1 == null) {
                 log(Warning) { "Couldn't find snapshot1 or no shots possible" }
                 withTimeout(2.Second) { flashlight?.strobe() }
+
+                coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
 
@@ -134,6 +138,8 @@ suspend fun Subsystems.visionAim() {
             if (snapshot2 == null) {
                 log(Error) { "Couldn't find snapshot2 or no shots possible" }
                 withTimeout(2.Second) { flashlight?.strobe() }
+
+                coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
 
@@ -153,7 +159,7 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
             log(Warning) { "I feel empty. I want to eat some balls." }
             withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
         } else {
-            val j = launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
+            launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
 
             log(Debug) { "Waiting for ball to launch." }
             withTimeout(1.5.Second) {
@@ -161,8 +167,7 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
             } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
             carousel.state.set(carouselAngle + carousel.shootSlot, false)
 
-            j.cancel()
-
+            coroutineContext[Job]!!.cancelChildren()
             delay(100.milli(Second)) // Prevent accidentally shooting twice
         }
     }

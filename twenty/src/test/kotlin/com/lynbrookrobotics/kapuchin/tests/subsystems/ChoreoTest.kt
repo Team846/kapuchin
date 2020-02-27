@@ -4,10 +4,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.junit.Test
 
 class ChoreoTest : Named by Named("Choreo Test") {
@@ -81,6 +78,29 @@ class ChoreoTest : Named by Named("Choreo Test") {
 
         log(Debug) { "Choreo is ${if (!complete) "not" else ""} complete. Should not be complete" }
         assert(!complete)
+    }
+
+    @Test
+    fun `cancelling children causes choreo to exit`() = runBlocking {
+
+        suspend fun choreo() = startChoreo("Test") {
+            choreography {
+                launch { freeze() }
+                launch { freeze() }
+                log(Debug) { "Reached the end of choreo. cancelling children" }
+
+                coroutineContext[Job]!!.cancelChildren()
+            }
+        }
+
+        var complete = false
+        withTimeout(.1.Second) {
+            choreo()
+            complete = true
+        }
+
+        log(Debug) { "Choreo is ${if (!complete) "not " else ""}complete. Should be complete" }
+        assert(complete)
     }
 
     @Test
