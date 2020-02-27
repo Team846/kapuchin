@@ -14,7 +14,19 @@ import java.io.File
 suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal Path") {
 
     val pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
-    val log = File("/home/lvuser/journal.tsv").printWriter().also {
+
+    val logPath = run {
+        val logDir = "/home/lvuser/"
+
+        var logName = "$journalId.tsv"
+        while (File("$logDir$logName").exists()) {
+            logName = "old_$logName"
+        }
+
+        "$logDir$logName"
+    }
+
+    val log = File(logPath).printWriter().also {
         it.println("x\ty")
         it.println("0.0\t0.0")
     }

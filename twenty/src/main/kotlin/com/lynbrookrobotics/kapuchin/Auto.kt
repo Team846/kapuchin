@@ -8,54 +8,71 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
 
-suspend fun Subsystems.`shoot wall`() = genericAuto(
-        fastAsFuckLine(6.Foot),
-        reverse = false, collect = false, rezero = true, shootTimeout = 10.Second
-)
+typealias Auto = Subsystems.() -> suspend CoroutineScope.() -> Unit
 
-suspend fun Subsystems.`I1 shoot C1`() {
-    val trajI1C1 = mediumAsFuck("I1C1")
-    if (trajI1C1 == null) {
-        log(Error) { "Path I1C1 doesn't exist, running shoot wall" }
-        `shoot wall`()
-    } else genericAuto(trajI1C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
-}
-
-suspend fun Subsystems.`I2 shoot C1`() {
-    val trajI2C1 = mediumAsFuck("I2C1")
-    if (trajI2C1 == null) {
-        log(Error) { "Path I2C1 doesn't exist, running shoot wall" }
-        `shoot wall`()
-    } else genericAuto(trajI2C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
-}
-
-suspend fun Subsystems.`I3 shoot C5`() {
-    val trajI3C5 = mediumAsFuck("I3C5")
-    if (trajI3C5 == null) {
-        log(Error) { "Path I3C5 doesn't exist, running shoot wall" }
-        `shoot wall`()
-    } else genericAuto(trajI3C5, reverse = false, collect = true, rezero = true, shootTimeout = 10.Second)
-}
-
-suspend fun Subsystems.`I1 shoot C1 I2 shoot`() {
-    val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(8.Foot).also {
-        log(Error) { "Path C1I2 doesn't exist, fallbacking to 8 foot line" }
+val `shoot wall`: Auto = {
+    choreography {
+        genericAuto(
+                fastAsFuckLine(6.Foot),
+                reverse = false, collect = false, rezero = true, shootTimeout = 10.Second
+        )
     }
-
-    `I1 shoot C1`()
-    drivetrain.followTrajectory(trajC1I2, 15.Inch, 5.Inch, reverse = false)
-    genericAuto(null, reverse = false, collect = false, rezero = false)
 }
 
-suspend fun Subsystems.`I3 shoot C5 I3 shoot`() {
-    val pathC5I3 = fastAsFuck("C5I3")
-    if (pathC5I3 == null) log(Error) { "C5I3 path doesn't exist!!" }
-    `I3 shoot C5`()
-    pathC5I3?.let { drivetrain.followTrajectory(it, 15.Inch, 5.Inch, reverse = false) }
-    genericAuto(null, reverse = false, collect = false, rezero = false)
+val `I1 shoot C1`: Auto = {
+    choreography {
+        val trajI1C1 = mediumAsFuck("I1C1")
+        if (trajI1C1 == null) {
+            log(Error) { "Path I1C1 doesn't exist, running shoot wall" }
+            `shoot wall`()
+        } else genericAuto(trajI1C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
+    }
+}
+
+val `I2 shoot C1`: Auto = {
+    choreography {
+        val trajI2C1 = mediumAsFuck("I2C1")
+        if (trajI2C1 == null) {
+            log(Error) { "Path I2C1 doesn't exist, running shoot wall" }
+            `shoot wall`()
+        } else genericAuto(trajI2C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
+    }
+}
+
+val `I3 shoot C5`: Auto = {
+    choreography {
+        val trajI3C5 = mediumAsFuck("I3C5")
+        if (trajI3C5 == null) {
+            log(Error) { "Path I3C5 doesn't exist, running shoot wall" }
+            `shoot wall`()
+        } else genericAuto(trajI3C5, reverse = false, collect = true, rezero = true, shootTimeout = 10.Second)
+    }
+}
+
+val `I1 shoot C1 I2 shoot`: Auto = {
+    choreography {
+        val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(8.Foot).also {
+            log(Error) { "Path C1I2 doesn't exist, fallbacking to 8 foot line" }
+        }
+
+        `I1 shoot C1`()
+        drivetrain.followTrajectory(trajC1I2, 15.Inch, 5.Inch, reverse = false)
+        genericAuto(null, reverse = false, collect = false, rezero = false)
+    }
+}
+
+val `I3 shoot C5 I3 shoot`: Auto = {
+    choreography {
+        val pathC5I3 = fastAsFuck("C5I3")
+        if (pathC5I3 == null) log(Error) { "C5I3 path doesn't exist!!" }
+        `I3 shoot C5`()
+        pathC5I3?.let { drivetrain.followTrajectory(it, 15.Inch, 5.Inch, reverse = false) }
+        genericAuto(null, reverse = false, collect = false, rezero = false)
+    }
 }
 
 private fun loadPath(name: String) = Thread.currentThread()

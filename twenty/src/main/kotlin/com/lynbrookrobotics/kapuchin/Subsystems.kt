@@ -30,6 +30,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import kotlin.math.roundToInt
 import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KSuspendFunction0
 import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
 
@@ -56,19 +57,27 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 ) : Named by Named("Subsystems") {
 
     private val autos = listOf(
-            choreography { `shoot wall`() },
-            choreography { `I1 shoot C1`() },
-            choreography { `I2 shoot C1`() },
-            choreography { `I3 shoot C5`() },
-            choreography { `I1 shoot C1 I2 shoot`() },
-            choreography { `I3 shoot C5 I3 shoot`() }
+            ::`shoot wall`,
+            ::`I1 shoot C1`,
+            ::`I2 shoot C1`,
+            ::`I3 shoot C5`,
+            ::`I1 shoot C1 I2 shoot`,
+            ::`I3 shoot C5 I3 shoot`
     )
 
     private val autoIdGraph = graph("Auto ID", Each)
+
+    private var prevAutoId = -1
     private val autoId
         get() = SmartDashboard.getEntry("DB/slider 0").getDouble(-1.0).roundToInt().also {
-            if (it !in autos.indices) log(Error) { "No auto with ID $it!!!!!!" }
+            if (it != prevAutoId) {
+                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}"}
+                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
+                prevAutoId = it
+            }
         }
+
+    val journalId get() = SmartDashboard.getEntry("DB/slider 1").getDouble(0.0).roundToInt()
 
     suspend fun teleop() {
         HAL.observeUserProgramTeleop()
@@ -89,7 +98,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
         if (autoId !in autos.indices) {
             log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
             freeze()
-        } else autos[autoId].invoke(this@coroutineScope)
+        } else autos[autoId].get().invoke(this@Subsystems).invoke(this@coroutineScope)
     }
 
     suspend fun warmup() {
