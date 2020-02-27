@@ -9,7 +9,10 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 import java.io.File
 
 typealias Auto = Subsystems.() -> suspend CoroutineScope.() -> Unit
@@ -26,85 +29,73 @@ val `verify odometry`: Auto = {
                 4.FootPerSecond, drivetrain.maxOmega / 3, 4.FootPerSecondSquared
         )
 
-        autoDrive(traj, rezero = true, reverse = false, collect = false)
+        drivetrain.followTrajectory(traj, 12.Inch, 2.Inch, reverse = false)
+        freeze()
     }
 }
 
 val `shoot wall`: Auto = {
     choreography {
-        withTimeout (10.Second) { autoAimAndFire(useCarouselState = false) }
-        autoDrive(fastAsFuckLine(4.Foot), reverse = false, collect = false, rezero = true)
+        withTimeout(12.Second) { autoAimAndFire(useCarouselState = false) }
+        drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
     }
 }
 
-
-val `I1 shoot C1`: Auto = {
+val `I1 shoot C1 I2 shoot`: Auto = {
     choreography {
         val trajI1C1 = fastAsFuck("I1C1", 40.Percent) ?: fastAsFuckLine(16.Foot, 40.Percent).also {
             log(Error) { "Path I1C1 doesn't exist, fallbacking to 16 feet line." }
         }
 
-        withTimeout(10.Second) { autoAimAndFire(useCarouselState = false) }
-        autoDrive(trajI1C1, reverse = true, collect = true, rezero = true)
+        val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(16.Foot).also {
+            log(Error) { "Path C1I2 doesn't exist, fallbacking to 16 foot line to I1" }
+        }
+
+        withTimeout(9.Second) { autoAimAndFire(useCarouselState = false) }
+
+        val turretJob = launch { turret?.rezero(electrical) }
+        val finishedReindex = withTimeout(4.Second) { carousel.whereAreMyBalls() } != null
+
+        val collectJob = launch { if (finishedReindex) eat() }
+        drivetrain.followTrajectory(trajI1C1, 12.Inch, 2.Inch, reverse = true)
+
+        collectJob.cancel()
+
+        drivetrain.followTrajectory(trajC1I2, 14.Inch, 2.Inch, reverse = false)
+        autoAimAndFire(useCarouselState = true)
+
+        turretJob.join()
     }
 }
 
-val `I2 shoot C1`: Auto = {
+val `I2 shoot C1 I2 shoot`: Auto = {
     choreography {
         val trajI2C1 = fastAsFuck("I2C1", 40.Percent)
         if (trajI2C1 == null) {
             log(Error) { "Path I2C1 doesn't exist, running shoot wall" }
             `shoot wall`()
         } else {
-            withTimeout(10.Second) { autoAimAndFire(useCarouselState = false) }
-            autoDrive(trajI2C1, reverse = true, collect = true, rezero = true)
+            val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(16.Foot).also {
+                log(Error) { "Path C1I2 doesn't exist, fallbacking to 16 foot line to I1" }
+            }
+
+            withTimeout(9.Second) { autoAimAndFire(useCarouselState = false) }
+
+            val turretJob = launch { turret?.rezero(electrical) }
+            val finishedReindex = withTimeout(4.Second) { carousel.whereAreMyBalls() } != null
+
+            val collectJob = launch { if (finishedReindex) eat() }
+            drivetrain.followTrajectory(trajI2C1, 12.Inch, 2.Inch, reverse = true)
+
+            collectJob.cancel()
+
+            drivetrain.followTrajectory(trajC1I2, 14.Inch, 2.Inch, reverse = false)
+            autoAimAndFire(useCarouselState = true)
+
+            turretJob.join()
         }
     }
 }
-
-//val `I3 shoot C5`: Auto = {
-//    choreography {
-//        val trajI3C5 = fastAsFuck("I3C5", 40.Percent)
-//        if (trajI3C5 == null) {
-//            log(Error) { "Path I3C5 doesn't exist, running shoot wall" }
-//            `shoot wall`()
-//        } else genericAuto(trajI3C5, reverse = false, collect = true, rezero = true, shootTimeout = 10.Second)
-//    }
-//}
-
-val `I1 shoot C1 I2 shoot`: Auto = {
-    choreography {
-        val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(8.Foot).also {
-            log(Error) { "Path C1I2 doesn't exist, fallbacking to 8 foot line" }
-        }
-
-        `I1 shoot C1`()
-        autoDrive(trajC1I2, reverse = false, collect = false, rezero = false)
-        autoAimAndFire(useCarouselState = true)
-    }
-}
-
-val `I2 shoot C1 I2 shoot`: Auto = {
-    choreography {
-        val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(8.Foot).also {
-            log(Error) { "Path C1I2 doesn't exist, fallbacking to 8 foot line" }
-        }
-
-        `I2 shoot C1`()
-        autoDrive(trajC1I2, reverse = false, collect = false, rezero = false)
-        autoAimAndFire(useCarouselState = true)
-    }
-}
-
-//val `I3 shoot C5 I3 shoot`: Auto = {
-//    choreography {
-//        val pathC5I3 = fastAsFuck("C5I3")
-//        if (pathC5I3 == null) log(Error) { "C5I3 path doesn't exist!!" }
-//        `I3 shoot C5`()
-//        pathC5I3?.let { drivetrain.followTrajectory(it, 15.Inch, 5.Inch, reverse = false) }
-//        genericAuto(null, reverse = false, collect = false, rezero = false, shootTimeout = 15.Second)
-//    }
-//}
 
 private fun loadPath(name: String) = Thread.currentThread()
         .contextClassLoader
@@ -132,7 +123,7 @@ private fun Subsystems.fastAsFuckLine(dist: Length, speedFactor: DutyCycle = 100
                 drivetrain.maxSpeed * speedFactor, drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor, drivetrain.maxAcceleration
         )
 
-private fun Subsystems.fastAsFuck(name: String, speedFactor: DutyCycle = 100.Percent): Trajectory? = loadPath(name)?.let {
+private fun Subsystems.fastAsFuck(name: String, speedFactor: Dimensionless = 100.Percent): Trajectory? = loadPath(name)?.let {
     pathToTrajectory(it, drivetrain.maxSpeed * speedFactor, drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor, drivetrain.maxAcceleration)
 }
 
@@ -155,6 +146,7 @@ private suspend fun Subsystems.autoAimAndFire(useCarouselState: Boolean) {
             if (reading1?.pipeline == null) {
                 log(Error) { "Limelight pipeline is null!" }
 
+                coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
 
@@ -168,7 +160,9 @@ private suspend fun Subsystems.autoAimAndFire(useCarouselState: Boolean) {
                 return@choreography
             }
 
-            withTimeout(2.Second) { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree) }
+            withTimeout(2.Second) {
+                turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree)
+            }
             launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
             withTimeout(1.Second) { limelight.autoZoom() }
 
@@ -195,44 +189,38 @@ private suspend fun Subsystems.autoAimAndFire(useCarouselState: Boolean) {
                     fullSlot
                 } else i.CarouselSlot
 
-                delayUntil { feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance }
-                delayUntil { flywheelSpeed in snapshot2.flywheel `±` flywheel.tolerance }
+                log(Debug) { "Waiting for feeder roller to get up to speed" }
+                withTimeout(2.Second) {
+                    delayUntil { feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance }
+                } ?: log(Error) {
+                    "Feeder roller never got up to speed (target = ${
+                    feederRoller.feedSpeed.Rpm withDecimals 0
+                    } RPM, current = ${
+                    feederSpeed.Rpm withDecimals 0
+                    })"
+                }
 
-                val fireJob = launch { carousel.set(slot - carousel.shootSlot, 0.CarouselSlot) }
+                log(Debug) { "Waiting for flywheel to get up to speed" }
+                withTimeout(2.Second) {
+                    delayUntil { flywheelSpeed in snapshot2.flywheel `±` flywheel.tolerance }
+                } ?: log(Error) {
+                    "Flywheel never got up to speed (target = ${
+                    snapshot2.flywheel.Rpm withDecimals 0
+                    } RPM, current = ${
+                    flywheelSpeed.Rpm withDecimals 0
+                    })"
+                }
 
-                log(Debug) { "Firing slot #$i, waiting for ball to launch." }
+                launch { carousel.set(slot - carousel.shootSlot, 0.CarouselSlot) }
+
+                log(Debug) { "Waiting for ball to launch." }
                 withTimeout(1.Second) {
                     flywheel.delayUntilBall()
-                } ?: log(Debug) { "Did not detect ball launch. Going to next slot." }
-
-                fireJob.cancel()
+                } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
+                carousel.state.set(carouselAngle + carousel.shootSlot, false)
             }
 
             coroutineContext[Job]!!.cancelChildren()
         }
     }
-}
-
-private suspend fun Subsystems.autoDrive(
-        trajectory: Trajectory,
-        rezero: Boolean,
-        reverse: Boolean,
-        collect: Boolean
-) = coroutineScope {
-
-    val carouselJob = launch { if (rezero) carousel.whereAreMyBalls() }
-    launch { if (rezero) turret?.rezero(electrical) }
-
-    if (collect && rezero) {
-        log(Debug) { "Waiting for carousel to rezero before collection" }
-        carouselJob.join()
-    }
-
-    val collectJob = launch { if (collect) eat() }
-    drivetrain.followTrajectory(trajectory, 12.Inch, 2.Inch, reverse)
-
-    collectJob.cancel()
-    carouselJob.join()
-
-    coroutineContext[Job]!!.cancelChildren()
 }

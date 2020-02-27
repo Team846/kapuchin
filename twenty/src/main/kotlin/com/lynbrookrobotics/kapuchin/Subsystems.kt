@@ -57,12 +57,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     private val autos = listOf(
             ::`shoot wall`,
-            ::`I1 shoot C1`,
-            ::`I2 shoot C1`,
-//            ::`I3 shoot C5`,
             ::`I1 shoot C1 I2 shoot`,
             ::`I2 shoot C1 I2 shoot`,
-//            ::`I3 shoot C5 I3 shoot`,
             ::`verify odometry`
     )
 

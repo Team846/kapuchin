@@ -89,12 +89,12 @@ class FunkyRobot : RobotBase() {
 //                        subsystems.carousel.whereAreMyBalls()
 //                        subsystems.eat()
 
-                        subsystems.turret?.rezero(subsystems.electrical)
-                        while (isActive) {
-                            withTimeout(3.Second) { subsystems.turret?.set(-90.Degree, 0.Degree) }
-                            withTimeout(3.Second) { subsystems.turret?.set(0.Degree, 0.Degree) }
-                            withTimeout(3.Second) { subsystems.turret?.set(90.Degree, 0.Degree) }
-                        }
+//                        subsystems.turret?.rezero(subsystems.electrical)
+//                        while (isActive) {
+//                            withTimeout(3.Second) { subsystems.turret?.set(-90.Degree, 0.Degree) }
+//                            withTimeout(3.Second) { subsystems.turret?.set(0.Degree, 0.Degree) }
+//                            withTimeout(3.Second) { subsystems.turret?.set(90.Degree, 0.Degree) }
+//                        }
 
                         freeze()
 //                      subsystems.drivetrain.set(0.Percent)
@@ -161,6 +161,6 @@ private fun printRunID() {
         System.err.println(e)
         -1
     }
-    println("Episode ${runId} - Rohan Awakens")
+    println("Episode $runId - Rohan Awakens")
     file.writeText(runId.toString())
 }
