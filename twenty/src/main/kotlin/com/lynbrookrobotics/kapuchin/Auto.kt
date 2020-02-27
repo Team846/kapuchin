@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
 
+<<<<<<< Updated upstream
 typealias Auto = Subsystems.() -> suspend CoroutineScope.() -> Unit
 
 val `shoot wall`: Auto = {
@@ -21,6 +22,32 @@ val `shoot wall`: Auto = {
                 reverse = false, collect = false, rezero = true, balls = 3, shootTimeout = 10.Second
         )
     }
+=======
+suspend fun Subsystems.`verify odometry`() = genericAuto(
+        pathToTrajectory(
+                interpolatePath(listOf(
+                        Waypoint(0.Foot, 0.Foot),
+                        Waypoint(0.Foot, 4.Foot),
+                        Waypoint(4.Foot, 4.Foot),
+                        Waypoint(4.Foot, 8.Foot)
+                ), 6.Inch),
+                drivetrain.maxSpeed, drivetrain.percentMaxOmega * drivetrain.maxOmega, drivetrain.maxAcceleration
+        ),
+        reverse = false, collect = false, rezero = true, shootTimeout = 10.Second
+)
+
+suspend fun Subsystems.`shoot wall`() = genericAuto(
+        fastAsFuckLine(6.Foot),
+        reverse = false, collect = false, rezero = true, shootTimeout = 10.Second
+)
+
+suspend fun Subsystems.`I1 shoot C1`() {
+    val trajI1C1 = mediumAsFuck("I1C1")
+    if (trajI1C1 == null) {
+        log(Error) { "Path I1C1 doesn't exist, running shoot wall" }
+        `shoot wall`()
+    } else genericAuto(trajI1C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
+>>>>>>> Stashed changes
 }
 
 val `I1 shoot C1`: Auto = {
