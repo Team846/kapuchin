@@ -6,18 +6,21 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal Path") {
 
     val pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
 
-    val logPath = run {
-        val logDir = "/home/lvuser/"
+    val logDir = "/home/lvuser/"
 
+    val logPath = run {
         var logName = "$journalId.tsv"
         while (File("$logDir$logName").exists()) {
             logName = "old_$logName"
@@ -56,6 +59,10 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
             log.println("${x.Foot}\t${y.Foot}")
             log.close()
 
+            scope.launch {
+                ProcessBuilder("sync").directory(File(logDir)).inheritIO().start().waitFor(5, TimeUnit.SECONDS)
+                log(Debug) { "Done syncing $logDir." }
+            }
             drivetrainEscs.forEach { it.setNeutralMode(Brake) }
         }
     }

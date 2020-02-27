@@ -6,22 +6,15 @@ import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
 
 typealias Auto = Subsystems.() -> suspend CoroutineScope.() -> Unit
-
-val `shoot wall`: Auto = {
-    choreography {
-        genericAuto(
-                fastAsFuckLine(6.Foot),
-                reverse = false, collect = false, rezero = true, balls = 3, shootTimeout = 10.Second
-        )
-    }
-}
 
 val `verify odometry`: Auto = {
     choreography {
@@ -35,39 +28,48 @@ val `verify odometry`: Auto = {
                 4.FootPerSecond, drivetrain.maxOmega / 3, 4.FootPerSecondSquared
         )
 
-        genericAuto(traj, reverse = false, collect = false, rezero = true, balls = 3, shootTimeout = 10.Second)
+        genericAuto(traj, reverse = false, collect = false, rezero = true, shootTimeout = 10.Second)
     }
 }
 
+val `shoot wall`: Auto = {
+    choreography {
+        genericAuto(
+                fastAsFuckLine(4.Foot),
+                reverse = false, collect = false, rezero = true, shootTimeout = 10.Second
+        )
+    }
+}
+
+
 val `I1 shoot C1`: Auto = {
     choreography {
-        val trajI1C1 = mediumAsFuck("I1C1")
-        if (trajI1C1 == null) {
-            log(Error) { "Path I1C1 doesn't exist, running shoot wall" }
-            `shoot wall`()
-        } else genericAuto(trajI1C1, reverse = true, collect = true, rezero = true, balls = 3, shootTimeout = 10.Second)
+        val trajI1C1 = fastAsFuck("I1C1", 40.Percent) ?: fastAsFuckLine(16.Foot, 40.Percent).also {
+            log(Error) { "Path I1C1 doesn't exist, fallbacking to 16 feet" }
+        }
+        genericAuto(trajI1C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
     }
 }
 
 val `I2 shoot C1`: Auto = {
     choreography {
-        val trajI2C1 = mediumAsFuck("I2C1")
+        val trajI2C1 = fastAsFuck("I2C1", 40.Percent)
         if (trajI2C1 == null) {
             log(Error) { "Path I2C1 doesn't exist, running shoot wall" }
             `shoot wall`()
-        } else genericAuto(trajI2C1, reverse = true, collect = true, rezero = true, balls = 3, shootTimeout = 10.Second)
+        } else genericAuto(trajI2C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
     }
 }
 
-val `I3 shoot C5`: Auto = {
-    choreography {
-        val trajI3C5 = mediumAsFuck("I3C5")
-        if (trajI3C5 == null) {
-            log(Error) { "Path I3C5 doesn't exist, running shoot wall" }
-            `shoot wall`()
-        } else genericAuto(trajI3C5, reverse = false, collect = true, rezero = true, balls = 3, shootTimeout = 10.Second)
-    }
-}
+//val `I3 shoot C5`: Auto = {
+//    choreography {
+//        val trajI3C5 = fastAsFuck("I3C5", 40.Percent)
+//        if (trajI3C5 == null) {
+//            log(Error) { "Path I3C5 doesn't exist, running shoot wall" }
+//            `shoot wall`()
+//        } else genericAuto(trajI3C5, reverse = false, collect = true, rezero = true, shootTimeout = 10.Second)
+//    }
+//}
 
 val `I1 shoot C1 I2 shoot`: Auto = {
     choreography {
@@ -77,19 +79,31 @@ val `I1 shoot C1 I2 shoot`: Auto = {
 
         `I1 shoot C1`()
         drivetrain.followTrajectory(trajC1I2, 15.Inch, 5.Inch, reverse = false)
-        genericAuto(null, reverse = false, collect = false, rezero = false, balls = carousel.state.size, shootTimeout = 15.Second)
+        genericAuto(null, reverse = false, collect = false, rezero = false, shootTimeout = 15.Second)
     }
 }
 
-val `I3 shoot C5 I3 shoot`: Auto = {
+val `I2 shoot C1 I2 shoot`: Auto = {
     choreography {
-        val pathC5I3 = fastAsFuck("C5I3")
-        if (pathC5I3 == null) log(Error) { "C5I3 path doesn't exist!!" }
-        `I3 shoot C5`()
-        pathC5I3?.let { drivetrain.followTrajectory(it, 15.Inch, 5.Inch, reverse = false) }
-        genericAuto(null, reverse = false, collect = false, rezero = false, balls = carousel.state.size, shootTimeout = 15.Second)
+        val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(8.Foot).also {
+            log(Error) { "Path C1I2 doesn't exist, fallbacking to 8 foot line" }
+        }
+
+        `I2 shoot C1`()
+        drivetrain.followTrajectory(trajC1I2, 15.Inch, 5.Inch, reverse = false)
+        genericAuto(null, reverse = false, collect = false, rezero = false, shootTimeout = 15.Second)
     }
 }
+
+//val `I3 shoot C5 I3 shoot`: Auto = {
+//    choreography {
+//        val pathC5I3 = fastAsFuck("C5I3")
+//        if (pathC5I3 == null) log(Error) { "C5I3 path doesn't exist!!" }
+//        `I3 shoot C5`()
+//        pathC5I3?.let { drivetrain.followTrajectory(it, 15.Inch, 5.Inch, reverse = false) }
+//        genericAuto(null, reverse = false, collect = false, rezero = false, shootTimeout = 15.Second)
+//    }
+//}
 
 private fun loadPath(name: String) = Thread.currentThread()
         .contextClassLoader
@@ -111,25 +125,20 @@ private fun loadTempPath() = File("/home/lvuser/journal.tsv")
         .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
         .toList()
 
-private fun Subsystems.fastAsFuckLine(dist: Length): Trajectory =
+/**
+ * Trajectory of a line at max limits.
+ */
+private fun Subsystems.fastAsFuckLine(dist: Length, speedFactor: DutyCycle = 100.Percent): Trajectory =
         pathToTrajectory(
                 nSect(Waypoint(0.Foot, 0.Foot), Waypoint(0.Foot, dist), 3.Inch),
-                drivetrain.maxSpeed, drivetrain.percentMaxOmega * drivetrain.maxOmega, drivetrain.maxAcceleration
+                drivetrain.maxSpeed * speedFactor, drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor, drivetrain.maxAcceleration
         )
 
 /**
  * Trajectory of the named path at max limits, null if path TSV doesn't exist.
  */
-private fun Subsystems.fastAsFuck(name: String): Trajectory? = loadPath(name)?.let {
-    pathToTrajectory(it, drivetrain.maxSpeed, drivetrain.percentMaxOmega * drivetrain.maxOmega, drivetrain.maxAcceleration)
-}
-
-/**
- * Trajectory of the named path at max limits but half max speed, null if path TSV doesn't exist.
- * Use when intaking balls while driving.
- */
-private fun Subsystems.mediumAsFuck(name: String): Trajectory? = loadPath(name)?.let {
-    pathToTrajectory(it, drivetrain.maxSpeed / 2, drivetrain.percentMaxOmega * drivetrain.maxOmega / 2, drivetrain.maxAcceleration)
+private fun Subsystems.fastAsFuck(name: String, speedFactor: DutyCycle = 100.Percent): Trajectory? = loadPath(name)?.let {
+    pathToTrajectory(it, drivetrain.maxSpeed * speedFactor, drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor, drivetrain.maxAcceleration)
 }
 
 /**
@@ -139,18 +148,17 @@ private fun Subsystems.mediumAsFuck(name: String): Trajectory? = loadPath(name)?
  * @param reverse whether or not to follow trajectory in reverse (reverse = intake on front).
  * @param collect whether or not to collect balls while following the trajectory.
  * @param rezero whether or not to rezero the turret and reindex the carousel while following the trajectory.
- * @param shootTimeout timeout on shooting before rezering and following trajectory.
+ * @param shootTimeout timeout on shooting before rezero-ing and following trajectory.
  */
 private suspend fun Subsystems.genericAuto(
         endingTrajectory: Trajectory?,
         reverse: Boolean,
         collect: Boolean,
         rezero: Boolean,
-        balls: Int,
         shootTimeout: Time
 ) {
     if (flywheel == null || feederRoller == null) {
-        log(Error) { "Need flywheel and feeder to run auto" }
+        log(Error) { "Need flywheel and feeder to run auto." }
         freeze()
     } else startChoreo("Generic Auto") {
 
@@ -158,6 +166,9 @@ private suspend fun Subsystems.genericAuto(
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
+        val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+
+        val jobs = mutableListOf<Job>()
 
         choreography {
             carousel.rezero()
@@ -169,7 +180,7 @@ private suspend fun Subsystems.genericAuto(
                     return@withTimeout
                 }
 
-                launch { limelight.set(reading1.pipeline) }
+                jobs += launch { limelight.set(reading1.pipeline) }
 
                 val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
                 if (snapshot1 == null) {
@@ -178,7 +189,7 @@ private suspend fun Subsystems.genericAuto(
                 }
 
                 withTimeout(2.Second) { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree) }
-                launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
+                jobs += launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
                 withTimeout(1.Second) { limelight.autoZoom() }
 
                 val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
@@ -187,33 +198,38 @@ private suspend fun Subsystems.genericAuto(
                     return@withTimeout
                 }
 
-                launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
-                launch { flywheel.set(snapshot2.flywheel) }
-                launch { feederRoller.set(feederRoller.feedSpeed) }
-                launch { shooterHood?.set(snapshot2.hood) }
+                jobs += launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
+                jobs += launch { flywheel.set(snapshot2.flywheel) }
+                jobs += launch { feederRoller.set(feederRoller.feedSpeed) }
+                jobs += launch { shooterHood?.set(snapshot2.hood) }
 
-                var ballsFired = 0
                 repeat(carousel.state.size) {
+                    val slot = carousel.state.closestEmpty(carouselAngle + carousel.shootSlot)
+                    if (slot == null) {
+                        log(Error) { "Cannot find an empty slot before reindex." }
+                        return@withTimeout
+                    }
+
                     delayUntil { feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance }
                     delayUntil { flywheelSpeed in snapshot2.flywheel `±` flywheel.tolerance }
 
-                    val fireJob = launch { fire() }
+                    val fireJob = launch { carousel.set(slot - carousel.shootSlot, 0.CarouselSlot) }
 
-                    withTimeout(1.5.Second) {
+                    log(Debug) { "Firing slot #$it, waiting for ball to launch." }
+                    withTimeout(1.Second) {
                         flywheel.delayUntilBall()
-                        ballsFired++
-                    }
+                    } ?: log(Debug) { "Did not detect ball launch. Going to next slot." }
 
-                    if (ballsFired == balls) return@repeat
-
-                    fireJob.join()
+                    fireJob.cancel()
                 }
+
+                log(Debug) { "Finished shooting loop." }
             }
 
-            log(Debug) { "Finishing auto" }
+            log(Debug) { "Running end of generic auto." }
 
-            val carouselJob = launch { if (rezero) carousel.whereAreMyBalls() }
-            launch { if (rezero) turret?.rezero(electrical) }
+            val carouselJob = launch { if (rezero) carousel.whereAreMyBalls() }.also { jobs += it }
+            jobs += launch { if (rezero) turret?.rezero(electrical) }
 
             if (collect && rezero) {
                 log(Debug) { "Waiting for carousel to rezero before collection" }
@@ -222,7 +238,11 @@ private suspend fun Subsystems.genericAuto(
 
             val collectJob = launch { if (collect) eat() }
             endingTrajectory?.let { drivetrain.followTrajectory(it, 12.Inch, 2.Inch, reverse) }
+
             collectJob.cancel()
+            carouselJob.join()
+
+            jobs.forEach { it.cancel() }
         }
     }
 }
