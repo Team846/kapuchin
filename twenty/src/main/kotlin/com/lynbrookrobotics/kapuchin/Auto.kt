@@ -18,7 +18,7 @@ val `shoot wall`: Auto = {
     choreography {
         genericAuto(
                 fastAsFuckLine(6.Foot),
-                reverse = false, collect = false, rezero = true, shootTimeout = 10.Second
+                reverse = false, collect = false, rezero = true, balls = 3, shootTimeout = 10.Second
         )
     }
 }
@@ -29,7 +29,7 @@ val `I1 shoot C1`: Auto = {
         if (trajI1C1 == null) {
             log(Error) { "Path I1C1 doesn't exist, running shoot wall" }
             `shoot wall`()
-        } else genericAuto(trajI1C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
+        } else genericAuto(trajI1C1, reverse = true, collect = true, rezero = true, balls = 3, shootTimeout = 10.Second)
     }
 }
 
@@ -39,7 +39,7 @@ val `I2 shoot C1`: Auto = {
         if (trajI2C1 == null) {
             log(Error) { "Path I2C1 doesn't exist, running shoot wall" }
             `shoot wall`()
-        } else genericAuto(trajI2C1, reverse = true, collect = true, rezero = true, shootTimeout = 10.Second)
+        } else genericAuto(trajI2C1, reverse = true, collect = true, rezero = true, balls = 3, shootTimeout = 10.Second)
     }
 }
 
@@ -49,7 +49,7 @@ val `I3 shoot C5`: Auto = {
         if (trajI3C5 == null) {
             log(Error) { "Path I3C5 doesn't exist, running shoot wall" }
             `shoot wall`()
-        } else genericAuto(trajI3C5, reverse = false, collect = true, rezero = true, shootTimeout = 10.Second)
+        } else genericAuto(trajI3C5, reverse = false, collect = true, rezero = true, balls = 3, shootTimeout = 10.Second)
     }
 }
 
@@ -61,7 +61,7 @@ val `I1 shoot C1 I2 shoot`: Auto = {
 
         `I1 shoot C1`()
         drivetrain.followTrajectory(trajC1I2, 15.Inch, 5.Inch, reverse = false)
-        genericAuto(null, reverse = false, collect = false, rezero = false)
+        genericAuto(null, reverse = false, collect = false, rezero = false, balls = carousel.state.size, shootTimeout = 15.Second)
     }
 }
 
@@ -71,7 +71,7 @@ val `I3 shoot C5 I3 shoot`: Auto = {
         if (pathC5I3 == null) log(Error) { "C5I3 path doesn't exist!!" }
         `I3 shoot C5`()
         pathC5I3?.let { drivetrain.followTrajectory(it, 15.Inch, 5.Inch, reverse = false) }
-        genericAuto(null, reverse = false, collect = false, rezero = false)
+        genericAuto(null, reverse = false, collect = false, rezero = false, balls = carousel.state.size, shootTimeout = 15.Second)
     }
 }
 
@@ -130,7 +130,8 @@ private suspend fun Subsystems.genericAuto(
         reverse: Boolean,
         collect: Boolean,
         rezero: Boolean,
-        shootTimeout: Time = 15.Second
+        balls: Int,
+        shootTimeout: Time
 ) {
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to run auto" }
@@ -187,7 +188,7 @@ private suspend fun Subsystems.genericAuto(
                         ballsFired++
                     }
 
-                    if (ballsFired == 3) return@repeat
+                    if (ballsFired == balls) return@repeat
 
                     fireJob.join()
                 }
