@@ -59,9 +59,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             ::`shoot wall`,
             ::`I1 shoot C1`,
             ::`I2 shoot C1`,
-            ::`I3 shoot C5`,
+//            ::`I3 shoot C5`,
             ::`I1 shoot C1 I2 shoot`,
-            ::`I3 shoot C5 I3 shoot`,
+            ::`I2 shoot C1 I2 shoot`,
+//            ::`I3 shoot C5 I3 shoot`,
             ::`verify odometry`
     )
 
@@ -71,7 +72,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     private val autoId
         get() = SmartDashboard.getEntry("DB/slider 0").getDouble(-1.0).roundToInt().also {
             if (it != prevAutoId) {
-                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}"}
+                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
                 else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
                 prevAutoId = it
             }

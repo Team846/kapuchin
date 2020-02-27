@@ -5,6 +5,8 @@ import com.ctre.phoenix.motorcontrol.NeutralMode.Coast
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
@@ -16,7 +18,7 @@ import java.util.concurrent.TimeUnit
 
 suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal Path") {
 
-    val pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
+    val ,pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
 
     val logDir = "/home/lvuser/"
 
