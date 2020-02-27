@@ -8,9 +8,7 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import java.io.File
 
 suspend fun Subsystems.`shoot wall`() = genericAuto(
@@ -127,39 +125,22 @@ private suspend fun Subsystems.genericAuto(
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
-        suspend fun finish() = supervisorScope {
-            val carouselJob = launch { if (rezero) carousel.whereAreMyBalls() }
-            val turretJob = launch { if (rezero) turret?.rezero(electrical) }
-
-            if (collect) {
-                log(Debug) { "Waiting for carousel to rezero before collection" }
-                carouselJob.join()
-            }
-            val collectJob = launch { if (collect) eat() }
-            endingTrajectory?.let { drivetrain.followTrajectory(it, 12.Inch, 2.Inch, reverse) }
-
-            collectJob.cancel()
-            turretJob.cancel()
-        }
-
         choreography {
             carousel.rezero()
 
             withTimeout(shootTimeout) {
                 val reading1 = reading
                 if (reading1?.pipeline == null) {
-                    log(Warning) { "Limelight pipeline is null!! finishing early" }
-                    finish()
-                    throw CancellationException()
+                    log(Error) { "Limelight pipeline is null. Finishing early." }
+                    return@withTimeout
                 }
 
                 launch { limelight.set(reading1.pipeline) }
 
                 val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
                 if (snapshot1 == null) {
-                    log(Warning) { "Couldn't find snapshot1 or no shots possible, finishing early" }
-                    finish()
-                    throw CancellationException()
+                    log(Error) { "Couldn't find snapshot1 or no shots possible. Finishing early." }
+                    return@withTimeout
                 }
 
                 withTimeout(2.Second) { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree) }
@@ -168,9 +149,8 @@ private suspend fun Subsystems.genericAuto(
 
                 val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
                 if (snapshot2 == null) {
-                    log(Warning) { "Couldn't find snapshot2 or no shots possible, finishing early" }
-                    finish()
-                    throw CancellationException()
+                    log(Error) { "Couldn't find snapshot2 or no shots possible. Finishing early." }
+                    return@withTimeout
                 }
 
                 launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
@@ -178,15 +158,37 @@ private suspend fun Subsystems.genericAuto(
                 launch { feederRoller.set(feederRoller.feedSpeed) }
                 launch { shooterHood?.set(snapshot2.hood) }
 
+                var ballsFired = 0
                 repeat(carousel.state.size) {
                     delayUntil { feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance }
                     delayUntil { flywheelSpeed in snapshot2.flywheel `±` flywheel.tolerance }
-                    fire()
+
+                    val fireJob = launch { fire() }
+
+                    withTimeout(1.5.Second) {
+                        flywheel.delayUntilBall()
+                        ballsFired++
+                    }
+
+                    if (ballsFired == 3) return@repeat
+
+                    fireJob.join()
                 }
             }
 
-            log(Debug) { "Finished shooting (or timed out), finishing normally" }
-            finish()
+            log(Debug) { "Finishing auto" }
+
+            val carouselJob = launch { if (rezero) carousel.whereAreMyBalls() }
+            launch { if (rezero) turret?.rezero(electrical) }
+
+            if (collect && rezero) {
+                log(Debug) { "Waiting for carousel to rezero before collection" }
+                carouselJob.join()
+            }
+
+            val collectJob = launch { if (collect) eat() }
+            endingTrajectory?.let { drivetrain.followTrajectory(it, 12.Inch, 2.Inch, reverse) }
+            collectJob.cancel()
         }
     }
 }

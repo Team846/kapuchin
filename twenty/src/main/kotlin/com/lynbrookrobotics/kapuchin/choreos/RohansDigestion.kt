@@ -11,8 +11,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -113,15 +111,18 @@ suspend fun Subsystems.visionAim() {
 
         choreography {
             val reading1 = reading
-            if (reading1?.pipeline == null)
-                throw CancellationException("Limelight pipeline is null!!")
+            if (reading1?.pipeline == null) {
+                log(Error) { "Limelight pipeline is null!!" }
+                return@choreography
+            }
 
             launch { limelight.set(reading1.pipeline) }
 
             val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
             if (snapshot1 == null) {
+                log(Warning) { "Couldn't find snapshot1 or no shots possible" }
                 withTimeout(2.Second) { flashlight?.strobe() }
-                throw CancellationException("Couldn't find snapshot1 or no shots possible")
+                return@choreography
             }
 
             withTimeout(2.Second) { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree) }
@@ -130,8 +131,9 @@ suspend fun Subsystems.visionAim() {
 
             val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
             if (snapshot2 == null) {
+                log(Error) { "Couldn't find snapshot2 or no shots possible" }
                 withTimeout(2.Second) { flashlight?.strobe() }
-                throw CancellationException("Couldn't find snapshot2 or no shots possible")
+                return@choreography
             }
 
             launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
@@ -153,14 +155,14 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
             val j = launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
 
             log(Debug) { "Waiting for ball to launch." }
-            withTimeout(3.Second) {
+            withTimeout(1.5.Second) {
                 flywheel?.delayUntilBall()
             } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
             carousel.state.set(carouselAngle + carousel.shootSlot, false)
 
             j.cancel()
 
-            delay(250.milli(Second)) // Prevent accidentally shooting twice
+            delay(100.milli(Second)) // Prevent accidentally shooting twice
         }
     }
 }
