@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
@@ -63,6 +64,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
                 { flywheelManual != null } to choreography {
+                    scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
                     flywheel?.let {
                         spinUpShooter(
                                 (flywheelManual ?: 0.Percent) * it.maxSpeed,
@@ -71,7 +73,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                     } ?: freeze()
 
                 },
-                { !turretManual.isZero } to choreography { turret?.manualOverride(operator) ?: freeze() },
+                { !turretManual.isZero } to choreography {
+                    scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
+                    turret?.manualOverride(operator) ?: freeze()
+                },
 
                 { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
                 { reindexCarousel } to choreography {
