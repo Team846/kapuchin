@@ -74,7 +74,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
                 },
                 { !turretManual.isZero } to choreography {
-                    scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
+                    scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
                     turret?.manualOverride(operator) ?: freeze()
                 },
 
@@ -129,6 +129,8 @@ suspend fun Subsystems.visionAim() {
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
 
         choreography {
+            scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
+
             val reading1 = reading
             if (reading1?.pipeline == null) {
                 log(Error) { "Limelight pipeline is null!!" }
@@ -140,20 +142,20 @@ suspend fun Subsystems.visionAim() {
             val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
             if (snapshot1 == null) {
                 log(Warning) { "Couldn't find snapshot1 or no shots possible" }
-                withTimeout(2.Second) { flashlight?.strobe() }
+//                withTimeout(2.Second) { flashlight?.strobe() }
 
                 coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
 
             withTimeout(2.Second) { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree) }
-            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
             withTimeout(1.Second) { limelight.autoZoom() }
+            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
 
             val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
             if (snapshot2 == null) {
                 log(Error) { "Couldn't find snapshot2 or no shots possible" }
-                withTimeout(2.Second) { flashlight?.strobe() }
+//                withTimeout(2.Second) { flashlight?.strobe() }
 
                 coroutineContext[Job]!!.cancelChildren()
                 return@choreography

@@ -21,6 +21,7 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         internal[index] = newState
     }
 
+//    hardware doesn't support CW & CCW turning
     private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
         val signum = if (bias) -1 else 1
         for (i in 0..2) {
@@ -30,6 +31,14 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         }
         return null
     }
+
+//    private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
+//        for (i in 0 until 5) {
+//            val position = slot - i.CarouselSlot
+//            if (f(position)) return position
+//        }
+//        return null
+//    }
 
     fun closestEmpty(robotBearing: Angle) = closest(robotBearing, false) {
         !get(it)

@@ -22,8 +22,8 @@ desired_contour_region:0
 dilation_steps:1
 direction_filter:0
 dual_close_sort_origin:0
-erosion_steps:1
-exposure:8
+erosion_steps:0
+exposure:3
 force_convex:1
 hue_max:80
 hue_min:40
@@ -39,7 +39,7 @@ red_balance:1882
 roi_x:1
 roi_y:0
 sat_max:255
-sat_min:117
+sat_min:110
 send_corners:0
 send_raw_contours:0
 solve3d:0

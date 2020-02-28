@@ -100,14 +100,12 @@ suspend fun TurretComponent.trackTarget(
 
 suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponent) = startRoutine("Field Oriented Position") {
     val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
-    val turretPosition by hardware.position.readEagerly.withoutStamps
 
-    val drivetrainStart = drivetrainPosition.bearing
-    val turretStart = turretPosition
+    // Initial field oriented bearing of the turret
+    val initial = drivetrainPosition.bearing `coterminal +` hardware.position.optimizedRead(currentTime, 0.Second).y
 
     controller {
-        val drivetrainDelta = drivetrainPosition.bearing `coterminal -` drivetrainStart
-        val target = turretStart `coterminal -` drivetrainDelta // negate the change in drivetrain
+        val target = initial `coterminal -` drivetrainPosition.bearing
         PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
     }
 }
