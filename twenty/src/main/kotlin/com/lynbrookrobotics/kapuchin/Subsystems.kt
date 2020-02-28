@@ -66,7 +66,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     private var prevAutoId = -1
     private val autoId
-        get() = SmartDashboard.getEntry("DB/slider 0").getDouble(-1.0).roundToInt().also {
+        get() = SmartDashboard.getEntry("DB/Slider 0").getDouble(-1.0).roundToInt().also {
             if (it != prevAutoId) {
                 if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
                 else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
@@ -74,7 +74,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             }
         }
 
-    val journalId get() = SmartDashboard.getEntry("DB/slider 1").getDouble(0.0).roundToInt()
+    val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
 
     suspend fun teleop() {
         HAL.observeUserProgramTeleop()

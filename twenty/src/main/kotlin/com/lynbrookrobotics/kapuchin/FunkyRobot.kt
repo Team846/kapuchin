@@ -51,22 +51,22 @@ class FunkyRobot : RobotBase() {
 //                        launch { subsystems.flywheel?.set(5000.Rpm)}
 //                        launch { subsystems.feederRoller?.set(5000.Rpm) }
 //                        launch { subsystems.drivetrain.set(100.Percent) }
-//                        subsystems.auto()
+                        subsystems.auto()
 
-                        while (isActive) {
-                            withTimeout(5.Second) {
-                                subsystems.carousel.set(1.CarouselSlot)
-                            }
-                            delay(1.Second)
-                            withTimeout(5.Second) {
-                                subsystems.carousel.set(5.CarouselSlot)
-                            }
-                            delay(1.Second)
-                            withTimeout(5.Second) {
-                                subsystems.carousel.set(-1.CarouselSlot)
-                            }
-                            delay(1.Second)
-                        }
+//                        while (isActive) {
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(1.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(5.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                            withTimeout(5.Second) {
+//                                subsystems.carousel.set(-1.CarouselSlot)
+//                            }
+//                            delay(1.Second)
+//                        }
 
 //                        subsystems.carousel.whereAreMyBalls()
 //                        println(subsystems.carousel.state.toString())
