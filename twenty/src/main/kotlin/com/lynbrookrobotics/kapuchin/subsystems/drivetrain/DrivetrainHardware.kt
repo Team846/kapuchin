@@ -47,9 +47,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     private val idx = 0
     private val leftMasterEscId = 30
-    private val leftSlaveEscId = 31
-    private val rightMasterEscId = 32
-    private val rightSlaveEscId = 33
+    private val leftSlaveEscId = 32
+    private val rightMasterEscId = 33
+    private val rightSlaveEscId = 31
 
     override val conversions = DrivetrainConversions(this)
 

@@ -25,8 +25,9 @@ suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball")
 
     val initialSpeed = speed.y
 
-    var lastPercentSpeed = 0.Percent
     var lastAcceleration = 0.Rpm / Second
+    var lastPercentSpeed = 0.Percent
+
     choreography {
         delayUntil(clock) {
             val acceleration = dvdt(speed.x, speed.y)
@@ -41,9 +42,14 @@ suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball")
                 "Peak percent drop: ${lastPercentSpeed.Percent withDecimals 1}%"
             }
 
-            accelerating &&
+            (accelerating &&
                     lastAcceleration < hardware.conversions.ballDecelerationThreshold &&
-                    lastPercentSpeed < hardware.conversions.ballPercentDropThreshold
+                    lastPercentSpeed < hardware.conversions.ballPercentDropThreshold)
+
+                    .also {
+                        lastAcceleration = acceleration
+                        lastPercentSpeed = percentSpeed
+                    }
         }
     }
 }

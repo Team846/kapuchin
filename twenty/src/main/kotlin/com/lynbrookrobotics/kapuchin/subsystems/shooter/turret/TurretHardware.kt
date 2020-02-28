@@ -23,7 +23,7 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     override val name = "Shooter Turret"
 
     private val invert by pref(false)
-    private val limitSwitchOffset by pref(116 + 78.8, Degree)
+    private val limitSwitchOffset by pref(185.5, Degree)
     val escConfig by escConfigPref(
             defaultNominalOutput = 1.Volt,
             defaultContinuousCurrentLimit = 15.Ampere,
