@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
@@ -11,6 +12,7 @@ import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -44,27 +46,27 @@ class FunkyRobot : RobotBase() {
                     },
                     { isEnabled && isAutonomous } to choreography {
                         System.gc()
-                        subsystems.turret?.rezero(subsystems.electrical)
-                        launch { subsystems.turret?.set(0.Degree, 0.Degree) }
+//                        subsystems.turret?.rezero(subsystems.electrical)
+//                        launch { subsystems.turret?.set(0.Degree, 0.Degree) }
 //                        launch { subsystems.flywheel?.set(5000.Rpm)}
 //                        launch { subsystems.feederRoller?.set(5000.Rpm) }
 //                        launch { subsystems.drivetrain.set(100.Percent) }
 //                        subsystems.auto()
 
-//                        while(isActive) {
-//                            withTimeout(5.Second) {
-//                                subsystems.carousel.set(1.CarouselSlot)
-//                            }
-//                            delay(1.Second)
-//                            withTimeout(5.Second) {
-//                                subsystems.carousel.set(5.CarouselSlot)
-//                            }
-//                            delay(1.Second)
-//                            withTimeout(5.Second) {
-//                                subsystems.carousel.set(-1.CarouselSlot)
-//                            }
-//                            delay(1.Second)
-//                        }
+                        while (isActive) {
+                            withTimeout(5.Second) {
+                                subsystems.carousel.set(1.CarouselSlot)
+                            }
+                            delay(1.Second)
+                            withTimeout(5.Second) {
+                                subsystems.carousel.set(5.CarouselSlot)
+                            }
+                            delay(1.Second)
+                            withTimeout(5.Second) {
+                                subsystems.carousel.set(-1.CarouselSlot)
+                            }
+                            delay(1.Second)
+                        }
 
 //                        subsystems.carousel.whereAreMyBalls()
 //                        println(subsystems.carousel.state.toString())
