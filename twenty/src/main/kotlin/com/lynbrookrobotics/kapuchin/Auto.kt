@@ -166,11 +166,11 @@ private suspend fun Subsystems.autoAimAndFire(useCarouselState: Boolean) {
                 return@choreography
             }
 
-            withTimeout(2.Second) {
+            withTimeout(1.Second) {
                 turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree)
             }
             launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
-            withTimeout(1.Second) { limelight.autoZoom() }
+            withTimeout(.5.Second) { limelight.autoZoom() }
 
             val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
             if (snapshot2 == null) {

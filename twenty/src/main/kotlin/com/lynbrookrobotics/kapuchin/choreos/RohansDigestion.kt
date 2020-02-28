@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import com.lynbrookrobotics.kapuchin.subsystems.intake.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.Job
@@ -241,7 +242,12 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
             runWhenever({
                 feederCheck() && flywheelCheck()
             } to choreography {
-                rumble.set(TwoSided(0.Percent, 100.Percent))
+                scope.launch {
+                    withTimeout(.5.Second) {
+                        rumble.set(TwoSided(0.Percent, 100.Percent))
+                    }
+                }
+                freeze()
             })
         }
     }
