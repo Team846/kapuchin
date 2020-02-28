@@ -34,6 +34,12 @@ val `verify odometry`: Auto = {
     }
 }
 
+val `wall`: Auto = {
+    choreography {
+        drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
+    }
+}
+
 val `shoot wall`: Auto = {
     choreography {
         withTimeout(12.Second) { autoAimAndFire(useCarouselState = false) }

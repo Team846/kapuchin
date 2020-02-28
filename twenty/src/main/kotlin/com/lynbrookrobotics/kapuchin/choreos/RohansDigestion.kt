@@ -164,22 +164,25 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 
     choreography {
         val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
+        val nextSlot = carouselAngle.roundToInt(CarouselSlot)
 
         if (fullSlot == null) {
             log(Warning) { "I feel empty. I want to eat some balls." }
             withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
-        } else {
-            launch { carousel.set(fullSlot - carousel.shootSlot, 0.CarouselSlot) }
-
-            log(Debug) { "Waiting for ball to launch." }
-            withTimeout(1.5.Second) {
-                flywheel?.delayUntilBall()
-            } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
-            carousel.state.set(carouselAngle + carousel.shootSlot, false)
-
-            coroutineContext[Job]!!.cancelChildren()
-            delay(100.milli(Second)) // Prevent accidentally shooting twice
         }
+
+        launch {
+            carousel.set((fullSlot ?: nextSlot) - carousel.shootSlot, 0.CarouselSlot)
+        }
+
+        log(Debug) { "Waiting for ball to launch." }
+        withTimeout(1.5.Second) {
+            flywheel?.delayUntilBall()
+        } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
+        carousel.state.set(carouselAngle + carousel.shootSlot, false)
+
+        coroutineContext[Job]!!.cancelChildren()
+        delay(100.milli(Second)) // Prevent accidentally shooting twice
     }
 }
 

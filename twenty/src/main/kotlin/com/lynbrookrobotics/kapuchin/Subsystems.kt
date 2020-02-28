@@ -92,7 +92,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     }
 
     suspend fun auto() = coroutineScope {
-        if (autoId !in autos.indices) {
+        if (autoId == -1) {
+            log(Error) { "DB Slider 0 is set to -1, running wall auto" }
+            `wall`()
+        } else if (autoId !in autos.indices) {
             log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
             freeze()
         } else autos[autoId].get().invoke(this@Subsystems).invoke(this@coroutineScope)
