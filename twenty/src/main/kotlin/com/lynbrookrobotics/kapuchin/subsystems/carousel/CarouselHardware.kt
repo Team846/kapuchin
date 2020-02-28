@@ -52,6 +52,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val position = sensor(encoder) {
         conversions.encoder.realPosition(position) stampWith it
     }.with(graph("Angle", Degree))
+            .with(graph("Error off slot", Degree)) { it - it.roundToInt(CarouselSlot) }
 
     // Sensor is electrically inverted
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->

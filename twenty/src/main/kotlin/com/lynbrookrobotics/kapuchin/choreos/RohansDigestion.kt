@@ -93,7 +93,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
-        carousel.rezero()
+//        carousel.rezero()
         while (isActive) {
             val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
 
