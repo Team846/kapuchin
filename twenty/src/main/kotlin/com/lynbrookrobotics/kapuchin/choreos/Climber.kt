@@ -1,6 +1,8 @@
 package com.lynbrookrobotics.kapuchin.choreos
 
 import com.lynbrookrobotics.kapuchin.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.Error
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.ClimberPivotState.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -31,11 +33,16 @@ suspend fun Subsystems.extendClimber() = coroutineScope {
 }
 
 suspend fun Subsystems.retractClimber() = coroutineScope {
+    if (climberPivot == null) {
+        log(Error) { "Climber pivot is required to retract." }
+        return@coroutineScope
+    }
+
     turret?.set(turret.windupPosition, 5.Degree)
 
-    launch { climberWinch?.set(climberWinch.retractSpeed) }
-    delay(1.Second)
-    scope.launch { climberPivot?.set(Down) }
+    launch { climberWinch?.set(-climberWinch.retractSpeed) }
+    delay(climberPivot.retractDelay)
+    scope.launch { climberPivot.set(Down) }
 
     freeze()
 }
