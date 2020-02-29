@@ -41,7 +41,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     choreography {
         if (turret != null && !turret.hardware.isZeroed) launch {
             turret.rezero(electrical)
-            withTimeout(2.Second) { turret.set(0.Degree) }
         }
 
         withTimeout(15.Second) {

@@ -49,5 +49,11 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
         } lstamp it
     }
 
+    val pipeline = sensor {
+        l("getpipe").toInt().let { rawpipe ->
+            Pipeline.values().firstOrNull { it.number == rawpipe }
+        } lstamp it
+    }
+
     val conversions = LimelightConversions(this)
 }

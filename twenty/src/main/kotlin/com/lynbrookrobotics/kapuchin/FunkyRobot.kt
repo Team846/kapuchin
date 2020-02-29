@@ -46,12 +46,19 @@ class FunkyRobot : RobotBase() {
                     },
                     { isEnabled && isAutonomous } to choreography {
                         System.gc()
+
+                        subsystems.auto()
+
+//                        withTimeout(5.Second) { subsystems.climberWinch?.set(0.Percent) } // should release chode
+//                        subsystems.climberWinch?.set(10.Percent) // extend is positive
+//                        subsystems.climberWinch?.set(-10.Percent) // extend is positive
+
 //                        subsystems.turret?.rezero(subsystems.electrical)
 //                        launch { subsystems.turret?.set(0.Degree, 0.Degree) }
 //                        launch { subsystems.flywheel?.set(5000.Rpm)}
 //                        launch { subsystems.feederRoller?.set(5000.Rpm) }
 //                        launch { subsystems.drivetrain.set(100.Percent) }
-                        subsystems.auto()
+//
 
 //                        while (isActive) {
 //                            withTimeout(5.Second) {
