@@ -14,7 +14,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.Goal.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.turret.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -67,6 +66,7 @@ suspend fun TurretComponent.manualOverride(operator: OperatorHardware) = startRo
     controller { PercentOutput(hardware.escConfig, precision) }
 }
 
+@Deprecated("Do not use. Doesn't work accross limelight pipeline shifts.")
 suspend fun TurretComponent.trackTarget(
         limelight: LimelightComponent, flywheel: FlywheelComponent, drivetrain: DrivetrainComponent,
         goal: Goal, tolerance: Angle? = null
@@ -98,11 +98,12 @@ suspend fun TurretComponent.trackTarget(
     }
 }
 
-suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponent) = startRoutine("Field Oriented Position") {
+suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponent, toTurretPosition: Angle? = null) = startRoutine("Field Oriented Position") {
     val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
+    val turretPosition by hardware.position.readEagerly.withoutStamps
 
     // Initial field oriented bearing of the turret
-    val initial = drivetrainPosition.bearing `coterminal +` hardware.position.optimizedRead(currentTime, 0.Second).y
+    val initial = drivetrainPosition.bearing `coterminal +` (toTurretPosition ?: turretPosition)
 
     controller {
         val target = initial `coterminal -` drivetrainPosition.bearing
