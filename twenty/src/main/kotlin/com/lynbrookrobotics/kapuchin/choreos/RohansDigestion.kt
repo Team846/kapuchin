@@ -18,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.sign
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -32,6 +33,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val flywheelManual by operator.flywheelManual.readEagerly().withoutStamps
     val turretManual by operator.turretManual.readEagerly().withoutStamps
 
+    val unjamCarousel by operator.unjamCarousel.readEagerly().withoutStamps
     val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
     val centerTurret by operator.centerTurret.readEagerly().withoutStamps
@@ -78,6 +80,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                     turret?.manualOverride(operator) ?: freeze()
                 },
 
+                { unjamCarousel } to choreography { unjam() },
                 { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
                 { reindexCarousel } to choreography {
                     carousel.whereAreMyBalls()
@@ -257,5 +260,29 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 freeze()
             })
         }
+    }
+}
+
+suspend fun Subsystems.unjam() = startChoreo("Unjam") {
+
+    val carouselPosition by carousel.hardware.position.readEagerly().withoutStamps
+
+    choreography {
+        val period = 1.Second
+        val delay = 1.Second
+
+        val initPosition = carouselPosition
+        val initDirection = carousel.hardware.esc.appliedOutput.sign
+
+        runWhile({
+            carouselPosition in initPosition `±` 1.CarouselSlot
+        }, {
+            withTimeout(period) { carousel.set(100.Percent * -initDirection) }
+            delay(delay)
+            withTimeout(period) { carousel.set(50.Percent * initDirection) }
+            delay(delay)
+        })
+
+        rumble.set(TwoSided(0.Percent, 100.Percent))
     }
 }

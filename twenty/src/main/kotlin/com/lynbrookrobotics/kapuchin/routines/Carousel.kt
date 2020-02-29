@@ -5,7 +5,10 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.sign
 
 suspend fun CarouselComponent.rezero() = startRoutine("Re-Zero") {
     hardware.isZeroed = false
@@ -22,6 +25,10 @@ suspend fun CarouselComponent.set(targetPosition: Angle, tolerance: Angle = 2.5.
                 hardware.escConfig, positionGains, hardware.conversions.encoder.native(targetPosition)
         ).takeUnless { targetPosition - current in `±`(tolerance) }
     }
+}
+
+suspend fun CarouselComponent.set(target: DutyCycle) = startRoutine("Set") {
+    controller { PercentOutput(hardware.escConfig, target) }
 }
 
 suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
