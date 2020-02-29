@@ -15,8 +15,6 @@ enum class ClimberPivotState(val output: Boolean) { Down(false), Up(true) }
 
 class ClimberPivotComponent(hardware: ClimberPivotHardware) : Component<ClimberPivotComponent, ClimberPivotHardware, ClimberPivotState>(hardware, pneumaticTicker) {
 
-    val retractDelay by pref(1, Second)
-
     override val fallbackController: ClimberPivotComponent.(Time) -> ClimberPivotState = { Down }
 
     override fun ClimberPivotHardware.output(value: ClimberPivotState) {

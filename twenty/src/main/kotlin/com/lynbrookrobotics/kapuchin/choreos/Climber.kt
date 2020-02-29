@@ -27,22 +27,18 @@ suspend fun Subsystems.extendClimber() = coroutineScope {
     turret?.set(turret.windupPosition, 5.Degree)
 
     scope.launch { climberPivot?.set(Up) }
+    delay(1.Second)
     launch { climberWinch?.set(climberWinch.extendSpeed) }
 
     freeze()
 }
 
 suspend fun Subsystems.retractClimber() = coroutineScope {
-    if (climberPivot == null) {
-        log(Error) { "Climber pivot is required to retract." }
-        return@coroutineScope
-    }
-
     turret?.set(turret.windupPosition, 5.Degree)
 
+    scope.launch { climberPivot?.set(Down) }
+    delay(1.Second)
     launch { climberWinch?.set(-climberWinch.retractSpeed) }
-    delay(climberPivot.retractDelay)
-    scope.launch { climberPivot.set(Down) }
 
     freeze()
 }

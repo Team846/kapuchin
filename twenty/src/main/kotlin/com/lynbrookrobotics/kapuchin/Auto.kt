@@ -47,7 +47,7 @@ val `wall`: Auto = {
 
 val `shoot wall`: Auto = {
     choreography {
-        withTimeout(12.Second) { autoAimAndFire(useCarouselState = false) }
+//        withTimeout(12.Second) { autoAimAndFire(useCarouselState = false) }
         drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
     }
 }
@@ -62,7 +62,7 @@ val `I1 shoot C1 I2 shoot`: Auto = {
             log(Error) { "Path C1I2 doesn't exist, fallbacking to 16 foot line to I1" }
         }
 
-        withTimeout(9.Second) { autoAimAndFire(useCarouselState = false) }
+//        withTimeout(9.Second) { autoAimAndFire(useCarouselState = false) }
 
         val turretJob = launch { turret?.rezero(electrical) }
         val finishedReindex = withTimeout(4.Second) { carousel.whereAreMyBalls() } != null
@@ -73,7 +73,7 @@ val `I1 shoot C1 I2 shoot`: Auto = {
         collectJob.cancel()
 
         drivetrain.followTrajectory(trajC1I2, 14.Inch, 2.Inch, reverse = false)
-        autoAimAndFire(useCarouselState = true)
+//        autoAimAndFire(useCarouselState = true)
 
         turretJob.join()
     }
@@ -90,7 +90,7 @@ val `I2 shoot C1 I2 shoot`: Auto = {
                 log(Error) { "Path C1I2 doesn't exist, fallbacking to 16 foot line to I1" }
             }
 
-            withTimeout(9.Second) { autoAimAndFire(useCarouselState = false) }
+//            withTimeout(9.Second) { autoAimAndFire(useCarouselState = false) }
 
             val turretJob = launch { turret?.rezero(electrical) }
             val finishedReindex = withTimeout(4.Second) { carousel.whereAreMyBalls() } != null
@@ -101,7 +101,7 @@ val `I2 shoot C1 I2 shoot`: Auto = {
             collectJob.cancel()
 
             drivetrain.followTrajectory(trajC1I2, 14.Inch, 2.Inch, reverse = false)
-            autoAimAndFire(useCarouselState = true)
+//            autoAimAndFire(useCarouselState = true)
 
             turretJob.join()
         }
