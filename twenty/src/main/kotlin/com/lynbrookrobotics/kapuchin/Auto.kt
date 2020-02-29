@@ -1,13 +1,18 @@
 package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.Field.innerGoalDepth
 import com.lynbrookrobotics.kapuchin.choreos.*
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
+import com.lynbrookrobotics.kapuchin.subsystems.limelight.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -133,70 +138,67 @@ private fun Subsystems.fastAsFuck(name: String, speedFactor: Dimensionless = 100
     pathToTrajectory(it, drivetrain.maxSpeed * speedFactor, drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor, drivetrain.maxAcceleration)
 }
 
-private suspend fun Subsystems.autoAimAndFire(useCarouselState: Boolean) {
-    if (flywheel == null || feederRoller == null) {
+private suspend fun Subsystems.autoAimAndFire() {
+    if (flywheel == null || feederRoller == null || turret == null) {
         log(Error) { "Need flywheel and feeder to run auto." }
         freeze()
     } else startChoreo("Auto aim and fire") {
 
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
+        val turretPosition by turret.hardware.position.readEagerly().withoutStamps
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+//
+//
+//        val distToBase = 146.05.Inch
+//
+//        val straightShot = bestShot(DetectedTarget(
+//                Position(0.Foot, distToBase + innerGoalDepth, 0.Degree),
+//                Position(0.Foot, distToBase, 0.Degree)
+//        ))
+//
+//        val offsetShot = bestShot(DetectedTarget(
+//                Position(0.Foot, distToBase + innerGoalDepth, 0.Degree),
+//                Position(0.Foot, straightDist, 0.Degree)
+//        ))
 
         choreography {
-            carousel.rezero()
+            val carouselRezeroJob = launch { carousel.rezero() }
+
+            scope.launch { withTimeout(7.Second) { flashlight?.set(On) } }
 
             val reading1 = reading
             if (reading1?.pipeline == null) {
-                log(Error) { "Limelight pipeline is null!" }
-
-                coroutineContext[Job]!!.cancelChildren()
+                log(Error) { "Limelight reading1 == $reading1" }
                 return@choreography
             }
-
-            launch { limelight.set(reading1.pipeline) }
 
             val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
             if (snapshot1 == null) {
-                log(Warning) { "Couldn't find snapshot1 or no shots possible." }
-
+                log(Warning) { "Couldn't find snapshot1 or no shots possible" }
                 coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
+
+            val turretAlignJob = launch { turret.set(turretPosition + reading1.tx + limelight.hardware.conversions.mountingBearing) }
+            launch { flywheel.set(snapshot1.flywheel) }
+            launch { feederRoller.set(feederRoller.feedSpeed) }
+            launch { shooterHood?.set(snapshot1.hood) }
 
             withTimeout(1.Second) {
-                turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree)
+                carouselRezeroJob.join()
             }
-            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
-            withTimeout(.5.Second) { limelight.autoZoom() }
-
-            val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
-            if (snapshot2 == null) {
-                log(Error) { "Couldn't find snapshot2 or no shots possible." }
-
-                coroutineContext[Job]!!.cancelChildren()
-                return@choreography
+            withTimeout(1.Second) {
+                turretAlignJob.join()
             }
-
-            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
-            launch { flywheel.set(snapshot2.flywheel) }
-            launch { feederRoller.set(feederRoller.feedSpeed) }
-            launch { shooterHood?.set(snapshot2.hood) }
 
             repeat(carousel.state.size) { i ->
-                val slot = if (useCarouselState) {
-                    val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-                    if (fullSlot == null) {
-                        log(Debug) { "No more balls." }
-                        return@repeat
-                    }
-                    fullSlot
-                } else i.CarouselSlot
+                val slot = i.CarouselSlot
 
                 log(Debug) { "Waiting for feeder roller to get up to speed" }
-                withTimeout(2.Second) {
+                withTimeout(1.5.Second) {
                     delayUntil { feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance }
                 } ?: log(Error) {
                     "Feeder roller never got up to speed (target = ${
@@ -207,11 +209,11 @@ private suspend fun Subsystems.autoAimAndFire(useCarouselState: Boolean) {
                 }
 
                 log(Debug) { "Waiting for flywheel to get up to speed" }
-                withTimeout(2.Second) {
-                    delayUntil { flywheelSpeed in snapshot2.flywheel `±` flywheel.tolerance }
+                withTimeout(1.5.Second) {
+                    delayUntil { flywheelSpeed in snapshot1.flywheel `±` flywheel.tolerance }
                 } ?: log(Error) {
                     "Flywheel never got up to speed (target = ${
-                    snapshot2.flywheel.Rpm withDecimals 0
+                    snapshot1.flywheel.Rpm withDecimals 0
                     } RPM, current = ${
                     flywheelSpeed.Rpm withDecimals 0
                     })"
