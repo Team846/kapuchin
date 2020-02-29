@@ -123,20 +123,22 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
 }
 
 suspend fun Subsystems.visionAim() {
-    if (flywheel == null || feederRoller == null) {
+    if (flywheel == null || feederRoller == null || turret == null) {
         log(Error) { "Need flywheel and feederRoller for vision aiming" }
         freeze()
     } else startChoreo("Vision Aim") {
 
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
+        val turretPosition by turret.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
+            scope.launch { withTimeout(7.Second) { flashlight?.set(On) } }
+            launch { turret.fieldOrientedPosition(drivetrain) }
 
             val reading1 = reading
             if (reading1?.pipeline == null) {
-                log(Error) { "Limelight pipeline is null!!" }
+                log(Error) { "Limelight reading1 == $reading1" }
                 return@choreography
             }
 
@@ -145,26 +147,38 @@ suspend fun Subsystems.visionAim() {
             val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
             if (snapshot1 == null) {
                 log(Warning) { "Couldn't find snapshot1 or no shots possible" }
-//                withTimeout(2.Second) { flashlight?.strobe() }
-
                 coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
 
-            withTimeout(2.Second) { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal, 1.Degree) }
-            withTimeout(1.Second) { limelight.autoZoom() }
-            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot1.goal) }
+            launch {
+                turret.fieldOrientedPosition(drivetrain,
+                        turretPosition + reading1.tx + limelight.hardware.conversions.mountingBearing
+                )
+            }
 
-            val snapshot2 = reading?.let { bestShot(limelight.hardware.conversions.goalPositions(it, robotPosition.bearing)) }
+            withTimeout(1.Second) { limelight.autoZoom() }
+
+            val reading2 = reading
+            if (reading2?.pipeline == null) {
+                log(Error) { "Limelight reading2 == $reading2" }
+                return@choreography
+            }
+
+            launch { limelight.set(reading2.pipeline) }
+
+            val snapshot2 = bestShot(limelight.hardware.conversions.goalPositions(reading2, robotPosition.bearing))
             if (snapshot2 == null) {
                 log(Error) { "Couldn't find snapshot2 or no shots possible" }
-//                withTimeout(2.Second) { flashlight?.strobe() }
-
                 coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
 
-            launch { turret?.trackTarget(limelight, flywheel, drivetrain, snapshot2.goal) }
+            launch {
+                turret.fieldOrientedPosition(drivetrain,
+                        turretPosition + reading2.tx + limelight.hardware.conversions.mountingBearing
+                )
+            }
             spinUpShooter(snapshot2.flywheel, snapshot2.hood)
         }
     }
