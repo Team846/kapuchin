@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -30,12 +31,21 @@ private fun calculateShot(
         launchAngle: Angle,
 
         maxSpeed: AngularVelocity,
-        shooterHeight: Length
+        shooterHeight: Length,
+        hoodUpLaunch: Angle,
+        hoodDownLaunch: Angle
 ): ShotState? {
     val distToBase = sqrt(target.x.squared + target.y.squared)
     val height = Field.targetHeight - shooterHeight
     val incline = atan( height / distToBase )
+    val hoodAngle = when(shooterHoodState){
+        Up -> {hoodUpLaunch}
+        Down -> {hoodDownLaunch}
+    }
 
+    if(incline > hoodAngle){
+        return null
+    }
     val ballVelocity = kotlin.math.sqrt(0.5) * sqrt((distToBase.squared * 1.EarthGravity) / ((distToBase * tan(launchAngle) - height) * cos(launchAngle).squared))
 
     val flywheelVelocity = inclineToRPM(incline)
