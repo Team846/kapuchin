@@ -3,7 +3,6 @@ package com.lynbrookrobotics.kapuchin.subsystems.climber
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.subsystems.climber.ClimberPivotState.*
 import com.lynbrookrobotics.kapuchin.timing.*

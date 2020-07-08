@@ -14,12 +14,12 @@ import info.kunalsheth.units.math.*
  *
  * @return an RPM
  */
-private fun inclineToRPM (incline : Angle) : AngularVelocity {
-    val a : Double = 1.0 //placeholder value for regression
-    val b : Double = 1.0 // "
-    val c : Double = 1.0 // "
+private fun inclineToRPM(incline: Angle): AngularVelocity {
+    val a: Double = 1.0 //placeholder value for regression
+    val b: Double = 1.0 // "
+    val c: Double = 1.0 // "
 
-    return (a*incline.Degree*incline + b*incline + c.Degree).Degree.Rpm
+    return (a * incline.Degree * incline + b * incline + c.Degree).Degree.Rpm
 }
 
 private fun calculateShot(
@@ -37,13 +37,17 @@ private fun calculateShot(
 ): ShotState? {
     val distToBase = sqrt(target.x.squared + target.y.squared)
     val height = Field.targetHeight - shooterHeight
-    val incline = atan( height / distToBase )
-    val hoodAngle = when(shooterHoodState){
-        Up -> {hoodUpLaunch}
-        Down -> {hoodDownLaunch}
+    val incline = atan(height / distToBase)
+    val hoodAngle = when (shooterHoodState) {
+        Up -> {
+            hoodUpLaunch
+        }
+        Down -> {
+            hoodDownLaunch
+        }
     }
 
-    if(incline > hoodAngle){
+    if (incline > hoodAngle) {
         return null
     }
     val ballVelocity = kotlin.math.sqrt(0.5) * sqrt((distToBase.squared * 1.EarthGravity) / ((distToBase * tan(launchAngle) - height) * cos(launchAngle).squared))

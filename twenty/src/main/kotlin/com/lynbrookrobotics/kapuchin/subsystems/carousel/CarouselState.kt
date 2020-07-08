@@ -21,7 +21,7 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         internal[index] = newState
     }
 
-//    hardware doesn't support CW & CCW turning
+    //    hardware doesn't support CW & CCW turning
     private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
         val signum = if (bias) -1 else 1
         for (i in 0..2) {

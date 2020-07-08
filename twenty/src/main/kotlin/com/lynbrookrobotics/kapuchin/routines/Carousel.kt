@@ -5,10 +5,7 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.math.sign
 
 suspend fun CarouselComponent.rezero() = startRoutine("Re-Zero") {
     hardware.isZeroed = false
