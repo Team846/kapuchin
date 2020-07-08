@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.driver.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.roundToInt
 
 suspend fun RumbleComponent.set(target: Rumble) = startRoutine("Set") {
     controller { target }

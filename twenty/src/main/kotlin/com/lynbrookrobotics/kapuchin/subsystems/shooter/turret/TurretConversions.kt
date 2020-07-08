@@ -13,14 +13,13 @@ class TurretConversions(hardware: TurretHardware) : Named by Named("Conversions"
             val output = 10
             ({ GearTrain(input, output) })
         }
-        val driveWheelRadius by pref(1, Inch)
-        val lazySusanRadius by pref(13, Inch)
+        val lazySusanBeltFactor by pref(0.0678)
 
         ({
             AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
                     nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                     nativeFeedbackUnits = 1,
-                    perFeedbackQuantity = gearbox.inputToOutput(1.Turn) * driveWheelRadius / lazySusanRadius,
+                    perFeedbackQuantity = gearbox.inputToOutput(1.Turn) * lazySusanBeltFactor,
                     nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
             )
         })

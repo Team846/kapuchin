@@ -9,14 +9,14 @@ import info.kunalsheth.units.generated.*
 
 class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, shooterTicker) {
 
-    val safeSpeed by pref(3, Volt)
+    val safeSpeed by pref(1, Volt)
+    val windupPosition by pref(-90, Degree)
 
     val positionGains by pref {
         val kP by pref(12, Volt, 45, Degree)
         val kD by pref(0, Volt, 60, DegreePerSecond)
         ({
             OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.native(kP),
                     kD = hardware.conversions.encoder.native(kD)
             )
@@ -34,7 +34,7 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
                 peakOutputForward = safeSpeed,
                 peakOutputReverse = -safeSpeed
         ))
-        else value.with(OffloadedEscSafeties(hardware.syncThreshold,
+        else value.with(OffloadedEscSafeties(
                 min = encoder.native(min),
                 max = encoder.native(max)
         ))

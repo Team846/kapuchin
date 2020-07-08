@@ -63,7 +63,7 @@ fun RobotHardware<*>.generalSetup(esc: CANSparkMax, config: OffloadedEscConfigur
 
     config.writeTo(esc, esc.pidController)
 
-    +esc.setCANTimeout(15)
+    +esc.setCANTimeout(config.timeoutMs)
 }
 
 fun SubsystemHardware<*, *>.setupMaster(master: BaseTalon, config: OffloadedEscConfiguration, sensor: FeedbackDevice, fastOnboard: Boolean) {
@@ -82,6 +82,8 @@ fun SubsystemHardware<*, *>.setupMaster(master: BaseTalon, config: OffloadedEscC
 fun SubsystemHardware<*, *>.setupMaster(master: CANSparkMax, config: OffloadedEscConfiguration, fastOnboard: Boolean) {
     generalSetup(master, config)
 
+    +master.setCANTimeout(configTimeout)
+
     master.setControlFramePeriodMs(syncThreshold.milli(Second).toInt())
     if (fastOnboard) { // http://www.revrobotics.com/sparkmax-users-manual/#section-3-3-2-1
         +master.setPeriodicFramePeriod(PeriodicFrame.kStatus1, syncThreshold.milli(Second).toInt())
@@ -96,4 +98,6 @@ fun SubsystemHardware<*, *>.setupMaster(master: CANSparkMax, config: OffloadedEs
         +setMeasurementPeriod(5)
         +setAverageDepth(4)
     }
+
+    +master.setCANTimeout(config.timeoutMs)
 }

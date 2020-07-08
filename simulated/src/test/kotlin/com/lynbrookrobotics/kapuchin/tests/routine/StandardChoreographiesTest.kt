@@ -91,7 +91,7 @@ class StandardChoreographiesTest {
         }
     }
 
-    @Test(timeout = 3 * 1000)
+    @Test(timeout = 4 * 1000)
     fun `runWhile runs only when its predicate is true`() = threadDumpOnFailure {
         runBlocking {
             val comps = List(10) { ChoreographyTestC(it) }

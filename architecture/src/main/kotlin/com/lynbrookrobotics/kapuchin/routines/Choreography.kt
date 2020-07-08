@@ -8,6 +8,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
+import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop as KapuchinEventLoop
 
 private typealias Block = suspend CoroutineScope.() -> Unit
 
@@ -64,6 +65,29 @@ suspend fun runAll(vararg blocks: Block) = supervisorScope {
 }
 
 /**
+ * Create a new coroutine which suspends until the predicate is met
+ *
+ * @param predicate function to check if the coroutine should still be suspended
+ * @return coroutine which suspends until `predicate` returns true
+ */
+suspend fun delayUntil(clock: Clock = KapuchinEventLoop, predicate: () -> Boolean) {
+    var runOnTick: Cancel? = null
+
+    if (!predicate()) try {
+        suspendCancellableCoroutine<Unit> { cont ->
+            runOnTick = clock.runOnTick {
+                if (predicate()) {
+                    runOnTick?.cancel()
+                    cont.resume(Unit)
+                }
+            }
+        }
+    } finally {
+        runOnTick?.cancel()
+    }
+}
+
+/**
  * Create a new coroutine running the function while the predicate is met
  *
  * @param predicate function to check if the coroutine should still be running
@@ -73,16 +97,12 @@ suspend fun runAll(vararg blocks: Block) = supervisorScope {
 suspend fun runWhile(predicate: () -> Boolean, block: Block) = coroutineScope {
     if (predicate()) {
         val job = launch { block() }
-
-        var runOnTick: Cancel? = null
-        runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-            if (!predicate()) {
-                runOnTick?.cancel()
-                job.cancel()
-            }
+        val delay = launch {
+            delayUntil { !predicate() || !job.isActive }
+            job.cancel()
         }
-
         job.join()
+        delay.cancelAndJoin()
     }
 }
 
@@ -94,24 +114,9 @@ suspend fun runWhile(predicate: () -> Boolean, block: Block) = coroutineScope {
  * @return coroutine which runs code whenever `predicate` returns false
  */
 suspend fun whenever(predicate: () -> Boolean, block: Block) = coroutineScope {
-    var cont: CancellableContinuation<Unit>? = null
-
-    val runOnTick = com.lynbrookrobotics.kapuchin.timing.clock.EventLoop.runOnTick {
-        if (predicate() && cont?.isActive == true) {
-            try {
-                cont?.resume(Unit)
-            } catch (e: IllegalStateException) {
-            }
-        }
-    }
-
-    try {
-        while (isActive) {
-            suspendCancellableCoroutine<Unit> { cont = it }
-            block()
-        }
-    } finally {
-        runOnTick.cancel()
+    while (isActive) {
+        delayUntil(predicate = predicate)
+        block()
     }
 }
 

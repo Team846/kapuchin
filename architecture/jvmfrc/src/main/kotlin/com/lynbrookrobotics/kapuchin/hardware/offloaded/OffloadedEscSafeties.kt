@@ -4,22 +4,17 @@ import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.SoftLimitDirection
-import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 import java.util.concurrent.ConcurrentHashMap
 
 data class OffloadedEscSafeties(
-        val syncThreshold: Time,
         val min: Double?, val max: Double?
 ) {
     companion object {
-        val NoSafeties = OffloadedEscSafeties(0.Second, null, null)
+        val NoSafeties = OffloadedEscSafeties(null, null)
         val cache = ConcurrentHashMap<Any, OffloadedEscSafeties>()
     }
 
-    private val timeoutMs = syncThreshold.milli(Second).toInt()
-
-    fun writeTo(esc: BaseTalon, timeoutMs: Int = this.timeoutMs) {
+    fun writeTo(esc: BaseTalon, timeoutMs: Int) {
         val cached = cache[esc]
         if (this != cached) {
             println("Writing safeties to Talon${if (esc is TalonSRX) "SRX" else "FX"} ${esc.deviceID}")

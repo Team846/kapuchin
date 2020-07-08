@@ -6,32 +6,47 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.roundToInt
 
-class CarouselState(component: CarouselComponent) : Named by Named("State", component) {
+class CarouselState(component: Named) : Named by Named("State", component) {
     private val internal = arrayOf(false, false, false, false, false)
 
     private fun index(robotBearing: Angle) =
             Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
 
-    operator fun get(robotBearing: Angle) = internal.get(index(robotBearing))
+    operator fun get(robotBearing: Angle) = internal[index(robotBearing)]
 
-    operator fun set(robotBearing: Angle, state: Boolean) {
-        log(Warning) { "Setting state of slot #${robotBearing.CarouselSlot withDecimals 1} to $state" }
-        internal.set(index(robotBearing), state)
+    operator fun set(robotBearing: Angle, newState: Boolean) {
+        val index = index(robotBearing)
+        log(Debug) { "Setting state of slot #$index @ ${robotBearing.Degree withDecimals 0}˚ from ${internal[index]} to $newState" }
+        if (internal[index] && newState) log(Error) { "#$index was assumed to be full. Setting to full again." }
+        internal[index] = newState
     }
 
-    private fun iterateAround(slot: Angle) = (0..size / 2)
-            .map { it.CarouselSlot }
-            .flatMap { setOf(slot + it, slot - it) }
+    //    hardware doesn't support CW & CCW turning
+    private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
+        val signum = if (bias) -1 else 1
+        for (i in 0..2) {
+            val offset = i.CarouselSlot * signum
+            if (f(slot + offset)) return slot + offset
+            if (f(slot - offset)) return slot - offset
+        }
+        return null
+    }
 
-    fun closestEmpty(robotBearing: Angle) = iterateAround(robotBearing)
-            .filterNot { get(it) }
-            .minBy { it.abs }
-            ?.roundToInt(CarouselSlot)
+//    private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
+//        for (i in 0 until 5) {
+//            val position = slot - i.CarouselSlot
+//            if (f(position)) return position
+//        }
+//        return null
+//    }
 
-    fun closestFull(robotBearing: Angle) = iterateAround(robotBearing)
-            .filter { get(it) }
-            .minBy { it.abs }
-            ?.roundToInt(CarouselSlot)
+    fun closestEmpty(robotBearing: Angle) = closest(robotBearing, false) {
+        !get(it)
+    }?.roundToInt(CarouselSlot)
+
+    fun closestFull(robotBearing: Angle) = closest(robotBearing, true) {
+        get(it)
+    }?.roundToInt(CarouselSlot)
 
     val ammo get() = internal.count { it }
     val size = internal.size

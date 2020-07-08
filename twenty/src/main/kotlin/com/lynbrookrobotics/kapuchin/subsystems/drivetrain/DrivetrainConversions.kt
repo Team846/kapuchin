@@ -20,15 +20,20 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     }
 
     val encoder by pref {
-        val encoderGear by pref(22)
-        val wheelGear by pref(72)
-        val resolution by pref(256)
-        val nativeEncoderCountMultiplier by pref(4)
+        val motorGear by pref(18)
+        val stage1Gear by pref(50)
+        val stage2Gear by pref(16)
+        val wheelGear by pref(60)
+        val resolution by pref(2048)
+        val nativeEncoderCountMultiplier by pref(1)
         ({
+            val stage1 = GearTrain(motorGear, stage1Gear)
+            val stage2 = GearTrain(stage2Gear, wheelGear)
+
             val nativeResolution = resolution * nativeEncoderCountMultiplier
             val enc = EncoderConversion(
                     nativeResolution,
-                    GearTrain(encoderGear, wheelGear).inputToOutput(1.Turn)
+                    stage1.inputToOutput(1.Turn).let(stage2::inputToOutput)
             )
 
             val left = LinearOffloadedNativeConversion(::p, ::p, ::p, ::p,

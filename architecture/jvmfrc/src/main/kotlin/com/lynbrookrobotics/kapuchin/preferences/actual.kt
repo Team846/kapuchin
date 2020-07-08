@@ -29,7 +29,7 @@ actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
 )
 
 fun SubsystemHardware<*, *>.escConfigPref(
-        defaultSyncThreshold: Time = syncThreshold,
+        defaultWriteTimeout: Time = period,
         defaultOpenloopRamp: Time = 0.Second,
         defaultClosedloopRamp: Time = 0.Second,
         defaultPeakOutput: V = 12.Volt,
@@ -54,7 +54,8 @@ fun SubsystemHardware<*, *>.escConfigPref(
 
     ({
         OffloadedEscConfiguration(
-                syncThreshold = defaultSyncThreshold,
+                writeTimeout = defaultWriteTimeout,
+
                 openloopRamp = openloopRamp,
                 closedloopRamp = closedloopRamp,
 

@@ -13,7 +13,7 @@ import info.kunalsheth.units.math.*
 import java.util.concurrent.ConcurrentHashMap
 
 data class OffloadedEscConfiguration(
-        val syncThreshold: Time,
+        val writeTimeout: Time,
         val openloopRamp: Time = 0.Second,
         val closedloopRamp: Time = 0.Second,
         val peakOutputForward: V = 12.Volt,
@@ -30,7 +30,7 @@ data class OffloadedEscConfiguration(
         val cache = ConcurrentHashMap<Any, OffloadedEscConfiguration>()
     }
 
-    private val timeoutMs = syncThreshold.milli(Second).toInt()
+    val timeoutMs = writeTimeout.milli(Second).toInt()
 
     private fun writeTo(esc: BaseMotorController, timeoutMs: Int, cached: OffloadedEscConfiguration? = null) {
         if (cached?.openloopRamp != this.openloopRamp)

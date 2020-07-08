@@ -47,7 +47,6 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     }
 
     val pidController by hardw { masterEsc.pidController }
-
     val encoder by hardw { masterEsc.encoder }
 
     val speed = sensor(encoder) {
@@ -55,7 +54,7 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     }.with(graph("Speed", Rpm))
 
     init {
-        Subsystems.uiBaselineTicker.runOnTick { time ->
+        Subsystems.shooterTicker.runOnTick { time ->
             setOf(speed).forEach {
                 it.optimizedRead(time, .5.Second)
             }

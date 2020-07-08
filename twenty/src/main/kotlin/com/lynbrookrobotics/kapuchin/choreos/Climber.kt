@@ -22,14 +22,21 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
 }
 
 suspend fun Subsystems.extendClimber() = coroutineScope {
+    turret?.set(turret.windupPosition, 5.Degree)
+
     scope.launch { climberPivot?.set(Up) }
+    delay(1.Second)
     launch { climberWinch?.set(climberWinch.extendSpeed) }
+
     freeze()
 }
 
 suspend fun Subsystems.retractClimber() = coroutineScope {
-    launch { climberWinch?.set(climberWinch.retractSpeed) }
-    delay(1.Second)
+    turret?.set(turret.windupPosition, 5.Degree)
+
     scope.launch { climberPivot?.set(Down) }
+    delay(1.Second)
+    launch { climberWinch?.set(-climberWinch.retractSpeed) }
+
     freeze()
 }

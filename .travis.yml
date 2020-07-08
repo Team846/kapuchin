@@ -1,10 +1,9 @@
 language: java
 
-before_install:
+install:
   - pip install --user codecov
-install: travis_wait ./gradlew assemble
 script:
-  - ./gradlew clean :simulated:check :twenty:build
+  - travis_wait 30 ./gradlew clean :simulated:build :twenty:build
 after_success:
   - codecov -t 934fa7e1-6db9-4724-9e86-84736fdb299a
 

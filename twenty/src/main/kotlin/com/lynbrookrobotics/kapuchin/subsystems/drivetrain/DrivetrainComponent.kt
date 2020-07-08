@@ -13,7 +13,6 @@ import info.kunalsheth.units.generated.*
 
 class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware), GenericDrivetrainComponent {
 
-    // TODO correct these for the 2020 bot if hardware team finishes it
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
     val maxAcceleration by pref(10, FootPerSecondSquared)
@@ -27,14 +26,12 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val kF by pref(110, Percent)
         ({
             val left = OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.left.native(kP),
                     kF = hardware.conversions.encoder.left.native(
                             Gain(hardware.escConfig.voltageCompSaturation, maxLeftSpeed)
                     ) * kF.Each
             )
             val right = OffloadedEscGains(
-                    syncThreshold = hardware.syncThreshold,
                     kP = hardware.conversions.encoder.right.native(kP),
                     kF = hardware.conversions.encoder.right.native(
                             Gain(hardware.escConfig.voltageCompSaturation, maxRightSpeed)

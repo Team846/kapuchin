@@ -3,6 +3,7 @@ package com.lynbrookrobotics.kapuchin.subsystems.limelight
 import com.lynbrookrobotics.kapuchin.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.networktables.NetworkTable
@@ -16,6 +17,9 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
     override val name = "Limelight"
+
+    val invertTx by pref(false)
+    val invertTy by pref(true)
 
     val table: NetworkTable by hardw {
         NetworkTableInstance.getDefault().getTable("/limelight")
@@ -32,7 +36,8 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
     val readings = sensor {
         when {
             l("tv").toInt() == 1 -> LimelightReading(
-                    l("ty").Degree, l("tx").Degree,
+                    l("ty").Degree * if (invertTy) -1 else 1,
+                    l("tx").Degree * if (invertTx) -1 else 1,
                     l("ty0").Each, l("tx0").Each,
                     l("tvert").Each, l("thor").Each,
                     l("ta").Each,// this is actually Pixels Squared
@@ -41,6 +46,12 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
                     }
             )
             else -> null
+        } lstamp it
+    }
+
+    val pipeline = sensor {
+        l("getpipe").toInt().let { rawpipe ->
+            Pipeline.values().firstOrNull { it.number == rawpipe }
         } lstamp it
     }
 

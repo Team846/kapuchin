@@ -1,17 +1,16 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
-import edu.wpi.first.wpilibj.Relay.Value.kOff
-import edu.wpi.first.wpilibj.Relay.Value.kOn
+import com.lynbrookrobotics.kapuchin.subsystems.shooter.FlashlightState.*
 
 suspend fun FlashlightComponent.set(state: FlashlightState) = startRoutine("Set") {
     controller { state }
 }
 
 suspend fun FlashlightComponent.strobe() = startRoutine("Strobe") {
-    var state = kOn
+    var state = On
     controller {
-        state = if (state == kOn) kOff else kOn
+        state = if (state == On) Off else On
         state
     }
 }
