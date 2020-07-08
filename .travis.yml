@@ -3,7 +3,7 @@ language: java
 install:
   - pip install --user codecov
 script:
-  - travis_wait 30 ./gradlew clean :simulated:build :twenty:build
+  - travis_wait 20 ./gradlew clean :architecture:assemble :architecture:jvmsimTest :twenty:build
 after_success:
   - codecov -t 934fa7e1-6db9-4724-9e86-84736fdb299a
 

@@ -1,54 +1,44 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 buildscript {
     repositories {
         gradlePluginPortal()
-        mavenCentral()
+        jcenter()
         maven { url 'http://repo.kunalsheth.info/' }
         mavenLocal()
     }
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "info.kunalsheth.units:plugin:$uoms_version"
         classpath "edu.wpi.first:GradleRIO:$gradlerio_version"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
 }
 
-apply plugin: 'idea'
-
 allprojects {
+
     group 'com.lynbrookrobotics'
     version '1.0.0'
-    repositories.jcenter()
+
+    repositories {
+        jcenter()
+    }
 
     tasks.withType(JavaCompile) {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    tasks.withType(KotlinCompile).configureEach {
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
-            jvmTarget = "11"
+            jvmTarget = '11'
             freeCompilerArgs += [
-                    "-XXLanguage:+InlineClasses",
-                    "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
+                    '-Xinline-classes',
+                    '-Xopt-in=kotlin.ExperimentalUnsignedTypes'
             ]
         }
     }
 
-    tasks.withType(Test) { // https://guides.gradle.org/performance/#parallel_test_execution
+    // https://guides.gradle.org/performance/#parallel_test_execution
+    tasks.withType(Test) {
         maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-    }
-}
-
-apply plugin: 'org.jetbrains.dokka'
-dokka { // https://github.com/Kotlin/dokka/blob/master/README.md#output_formats
-    outputDirectory = "docs"
-    sourceDirs = files('architecture/src/main/kotlin', 'architecture/build/uom/')
-
-    packageOptions {
-        prefix = 'info.kunalsheth.units.generated'
-        suppress = true
     }
 }
