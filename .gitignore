@@ -110,3 +110,4 @@ docs
 .DS_Store
 benchmark/*/*
 local.properties
+!uoms/libs/*
