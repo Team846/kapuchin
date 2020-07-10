@@ -1,6 +1,8 @@
+import edu.wpi.first.gradlerio.GradleRIOPlugin
+
 plugins {
     id 'org.jetbrains.kotlin.jvm'
-    id 'edu.wpi.first.GradleRIO'
+    id 'edu.wpi.first.GradleRIO' version "$gradlerio_version"
 }
 
 dependencies {
@@ -11,8 +13,8 @@ dependencies {
     implementation project(path: ':architecture', configuration: 'jvmfrcDefault')
 
     implementation wpi.deps.wpilib()
-    implementation wpi.deps. vendor.java()
-
+    implementation wpi.deps.vendor.java()
+    nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
@@ -21,17 +23,17 @@ dependencies {
 
 deploy {
     targets {
-        roboRIO("roborio") {
+        roboRIO('roborio') {
             team = 846
         }
     }
+
     artifacts {
         frcJavaArtifact(project.name) {
-            targets << "roborio"
+            targets << 'roborio'
             jvmArgs /*<< '-XX:+UseG1GC'*/ << '-XX:MaxGCPauseMillis=75' << '-Xmx100M'
 //          jvmArgs << '-verbose:class'
 //          jvmArgs << '-verbosegc'
-//          arguments << 'myCustomArgs'
 //          debug = true
 //          debugPort = 8348
         }
@@ -40,5 +42,5 @@ deploy {
 
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobotKt')
+    manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobotKt')
 }

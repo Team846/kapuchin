@@ -1,33 +1,20 @@
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        jcenter()
-        maven { url 'http://repo.kunalsheth.info/' }
-        mavenLocal()
-    }
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "info.kunalsheth.units:plugin:$uoms_version"
-        classpath "edu.wpi.first:GradleRIO:$gradlerio_version"
-    }
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform' version "$kotlin_version" apply false
 }
 
-allprojects {
+subprojects {
 
     group 'com.lynbrookrobotics'
     version '1.0.0'
-
-    repositories {
-        jcenter()
-    }
 
     tasks.withType(JavaCompile) {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    tasks.withType(KotlinCompile).all {
         kotlinOptions {
             jvmTarget = '11'
             freeCompilerArgs += [

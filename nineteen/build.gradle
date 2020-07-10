@@ -1,6 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
-    id 'edu.wpi.first.GradleRIO'
+    id 'edu.wpi.first.GradleRIO' version "$gradlerio_version"
 }
 
 dependencies {
