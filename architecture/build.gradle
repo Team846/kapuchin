@@ -7,6 +7,13 @@ plugins {
 kotlin {
     jvm('jvmfrc') {
         withJava()
+
+        // TODO dont hardcode this
+        // jvmfrcTest automatically tries to run commonTest but crashes since jvmfrcTest doesn't have any dependencies,
+        // so jvmfrc testing tasks need to be manually disabled
+        ['compileTestKotlinJvmfrc', 'jvmfrcTest'].each {
+            tasks.findByName(it).enabled = false
+        }
     }
 
     jvm('jvmsim')
@@ -16,7 +23,6 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutines_version"
-//                api project(':uoms')
                 implementation files('../uoms/libs/uoms-metadata-1.0.0.jar')
             }
         }
