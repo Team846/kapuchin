@@ -15,15 +15,19 @@ actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
     Level.Debug -> println("DEBUG $formattedMessage")
 }
 
-actual class Grapher<Q : Quan<Q>> internal actual constructor(parent: Named, of: String, private val withUnits: UomConverter<Q>) :
-        Named by Named("$of (${withUnits.unitName})", parent),
-        Flushable, Closeable,
+actual class Grapher<Q : Quan<Q>> internal actual constructor(
+    parent: Named,
+    of: String,
+    private val withUnits: UomConverter<Q>
+) :
+    Named by Named("$of (${withUnits.unitName})", parent),
+    Flushable, Closeable,
         (Time, Q) -> Unit {
 
     private var running = scope.launch { }
     private val safeName = name.replace("""[^\w\d]""".toRegex(), "_")
     private val printer = File("/tmp/$safeName.csv")
-            .printWriter(Charsets.US_ASCII).also { it.println("seconds,${withUnits.unitName}") }
+        .printWriter(Charsets.US_ASCII).also { it.println("seconds,${withUnits.unitName}") }
 
     actual override fun invoke(x: Time, y: Q) {
         if (running.isCompleted) running = scope.launch {

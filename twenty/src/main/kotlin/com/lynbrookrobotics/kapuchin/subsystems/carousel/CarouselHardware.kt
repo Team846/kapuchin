@@ -26,9 +26,9 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
 
     private val invert by pref(false)
     val escConfig by escConfigPref(
-            defaultNominalOutput = 1.Volt,
-            defaultContinuousCurrentLimit = 15.Ampere,
-            defaultPeakCurrentLimit = 25.Ampere
+        defaultNominalOutput = 1.Volt,
+        defaultContinuousCurrentLimit = 15.Ampere,
+        defaultPeakCurrentLimit = 25.Ampere
     )
 
     private val escId = 60
@@ -52,14 +52,16 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val position = sensor(encoder) {
         conversions.encoder.realPosition(position) stampWith it
     }.with(graph("Angle", Degree))
-            .with(graph("Error off slot", Degree)) { it - it.roundToInt(CarouselSlot) }
+        .with(graph("Error off slot", Degree)) { it - it.roundToInt(CarouselSlot) }
 
     // Sensor is electrically inverted
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
         dio.requestInterrupts {
-            encoder.position = conversions.encoder.native(position.optimizedRead(
+            encoder.position = conversions.encoder.native(
+                position.optimizedRead(
                     dio.readFallingTimestamp().Second, syncThreshold
-            ).y.roundToInt(CarouselSlot))
+                ).y.roundToInt(CarouselSlot)
+            )
 //          log(Debug) { "Running hall effect ISR" }
             isZeroed = true
         }
@@ -67,24 +69,31 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         dio.enableInterrupts()
     }
     val alignedToSlot = sensor(hallEffect) { get() stampWith it }
-            .with(graph("Aligned to Slot", Each)) { (if (it) 1 else 0).Each }
+        .with(graph("Aligned to Slot", Each)) { (if (it) 1 else 0).Each }
 
     private val colorSensor by hardw { ColorSensorV3(kOnboard) }.configure {
-        it.configureColorSensor(ColorSensorResolution.kColorSensorRes18bit, ColorSensorMeasurementRate.kColorRate25ms, GainFactor.kGain3x)
-        it.configureProximitySensor(ProximitySensorResolution.kProxRes11bit, ProximitySensorMeasurementRate.kProxRate6ms)
+        it.configureColorSensor(
+            ColorSensorResolution.kColorSensorRes18bit,
+            ColorSensorMeasurementRate.kColorRate25ms,
+            GainFactor.kGain3x
+        )
+        it.configureProximitySensor(
+            ProximitySensorResolution.kProxRes11bit,
+            ProximitySensorMeasurementRate.kProxRate6ms
+        )
         it.configureProximitySensorLED(LEDPulseFrequency.kFreq60kHz, LEDCurrent.kPulse125mA, 8)
     }.verify("the color sensor is connected") {
         it.proximity.Each / 2047 > 50.Percent
     }
     private val colorNamed = Named("Color Sensor", this)
     val color = sensor(colorSensor) { color stampWith it }
-            .with(graph("R", Percent, colorNamed)) { it.red.Each }
-            .with(graph("G", Percent, colorNamed)) { it.green.Each }
-            .with(graph("B", Percent, colorNamed)) { it.blue.Each }
-            .with(graph("Similarity", Each, colorNamed)) { conversions.similarity(it).Each }
+        .with(graph("R", Percent, colorNamed)) { it.red.Each }
+        .with(graph("G", Percent, colorNamed)) { it.green.Each }
+        .with(graph("B", Percent, colorNamed)) { it.blue.Each }
+        .with(graph("Similarity", Each, colorNamed)) { conversions.similarity(it).Each }
 
     val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
-            .with(graph("IR", Percent, colorNamed))
+        .with(graph("IR", Percent, colorNamed))
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

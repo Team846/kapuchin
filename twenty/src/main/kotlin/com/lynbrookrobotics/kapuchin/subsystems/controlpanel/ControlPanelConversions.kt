@@ -32,10 +32,10 @@ class ControlPanelConversions(hardware: ControlPanelSpinnerHardware) : Named by 
     fun encoderPositionDelta(motor: Angle): Angle = motor * complianceWheelRadius / controlPanelRadius
 
     fun indexColor(color: Color): Int? = colorMatcher
-            .matchColor(color)
-            ?.color
-            ?.let(panelPattern::indexOf)
-            .takeIf { it in 0..3 }
+        .matchColor(color)
+        ?.color
+        ?.let(panelPattern::indexOf)
+        .takeIf { it in 0..3 }
 
     fun colorPositionDelta(lastIndex: Int, currentIndex: Int): Angle {
         require(lastIndex in 0..3)

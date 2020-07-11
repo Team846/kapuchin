@@ -12,7 +12,8 @@ import info.kunalsheth.units.math.*
 
 enum class ClimberPivotState(val output: Boolean) { Down(false), Up(true) }
 
-class ClimberPivotComponent(hardware: ClimberPivotHardware) : Component<ClimberPivotComponent, ClimberPivotHardware, ClimberPivotState>(hardware, pneumaticTicker) {
+class ClimberPivotComponent(hardware: ClimberPivotHardware) :
+    Component<ClimberPivotComponent, ClimberPivotHardware, ClimberPivotState>(hardware, pneumaticTicker) {
 
     override val fallbackController: ClimberPivotComponent.(Time) -> ClimberPivotState = { Down }
 

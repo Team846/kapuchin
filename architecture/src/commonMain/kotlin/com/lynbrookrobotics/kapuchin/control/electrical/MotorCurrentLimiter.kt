@@ -19,8 +19,8 @@ import info.kunalsheth.units.math.*
  * @param limit current limit. Must be greater than zero.
  */
 fun <S : Quan<S>> motorCurrentLimiter(
-        maxVoltage: V, freeSpeed: S,
-        stall: I, limit: I
+    maxVoltage: V, freeSpeed: S,
+    stall: I, limit: I
 ): (S, V) -> V {
 
     val windings = maxVoltage / stall

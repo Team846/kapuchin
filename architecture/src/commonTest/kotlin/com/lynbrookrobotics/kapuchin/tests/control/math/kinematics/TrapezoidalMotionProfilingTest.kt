@@ -12,8 +12,8 @@ class TrapezoidalMotionProfilingTest {
     val speed = 10.FootPerSecond
 
     private val trap = trapezoidalMotionProfile(
-            deceleration = 5.FootPerSecondSquared,
-            topSpeed = speed
+        deceleration = 5.FootPerSecondSquared,
+        topSpeed = speed
     )
 
     @Test

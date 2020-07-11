@@ -15,8 +15,8 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
 
     choreography {
         runWhenever(
-                { extendClimber } to choreography { extendClimber() },
-                { retractClimber } to choreography { retractClimber() }
+            { extendClimber } to choreography { extendClimber() },
+            { retractClimber } to choreography { retractClimber() }
         )
     }
 }

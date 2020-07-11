@@ -21,11 +21,11 @@ data class TwoSided<out T>(val left: T, val right: T) {
 val <Q : Quan<Q>> TwoSided<Q>.avg get() = avg(left, right)
 
 operator fun <Q : Quan<Q>> TwoSided<Q>.plus(that: TwoSided<Q>) = TwoSided(
-        this.left + that.left,
-        this.right + that.right
+    this.left + that.left,
+    this.right + that.right
 )
 
 operator fun <Q : Quan<Q>> TwoSided<Q>.minus(that: TwoSided<Q>) = TwoSided(
-        this.left - that.left,
-        this.right - that.right
+    this.left - that.left,
+    this.right - that.right
 )

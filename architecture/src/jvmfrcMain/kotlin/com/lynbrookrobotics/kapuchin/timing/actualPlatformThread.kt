@@ -14,7 +14,12 @@ import kotlin.concurrent.thread
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-actual class PlatformThread internal actual constructor(parent: Named, name: String, priority: Priority, run: () -> Unit) {
+actual class PlatformThread internal actual constructor(
+    parent: Named,
+    name: String,
+    priority: Priority,
+    run: () -> Unit
+) {
     private val thread: Thread
 
     init {

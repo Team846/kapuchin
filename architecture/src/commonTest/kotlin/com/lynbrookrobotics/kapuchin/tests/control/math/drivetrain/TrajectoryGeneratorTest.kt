@@ -17,8 +17,8 @@ class TrajectoryGeneratorTest {
 
     // https://www.desmos.com/calculator/ihzjjn1gzh
     private val path = (0 until 1000)
-            .map { it / 500.0 }
-            .map { Waypoint(sin(5 * PI * it).Foot, (cos(7 * PI * it) - 1).Foot) }
+        .map { it / 500.0 }
+        .map { Waypoint(sin(5 * PI * it).Foot, (cos(7 * PI * it) - 1).Foot) }
 
     @Test
     fun `trajectories never exceed max velocity`() {

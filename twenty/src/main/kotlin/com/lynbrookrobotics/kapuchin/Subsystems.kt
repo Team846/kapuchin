@@ -33,33 +33,34 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
 
-class Subsystems(val drivetrain: DrivetrainComponent,
-                 val carousel: CarouselComponent,
-                 val electrical: ElectricalSystemHardware,
-                 val limelight: LimelightComponent,
+class Subsystems(
+    val drivetrain: DrivetrainComponent,
+    val carousel: CarouselComponent,
+    val electrical: ElectricalSystemHardware,
+    val limelight: LimelightComponent,
 
-                 val driver: DriverHardware,
-                 val operator: OperatorHardware,
-                 val rumble: RumbleComponent,
+    val driver: DriverHardware,
+    val operator: OperatorHardware,
+    val rumble: RumbleComponent,
 
-                 val climberPivot: ClimberPivotComponent?,
-                 val climberWinch: ClimberWinchComponent?,
-                 val controlPanelPivot: ControlPanelPivotComponent?,
-                 val controlPanelSpinner: ControlPanelSpinnerComponent?,
-                 val intakeRollers: IntakeRollersComponent?,
-                 val intakeSlider: IntakeSliderComponent?,
-                 val flywheel: FlywheelComponent?,
-                 val turret: TurretComponent?,
-                 val feederRoller: FeederRollerComponent?,
-                 val flashlight: FlashlightComponent?,
-                 val shooterHood: ShooterHoodComponent?
+    val climberPivot: ClimberPivotComponent?,
+    val climberWinch: ClimberWinchComponent?,
+    val controlPanelPivot: ControlPanelPivotComponent?,
+    val controlPanelSpinner: ControlPanelSpinnerComponent?,
+    val intakeRollers: IntakeRollersComponent?,
+    val intakeSlider: IntakeSliderComponent?,
+    val flywheel: FlywheelComponent?,
+    val turret: TurretComponent?,
+    val feederRoller: FeederRollerComponent?,
+    val flashlight: FlashlightComponent?,
+    val shooterHood: ShooterHoodComponent?
 ) : Named by Named("Subsystems") {
 
     private val autos = listOf(
-            ::`shoot wall`,
-            ::`I1 shoot C1 I2 shoot`,
-            ::`I2 shoot C1 I2 shoot`,
-            ::`verify odometry`
+        ::`shoot wall`,
+        ::`I1 shoot C1 I2 shoot`,
+        ::`I2 shoot C1 I2 shoot`,
+        ::`verify odometry`
     )
 
     private val autoIdGraph = graph("Auto ID", Each)
@@ -79,15 +80,15 @@ class Subsystems(val drivetrain: DrivetrainComponent,
     suspend fun teleop() {
         HAL.observeUserProgramTeleop()
         runAll(
-                { climberTeleop() },
-                { controlPanelTeleop() },
-                { digestionTeleop() },
-                {
-                    launchWhenever(
-                            { limelight.routine == null } to choreography { limelight.autoZoom() },
-                            { drivetrain.routine == null } to choreography { drivetrain.teleop(driver) }
-                    )
-                }
+            { climberTeleop() },
+            { controlPanelTeleop() },
+            { digestionTeleop() },
+            {
+                launchWhenever(
+                    { limelight.routine == null } to choreography { limelight.autoZoom() },
+                    { drivetrain.routine == null } to choreography { drivetrain.teleop(driver) }
+                )
+            }
         )
     }
 
@@ -103,14 +104,14 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
     suspend fun warmup() {
         runAll(
-                { drivetrain.teleop(driver) },
-                { limelight.autoZoom() },
-                {
-                    while (isActive) {
-                        delay(0.3.Second)
-                        if (RobotController.getUserButton()) exitProcess(0)
-                    }
+            { drivetrain.teleop(driver) },
+            { limelight.autoZoom() },
+            {
+                while (isActive) {
+                    delay(0.3.Second)
+                    if (RobotController.getUserButton()) exitProcess(0)
                 }
+            }
         )
     }
 
@@ -132,9 +133,9 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val ntPath = "/home/lvuser/networktables.ini"
 
                 Thread.currentThread()
-                        .contextClassLoader
-                        .getResourceAsStream("com/lynbrookrobotics/kapuchin/configbackups/networktables.ini")!!
-                        .copyTo(File(ntPath).outputStream())
+                    .contextClassLoader
+                    .getResourceAsStream("com/lynbrookrobotics/kapuchin/configbackups/networktables.ini")!!
+                    .copyTo(File(ntPath).outputStream())
                 File("$ntPath.bak").delete()
 
                 exitProcess(1)
@@ -176,7 +177,8 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                     if (crashOnFailure) throw t else null
                 }
 
-                suspend fun <R> i(shouldInit: Boolean, producer: suspend () -> R) = async { if (shouldInit) producer() else null }
+                suspend fun <R> i(shouldInit: Boolean, producer: suspend () -> R) =
+                    async { if (shouldInit) producer() else null }
 
                 val drivetrainAsync = async { DrivetrainComponent(DrivetrainHardware()) }
                 val carouselAsync = async { CarouselComponent(CarouselHardware()) }
@@ -189,8 +191,10 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
                 val climberPivotAsync = i(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
                 val climberWinchAsync = i(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
-                val controlPanelPivotAsync = i(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
-                val controlPanelSpinnerAsync = i(initControlPanelSpinner) { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware(driverAsync.await())) }
+                val controlPanelPivotAsync =
+                    i(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
+                val controlPanelSpinnerAsync =
+                    i(initControlPanelSpinner) { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware(driverAsync.await())) }
                 val intakeRollersAsync = i(initIntakeRollers) { IntakeRollersComponent(IntakeRollersHardware()) }
                 val intakeSliderAsync = i(initIntakeSlider) { IntakeSliderComponent(IntakeSliderHardware()) }
                 val flywheelAsync = i(initFlywheel) { FlywheelComponent(FlywheelHardware()) }
@@ -200,26 +204,26 @@ class Subsystems(val drivetrain: DrivetrainComponent,
                 val shooterHoodAsync = i(initShooterHood) { ShooterHoodComponent(ShooterHoodHardware()) }
 
                 instance = Subsystems(
-                        drivetrainAsync.await(),
-                        carouselAsync.await(),
-                        electricalAsync.await(),
-                        limelightAsync.await(),
+                    drivetrainAsync.await(),
+                    carouselAsync.await(),
+                    electricalAsync.await(),
+                    limelightAsync.await(),
 
-                        driverAsync.await(),
-                        operatorAsync.await(),
-                        rumbleAsync.await(),
+                    driverAsync.await(),
+                    operatorAsync.await(),
+                    rumbleAsync.await(),
 
-                        t { climberPivotAsync.await() },
-                        t { climberWinchAsync.await() },
-                        t { controlPanelPivotAsync.await() },
-                        t { controlPanelSpinnerAsync.await() },
-                        t { intakeRollersAsync.await() },
-                        t { intakeSliderAsync.await() },
-                        t { flywheelAsync.await() },
-                        t { turretAsync.await() },
-                        t { feederRollerAsync.await() },
-                        t { flashlightAsync.await() },
-                        t { shooterHoodAsync.await() }
+                    t { climberPivotAsync.await() },
+                    t { climberWinchAsync.await() },
+                    t { controlPanelPivotAsync.await() },
+                    t { controlPanelSpinnerAsync.await() },
+                    t { intakeRollersAsync.await() },
+                    t { intakeSliderAsync.await() },
+                    t { flywheelAsync.await() },
+                    t { turretAsync.await() },
+                    t { feederRollerAsync.await() },
+                    t { flashlightAsync.await() },
+                    t { shooterHoodAsync.await() }
                 )
             }
         }.also { runBlocking { it.join() } }
@@ -236,26 +240,26 @@ class Subsystems(val drivetrain: DrivetrainComponent,
             val driver = DriverHardware()
             val operator = OperatorHardware()
             instance = Subsystems(
-                    DrivetrainComponent(DrivetrainHardware()),
-                    CarouselComponent(CarouselHardware()),
-                    ElectricalSystemHardware(),
-                    LimelightComponent(LimelightHardware()),
+                DrivetrainComponent(DrivetrainHardware()),
+                CarouselComponent(CarouselHardware()),
+                ElectricalSystemHardware(),
+                LimelightComponent(LimelightHardware()),
 
-                    driver,
-                    operator,
-                    RumbleComponent(RumbleHardware(driver, operator)),
+                driver,
+                operator,
+                RumbleComponent(RumbleHardware(driver, operator)),
 
-                    i(initClimberPivot) { t { ClimberPivotComponent(ClimberPivotHardware()) } },
-                    i(initClimberWinch) { t { ClimberWinchComponent(ClimberWinchHardware()) } },
-                    i(initControlPanelPivot) { t { ControlPanelPivotComponent(ControlPanelPivotHardware()) } },
-                    i(initControlPanelSpinner) { t { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware(driver)) } },
-                    i(initIntakeRollers) { t { IntakeRollersComponent(IntakeRollersHardware()) } },
-                    i(initIntakeSlider) { t { IntakeSliderComponent(IntakeSliderHardware()) } },
-                    i(initFlywheel) { t { FlywheelComponent(FlywheelHardware()) } },
-                    i(initTurret) { t { TurretComponent(TurretHardware()) } },
-                    i(initFeederRoller) { t { FeederRollerComponent(FeederRollerHardware()) } },
-                    i(initFlashlight) { t { FlashlightComponent(FlashlightHardware()) } },
-                    i(initShooterHood) { t { ShooterHoodComponent(ShooterHoodHardware()) } }
+                i(initClimberPivot) { t { ClimberPivotComponent(ClimberPivotHardware()) } },
+                i(initClimberWinch) { t { ClimberWinchComponent(ClimberWinchHardware()) } },
+                i(initControlPanelPivot) { t { ControlPanelPivotComponent(ControlPanelPivotHardware()) } },
+                i(initControlPanelSpinner) { t { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware(driver)) } },
+                i(initIntakeRollers) { t { IntakeRollersComponent(IntakeRollersHardware()) } },
+                i(initIntakeSlider) { t { IntakeSliderComponent(IntakeSliderHardware()) } },
+                i(initFlywheel) { t { FlywheelComponent(FlywheelHardware()) } },
+                i(initTurret) { t { TurretComponent(TurretHardware()) } },
+                i(initFeederRoller) { t { FeederRollerComponent(FeederRollerHardware()) } },
+                i(initFlashlight) { t { FlashlightComponent(FlashlightHardware()) } },
+                i(initShooterHood) { t { ShooterHoodComponent(ShooterHoodHardware()) } }
             )
         }
     }

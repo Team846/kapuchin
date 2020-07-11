@@ -64,8 +64,8 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
      * @param setup function returning a subsystem controller
      */
     suspend fun startRoutine(
-            name: String,
-            setup: BoundSensorScope.() -> This.(Time) -> Output?
+        name: String,
+        setup: BoundSensorScope.() -> This.(Time) -> Output?
     ) {
         val sensorScope = BoundSensorScope(this)
         var routine: Routine<This, H, Output>? = null
@@ -113,8 +113,8 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
         clock.runOnTick(Last) { tickStart: Time ->
             if (tickStart - subsystemBirth > 1.Second) try {
                 (routine ?: fallbackController)
-                        .invoke(thisAsThis, tickStart)
-                        .let { hardware.output(it) }
+                    .invoke(thisAsThis, tickStart)
+                    .let { hardware.output(it) }
             } catch (t: Throwable) {
                 routine?.resumeWithException(t) ?: log(Error, t)
             }

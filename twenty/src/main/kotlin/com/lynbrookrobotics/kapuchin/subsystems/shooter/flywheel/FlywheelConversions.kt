@@ -11,11 +11,12 @@ class FlywheelConversions(hardware: FlywheelHardware) : Named by Named("Conversi
         val motorSprocket by pref(45)
         val flywheelSprocket by pref(24)
         ({
-            AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
-                    nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
-                    nativeFeedbackUnits = 1,
-                    perFeedbackQuantity = GearTrain(motorSprocket, flywheelSprocket, 1).inputToOutput(1.Turn),
-                    nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
+            AngularOffloadedNativeConversion(
+                ::p, ::p, ::p, ::p,
+                nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
+                nativeFeedbackUnits = 1,
+                perFeedbackQuantity = GearTrain(motorSprocket, flywheelSprocket, 1).inputToOutput(1.Turn),
+                nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
             )
         })
     }

@@ -26,14 +26,14 @@ enum class Goal { Inner, Outer }
 data class ShotState(val flywheel: AngularVelocity, val hood: ShooterHoodState, val goal: Goal, val entryAngle: Angle)
 
 fun Subsystems.bestShot(target: DetectedTarget): ShotState? =
-        if (flywheel == null || shooterHood == null) null
-        else with(flywheel) {
-            bestShot(
-                    target, limelight.allowInnerGoal,
-                    shooterHood.hoodUpLaunch, shooterHood.hoodDownLaunch,
-                    maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
-            )
-        }
+    if (flywheel == null || shooterHood == null) null
+    else with(flywheel) {
+        bestShot(
+            target, limelight.allowInnerGoal,
+            shooterHood.hoodUpLaunch, shooterHood.hoodDownLaunch,
+            maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
+        )
+    }
 
 /**
  * Calculate the best shot state given the current target.
@@ -44,49 +44,50 @@ fun Subsystems.bestShot(target: DetectedTarget): ShotState? =
  * @return the best shot state, null if shot is impossible.
  */
 fun bestShot(
-        target: DetectedTarget,
+    target: DetectedTarget,
 
-        allowInnerGoal: Boolean,
+    allowInnerGoal: Boolean,
 
-        launchAngleUp: Angle,
-        launchAngleDown: Angle,
+    launchAngleUp: Angle,
+    launchAngleDown: Angle,
 
-        maxSpeed: AngularVelocity,
-        momentFactor: Double,
-        rollerRadius: Length,
-        momentOfInertia: MomentOfInertia,
-        fudgeFactor: Dimensionless,
-        shooterHeight: Length
+    maxSpeed: AngularVelocity,
+    momentFactor: Double,
+    rollerRadius: Length,
+    momentOfInertia: MomentOfInertia,
+    fudgeFactor: Dimensionless,
+    shooterHeight: Length
 ): ShotState? {
 
     val innerLimits = innerEntryAngleLimits(target, shooterHeight)
     val outerLimits = `±`(90.Degree - atan2(ballDiameter, targetDiameter / 2))
-    val boundingCircleRadius = (targetDiameter / 2) - (ballDiameter / 2) // TODO maybe use slightly larger bounding circle radius? sid r
+    val boundingCircleRadius =
+        (targetDiameter / 2) - (ballDiameter / 2) // TODO maybe use slightly larger bounding circle radius? sid r
     val innerGoalPossible = innerGoalOffsets(target, shooterHeight)
-            .let { (hor, vert) -> (hor.squared + vert.squared) < boundingCircleRadius.squared }
+        .let { (hor, vert) -> (hor.squared + vert.squared) < boundingCircleRadius.squared }
 
     val innerUp = target.inner?.let {
         calculateShot(
-                it, Up, Inner, innerLimits,
-                launchAngleUp, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
+            it, Up, Inner, innerLimits,
+            launchAngleUp, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
         ).takeIf { innerGoalPossible && allowInnerGoal }
     }
 
     val innerDown = target.inner?.let {
         calculateShot(
-                it, Down, Inner, innerLimits,
-                launchAngleDown, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
+            it, Down, Inner, innerLimits,
+            launchAngleDown, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
         ).takeIf { innerGoalPossible && allowInnerGoal }
     }
 
     val outerUp = calculateShot(
-            target.outer, Up, Outer, outerLimits,
-            launchAngleUp, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
+        target.outer, Up, Outer, outerLimits,
+        launchAngleUp, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
     )
 
     val outerDown = calculateShot(
-            target.outer, Down, Outer, outerLimits,
-            launchAngleDown, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
+        target.outer, Down, Outer, outerLimits,
+        launchAngleDown, maxSpeed, momentFactor, rollerRadius, momentOfInertia, fudgeFactor, shooterHeight
     )
 
     // If both hood states are possible, choose the one with the better entry angle
@@ -105,34 +106,37 @@ fun bestShot(
  * @return a pair of flywheel velocity to entry angle.
  */
 private fun calculateShot(
-        target: Position,
-        shooterHoodState: ShooterHoodState,
-        goal: Goal,
-        entryAngleLimits: ClosedRange<Angle>,
+    target: Position,
+    shooterHoodState: ShooterHoodState,
+    goal: Goal,
+    entryAngleLimits: ClosedRange<Angle>,
 
-        launchAngle: Angle,
+    launchAngle: Angle,
 
-        maxSpeed: AngularVelocity,
-        momentFactor: Double,
-        rollerRadius: Length,
-        momentOfInertia: MomentOfInertia,
-        fudgeFactor: Dimensionless,
-        shooterHeight: Length
+    maxSpeed: AngularVelocity,
+    momentFactor: Double,
+    rollerRadius: Length,
+    momentOfInertia: MomentOfInertia,
+    fudgeFactor: Dimensionless,
+    shooterHeight: Length
 ): ShotState? {
     val distToBase = sqrt(target.x.squared + target.y.squared)
     val height = targetHeight - shooterHeight
 
-    val ballVelocity = sqrt(0.5) * sqrt((distToBase.squared * 1.EarthGravity) / ((distToBase * tan(launchAngle) - height) * cos(launchAngle).squared))
+    val ballVelocity = sqrt(0.5) * sqrt(
+        (distToBase.squared * 1.EarthGravity) / ((distToBase * tan(launchAngle) - height) * cos(launchAngle).squared)
+    )
 
     val flywheelVelocity =
-            (((momentFactor * ballMass + (2 * momentOfInertia / rollerRadius.squared)) * ballVelocity * rollerRadius) / momentOfInertia * fudgeFactor) * Radian
+        (((momentFactor * ballMass + (2 * momentOfInertia / rollerRadius.squared)) * ballVelocity * rollerRadius) / momentOfInertia * fudgeFactor) * Radian
 
-    val shotEntrySlope = -((distToBase * 1.EarthGravity) / (ballVelocity.squared * cos(launchAngle).squared)) + tan(launchAngle)
+    val shotEntrySlope =
+        -((distToBase * 1.EarthGravity) / (ballVelocity.squared * cos(launchAngle).squared)) + tan(launchAngle)
     val shotEntryAngle = atan(shotEntrySlope)
 
     return ShotState(flywheelVelocity, shooterHoodState, goal, shotEntryAngle)
-            .takeIf { shotEntryAngle in entryAngleLimits }
-            .takeIf { flywheelVelocity <= maxSpeed }
+        .takeIf { shotEntryAngle in entryAngleLimits }
+        .takeIf { flywheelVelocity <= maxSpeed }
 }
 
 /**

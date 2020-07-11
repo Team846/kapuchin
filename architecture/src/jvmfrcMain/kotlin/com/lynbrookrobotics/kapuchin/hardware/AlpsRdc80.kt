@@ -14,8 +14,8 @@ import info.kunalsheth.units.math.*
  * @param tolerance the approximate range of the phase shift.
  */
 fun alpsRdc80(
-        phaseShift: Dimensionless = 50.Percent,
-        tolerance: Dimensionless = 10.Percent
+    phaseShift: Dimensionless = 50.Percent,
+    tolerance: Dimensionless = 10.Percent
 ): (Dimensionless, Dimensionless) -> Angle {
 
     val center = 50.Percent
@@ -37,8 +37,8 @@ fun alpsRdc80(
         if (b !in safeRange) readingB = false
 
         if (
-                a in safeRange && b in safeRange &&
-                a in inPhaseB `±` tolerance
+            a in safeRange && b in safeRange &&
+            a in inPhaseB `±` tolerance
         ) {
             readingA = true
             readingB = true

@@ -66,7 +66,7 @@ val UomVector<Length>.abs get() = Length(sqrt(absSq.siValue))
 fun distance(a: UomVector<Length>, b: UomVector<Length>) = (a - b).abs
 
 inline infix fun <Q : Quan<Q>> UomVector<Q>.midpt(that: UomVector<Q>) = UomVector(
-        avg(this.x, that.x),
-        avg(this.y, that.y),
-        avg(this.z, that.z)
+    avg(this.x, that.x),
+    avg(this.y, that.y),
+    avg(this.z, that.z)
 )

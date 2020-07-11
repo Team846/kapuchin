@@ -45,9 +45,9 @@ expect inline fun <R> blockingMutex(lock: Any, block: () -> R): R
 expect fun blockingDelay(time: Time)
 
 fun Named.blockUntil(
-        timeout: Time = 10.Second,
-        poll: Time = 0.5.Second,
-        f: () -> Boolean
+    timeout: Time = 10.Second,
+    poll: Time = 0.5.Second,
+    f: () -> Boolean
 ): Boolean {
     if (!f()) {
         log(Debug) { "Waiting for predicated to return true..." }

@@ -11,7 +11,8 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class IntakeRollersComponent(hardware: IntakeRollersHardware) : Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, pneumaticTicker) {
+class IntakeRollersComponent(hardware: IntakeRollersHardware) :
+    Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, pneumaticTicker) {
 
     val eatSpeed by pref(6, Volt)
     val pukeSpeed by pref(50, Percent)
@@ -33,9 +34,9 @@ class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRol
 
     private val invert by pref(false)
     val escConfig by escConfigPref(
-            defaultNominalOutput = 0.5.Volt,
-            defaultContinuousCurrentLimit = 10.Ampere,
-            defaultPeakCurrentLimit = 25.Ampere
+        defaultNominalOutput = 0.5.Volt,
+        defaultContinuousCurrentLimit = 10.Ampere,
+        defaultPeakCurrentLimit = 25.Ampere
     )
 
     private val escId = 40

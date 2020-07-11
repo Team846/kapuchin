@@ -19,11 +19,12 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
         val carouselRadius by pref(10, Inch)
 
         ({
-            AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
-                    nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
-                    nativeFeedbackUnits = 1,
-                    perFeedbackQuantity = gearbox.inputToOutput(1.Turn) * complianceWheelRadius / carouselRadius,
-                    nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
+            AngularOffloadedNativeConversion(
+                ::p, ::p, ::p, ::p,
+                nativeOutputUnits = 1, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
+                nativeFeedbackUnits = 1,
+                perFeedbackQuantity = gearbox.inputToOutput(1.Turn) * complianceWheelRadius / carouselRadius,
+                nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
             )
         })
     }
@@ -42,10 +43,10 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
     val ballColorTolerance by pref(0.1)
 
     fun similarity(colorA: Color, colorB: Color = ballColor) =
-            (colorA.red - colorB.red).pow(2) +
-                    (colorA.green - colorB.green).pow(2) +
-                    (colorA.blue - colorB.blue).pow(2)
+        (colorA.red - colorB.red).pow(2) +
+                (colorA.green - colorB.green).pow(2) +
+                (colorA.blue - colorB.blue).pow(2)
 
     fun detectingBall(proximity: Dimensionless, color: Color) =
-            proximity in ballIrRange && similarity(color) < ballColorTolerance
+        proximity in ballIrRange && similarity(color) < ballColorTolerance
 }

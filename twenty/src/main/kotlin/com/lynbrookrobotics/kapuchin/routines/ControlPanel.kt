@@ -51,6 +51,6 @@ suspend fun ControlPanelSpinnerComponent.spinStage2(electrical: ElectricalSystem
 
         val error = target - totalAngle
         voltageToDutyCycle(kP * error - kD * omega, vBat)
-                .takeIf { error in `±`(0.25.Turn) }
+            .takeIf { error in `±`(0.25.Turn) }
     }
 }

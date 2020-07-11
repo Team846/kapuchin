@@ -12,7 +12,11 @@ import info.kunalsheth.units.math.*
 
 enum class ControlPanelPivotState(val output: Boolean) { Up(true), Down(false) }
 
-class ControlPanelPivotComponent(hardware: ControlPanelPivotHardware) : Component<ControlPanelPivotComponent, ControlPanelPivotHardware, ControlPanelPivotState>(hardware, pneumaticTicker) {
+class ControlPanelPivotComponent(hardware: ControlPanelPivotHardware) :
+    Component<ControlPanelPivotComponent, ControlPanelPivotHardware, ControlPanelPivotState>(
+        hardware,
+        pneumaticTicker
+    ) {
 
     override val fallbackController: ControlPanelPivotComponent.(Time) -> ControlPanelPivotState = { Down }
 

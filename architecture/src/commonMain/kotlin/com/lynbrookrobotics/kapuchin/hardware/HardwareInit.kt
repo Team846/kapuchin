@@ -22,33 +22,34 @@ import kotlin.reflect.KProperty
  * @param Hardw type of hardware object being initialized
  */
 class HardwareInit<Hardw> internal constructor(
-        private val parent: RobotHardware<*>,
-        private val initialize: Named.() -> Hardw,
-        private val configure: Named.(Hardw) -> Unit = {},
-        private val validate: Named.(Hardw) -> Boolean = { true },
-        private val alternative: HardwareInit<Hardw>? = null,
-        private val nameSuffix: String = ""
+    private val parent: RobotHardware<*>,
+    private val initialize: Named.() -> Hardw,
+    private val configure: Named.(Hardw) -> Unit = {},
+    private val validate: Named.(Hardw) -> Boolean = { true },
+    private val alternative: HardwareInit<Hardw>? = null,
+    private val nameSuffix: String = ""
 ) : DelegateProvider<Any?, Hardw> {
 
-    override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Hardw> = Named(prop.name + nameSuffix, parent).run {
-        try {
-            log(Debug) { "Initializing" }
-            val value = initialize()
+    override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Hardw> =
+        Named(prop.name + nameSuffix, parent).run {
+            try {
+                log(Debug) { "Initializing" }
+                val value = initialize()
                     .also { configure(it) }
                     .also {
                         if (!validate(it) && crashOnFailure)
                             error("Initialized hardware is invalid.")
                     }
 
-            object : ReadOnlyProperty<Any?, Hardw> {
-                override fun getValue(thisRef: Any?, property: KProperty<*>) = value
-            }
+                object : ReadOnlyProperty<Any?, Hardw> {
+                    override fun getValue(thisRef: Any?, property: KProperty<*>) = value
+                }
 
-        } catch (t: Throwable) {
-            log(Error, t) { "Error during creation.\nMessage: ${t.message}\nCause: ${t.cause}" }
-            alternative?.provideDelegate(thisRef, prop) ?: throw t
+            } catch (t: Throwable) {
+                log(Error, t) { "Error during creation.\nMessage: ${t.message}\nCause: ${t.cause}" }
+                alternative?.provideDelegate(thisRef, prop) ?: throw t
+            }
         }
-    }
 
     /**
      * Safely configure the hardware object
@@ -57,7 +58,7 @@ class HardwareInit<Hardw> internal constructor(
      * @return new `HardwareInit` delegate with the given configuration
      */
     fun configure(f: Named.(Hardw) -> Unit) = HardwareInit(
-            parent, initialize, { configure(it); f(it) }, validate, alternative, nameSuffix
+        parent, initialize, { configure(it); f(it) }, validate, alternative, nameSuffix
     )
 
     /**
@@ -68,9 +69,9 @@ class HardwareInit<Hardw> internal constructor(
      * @return new `HardwareInit` delegate with the given verification
      */
     fun verify(that: String, f: Named.(Hardw) -> Boolean) = HardwareInit(
-            parent, initialize, configure,
-            { validate(it) && f(it).also { if (!it) log(Error) { that } } },
-            alternative, nameSuffix
+        parent, initialize, configure,
+        { validate(it) && f(it).also { if (!it) log(Error) { that } } },
+        alternative, nameSuffix
     )
 
     /**
@@ -80,9 +81,9 @@ class HardwareInit<Hardw> internal constructor(
      * @return new `HardwareInit` delegate with the given alternative
      */
     fun otherwise(useThis: HardwareInit<Hardw>): HardwareInit<Hardw> = HardwareInit(
-            parent, initialize, configure, validate,
-            alternative?.otherwise(useThis) ?: useThis,
-            nameSuffix
+        parent, initialize, configure, validate,
+        alternative?.otherwise(useThis) ?: useThis,
+        nameSuffix
     )
 
     companion object : Named by Named("Hardware Initialization") {
@@ -101,4 +102,5 @@ class HardwareInit<Hardw> internal constructor(
  * @param initialize function to instantiate hardware object
  * @return new `HardwareInit` delegate for the given hardware object
  */
-fun <Hardw> RobotHardware<*>.hardw(nameSuffix: String = "", initialize: Named.() -> Hardw) = HardwareInit(this, initialize, nameSuffix = nameSuffix)
+fun <Hardw> RobotHardware<*>.hardw(nameSuffix: String = "", initialize: Named.() -> Hardw) =
+    HardwareInit(this, initialize, nameSuffix = nameSuffix)

@@ -7,7 +7,7 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection
 import java.util.concurrent.ConcurrentHashMap
 
 data class OffloadedEscSafeties(
-        val min: Double?, val max: Double?
+    val min: Double?, val max: Double?
 ) {
     companion object {
         val NoSafeties = OffloadedEscSafeties(null, null)

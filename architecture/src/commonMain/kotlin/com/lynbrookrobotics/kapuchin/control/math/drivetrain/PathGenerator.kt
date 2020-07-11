@@ -17,9 +17,9 @@ fun interpolatePath(path: Path, cut: Length): Path {
     val end = path.last()
 
     val split = path
-            .zipWithNext { t, n -> nSect(t, n, cut) }
-            .map { it - path }
-            .flatten()
+        .zipWithNext { t, n -> nSect(t, n, cut) }
+        .map { it - path }
+        .flatten()
 
     return listOf(start) + split + end
 }
@@ -38,11 +38,11 @@ fun nSect(a: Waypoint, b: Waypoint, cut: Length): Path {
     val n = ceil((dist / cut).Each).toInt().takeIf { it > 1 } ?: 1
 
     return (n downTo 0)
-            .map { it.toDouble() / n }
-            .map { weight ->
-                Waypoint(
-                        a.x * weight + b.x * (1 - weight),
-                        a.y * weight + b.y * (1 - weight)
-                )
-            }
+        .map { it.toDouble() / n }
+        .map { weight ->
+            Waypoint(
+                a.x * weight + b.x * (1 - weight),
+                a.y * weight + b.y * (1 - weight)
+            )
+        }
 }

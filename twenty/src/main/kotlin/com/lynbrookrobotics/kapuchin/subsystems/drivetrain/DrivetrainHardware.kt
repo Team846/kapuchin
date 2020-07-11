@@ -38,10 +38,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     private val driftTolerance by pref(0.2, DegreePerSecond)
 
     val escConfig by escConfigPref(
-            defaultNominalOutput = 1.5.Volt,
+        defaultNominalOutput = 1.5.Volt,
 
-            defaultContinuousCurrentLimit = 25.Ampere,
-            defaultPeakCurrentLimit = 35.Ampere
+        defaultContinuousCurrentLimit = 25.Ampere,
+        defaultPeakCurrentLimit = 35.Ampere
     )
 
     private val idx = 0
@@ -109,38 +109,38 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     private val escNamed = Named("ESC Odometry", this)
     override val position = sensor {
         conversions.odometry(
-                leftPosition.optimizedRead(it, syncThreshold).y,
-                rightPosition.optimizedRead(it, syncThreshold).y,
-                gyro.yaw.Degree
+            leftPosition.optimizedRead(it, syncThreshold).y,
+            rightPosition.optimizedRead(it, syncThreshold).y,
+            gyro.yaw.Degree
         )
         conversions.tracking.run { Position(x, y, bearing) } stampWith it
     }
-            .with(graph("X Location", Foot, escNamed)) { it.x }
-            .with(graph("Y Location", Foot, escNamed)) { it.y }
-            .with(graph("Bearing", Degree, escNamed)) { it.bearing }
+        .with(graph("X Location", Foot, escNamed)) { it.x }
+        .with(graph("Y Location", Foot, escNamed)) { it.y }
+        .with(graph("Bearing", Degree, escNamed)) { it.bearing }
 
 
     val leftPosition = sensor {
         conversions.encoder.right.realPosition(
-                leftMasterEsc.getSelectedSensorPosition(idx)
+            leftMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Left Position", Foot))
 
     val rightPosition = sensor {
         conversions.encoder.left.realPosition(
-                rightMasterEsc.getSelectedSensorPosition(idx)
+            rightMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Right Position", Foot))
 
     val leftSpeed = sensor {
         conversions.encoder.left.realVelocity(
-                leftMasterEsc.getSelectedSensorVelocity(idx)
+            leftMasterEsc.getSelectedSensorVelocity(idx)
         ) stampWith it
     }.with(graph("Left Speed", FootPerSecond))
 
     val rightSpeed = sensor {
         conversions.encoder.right.realVelocity(
-                rightMasterEsc.getSelectedSensorVelocity(idx)
+            rightMasterEsc.getSelectedSensorVelocity(idx)
         ) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
 
@@ -153,9 +153,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
         odometryTicker.runOnTick { time ->
             conversions.odometry(
-                    leftPosition.optimizedRead(time, syncThreshold).y,
-                    rightPosition.optimizedRead(time, syncThreshold).y,
-                    gyro.yaw.Degree
+                leftPosition.optimizedRead(time, syncThreshold).y,
+                rightPosition.optimizedRead(time, syncThreshold).y,
+                gyro.yaw.Degree
             )
         }
     }

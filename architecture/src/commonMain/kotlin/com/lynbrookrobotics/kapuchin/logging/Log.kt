@@ -41,7 +41,8 @@ fun Named.log(level: Level, throwable: Throwable): Job = log(level, throwable) {
  * @param message any additional information
  * @return asynchronous logging job
  */
-fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job = log(level, throwable.platformStackTrace, message)
+fun Named.log(level: Level, throwable: Throwable, message: () -> String): Job =
+    log(level, throwable.platformStackTrace, message)
 
 /**
  * Logs an exception stacktrace
@@ -68,7 +69,7 @@ private fun messageToString(sender: Named, stackTrace: Array<StackTraceElement>?
     val indentedMessage = message().replace("\n", newLine)
     return "$senderHeader$indentedMessage" +
             (stackTrace?.joinToString(prefix = newLine, postfix = newLine, separator = newLine, limit = stackTraceLimit)
-                    ?: "")
+                ?: "")
 }
 
 /**

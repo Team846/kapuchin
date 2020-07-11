@@ -40,14 +40,14 @@ import kotlin.jvm.JvmName
  * @property nativeRateUnit factor used in ESC derivative and integral calculations
  */
 data class OffloadedNativeConversion<O, I, Q, D, DD>(
-        private val d2: (I, `÷`, T) -> Q,
-        private val d1: (Q, `÷`, T) -> D,
-        private val t1: (D, `*`, T) -> Q,
-        private val t2: (DD, `*`, T) -> D,
-        val nativeOutputUnits: Int, val perOutputQuantity: O,
-        val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
-        val feedbackZero: Q = perFeedbackQuantity * 0,
-        val nativeTimeUnit: Time, val nativeRateUnit: Time
+    private val d2: (I, `÷`, T) -> Q,
+    private val d1: (Q, `÷`, T) -> D,
+    private val t1: (D, `*`, T) -> Q,
+    private val t2: (DD, `*`, T) -> D,
+    val nativeOutputUnits: Int, val perOutputQuantity: O,
+    val nativeFeedbackUnits: Int, val perFeedbackQuantity: Q,
+    val feedbackZero: Q = perFeedbackQuantity * 0,
+    val nativeTimeUnit: Time, val nativeRateUnit: Time
 )
         where O : Quan<O>,
               Q : Quan<Q>,

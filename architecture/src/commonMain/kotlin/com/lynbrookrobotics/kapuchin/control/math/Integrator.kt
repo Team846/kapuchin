@@ -4,9 +4,9 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import info.kunalsheth.units.generated.*
 
 private fun <Q, SQDT> integrator(
-        p: (Q, `*`, T) -> SQDT,
-        x1: Time, y1: Q,
-        nextArea: (x1: Time, y1: Q, x2: Time, y2: Q) -> SQDT
+    p: (Q, `*`, T) -> SQDT,
+    x1: Time, y1: Q,
+    nextArea: (x1: Time, y1: Q, x2: Time, y2: Q) -> SQDT
 ): (Time, Q) -> SQDT
 
         where SQDT : Quan<SQDT>,
@@ -42,8 +42,8 @@ private fun <Q, SQDT> integrator(
  * @param y1 initial value
  */
 fun <Q, SQDT> infiniteIntegrator(
-        p: (Q, `*`, T) -> SQDT,
-        x1: Time, y1: Q
+    p: (Q, `*`, T) -> SQDT,
+    x1: Time, y1: Q
 ): (Time, Q) -> SQDT
 
         where SQDT : Quan<SQDT>,
@@ -51,7 +51,7 @@ fun <Q, SQDT> infiniteIntegrator(
 
     return integrator(p, x1, y1) { x1, y1, x2, y2 ->
         p(
-                (y1 + y2) / 2, `*`, (x2 - x1)
+            (y1 + y2) / 2, `*`, (x2 - x1)
         )
     }
 }
@@ -73,9 +73,9 @@ fun <Q, SQDT> infiniteIntegrator(
  * @param falloff number of trapezoids to look back when accumulating
  */
 fun <Q, SQDT> finiteIntegrator(
-        p: (Q, `*`, T) -> SQDT,
-        x1: Time, y1: Q,
-        falloff: Int
+    p: (Q, `*`, T) -> SQDT,
+    x1: Time, y1: Q,
+    falloff: Int
 ): (Time, Q) -> SQDT
 
         where SQDT : Quan<SQDT>,
@@ -86,7 +86,7 @@ fun <Q, SQDT> finiteIntegrator(
 
     return integrator(p, x1, y1) { x1, y1, x2, y2 ->
         val area = p(
-                (y1 + y2) / 2, `*`, (x2 - x1)
+            (y1 + y2) / 2, `*`, (x2 - x1)
         )
 
         area - (delayed(area) ?: zero)

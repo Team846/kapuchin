@@ -15,15 +15,16 @@ class ElectricalTests {
     fun `ramp rate limiting ramps up and down output`() {
         val startRampUpTime = 846.Minute
 
-        val limiter = rampRateLimiter(::p, ::p,
-                startRampUpTime, 0.Volt
+        val limiter = rampRateLimiter(
+            ::p, ::p,
+            startRampUpTime, 0.Volt
         ) { 12.VoltPerSecond }
 
         val incr = 3.milli(Second)
 
         generateSequence(startRampUpTime) { it + incr }
-                .takeWhile { startRampUpTime - it > 0.Second }
-                .forEach { 12.Volt `is greater than?` limiter(it, 12.Volt) }
+            .takeWhile { startRampUpTime - it > 0.Second }
+            .forEach { 12.Volt `is greater than?` limiter(it, 12.Volt) }
         repeat(50) {
             limiter(startRampUpTime + 1.Second + incr * it, 12.Volt) `is equal to?` 12.Volt
         }
@@ -31,8 +32,8 @@ class ElectricalTests {
         val startRampDownTime = startRampUpTime + 1.Second + incr * 49
 
         generateSequence(startRampDownTime) { it + incr }
-                .takeWhile { startRampDownTime - it > 0.Second }
-                .forEach { limiter(it, -12.Volt) `is greater than?` -12.Volt }
+            .takeWhile { startRampDownTime - it > 0.Second }
+            .forEach { limiter(it, -12.Volt) `is greater than?` -12.Volt }
         repeat(50) {
             limiter(startRampDownTime + 2.Second + incr * it, -12.Volt) `is equal to?` -12.Volt
         }
@@ -46,8 +47,8 @@ class ElectricalTests {
         val r = maxVoltage / stallCurrent
 
         val limiter = motorCurrentLimiter(
-                maxVoltage, 5300.Rpm,
-                stallCurrent, currentLimit
+            maxVoltage, 5300.Rpm,
+            stallCurrent, currentLimit
         )
 
         val incr = 0.2.Volt
@@ -70,8 +71,8 @@ class ElectricalTests {
         val freeSpeed = 5300.Rpm
 
         val limiter = motorCurrentLimiter(
-                maxVoltage, freeSpeed,
-                stallCurrent, currentLimit
+            maxVoltage, freeSpeed,
+            stallCurrent, currentLimit
         )
 
         for (i in -6000 until 2000) {
@@ -103,8 +104,8 @@ class ElectricalTests {
 
         val outsideStartTime = insideStartTime + incr * 99
         generateSequence(outsideStartTime) { it + incr }
-                .takeWhile { it - outsideStartTime < duration }
-                .forEach { checker(it, 25.1.Ampere) `is equal to?` false }
+            .takeWhile { it - outsideStartTime < duration }
+            .forEach { checker(it, 25.1.Ampere) `is equal to?` false }
         checker(outsideStartTime + duration + incr * 1, 25.1.Ampere) `is equal to?` true
         checker(outsideStartTime + duration + incr * 2, 24.9.Ampere) `is equal to?` false
         checker(outsideStartTime + duration + incr * 3, 25.1.Ampere) `is equal to?` false
@@ -112,8 +113,8 @@ class ElectricalTests {
 
         val negativeOutsideStartTime = outsideStartTime + 3.Second + incr * 5
         generateSequence(negativeOutsideStartTime) { it + incr }
-                .takeWhile { it - negativeOutsideStartTime < duration }
-                .forEach { checker(it, -25.1.Ampere) `is equal to?` false }
+            .takeWhile { it - negativeOutsideStartTime < duration }
+            .forEach { checker(it, -25.1.Ampere) `is equal to?` false }
         checker(negativeOutsideStartTime + duration + incr * 1, -25.1.Ampere) `is equal to?` true
     }
 

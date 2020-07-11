@@ -7,15 +7,16 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
-class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
+class CarouselComponent(hardware: CarouselHardware) :
+    Component<CarouselComponent, CarouselHardware, OffloadedOutput>(hardware) {
 
     val positionGains by pref {
         val kP by pref(12, Volt, 90, Degree)
         val kD by pref(0, Volt, 60, DegreePerSecond)
         ({
             OffloadedEscGains(
-                    kP = hardware.conversions.encoder.native(kP),
-                    kD = hardware.conversions.encoder.native(kD)
+                kP = hardware.conversions.encoder.native(kP),
+                kD = hardware.conversions.encoder.native(kD)
             )
         })
     }
@@ -39,8 +40,8 @@ class CarouselComponent(hardware: CarouselHardware) : Component<CarouselComponen
 
         with(hardware) {
             isBallGraph(currentTime, conversions.detectingBall(
-                    proximity.optimizedRead(currentTime, syncThreshold).y,
-                    color.optimizedRead(currentTime, syncThreshold).y
+                proximity.optimizedRead(currentTime, syncThreshold).y,
+                color.optimizedRead(currentTime, syncThreshold).y
             ).let { if (it) 1.Each else 0.Each })
         }
     }

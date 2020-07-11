@@ -40,11 +40,11 @@ fun <Value> Named.pref(nameSuffix: String = "", get: Named.() -> (() -> Value)) 
 fun <C, E> Named.pref(comp: Number, compUnits: UomConverter<C>, err: Number, errUnits: UomConverter<E>)
         where C : Quan<C>,
               E : Quan<E> =
-        pref {
-            val compensation by pref(comp, compUnits)
-            val forError by pref(err, errUnits)
-            ({ Gain(compensation, forError) })
-        }
+    pref {
+        val compensation by pref(comp, compUnits)
+        val forError by pref(err, errUnits)
+        ({ Gain(compensation, forError) })
+    }
 
 /**
  * Preference domain-specific language
@@ -61,9 +61,9 @@ fun <C, E> Named.pref(comp: Number, compUnits: UomConverter<C>, err: Number, err
  * @param Value type of preference data being managed
  */
 class PreferenceLayer<Value>(
-        private val parent: Named,
-        private val construct: Named.() -> () -> Value,
-        private val nameSuffix: String = ""
+    private val parent: Named,
+    private val construct: Named.() -> () -> Value,
+    private val nameSuffix: String = ""
 ) : Named, DelegateProvider<Any?, Value>, () -> Unit {
 
     override lateinit var name: String
@@ -78,7 +78,7 @@ class PreferenceLayer<Value>(
 
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value
-                    ?: get().also { value = it }
+                ?: get().also { value = it }
         }
     }
 

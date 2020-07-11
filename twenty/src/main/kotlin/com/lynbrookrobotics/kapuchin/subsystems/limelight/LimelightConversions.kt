@@ -49,11 +49,13 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
 
     private fun outerGoalPosition(sample: LimelightReading, skew: Angle) = with(sample) {
 
-        val targetDistance = (targetHeight - mounting.z) / tan(mountingIncline + ty + when (pipeline) {
-            ZoomInPanHigh -> zoomOutFov.y / 2
-            ZoomInPanLow -> -zoomOutFov.y / 2
-            else -> 0.Degree
-        })
+        val targetDistance = (targetHeight - mounting.z) / tan(
+            mountingIncline + ty + when (pipeline) {
+                ZoomInPanHigh -> zoomOutFov.y / 2
+                ZoomInPanLow -> -zoomOutFov.y / 2
+                else -> 0.Degree
+            }
+        )
 
         val x = tan(tx + mountingBearing) * targetDistance
 
@@ -65,9 +67,9 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         val offsetAngle = 90.Degree - skew
 
         val innerGoal = Position(
-                innerGoalOffset * cos(offsetAngle) + outerGoal.x,
-                innerGoalOffset * sin(offsetAngle) + outerGoal.y,
-                skew
+            innerGoalOffset * cos(offsetAngle) + outerGoal.x,
+            innerGoalOffset * sin(offsetAngle) + outerGoal.y,
+            skew
         )
 
         return DetectedTarget(innerGoal.takeUnless { skew > skewTolerance }, outerGoal)

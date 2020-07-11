@@ -12,13 +12,13 @@ import info.kunalsheth.units.math.*
 
 @ExperimentalUnsignedTypes
 actual class Ticker internal actual constructor(
-        parent: Named,
-        priority: Priority,
-        val period: Time,
-        name: String
+    parent: Named,
+    priority: Priority,
+    val period: Time,
+    name: String
 ) :
-        Named by Named(name, parent),
-        Clock {
+    Named by Named(name, parent),
+    Clock {
 
     actual var computeTime = 0.Second
         private set
@@ -40,8 +40,8 @@ actual class Ticker internal actual constructor(
         val nextPeriodIndex = (dt / period).Each.toLong() + 1
 
         if (nextPeriodIndex != periodIndex) NotifierJNI.updateNotifierAlarm(
-                notifierHandle,
-                (startTime + period * nextPeriodIndex).micro(Second).toLong()
+            notifierHandle,
+            (startTime + period * nextPeriodIndex).micro(Second).toLong()
         )
 
         periodIndex = nextPeriodIndex

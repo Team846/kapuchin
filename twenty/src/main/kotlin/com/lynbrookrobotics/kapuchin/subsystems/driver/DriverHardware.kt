@@ -70,13 +70,13 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     }.otherwise(hardw { null })
 
     val accelerator = s { joystickMapping(stick.y.Each) }
-            .with(graph("Accelerator", Percent))
+        .with(graph("Accelerator", Percent))
 
     val steering = s { wheelMapping(wheel.x.Each) }
-            .with(graph("Steering", Percent))
+        .with(graph("Steering", Percent))
 
     val absSteering = s { (-180).Degree * absoluteWheel.x }
-            .with(graph("Absolute Steering", Degree))
+        .with(graph("Absolute Steering", Degree))
 
     val intakeBalls = s { stick[Trigger] }
     val unjamBalls = s { stick[Trigger] && stick[BottomTrigger] }

@@ -16,13 +16,15 @@ import kotlin.ranges.rangeTo
 
 class ChoreographySensorTest {
 
-    private class ChoreographySensorTestSH : TSH<ChoreographySensorTestSH, ChoreographySensorTestC>("ChoreographySensorTest Hardware") {
+    private class ChoreographySensorTestSH :
+        TSH<ChoreographySensorTestSH, ChoreographySensorTestC>("ChoreographySensorTest Hardware") {
         val sensorA = sensor { Math.random() stampWith currentTime }
         val sensorB = sensor { Math.random() stampWith currentTime }
         val sensorC = sensor { Math.random() stampWith currentTime }
     }
 
-    private class ChoreographySensorTestC : TC<ChoreographySensorTestC, ChoreographySensorTestSH>(ChoreographySensorTestSH())
+    private class ChoreographySensorTestC :
+        TC<ChoreographySensorTestC, ChoreographySensorTestSH>(ChoreographySensorTestSH())
 
     @Test(timeout = 8 * 1000)
     fun `sensors getting old are in sync`() = threadDumpOnFailure {

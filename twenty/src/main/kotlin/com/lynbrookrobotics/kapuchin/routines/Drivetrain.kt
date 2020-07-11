@@ -31,8 +31,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     var lastGc = 0.Second
     controller {
         lastGc = if (
-                speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero &&
-                currentTime - lastGc > 2.Second
+            speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero &&
+            currentTime - lastGc > 2.Second
         ) {
             System.gc()
             currentTime
@@ -49,15 +49,15 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
         val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, absSteering + startingAngle)
 
         val nativeL = hardware.conversions.encoder.left.native(
-                target.left + steeringVelocity
+            target.left + steeringVelocity
         )
         val nativeR = hardware.conversions.encoder.right.native(
-                target.right - steeringVelocity
+            target.right - steeringVelocity
         )
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+            VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+            VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         )
     }
 }
@@ -72,8 +72,8 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
         val nativeR = hardware.conversions.encoder.right.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+            VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+            VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         ).takeUnless {
             error.abs < tolerance
         }
@@ -81,15 +81,15 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
 }
 
 suspend fun DrivetrainComponent.followTrajectory(
-        trajectory: Trajectory,
-        tolerance: Length,
-        endTolerance: Length,
-        reverse: Boolean,
-        origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
+    trajectory: Trajectory,
+    tolerance: Length,
+    endTolerance: Length,
+    reverse: Boolean,
+    origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
 ) = startRoutine("Follow Trajectory") {
 
     val follower = TrajectoryFollower(
-            this@followTrajectory, tolerance, endTolerance, reverse, this@startRoutine, trajectory, origin
+        this@followTrajectory, tolerance, endTolerance, reverse, this@startRoutine, trajectory, origin
     )
 
     controller {
@@ -98,8 +98,8 @@ suspend fun DrivetrainComponent.followTrajectory(
             val nativeL = hardware.conversions.encoder.left.native(velocities.left)
             val nativeR = hardware.conversions.encoder.right.native(velocities.right)
             TwoSided(
-                    VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
-                    VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
             )
         } else {
             null
@@ -108,9 +108,9 @@ suspend fun DrivetrainComponent.followTrajectory(
 }
 
 suspend fun DrivetrainComponent.waypoint(
-        motionProfile: (Length) -> Velocity,
-        target: Waypoint,
-        tolerance: Length
+    motionProfile: (Length) -> Velocity,
+    target: Waypoint,
+    tolerance: Length
 ) = startRoutine("Waypoint") {
     val position by hardware.position.readOnTick.withStamps
     val uni = UnicycleDrive(this@waypoint, this@startRoutine)
@@ -131,8 +131,8 @@ suspend fun DrivetrainComponent.waypoint(
         val nativeR = hardware.conversions.encoder.right.native(targVels.right)
 
         TwoSided(
-                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
-                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+            VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+            VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
         ).takeUnless {
             distance < tolerance
         }

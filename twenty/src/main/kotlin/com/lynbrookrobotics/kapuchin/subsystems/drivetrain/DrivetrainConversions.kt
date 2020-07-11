@@ -10,7 +10,8 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware), GenericDrivetrainConversions {
+class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("Conversions", hardware),
+    GenericDrivetrainConversions {
 
     override val trackLength by pref(2, Foot)
     private val wheelRadius by pref {
@@ -32,18 +33,19 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
 
             val nativeResolution = resolution * nativeEncoderCountMultiplier
             val enc = EncoderConversion(
-                    nativeResolution,
-                    stage1.inputToOutput(1.Turn).let(stage2::inputToOutput)
+                nativeResolution,
+                stage1.inputToOutput(1.Turn).let(stage2::inputToOutput)
             )
 
-            val left = LinearOffloadedNativeConversion(::p, ::p, ::p, ::p,
-                    nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
-                    nativeFeedbackUnits = nativeResolution,
-                    perFeedbackQuantity = wheelRadius.left * enc.angle(nativeResolution) / Radian,
-                    nativeTimeUnit = 100.milli(Second), nativeRateUnit = 1.Second
+            val left = LinearOffloadedNativeConversion(
+                ::p, ::p, ::p, ::p,
+                nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
+                nativeFeedbackUnits = nativeResolution,
+                perFeedbackQuantity = wheelRadius.left * enc.angle(nativeResolution) / Radian,
+                nativeTimeUnit = 100.milli(Second), nativeRateUnit = 1.Second
             )
             val right = left.copy(
-                    perFeedbackQuantity = wheelRadius.right * enc.angle(nativeResolution) / Radian
+                perFeedbackQuantity = wheelRadius.right * enc.angle(nativeResolution) / Radian
             )
             TwoSided(left, right)
         })
@@ -66,9 +68,9 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
         }.also { noTicksR = false }
 
         tracking(
-                totalLeft - lastLeft,
-                totalRight - lastRight,
-                bearing
+            totalLeft - lastLeft,
+            totalRight - lastRight,
+            bearing
         )
         lastLeft = totalLeft
         lastRight = totalRight

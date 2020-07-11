@@ -40,10 +40,10 @@ typealias Trajectory = List<TimeStamped<Waypoint>>
  * @return a trajectory containing [Waypoint]s with timestamps.
  */
 fun pathToTrajectory(
-        path: Path,
-        maxVelocity: Velocity,
-        maxOmega: AngularVelocity,
-        maxAcceleration: Acceleration
+    path: Path,
+    maxVelocity: Velocity,
+    maxOmega: AngularVelocity,
+    maxAcceleration: Acceleration
 ): Trajectory {
 
     check(maxVelocity > 0.Foot / Second)
@@ -54,8 +54,8 @@ fun pathToTrajectory(
 
     val forwardPath = path.toMutableList()
     val forwardSegments = oneWayAccelCap(
-            forwardPath, maxVelocity, maxOmega,
-            f = { curVelocity -> maxAcceleration - (curVelocity / maxVelocity) * maxAcceleration }
+        forwardPath, maxVelocity, maxOmega,
+        f = { curVelocity -> maxAcceleration - (curVelocity / maxVelocity) * maxAcceleration }
     )
 
 
@@ -63,8 +63,8 @@ fun pathToTrajectory(
 
     val reversePath = path.toMutableList().reversed()
     val reverseSegments = oneWayAccelCap(
-            reversePath, maxVelocity, maxOmega,
-            f = { curVelocity -> maxAcceleration + (curVelocity / maxVelocity) * maxAcceleration }
+        reversePath, maxVelocity, maxOmega,
+        f = { curVelocity -> maxAcceleration + (curVelocity / maxVelocity) * maxAcceleration }
     ).reversed()
 
 
@@ -112,10 +112,10 @@ fun pathToTrajectory(
  * @return a list of [Waypoint]s along with their respective velocities.
  */
 private fun oneWayAccelCap(
-        path: Path,
-        maxVelocity: Velocity,
-        maxOmega: AngularVelocity,
-        f: (Velocity) -> Acceleration
+    path: Path,
+    maxVelocity: Velocity,
+    maxOmega: AngularVelocity,
+    f: (Velocity) -> Acceleration
 ): List<Pair<Waypoint, Velocity>> {
 
     // First point always as 0 velocity and the second point always has max velocity.

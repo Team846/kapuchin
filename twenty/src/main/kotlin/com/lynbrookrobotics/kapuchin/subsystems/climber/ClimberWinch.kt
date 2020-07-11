@@ -21,7 +21,8 @@ sealed class ClimberWinchOutput() {
     object Stopped : ClimberWinchOutput()
 }
 
-class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberWinchComponent, ClimberWinchHardware, ClimberWinchOutput>(hardware, pneumaticTicker) {
+class ClimberWinchComponent(hardware: ClimberWinchHardware) :
+    Component<ClimberWinchComponent, ClimberWinchHardware, ClimberWinchOutput>(hardware, pneumaticTicker) {
 
     val extendSpeed by pref(80, Percent)
     val retractSpeed by pref(80, Percent)
@@ -38,8 +39,8 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) : Component<ClimberW
     override fun ClimberWinchHardware.output(value: ClimberWinchOutput) = when (value) {
         is Stopped -> {
             if (currentTime - lastWinchRun >= chodeDelaySafety &&
-                    masterEsc.appliedOutput == 0.0 &&
-                    slaveEsc.appliedOutput == 0.0
+                masterEsc.appliedOutput == 0.0 &&
+                slaveEsc.appliedOutput == 0.0
             ) {
                 chodeSolenoid.set(erect)
                 lastErection = currentTime
@@ -75,8 +76,8 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
 
     private val invert by pref(false)
     val escConfig by escConfigPref(
-            defaultContinuousCurrentLimit = 40.Ampere,
-            defaultPeakOutput = 3.Volt // TODO: remove extra safe default
+        defaultContinuousCurrentLimit = 40.Ampere,
+        defaultPeakOutput = 3.Volt // TODO: remove extra safe default
     )
 
     private val masterEscId = 10

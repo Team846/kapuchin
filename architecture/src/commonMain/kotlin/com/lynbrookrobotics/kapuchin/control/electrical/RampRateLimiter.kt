@@ -22,10 +22,10 @@ import info.kunalsheth.units.generated.*
  * @param limit function returning max ramp rate
  */
 fun <Q, D> rampRateLimiter(
-        p1: (Q, `÷`, T) -> D,
-        p2: (D, `*`, T) -> Q,
-        x1: Time, y1: Q,
-        limit: (Time) -> D
+    p1: (Q, `÷`, T) -> D,
+    p2: (D, `*`, T) -> Q,
+    x1: Time, y1: Q,
+    limit: (Time) -> D
 ): (Time, Q) -> Q
 
         where Q : Quan<Q>,

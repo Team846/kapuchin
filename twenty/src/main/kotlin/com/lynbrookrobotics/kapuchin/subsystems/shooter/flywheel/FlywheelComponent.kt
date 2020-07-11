@@ -7,7 +7,8 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import info.kunalsheth.units.generated.*
 
-class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
+class FlywheelComponent(hardware: FlywheelHardware) :
+    Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
 
     val maxSpeed by pref(9632, Rpm)
     val minSpeed by pref(5000, Rpm)
@@ -26,10 +27,10 @@ class FlywheelComponent(hardware: FlywheelHardware) : Component<FlywheelComponen
         val kF by pref(110, Percent)
         ({
             OffloadedEscGains(
-                    kP = hardware.conversions.encoder.native(kP),
-                    kF = hardware.conversions.encoder.native(
-                            Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
-                    ) * kF.Each
+                kP = hardware.conversions.encoder.native(kP),
+                kF = hardware.conversions.encoder.native(
+                    Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
+                ) * kF.Each
             )
         })
     }

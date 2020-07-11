@@ -6,7 +6,7 @@ import java.io.Closeable
 import kotlin.math.min
 
 class TicksToSerial(
-        val port: SerialPort.Port
+    val port: SerialPort.Port
 ) : Closeable {
 
     val device = SerialPort(115200, port).apply {

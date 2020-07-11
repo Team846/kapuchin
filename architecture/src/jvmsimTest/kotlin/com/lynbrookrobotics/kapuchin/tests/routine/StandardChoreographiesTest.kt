@@ -16,7 +16,9 @@ import kotlin.math.min
 
 class StandardChoreographiesTest {
 
-    private class ChoreographyTestSH(id: Int) : TSH<ChoreographyTestSH, ChoreographyTestC>("StandardChoreographiesTest Hardware $id")
+    private class ChoreographyTestSH(id: Int) :
+        TSH<ChoreographyTestSH, ChoreographyTestC>("StandardChoreographiesTest Hardware $id")
+
     private class ChoreographyTestC(id: Int) : TC<ChoreographyTestC, ChoreographyTestSH>(ChoreographyTestSH(id))
 
     @Test(timeout = 5 * 1000)
@@ -24,9 +26,9 @@ class StandardChoreographiesTest {
         runBlocking {
             val comps = List(15) { ChoreographyTestC(it) }
             runAll(
-                    *comps.mapIndexed { i, c ->
-                        choreography { c.countTo(i) }
-                    }.toTypedArray()
+                *comps.mapIndexed { i, c ->
+                    choreography { c.countTo(i) }
+                }.toTypedArray()
             )
 
             comps.forEachIndexed { i, c ->
@@ -40,10 +42,10 @@ class StandardChoreographiesTest {
         runBlocking {
             val comps = List(15) { ChoreographyTestC(it) }
             runAll(
-                    { error("This job intentionally fails") },
-                    *comps.mapIndexed { i, c ->
-                        choreography { c.countTo(i) }
-                    }.toTypedArray()
+                { error("This job intentionally fails") },
+                *comps.mapIndexed { i, c ->
+                    choreography { c.countTo(i) }
+                }.toTypedArray()
             )
 
             comps.forEachIndexed { i, c ->
@@ -60,9 +62,9 @@ class StandardChoreographiesTest {
 
             val j1 = launch {
                 runAll(
-                        *comps.mapIndexed { i, c ->
-                            choreography { c.countTo(i + 1) }
-                        }.toTypedArray()
+                    *comps.mapIndexed { i, c ->
+                        choreography { c.countTo(i + 1) }
+                    }.toTypedArray()
                 )
             }
 
@@ -76,9 +78,9 @@ class StandardChoreographiesTest {
             comps.forEach { it.out.clear() }
             val j2 = launch {
                 runAll(
-                        *comps.mapIndexed { i, c ->
-                            choreography { c.countTo(i) }
-                        }.toTypedArray()
+                    *comps.mapIndexed { i, c ->
+                        choreography { c.countTo(i) }
+                    }.toTypedArray()
                 )
             }
             while (comps[last].routine == null) delay(1.milli(Second))
@@ -96,9 +98,9 @@ class StandardChoreographiesTest {
         runBlocking {
             val comps = List(10) { ChoreographyTestC(it) }
             suspend fun doSomething() = runAll(
-                    *comps.mapIndexed { i, c ->
-                        choreography { c.countTo(i) }
-                    }.toTypedArray()
+                *comps.mapIndexed { i, c ->
+                    choreography { c.countTo(i) }
+                }.toTypedArray()
             )
 
             runWhile({ false }, { doSomething() })
@@ -172,12 +174,12 @@ class StandardChoreographiesTest {
             val predicates = List(15) { false }.toMutableList()
             val j = launch {
                 runWhenever(
-                        *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
-                            choreography {
-                                c.countTo(i)
-                                predicates[i] = false
-                            }
-                        }).toTypedArray()
+                    *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
+                        choreography {
+                            c.countTo(i)
+                            predicates[i] = false
+                        }
+                    }).toTypedArray()
                 )
             }
 
@@ -209,10 +211,10 @@ class StandardChoreographiesTest {
             val predicates = List(15) { false }.toMutableList()
             val j = launch {
                 runWhenever(
-                        { true } to choreography { error("This job intentionally fails") },
-                        *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
-                            choreography { c.countTo(i) }
-                        }).toTypedArray()
+                    { true } to choreography { error("This job intentionally fails") },
+                    *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
+                        choreography { c.countTo(i) }
+                    }).toTypedArray()
                 )
             }
 
@@ -259,13 +261,13 @@ class StandardChoreographiesTest {
 
             val j1 = launch {
                 runWhenever(
-                        *predicates.mapIndexed { i, _ -> { predicates[i] } }
-                                .zip(comps.mapIndexed { i, c ->
-                                    choreography {
-                                        c.countTo(i)
-                                        predicates[i] = false
-                                    }
-                                }).toTypedArray()
+                    *predicates.mapIndexed { i, _ -> { predicates[i] } }
+                        .zip(comps.mapIndexed { i, c ->
+                            choreography {
+                                c.countTo(i)
+                                predicates[i] = false
+                            }
+                        }).toTypedArray()
                 )
             }
 
@@ -283,13 +285,13 @@ class StandardChoreographiesTest {
             predicates = List(last + 1) { true }.toMutableList()
             val j2 = launch {
                 runWhenever(
-                        *predicates.mapIndexed { i, _ -> { predicates[i] } }
-                                .zip(comps.mapIndexed { i, c ->
-                                    choreography {
-                                        c.countTo(i)
-                                        predicates[i] = false
-                                    }
-                                }).toTypedArray()
+                    *predicates.mapIndexed { i, _ -> { predicates[i] } }
+                        .zip(comps.mapIndexed { i, c ->
+                            choreography {
+                                c.countTo(i)
+                                predicates[i] = false
+                            }
+                        }).toTypedArray()
                 )
             }
             while (comps[last].routine == null) {
@@ -317,12 +319,12 @@ class StandardChoreographiesTest {
             val predicates = List(15) { false }.toMutableList()
             val j = launch {
                 launchWhenever(
-                        *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
-                            choreography {
-                                c.countTo(i)
-                                predicates[i] = false
-                            }
-                        }).toTypedArray()
+                    *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
+                        choreography {
+                            c.countTo(i)
+                            predicates[i] = false
+                        }
+                    }).toTypedArray()
                 )
             }
 
@@ -354,10 +356,10 @@ class StandardChoreographiesTest {
             val predicates = List(15) { false }.toMutableList()
             val j = launch {
                 launchWhenever(
-                        { true } to choreography { error("This job intentionally fails") },
-                        *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
-                            choreography { c.countTo(i) }
-                        }).toTypedArray()
+                    { true } to choreography { error("This job intentionally fails") },
+                    *List(15) { { predicates[it] } }.zip(comps.mapIndexed { i, c ->
+                        choreography { c.countTo(i) }
+                    }).toTypedArray()
                 )
             }
 
@@ -404,13 +406,13 @@ class StandardChoreographiesTest {
 
             val j1 = launch {
                 launchWhenever(
-                        *predicates.mapIndexed { i, _ -> { predicates[i] } }
-                                .zip(comps.mapIndexed { i, c ->
-                                    choreography {
-                                        c.countTo(i)
-                                        predicates[i] = false
-                                    }
-                                }).toTypedArray()
+                    *predicates.mapIndexed { i, _ -> { predicates[i] } }
+                        .zip(comps.mapIndexed { i, c ->
+                            choreography {
+                                c.countTo(i)
+                                predicates[i] = false
+                            }
+                        }).toTypedArray()
                 )
             }
 
@@ -428,13 +430,13 @@ class StandardChoreographiesTest {
             predicates = List(last + 1) { true }.toMutableList()
             val j2 = launch {
                 launchWhenever(
-                        *predicates.mapIndexed { i, _ -> { predicates[i] } }
-                                .zip(comps.mapIndexed { i, c ->
-                                    choreography {
-                                        c.countTo(i)
-                                        predicates[i] = false
-                                    }
-                                }).toTypedArray()
+                    *predicates.mapIndexed { i, _ -> { predicates[i] } }
+                        .zip(comps.mapIndexed { i, c ->
+                            choreography {
+                                c.countTo(i)
+                                predicates[i] = false
+                            }
+                        }).toTypedArray()
                 )
             }
             while (comps[last].routine == null) {
