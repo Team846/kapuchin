@@ -7,11 +7,11 @@ import com.revrobotics.CANSparkMax
 import java.util.concurrent.ConcurrentHashMap
 
 data class OffloadedEscGains(
-        var kP: Double = 0.0,
-        var kI: Double = 0.0,
-        var kD: Double = 0.0,
-        var kF: Double = 0.0,
-        var maxIntegralAccumulator: Double = 0.0
+    var kP: Double = 0.0,
+    var kI: Double = 0.0,
+    var kD: Double = 0.0,
+    var kF: Double = 0.0,
+    var maxIntegralAccumulator: Double = 0.0
 ) {
     init {
         fun illegal(k: Double) = k < 0 || !k.isFinite()

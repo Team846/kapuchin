@@ -23,17 +23,17 @@ private fun inclineToRPM(incline: Angle): AngularVelocity {
 }
 
 private fun calculateShot(
-        target: Position,
-        shooterHoodState: ShooterHoodState,
-        goal: Goal,
-        entryAngleLimits: ClosedRange<Angle>,
+    target: Position,
+    shooterHoodState: ShooterHoodState,
+    goal: Goal,
+    entryAngleLimits: ClosedRange<Angle>,
 
-        launchAngle: Angle,
+    launchAngle: Angle,
 
-        maxSpeed: AngularVelocity,
-        shooterHeight: Length,
-        hoodUpLaunch: Angle,
-        hoodDownLaunch: Angle
+    maxSpeed: AngularVelocity,
+    shooterHeight: Length,
+    hoodUpLaunch: Angle,
+    hoodDownLaunch: Angle
 ): ShotState? {
     val distToBase = sqrt(target.x.squared + target.y.squared)
     val height = Field.targetHeight - shooterHeight
@@ -50,14 +50,17 @@ private fun calculateShot(
     if (incline > hoodAngle) {
         return null
     }
-    val ballVelocity = kotlin.math.sqrt(0.5) * sqrt((distToBase.squared * 1.EarthGravity) / ((distToBase * tan(launchAngle) - height) * cos(launchAngle).squared))
+    val ballVelocity = kotlin.math.sqrt(0.5) * sqrt(
+        (distToBase.squared * 1.EarthGravity) / ((distToBase * tan(launchAngle) - height) * cos(launchAngle).squared)
+    )
 
     val flywheelVelocity = inclineToRPM(incline)
 
-    val shotEntrySlope = -((distToBase * 1.EarthGravity) / (ballVelocity.squared * cos(launchAngle).squared)) + tan(launchAngle)
+    val shotEntrySlope =
+        -((distToBase * 1.EarthGravity) / (ballVelocity.squared * cos(launchAngle).squared)) + tan(launchAngle)
     val shotEntryAngle = atan(shotEntrySlope)
 
     return ShotState(flywheelVelocity, shooterHoodState, goal, shotEntryAngle)
-            .takeIf { shotEntryAngle in entryAngleLimits }
-            .takeIf { flywheelVelocity <= maxSpeed }
+        .takeIf { shotEntryAngle in entryAngleLimits }
+        .takeIf { flywheelVelocity <= maxSpeed }
 }

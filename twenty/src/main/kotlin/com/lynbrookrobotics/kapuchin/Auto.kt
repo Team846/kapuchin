@@ -23,13 +23,15 @@ typealias Auto = Subsystems.() -> suspend CoroutineScope.() -> Unit
 val `verify odometry`: Auto = {
     choreography {
         val traj = pathToTrajectory(
-                interpolatePath(listOf(
-                        Waypoint(0.Foot, 0.Foot),
-                        Waypoint(0.Foot, 4.Foot),
-                        Waypoint(4.Foot, 4.Foot),
-                        Waypoint(4.Foot, 8.Foot)
-                ), 6.Inch),
-                4.FootPerSecond, drivetrain.maxOmega / 3, 4.FootPerSecondSquared
+            interpolatePath(
+                listOf(
+                    Waypoint(0.Foot, 0.Foot),
+                    Waypoint(0.Foot, 4.Foot),
+                    Waypoint(4.Foot, 4.Foot),
+                    Waypoint(4.Foot, 8.Foot)
+                ), 6.Inch
+            ),
+            4.FootPerSecond, drivetrain.maxOmega / 3, 4.FootPerSecondSquared
         )
 
         drivetrain.followTrajectory(traj, 12.Inch, 2.Inch, reverse = false)
@@ -107,34 +109,42 @@ val `I2 shoot C1 I2 shoot`: Auto = {
 }
 
 private fun loadPath(name: String) = Thread.currentThread()
-        .contextClassLoader
-        .getResourceAsStream("com/lynbrookrobotics/kapuchin/paths/$name.tsv")
-        ?.bufferedReader()
-        ?.lineSequence()
-        ?.drop(1)
-        ?.map { it.split('\t') }
-        ?.map { it.map { tkn -> tkn.trim() } }
-        ?.map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
-        ?.toList()
+    .contextClassLoader
+    .getResourceAsStream("com/lynbrookrobotics/kapuchin/paths/$name.tsv")
+    ?.bufferedReader()
+    ?.lineSequence()
+    ?.drop(1)
+    ?.map { it.split('\t') }
+    ?.map { it.map { tkn -> tkn.trim() } }
+    ?.map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+    ?.toList()
 
 private fun loadTempPath() = File("/home/lvuser/journal.tsv")
-        .bufferedReader()
-        .lineSequence()
-        .drop(1)
-        .map { it.split('\t') }
-        .map { it.map { tkn -> tkn.trim() } }
-        .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
-        .toList()
+    .bufferedReader()
+    .lineSequence()
+    .drop(1)
+    .map { it.split('\t') }
+    .map { it.map { tkn -> tkn.trim() } }
+    .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+    .toList()
 
 private fun Subsystems.fastAsFuckLine(dist: Length, speedFactor: DutyCycle = 100.Percent): Trajectory =
-        pathToTrajectory(
-                nSect(Waypoint(0.Foot, 0.Foot), Waypoint(0.Foot, dist), 3.Inch),
-                drivetrain.maxSpeed * speedFactor, drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor, drivetrain.maxAcceleration
-        )
+    pathToTrajectory(
+        nSect(Waypoint(0.Foot, 0.Foot), Waypoint(0.Foot, dist), 3.Inch),
+        drivetrain.maxSpeed * speedFactor,
+        drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor,
+        drivetrain.maxAcceleration
+    )
 
-private fun Subsystems.fastAsFuck(name: String, speedFactor: Dimensionless = 100.Percent): Trajectory? = loadPath(name)?.let {
-    pathToTrajectory(it, drivetrain.maxSpeed * speedFactor, drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor, drivetrain.maxAcceleration)
-}
+private fun Subsystems.fastAsFuck(name: String, speedFactor: Dimensionless = 100.Percent): Trajectory? =
+    loadPath(name)?.let {
+        pathToTrajectory(
+            it,
+            drivetrain.maxSpeed * speedFactor,
+            drivetrain.percentMaxOmega * drivetrain.maxOmega * speedFactor,
+            drivetrain.maxAcceleration
+        )
+    }
 
 private suspend fun Subsystems.autoFallbackAimAndFire() {
     val flywheelTarget = 7500.Rpm
@@ -247,8 +257,9 @@ private suspend fun Subsystems.autoLimelightAimAndFire() {
             }
 
             launch {
-                turret.fieldOrientedPosition(drivetrain,
-                        turretPosition + reading1.tx + limelight.hardware.conversions.mountingBearing
+                turret.fieldOrientedPosition(
+                    drivetrain,
+                    turretPosition + reading1.tx + limelight.hardware.conversions.mountingBearing
                 )
             }
             launch { flywheel.set(snapshot1.flywheel) }

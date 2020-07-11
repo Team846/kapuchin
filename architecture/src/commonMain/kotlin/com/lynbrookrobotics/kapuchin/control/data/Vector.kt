@@ -20,39 +20,39 @@ interface Vector<T> {
 }
 
 data class UomVector<Q : Quan<Q>>(
-        override val x: Q,
-        override val y: Q,
-        override val z: Q = x * 0
+    override val x: Q,
+    override val y: Q,
+    override val z: Q = x * 0
 ) : Vector<Q> {
 
     operator fun plus(that: UomVector<Q>) = UomVector(
-            x + that.x,
-            y + that.y,
-            z + that.z
+        x + that.x,
+        y + that.y,
+        z + that.z
     )
 
     operator fun minus(that: UomVector<Q>) = UomVector(
-            this.x - that.x,
-            this.y - that.y,
-            this.z - that.z
+        this.x - that.x,
+        this.y - that.y,
+        this.z - that.z
     )
 
     operator fun times(that: Double) = UomVector(
-            this.x * that,
-            this.y * that,
-            this.z * that
+        this.x * that,
+        this.y * that,
+        this.z * that
     )
 
     operator fun div(that: Number) = UomVector(
-            this.x / that.toDouble(),
-            this.y / that.toDouble(),
-            this.z / that.toDouble()
+        this.x / that.toDouble(),
+        this.y / that.toDouble(),
+        this.z / that.toDouble()
     )
 
 }
 
 data class NumVector(
-        override val x: Double,
-        override val y: Double,
-        override val z: Double
+    override val x: Double,
+    override val y: Double,
+    override val z: Double
 ) : Vector<Double>

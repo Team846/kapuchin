@@ -95,12 +95,12 @@ class CarouselTest : Named by Named("Carousel Test") {
     }
 
     val defaultOffsets = listOf(0.1, 0.2, 0.3)
-            .map { it.CarouselSlot }
-            .flatMap { setOf(+it, -it) }
+        .map { it.CarouselSlot }
+        .flatMap { setOf(+it, -it) }
 
     fun CarouselState.assert(
-            it: Angle,
-            s0: Boolean, s1: Boolean, s2: Boolean, s3: Boolean, s4: Boolean
+        it: Angle,
+        s0: Boolean, s1: Boolean, s2: Boolean, s3: Boolean, s4: Boolean
     ) {
         assert(get(it + 0.CarouselSlot) == s0) { "get(${it.Degree withDecimals 0}˚ + 0.CarouselSlot) == $s0" }
         assert(get(it + 1.CarouselSlot) == s1) { "get(${it.Degree withDecimals 0}˚ + 1.CarouselSlot) == $s1" }
@@ -110,35 +110,35 @@ class CarouselTest : Named by Named("Carousel Test") {
     }
 
     fun CarouselState.assertWithOffsets(
-            it: Angle,
-            s0: Boolean, s1: Boolean, s2: Boolean, s3: Boolean, s4: Boolean,
-            offsets: Collection<Angle> = defaultOffsets
+        it: Angle,
+        s0: Boolean, s1: Boolean, s2: Boolean, s3: Boolean, s4: Boolean,
+        offsets: Collection<Angle> = defaultOffsets
     ) = offsets.forEach { offset -> assert(it + offset, s0, s1, s2, s3, s4) }
 
     fun CarouselState.assertThroughRotation(
-            s0: Boolean, s1: Boolean, s2: Boolean, s3: Boolean, s4: Boolean
+        s0: Boolean, s1: Boolean, s2: Boolean, s3: Boolean, s4: Boolean
     ) = (-50..50 step 5)
-            .shuffled(Random(846))
-            .map { it.CarouselSlot }
-            .forEach { base ->
-                assertWithOffsets(base - 6.CarouselSlot, s4, s0, s1, s2, s3)
-                assertWithOffsets(base - 5.CarouselSlot, s0, s1, s2, s3, s4)
-                assertWithOffsets(base - 4.CarouselSlot, s1, s2, s3, s4, s0)
-                assertWithOffsets(base - 3.CarouselSlot, s2, s3, s4, s0, s1)
-                assertWithOffsets(base - 2.CarouselSlot, s3, s4, s0, s1, s2)
-                assertWithOffsets(base - 1.CarouselSlot, s4, s0, s1, s2, s3)
-                assertWithOffsets(base - 0.CarouselSlot, s0, s1, s2, s3, s4)
-                assertWithOffsets(base + 0.CarouselSlot, s0, s1, s2, s3, s4)
-                assertWithOffsets(base + 1.CarouselSlot, s1, s2, s3, s4, s0)
-                assertWithOffsets(base + 2.CarouselSlot, s2, s3, s4, s0, s1)
-                assertWithOffsets(base + 3.CarouselSlot, s3, s4, s0, s1, s2)
-                assertWithOffsets(base + 4.CarouselSlot, s4, s0, s1, s2, s3)
-                assertWithOffsets(base + 5.CarouselSlot, s0, s1, s2, s3, s4)
-                assertWithOffsets(base + 6.CarouselSlot, s1, s2, s3, s4, s0)
-            }
+        .shuffled(Random(846))
+        .map { it.CarouselSlot }
+        .forEach { base ->
+            assertWithOffsets(base - 6.CarouselSlot, s4, s0, s1, s2, s3)
+            assertWithOffsets(base - 5.CarouselSlot, s0, s1, s2, s3, s4)
+            assertWithOffsets(base - 4.CarouselSlot, s1, s2, s3, s4, s0)
+            assertWithOffsets(base - 3.CarouselSlot, s2, s3, s4, s0, s1)
+            assertWithOffsets(base - 2.CarouselSlot, s3, s4, s0, s1, s2)
+            assertWithOffsets(base - 1.CarouselSlot, s4, s0, s1, s2, s3)
+            assertWithOffsets(base - 0.CarouselSlot, s0, s1, s2, s3, s4)
+            assertWithOffsets(base + 0.CarouselSlot, s0, s1, s2, s3, s4)
+            assertWithOffsets(base + 1.CarouselSlot, s1, s2, s3, s4, s0)
+            assertWithOffsets(base + 2.CarouselSlot, s2, s3, s4, s0, s1)
+            assertWithOffsets(base + 3.CarouselSlot, s3, s4, s0, s1, s2)
+            assertWithOffsets(base + 4.CarouselSlot, s4, s0, s1, s2, s3)
+            assertWithOffsets(base + 5.CarouselSlot, s0, s1, s2, s3, s4)
+            assertWithOffsets(base + 6.CarouselSlot, s1, s2, s3, s4, s0)
+        }
 
     fun CarouselState.assertClosest(
-            to: Angle, expected: Angle, f: KFunction1<Angle, `∠`?>
+        to: Angle, expected: Angle, f: KFunction1<Angle, `∠`?>
     ) = defaultOffsets.forEach { offset ->
         assert(f(to + offset)!! in expected `±` 1.Degree) {
             "${f.name}(${(offset + offset).Degree withDecimals 0}˚)!! == ${f(to)!!.Degree withDecimals 0}˚ != ${expected.Degree withDecimals 0}"

@@ -13,10 +13,10 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 actual class PlatformThread internal actual constructor(
-        parent: Named,
-        name: String,
-        priority: Priority,
-        run: () -> Unit
+    parent: Named,
+    name: String,
+    priority: Priority,
+    run: () -> Unit
 ) {
     private val thread = thread(name = "${parent.name} $name Thread", block = run)
 }

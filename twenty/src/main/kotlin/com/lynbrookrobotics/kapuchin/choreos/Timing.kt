@@ -46,10 +46,10 @@ suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball")
                     lastAcceleration < hardware.conversions.ballDecelerationThreshold &&
                     lastPercentSpeed < hardware.conversions.ballPercentDropThreshold)
 
-                    .also {
-                        lastAcceleration = acceleration
-                        lastPercentSpeed = percentSpeed
-                    }
+                .also {
+                    lastAcceleration = acceleration
+                    lastPercentSpeed = percentSpeed
+                }
         }
     }
 }

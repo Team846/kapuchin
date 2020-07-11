@@ -7,8 +7,8 @@ import info.kunalsheth.units.math.*
 fun theta(sl: Length, sr: Length, track: Length) = (sl - sr) / track * Radian
 
 class SimpleVectorTracking(
-        private var trackLength: Length,
-        init: Position
+    private var trackLength: Length,
+    init: Position
 ) : (Length, Length, Angle?) -> Unit {
 
     var x = init.x
@@ -27,7 +27,7 @@ class SimpleVectorTracking(
 }
 
 class CircularArcTracking(
-        init: Position
+    init: Position
 ) : (Length, Length, Angle) -> Unit {
 
     var x = init.x
@@ -60,9 +60,9 @@ class CircularArcTracking(
 }
 
 class HighFrequencyTracking(
-        private var trackLength: Length,
-        init: Position,
-        private var cache: Map<Angle, RotationMatrix> = emptyMap()
+    private var trackLength: Length,
+    init: Position,
+    private var cache: Map<Angle, RotationMatrix> = emptyMap()
 ) : (Length, Length) -> Unit {
 
     private var leftX: Length

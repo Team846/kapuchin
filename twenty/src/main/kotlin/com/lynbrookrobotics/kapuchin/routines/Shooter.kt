@@ -57,7 +57,7 @@ suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 2.Degree) = st
 
     controller {
         PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
-                .takeUnless { target - current in `±`(tolerance) }
+            .takeUnless { target - current in `±`(tolerance) }
     }
 }
 
@@ -68,8 +68,8 @@ suspend fun TurretComponent.manualOverride(operator: OperatorHardware) = startRo
 
 @Deprecated("Do not use. Doesn't work accross limelight pipeline shifts.")
 suspend fun TurretComponent.trackTarget(
-        limelight: LimelightComponent, flywheel: FlywheelComponent, drivetrain: DrivetrainComponent,
-        goal: Goal, tolerance: Angle? = null
+    limelight: LimelightComponent, flywheel: FlywheelComponent, drivetrain: DrivetrainComponent,
+    goal: Goal, tolerance: Angle? = null
 ) = startRoutine("Track Target") {
 
     val reading by limelight.hardware.readings.readOnTick.withoutStamps
@@ -83,13 +83,14 @@ suspend fun TurretComponent.trackTarget(
                 Inner -> with(limelight.hardware.conversions) {
                     val llTarget = goalPositions(snapshot, robotPosition.bearing)
                     val horizontalOffset = innerGoalOffsets(llTarget, flywheel.shooterHeight).first
-                    val dtheta = atan(innerGoalDepth / horizontalOffset) - (90.Degree - (snapshot.tx + limelight.hardware.conversions.mountingBearing + robotPosition.bearing))
+                    val dtheta =
+                        atan(innerGoalDepth / horizontalOffset) - (90.Degree - (snapshot.tx + limelight.hardware.conversions.mountingBearing + robotPosition.bearing))
                     current + snapshot.tx + limelight.hardware.conversions.mountingBearing - dtheta
                 }
             }
 
             PositionOutput(
-                    hardware.escConfig, positionGains, hardware.conversions.encoder.native(target)
+                hardware.escConfig, positionGains, hardware.conversions.encoder.native(target)
             ).takeUnless { (snapshot.tx + limelight.hardware.conversions.mountingBearing).abs < tolerance ?: -1.Degree }
         } ?: run {
             log(Debug) { "Lost sight of target!" }
@@ -98,18 +99,19 @@ suspend fun TurretComponent.trackTarget(
     }
 }
 
-suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponent, toTurretPosition: Angle? = null) = startRoutine("Field Oriented Position") {
-    val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
-    val turretPosition by hardware.position.readEagerly.withoutStamps
+suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponent, toTurretPosition: Angle? = null) =
+    startRoutine("Field Oriented Position") {
+        val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
+        val turretPosition by hardware.position.readEagerly.withoutStamps
 
-    // Initial field oriented bearing of the turret
-    val initial = drivetrainPosition.bearing `coterminal +` (toTurretPosition ?: turretPosition)
+        // Initial field oriented bearing of the turret
+        val initial = drivetrainPosition.bearing `coterminal +` (toTurretPosition ?: turretPosition)
 
-    controller {
-        val target = initial `coterminal -` drivetrainPosition.bearing
-        PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+        controller {
+            val target = initial `coterminal -` drivetrainPosition.bearing
+            PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+        }
     }
-}
 
 suspend fun TurretComponent.rezero(electrical: ElectricalSystemHardware) = startRoutine("Re-zero") {
     val vBat by electrical.batteryVoltage.readEagerly.withoutStamps

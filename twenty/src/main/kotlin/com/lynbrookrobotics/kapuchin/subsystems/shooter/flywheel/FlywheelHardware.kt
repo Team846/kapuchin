@@ -24,9 +24,9 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     private val invertMaster by pref(false)
     private val invertSlave by pref(true)
     val escConfig by escConfigPref(
-            defaultContinuousCurrentLimit = 30.Ampere,
-            defaultPeakCurrentLimit = 60.Ampere,
-            defaultVoltageCompSaturation = 11.Volt
+        defaultContinuousCurrentLimit = 30.Ampere,
+        defaultPeakCurrentLimit = 60.Ampere,
+        defaultVoltageCompSaturation = 11.Volt
     )
 
     val conversions = FlywheelConversions(this)

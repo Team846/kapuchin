@@ -14,7 +14,8 @@ import info.kunalsheth.units.generated.*
  * @see EventLoop
  * @see Clock
  */
-expect class Ticker internal constructor(parent: Named, priority: Priority, period: Time, name: String = "Ticker") : Named, Clock {
+expect class Ticker internal constructor(parent: Named, priority: Priority, period: Time, name: String = "Ticker") :
+    Named, Clock {
     fun waitOnTick(): Time
 
     var computeTime: Time

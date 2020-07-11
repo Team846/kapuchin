@@ -13,7 +13,8 @@ import info.kunalsheth.units.generated.*
  *
  * @param Q type of data being graphed
  */
-expect class Grapher<Q : Quan<Q>> internal constructor(parent: Named, of: String, withUnits: UomConverter<Q>) : Named, (Time, Q) -> Unit {
+expect class Grapher<Q : Quan<Q>> internal constructor(parent: Named, of: String, withUnits: UomConverter<Q>) : Named,
+        (Time, Q) -> Unit {
     override fun invoke(x: Time, y: Q)
 
     fun flush()
@@ -29,4 +30,5 @@ expect class Grapher<Q : Quan<Q>> internal constructor(parent: Named, of: String
  * @param withUnits y-axis units
  * @return new `Grapher` instance
  */
-fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>, parent: Named = this) = Grapher(parent, of, withUnits)
+fun <Q : Quan<Q>> Named.graph(of: String, withUnits: UomConverter<Q>, parent: Named = this) =
+    Grapher(parent, of, withUnits)

@@ -25,13 +25,14 @@ class ChoreographyTest {
         }
     }
 
-    private suspend fun CoroutineScope.countTo(c: ChoreographyTestC, vararg nums: Int) = startChoreo("count to ${nums.contentToString()}") {
-        choreography {
-            nums.forEach {
-                c.countTo(it)
+    private suspend fun CoroutineScope.countTo(c: ChoreographyTestC, vararg nums: Int) =
+        startChoreo("count to ${nums.contentToString()}") {
+            choreography {
+                nums.forEach {
+                    c.countTo(it)
+                }
             }
         }
-    }
 
     private fun ChoreographyTestC.check(eight: Int, four: Int, six: Int, tolerance: Int = 0) {
         checkCount(8, eight, tolerance)

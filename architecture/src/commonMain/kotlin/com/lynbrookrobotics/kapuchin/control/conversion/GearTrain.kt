@@ -28,16 +28,16 @@ data class GearTrain(val inputTeeth: Int, val outputTeeth: Int, val idlers: Int 
     fun inputToOutput(driveInput: Angle): Angle = driveInput * inOverOut * flip
 
     fun inputToOutput(driveInput: AngularVelocity) =
-            inputToOutput(driveInput * t) / t
+        inputToOutput(driveInput * t) / t
 
     fun inputToOutput(driveInput: AngularAcceleration) =
-            inputToOutput(driveInput * t) / t
+        inputToOutput(driveInput * t) / t
 
     fun outputToInput(driveOutput: Angle): Angle = driveOutput * outOverIn * flip
 
     fun outputToInput(driveOutput: AngularVelocity) =
-            outputToInput(driveOutput * t) / t
+        outputToInput(driveOutput * t) / t
 
     fun outputToInput(driveOutput: AngularAcceleration) =
-            outputToInput(driveOutput * t) / t
+        outputToInput(driveOutput * t) / t
 }

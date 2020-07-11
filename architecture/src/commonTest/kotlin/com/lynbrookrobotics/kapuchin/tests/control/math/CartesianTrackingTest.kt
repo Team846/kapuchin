@@ -16,33 +16,33 @@ class CartesianTrackingTest {
     fun `high frequency tracking rotation`() {
         val tracking = HighFrequencyTracking(2.Foot, Position(8.Foot, 4.Foot, 6.Degree))
         anyDouble.shuffled(Random(846))
-                .filter { it.absoluteValue > 0.1 }
-                .map { 0.03 + 1 / it }
-                .forEach {
-                    val sl = it.milli(Metre)
-                    val sr = -sl
+            .filter { it.absoluteValue > 0.1 }
+            .map { 0.03 + 1 / it }
+            .forEach {
+                val sl = it.milli(Metre)
+                val sr = -sl
 
-                    tracking(sl, sr)
+                tracking(sl, sr)
 
-                    tracking.x `is within?` (8.Foot `±` 0.1.Inch)
-                    tracking.y `is within?` (4.Foot `±` 0.1.Inch)
-                }
+                tracking.x `is within?` (8.Foot `±` 0.1.Inch)
+                tracking.y `is within?` (4.Foot `±` 0.1.Inch)
+            }
     }
 
     @Test
     fun `circular arc tracking rotation`() {
         val tracking = CircularArcTracking(Position(8.Foot, 4.Foot, 6.Degree))
         anyDouble.shuffled(Random(846))
-                .forEach {
-                    val sl = it.milli(Metre)
-                    val sr = -sl
+            .forEach {
+                val sl = it.milli(Metre)
+                val sr = -sl
 
-                    tracking(sl, sr, theta(sl, sr, 2.Foot))
-                    val x = tracking.x
-                    val y = tracking.y
-                    x `is within?` (8.Foot `±` 0.1.Inch)
-                    y `is within?` (4.Foot `±` 0.1.Inch)
-                }
+                tracking(sl, sr, theta(sl, sr, 2.Foot))
+                val x = tracking.x
+                val y = tracking.y
+                x `is within?` (8.Foot `±` 0.1.Inch)
+                y `is within?` (4.Foot `±` 0.1.Inch)
+            }
     }
 
     @Test

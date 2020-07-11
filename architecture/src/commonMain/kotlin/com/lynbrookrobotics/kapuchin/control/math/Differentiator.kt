@@ -19,8 +19,8 @@ import info.kunalsheth.units.generated.*
  * @param y1 initial value
  */
 fun <Q, DQDT> differentiator(
-        p: (Q, `÷`, T) -> DQDT,
-        x1: Time, y1: Q
+    p: (Q, `÷`, T) -> DQDT,
+    x1: Time, y1: Q
 ): (Time, Q) -> DQDT
 
         where Q : Quan<Q>,
@@ -30,7 +30,7 @@ fun <Q, DQDT> differentiator(
     var y1 = y1
 
     return fun(x2: Time, y2: Q) = p(
-            (y2 - y1), `÷`, (x2 - x1)
+        (y2 - y1), `÷`, (x2 - x1)
     ).also {
         x1 = x2
         y1 = y2

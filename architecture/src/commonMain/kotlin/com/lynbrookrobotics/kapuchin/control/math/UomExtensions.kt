@@ -34,7 +34,7 @@ fun <Q : Number> `±`(radius: Q) = 0.0 `±` radius
 inline fun <Q : Quan<Q>> `±`(radius: Q) = radius.new(0.0) `±` radius
 
 inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊆`(that: ClosedRange<Q>): Boolean =
-        that.start <= this.start && this.endInclusive <= that.endInclusive
+    that.start <= this.start && this.endInclusive <= that.endInclusive
 
 /**
  *
@@ -49,7 +49,11 @@ inline infix fun <Q : Quan<Q>> ClosedRange<Q>.`⊆`(that: ClosedRange<Q>): Boole
  * @param leftBound the left extreme of `Q`. If the underlying mechanism for comparison is Int, make sure you
  * add 1 to leftBound otherwise `Q.abs` will fail due to integer overflow.
  */
-fun <Q : Quan<Q>> unionizeAndFindClosestRange(sequence: Sequence<ClosedRange<Q>>, current: Q, leftBound: Q): ClosedRange<Q> {
+fun <Q : Quan<Q>> unionizeAndFindClosestRange(
+    sequence: Sequence<ClosedRange<Q>>,
+    current: Q,
+    leftBound: Q
+): ClosedRange<Q> {
 
     var currLeft = leftBound
     var currRight = leftBound

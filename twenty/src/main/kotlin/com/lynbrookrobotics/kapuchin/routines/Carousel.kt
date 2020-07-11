@@ -19,7 +19,7 @@ suspend fun CarouselComponent.set(targetPosition: Angle, tolerance: Angle = 2.5.
 
     controller {
         PositionOutput(
-                hardware.escConfig, positionGains, hardware.conversions.encoder.native(targetPosition)
+            hardware.escConfig, positionGains, hardware.conversions.encoder.native(targetPosition)
         ).takeUnless { targetPosition - current in `±`(tolerance) }
     }
 }
@@ -41,8 +41,8 @@ suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
             val j = launch { set(start + i.CarouselSlot - collectSlot, 0.Degree) }
             delay(0.1.Second)
             state.set(
-                    carouselAngle + collectSlot,
-                    hardware.conversions.detectingBall(proximity, color)
+                carouselAngle + collectSlot,
+                hardware.conversions.detectingBall(proximity, color)
             )
             j.cancel()
         }

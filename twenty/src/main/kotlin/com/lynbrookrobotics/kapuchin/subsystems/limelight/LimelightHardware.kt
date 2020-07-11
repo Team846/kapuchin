@@ -30,20 +30,20 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private infix fun <Q> Q.lstamp(withTime: Time) = TimeStamped(
-            withTime - l("tl").milli(Second) - 11.milli(Second), this
+        withTime - l("tl").milli(Second) - 11.milli(Second), this
     )
 
     val readings = sensor {
         when {
             l("tv").toInt() == 1 -> LimelightReading(
-                    l("ty").Degree * if (invertTy) -1 else 1,
-                    l("tx").Degree * if (invertTx) -1 else 1,
-                    l("ty0").Each, l("tx0").Each,
-                    l("tvert").Each, l("thor").Each,
-                    l("ta").Each,// this is actually Pixels Squared
-                    l("getpipe").toInt().let { rawpipe ->
-                        Pipeline.values().firstOrNull { it.number == rawpipe }
-                    }
+                l("ty").Degree * if (invertTy) -1 else 1,
+                l("tx").Degree * if (invertTx) -1 else 1,
+                l("ty0").Each, l("tx0").Each,
+                l("tvert").Each, l("thor").Each,
+                l("ta").Each,// this is actually Pixels Squared
+                l("getpipe").toInt().let { rawpipe ->
+                    Pipeline.values().firstOrNull { it.number == rawpipe }
+                }
             )
             else -> null
         } lstamp it

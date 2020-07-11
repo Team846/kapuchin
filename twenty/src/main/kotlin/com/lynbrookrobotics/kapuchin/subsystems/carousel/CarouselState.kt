@@ -10,7 +10,7 @@ class CarouselState(component: Named) : Named by Named("State", component) {
     private val internal = arrayOf(false, false, false, false, false)
 
     private fun index(robotBearing: Angle) =
-            Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
+        Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
 
     operator fun get(robotBearing: Angle) = internal[index(robotBearing)]
 
@@ -52,6 +52,6 @@ class CarouselState(component: Named) : Named by Named("State", component) {
     val size = internal.size
 
     override fun toString() = internal.joinToString(
-            prefix = "CarouselState(", separator = ", ", postfix = ")"
+        prefix = "CarouselState(", separator = ", ", postfix = ")"
     )
 }

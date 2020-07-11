@@ -13,7 +13,8 @@ import info.kunalsheth.units.math.*
 
 enum class ShooterHoodState(val output: Boolean) { Up(true), Down(false) }
 
-class ShooterHoodComponent(hardware: ShooterHoodHardware) : Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, shooterTicker) {
+class ShooterHoodComponent(hardware: ShooterHoodHardware) :
+    Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, shooterTicker) {
 
     val hoodUpLaunch by pref(20, Degree)
     val hoodDownLaunch by pref(50, Degree)

@@ -101,13 +101,13 @@ expect fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>
  * @param Value type of preference data being managed
  */
 open class Preference<Value>(
-        private val parent: Named,
-        private val fallback: Value,
-        private val init: (String, Value) -> Unit,
-        private val get: (String, Value) -> Value,
-        private val contains: (String) -> Boolean,
-        private val registerCallback: (String, () -> Unit) -> Unit,
-        private val prefNameSuffix: String = ""
+    private val parent: Named,
+    private val fallback: Value,
+    private val init: (String, Value) -> Unit,
+    private val get: (String, Value) -> Value,
+    private val contains: (String) -> Boolean,
+    private val registerCallback: (String, () -> Unit) -> Unit,
+    private val prefNameSuffix: String = ""
 ) : Named, DelegateProvider<Any?, Value>, () -> Unit {
 
     final override lateinit var name: String
@@ -127,7 +127,7 @@ open class Preference<Value>(
 
         return object : ReadOnlyProperty<Any?, Value> {
             override fun getValue(thisRef: Any?, property: KProperty<*>) = value
-                    ?: get(name, fallback).also { value = it }
+                ?: get(name, fallback).also { value = it }
         }
     }
 

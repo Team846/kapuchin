@@ -21,11 +21,11 @@ fun <Q : Quan<Q>> outsideThresholdChecker(safeRange: ClosedRange<Q>, forDuration
     var start: Time? = null
 
     return fun(x: Time, y: Q) =
-            if (y !in safeRange) {
-                if (start == null) start = x
-                x - (start ?: x) > forDuration
-            } else {
-                start = null
-                false
-            }
+        if (y !in safeRange) {
+            if (start == null) start = x
+            x - (start ?: x) > forDuration
+        } else {
+            start = null
+            false
+        }
 }

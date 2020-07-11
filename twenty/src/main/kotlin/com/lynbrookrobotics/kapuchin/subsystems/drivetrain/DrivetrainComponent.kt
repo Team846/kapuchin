@@ -11,7 +11,9 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import info.kunalsheth.units.generated.*
 
-class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware), GenericDrivetrainComponent {
+class DrivetrainComponent(hardware: DrivetrainHardware) :
+    Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware),
+    GenericDrivetrainComponent {
 
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
@@ -26,16 +28,16 @@ class DrivetrainComponent(hardware: DrivetrainHardware) : Component<DrivetrainCo
         val kF by pref(110, Percent)
         ({
             val left = OffloadedEscGains(
-                    kP = hardware.conversions.encoder.left.native(kP),
-                    kF = hardware.conversions.encoder.left.native(
-                            Gain(hardware.escConfig.voltageCompSaturation, maxLeftSpeed)
-                    ) * kF.Each
+                kP = hardware.conversions.encoder.left.native(kP),
+                kF = hardware.conversions.encoder.left.native(
+                    Gain(hardware.escConfig.voltageCompSaturation, maxLeftSpeed)
+                ) * kF.Each
             )
             val right = OffloadedEscGains(
-                    kP = hardware.conversions.encoder.right.native(kP),
-                    kF = hardware.conversions.encoder.right.native(
-                            Gain(hardware.escConfig.voltageCompSaturation, maxRightSpeed)
-                    ) * kF.Each
+                kP = hardware.conversions.encoder.right.native(kP),
+                kF = hardware.conversions.encoder.right.native(
+                    Gain(hardware.escConfig.voltageCompSaturation, maxRightSpeed)
+                ) * kF.Each
             )
             TwoSided(left, right)
         })

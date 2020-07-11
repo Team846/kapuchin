@@ -25,9 +25,9 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     private val invert by pref(false)
     private val limitSwitchOffset by pref(185.5, Degree)
     val escConfig by escConfigPref(
-            defaultNominalOutput = 1.Volt,
-            defaultContinuousCurrentLimit = 15.Ampere,
-            defaultPeakCurrentLimit = 25.Ampere
+        defaultNominalOutput = 1.Volt,
+        defaultContinuousCurrentLimit = 15.Ampere,
+        defaultPeakCurrentLimit = 25.Ampere
     )
 
     val conversions = TurretConversions(this)
@@ -55,7 +55,7 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     }.with(graph("Angle", Degree))
 
     val atZero = sensor(limitSwitch) { get() stampWith it }
-            .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
+        .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
 
     fun zero() {
         if (isZeroed) log(Error) { "Already zeroed!" }

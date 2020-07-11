@@ -16,7 +16,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRollerComponent, FeederRollerHardware, OffloadedOutput>(hardware, shooterTicker) {
+class FeederRollerComponent(hardware: FeederRollerHardware) :
+    Component<FeederRollerComponent, FeederRollerHardware, OffloadedOutput>(hardware, shooterTicker) {
 
     val maxSpeed by pref(11000, Rpm)
 
@@ -28,10 +29,10 @@ class FeederRollerComponent(hardware: FeederRollerHardware) : Component<FeederRo
         val kF by pref(110, Percent)
         ({
             OffloadedEscGains(
-                    kP = hardware.conversions.native(kP),
-                    kF = hardware.conversions.native(
-                            Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
-                    ) * kF.Each
+                kP = hardware.conversions.native(kP),
+                kF = hardware.conversions.native(
+                    Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
+                ) * kF.Each
             )
         })
     }
@@ -53,10 +54,10 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
 
     private val invert by pref(false)
     val escConfig by escConfigPref(
-            defaultNominalOutput = 0.5.Volt,
-            defaultContinuousCurrentLimit = 25.Ampere,
-            defaultPeakCurrentLimit = 35.Ampere,
-            defaultVoltageCompSaturation = 11.Volt
+        defaultNominalOutput = 0.5.Volt,
+        defaultContinuousCurrentLimit = 25.Ampere,
+        defaultPeakCurrentLimit = 35.Ampere,
+        defaultVoltageCompSaturation = 11.Volt
     )
 
     private val escId = 61
@@ -74,10 +75,11 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
         conversions.realVelocity(encoder.velocity) stampWith it
     }.with(graph("Speed", Rpm))
 
-    val conversions = AngularOffloadedNativeConversion(::p, ::p, ::p, ::p,
-            nativeOutputUnits = 1, perOutputQuantity = escConfig.voltageCompSaturation,
-            nativeFeedbackUnits = 1, perFeedbackQuantity = 1.Turn,
-            nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
+    val conversions = AngularOffloadedNativeConversion(
+        ::p, ::p, ::p, ::p,
+        nativeOutputUnits = 1, perOutputQuantity = escConfig.voltageCompSaturation,
+        nativeFeedbackUnits = 1, perFeedbackQuantity = 1.Turn,
+        nativeTimeUnit = 1.Minute, nativeRateUnit = 1.milli(Second)
     )
 
     init {

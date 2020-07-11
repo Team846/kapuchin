@@ -3,8 +3,8 @@ package com.lynbrookrobotics.kapuchin.control.math.kinematics
 import info.kunalsheth.units.generated.*
 
 fun trapezoidalMotionProfile(
-        deceleration: Acceleration,
-        topSpeed: Velocity
+    deceleration: Acceleration,
+    topSpeed: Velocity
 ): (Length) -> Velocity {
 
     // cad18/trunk/Users/Kunal Sheth/trapezoidal-motion-profile.gcx

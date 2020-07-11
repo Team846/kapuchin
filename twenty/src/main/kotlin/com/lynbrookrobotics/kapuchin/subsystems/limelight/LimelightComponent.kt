@@ -5,7 +5,8 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import info.kunalsheth.units.generated.*
 
-class LimelightComponent(hardware: LimelightHardware) : Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware, uiBaselineTicker) {
+class LimelightComponent(hardware: LimelightHardware) :
+    Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware, uiBaselineTicker) {
 
     val allowInnerGoal by pref(false)
 

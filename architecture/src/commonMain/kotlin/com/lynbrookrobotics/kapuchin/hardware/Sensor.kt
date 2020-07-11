@@ -28,27 +28,28 @@ class Sensor<Input> internal constructor(internal val read: (Time) -> TimeStampe
 
     internal var value: TimeStamped<Input>? = null
     fun optimizedRead(atTime: Time, syncThreshold: Time) =
-            value
-                    ?.takeIf { it.x in atTime `±` syncThreshold }
-                    ?: blockingMutex(this) {
-                        read(atTime).also { value = it }
-                    }
+        value
+            ?.takeIf { it.x in atTime `±` syncThreshold }
+            ?: blockingMutex(this) {
+                read(atTime).also { value = it }
+            }
 
     class UpdateSource<Input>(
-            private val forSensor: Sensor<Input>,
-            private val startUpdates: (Sensor<Input>) -> Unit = { _ -> },
-            private val getValue: (Sensor<Input>) -> TimeStamped<Input> = {
-                it.value ?: it.optimizedRead(currentTime, 0.Second)
-            }
+        private val forSensor: Sensor<Input>,
+        private val startUpdates: (Sensor<Input>) -> Unit = { _ -> },
+        private val getValue: (Sensor<Input>) -> TimeStamped<Input> = {
+            it.value ?: it.optimizedRead(currentTime, 0.Second)
+        }
     ) {
         /**
          * Get sensor data only
          */
         val withoutStamps
             get() = object : DelegateProvider<Any?, Input> {
-                override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, Input> {
-                    override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).y
-                }.also { startUpdates(forSensor) }
+                override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) =
+                    object : ReadOnlyProperty<Any?, Input> {
+                        override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor).y
+                    }.also { startUpdates(forSensor) }
             }
 
         /**
@@ -56,9 +57,10 @@ class Sensor<Input> internal constructor(internal val read: (Time) -> TimeStampe
          */
         val withStamps
             get() = object : DelegateProvider<Any?, TimeStamped<Input>> {
-                override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) = object : ReadOnlyProperty<Any?, TimeStamped<Input>> {
-                    override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor)
-                }.also { startUpdates(forSensor) }
+                override fun provideDelegate(thisRef: Any?, prop: KProperty<*>) =
+                    object : ReadOnlyProperty<Any?, TimeStamped<Input>> {
+                        override fun getValue(thisRef: Any?, property: KProperty<*>) = getValue(forSensor)
+                    }.also { startUpdates(forSensor) }
             }
     }
 }
@@ -87,7 +89,8 @@ fun <Input> RobotHardware<*>.sensor(read: (Time) -> TimeStamped<Input>) = Sensor
  * @param read function to read new sensor data from the hardware object
  * @return new `Sensor` instance for the given read function and hardware object
  */
-fun <Hardw, Input> RobotHardware<*>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) = Sensor { read(hardw, it) }
+fun <Hardw, Input> RobotHardware<*>.sensor(hardw: Hardw, read: Hardw.(Time) -> TimeStamped<Input>) =
+    Sensor { read(hardw, it) }
 
 /**
  * Graph new sensor data whenever it is read
@@ -97,7 +100,7 @@ fun <Hardw, Input> RobotHardware<*>.sensor(hardw: Hardw, read: Hardw.(Time) -> T
  * @return new `Sensor` instance with the given grapher
  */
 fun <QInput : Quan<QInput>> Sensor<QInput>.with(graph: Grapher<QInput>) =
-        Sensor { t -> read(t).also { graph(it.x, it.y) } }
+    Sensor { t -> read(t).also { graph(it.x, it.y) } }
 
 /**
  * Graph new sensor data whenever it is read
@@ -109,4 +112,4 @@ fun <QInput : Quan<QInput>> Sensor<QInput>.with(graph: Grapher<QInput>) =
  * @return new `Sensor` instance with the given grapher
  */
 fun <Input, QInput : Quan<QInput>> Sensor<Input>.with(graph: Grapher<QInput>, structure: (Input) -> QInput) =
-        Sensor { t -> read(t).also { graph(it.x, structure(it.y)) } }
+    Sensor { t -> read(t).also { graph(it.x, structure(it.y)) } }

@@ -38,14 +38,14 @@ class FunkyRobot : RobotBase() {
 
         scope.launch {
             runWhenever(
-                    { isEnabled && isOperatorControl } to choreography {
-                        System.gc()
-                        subsystems.teleop()
-                    },
-                    { isEnabled && isAutonomous } to choreography {
-                        System.gc()
+                { isEnabled && isOperatorControl } to choreography {
+                    System.gc()
+                    subsystems.teleop()
+                },
+                { isEnabled && isAutonomous } to choreography {
+                    System.gc()
 
-                        subsystems.auto()
+                    subsystems.auto()
 
 //                        withTimeout(5.Second) { subsystems.climberWinch?.set(0.Percent) } // should release chode
 //                        subsystems.climberWinch?.set(10.Percent) // extend is positive
@@ -107,17 +107,17 @@ class FunkyRobot : RobotBase() {
 //                            withTimeout(3.Second) { subsystems.turret?.set(90.Degree, 0.Degree) }
 //                        }
 
-                        freeze()
+                    freeze()
 //                      subsystems.drivetrain.set(0.Percent)
-                    },
-                    { isDisabled && !isTest } to choreography {
-                        subsystems.warmup()
-                    },
-                    { isTest } to choreography {
-                        System.gc()
-                        launch { subsystems.journalPath() }
-                        subsystems.teleop()
-                    }
+                },
+                { isDisabled && !isTest } to choreography {
+                    subsystems.warmup()
+                },
+                { isTest } to choreography {
+                    System.gc()
+                    launch { subsystems.journalPath() }
+                    subsystems.teleop()
+                }
             )
         }
 
@@ -148,20 +148,20 @@ val classPreloading = scope.launch {
     println("Loading classes...")
     val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
     Thread.currentThread()
-            .contextClassLoader
-            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")!!
-            .bufferedReader()
-            .lineSequence()
-            .filter { it.matches(classNameRegex) }
-            .map { it.replace(classNameRegex, "$1") }
-            .forEach {
-                launch {
-                    try {
-                        Class.forName(it)
-                    } catch (t: Throwable) {
-                    }
+        .contextClassLoader
+        .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")!!
+        .bufferedReader()
+        .lineSequence()
+        .filter { it.matches(classNameRegex) }
+        .map { it.replace(classNameRegex, "$1") }
+        .forEach {
+            launch {
+                try {
+                    Class.forName(it)
+                } catch (t: Throwable) {
                 }
             }
+        }
 }
 
 private fun printRunID() {

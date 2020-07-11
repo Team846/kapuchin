@@ -19,7 +19,8 @@ import edu.wpi.first.wpilibj.I2C.Port
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware) {
+class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) :
+    Component<ControlPanelSpinnerComponent, ControlPanelSpinnerHardware, DutyCycle>(hardware) {
 
     val kP by pref(10, Volt, 1, Turn)
     val kD by pref(10, Volt, 60, Rpm)
@@ -31,7 +32,8 @@ class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) : Comp
     }
 }
 
-class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<ControlPanelSpinnerHardware, ControlPanelSpinnerComponent>() {
+class ControlPanelSpinnerHardware(driver: DriverHardware) :
+    SubsystemHardware<ControlPanelSpinnerHardware, ControlPanelSpinnerComponent>() {
     override val period by sharedTickerTiming
     override val syncThreshold = 20.milli(Second)
     override val priority = Priority.High
@@ -54,8 +56,15 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
     val encoderPosition = sensor(encoder) { conversions.encoderPositionDelta(position.Turn) stampWith it }
 
     val colorSensor by hardw { ColorSensorV3(Port.kOnboard) }.configure {
-        it.configureColorSensor(ColorSensorResolution.kColorSensorRes18bit, ColorSensorMeasurementRate.kColorRate25ms, GainFactor.kGain3x)
-        it.configureProximitySensor(ProximitySensorResolution.kProxRes11bit, ProximitySensorMeasurementRate.kProxRate6ms)
+        it.configureColorSensor(
+            ColorSensorResolution.kColorSensorRes18bit,
+            ColorSensorMeasurementRate.kColorRate25ms,
+            GainFactor.kGain3x
+        )
+        it.configureProximitySensor(
+            ProximitySensorResolution.kProxRes11bit,
+            ProximitySensorMeasurementRate.kProxRate6ms
+        )
         it.configureProximitySensorLED(LEDPulseFrequency.kFreq60kHz, LEDCurrent.kPulse125mA, 8)
     }.verify("the color sensor is connected") {
         // TODO: Must test empirically
@@ -64,12 +73,12 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
 
     private val colorNamed = Named("Color Sensor", this)
     val color = sensor(colorSensor) { color stampWith it }
-            .with(graph("R", Percent, colorNamed)) { it.red.Each }
-            .with(graph("G", Percent, colorNamed)) { it.green.Each }
-            .with(graph("B", Percent, colorNamed)) { it.blue.Each }
+        .with(graph("R", Percent, colorNamed)) { it.red.Each }
+        .with(graph("G", Percent, colorNamed)) { it.green.Each }
+        .with(graph("B", Percent, colorNamed)) { it.blue.Each }
 
     val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
-            .with(graph("IR", Percent, colorNamed))
+        .with(graph("IR", Percent, colorNamed))
 
     val targetColor = sensor {
         when (driver.station.gameSpecificMessage.trim()) {
@@ -81,7 +90,7 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) : SubsystemHardware<Co
             else -> null
         } stampWith it
     }
-            .with(graph("Target Color", Each)) { (it?.run(conversions::indexColor) ?: -1).Each }
+        .with(graph("Target Color", Each)) { (it?.run(conversions::indexColor) ?: -1).Each }
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

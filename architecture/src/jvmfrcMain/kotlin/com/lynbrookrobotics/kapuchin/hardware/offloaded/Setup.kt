@@ -66,7 +66,12 @@ fun RobotHardware<*>.generalSetup(esc: CANSparkMax, config: OffloadedEscConfigur
     +esc.setCANTimeout(config.timeoutMs)
 }
 
-fun SubsystemHardware<*, *>.setupMaster(master: BaseTalon, config: OffloadedEscConfiguration, sensor: FeedbackDevice, fastOnboard: Boolean) {
+fun SubsystemHardware<*, *>.setupMaster(
+    master: BaseTalon,
+    config: OffloadedEscConfiguration,
+    sensor: FeedbackDevice,
+    fastOnboard: Boolean
+) {
     generalSetup(master, config)
 
     +master.setControlFramePeriod(Control_3_General, syncThreshold.milli(Second).toInt())

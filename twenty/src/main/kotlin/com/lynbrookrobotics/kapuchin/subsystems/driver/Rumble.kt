@@ -12,7 +12,8 @@ import info.kunalsheth.units.math.*
 
 typealias Rumble = TwoSided<DutyCycle>
 
-class RumbleComponent(hardware: RumbleHardware) : Component<RumbleComponent, RumbleHardware, Rumble>(hardware, EventLoop) {
+class RumbleComponent(hardware: RumbleHardware) :
+    Component<RumbleComponent, RumbleHardware, Rumble>(hardware, EventLoop) {
 
     override val fallbackController: RumbleComponent.(Time) -> Rumble = { TwoSided(0.Percent) }
 
@@ -30,8 +31,8 @@ class RumbleComponent(hardware: RumbleHardware) : Component<RumbleComponent, Rum
 }
 
 class RumbleHardware(
-        val driver: DriverHardware,
-        val operator: OperatorHardware
+    val driver: DriverHardware,
+    val operator: OperatorHardware
 ) : SubsystemHardware<RumbleHardware, RumbleComponent>() {
     override val period by sharedTickerTiming
     override val syncThreshold = 10.milli(Second)

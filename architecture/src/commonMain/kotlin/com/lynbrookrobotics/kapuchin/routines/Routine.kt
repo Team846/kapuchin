@@ -20,12 +20,12 @@ import kotlin.coroutines.resumeWithException
  * @param Output type of this subsystem's output
  */
 class Routine<C, H, Output> internal constructor(
-        parent: C, name: String,
-        private val controller: C.(Time) -> Output?,
-        cont: CancellableContinuation<Unit>
+    parent: C, name: String,
+    private val controller: C.(Time) -> Output?,
+    cont: CancellableContinuation<Unit>
 ) :
-        CancellableContinuation<Unit> by cont,
-        Named by Named(name, parent),
+    CancellableContinuation<Unit> by cont,
+    Named by Named(name, parent),
         (C, Time) -> Output
 
         where C : Component<C, H, Output>,
@@ -39,10 +39,10 @@ class Routine<C, H, Output> internal constructor(
      * @return next subsystem output
      */
     override fun invoke(c: C, t: Time) =
-            try {
-                controller(c, t) ?: c.fallbackController(c, t).also { resume(Unit) }
-            } catch (e: Throwable) {
-                resumeWithException(e)
-                c.fallbackController(c, t)
-            }
+        try {
+            controller(c, t) ?: c.fallbackController(c, t).also { resume(Unit) }
+        } catch (e: Throwable) {
+            resumeWithException(e)
+            c.fallbackController(c, t)
+        }
 }

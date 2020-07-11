@@ -9,8 +9,11 @@ import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.*
 import info.kunalsheth.units.generated.*
 
 @ExperimentalUnsignedTypes
-class RealtimeChecker private constructor(parent: Ticker, private val setJitterPin: (Boolean) -> Unit, private val getPeriod: () -> Time)
-    : Named by Named("Real-time Checker", parent) {
+class RealtimeChecker private constructor(
+    parent: Ticker,
+    private val setJitterPin: (Boolean) -> Unit,
+    private val getPeriod: () -> Time
+) : Named by Named("Real-time Checker", parent) {
 
     val loopPeriodGraph = graph("Loop Period", Millisecond)
     val computeTimeGraph = graph("Compute Time", Millisecond)
@@ -45,7 +48,8 @@ class RealtimeChecker private constructor(parent: Ticker, private val setJitterP
             if (logGc && deriv.isNegative) log(Debug) { "Collected Garbage" }
         }
 
-        fun Ticker.realtimeChecker(setJitterPin: (Boolean) -> Unit, getPeriod: () -> Time) = RealtimeChecker(this, setJitterPin, getPeriod)
+        fun Ticker.realtimeChecker(setJitterPin: (Boolean) -> Unit, getPeriod: () -> Time) =
+            RealtimeChecker(this, setJitterPin, getPeriod)
     }
 }
 

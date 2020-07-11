@@ -14,8 +14,11 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
 
     val visionTarget by hardware.readings.readEagerly.withoutStamps
 
-    infix fun <Q : Quan<Q>> ClosedRange<Q>.more(that: ClosedRange<Q>): Boolean = this.start > that.start && this.endInclusive > that.endInclusive
-    infix fun <Q : Quan<Q>> ClosedRange<Q>.less(that: ClosedRange<Q>): Boolean = this.start < that.start && this.endInclusive < that.endInclusive
+    infix fun <Q : Quan<Q>> ClosedRange<Q>.more(that: ClosedRange<Q>): Boolean =
+        this.start > that.start && this.endInclusive > that.endInclusive
+
+    infix fun <Q : Quan<Q>> ClosedRange<Q>.less(that: ClosedRange<Q>): Boolean =
+        this.start < that.start && this.endInclusive < that.endInclusive
 
     controller {
         with(hardware.conversions) {

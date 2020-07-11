@@ -9,13 +9,13 @@ import java.util.concurrent.TimeUnit
 import kotlin.system.measureNanoTime
 
 actual class Ticker internal actual constructor(
-        parent: Named,
-        priority: Priority,
-        val period: Time,
-        name: String
+    parent: Named,
+    priority: Priority,
+    val period: Time,
+    name: String
 ) :
-        Named by Named(name, parent),
-        Clock {
+    Named by Named(name, parent),
+    Clock {
 
     actual var computeTime = 0.Second
         private set
@@ -25,17 +25,17 @@ actual class Ticker internal actual constructor(
 
     init {
         exec.scheduleAtFixedRate(
-                {
-                    computeTime = measureNanoTime {
-                        try {
-                            tick(currentTime)
-                        } catch (e: Throwable) {
-                            e.printStackTrace()
-                            throw e
-                        }
-                    }.nano(Second)
-                },
-                100, period.milli(Second).toLong(), TimeUnit.MILLISECONDS
+            {
+                computeTime = measureNanoTime {
+                    try {
+                        tick(currentTime)
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
+                        throw e
+                    }
+                }.nano(Second)
+            },
+            100, period.milli(Second).toLong(), TimeUnit.MILLISECONDS
         )
     }
 

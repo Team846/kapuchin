@@ -7,7 +7,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 
-class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, shooterTicker) {
+class TurretComponent(hardware: TurretHardware) :
+    Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, shooterTicker) {
 
     val safeSpeed by pref(1, Volt)
     val windupPosition by pref(-90, Degree)
@@ -17,8 +18,8 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
         val kD by pref(0, Volt, 60, DegreePerSecond)
         ({
             OffloadedEscGains(
-                    kP = hardware.conversions.encoder.native(kP),
-                    kD = hardware.conversions.encoder.native(kD)
+                kP = hardware.conversions.encoder.native(kP),
+                kD = hardware.conversions.encoder.native(kD)
             )
         })
     }
@@ -30,14 +31,18 @@ class TurretComponent(hardware: TurretHardware) : Component<TurretComponent, Tur
     override fun TurretHardware.output(value: OffloadedOutput) = with(hardware.conversions) {
         if (atZero.optimizedRead(currentTime, 0.Second).y && !isZeroed) zero()
 
-        val safeValue = if (!isZeroed) value.with(value.config.copy(
+        val safeValue = if (!isZeroed) value.with(
+            value.config.copy(
                 peakOutputForward = safeSpeed,
                 peakOutputReverse = -safeSpeed
-        ))
-        else value.with(OffloadedEscSafeties(
+            )
+        )
+        else value.with(
+            OffloadedEscSafeties(
                 min = encoder.native(min),
                 max = encoder.native(max)
-        ))
+            )
+        )
 
         safeValue.writeTo(esc, pidController)
     }

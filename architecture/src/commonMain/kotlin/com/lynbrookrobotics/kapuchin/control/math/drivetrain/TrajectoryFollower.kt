@@ -18,24 +18,24 @@ import info.kunalsheth.units.generated.*
  * @param origin the starting position of the robot.
  */
 class TrajectoryFollower(
-        private val drivetrain: GenericDrivetrainComponent,
-        private val tolerance: Length,
-        private val endTolerance: Length,
-        private val reverse: Boolean,
-        scope: BoundSensorScope,
-        trajectory: Trajectory,
-        origin: Position
+    private val drivetrain: GenericDrivetrainComponent,
+    private val tolerance: Length,
+    private val endTolerance: Length,
+    private val reverse: Boolean,
+    scope: BoundSensorScope,
+    trajectory: Trajectory,
+    origin: Position
 ) {
 
     // Make waypoints relative to origin
     private val waypoints = origin.bearing
-            .let { if (reverse) 180.Degree `coterminal +` it else it }
-            .let { RotationMatrix(it) }
-            .let { mtrx ->
-                trajectory
-                        .map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
-                        .iterator()
-            }
+        .let { if (reverse) 180.Degree `coterminal +` it else it }
+        .let { RotationMatrix(it) }
+        .let { mtrx ->
+            trajectory
+                .map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
+                .iterator()
+        }
 
     private var target = waypoints.next()
     private var done = false
@@ -67,8 +67,8 @@ class TrajectoryFollower(
         val targetA = (target.y - position.vector).bearing
 
         val (velocityL, velocityR) = uni.speedTargetAngleTarget(
-                if (reverse) -speed else speed,
-                if (reverse) 180.Degree `coterminal +` targetA else targetA
+            if (reverse) -speed else speed,
+            if (reverse) 180.Degree `coterminal +` targetA else targetA
         ).first
 
         return TwoSided(velocityL, velocityR).takeIf { !done }

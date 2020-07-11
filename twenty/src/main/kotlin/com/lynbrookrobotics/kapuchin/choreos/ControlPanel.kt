@@ -12,9 +12,9 @@ suspend fun Subsystems.controlPanelTeleop() = startChoreo("Control Panel Teleop"
 
     choreography {
         runWhenever(
-                { extend } to choreography { controlPanelPivot?.set(Up) ?: freeze() },
-                { stage2 } to choreography { controlPanelSpinner?.spinStage2(electrical) ?: freeze() },
-                { stage3 } to choreography { TODO("Control Panel Stage 3") }
+            { extend } to choreography { controlPanelPivot?.set(Up) ?: freeze() },
+            { stage2 } to choreography { controlPanelSpinner?.spinStage2(electrical) ?: freeze() },
+            { stage3 } to choreography { TODO("Control Panel Stage 3") }
         )
     }
 }

@@ -12,32 +12,43 @@ import java.io.File
 
 private val impl = Preferences2.getInstance()
 
-actual fun Named.pref(fallback: Boolean) = Preference(this, fallback, impl::putBoolean, impl::getBoolean, impl::containsKey, ::registerCallback)
-actual fun Named.pref(fallback: Double) = Preference(this, fallback, impl::putDouble, impl::getDouble, impl::containsKey, ::registerCallback)
-actual fun Named.pref(fallback: Float) = Preference(this, fallback, impl::putFloat, impl::getFloat, impl::containsKey, ::registerCallback)
-actual fun Named.pref(fallback: Int) = Preference(this, fallback, impl::putInt, impl::getInt, impl::containsKey, ::registerCallback)
-actual fun Named.pref(fallback: Long) = Preference(this, fallback, impl::putLong, impl::getLong, impl::containsKey, ::registerCallback)
-actual fun Named.pref(fallback: String) = Preference(this, fallback, impl::putString, impl::getString, impl::containsKey, ::registerCallback)
+actual fun Named.pref(fallback: Boolean) =
+    Preference(this, fallback, impl::putBoolean, impl::getBoolean, impl::containsKey, ::registerCallback)
+
+actual fun Named.pref(fallback: Double) =
+    Preference(this, fallback, impl::putDouble, impl::getDouble, impl::containsKey, ::registerCallback)
+
+actual fun Named.pref(fallback: Float) =
+    Preference(this, fallback, impl::putFloat, impl::getFloat, impl::containsKey, ::registerCallback)
+
+actual fun Named.pref(fallback: Int) =
+    Preference(this, fallback, impl::putInt, impl::getInt, impl::containsKey, ::registerCallback)
+
+actual fun Named.pref(fallback: Long) =
+    Preference(this, fallback, impl::putLong, impl::getLong, impl::containsKey, ::registerCallback)
+
+actual fun Named.pref(fallback: String) =
+    Preference(this, fallback, impl::putString, impl::getString, impl::containsKey, ::registerCallback)
 
 actual fun <Q : Quan<Q>> Named.pref(fallback: Number, withUnits: UomConverter<Q>) = Preference(
-        this, withUnits(fallback.toDouble()),
-        { name, value -> impl.putDouble(name, withUnits(value)) },
-        { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
-        impl::containsKey,
-        ::registerCallback,
-        " (${withUnits.unitName})"
+    this, withUnits(fallback.toDouble()),
+    { name, value -> impl.putDouble(name, withUnits(value)) },
+    { name, value -> withUnits(impl.getDouble(name, withUnits(value))) },
+    impl::containsKey,
+    ::registerCallback,
+    " (${withUnits.unitName})"
 )
 
 fun SubsystemHardware<*, *>.escConfigPref(
-        defaultWriteTimeout: Time = period,
-        defaultOpenloopRamp: Time = 0.Second,
-        defaultClosedloopRamp: Time = 0.Second,
-        defaultPeakOutput: V = 12.Volt,
-        defaultNominalOutput: V = 0.Volt,
-        defaultVoltageCompSaturation: V = 12.Volt,
-        defaultContinuousCurrentLimit: I = 25.Ampere,
-        defaultPeakCurrentLimit: I = 40.Ampere,
-        defaultPeakCurrentDuration: Time = 1.Second
+    defaultWriteTimeout: Time = period,
+    defaultOpenloopRamp: Time = 0.Second,
+    defaultClosedloopRamp: Time = 0.Second,
+    defaultPeakOutput: V = 12.Volt,
+    defaultNominalOutput: V = 0.Volt,
+    defaultVoltageCompSaturation: V = 12.Volt,
+    defaultContinuousCurrentLimit: I = 25.Ampere,
+    defaultPeakCurrentLimit: I = 40.Ampere,
+    defaultPeakCurrentDuration: Time = 1.Second
 ) = pref {
 
     val openloopRamp by pref(defaultOpenloopRamp.Second, Second)
@@ -54,20 +65,20 @@ fun SubsystemHardware<*, *>.escConfigPref(
 
     ({
         OffloadedEscConfiguration(
-                writeTimeout = defaultWriteTimeout,
+            writeTimeout = defaultWriteTimeout,
 
-                openloopRamp = openloopRamp,
-                closedloopRamp = closedloopRamp,
+            openloopRamp = openloopRamp,
+            closedloopRamp = closedloopRamp,
 
-                peakOutputForward = peakOutput,
-                nominalOutputForward = nominalOutput,
-                nominalOutputReverse = -nominalOutput,
-                peakOutputReverse = -peakOutput,
+            peakOutputForward = peakOutput,
+            nominalOutputForward = nominalOutput,
+            nominalOutputReverse = -nominalOutput,
+            peakOutputReverse = -peakOutput,
 
-                voltageCompSaturation = voltageCompSaturation,
-                continuousCurrentLimit = continuousCurrentLimit,
-                peakCurrentLimit = peakCurrentLimit,
-                peakCurrentDuration = peakCurrentDuration
+            voltageCompSaturation = voltageCompSaturation,
+            continuousCurrentLimit = continuousCurrentLimit,
+            peakCurrentLimit = peakCurrentLimit,
+            peakCurrentDuration = peakCurrentDuration
         )
     })
 }
@@ -115,6 +126,6 @@ fun trim(table: NetworkTable = impl.m_table) {
 
 fun printKeys() = blockingMutex(keys) {
     File("/home/lvuser/keylist.txt").writeText(
-            keys.joinToString(separator = "\n")
+        keys.joinToString(separator = "\n")
     )
 }

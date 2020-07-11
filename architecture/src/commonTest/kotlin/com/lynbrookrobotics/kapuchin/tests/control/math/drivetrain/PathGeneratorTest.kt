@@ -16,33 +16,33 @@ class PathGeneratorTest {
             anyDouble.forEach { y1 ->
                 anyDouble.forEach { x2 ->
                     anyDouble
-                            .filterNot { y2 -> x1 == x2 && y1 == y2 }
-                            .forEach { y2 ->
+                        .filterNot { y2 -> x1 == x2 && y1 == y2 }
+                        .forEach { y2 ->
 
-                                anyDouble.map { it.Metre }.forEach { len ->
-                                    val a = Waypoint(x1.Metre, y1.Metre)
-                                    val b = Waypoint(x2.Metre, y2.Metre)
+                            anyDouble.map { it.Metre }.forEach { len ->
+                                val a = Waypoint(x1.Metre, y1.Metre)
+                                val b = Waypoint(x2.Metre, y2.Metre)
 
-                                    val path = nSect(a, b, len)
+                                val path = nSect(a, b, len)
 
-                                    path.size `is greater than or equal to?` 2
+                                path.size `is greater than or equal to?` 2
 
-                                    if (path.size > 2) path
-                                            .zipWithNext { p1, p2 -> distance(p1, p2) }
-                                            .forEach { len `is greater than or equal to?` it }
+                                if (path.size > 2) path
+                                    .zipWithNext { p1, p2 -> distance(p1, p2) }
+                                    .forEach { len `is greater than or equal to?` it }
 
-                                    path.zipWithNext().forEach { (p1, p2) ->
-                                        val da1 = distance(a, p1)
-                                        val da2 = distance(a, p2)
+                                path.zipWithNext().forEach { (p1, p2) ->
+                                    val da1 = distance(a, p1)
+                                    val da2 = distance(a, p2)
 
-                                        val db1 = distance(b, p1)
-                                        val db2 = distance(b, p2)
+                                    val db1 = distance(b, p1)
+                                    val db2 = distance(b, p2)
 
-                                        da2 `is greater than?` da1
-                                        db1 `is greater than?` db2
-                                    }
+                                    da2 `is greater than?` da1
+                                    db1 `is greater than?` db2
                                 }
                             }
+                        }
                 }
             }
         }
@@ -51,10 +51,10 @@ class PathGeneratorTest {
     @Test
     fun `interpolatePath smooths waypoints`() {
         val path = listOf(
-                Waypoint(-1.Metre, -1.Metre),
-                Waypoint(-1.Metre, 0.Metre),
-                Waypoint(1.Metre, 0.Metre),
-                Waypoint(1.Metre, 1.Metre)
+            Waypoint(-1.Metre, -1.Metre),
+            Waypoint(-1.Metre, 0.Metre),
+            Waypoint(1.Metre, 0.Metre),
+            Waypoint(1.Metre, 1.Metre)
         )
 
         val len = 0.1.Metre
@@ -62,8 +62,8 @@ class PathGeneratorTest {
         val segs = newPath.zipWithNext()
 
         segs
-                .map { (a, b) -> distance(a, b) }
-                .forEach { len * 2 `is greater than or equal to?` it }
+            .map { (a, b) -> distance(a, b) }
+            .forEach { len * 2 `is greater than or equal to?` it }
 
 
         val start = path.first()

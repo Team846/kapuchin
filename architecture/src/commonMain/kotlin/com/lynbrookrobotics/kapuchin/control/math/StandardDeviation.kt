@@ -20,8 +20,8 @@ import kotlin.math.sqrt
  * @param init first value
  */
 fun <Q : Quan<Q>, Q2 : Quan<Q2>> infiniteStdev(
-        p: (Q, `*`, Q) -> Q2,
-        init: Q
+    p: (Q, `*`, Q) -> Q2,
+    init: Q
 ): (Q) -> Q {
     var sum = init
     var sqSum = p(init, `*`, init)
@@ -52,9 +52,9 @@ fun <Q : Quan<Q>, Q2 : Quan<Q2>> infiniteStdev(
  * @param falloff number of values to look back when calculating
  */
 fun <Q : Quan<Q>, Q2 : Quan<Q2>> finiteStdev(
-        p: (Q, `*`, Q) -> Q2,
-        init: Q,
-        falloff: Int
+    p: (Q, `*`, Q) -> Q2,
+    init: Q,
+    falloff: Int
 ): (Q) -> Q {
     val delay = delay<Q>(falloff).also { it(init) }
 

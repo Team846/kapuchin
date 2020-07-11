@@ -48,21 +48,23 @@ sealed class OffloadedOutput {
         gains?.writeTo(esc, pidController)
         config.writeTo(esc, pidController)
 
-        +pidController.setReference(value, when (mode) {
-            Position -> kPosition
-            Velocity -> kVelocity
-            PercentOutput -> kDutyCycle
-            Current -> kCurrent
-            else -> TODO("Implement fancy control types for SparkMAX")
-        })
+        +pidController.setReference(
+            value, when (mode) {
+                Position -> kPosition
+                Velocity -> kVelocity
+                PercentOutput -> kDutyCycle
+                Current -> kCurrent
+                else -> TODO("Implement fancy control types for SparkMAX")
+            }
+        )
     }
 }
 
 data class VelocityOutput(
-        override val config: OffloadedEscConfiguration,
-        override val gains: OffloadedEscGains,
-        override val value: Double,
-        override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
+    override val config: OffloadedEscConfiguration,
+    override val gains: OffloadedEscGains,
+    override val value: Double,
+    override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
     override val mode = Velocity
     override fun with(safeties: OffloadedEscSafeties) = copy(safeties = safeties)
@@ -70,10 +72,10 @@ data class VelocityOutput(
 }
 
 data class PositionOutput(
-        override val config: OffloadedEscConfiguration,
-        override val gains: OffloadedEscGains,
-        override val value: Double,
-        override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
+    override val config: OffloadedEscConfiguration,
+    override val gains: OffloadedEscGains,
+    override val value: Double,
+    override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
     override val mode = Position
     override fun with(safeties: OffloadedEscSafeties) = copy(safeties = safeties)
@@ -81,9 +83,9 @@ data class PositionOutput(
 }
 
 data class PercentOutput(
-        override val config: OffloadedEscConfiguration,
-        val dutyCycle: DutyCycle,
-        override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
+    override val config: OffloadedEscConfiguration,
+    val dutyCycle: DutyCycle,
+    override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
     override val mode = PercentOutput
     override val value = dutyCycle.Each
@@ -94,9 +96,9 @@ data class PercentOutput(
 }
 
 data class CurrentOutput(
-        override val config: OffloadedEscConfiguration,
-        val current: ElectricCurrent,
-        override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
+    override val config: OffloadedEscConfiguration,
+    val current: ElectricCurrent,
+    override val safeties: OffloadedEscSafeties = OffloadedEscSafeties.NoSafeties
 ) : OffloadedOutput() {
     override val mode = Current
     override val value = current.Ampere

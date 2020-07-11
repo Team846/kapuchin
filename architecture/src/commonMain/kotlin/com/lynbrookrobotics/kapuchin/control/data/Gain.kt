@@ -15,8 +15,8 @@ import info.kunalsheth.units.generated.*
  * @property forError error resulting in `compensation` output
  */
 data class Gain<Compensation, Error>(
-        val compensation: Compensation,
-        val forError: Error
+    val compensation: Compensation,
+    val forError: Error
 )
         where Compensation : Quan<Compensation>,
               Error : Quan<Error> {

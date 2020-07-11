@@ -43,9 +43,9 @@ data class RotationMatrix(val theta: Angle) {
      */
     infix fun rz(that: UomVector<Length>) = that.run {
         UomVector(
-                rzCoordinateX(x, y),
-                rzCoordinateY(x, y),
-                z
+            rzCoordinateX(x, y),
+            rzCoordinateY(x, y),
+            z
         )
     }
 }

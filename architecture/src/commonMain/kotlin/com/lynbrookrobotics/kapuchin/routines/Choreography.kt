@@ -25,8 +25,8 @@ private typealias Block = suspend CoroutineScope.() -> Unit
  * @param setup function returning a choreography
  */
 suspend fun startChoreo(
-        name: String,
-        setup: FreeSensorScope.() -> Block
+    name: String,
+    setup: FreeSensorScope.() -> Block
 ) {
     val named = Named(name)
     val sensorScope = FreeSensorScope()
@@ -158,7 +158,7 @@ suspend fun launchWhenever(vararg blocks: Pair<() -> Boolean, Block>) = supervis
  * @param time period to delay for
  */
 suspend fun delay(time: Time) =
-        delay(time.milli(Second).toLong())
+    delay(time.milli(Second).toLong())
 
 /**
  * Pauses the coroutine until cancelled
@@ -174,4 +174,4 @@ suspend fun freeze() = suspendCancellableCoroutine<Unit> { }
  * @param block function to run
  */
 suspend fun withTimeout(time: Time, block: Block) =
-        withTimeoutOrNull(time.milli(Second).toLong(), block)
+    withTimeoutOrNull(time.milli(Second).toLong(), block)

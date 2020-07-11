@@ -13,17 +13,17 @@ import info.kunalsheth.units.math.*
 import java.util.concurrent.ConcurrentHashMap
 
 data class OffloadedEscConfiguration(
-        val writeTimeout: Time,
-        val openloopRamp: Time = 0.Second,
-        val closedloopRamp: Time = 0.Second,
-        val peakOutputForward: V = 12.Volt,
-        val nominalOutputForward: V = 0.Volt,
-        val nominalOutputReverse: V = -nominalOutputForward,
-        val peakOutputReverse: V = -peakOutputForward,
-        val voltageCompSaturation: V = 12.Volt,
-        val continuousCurrentLimit: I = 25.Ampere,
-        val peakCurrentLimit: I = 40.Ampere,
-        val peakCurrentDuration: Time = 1.Second
+    val writeTimeout: Time,
+    val openloopRamp: Time = 0.Second,
+    val closedloopRamp: Time = 0.Second,
+    val peakOutputForward: V = 12.Volt,
+    val nominalOutputForward: V = 0.Volt,
+    val nominalOutputReverse: V = -nominalOutputForward,
+    val peakOutputReverse: V = -peakOutputForward,
+    val voltageCompSaturation: V = 12.Volt,
+    val continuousCurrentLimit: I = 25.Ampere,
+    val peakCurrentLimit: I = 40.Ampere,
+    val peakCurrentDuration: Time = 1.Second
 ) {
 
     companion object {
@@ -82,25 +82,25 @@ data class OffloadedEscConfiguration(
             writeTo(esc, timeoutMs, cached)
 
             if (cached == null ||
-                    cached.continuousCurrentLimit != this.continuousCurrentLimit ||
-                    cached.peakCurrentLimit != this.peakCurrentLimit ||
-                    cached.peakCurrentDuration != this.peakCurrentDuration
+                cached.continuousCurrentLimit != this.continuousCurrentLimit ||
+                cached.peakCurrentLimit != this.peakCurrentLimit ||
+                cached.peakCurrentDuration != this.peakCurrentDuration
             ) {
                 +esc.configStatorCurrentLimit(
-                        StatorCurrentLimitConfiguration(
-                                true,
-                                continuousCurrentLimit.Ampere,
-                                peakCurrentLimit.Ampere,
-                                peakCurrentDuration.Second
-                        ), timeoutMs
+                    StatorCurrentLimitConfiguration(
+                        true,
+                        continuousCurrentLimit.Ampere,
+                        peakCurrentLimit.Ampere,
+                        peakCurrentDuration.Second
+                    ), timeoutMs
                 )
                 +esc.configSupplyCurrentLimit(
-                        SupplyCurrentLimitConfiguration(
-                                true,
-                                continuousCurrentLimit.Ampere,
-                                peakCurrentLimit.Ampere,
-                                peakCurrentDuration.Second
-                        ), timeoutMs
+                    SupplyCurrentLimitConfiguration(
+                        true,
+                        continuousCurrentLimit.Ampere,
+                        peakCurrentLimit.Ampere,
+                        peakCurrentDuration.Second
+                    ), timeoutMs
                 )
             }
         }
@@ -144,11 +144,11 @@ data class OffloadedEscConfiguration(
                 println("Cannot write `nominalOutputReverse` to SparkMAX ${esc.deviceId}")
 
             if (cached == null ||
-                    cached.peakOutputReverse != this.peakOutputReverse ||
-                    cached.peakOutputForward != this.peakOutputForward
+                cached.peakOutputReverse != this.peakOutputReverse ||
+                cached.peakOutputForward != this.peakOutputForward
             ) +pidController.setOutputRange(
-                    (peakOutputReverse / voltageCompSaturation).Each,
-                    (peakOutputForward / voltageCompSaturation).Each
+                (peakOutputReverse / voltageCompSaturation).Each,
+                (peakOutputForward / voltageCompSaturation).Each
             )
 
             if (cached?.voltageCompSaturation != this.voltageCompSaturation)

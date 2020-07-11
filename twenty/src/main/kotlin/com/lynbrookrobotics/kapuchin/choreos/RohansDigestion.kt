@@ -50,42 +50,42 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         launch {
             launchWhenever(
-                    { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
-                    { shoot } to choreography { fire() }
+                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
+                { shoot } to choreography { fire() }
             )
         }
         runWhenever(
-                { intakeBalls } to choreography { eat() },
-                { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
+            { intakeBalls } to choreography { eat() },
+            { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
-                { aim } to choreography { visionAim() },
-                { aimPreset } to choreography {
-                    flywheel?.let { spinUpShooter(flywheel.preset, Down) }
-                },
-                { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
+            { aim } to choreography { visionAim() },
+            { aimPreset } to choreography {
+                flywheel?.let { spinUpShooter(flywheel.preset, Down) }
+            },
+            { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
 
-                { flywheelManual != null } to choreography {
-                    scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
-                    flywheel?.let {
-                        spinUpShooter(
-                                (flywheelManual ?: 0.Percent) * it.maxSpeed,
-                                if (hoodUp) Up else Down
-                        )
-                    } ?: freeze()
+            { flywheelManual != null } to choreography {
+                scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
+                flywheel?.let {
+                    spinUpShooter(
+                        (flywheelManual ?: 0.Percent) * it.maxSpeed,
+                        if (hoodUp) Up else Down
+                    )
+                } ?: freeze()
 
-                },
-                { !turretManual.isZero } to choreography {
-                    scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
-                    turret?.manualOverride(operator) ?: freeze()
-                },
+            },
+            { !turretManual.isZero } to choreography {
+                scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
+                turret?.manualOverride(operator) ?: freeze()
+            },
 
-                { unjamCarousel } to choreography { unjam() },
-                { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
-                { reindexCarousel } to choreography {
-                    carousel.whereAreMyBalls()
-                    rumble.set(TwoSided(0.Percent, 100.Percent))
-                },
-                { centerTurret } to choreography { turret?.set(0.Degree) }
+            { unjamCarousel } to choreography { unjam() },
+            { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
+            { reindexCarousel } to choreography {
+                carousel.whereAreMyBalls()
+                rumble.set(TwoSided(0.Percent, 100.Percent))
+            },
+            { centerTurret } to choreography { turret?.set(0.Degree) }
         )
     }
 
@@ -151,8 +151,9 @@ suspend fun Subsystems.visionAim() {
             }
 
             launch {
-                turret.fieldOrientedPosition(drivetrain,
-                        turretPosition + reading1.tx + limelight.hardware.conversions.mountingBearing
+                turret.fieldOrientedPosition(
+                    drivetrain,
+                    turretPosition + reading1.tx + limelight.hardware.conversions.mountingBearing
                 )
             }
 
@@ -174,8 +175,9 @@ suspend fun Subsystems.visionAim() {
             }
 
             launch {
-                turret.fieldOrientedPosition(drivetrain,
-                        turretPosition + reading2.tx + limelight.hardware.conversions.mountingBearing
+                turret.fieldOrientedPosition(
+                    drivetrain,
+                    turretPosition + reading2.tx + limelight.hardware.conversions.mountingBearing
                 )
             }
             spinUpShooter(snapshot2.flywheel, snapshot2.hood)
