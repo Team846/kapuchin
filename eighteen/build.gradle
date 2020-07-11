@@ -1,18 +1,20 @@
-apply plugin: 'kotlin-platform-jvm'
-apply plugin: 'edu.wpi.first.GradleRIO'
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'edu.wpi.first.GradleRIO' version "$gradlerio_version"
+}
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.30'
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.3.30'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
 
+    implementation files('../uoms/libs/uoms-jvm-1.0.0.jar')
 //    implementation project(":architecture:jvmfrc")
     compileOnly 'com.github.Team846.2019-preseason:jvmfrc:01cffb1a47'
 
     implementation wpi.deps.wpilib()
     implementation wpi.deps.vendor.java()
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
-    nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 }
 
 repositories.maven { url 'https://jitpack.io' }

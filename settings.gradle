@@ -1,9 +1,7 @@
 rootProject.name = 'kapuchin'
 include 'uoms'
-include 'uoms:jvm'
 include 'architecture'
-include 'architecture:jvmfrc'
-include 'simulated'
+
 include 'eighteen'
 include 'nineteen'
 include 'twenty'

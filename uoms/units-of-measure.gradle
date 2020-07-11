@@ -42,6 +42,3 @@ generateUnitsOfMeasure {
             u("VoltPerSecond", 1.0, d(L: 2, M: 1, T: -4, I: -1)),
     ].toSet()
 }
-
-sourceSets.main.kotlin.srcDir generateUnitsOfMeasure.generatedSrcDir
-compileKotlinCommon.dependsOn(generateUnitsOfMeasure)

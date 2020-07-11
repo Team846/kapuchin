@@ -1,43 +1,39 @@
-apply plugin: 'kotlin-platform-jvm'
-apply plugin: 'edu.wpi.first.GradleRIO'
+import edu.wpi.first.gradlerio.GradleRIOPlugin
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'edu.wpi.first.GradleRIO' version "$gradlerio_version"
+}
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
 
-    implementation project(':uoms:jvm')
-    implementation project(":architecture:jvmfrc")
+    implementation project(path: ':architecture', configuration: 'jvmfrcDefault')
 
     implementation wpi.deps.wpilib()
-    nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
-    nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
-
     implementation wpi.deps.vendor.java()
+    nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
-    nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 
-    testImplementation "junit:junit:$junit_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 }
 
-// uncommenting makes compilation not work, didn't test much -Andy
-//repositories.maven { url 'https://jitpack.io' }
-
 deploy {
     targets {
-        roboRIO("roborio") {
+        roboRIO('roborio') {
             team = 846
         }
     }
+
     artifacts {
         frcJavaArtifact(project.name) {
-            targets << "roborio"
+            targets << 'roborio'
             jvmArgs /*<< '-XX:+UseG1GC'*/ << '-XX:MaxGCPauseMillis=75' << '-Xmx100M'
 //          jvmArgs << '-verbose:class'
 //          jvmArgs << '-verbosegc'
-//          arguments << 'myCustomArgs'
 //          debug = true
 //          debugPort = 8348
         }
@@ -46,5 +42,5 @@ deploy {
 
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobotKt')
+    manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobotKt')
 }
