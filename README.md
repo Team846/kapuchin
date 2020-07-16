@@ -26,3 +26,7 @@
 - Update `uoms/units-of-measure.gradle`
 - Run `./gradlew :uoms:build` (will take a long time)
 - Copy `uoms/build/libs/*.jar` to `uoms/libs`
+
+## Accessing robot log
+- SSH into the roboRIO: `ssh lvuser@10.8.46.2`
+- Open the log: `tail -f FRC_UserProgram.log`
