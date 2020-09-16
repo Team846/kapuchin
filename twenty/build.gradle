@@ -44,3 +44,25 @@ jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobotKt')
 }
+
+def buildInfoPath = "build/buildInfo/"
+
+task generateBuildInfo {
+
+    doLast {
+        mkdir buildInfoPath
+        def info = [
+                'DateTime'        : new Date().format('MM/dd/yyyy HH:mm:ss'),
+                'User'            : ['git', 'config', 'user.name'].execute().text.trim(),
+                'GitHasUncommited': (['git', 'status', '--porcelain'].execute().text.trim().isBlank() ? 'No' : 'Yes'),
+                'GitBranch'       : ['git', 'branch', '--show-current'].execute().text.trim(),
+                'GitHash'         : ['git', 'rev-parse', 'HEAD'].execute().text.trim()
+        ]
+        info.each { key, value -> file("$buildInfoPath${key}.txt").text = value }
+    }
+}
+
+processResources.finalizedBy generateBuildInfo
+
+sourceSets.main.resources.srcDir buildInfoPath
+
