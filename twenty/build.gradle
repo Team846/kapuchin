@@ -45,24 +45,24 @@ jar {
     manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobotKt')
 }
 
-def buildInfoPath = "build/buildInfo/"
+def buildInfoDir = "build/buildInfo/"
 
 task generateBuildInfo {
-
     doLast {
-        mkdir buildInfoPath
+        mkdir buildInfoDir
+
+        def git = { args -> "git $args".execute().text.trim() }
         def info = [
                 'DateTime'        : new Date().format('MM/dd/yyyy HH:mm:ss'),
-                'User'            : ['git', 'config', 'user.name'].execute().text.trim(),
-                'GitHasUncommited': (['git', 'status', '--porcelain'].execute().text.trim().isBlank() ? 'No' : 'Yes'),
-                'GitBranch'       : ['git', 'branch', '--show-current'].execute().text.trim(),
-                'GitHash'         : ['git', 'rev-parse', 'HEAD'].execute().text.trim()
+                'User'            : git('config user.name'),
+                'GitHasUncommited': git('status --porcelain').isBlank() ? 'No' : 'Yes',
+                'GitBranch'       : git('branch --show-current'),
+                'GitHash'         : git('rev-parse HEAD')
         ]
-        info.each { key, value -> file("$buildInfoPath${key}.txt").text = value }
+
+        info.each { key, value -> file("$buildInfoDir${key}.txt").text = value }
     }
 }
 
-processResources.finalizedBy generateBuildInfo
-
-sourceSets.main.resources.srcDir buildInfoPath
-
+processResources.finalizedBy generateBuildInfo // Run after compileKotlin and before jar
+sourceSets.main.resources.srcDir buildInfoDir
