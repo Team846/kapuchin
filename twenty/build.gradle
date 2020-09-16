@@ -64,5 +64,7 @@ task generateBuildInfo {
     }
 }
 
-processResources.finalizedBy generateBuildInfo // Run after compileKotlin and before jar
+// Run after compileKotlin and before processResources
+processResources.dependsOn generateBuildInfo
+generateBuildInfo.mustRunAfter compileKotlin
 sourceSets.main.resources.srcDir buildInfoDir
