@@ -166,9 +166,15 @@ val classPreloading = scope.launch {
 }
 
 private fun printBuildInfo() {
-    println("BUILDINFO: ")
-    listOf("User", "GitBranch", "GitHash", "GitHasUncommited", "DateTime").forEach {
-        val fileContents: String? = Thread.currentThread()?.contextClassLoader?.getResourceAsStream("$it.txt")?.bufferedReader()?.readText()
-        println("$it: ${fileContents ?: "No file"}")
+    println("BUILD INFO:")
+
+    arrayOf("User", "DateTime", "GitBranch", "GitHash", "GitHasUncommited").forEach {
+        val fileContents = Thread.currentThread()
+            .contextClassLoader
+            .getResourceAsStream("$it.txt")
+            ?.bufferedReader()
+            ?.readText() ?: "Unknown"
+
+        println("\t$it: $fileContents")
     }
 }
