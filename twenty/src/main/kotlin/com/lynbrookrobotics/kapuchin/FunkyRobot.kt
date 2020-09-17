@@ -158,7 +158,6 @@ val classPreloading = scope.launch {
             launch {
                 try {
                     Class.forName(it)
-                    println(it)
                 } catch (t: Throwable) {
                 }
             }
