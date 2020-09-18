@@ -13,11 +13,11 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.io.File
 import kotlin.system.measureTimeMillis
 
+
 fun main() {
-    printRunID()
+    printBuildInfo()
     RobotBase.startRobot(::FunkyRobot)
 }
 
@@ -164,14 +164,16 @@ val classPreloading = scope.launch {
         }
 }
 
-private fun printRunID() {
-    val file = File("/home/lvuser/run_id")
-    val runId = try {
-        file.readText().trim().toInt() + 1
-    } catch (e: Exception) {
-        System.err.println(e)
-        -1
+private fun printBuildInfo() {
+    println("BUILD INFO:")
+
+    arrayOf("User", "DateTime", "GitBranch", "GitHash", "GitHasUncommited").forEach {
+        val fileContents = Thread.currentThread()
+            .contextClassLoader
+            .getResourceAsStream("$it.txt")
+            ?.bufferedReader()
+            ?.readText() ?: "Unknown"
+
+        println("\t$it: $fileContents")
     }
-    println("Episode $runId - Rohan Awakens")
-    file.writeText(runId.toString())
 }

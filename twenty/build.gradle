@@ -44,3 +44,27 @@ jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobotKt')
 }
+
+def buildInfoDir = "build/buildInfo/"
+
+task generateBuildInfo {
+    doLast {
+        mkdir buildInfoDir
+
+        def git = { args -> "git $args".execute().text.trim() }
+        def info = [
+                'DateTime'        : new Date().format('MM/dd/yyyy HH:mm:ss'),
+                'User'            : git('config user.name'),
+                'GitHasUncommited': git('status --porcelain').isBlank() ? 'No' : 'Yes',
+                'GitBranch'       : git('branch --show-current'),
+                'GitHash'         : git('rev-parse HEAD')
+        ]
+
+        info.each { key, value -> file("$buildInfoDir${key}.txt").text = value }
+    }
+}
+
+// Run after compileKotlin and before processResources
+processResources.dependsOn generateBuildInfo
+generateBuildInfo.mustRunAfter compileKotlin
+sourceSets.main.resources.srcDir buildInfoDir
