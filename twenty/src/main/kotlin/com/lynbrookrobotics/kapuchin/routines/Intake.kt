@@ -16,7 +16,7 @@ suspend fun IntakeRollersComponent.set(target: DutyCycle) = startRoutine("Set") 
 }
 
 suspend fun IntakeRollersComponent.optimalEat(drivetrain: DrivetrainComponent, electrical: ElectricalSystemHardware) =
-    startRoutine("Optimal Eat") {
+    startRoutine("Optimal Intake") {
 
         val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
 

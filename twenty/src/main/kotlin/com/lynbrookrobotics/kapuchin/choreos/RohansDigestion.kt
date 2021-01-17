@@ -113,7 +113,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
                 launch { intakeRollers?.optimalEat(drivetrain, electrical) }
 
-                log(Debug) { "Waiting for a yummy mouthful of balls." }
+                log(Debug) { "Waiting for balls to be fed." }
                 carousel.delayUntilBall()
                 carousel.state.set(carouselAngle + carousel.collectSlot, true)
             }
