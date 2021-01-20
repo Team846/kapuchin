@@ -41,24 +41,24 @@ val `verify odometry`: Auto = {
 
 val `wall`: Auto = {
     choreography {
-        drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
+        drivetrain.followTrajectory(fastLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
     }
 }
 
 val `shoot wall`: Auto = {
     choreography {
         withTimeout(12.Second) { autoLimelightAimAndFire() }
-        drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
+        drivetrain.followTrajectory(fastLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
     }
 }
 
 val `I1 shoot C1 I2 shoot`: Auto = {
     choreography {
-        val trajI1C1 = fastAsFuck("I1C1", 40.Percent) ?: fastAsFuckLine(16.Foot, 40.Percent).also {
+        val trajI1C1 = fastSpeed("I1C1", 40.Percent) ?: fastLine(16.Foot, 40.Percent).also {
             log(Error) { "Path I1C1 doesn't exist, fallbacking to 16 feet line." }
         }
 
-        val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(16.Foot).also {
+        val trajC1I2 = fastSpeed("C1I2") ?: fastLine(16.Foot).also {
             log(Error) { "Path C1I2 doesn't exist, fallbacking to 16 foot line to I1" }
         }
 
@@ -81,12 +81,12 @@ val `I1 shoot C1 I2 shoot`: Auto = {
 
 val `I2 shoot C1 I2 shoot`: Auto = {
     choreography {
-        val trajI2C1 = fastAsFuck("I2C1", 40.Percent)
+        val trajI2C1 = fastSpeed("I2C1", 40.Percent)
         if (trajI2C1 == null) {
             log(Error) { "Path I2C1 doesn't exist, running shoot wall" }
             `shoot wall`()
         } else {
-            val trajC1I2 = fastAsFuck("C1I2") ?: fastAsFuckLine(16.Foot).also {
+            val trajC1I2 = fastSpeed("C1I2") ?: fastLine(16.Foot).also {
                 log(Error) { "Path C1I2 doesn't exist, fallbacking to 16 foot line to I1" }
             }
 
@@ -128,7 +128,7 @@ private fun loadTempPath() = File("/home/lvuser/journal.tsv")
     .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
     .toList()
 
-private fun Subsystems.fastAsFuckLine(dist: Length, speedFactor: DutyCycle = 100.Percent): Trajectory =
+private fun Subsystems.fastLine(dist: Length, speedFactor: DutyCycle = 100.Percent): Trajectory =
     pathToTrajectory(
         nSect(Waypoint(0.Foot, 0.Foot), Waypoint(0.Foot, dist), 3.Inch),
         drivetrain.maxSpeed * speedFactor,
@@ -136,7 +136,7 @@ private fun Subsystems.fastAsFuckLine(dist: Length, speedFactor: DutyCycle = 100
         drivetrain.maxAcceleration
     )
 
-private fun Subsystems.fastAsFuck(name: String, speedFactor: Dimensionless = 100.Percent): Trajectory? =
+private fun Subsystems.fastSpeed(name: String, speedFactor: Dimensionless = 100.Percent): Trajectory? =
     loadPath(name)?.let {
         pathToTrajectory(
             it,
