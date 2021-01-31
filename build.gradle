@@ -2,12 +2,16 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id 'org.jetbrains.kotlin.multiplatform' version "$kotlin_version" apply false
+    id 'edu.wpi.first.GradleRIO' version "$gradlerio_version" apply false
 }
 
 subprojects {
 
     group 'com.lynbrookrobotics'
     version '1.0.0'
+
+    // roborio runs on Java 11
+    // https://github.com/wpilibsuite/frc-openjdk-roborio
 
     tasks.withType(JavaCompile) {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -17,6 +21,8 @@ subprojects {
     tasks.withType(KotlinCompile).all {
         kotlinOptions {
             jvmTarget = '11'
+
+            // Ignore inline class and unsigned type experimental feature warnings
             freeCompilerArgs += [
                     '-Xinline-classes',
                     '-Xopt-in=kotlin.ExperimentalUnsignedTypes'
@@ -27,5 +33,9 @@ subprojects {
     // https://guides.gradle.org/performance/#parallel_test_execution
     tasks.withType(Test) {
         maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    }
+
+    repositories {
+        jcenter()
     }
 }
