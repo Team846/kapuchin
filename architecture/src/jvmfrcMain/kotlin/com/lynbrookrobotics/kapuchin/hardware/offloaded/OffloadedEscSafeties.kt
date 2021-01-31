@@ -21,11 +21,11 @@ data class OffloadedEscSafeties(
 
             if (cached?.min != this.min) {
                 +esc.configReverseSoftLimitEnable(min != null, timeoutMs)
-                if (min != null) +esc.configReverseSoftLimitThreshold(min.toInt(), timeoutMs)
+                if (min != null) +esc.configReverseSoftLimitThreshold(min, timeoutMs)
             }
             if (cached?.max != this.max) {
                 +esc.configForwardSoftLimitEnable(max != null, timeoutMs)
-                if (max != null) +esc.configForwardSoftLimitThreshold(max.toInt(), timeoutMs)
+                if (max != null) +esc.configForwardSoftLimitThreshold(max, timeoutMs)
             }
         }
         cache[esc] = this
