@@ -97,7 +97,7 @@ class Subsystems(val drivetrain: DrivetrainComponent,
 
                 Thread.currentThread()
                         .contextClassLoader
-                        .getResourceAsStream("com/lynbrookrobotics/kapuchin/configbackups/networktables.ini")
+                        .getResourceAsStream("com/lynbrookrobotics/nineteen/configbackups/networktables.ini")
                         .copyTo(File(ntPath).outputStream())
                 File("$ntPath.bak").delete()
 

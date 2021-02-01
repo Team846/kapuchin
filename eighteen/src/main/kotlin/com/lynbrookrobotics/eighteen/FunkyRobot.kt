@@ -50,7 +50,7 @@ class FunkyRobot : RobotBase() {
         val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
         Thread.currentThread()
                 .contextClassLoader
-                .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
+                .getResourceAsStream("com/lynbrookrobotics/eighteen/preload")
                 .bufferedReader()
                 .lineSequence()
                 .filter { it.matches(classNameRegex) }

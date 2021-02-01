@@ -86,7 +86,7 @@ suspend fun Subsystems.cargoShipSandstorm() = startChoreo("Rocket Sandstorm") {
 fun Subsystems.loadTrajectory(name: String, performance: Dimensionless): List<TimeStamped<Waypt>> {
     val waypts = Thread.currentThread()
             .contextClassLoader
-            .getResourceAsStream("com/lynbrookrobotics/kapuchin/paths/$name")
+            .getResourceAsStream("com/lynbrookrobotics/nineteen/paths/$name")
             .bufferedReader()
             .lineSequence()
             .drop(1)

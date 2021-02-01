@@ -79,7 +79,7 @@ val classPreloading = scope.launch {
     val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
     Thread.currentThread()
             .contextClassLoader
-            .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")
+            .getResourceAsStream("com/lynbrookrobotics/nineteen/preload")
             .bufferedReader()
             .lineSequence()
             .filter { it.matches(classNameRegex) }

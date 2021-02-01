@@ -113,7 +113,7 @@ val `I2 shoot C1 I2 shoot`: Auto = {
 
 private fun loadPath(name: String) = Thread.currentThread()
     .contextClassLoader
-    .getResourceAsStream("com/lynbrookrobotics/kapuchin/paths/$name.tsv")
+    .getResourceAsStream("com/lynbrookrobotics/twenty/paths/$name.tsv")
     ?.bufferedReader()
     ?.lineSequence()
     ?.drop(1)

@@ -136,7 +136,7 @@ class Subsystems(
 
                 Thread.currentThread()
                     .contextClassLoader
-                    .getResourceAsStream("com/lynbrookrobotics/kapuchin/configbackups/networktables.ini")!!
+                    .getResourceAsStream("com/lynbrookrobotics/twenty/configbackups/networktables.ini")!!
                     .copyTo(File(ntPath).outputStream())
                 File("$ntPath.bak").delete()
 
