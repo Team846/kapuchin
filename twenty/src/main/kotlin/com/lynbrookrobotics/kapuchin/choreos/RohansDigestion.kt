@@ -93,14 +93,14 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
 suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
-    val color by hardware.color.readEagerly().withoutStamps
-    val proximity by hardware.proximity.readEagerly().withoutStamps
+    val color by carousel.hardware.color.readEagerly().withoutStamps
+    val proximity by carousel.hardware.proximity.readEagerly().withoutStamps
     choreography {
 //        carousel.rezero()
         while (isActive) {
             //val emptySlot = carousel.state.closestEmpty()
 
-            if (carousel.state.currentSlot == 0 && hardware.conversions.detectingBall(proximity, color)) {
+            if (carousel.state.currentSlot == 0 && carousel.hardware.conversions.detectingBall(proximity, color)) {
                 log(Warning) { "I'm full. No open slots in carousel magazine." }
 
                 launch { intakeSlider?.set(IntakeSliderState.In) }
@@ -109,7 +109,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
             } else {
                 launch { feederRoller?.set(0.Rpm) }
                 carousel.set(carousel.state.rotateOnce())
-                launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
+                launch { carousel.set(carousel.emptySlot - carousel.collectSlot, 0.Degree) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
                 launch { intakeRollers?.optimalEat(drivetrain, electrical) }
@@ -219,7 +219,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         freeze()
     } else startChoreo("Spin Up Shooter") {
 
-        theseset(carousel.state.rotateNearestEmpty())
+        set(carousel.state.rotateNearestEmpty())
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps

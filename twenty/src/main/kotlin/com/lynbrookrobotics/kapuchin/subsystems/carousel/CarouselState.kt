@@ -8,7 +8,7 @@ import kotlin.math.roundToInt
 
 class CarouselState(component: Named) : Named by Named("State", component) {
     private val internal = arrayOf(false, false, false, false, false)
-    private var currentSlot = 0
+    var currentSlot = 0
 
     private fun index(robotBearing: Angle) =
         Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
