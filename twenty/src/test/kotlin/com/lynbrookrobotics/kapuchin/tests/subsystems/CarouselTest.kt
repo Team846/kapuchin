@@ -2,7 +2,8 @@ package com.lynbrookrobotics.kapuchin.tests.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.twenty.subsystems.*
 import info.kunalsheth.units.generated.*
 import java.util.Random
 import kotlin.reflect.KFunction1
