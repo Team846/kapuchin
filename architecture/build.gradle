@@ -1,6 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
-    id 'edu.wpi.first.GradleRIO' version "$gradlerio_version"
+    id 'edu.wpi.first.GradleRIO'
     id 'org.jetbrains.dokka' version "$dokka_version"
 }
 
@@ -21,48 +21,40 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation kotlin('stdlib-common')
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutines_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
                 implementation files('../uoms/libs/uoms-metadata-1.0.0.jar')
             }
         }
 
         commonTest {
             dependencies {
-                implementation kotlin('test-annotations-common')
+                implementation "org.jetbrains.kotlin:kotlin-test-common"
+                implementation "org.jetbrains.kotlin:kotlin-test-annotations-common"
             }
         }
 
         jvmfrcMain {
-            dependsOn commonMain
-
             dependencies {
-                implementation kotlin('stdlib-jdk8')
-                implementation kotlin('reflect')
+                implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
                 api files('../uoms/libs/uoms-jvm-1.0.0.jar')
 
-                wpi.deps.wpilib().each { implementation it }
-                wpi.deps.vendor.java().each { implementation it }
+                // Kotlin multiplatform DSL is dumb and can't handle dependencies in lists
+                wpi.deps.wpilib().each { implementation it }  // implementation wpi.deps.wpilib()
+                wpi.deps.vendor.java().each { implementation it }  // implementation wpi.deps.vendor.java()
             }
         }
 
         jvmsimMain {
-            dependsOn commonMain
-
             dependencies {
-                implementation kotlin('stdlib-jdk8')
-                implementation kotlin('reflect')
+                implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
                 implementation files('../uoms/libs/uoms-jvm-1.0.0.jar')
             }
         }
 
         jvmsimTest {
-            dependsOn commonTest
-
             dependencies {
-                implementation kotlin('test')
                 implementation kotlin('test-junit')
             }
         }

@@ -40,13 +40,13 @@ class CarouselState(component: Named) : Named by Named("State", component) {
 //        return null
 //    }
 
-    fun closestEmpty(robotBearing: Angle) = closest(robotBearing, false) {
+    fun closestEmpty(robotBearing: Angle): Angle? = closest(robotBearing, false) {
         !get(it)
-    }?.roundToInt(CarouselSlot)
+    }?.roundToInt(CarouselSlot)?.CarouselSlot
 
-    fun closestFull(robotBearing: Angle) = closest(robotBearing, true) {
+    fun closestFull(robotBearing: Angle): Angle? = closest(robotBearing, true) {
         get(it)
-    }?.roundToInt(CarouselSlot)
+    }?.roundToInt(CarouselSlot)?.CarouselSlot
 
     val ammo get() = internal.count { it }
     val size = internal.size

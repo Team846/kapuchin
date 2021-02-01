@@ -11,6 +11,6 @@ suspend fun RumbleComponent.set(target: Rumble) = startRoutine("Set") {
 
 suspend fun RumbleComponent.error(rate: Frequency = 4.Hertz) = startRoutine("Error") {
     controller {
-        Rumble((currentTime * rate * 2).roundToInt(Each))
+        Rumble((currentTime * rate * 2).roundToInt(Each).Each)
     }
 }

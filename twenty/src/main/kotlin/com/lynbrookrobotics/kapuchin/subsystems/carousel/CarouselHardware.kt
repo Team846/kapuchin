@@ -52,7 +52,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     val position = sensor(encoder) {
         conversions.encoder.realPosition(position) stampWith it
     }.with(graph("Angle", Degree))
-        .with(graph("Error off slot", Degree)) { it - it.roundToInt(CarouselSlot) }
+        .with(graph("Error off slot", Degree)) { it - it.roundToInt(CarouselSlot).CarouselSlot }
 
     // Sensor is electrically inverted
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
@@ -60,7 +60,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
             encoder.position = conversions.encoder.native(
                 position.optimizedRead(
                     dio.readFallingTimestamp().Second, syncThreshold
-                ).y.roundToInt(CarouselSlot)
+                ).y.roundToInt(CarouselSlot).CarouselSlot
             )
 //          log(Debug) { "Running hall effect ISR" }
             isZeroed = true

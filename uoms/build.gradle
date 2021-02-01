@@ -7,30 +7,19 @@ kotlin {
     jvm()
 
     sourceSets {
+        uoms {
+            tasks {
+                kotlin.srcDir generateUnitsOfMeasure.generatedSrcDir
+            }
+        }
         commonMain {
-            kotlin.srcDir generateUnitsOfMeasure.generatedSrcDir
-
-            dependencies {
-                implementation kotlin('stdlib-common')
-            }
-        }
-
-        jvmMain {
-            dependencies {
-                implementation kotlin('stdlib-jdk8')
-            }
-        }
-
-    }
-
-    targets.all {
-        compilations.all {
-            compileKotlinTask.dependsOn generateUnitsOfMeasure
-            kotlinOptions {
-                suppressWarnings = true
-            }
+            dependsOn uoms
         }
     }
 }
 
 apply from: 'units-of-measure.gradle'
+
+tasks
+        .findAll { it != generateUnitsOfMeasure }
+        .each { it.dependsOn generateUnitsOfMeasure }

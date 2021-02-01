@@ -35,7 +35,7 @@ suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
 
     choreography {
         rezero()
-        val start = carouselAngle.roundToInt(CarouselSlot)
+        val start = carouselAngle.roundToInt(CarouselSlot).CarouselSlot
         for (i in 0 until state.size) {
             set(start + i.CarouselSlot - collectSlot)
             val j = launch { set(start + i.CarouselSlot - collectSlot, 0.Degree) }
