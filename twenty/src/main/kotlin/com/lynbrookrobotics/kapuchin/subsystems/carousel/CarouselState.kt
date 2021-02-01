@@ -8,6 +8,7 @@ import kotlin.math.roundToInt
 
 class CarouselState(component: Named) : Named by Named("State", component) {
     private val internal = arrayOf(false, false, false, false, false)
+    private var currentSlot = 0
 
     private fun index(robotBearing: Angle) =
         Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
@@ -21,32 +22,49 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         internal[index] = newState
     }
 
-    //    hardware doesn't support CW & CCW turning
-    private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
-        val signum = if (bias) -1 else 1
-        for (i in 0..2) {
-            val offset = i.CarouselSlot * signum
-            if (f(slot + offset)) return slot + offset
-            if (f(slot - offset)) return slot - offset
+    fun rotateOnce(): `∠` = (++currentSlot%5).CarouselSlot
+
+    fun rotateNearestEmpty(): `∠`{
+        var isFull = true
+        for(i in internal) {
+            if(!i){
+                isFull = false
+                break
+            }
+        }
+
+        if(isFull) return 0.Degree
+        var ans = ((4 - currentSlot) * 72).Degree + 36.Degree
+        currentSlot += (4-currentSlot)
+        currentSlot %= 5
+        return ans
+    }
+    
+/*
+    /**
+     * returns the first non empty slot as an angle in the carousel while going only one direction
+     */
+    fun closestEmpty(): `∠`?{
+        for(i in 0..5){
+            if(!internal[currentSlot%5]) return currentSlot.CarouselSlot //Check return statement later
+            currentSlot++
         }
         return null
     }
 
-//    private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
-//        for (i in 0 until 5) {
-//            val position = slot - i.CarouselSlot
-//            if (f(position)) return position
-//        }
-//        return null
-//    }
+    /**
+     * returns the first full slot going the opposite direction as `closestEmpty`
+     */
+    fun closestFull(): `∠`?{
+        for(i in 0..5){
+            if(internal[currentSlot%5]) return currentSlot.CarouselSlot //Check return statement later
+            currentSlot--
+       }
+        return null
+    }
+*/
 
-    fun closestEmpty(robotBearing: Angle) = closest(robotBearing, false) {
-        !get(it)
-    }?.roundToInt(CarouselSlot)
 
-    fun closestFull(robotBearing: Angle) = closest(robotBearing, true) {
-        get(it)
-    }?.roundToInt(CarouselSlot)
 
     val ammo get() = internal.count { it }
     val size = internal.size

@@ -93,13 +93,14 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
 suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
-
+    val color by hardware.color.readEagerly().withoutStamps
+    val proximity by hardware.proximity.readEagerly().withoutStamps
     choreography {
 //        carousel.rezero()
         while (isActive) {
-            val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
+            //val emptySlot = carousel.state.closestEmpty()
 
-            if (emptySlot == null) {
+            if (carousel.state.currentSlot == 0 && hardware.conversions.detectingBall(proximity, color)) {
                 log(Warning) { "I'm full. No open slots in carousel magazine." }
 
                 launch { intakeSlider?.set(IntakeSliderState.In) }
@@ -107,7 +108,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 rumble.set(TwoSided(100.Percent, 0.Percent))
             } else {
                 launch { feederRoller?.set(0.Rpm) }
-                carousel.set(emptySlot - carousel.collectSlot)
+                carousel.set(carousel.state.rotateOnce())
                 launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
@@ -189,16 +190,16 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
-        val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-        val nextSlot = carouselAngle.roundToInt(CarouselSlot)
+//        val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
+//        val nextSlot = carouselAngle.roundToInt(CarouselSlot)
 
-        if (fullSlot == null) {
-            log(Warning) { "I feel empty. I want to eat some balls." }
-            withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
-        }
+//        if (fullSlot == null) {
+//            log(Warning) { "I feel empty. I want to eat some balls." }
+//            withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
+//        }
 
         launch {
-            carousel.set((fullSlot ?: nextSlot) - carousel.shootSlot, 0.CarouselSlot)
+            carousel.set(carouselAngle + 72.Degree)
         }
 
         log(Debug) { "Waiting for ball to launch." }
@@ -218,6 +219,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         freeze()
     } else startChoreo("Spin Up Shooter") {
 
+        theseset(carousel.state.rotateNearestEmpty())
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
@@ -226,12 +228,12 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
-            val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
+            /*val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
             if (fullSlot != null) {
                 val target = fullSlot - carousel.shootSlot
                 if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
                 if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
-            }
+            }*/
 
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }

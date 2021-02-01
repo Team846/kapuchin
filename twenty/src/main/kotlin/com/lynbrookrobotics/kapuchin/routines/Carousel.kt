@@ -24,6 +24,7 @@ suspend fun CarouselComponent.set(targetPosition: Angle, tolerance: Angle = 2.5.
     }
 }
 
+
 suspend fun CarouselComponent.set(target: DutyCycle) = startRoutine("Set") {
     controller { PercentOutput(hardware.escConfig, target) }
 }
@@ -37,7 +38,7 @@ suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
         rezero()
         val start = carouselAngle.roundToInt(CarouselSlot)
         for (i in 0 until state.size) {
-            set(start + i.CarouselSlot - collectSlot)
+            set(start + i.CarouselSlot - collectSlot )
             val j = launch { set(start + i.CarouselSlot - collectSlot, 0.Degree) }
             delay(0.1.Second)
             state.set(
