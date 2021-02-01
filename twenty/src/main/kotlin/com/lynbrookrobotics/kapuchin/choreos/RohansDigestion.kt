@@ -108,15 +108,15 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 rumble.set(TwoSided(100.Percent, 0.Percent))
             } else {
                 launch { feederRoller?.set(0.Rpm) }
-                carousel.set(carousel.state.rotateOnce())
-                launch { carousel.set(carousel.emptySlot - carousel.collectSlot, 0.Degree) }
+                //launch { carousel.set(carousel.emptySlot - carousel.collectSlot, 0.Degree) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
                 launch { intakeRollers?.optimalEat(drivetrain, electrical) }
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
                 carousel.delayUntilBall()
-                carousel.state.set(carouselAngle + carousel.collectSlot, true)
+                //carousel.state.set(carouselAngle + carousel.collectSlot, true)
+                carousel.set(carousel.state.rotateOnce(true))
             }
         }
     }
@@ -199,14 +199,14 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 //        }
 
         launch {
-            carousel.set(carouselAngle + 72.Degree)
+            carousel.set(carousel.state.rotateOnce(false))
         }
 
         log(Debug) { "Waiting for ball to launch." }
         withTimeout(1.5.Second) {
             flywheel?.delayUntilBall()
         } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
-        carousel.state.set(carouselAngle + carousel.shootSlot, false)
+        //carousel.state.set(carouselAngle + carousel.shootSlot, false)
 
         coroutineContext[Job]!!.cancelChildren()
         delay(100.milli(Second)) // Prevent accidentally shooting twice
@@ -218,8 +218,8 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         log(Error) { "Need flywheel and feeder to spin up shooter" }
         freeze()
     } else startChoreo("Spin Up Shooter") {
+        val angle = carousel.state.rotateNearestEmpty()
 
-        set(carousel.state.rotateNearestEmpty())
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
@@ -234,6 +234,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
                 if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
             }*/
+            if (angle != null) launch { carousel.set(carousel.state.rotateNearestEmpty())} else launch { carousel.set(36.Degree) } // Currently very broken
 
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }

@@ -22,9 +22,24 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         internal[index] = newState
     }
 
-    fun rotateOnce(): `∠` = (++currentSlot%5).CarouselSlot
+    /**
+     * Rotates the carousel slot once clockwise, does not perform checks for balls
+     * @return - Angle to move to in order to rotate one slot
+     */
+    fun rotateOnce(isIntake: Boolean): `∠` {
+        val newSlot = ++currentSlot%5
+        internal[newSlot] = isIntake
+        if(isIntake) return newSlot.CarouselSlot
+        return newSlot.CarouselSlot + 36.Degree
+    }
 
-    fun rotateNearestEmpty(): `∠`{
+
+    /**
+     * Rotates the carousel such that the first ball (most clockwise from intake side) to 324 degrees
+     * so that when shooting, we can rotate in increments of 72 degrees
+     * @return - Angle to move to, null if carousel is full
+     */
+    fun rotateNearestEmpty(): Angle?{
         var isFull = true
         for(i in internal) {
             if(!i){
@@ -33,8 +48,8 @@ class CarouselState(component: Named) : Named by Named("State", component) {
             }
         }
 
-        if(isFull) return 0.Degree
-        var ans = ((4 - currentSlot) * 72).Degree + 36.Degree
+        if(isFull) return null
+        val ans = ((4 - currentSlot) * 72).Degree + 36.Degree
         currentSlot += (4-currentSlot)
         currentSlot %= 5
         return ans
