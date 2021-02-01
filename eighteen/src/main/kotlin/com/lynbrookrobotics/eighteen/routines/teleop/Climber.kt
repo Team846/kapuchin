@@ -1,9 +1,12 @@
-package com.lynbrookrobotics.kapuchin.routines.teleop
+package com.lynbrookrobotics.eighteen.routines.teleop
 
+import com.lynbrookrobotics.eighteen.subsystems.DriverHardware
+import com.lynbrookrobotics.eighteen.subsystems.LiftComponent
+import com.lynbrookrobotics.eighteen.subsystems.climber.ForksComponent
+import com.lynbrookrobotics.eighteen.subsystems.climber.HooksComponent
+import com.lynbrookrobotics.eighteen.subsystems.climber.WinchComponent
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.climber.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

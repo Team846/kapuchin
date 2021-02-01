@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.climber
+package com.lynbrookrobotics.eighteen.subsystems.climber
 
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.preferences.*

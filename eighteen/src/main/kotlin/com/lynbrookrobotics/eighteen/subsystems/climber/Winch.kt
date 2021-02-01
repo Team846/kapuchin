@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.climber
+package com.lynbrookrobotics.eighteen.subsystems.climber
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.lynbrookrobotics.kapuchin.hardware.*

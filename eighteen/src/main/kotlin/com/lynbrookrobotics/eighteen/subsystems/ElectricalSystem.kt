@@ -1,8 +1,9 @@
-package com.lynbrookrobotics.kapuchin.subsystems
+package com.lynbrookrobotics.eighteen.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.RobotController

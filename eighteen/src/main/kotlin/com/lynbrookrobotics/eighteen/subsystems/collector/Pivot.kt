@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems.collector
+package com.lynbrookrobotics.eighteen.subsystems.collector
 
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.preferences.*

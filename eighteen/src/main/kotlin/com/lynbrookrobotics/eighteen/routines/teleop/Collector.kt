@@ -1,8 +1,10 @@
-package com.lynbrookrobotics.kapuchin.routines.teleop
+package com.lynbrookrobotics.eighteen.routines.teleop
 
+import com.lynbrookrobotics.eighteen.subsystems.DriverHardware
+import com.lynbrookrobotics.eighteen.subsystems.collector.ClampComponent
+import com.lynbrookrobotics.eighteen.subsystems.collector.PivotComponent
+import com.lynbrookrobotics.eighteen.subsystems.collector.RollersComponent
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.subsystems.collector.*
 import info.kunalsheth.units.generated.*
 
 suspend fun RollersComponent.teleop(driver: DriverHardware) = startRoutine("teleop") {

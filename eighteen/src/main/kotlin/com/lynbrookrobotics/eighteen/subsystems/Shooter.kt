@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.subsystems
+package com.lynbrookrobotics.eighteen.subsystems
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.loops.*
@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.loops.pid.*
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.hardw
 import com.lynbrookrobotics.kapuchin.hardware.Sensor.Companion.sensor
 import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.Spark
