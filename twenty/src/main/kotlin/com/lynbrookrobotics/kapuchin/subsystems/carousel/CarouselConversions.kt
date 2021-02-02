@@ -60,12 +60,12 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
      *           otherwise angle to move to after picking ball
      */
     fun loadBallAngle(current: Angle): `∠`? {
+        if (state == 5) return null
         if (!firstShot) {
             firstShot = true
-            return state * 72.Degree - 36.Degree
+            return state * 72.Degree + current - 36.Degree
         }
         firstShot = true
-        if (state == 5) return null
         state++
         return 72.Degree + current
     }
@@ -75,7 +75,7 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
      * @return - 0 if carousel is full since there's nothing to do,
      *           otherwise the angle to move to so that the slot at shooter is empty and slot before is full
      */
-    fun moveToShootingPos(current: Angle): `∠`? {
+    fun moveToShootingPos(current: Angle): `∠` {
         if (state == 5) {
             log(Warning) { "Empty carousel" }
             return 0.Degree
@@ -95,7 +95,7 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
         state--
         if (firstShot) {
             firstShot = false
-            return 36.Degree
+            return 36.Degree + current
         }
         return 72.Degree + current
 
