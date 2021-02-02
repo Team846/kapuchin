@@ -17,7 +17,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
-import edu.wpi.first.wpilibj.SPI
+import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -83,7 +83,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.setNeutralMode(NeutralMode.Coast)
     }
 
-    private val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
+    private val gyro by hardw { AHRS(SerialPort.Port.kUSB) }.configure {
         blockUntil() { it.isConnected }
         blockUntil() { !it.isCalibrating }
         it.zeroYaw()

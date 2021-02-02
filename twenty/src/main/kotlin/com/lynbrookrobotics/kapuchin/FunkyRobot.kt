@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.kapuchin
 
 import com.lynbrookrobotics.kapuchin.choreos.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -13,6 +14,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.File
 import kotlin.system.measureTimeMillis
 
 
@@ -43,72 +45,25 @@ class FunkyRobot : RobotBase() {
                     subsystems.teleop()
                 },
                 { isEnabled && isAutonomous } to choreography {
-                    System.gc()
-
-                    subsystems.auto()
-
-//                        withTimeout(5.Second) { subsystems.climberWinch?.set(0.Percent) } // should release chode
-//                        subsystems.climberWinch?.set(10.Percent) // extend is positive
-//                        subsystems.climberWinch?.set(-10.Percent) // extend is positive
-
-//                        subsystems.turret?.rezero(subsystems.electrical)
-//                        launch { subsystems.turret?.set(0.Degree, 0.Degree) }
-//                        launch { subsystems.flywheel?.set(5000.Rpm)}
-//                        launch { subsystems.feederRoller?.set(5000.Rpm) }
-//                        launch { subsystems.drivetrain.set(100.Percent) }
-//
-
-//                        while (isActive) {
-//                            withTimeout(5.Second) {
-//                                subsystems.carousel.set(1.CarouselSlot)
-//                            }
-//                            delay(1.Second)
-//                            withTimeout(5.Second) {
-//                                subsystems.carousel.set(5.CarouselSlot)
-//                            }
-//                            delay(1.Second)
-//                            withTimeout(5.Second) {
-//                                subsystems.carousel.set(-1.CarouselSlot)
-//                            }
-//                            delay(1.Second)
-//                        }
-
-//                        subsystems.carousel.whereAreMyBalls()
-//                        println(subsystems.carousel.state.toString())
-//                        subsystems.carousel.log(Debug) { subsystems.carousel.state.toString() }
-//                        println(subsystems.carousel.state.toString())
-
-//                        launch { subsystems.feederRoller?.set(subsystems.feederRoller.feedSpeed) }
-//                        launch { subsystems.flywheel?.set(4000.Rpm) }
-//                        delay(2.Second)
-//                        launch { subsystems.carousel.whereAreMyBalls() }
-
-//                        subsystems.turret?.rezero(subsystems.electrical)
-
-//                        launch {
-//                           subsystems.intakeSlider?.set(IntakeSliderState.Out)
-//                        }
-//                        launch {
-//                            subsystems.intakeRollers?.set(subsystems.intakeRollers.eatSpeed)
-//                        }
-//
-//                        repeat(60) {
-//                            withTimeout(1.Second) { subsystems.shooterHood?.set(ShooterHoodState.Up) }
-//                            withTimeout(1.Second) { subsystems.shooterHood?.set(ShooterHoodState.Down) }
-//                        }
-
-//                        subsystems.carousel.whereAreMyBalls()
-//                        subsystems.eat()
-
-//                        subsystems.turret?.rezero(subsystems.electrical)
-//                        while (isActive) {
-//                            withTimeout(3.Second) { subsystems.turret?.set(-90.Degree, 0.Degree) }
-//                            withTimeout(3.Second) { subsystems.turret?.set(0.Degree, 0.Degree) }
-//                            withTimeout(3.Second) { subsystems.turret?.set(90.Degree, 0.Degree) }
-//                        }
-
+                    val speedFactor = 50.Percent
+                    val traj = File("/home/lvuser/0.tsv")
+                        .bufferedReader()
+                        .lineSequence()
+                        .drop(1)
+                        .map { it.split('\t') }
+                        .map { it.map { tkn -> tkn.trim() } }
+                        .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+                        .toList()
+                        .let {
+                            pathToTrajectory(
+                                it,
+                                subsystems.drivetrain.maxSpeed * speedFactor,
+                                subsystems.drivetrain.percentMaxOmega * subsystems.drivetrain.maxOmega * speedFactor,
+                                subsystems.drivetrain.maxAcceleration
+                            )
+                        }
+                    subsystems.drivetrain.followTrajectory(traj, 12.Inch, 2.Inch, reverse = false)
                     freeze()
-//                      subsystems.drivetrain.set(0.Percent)
                 },
                 { isDisabled && !isTest } to choreography {
                     subsystems.warmup()

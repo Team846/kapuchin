@@ -43,10 +43,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             turret.rezero(electrical)
         }
 
-        withTimeout(15.Second) {
-            carousel.rezero()
-            carousel.whereAreMyBalls()
-        }
+//        withTimeout(15.Second) {
+//            carousel.rezero()
+//            carousel.whereAreMyBalls()
+//        }
 
         launch {
             launchWhenever(
