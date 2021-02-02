@@ -107,17 +107,15 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 rumble.set(TwoSided(100.Percent, 0.Percent))
             } else {
                 launch { feederRoller?.set(0.Rpm) }
-                //launch { carousel.set(carousel.emptySlot - carousel.collectSlot, 0.Degree) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
                 launch { intakeRollers?.optimalEat(drivetrain, electrical) }
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
                 carousel.delayUntilBall()
-                //carousel.state.set(carouselAngle + carousel.collectSlot, true)
-                //carousel.incrementAngleBy(carousel.state.loadBallAngle())
+
                 val newAngle = carousel.hardware.conversions.loadBallAngle(angle)
-                if(newAngle != null) carousel.set(newAngle)
+                if (newAngle != null) carousel.set(newAngle)
             }
         }
     }
@@ -190,22 +188,14 @@ suspend fun Subsystems.visionAim() {
 suspend fun Subsystems.fire() = startChoreo("Fire") {
     val angle by carousel.hardware.position.readEagerly().withoutStamps
     choreography {
-//        val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-//        val nextSlot = carouselAngle.roundToInt(CarouselSlot)
-
-//        if (fullSlot == null) {
-//            log(Warning) { "I feel empty. I want to eat some balls." }
-//            withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
-//        }
 
         val newAngle = carousel.hardware.conversions.shootBallAngle(angle)
-        if(newAngle != null) carousel.set(newAngle)
+        if (newAngle != null) carousel.set(newAngle)
 
         log(Debug) { "Waiting for ball to launch." }
         withTimeout(1.5.Second) {
             flywheel?.delayUntilBall()
         } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
-        //carousel.state.set(carouselAngle + carousel.shootSlot, false)
 
         coroutineContext[Job]!!.cancelChildren()
         delay(100.milli(Second)) // Prevent accidentally shooting twice
@@ -226,15 +216,8 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
-            /*val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-            if (fullSlot != null) {
-                val target = fullSlot - carousel.shootSlot
-                if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
-                if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
-            }*/
-
             val newAngle = carousel.hardware.conversions.moveToShootingPos(angle)
-            if(newAngle != null) carousel.set(newAngle)
+            if (newAngle != null) carousel.set(newAngle)
 
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }
@@ -247,9 +230,9 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 delayUntil(predicate = ::feederCheck)
             } ?: log(Error) {
                 "Feeder roller never got up to speed (target = ${
-                feederRoller.feedSpeed.Rpm withDecimals 0
+                    feederRoller.feedSpeed.Rpm withDecimals 0
                 } RPM, current = ${
-                feederSpeed.Rpm withDecimals 0
+                    feederSpeed.Rpm withDecimals 0
                 })"
             }
 
@@ -258,9 +241,9 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 delayUntil(predicate = ::flywheelCheck)
             } ?: log(Error) {
                 "Flywheel never got up to speed (target = ${
-                flywheelTarget.Rpm withDecimals 0
+                    flywheelTarget.Rpm withDecimals 0
                 } RPM, current = ${
-                flywheelSpeed.Rpm withDecimals 0
+                    flywheelSpeed.Rpm withDecimals 0
                 })"
             }
 
