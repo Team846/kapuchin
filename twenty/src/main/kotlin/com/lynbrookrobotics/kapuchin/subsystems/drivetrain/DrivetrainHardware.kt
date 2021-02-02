@@ -57,7 +57,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val leftMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
-        +it.setSelectedSensorPosition(0)
+        +it.setSelectedSensorPosition(0.0)
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
         it.setNeutralMode(NeutralMode.Coast)
@@ -71,7 +71,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val rightMasterEsc by hardw { TalonFX(rightMasterEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
-        +it.setSelectedSensorPosition(0)
+        +it.setSelectedSensorPosition(0.0)
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
         it.setNeutralMode(NeutralMode.Coast)

@@ -190,7 +190,7 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 
     choreography {
         val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-        val nextSlot = carouselAngle.roundToInt(CarouselSlot)
+        val nextSlot = carouselAngle.roundToInt(CarouselSlot).CarouselSlot
 
         if (fullSlot == null) {
             log(Warning) { "I feel empty. I want to eat some balls." }

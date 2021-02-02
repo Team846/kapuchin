@@ -15,7 +15,7 @@ import info.kunalsheth.units.generated.*
  * @param scope sensor scope of the routine.
  */
 class UnicycleDrive(private val drivetrain: GenericDrivetrainComponent, scope: BoundSensorScope) {
-    val position by with(scope) { drivetrain.hardware.position.readOnTick.withStamps }
+    val position by drivetrain.hardware.positionDelegate(scope)
     val dadt = differentiator(::p, position.x, position.y.bearing)
 
     val errorGraph = drivetrain.graph("Error Angle", Degree)
