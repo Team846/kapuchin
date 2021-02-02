@@ -31,7 +31,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 
     override val fallbackController: ClimberWinchComponent.(Time) -> ClimberWinchOutput = { Stopped }
 
-    private val run = true
+    private val coast = true
     private val brake = false
 
     private var lastBrake = currentTime
@@ -58,12 +58,12 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
                 value.esc.writeTo(masterEsc, pidController)
                 lastWinchRun = currentTime
             } else log(Warning) {
-                "Cannot run while \n" +
+                "Cannot coast while \n" +
                         "currentTime - lastBrake == ${currentTime - lastBrake withDecimals 2}\n" +
                         "winchSolenoid.get() == brake"
             }
 
-            winchSolenoid.set(run)
+            winchSolenoid.set(coast)
         }
     }
 }
