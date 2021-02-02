@@ -8,9 +8,8 @@ import kotlin.math.roundToInt
 
 class CarouselState(component: Named) : Named by Named("State", component) {
     private val internal = arrayOf(false, false, false, false, false)
-    var currentSlot = 0
-    var needForOffset = false
-    var doneShooting = true
+    var state = 0
+    var firstShot = true
 
     private fun index(robotBearing: Angle) =
         Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
@@ -24,54 +23,6 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         internal[index] = newState
     }
 
-    /**
-     * Rotates the carousel slot once clockwise, does not perform checks for balls
-     * @return - Angle to move to in order to rotate one slot
-     */
-    fun rotateOnce(): `∠` {
-        if(!doneShooting){
-            doneShooting = true
-            return currentSlot * 72.Degree
-        }
-        needForOffset = true
-        val newSlot = ++currentSlot%5
-        internal[newSlot] = true
-        return newSlot.CarouselSlot
-    }
-
-    fun rotateForShot(): `∠` {
-        doneShooting = false
-        var off = 0.Degree
-        if(needForOffset){
-            off += 36.Degree
-            needForOffset = false
-        }
-        return (currentSlot++%5).CarouselSlot + off
-        //return newSlot.CarouselSlot + 36.Degree
-    }
-
-
-    /**
-     * Rotates the carousel such that the first ball (most clockwise from intake side) to 324 degrees
-     * so that when shooting, we can rotate in increments of 72 degrees
-     * @return - Angle to move to, null if carousel is full
-     */
-    fun rotateNearestEmpty(): `∠`?{
-        var isFull = true
-        for(i in internal) {
-            if(!i){
-                isFull = false
-                break
-            }
-        }
-
-        if(isFull) return null
-        val ans = (4 - currentSlot).CarouselSlot + currentSlot.CarouselSlot
-        currentSlot += (4-currentSlot)
-        currentSlot %= 5
-        return ans
-    }
-    
 /*
     /**
      * returns the first non empty slot as an angle in the carousel while going only one direction

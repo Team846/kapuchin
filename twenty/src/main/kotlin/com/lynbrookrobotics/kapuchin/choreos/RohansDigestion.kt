@@ -94,12 +94,12 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     val color by carousel.hardware.color.readEagerly().withoutStamps
     val proximity by carousel.hardware.proximity.readEagerly().withoutStamps
+    val angle by carousel.hardware.position.readEagerly().withoutStamps
     choreography {
 //        carousel.rezero()
         while (isActive) {
-            //val emptySlot = carousel.state.closestEmpty()
 
-            if (carousel.state.currentSlot == 0 && carousel.hardware.conversions.detectingBall(proximity, color)) {
+            if (carousel.hardware.conversions.state == 5) {
                 log(Warning) { "I'm full. No open slots in carousel magazine." }
 
                 launch { intakeSlider?.set(IntakeSliderState.In) }
@@ -115,7 +115,9 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
                 carousel.delayUntilBall()
                 //carousel.state.set(carouselAngle + carousel.collectSlot, true)
-                carousel.set(carousel.state.rotateOnce(true))
+                //carousel.incrementAngleBy(carousel.state.loadBallAngle())
+                val newAngle = carousel.hardware.conversions.loadBallAngle(angle)
+                if(newAngle != null) carousel.set(newAngle)
             }
         }
     }
@@ -186,6 +188,7 @@ suspend fun Subsystems.visionAim() {
 }
 
 suspend fun Subsystems.fire() = startChoreo("Fire") {
+    val angle by carousel.hardware.position.readEagerly().withoutStamps
     choreography {
 //        val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
 //        val nextSlot = carouselAngle.roundToInt(CarouselSlot)
@@ -195,9 +198,8 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 //            withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
 //        }
 
-        launch {
-            carousel.set(carousel.state.rotateForShot())
-        }
+        val newAngle = carousel.hardware.conversions.shootBallAngle(angle)
+        if(newAngle != null) carousel.set(newAngle)
 
         log(Debug) { "Waiting for ball to launch." }
         withTimeout(1.5.Second) {
@@ -215,10 +217,11 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         log(Error) { "Need flywheel and feeder to spin up shooter" }
         freeze()
     } else startChoreo("Spin Up Shooter") {
-        val angle = carousel.state.rotateNearestEmpty()
+
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
+        val angle by carousel.hardware.position.readEagerly().withoutStamps
 
         choreography {
             launch { feederRoller.set(0.Rpm) }
@@ -229,7 +232,9 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
                 if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
             }*/
-            if (angle != null) launch { angle.let { carousel.set(it) } } else launch { carousel.set(36.Degree) } // Currently very broken
+
+            val newAngle = carousel.hardware.conversions.moveToShootingPos(angle)
+            if(newAngle != null) carousel.set(newAngle)
 
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }
@@ -279,6 +284,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
 suspend fun Subsystems.unjam() = startChoreo("Unjam") {
 
     val carouselPosition by carousel.hardware.position.readEagerly().withoutStamps
+    val angle by carousel.hardware.position.readEagerly().withoutStamps
 
     choreography {
         val period = 1.Second
