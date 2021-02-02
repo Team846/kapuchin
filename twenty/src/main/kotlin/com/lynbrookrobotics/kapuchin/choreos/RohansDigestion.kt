@@ -90,7 +90,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { centerTurret } to choreography { turret?.set(0.Degree) },
                 { turretPreset } to choreography {
                     val time = measureTimeMillis {
-                        turret?.set(turret.preset)
+                        turret?.set(turret.preset, 0.1.Degree)
                     }
                     println(time)
                     freeze()

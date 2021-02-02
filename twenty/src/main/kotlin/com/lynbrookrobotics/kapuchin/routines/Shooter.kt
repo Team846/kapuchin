@@ -19,7 +19,9 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 suspend fun FlywheelComponent.set(target: AngularVelocity) = startRoutine("Set Omega") {
+    val current by hardware.speed.readOnTick.withoutStamps
     controller {
+        println("$currentTime \t $current")
         VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.encoder.native(target))
     }
 }
@@ -53,10 +55,11 @@ suspend fun FeederRollerComponent.set(target: DutyCycle) = startRoutine("Set Dut
     }
 }
 
-suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 0.5.Degree) = startRoutine("Set") {
+suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 0.2.Degree) = startRoutine("Set") {
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {
+        println("$currentTime \t $current.Degree")
         PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
             .takeUnless { target - current in `±`(tolerance) }
     }
