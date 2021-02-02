@@ -19,6 +19,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.sign
+import kotlin.system.measureTimeMillis
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -37,57 +38,65 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
     val centerTurret by operator.centerTurret.readEagerly().withoutStamps
+    val turretPreset by operator.turretTest.readEagerly().withoutStamps
 
-    choreography {
-        if (turret != null && !turret.hardware.isZeroed) launch {
-            turret.rezero(electrical)
-        }
+        choreography {
+            if (turret != null && !turret.hardware.isZeroed) launch {
+                turret.rezero(electrical)
+            }
 
 //        withTimeout(15.Second) {
 //            carousel.rezero()
 //            carousel.whereAreMyBalls()
 //        }
 
-        launch {
-            launchWhenever(
-                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
-                { shoot } to choreography { fire() }
+            launch {
+                launchWhenever(
+//                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
+                    { shoot } to choreography { fire() }
+                )
+            }
+            runWhenever(
+                { intakeBalls } to choreography { eat() },
+                { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
+
+                { aim } to choreography { visionAim() },
+                { aimPreset } to choreography {
+                    flywheel?.let { spinUpShooter(flywheel.preset, Down) }
+                },
+                { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
+
+                { flywheelManual != null } to choreography {
+                    scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
+                    flywheel?.let {
+                        spinUpShooter(
+                            (flywheelManual ?: 0.Percent) * it.maxSpeed,
+                            if (hoodUp) Up else Down
+                        )
+                    } ?: freeze()
+
+                },
+                { !turretManual.isZero } to choreography {
+                    scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
+                    turret?.manualOverride(operator) ?: freeze()
+                },
+
+                { unjamCarousel } to choreography { unjam() },
+                { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
+                { reindexCarousel } to choreography {
+                    carousel.whereAreMyBalls()
+                    rumble.set(TwoSided(0.Percent, 100.Percent))
+                },
+                { centerTurret } to choreography { turret?.set(0.Degree) },
+                { turretPreset } to choreography {
+                    val time = measureTimeMillis {
+                        turret?.set(turret.preset)
+                    }
+                    println(time)
+                    freeze()
+                }
             )
         }
-        runWhenever(
-            { intakeBalls } to choreography { eat() },
-            { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
-
-            { aim } to choreography { visionAim() },
-            { aimPreset } to choreography {
-                flywheel?.let { spinUpShooter(flywheel.preset, Down) }
-            },
-            { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
-
-            { flywheelManual != null } to choreography {
-                scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
-                flywheel?.let {
-                    spinUpShooter(
-                        (flywheelManual ?: 0.Percent) * it.maxSpeed,
-                        if (hoodUp) Up else Down
-                    )
-                } ?: freeze()
-
-            },
-            { !turretManual.isZero } to choreography {
-                scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
-                turret?.manualOverride(operator) ?: freeze()
-            },
-
-            { unjamCarousel } to choreography { unjam() },
-            { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
-            { reindexCarousel } to choreography {
-                carousel.whereAreMyBalls()
-                rumble.set(TwoSided(0.Percent, 100.Percent))
-            },
-            { centerTurret } to choreography { turret?.set(0.Degree) }
-        )
-    }
 
 }
 

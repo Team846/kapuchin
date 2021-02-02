@@ -14,6 +14,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.shooter.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.Goal.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.flywheel.*
 import com.lynbrookrobotics.kapuchin.subsystems.shooter.turret.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -52,7 +53,7 @@ suspend fun FeederRollerComponent.set(target: DutyCycle) = startRoutine("Set Dut
     }
 }
 
-suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 2.Degree) = startRoutine("Set") {
+suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 0.5.Degree) = startRoutine("Set") {
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {
