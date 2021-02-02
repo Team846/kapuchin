@@ -92,7 +92,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 }
 
 suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
-    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
     val color by carousel.hardware.color.readEagerly().withoutStamps
     val proximity by carousel.hardware.proximity.readEagerly().withoutStamps
     choreography {
@@ -187,8 +186,6 @@ suspend fun Subsystems.visionAim() {
 }
 
 suspend fun Subsystems.fire() = startChoreo("Fire") {
-    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
-
     choreography {
 //        val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
 //        val nextSlot = carouselAngle.roundToInt(CarouselSlot)
@@ -199,7 +196,7 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 //        }
 
         launch {
-            carousel.set(carousel.state.rotateOnce(false))
+            carousel.set(carousel.state.rotateForShot())
         }
 
         log(Debug) { "Waiting for ball to launch." }
@@ -220,8 +217,6 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
     } else startChoreo("Spin Up Shooter") {
         val angle = carousel.state.rotateNearestEmpty()
 
-        val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
-
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
@@ -234,7 +229,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
                 if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
             }*/
-            if (angle != null) launch { carousel.set(carousel.state.rotateNearestEmpty())} else launch { carousel.set(36.Degree) } // Currently very broken
+            if (angle != null) launch { angle.let { carousel.set(it) } } else launch { carousel.set(36.Degree) } // Currently very broken
 
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }
