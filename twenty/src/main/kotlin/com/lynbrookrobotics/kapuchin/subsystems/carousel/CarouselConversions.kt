@@ -77,7 +77,7 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
      */
     fun moveToShootingPos(current: Angle): `∠` {
         if (state == 5) {
-            log(Warning) { "Empty carousel" }
+            log(Debug) { "Empty carousel" }
             return 0.Degree
         }
         return (4 - state) * 72.Degree + current
@@ -89,7 +89,7 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
      */
     fun shootBallAngle(current: Angle): `∠`? {
         if (state == 0) {
-            log(Warning) { "No ball was there to shoot" }
+            log(Debug) { "No ball was there to shoot" }
             return null
         }
         state--

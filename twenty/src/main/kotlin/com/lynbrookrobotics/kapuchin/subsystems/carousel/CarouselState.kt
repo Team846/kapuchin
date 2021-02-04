@@ -46,7 +46,52 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         return null
     }
 */
+    /**
+     * @param current - Carousels current angle position
+     * @return - null if carousel is full,
+     *           otherwise angle to move to after picking ball
+     */
+    fun loadBallAngle(current: Angle): `∠`? {
+        if (state == 5) return null
+        if (!firstShot) {
+            firstShot = true
+            return state * 72.Degree + current - 36.Degree
+        }
+        firstShot = true
+        state++
+        return 72.Degree + current
+    }
 
+    /**
+     * @param current - Carousels current angle position
+     * @return - 0 if carousel is full since there's nothing to do,
+     *           otherwise the angle to move to so that the slot at shooter is empty and slot before is full
+     */
+    fun moveToShootingPos(current: Angle): `∠` {
+        if (state == 5) {
+            log(Warning) { "Empty carousel" }
+            return 0.Degree
+        }
+        return (4 - state) * 72.Degree + current
+    }
+
+    /**
+     * @param current - Carousels current angle position
+     * @return - null if carousel is empty but angle to move to shoot a ball if carousel isn't empty
+     */
+    fun shootBallAngle(current: Angle): `∠`? {
+        if (state == 0) {
+            log(Warning) { "No ball was there to shoot" }
+            return null
+        }
+        state--
+        if (firstShot) {
+            firstShot = false
+            return 36.Degree + current
+        }
+        return 72.Degree + current
+
+    }
 
 
     val ammo get() = internal.count { it }
