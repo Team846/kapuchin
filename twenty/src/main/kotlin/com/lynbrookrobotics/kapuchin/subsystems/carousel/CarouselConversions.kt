@@ -80,7 +80,7 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
             log(Debug) { "Empty carousel" }
             return 0.Degree
         }
-        return (4 - state) * 72.Degree + current
+        return (5 - state) * 72.Degree + current
     }
 
     /**

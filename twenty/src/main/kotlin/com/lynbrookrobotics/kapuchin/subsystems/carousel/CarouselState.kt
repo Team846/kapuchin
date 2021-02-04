@@ -72,7 +72,7 @@ class CarouselState(component: Named) : Named by Named("State", component) {
             log(Warning) { "Empty carousel" }
             return 0.Degree
         }
-        return (4 - state) * 72.Degree + current
+        return (5 - state) * 72.Degree + current
     }
 
     /**

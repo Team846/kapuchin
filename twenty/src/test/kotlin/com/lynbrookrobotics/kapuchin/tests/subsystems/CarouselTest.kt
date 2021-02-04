@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.carousel.*
 import info.kunalsheth.units.generated.*
+import java.lang.Math.PI
 import java.util.Random
 import kotlin.reflect.KFunction1
 import kotlin.test.Test
@@ -18,12 +19,9 @@ class CarouselTest : Named by Named("Carousel Test") {
     @Test
     fun `carousel rotate when loaded`(){
 
-        var angle = carousel.loadBallAngle(0.Degree)
-        assertEquals(angle, 72.Degree, "Did not rotate to right angle... wanted: ${72.Degree} but got $angle")
+        println(carousel.loadBallAngle(0.Degree))
+        val angle = carousel.loadBallAngle(72.Degree)
 
-        angle = carousel.loadBallAngle(72.Degree)
-        //assertEquals(angle, 144.Degree, "Did not rotate to right angle... wanted: ${144.Degree} but got $angle")
-        println(angle)
         if (angle != null) {
             assert(angle == 144.Degree)
         }
@@ -33,31 +31,33 @@ class CarouselTest : Named by Named("Carousel Test") {
     fun `rotate for shooter setup`(){
         carousel.loadBallAngle(0.Degree)
         carousel.loadBallAngle(72.Degree)
-        val angle = carousel.moveToShootingPos(144.Degree)
-        //assertEquals(angle, 288.Degree, "Did not rotate to right angle... wanted: ${288.Degree} but got $angle")
-        println(angle)
-        println("state = ${carousel.state}")
-        if (angle != null) {
-            assert(angle == 288.Degree)
-        }
+        val angle = (carousel.moveToShootingPos(144.Degree))
+
+        assert(angle == 360.Degree)
     }
 
     @Test
     fun `first shot ball angle`(){
-        val angle = (carousel.shootBallAngle(288.Degree))?.rem(360.Degree)
-        //assertEquals(angle, 36.Degree, "Did not rotate to right angle... wanted: ${36.Degree} but got $angle")
-        println(angle)
+        carousel.loadBallAngle(0.Degree)
+        carousel.loadBallAngle(72.Degree)
+        carousel.moveToShootingPos(144.Degree)
+        val angle = (carousel.shootBallAngle(360.Degree))
+
         if (angle != null) {
-            assert(angle.equals(36.Degree))
+            assert(angle == 396.Degree)
         }
     }
 
     @Test
     fun `shoot again`(){
-        val angle = (carousel.shootBallAngle(36.Degree))
-        //assertEquals(angle, 108.Degree, "Did not rotate to right angle... wanted: ${36.Degree} but got $angle")
+        carousel.loadBallAngle(0.Degree)
+        carousel.loadBallAngle(72.Degree)
+        carousel.moveToShootingPos(144.Degree)
+        carousel.shootBallAngle(360.Degree)
+        val angle = (carousel.shootBallAngle(396.Degree))
+
         if (angle != null) {
-            assert(angle == 108.Degree)
+            assert(angle == 468.Degree)
         }
     }
 
