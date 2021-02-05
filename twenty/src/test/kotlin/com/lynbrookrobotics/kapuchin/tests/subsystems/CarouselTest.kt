@@ -33,7 +33,7 @@ class CarouselTest : Named by Named("Carousel Test") {
         carousel.loadBallAngle(72.Degree)
         val angle = (carousel.moveToShootingPos(144.Degree))
 
-        assert(angle == 360.Degree)
+        assert(angle == 0.Degree)
     }
 
     @Test
@@ -41,10 +41,10 @@ class CarouselTest : Named by Named("Carousel Test") {
         carousel.loadBallAngle(0.Degree)
         carousel.loadBallAngle(72.Degree)
         carousel.moveToShootingPos(144.Degree)
-        val angle = (carousel.shootBallAngle(360.Degree))
+        val angle = (carousel.shootBallAngle(0.Degree))
 
         if (angle != null) {
-            assert(angle == 396.Degree)
+            assert(angle == 36.Degree)
         }
     }
 
@@ -53,11 +53,11 @@ class CarouselTest : Named by Named("Carousel Test") {
         carousel.loadBallAngle(0.Degree)
         carousel.loadBallAngle(72.Degree)
         carousel.moveToShootingPos(144.Degree)
-        carousel.shootBallAngle(360.Degree)
-        val angle = (carousel.shootBallAngle(396.Degree))
+        carousel.shootBallAngle(0.Degree)
+        val angle = (carousel.shootBallAngle(36.Degree))
 
         if (angle != null) {
-            assert(angle == 468.Degree)
+            assert(angle == 108.Degree)
         }
     }
 

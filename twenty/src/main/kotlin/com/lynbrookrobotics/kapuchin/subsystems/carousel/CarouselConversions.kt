@@ -63,11 +63,11 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
         if (state == 5) return null
         if (!firstShot) {
             firstShot = true
-            return state * 72.Degree + current - 36.Degree
+            return (state * 72.Degree + current - 36.Degree)%(360.Degree)
         }
         firstShot = true
         state++
-        return 72.Degree + current
+        return (72.Degree + current)%(360.Degree)
     }
 
     /**
@@ -77,10 +77,10 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
      */
     fun moveToShootingPos(current: Angle): `∠` {
         if (state == 5) {
-            log(Debug) { "Empty carousel" }
+            log(Warning) { "Empty carousel" }
             return 0.Degree
         }
-        return (5 - state) * 72.Degree + current
+        return ((5 - state) * 72.Degree + current)%(360.Degree)
     }
 
     /**
@@ -89,15 +89,15 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
      */
     fun shootBallAngle(current: Angle): `∠`? {
         if (state == 0) {
-            log(Debug) { "No ball was there to shoot" }
+            log(Warning) { "No ball was there to shoot" }
             return null
         }
         state--
         if (firstShot) {
             firstShot = false
-            return 36.Degree + current
+            return (36.Degree + current)%(360.Degree)
         }
-        return 72.Degree + current
+        return (72.Degree + current)%(360.Degree)
 
     }
 }

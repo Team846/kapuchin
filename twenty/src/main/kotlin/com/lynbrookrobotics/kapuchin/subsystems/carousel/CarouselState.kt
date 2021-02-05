@@ -55,11 +55,11 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         if (state == 5) return null
         if (!firstShot) {
             firstShot = true
-            return state * 72.Degree + current - 36.Degree
+            return (state * 72.Degree + current - 36.Degree)%(360.Degree)
         }
         firstShot = true
         state++
-        return 72.Degree + current
+        return (72.Degree + current)%(360.Degree)
     }
 
     /**
@@ -72,7 +72,7 @@ class CarouselState(component: Named) : Named by Named("State", component) {
             log(Warning) { "Empty carousel" }
             return 0.Degree
         }
-        return (5 - state) * 72.Degree + current
+        return ((5 - state) * 72.Degree + current)%(360.Degree)
     }
 
     /**
@@ -87,9 +87,9 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         state--
         if (firstShot) {
             firstShot = false
-            return 36.Degree + current
+            return (36.Degree + current)%(360.Degree)
         }
-        return 72.Degree + current
+        return (72.Degree + current)%(360.Degree)
 
     }
 
