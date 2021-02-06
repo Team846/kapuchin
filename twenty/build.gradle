@@ -41,7 +41,7 @@ deploy {
 
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.kapuchin.FunkyRobotKt')
+    manifest GradleRIOPlugin.javaManifest('com.lynbrookrobotics.twenty.FunkyRobotKt')
 }
 
 def buildInfoDir = "build/buildInfo/"
