@@ -63,11 +63,11 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
         if (state == 5) return null
         if (!firstShot) {
             firstShot = true
-            return (state * 72.Degree + current - 36.Degree)%(360.Degree)
+            return (state * 72.Degree + current - 36.Degree) % (360.Degree)
         }
         firstShot = true
         state++
-        return (72.Degree + current)%(360.Degree)
+        return (72.Degree + current) % (360.Degree)
     }
 
     /**
@@ -80,7 +80,7 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
             log(Warning) { "Empty carousel" }
             return 0.Degree
         }
-        return ((5 - state) * 72.Degree + current)%(360.Degree)
+        return ((5 - state) * 72.Degree + current) % (360.Degree)
     }
 
     /**
@@ -95,9 +95,9 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
         state--
         if (firstShot) {
             firstShot = false
-            return (36.Degree + current)%(360.Degree)
+            return (36.Degree + current) % (360.Degree)
         }
-        return (72.Degree + current)%(360.Degree)
+        return (72.Degree + current) % (360.Degree)
 
     }
 }

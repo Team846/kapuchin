@@ -10,7 +10,7 @@ class CarouselTest : Named by Named("Carousel Test") {
     private val carousel = CarouselState(this)
 
     @Test
-    fun `carousel rotate when loaded`(){
+    fun `carousel rotate when loaded`() {
 
         println(carousel.loadBallAngle(0.Degree))
         val angle = carousel.loadBallAngle(72.Degree)
@@ -21,7 +21,7 @@ class CarouselTest : Named by Named("Carousel Test") {
     }
 
     @Test
-    fun `rotate for shooter setup`(){
+    fun `rotate for shooter setup`() {
         carousel.loadBallAngle(0.Degree)
         carousel.loadBallAngle(72.Degree)
         val angle = (carousel.moveToShootingPos(144.Degree))
@@ -30,7 +30,7 @@ class CarouselTest : Named by Named("Carousel Test") {
     }
 
     @Test
-    fun `first shot ball angle`(){
+    fun `first shot ball angle`() {
         carousel.loadBallAngle(0.Degree)
         carousel.loadBallAngle(72.Degree)
         carousel.moveToShootingPos(144.Degree)
@@ -42,7 +42,7 @@ class CarouselTest : Named by Named("Carousel Test") {
     }
 
     @Test
-    fun `shoot again`(){
+    fun `shoot again`() {
         carousel.loadBallAngle(0.Degree)
         carousel.loadBallAngle(72.Degree)
         carousel.moveToShootingPos(144.Degree)
@@ -53,7 +53,6 @@ class CarouselTest : Named by Named("Carousel Test") {
             assert(angle == 108.Degree)
         }
     }
-
 
 
 /*

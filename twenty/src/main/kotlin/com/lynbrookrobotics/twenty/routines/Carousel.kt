@@ -3,7 +3,8 @@ package com.lynbrookrobotics.twenty.routines
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.twenty.subsystems.carousel.*
+import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
+import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
@@ -39,7 +40,7 @@ suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
         rezero()
         val start = carouselAngle.roundToInt(CarouselSlot).CarouselSlot
         for (i in 0 until state.size) {
-            set(start + i.CarouselSlot - collectSlot )
+            set(start + i.CarouselSlot - collectSlot)
             val j = launch { set(start + i.CarouselSlot - collectSlot, 0.Degree) }
             delay(0.1.Second)
             state.set(
