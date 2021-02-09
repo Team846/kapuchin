@@ -26,7 +26,6 @@ suspend fun CarouselComponent.set(targetPosition: Angle, tolerance: Angle = 2.5.
     }
 }
 
-
 suspend fun CarouselComponent.set(target: DutyCycle) = startRoutine("Set") {
     controller { PercentOutput(hardware.escConfig, target) }
 }
