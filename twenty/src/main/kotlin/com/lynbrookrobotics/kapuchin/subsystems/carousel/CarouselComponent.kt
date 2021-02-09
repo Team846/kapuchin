@@ -12,14 +12,18 @@ class CarouselComponent(hardware: CarouselHardware) :
 
     val positionGains by pref {
         val kP by pref(12, Volt, 90, Degree)
+        val kI by pref(4, Volt, 90, DegreeSecond)
         val kD by pref(0, Volt, 60, DegreePerSecond)
         ({
             OffloadedEscGains(
                 kP = hardware.conversions.encoder.native(kP),
+                kI = hardware.conversions.encoder.native(kI),
                 kD = hardware.conversions.encoder.native(kD)
             )
         })
     }
+
+    val fireAllDutycycle by pref(50, Percent)
 
     val zeroSpeed by pref(30, Percent)
 

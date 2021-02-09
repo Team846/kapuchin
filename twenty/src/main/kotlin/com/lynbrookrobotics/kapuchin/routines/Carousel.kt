@@ -18,6 +18,7 @@ suspend fun CarouselComponent.set(targetPosition: Angle, tolerance: Angle = 2.5.
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {
+        println("err: ${(targetPosition - current).Degree} | target: ${targetPosition.Degree} | current: ${current.Degree}")
         PositionOutput(
             hardware.escConfig, positionGains, hardware.conversions.encoder.native(targetPosition)
         ).takeUnless { targetPosition - current in `±`(tolerance) }

@@ -53,7 +53,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             launch {
                 launchWhenever(
 //                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
-                    { shoot } to choreography { fire() }
+//                    { shoot } to choreography { fire() }
                 )
             }
             runWhenever(
@@ -61,6 +61,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
                 { aim } to choreography { visionAim() },
+                { shoot } to choreography { fireAll() },
                 { aimPreset } to choreography {
                     flywheel?.let { spinUpShooter(flywheel.preset, Down) }
                 },
@@ -70,7 +71,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                     scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
                     flywheel?.let {
                         spinUpShooter(
-                            (flywheelManual ?: 0.Percent) * it.maxSpeed,
+                            flywheel.manualSpeed,
                             if (hoodUp) Up else Down
                         )
                     } ?: freeze()
@@ -218,6 +219,14 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 
         coroutineContext[Job]!!.cancelChildren()
         delay(100.milli(Second)) // Prevent accidentally shooting twice
+    }
+}
+
+suspend fun Subsystems.fireAll() = startChoreo("Fire") {
+    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+
+    choreography {
+        carousel.set(carousel.fireAllDutycycle)
     }
 }
 
