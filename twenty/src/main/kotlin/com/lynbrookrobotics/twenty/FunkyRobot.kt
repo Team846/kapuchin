@@ -1,11 +1,11 @@
-package com.lynbrookrobotics.twenty
+package com.lynbrookrobotics.kapuchin
 
+import com.lynbrookrobotics.kapuchin.choreos.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.*
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.networktables.NetworkTableInstance
@@ -45,12 +45,7 @@ class FunkyRobot : RobotBase() {
                     subsystems.teleop()
                 },
                 { isEnabled && isAutonomous } to choreography {
-                    NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").setNumber(0)
 
-                    var path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
-                    while(path == 0){
-                        path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
-                    }
                     System.gc()
 
                     subsystems.auto()
@@ -157,7 +152,7 @@ val classPreloading = scope.launch {
     val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
     Thread.currentThread()
         .contextClassLoader
-        .getResourceAsStream("com/lynbrookrobotics/twenty/preload")!!
+        .getResourceAsStream("com/lynbrookrobotics/kapuchin/preload")!!
         .bufferedReader()
         .lineSequence()
         .filter { it.matches(classNameRegex) }
@@ -184,4 +179,17 @@ private fun printBuildInfo() {
 
         println("\t$it: $fileContents")
     }
+}
+
+private fun getPathBallPickupChallenge(): Int {
+    NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").setNumber(0)
+
+    var path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
+    
+    while(path == 0){
+
+        path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
+    }
+
+    return path
 }
