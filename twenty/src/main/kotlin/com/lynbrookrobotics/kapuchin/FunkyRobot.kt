@@ -7,6 +7,8 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.networktables.NetworkTable
+import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.*
@@ -43,6 +45,7 @@ class FunkyRobot : RobotBase() {
                     subsystems.teleop()
                 },
                 { isEnabled && isAutonomous } to choreography {
+
                     System.gc()
 
                     subsystems.auto()
@@ -176,4 +179,17 @@ private fun printBuildInfo() {
 
         println("\t$it: $fileContents")
     }
+}
+
+private fun getPathBallPickupChallenge(): Int {
+    NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").setNumber(0)
+
+    var path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
+    
+    while(path == 0){
+
+        path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
+    }
+
+    return path
 }
