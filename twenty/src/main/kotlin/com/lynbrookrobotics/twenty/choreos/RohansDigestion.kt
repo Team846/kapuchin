@@ -218,7 +218,6 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
             launch { feederRoller.set(0.Rpm) }
 
             val newAngle = carousel.state.moveToShootingPos(angle)
-            if (newAngle != null) carousel.set(newAngle)
 
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }

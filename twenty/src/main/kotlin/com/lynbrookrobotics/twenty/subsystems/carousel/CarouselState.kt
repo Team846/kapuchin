@@ -9,7 +9,7 @@ import kotlin.math.roundToInt
 class CarouselState(component: Named) : Named by Named("State", component) {
     private val internal = arrayOf(false, false, false, false, false)
     var state = 0
-    var firstShot = true
+    private var firstShot = true
 
     private fun index(robotBearing: Angle) =
         Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
