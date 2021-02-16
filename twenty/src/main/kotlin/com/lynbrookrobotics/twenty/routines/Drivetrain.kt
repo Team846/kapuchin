@@ -16,8 +16,18 @@ suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
     controller { TwoSided(PercentOutput(hardware.escConfig, target)) }
 }
 
+suspend fun DrivetrainComponent.set(target: Velocity) = startRoutine("Set") {
+    controller {
+        TwoSided(
+            VelocityOutput(hardware.escConfig, velocityGains.left, hardware.conversions.encoder.left.native(target)),
+            VelocityOutput(hardware.escConfig, velocityGains.right, hardware.conversions.encoder.right.native(target))
+        )
+    }
+}
+
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
+    val constantAccel by driver.constantAccel.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
     val absSteering by driver.absSteering.readOnTick.withoutStamps
 
@@ -43,7 +53,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
         // https://www.desmos.com/calculator/qkczjursq7
         val cappedAccelerator = accelerator cap `±`(100.Percent - steering.abs)
 
-        val forwardVelocity = maxSpeed * cappedAccelerator
+
+        val forwardVelocity = if (constantAccel) constantSpeed else maxSpeed * cappedAccelerator
         val steeringVelocity = maxSpeed * steering
 
         if (!steering.isZero) startingAngle = -absSteering + position.y.bearing

@@ -1,13 +1,16 @@
 package com.lynbrookrobotics.twenty
 
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.choreos.journalPath
+import com.lynbrookrobotics.twenty.routines.followTrajectory
 import com.lynbrookrobotics.twenty.routines.rezero
 import com.lynbrookrobotics.twenty.routines.set
+import com.lynbrookrobotics.twenty.routines.turn
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.networktables.NetworkTableInstance
@@ -17,6 +20,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.File
 import kotlin.system.measureTimeMillis
 
 
@@ -47,71 +51,41 @@ class FunkyRobot : RobotBase() {
                     subsystems.teleop()
                 },
                 { isEnabled && isAutonomous } to choreography {
-                    subsystems.carousel.rezero()
-                    println("zeroed")
-                    delay(2.Second)
-                    subsystems.carousel.set(0.CarouselSlot)
-                    println(
-                        "init0: ${
-                            subsystems.carousel.hardware.position.optimizedRead(
-                                currentTime,
-                                0.Second
-                            ).y.Degree
-                        }"
-                    )
-                    subsystems.carousel.hardware.esc.encoder.setPosition(0.0)
-                    println(
-                        "init: ${
-                            subsystems.carousel.hardware.position.optimizedRead(
-                                currentTime,
-                                0.Second
-                            ).y.Degree
-                        }"
-                    )
-                    delay(2.Second)
-                    var time = measureTimeMillis {
-                        repeat(5) {
-                            subsystems.carousel.set(
-                                it.CarouselSlot, 1.Degree
+//                    subsystems.drivetrain.set(10.Foot / Second)
+
+//
+//                    subsystems.drivetrain.turn(0.Degree, 3.Degree)
+//                    println("wlekfj")
+//                    delay(3.Second)
+//                    subsystems.drivetrain.turn(180.Degree, 1.Degree)
+//                    println("wlekfj2")
+//                    freeze()
+                    val traj = File("/home/lvuser/0.tsv")
+                        .bufferedReader()
+                        .lineSequence()
+                        .drop(1)
+                        .map { it.split('\t') }
+                        .map { it.map { tkn -> tkn.trim() } }
+                        .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+                        .toList()
+                        .let {
+                            pathToTrajectory(
+                                it,
+                                subsystems.drivetrain.maxSpeed * subsystems.drivetrain.speedFactor,
+                                subsystems.drivetrain.percentMaxOmega * subsystems.drivetrain.maxOmega * subsystems.drivetrain.speedFactor,
+                                subsystems.drivetrain.maxAcceleration
                             )
-                            println(
-                                "slot $it: ${
-                                    subsystems.carousel.hardware.position.optimizedRead(
-                                        currentTime,
-                                        0.Second
-                                    ).y.Degree
-                                }"
-                            )
-                            delay(1.Second)
                         }
-                    }
-                    println("ASDF: $time")
-                    time = measureTimeMillis {
-                        subsystems.carousel.set(
-                            0.CarouselSlot
+                    val time = measureTimeMillis {
+                        subsystems.drivetrain.followTrajectory(
+                            traj,
+                            tolerance = 18.Inch,
+                            endTolerance = 6.Inch,
+                            reverse = false
                         )
                     }
-                    println("ASDF2: $time")
+                    print(time)
                     freeze()
-//                    val speedFactor = 50.Percent
-//                    val traj = File("/home/lvuser/0.tsv")
-//                        .bufferedReader()
-//                        .lineSequence()
-//                        .drop(1)
-//                        .map { it.split('\t') }
-//                        .map { it.map { tkn -> tkn.trim() } }
-//                        .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
-//                        .toList()
-//                        .let {
-//                            pathToTrajectory(
-//                                it,
-//                                subsystems.drivetrain.maxSpeed * speedFactor,
-//                                subsystems.drivetrain.percentMaxOmega * subsystems.drivetrain.maxOmega * speedFactor,
-//                                subsystems.drivetrain.maxAcceleration
-//                            )
-//                        }
-//                    subsystems.drivetrain.followTrajectory(traj, 12.Inch, 2.Inch, reverse = false)
-//                    freeze()
                 },
                 { isDisabled && !isTest } to choreography {
                     subsystems.warmup()
