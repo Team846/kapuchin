@@ -37,21 +37,21 @@ val `verify odometry`: Auto = {
             4.FootPerSecond, drivetrain.maxOmega / 3, 4.FootPerSecondSquared
         )
 
-        drivetrain.followTrajectory(traj, 12.Inch, 2.Inch, reverse = false)
+//        drivetrain.followTrajectory(traj, 12.Inch, 2.Inch, reverse = false)
         freeze()
     }
 }
 
 val `wall`: Auto = {
     choreography {
-        drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
+//        drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
     }
 }
 
 val `shoot wall`: Auto = {
     choreography {
         withTimeout(12.Second) { autoLimelightAimAndFire() }
-        drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
+//        drivetrain.followTrajectory(fastAsFuckLine(4.Foot), 15.Inch, 2.Inch, reverse = false)
     }
 }
 
@@ -71,11 +71,11 @@ val `I1 shoot C1 I2 shoot`: Auto = {
         val finishedReindex = withTimeout(4.Second) { carousel.whereAreMyBalls() } != null
 
         val collectJob = launch { if (finishedReindex) eat() }
-        drivetrain.followTrajectory(trajI1C1, 12.Inch, 2.Inch, reverse = true)
+//        drivetrain.followTrajectory(trajI1C1, 12.Inch, 2.Inch, reverse = true)
 
         collectJob.cancel()
 
-        drivetrain.followTrajectory(trajC1I2, 14.Inch, 2.Inch, reverse = false)
+//        drivetrain.followTrajectory(trajC1I2, 14.Inch, 2.Inch, reverse = false)
         autoLimelightAimAndFire()
 
         turretJob.join()
@@ -99,11 +99,11 @@ val `I2 shoot C1 I2 shoot`: Auto = {
             val finishedReindex = withTimeout(4.Second) { carousel.whereAreMyBalls() } != null
 
             val collectJob = launch { if (finishedReindex) eat() }
-            drivetrain.followTrajectory(trajI2C1, 12.Inch, 2.Inch, reverse = true)
+//            drivetrain.followTrajectory(trajI2C1, 12.Inch, 2.Inch, reverse = true)
 
             collectJob.cancel()
 
-            drivetrain.followTrajectory(trajC1I2, 14.Inch, 2.Inch, reverse = false)
+//            drivetrain.followTrajectory(trajC1I2, 14.Inch, 2.Inch, reverse = false)
             autoLimelightAimAndFire()
 
             turretJob.join()

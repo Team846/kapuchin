@@ -95,14 +95,20 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
 
 suspend fun DrivetrainComponent.followTrajectory(
     trajectory: Trajectory,
-    tolerance: Length,
-    endTolerance: Length,
+    maxExtrapolate: Length,
+    safetyTolerance: Length,
     reverse: Boolean,
     origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
 ) = startRoutine("Follow Trajectory") {
 
     val follower = TrajectoryFollower(
-        this@followTrajectory, tolerance, endTolerance, reverse, this@startRoutine, trajectory, origin
+        this@startRoutine,
+        trajectory,
+        origin,
+        this@followTrajectory,
+        maxExtrapolate,
+        safetyTolerance,
+        reverse
     )
 
     controller {
