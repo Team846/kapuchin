@@ -60,13 +60,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         +it.setSelectedSensorPosition(0.0)
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
-        it.setNeutralMode(NeutralMode.Coast)
+        it.setNeutralMode(NeutralMode.Brake)
     }
     val leftSlaveEsc by hardw { TalonFX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
-        it.setNeutralMode(NeutralMode.Coast)
+        it.setNeutralMode(NeutralMode.Brake)
     }
 
     val rightMasterEsc by hardw { TalonFX(rightMasterEscId) }.configure {
@@ -74,13 +74,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         +it.setSelectedSensorPosition(0.0)
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
-        it.setNeutralMode(NeutralMode.Coast)
+        it.setNeutralMode(NeutralMode.Brake)
     }
     val rightSlaveEsc by hardw { TalonFX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
-        it.setNeutralMode(NeutralMode.Coast)
+        it.setNeutralMode(NeutralMode.Brake)
     }
 
     private val gyro by hardw { AHRS(SerialPort.Port.kUSB) }.configure {
