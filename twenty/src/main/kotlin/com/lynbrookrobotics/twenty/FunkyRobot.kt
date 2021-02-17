@@ -2,18 +2,14 @@ package com.lynbrookrobotics.twenty
 
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.choreos.journalPath
 import com.lynbrookrobotics.twenty.routines.followTrajectory
-import com.lynbrookrobotics.twenty.routines.rezero
-import com.lynbrookrobotics.twenty.routines.set
-import com.lynbrookrobotics.twenty.routines.turn
-import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import edu.wpi.first.hal.HAL
-import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
 import info.kunalsheth.units.generated.*
@@ -51,40 +47,42 @@ class FunkyRobot : RobotBase() {
                     subsystems.teleop()
                 },
                 { isEnabled && isAutonomous } to choreography {
-//                    subsystems.drivetrain.set(10.Foot / Second)
+                    System.gc()
 
-//
-//                    subsystems.drivetrain.turn(0.Degree, 3.Degree)
-//                    println("wlekfj")
-//                    delay(3.Second)
-//                    subsystems.drivetrain.turn(180.Degree, 1.Degree)
-//                    println("wlekfj2")
-//                    freeze()
-                    val traj = File("/home/lvuser/0.tsv")
-                        .bufferedReader()
-                        .lineSequence()
-                        .drop(1)
-                        .map { it.split('\t') }
-                        .map { it.map { tkn -> tkn.trim() } }
-                        .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
-                        .toList()
-                        .let {
-                            pathToTrajectory(
-                                it,
-                                subsystems.drivetrain.maxSpeed * subsystems.drivetrain.speedFactor,
-                                subsystems.drivetrain.percentMaxOmega * subsystems.drivetrain.maxOmega * subsystems.drivetrain.speedFactor,
-                                subsystems.drivetrain.maxAcceleration
-                            )
+                    var time = 0.Second
+                    with(subsystems.drivetrain) {
+                        suspend fun manual() {
+                            val traj = File("/home/lvuser/slalom_975.tsv")
+                                .bufferedReader()
+                                .lineSequence()
+                                .drop(1)
+                                .map { it.split('\t') }
+                                .map { it.map { tkn -> tkn.trim() } }
+                                .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+                                .toList()
+                                .let {
+                                    pathToTrajectory(
+                                        it,
+                                        maxSpeed * speedFactor,
+                                        percentMaxOmega * maxOmega * speedFactor,
+                                        maxAcceleration
+                                    )
+                                }
+
+                            time = measureTimeMillis {
+                                followTrajectory(
+                                    traj,
+                                    maxExtrapolate = maxExtrapolate,
+                                    safetyTolerance = 3.Foot,
+                                    reverse = false,
+                                )
+                            }.milli(Second)
                         }
-                    val time = measureTimeMillis {
-                        subsystems.drivetrain.followTrajectory(
-                            traj,
-                            tolerance = 18.Inch,
-                            endTolerance = 6.Inch,
-                            reverse = false
-                        )
+
+                        manual()
+                        log(Debug) { "Trajectroy finished: ${time.Second}s" }
                     }
-                    print(time)
+
                     freeze()
                 },
                 { isDisabled && !isTest } to choreography {
@@ -100,8 +98,6 @@ class FunkyRobot : RobotBase() {
 
         System.gc()
         HAL.observeUserProgramStarting()
-
-        NetworkTableInstance.getDefault().flush()
 
         val eventLoopPeriod = 20.milli(Second)
         println("Starting event loop...")
