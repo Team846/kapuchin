@@ -116,7 +116,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
                 carousel.delayUntilBall()
 
-                val newAngle = carousel.state.loadBallAngle(angle)
+                val newAngle = carousel.state.loadBallAngle(angle)?.rem(360.Degree)
                 if (newAngle != null) carousel.set(newAngle)
             }
         }
@@ -190,7 +190,7 @@ suspend fun Subsystems.visionAim() {
 suspend fun Subsystems.fire() = startChoreo("Fire") {
     val angle by carousel.hardware.position.readEagerly().withoutStamps
     choreography {
-        val newAngle = carousel.state.shootBallAngle(angle)
+        val newAngle = carousel.state.shootBallAngle(angle)?.rem(360.Degree)
         if (newAngle != null) carousel.set(newAngle)
 
         log(Debug) { "Waiting for ball to launch." }
@@ -217,7 +217,8 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
-            val newAngle = carousel.state.moveToShootingPos(angle)
+            val newAngle = carousel.state.moveToShootingPos(angle)?.rem(360.Degree)
+            if (newAngle != null) carousel.set(newAngle)
 
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }

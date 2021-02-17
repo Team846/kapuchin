@@ -27,19 +27,19 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         if (state == 5) return null
         if (!firstShot) {
             firstShot = true
-            return (state * 72.Degree + current - 36.Degree) % (360.Degree)
+            return (state * 1.CarouselSlot + current - 0.5.CarouselSlot)
         }
         firstShot = true
         state++
-        return (72.Degree + current) % (360.Degree)
+        return (1.CarouselSlot + current)
     }
 
-    fun moveToShootingPos(current: Angle): `∠` {
+    fun moveToShootingPos(current: Angle): `∠`? {
         if (state == 5) {
             log(Warning) { "Empty carousel" }
-            return 0.Degree
+            return null
         }
-        return ((5 - state) * 72.Degree + current) % (360.Degree)
+        return ((5 - state) * 1.CarouselSlot + current)
     }
 
     fun shootBallAngle(current: Angle): `∠`? {
@@ -50,9 +50,9 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         state--
         if (firstShot) {
             firstShot = false
-            return (36.Degree + current) % (360.Degree)
+            return (0.5.CarouselSlot + current)
         }
-        return (72.Degree + current) % (360.Degree)
+        return (1.CarouselSlot + current)
 
     }
 
