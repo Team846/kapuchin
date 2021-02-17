@@ -98,7 +98,6 @@ class TrajectoryFollower(
         .let { mtrx ->
             trajectory
                 .map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
-                .map { Waypoint(it.y.x, it.y.y) stampWith it.x }
                 .iterator()
         }
 
