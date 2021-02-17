@@ -86,7 +86,6 @@ class TrajectoryFollower(
     origin: Position,
     private val drivetrain: GenericDrivetrainComponent,
     private val maxExtrapolate: Length,
-    private val maxSpeed: Velocity,
     private val safetyTolerance: Length,
     private val reverse: Boolean,
 ) {
@@ -120,6 +119,7 @@ class TrajectoryFollower(
 
     private fun finish() {
         done = true
+        drivetrain.log(Debug) { "*****Finished Trajectory*****"}
 
         if (errors.size == 0) {
             drivetrain.log(Error) { "No error data points" }
@@ -127,7 +127,7 @@ class TrajectoryFollower(
         }
 
         val avg = errors.sumOf { it.Inch }.Inch / errors.size
-        val max = errors.maxByOrNull { it.Inch }!!.Inch
+        val max = errors.maxByOrNull { it.Inch }!!
         drivetrain.log(Debug) { "Avg error: ${avg.Inch} in | Max error: ${max.Inch} in" }
     }
 
@@ -158,11 +158,11 @@ class TrajectoryFollower(
             // Set new target and speed
             val newTarget = waypoints.next()
             speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
-            extrapolatedTarget = newTarget.extrapolate(target.y, maxExtrapolate * (speed / maxSpeed))
+            extrapolatedTarget = newTarget.extrapolate(target.y, maxExtrapolate * (speed / drivetrain.maxSpeed))
             target = newTarget
 
             drivetrain.log(Debug) { "New target: ${newTarget.y.x.Foot withDecimals 2} ft, ${newTarget.y.y.Foot withDecimals 2} ft" }
-            drivetrain.log(Debug) { "Extrap Dist: ${(maxExtrapolate * speed / maxSpeed).Inch} in (${speed / maxSpeed}%)" }
+            drivetrain.log(Debug) { "Extrap Dist: ${(maxExtrapolate * speed / drivetrain.maxSpeed).Inch} in (${speed / drivetrain.maxSpeed}%)" }
             drivetrain.log(Debug) { "Extrap Target: ${extrapolatedTarget.y.x.Foot withDecimals 2} ft, ${extrapolatedTarget.y.y.Foot withDecimals 2} ft" }
         }
 
