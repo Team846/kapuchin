@@ -20,7 +20,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
     val maxAcceleration by pref(10, FootPerSecondSquared)
     val percentMaxOmega by pref(75, Percent)
 
-    val maxSpeed get() = maxLeftSpeed min maxRightSpeed
+    override val maxSpeed get() = maxLeftSpeed min maxRightSpeed
     val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian
 
     val velocityGains by pref {

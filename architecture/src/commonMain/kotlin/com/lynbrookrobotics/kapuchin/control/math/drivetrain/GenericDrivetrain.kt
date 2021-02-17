@@ -41,6 +41,7 @@ interface GenericDrivetrainHardware {
 
 interface GenericDrivetrainComponent : Named {
     val hardware: GenericDrivetrainHardware
+    val maxSpeed: Velocity
     val bearingKp: Gain<Velocity, Angle>
     val bearingKd: Gain<Velocity, AngularVelocity>
 }
