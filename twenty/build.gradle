@@ -33,8 +33,15 @@ deploy {
             jvmArgs /*<< '-XX:+UseG1GC'*/ << '-XX:MaxGCPauseMillis=75' << '-Xmx100M'
 //          jvmArgs << '-verbose:class'
 //          jvmArgs << '-verbosegc'
-//          debug = true
-//          debugPort = 8348
+
+            // may need to run this on roborio
+            // echo "127.0.0.1 $HOSTNAME" | sudo tee -a /etc/hosts
+            jvmArgs << '-Dcom.sun.management.jmxremote=true'
+            jvmArgs << '-Dcom.sun.management.jmxremote.port=1099'
+            jvmArgs << '-Dcom.sun.management.jmxremote.local.only=false'
+            jvmArgs << '-Dcom.sun.management.jmxremote.ssl=false'
+            jvmArgs << '-Dcom.sun.management.jmxremote.authenticate=false'
+            jvmArgs << '-Djava.rmi.server.hostname=roborio-846-frc.local'
         }
     }
 }
