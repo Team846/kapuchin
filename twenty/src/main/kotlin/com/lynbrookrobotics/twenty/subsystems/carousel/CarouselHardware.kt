@@ -57,13 +57,13 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     // Sensor is electrically inverted
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
         dio.requestInterrupts {
-            encoder.position = conversions.encoder.native(
-                position.optimizedRead(
-                    dio.readFallingTimestamp().Second, syncThreshold
-                ).y.roundToInt(CarouselSlot).CarouselSlot
-            )
-//          log(Debug) { "Running hall effect ISR" }
-            isZeroed = true
+//            encoder.position = conversions.encoder.native(
+//                position.optimizedRead(
+//                    dio.readFallingTimestamp().Second, syncThreshold
+//                ).y.roundToInt(CarouselSlot).CarouselSlot
+//            )
+////          log(Debug) { "Running hall effect ISR" }
+//            isZeroed = true
         }
         dio.setUpSourceEdge(false, true)
         dio.enableInterrupts()
