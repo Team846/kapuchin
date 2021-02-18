@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.control.math.drivetrain
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.routines.*
@@ -43,7 +44,7 @@ class TrajectoryFollower(
     private var speed = 0.Foot / Second
 
     private val uni = UnicycleDrive(drivetrain, scope)
-    private val position by with(scope) { drivetrain.hardware.position.readOnTick.withoutStamps }
+    private val position by drivetrain.hardware.positionDelegate(scope)
 
     /**
      * Calculate the next left and right velocity outputs given the current position.
@@ -54,9 +55,9 @@ class TrajectoryFollower(
      * @return the left and right velocities, null if the robot is at the target.
      */
     operator fun invoke(): TwoSided<Velocity>? {
-        if (!waypoints.hasNext() && distance(position.vector, target.y) < endTolerance) {
+        if (!waypoints.hasNext() && distance(position.y.vector, target.y) < endTolerance) {
             done = true
-        } else if (waypoints.hasNext() && distance(position.vector, target.y) < tolerance) {
+        } else if (waypoints.hasNext() && distance(position.y.vector, target.y) < tolerance) {
             val newTarget = waypoints.next()
             val dist = distance(newTarget.y, target.y)
             speed = dist / (newTarget.x - target.x)
@@ -64,7 +65,7 @@ class TrajectoryFollower(
             target = newTarget
         }
 
-        val targetA = (target.y - position.vector).bearing
+        val targetA = (target.y - position.y.vector).bearing
 
         val (velocityL, velocityR) = uni.speedTargetAngleTarget(
             if (reverse) -speed else speed,
