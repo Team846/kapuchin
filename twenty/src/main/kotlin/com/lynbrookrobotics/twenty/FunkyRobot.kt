@@ -1,11 +1,16 @@
 package com.lynbrookrobotics.twenty
 
+import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.choreos.*
+import com.lynbrookrobotics.twenty.routines.set
+import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainSim
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
@@ -24,14 +29,20 @@ fun main() {
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         println("Initializing hardware...")
-
         Compressor()
         Field // Initialize preferences
         Subsystems.concurrentInit()
-        val subsystems = Subsystems.instance!!
 
-        println("Printing key list to `keylist.txt`...")
-        printKeys()
+        val subsystems = Subsystems.instance!!
+        if (isSimulation()) {
+            DrivetrainSim(subsystems.drivetrain)
+        }
+
+
+        if (isReal()) {
+            println("Printing key list to `keylist.txt`...")
+            printKeys()
+        }
 
         println("Loading classes...")
         runBlocking { withTimeout(5.Second) { classPreloading.join() } }
@@ -40,12 +51,15 @@ class FunkyRobot : RobotBase() {
             runWhenever(
                 { isEnabled && isOperatorControl } to choreography {
                     System.gc()
-                    subsystems.teleop()
+
+//                    subsystems.drivetrain.hardware.leftMasterEsc.set(ControlMode.PercentOutput, 0.5)
+                    freeze()
+//                    subsystems.teleop()
                 },
                 { isEnabled && isAutonomous } to choreography {
                     System.gc()
-
-                    subsystems.auto()
+                    subsystems.drivetrain.set(40.Percent)
+//                    subsystems.auto()
 
 //                        withTimeout(5.Second) { subsystems.climberWinch?.set(0.Percent) } // should release chode
 //                        subsystems.climberWinch?.set(10.Percent) // extend is positive
@@ -107,7 +121,7 @@ class FunkyRobot : RobotBase() {
 //                            withTimeout(3.Second) { subsystems.turret?.set(90.Degree, 0.Degree) }
 //                        }
 
-                    freeze()
+//                    freeze()
 //                      subsystems.drivetrain.set(0.Percent)
                 },
                 { isDisabled && !isTest } to choreography {

@@ -2,7 +2,9 @@ package com.lynbrookrobotics.twenty.subsystems.drivetrain
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.IntegratedSensor
 import com.ctre.phoenix.motorcontrol.NeutralMode
+import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.TalonFX
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
 import com.kauailabs.navx.frc.AHRS
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
@@ -17,6 +19,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.Subsystems.Companion.uiBaselineTicker
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
+import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SPI
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -55,35 +58,38 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
-    val leftMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
+    private fun maybeTalonFX(deviceNumber: Int): BaseTalon =
+        if (isReal()) TalonFX(deviceNumber) else WPI_TalonSRX(deviceNumber)
+
+    val leftMasterEsc by hardw { maybeTalonFX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
         it.setNeutralMode(NeutralMode.Coast)
     }
-    val leftSlaveEsc by hardw { TalonFX(leftSlaveEscId) }.configure {
+    val leftSlaveEsc by hardw { maybeTalonFX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
         it.setNeutralMode(NeutralMode.Coast)
     }
 
-    val rightMasterEsc by hardw { TalonFX(rightMasterEscId) }.configure {
+    val rightMasterEsc by hardw { maybeTalonFX(rightMasterEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
         it.setNeutralMode(NeutralMode.Coast)
     }
-    val rightSlaveEsc by hardw { TalonFX(rightSlaveEscId) }.configure {
+    val rightSlaveEsc by hardw { maybeTalonFX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
         it.setNeutralMode(NeutralMode.Coast)
     }
 
-    private val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
+    val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
         blockUntil() { it.isConnected }
         blockUntil() { !it.isCalibrating }
         it.zeroYaw()

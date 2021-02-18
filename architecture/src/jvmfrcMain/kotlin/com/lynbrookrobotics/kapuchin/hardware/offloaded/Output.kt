@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.ControlMode.*
 import com.ctre.phoenix.motorcontrol.ControlMode.PercentOutput
 import com.ctre.phoenix.motorcontrol.ControlMode.Velocity
+import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
@@ -39,6 +40,13 @@ sealed class OffloadedOutput {
         gains?.writeTo(esc, timeoutMs)
         config.writeTo(esc, timeoutMs)
         esc.set(mode, value)
+    }
+
+    fun writeTo(esc: BaseTalon, timeoutMs: Int = config.timeoutMs) {
+        when(esc) {
+            is TalonSRX -> writeTo(esc, timeoutMs)
+            is TalonFX -> writeTo(esc, timeoutMs)
+        }
     }
 
     fun writeTo(esc: CANSparkMax, pidController: CANPIDController, timeoutMs: Int = config.timeoutMs) {

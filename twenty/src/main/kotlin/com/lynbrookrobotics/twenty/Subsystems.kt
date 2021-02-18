@@ -24,6 +24,7 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.*
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.*
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.networktables.NetworkTableInstance
+import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.*
@@ -128,7 +129,7 @@ class Subsystems(
         private val isCorrupted by pref(true)
 
         init {
-            if (isCorrupted) {
+            if (isCorrupted && isReal()) {
                 log(Error) { "The config seems to be corrupted. Attempting restoration." }
                 NetworkTableInstance.getDefault().stopServer()
 

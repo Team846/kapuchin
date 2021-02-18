@@ -15,10 +15,17 @@ dependencies {
     implementation wpi.deps.vendor.java()
     nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
+    nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
+    nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+
+    simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
+    simulation wpi.deps.sim.driverstation(wpi.platforms.desktop, false)
 }
+
+def includeDesktopSupport = true
 
 deploy {
     targets {
