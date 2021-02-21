@@ -92,16 +92,14 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { centerTurret } to choreography { turret?.set(0.Degree) }
         )
     }
-
 }
 
 suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
-    val angle by carousel.hardware.position.readEagerly().withoutStamps
     choreography {
-//        carousel.rezero()
-        while (isActive) {
 
-            if (carousel.state.state == 5) {
+        while (isActive) {
+            val angle = carousel.state.intake()
+            if (angle == null) {
                 log(Warning) { "I'm full. No open slots in carousel magazine." }
 
                 launch { intakeSlider?.set(IntakeSliderState.In) }
@@ -114,10 +112,10 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 launch { intakeRollers?.optimalEat(drivetrain, electrical) }
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
-                carousel.delayUntilBall()
 
-                val newAngle = carousel.state.loadBallAngle(angle)?.rem(360.Degree)
-                if (newAngle != null) carousel.set(newAngle)
+                carousel.delayUntilBall()
+                carousel.set(angle)
+                carousel.state.push()
             }
         }
     }
@@ -188,18 +186,19 @@ suspend fun Subsystems.visionAim() {
 }
 
 suspend fun Subsystems.fire() = startChoreo("Fire") {
-    val angle by carousel.hardware.position.readEagerly().withoutStamps
+    val angle = carousel.state.shoot()
     choreography {
-        val newAngle = carousel.state.shootBallAngle(angle)?.rem(360.Degree)
-        if (newAngle != null) carousel.set(newAngle)
+        if (angle != null) {
+            carousel.set(angle)
+            carousel.state.pop()
+            log(Debug) { "Waiting for ball to launch." }
+            withTimeout(1.5.Second) {
+                flywheel?.delayUntilBall()
+            } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
 
-        log(Debug) { "Waiting for ball to launch." }
-        withTimeout(1.5.Second) {
-            flywheel?.delayUntilBall()
-        } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
-
-        coroutineContext[Job]!!.cancelChildren()
-        delay(100.milli(Second)) // Prevent accidentally shooting twice
+            coroutineContext[Job]!!.cancelChildren()
+            delay(100.milli(Second)) // Prevent accidentally shooting twice
+        }
     }
 }
 
@@ -217,50 +216,54 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
-            val newAngle = carousel.state.moveToShootingPos(angle)?.rem(360.Degree)
-            if (newAngle != null) carousel.set(newAngle)
+            val angle = carousel.state.shootSetup()
 
-            launch { flywheel.set(flywheelTarget) }
-            launch { feederRoller.set(feederRoller.feedSpeed) }
+            if(angle != null) {
 
-            fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-            fun flywheelCheck() = flywheelSpeed in flywheelTarget `±` flywheel.tolerance
+                carousel.set(angle)
 
-            log(Debug) { "Waiting for feeder roller to get up to speed" }
-            withTimeout(5.Second) {
-                delayUntil(predicate = ::feederCheck)
-            } ?: log(Error) {
-                "Feeder roller never got up to speed (target = ${
-                    feederRoller.feedSpeed.Rpm withDecimals 0
-                } RPM, current = ${
-                    feederSpeed.Rpm withDecimals 0
-                })"
-            }
+                launch { flywheel.set(flywheelTarget) }
+                launch { feederRoller.set(feederRoller.feedSpeed) }
 
-            log(Debug) { "Waiting for flywheel to get up to speed" }
-            withTimeout(5.Second) {
-                delayUntil(predicate = ::flywheelCheck)
-            } ?: log(Error) {
-                "Flywheel never got up to speed (target = ${
-                    flywheelTarget.Rpm withDecimals 0
-                } RPM, current = ${
-                    flywheelSpeed.Rpm withDecimals 0
-                })"
-            }
+                fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+                fun flywheelCheck() = flywheelSpeed in flywheelTarget `±` flywheel.tolerance
 
-            log(Debug) { "Feeder roller and flywheel set" }
-            launch { shooterHood?.set(hoodTarget) }
-
-            runWhenever({
-                feederCheck() && flywheelCheck()
-            } to choreography {
-                scope.launch {
-                    withTimeout(.5.Second) {
-                        rumble.set(TwoSided(0.Percent, 100.Percent))
-                    }
+                log(Debug) { "Waiting for feeder roller to get up to speed" }
+                withTimeout(5.Second) {
+                    delayUntil(predicate = ::feederCheck)
+                } ?: log(Error) {
+                    "Feeder roller never got up to speed (target = ${
+                        feederRoller.feedSpeed.Rpm withDecimals 0
+                    } RPM, current = ${
+                        feederSpeed.Rpm withDecimals 0
+                    })"
                 }
-                freeze()
-            })
+
+                log(Debug) { "Waiting for flywheel to get up to speed" }
+                withTimeout(5.Second) {
+                    delayUntil(predicate = ::flywheelCheck)
+                } ?: log(Error) {
+                    "Flywheel never got up to speed (target = ${
+                        flywheelTarget.Rpm withDecimals 0
+                    } RPM, current = ${
+                        flywheelSpeed.Rpm withDecimals 0
+                    })"
+                }
+
+                log(Debug) { "Feeder roller and flywheel set" }
+                launch { shooterHood?.set(hoodTarget) }
+
+                runWhenever({
+                    feederCheck() && flywheelCheck()
+                } to choreography {
+                    scope.launch {
+                        withTimeout(.5.Second) {
+                            rumble.set(TwoSided(0.Percent, 100.Percent))
+                        }
+                    }
+                    freeze()
+                })
+            }
         }
     }
 }
