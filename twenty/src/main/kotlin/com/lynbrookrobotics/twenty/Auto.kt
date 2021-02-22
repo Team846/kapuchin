@@ -175,7 +175,7 @@ private suspend fun Subsystems.autoFallbackAimAndFire() {
                 carouselRezeroJob.join()
             }
 
-            repeat(carousel.state.size) { i ->
+            repeat(carousel.state.maxBalls) { i ->
                 val slot = i.CarouselSlot
 
                 log(Debug) { "Waiting for feeder roller to get up to speed" }
@@ -183,9 +183,9 @@ private suspend fun Subsystems.autoFallbackAimAndFire() {
                     delayUntil { feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance }
                 } ?: log(Error) {
                     "Feeder roller never got up to speed (target = ${
-                    feederRoller.feedSpeed.Rpm withDecimals 0
+                        feederRoller.feedSpeed.Rpm withDecimals 0
                     } RPM, current = ${
-                    feederSpeed.Rpm withDecimals 0
+                        feederSpeed.Rpm withDecimals 0
                     })"
                 }
 
@@ -194,9 +194,9 @@ private suspend fun Subsystems.autoFallbackAimAndFire() {
                     delayUntil { flywheelSpeed in flywheelTarget `±` flywheel.tolerance }
                 } ?: log(Error) {
                     "Flywheel never got up to speed (target = ${
-                    flywheelTarget.Rpm withDecimals 0
+                        flywheelTarget.Rpm withDecimals 0
                     } RPM, current = ${
-                    flywheelSpeed.Rpm withDecimals 0
+                        flywheelSpeed.Rpm withDecimals 0
                     })"
                 }
 
@@ -206,7 +206,7 @@ private suspend fun Subsystems.autoFallbackAimAndFire() {
                 withTimeout(1.Second) {
                     flywheel.delayUntilBall()
                 } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
-                carousel.state.set(carouselAngle + carousel.shootSlot, false)
+                carousel.state.pop()
             }
 
             coroutineContext[Job]!!.cancelChildren()
@@ -273,7 +273,7 @@ private suspend fun Subsystems.autoLimelightAimAndFire() {
                 carouselRezeroJob.join()
             }
 
-            repeat(carousel.state.size) { i ->
+            repeat(carousel.state.maxBalls) { i ->
                 val slot = i.CarouselSlot
 
                 log(Debug) { "Waiting for feeder roller to get up to speed" }
@@ -281,9 +281,9 @@ private suspend fun Subsystems.autoLimelightAimAndFire() {
                     delayUntil { feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance }
                 } ?: log(Error) {
                     "Feeder roller never got up to speed (target = ${
-                    feederRoller.feedSpeed.Rpm withDecimals 0
+                        feederRoller.feedSpeed.Rpm withDecimals 0
                     } RPM, current = ${
-                    feederSpeed.Rpm withDecimals 0
+                        feederSpeed.Rpm withDecimals 0
                     })"
                 }
 
@@ -292,9 +292,9 @@ private suspend fun Subsystems.autoLimelightAimAndFire() {
                     delayUntil { flywheelSpeed in snapshot1.flywheel `±` flywheel.tolerance }
                 } ?: log(Error) {
                     "Flywheel never got up to speed (target = ${
-                    snapshot1.flywheel.Rpm withDecimals 0
+                        snapshot1.flywheel.Rpm withDecimals 0
                     } RPM, current = ${
-                    flywheelSpeed.Rpm withDecimals 0
+                        flywheelSpeed.Rpm withDecimals 0
                     })"
                 }
 
@@ -304,7 +304,7 @@ private suspend fun Subsystems.autoLimelightAimAndFire() {
                 withTimeout(1.Second) {
                     flywheel.delayUntilBall()
                 } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
-                carousel.state.set(carouselAngle + carousel.shootSlot, false)
+                carousel.state.pop()
             }
 
             coroutineContext[Job]!!.cancelChildren()

@@ -37,15 +37,16 @@ suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
 
     choreography {
         rezero()
+        var slotsSkipped = 0
         val start = carouselAngle.roundToInt(CarouselSlot).CarouselSlot
-        for (i in 0 until state.size) {
+        for (i in 0 until state.maxBalls) {
             set(start + i.CarouselSlot - collectSlot)
             val j = launch { set(start + i.CarouselSlot - collectSlot, 0.Degree) }
             delay(0.1.Second)
-            state.set(
-                carouselAngle + collectSlot,
-                hardware.conversions.detectingBall(proximity, color)
-            )
+            if (hardware.conversions.detectingBall(proximity, color)) {
+                state.push(slotsSkipped + 1)
+                slotsSkipped = 0
+            } else slotsSkipped++
             j.cancel()
         }
     }
