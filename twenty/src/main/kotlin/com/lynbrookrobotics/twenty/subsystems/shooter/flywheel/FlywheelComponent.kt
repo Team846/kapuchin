@@ -2,6 +2,7 @@ package com.lynbrookrobotics.twenty.subsystems.shooter.flywheel
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
+import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.twenty.Subsystems.Companion.shooterTicker
@@ -9,6 +10,45 @@ import info.kunalsheth.units.generated.*
 
 class FlywheelComponent(hardware: FlywheelHardware) :
     Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
+
+    private val accuracyChallengeNamed = Named("Accuracy Challenge", this)
+
+    val greenZone by accuracyChallengeNamed.pref {
+        val distance by pref(0, Inch)
+        val rpm by pref(2000, Rpm)
+        ({
+            distance to rpm
+        })
+    }
+    val yellowZone by accuracyChallengeNamed.pref {
+        val distance by pref(120, Inch)
+        val rpm by pref(2000, Rpm)
+        ({
+            distance to rpm
+        })
+    }
+    val blueZone by accuracyChallengeNamed.pref {
+        val distance by pref(180, Inch)
+        val rpm by pref(2000, Rpm)
+        ({
+            distance to rpm
+        })
+    }
+    val redZone by accuracyChallengeNamed.pref {
+        val distance by pref(240, Inch)
+        val rpm by pref(2000, Rpm)
+        ({
+            distance to rpm
+        })
+    }
+
+    val reIntroZone by accuracyChallengeNamed.pref {
+        val distance by pref(300, Inch)
+        val rpm by pref(2000, Rpm)
+        ({
+            distance to rpm
+        })
+    }
 
     val manualSpeed by pref(5000, Rpm)
 
