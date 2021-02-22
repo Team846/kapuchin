@@ -10,47 +10,64 @@ class CarouselTest : Named by Named("Carousel Test") {
     private val carousel = CarouselState(this)
 
     @Test
-    fun `carousel rotate when loaded`() {
+    fun `carousel cycle with 3 balls`() {
+        assert(carousel.intake() == 72.Degree)
+        carousel.push()
 
-        println(carousel.loadBallAngle(0.Degree))
-        val angle = carousel.loadBallAngle(72.Degree)
+        assert(carousel.intake() == 144.Degree)
+        carousel.push()
 
-        if (angle != null) {
-            assert(angle == 144.Degree)
-        }
+        assert(carousel.intake() == 216.Degree)
+        carousel.push()
+
+        assert(carousel.shootSetup() == 252.Degree)
+
+        assert(carousel.shoot() == 180.Degree)
+        carousel.pop()
+
+        assert(carousel.shoot() == 108.Degree)
+        carousel.pop()
+
+        assert(carousel.shoot() == 36.Degree)
+        carousel.pop()
     }
 
     @Test
-    fun `rotate for shooter setup`() {
-        carousel.loadBallAngle(0.Degree)
-        carousel.loadBallAngle(72.Degree)
-        val angle = (carousel.moveToShootingPos(144.Degree))
+    fun `max carousel cycle test`() {
+        assert(carousel.intake() == 72.Degree)
+        carousel.push()
 
-        assert(angle == 0.Degree)
-    }
+        assert(carousel.intake() == 144.Degree)
+        carousel.push()
 
-    @Test
-    fun `first shot ball angle`() {
-        carousel.loadBallAngle(0.Degree)
-        carousel.loadBallAngle(72.Degree)
-        carousel.moveToShootingPos(144.Degree)
-        val angle = (carousel.shootBallAngle(0.Degree))
+        assert(carousel.intake() == 216.Degree)
+        carousel.push()
 
-        if (angle != null) {
-            assert(angle == 36.Degree)
-        }
-    }
+        assert(carousel.intake() == 288.Degree)
+        carousel.push()
 
-    @Test
-    fun `shoot again`() {
-        carousel.loadBallAngle(0.Degree)
-        carousel.loadBallAngle(72.Degree)
-        carousel.moveToShootingPos(144.Degree)
-        carousel.shootBallAngle(0.Degree)
-        val angle = (carousel.shootBallAngle(36.Degree))
+        assert(carousel.intake() == 360.Degree)
+        carousel.push()
 
-        if (angle != null) {
-            assert(angle == 108.Degree)
-        }
+        assert(carousel.intake() == null)
+
+        assert(carousel.shootSetup() == 36.Degree)
+
+        assert(carousel.shoot() == 324.Degree)
+        carousel.pop()
+
+        assert(carousel.shoot() == 252.Degree)
+        carousel.pop()
+
+        assert(carousel.shoot() == 180.Degree)
+        carousel.pop()
+
+        assert(carousel.shoot() == 108.Degree)
+        carousel.pop()
+
+        assert(carousel.shoot() == 36.Degree)
+        carousel.pop()
+
+        assert(carousel.shoot() == null)
     }
 }
