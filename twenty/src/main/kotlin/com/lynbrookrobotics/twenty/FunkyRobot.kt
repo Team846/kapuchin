@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.twenty
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
@@ -52,13 +53,13 @@ class FunkyRobot : RobotBase() {
                     var time = 0.Second
                     with(subsystems.drivetrain) {
                         suspend fun manual() {
-                            val traj = File("/home/lvuser/slalom_975.tsv")
+                            val traj = File("/home/lvuser/Slalom_Path.tsv")
                                 .bufferedReader()
                                 .lineSequence()
                                 .drop(1)
                                 .map { it.split('\t') }
                                 .map { it.map { tkn -> tkn.trim() } }
-                                .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+                                .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot )}
                                 .toList()
                                 .let {
                                     pathToTrajectory(

@@ -14,6 +14,8 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     GenericDrivetrainConversions {
 
     override val trackLength by pref(2, Foot)
+    private val leftTrim by pref(1.0)
+    private val rightTrim by pref(1.0)
     private val wheelRadius by pref {
         val left by pref(3, Inch)
         val right by pref(3, Inch)
@@ -41,13 +43,14 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
                 ::p, ::p, ::p, ::p,
                 nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                 nativeFeedbackUnits = nativeResolution,
-                perFeedbackQuantity = wheelRadius.left * enc.angle(nativeResolution) / Radian,
+                perFeedbackQuantity = wheelRadius.left * enc.angle(nativeResolution) * leftTrim / Radian,
                 nativeTimeUnit = 100.milli(Second), nativeRateUnit = 1.Second
             )
             val right = left.copy(
-                perFeedbackQuantity = wheelRadius.right * enc.angle(nativeResolution) / Radian
+                perFeedbackQuantity = wheelRadius.right * enc.angle(nativeResolution) * rightTrim / Radian
             )
             TwoSided(left, right)
+
         })
     }
 
