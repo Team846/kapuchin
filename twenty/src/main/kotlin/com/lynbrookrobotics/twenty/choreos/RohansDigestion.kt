@@ -98,7 +98,7 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     choreography {
 
         while (isActive) {
-            val angle = carousel.state.intake()
+            val angle = carousel.state.intakeAngle()
             if (angle == null) {
                 log(Warning) { "I'm full. No open slots in carousel magazine." }
 
@@ -186,7 +186,7 @@ suspend fun Subsystems.visionAim() {
 }
 
 suspend fun Subsystems.fire() = startChoreo("Fire") {
-    val angle = carousel.state.shoot()
+    val angle = carousel.state.shootAngle()
     choreography {
         if (angle != null) {
             carousel.set(angle)
@@ -216,7 +216,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
-            val angle = carousel.state.shootSetup()
+            val angle = carousel.state.shootInitialAngle()
 
             if(angle != null) {
 

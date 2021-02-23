@@ -9,29 +9,29 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         private set
     val maxBalls = 5
 
-    fun intake(): Angle? {
+    fun intakeAngle(): Angle? {
         if (balls == maxBalls) return null
         return (balls + 1).CarouselSlot
     }
 
-    fun shootSetup(): Angle? {
+    fun shootInitialAngle(): Angle? {
         if (balls == 0) return null
         if (balls == maxBalls) return 0.5.CarouselSlot
         return (balls + 0.5).CarouselSlot
     }
 
-    fun shoot(): Angle? {
+    fun shootAngle(): Angle? {
         if (balls == 0) return null
         return (balls - 0.5).CarouselSlot
     }
 
-    fun push(ballsToIncrement: Int = 1) {
-        balls += ballsToIncrement
+    fun push(count: Int = 1) {
+        balls += count
     }
 
     fun pop() {
         balls--
     }
 
-    override fun toString() = "$balls"
+    override fun toString() = "CarouselState($balls/$maxBalls)"
 }

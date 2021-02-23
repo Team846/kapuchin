@@ -11,63 +11,63 @@ class CarouselTest : Named by Named("Carousel Test") {
 
     @Test
     fun `carousel cycle with 3 balls`() {
-        assert(carousel.intake() == 72.Degree)
+        assert(carousel.intakeAngle() == 72.Degree)
         carousel.push()
 
-        assert(carousel.intake() == 144.Degree)
+        assert(carousel.intakeAngle() == 144.Degree)
         carousel.push()
 
-        assert(carousel.intake() == 216.Degree)
+        assert(carousel.intakeAngle() == 216.Degree)
         carousel.push()
 
-        assert(carousel.shootSetup() == 252.Degree)
+        assert(carousel.shootInitialAngle() == 252.Degree)
 
-        assert(carousel.shoot() == 180.Degree)
+        assert(carousel.shootAngle() == 180.Degree)
         carousel.pop()
 
-        assert(carousel.shoot() == 108.Degree)
+        assert(carousel.shootAngle() == 108.Degree)
         carousel.pop()
 
-        assert(carousel.shoot() == 36.Degree)
+        assert(carousel.shootAngle() == 36.Degree)
         carousel.pop()
     }
 
     @Test
     fun `max carousel cycle test`() {
-        assert(carousel.intake() == 72.Degree)
+        assert(carousel.intakeAngle() == 72.Degree)
         carousel.push()
 
-        assert(carousel.intake() == 144.Degree)
+        assert(carousel.intakeAngle() == 144.Degree)
         carousel.push()
 
-        assert(carousel.intake() == 216.Degree)
+        assert(carousel.intakeAngle() == 216.Degree)
         carousel.push()
 
-        assert(carousel.intake() == 288.Degree)
+        assert(carousel.intakeAngle() == 288.Degree)
         carousel.push()
 
-        assert(carousel.intake() == 360.Degree)
+        assert(carousel.intakeAngle() == 360.Degree)
         carousel.push()
 
-        assert(carousel.intake() == null)
+        assert(carousel.intakeAngle() == null)
 
-        assert(carousel.shootSetup() == 36.Degree)
+        assert(carousel.shootInitialAngle() == 36.Degree)
 
-        assert(carousel.shoot() == 324.Degree)
+        assert(carousel.shootAngle() == 324.Degree)
         carousel.pop()
 
-        assert(carousel.shoot() == 252.Degree)
+        assert(carousel.shootAngle() == 252.Degree)
         carousel.pop()
 
-        assert(carousel.shoot() == 180.Degree)
+        assert(carousel.shootAngle() == 180.Degree)
         carousel.pop()
 
-        assert(carousel.shoot() == 108.Degree)
+        assert(carousel.shootAngle() == 108.Degree)
         carousel.pop()
 
-        assert(carousel.shoot() == 36.Degree)
+        assert(carousel.shootAngle() == 36.Degree)
         carousel.pop()
 
-        assert(carousel.shoot() == null)
+        assert(carousel.shootAngle() == null)
     }
 }
