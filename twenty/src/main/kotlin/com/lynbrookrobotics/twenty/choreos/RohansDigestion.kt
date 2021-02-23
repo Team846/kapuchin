@@ -107,6 +107,8 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 rumble.set(TwoSided(100.Percent, 0.Percent))
             } else {
                 launch { feederRoller?.set(0.Rpm) }
+                carousel.set(angle)
+                launch { carousel.set(angle, 0.Degree) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
                 launch { intakeRollers?.optimalEat(drivetrain, electrical) }
@@ -114,7 +116,6 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
 
                 carousel.delayUntilBall()
-                carousel.set(angle)
                 carousel.state.push()
             }
         }
@@ -186,15 +187,21 @@ suspend fun Subsystems.visionAim() {
 }
 
 suspend fun Subsystems.fire() = startChoreo("Fire") {
-    val angle = carousel.state.shootAngle()
     choreography {
-        if (angle != null) {
-            carousel.set(angle)
-            carousel.state.pop()
+        val angle = carousel.state.shootAngle()
+        if (angle == null) {
+            log(Warning) { "I feel empty. I want to eat some balls." }
+            withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
+        } else {
+            launch {
+                carousel.set(angle, 0.CarouselSlot)
+            }
+
             log(Debug) { "Waiting for ball to launch." }
             withTimeout(1.5.Second) {
                 flywheel?.delayUntilBall()
             } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
+            carousel.state.pop()
 
             coroutineContext[Job]!!.cancelChildren()
             delay(100.milli(Second)) // Prevent accidentally shooting twice
@@ -211,15 +218,11 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
-        val angle by carousel.hardware.position.readEagerly().withoutStamps
 
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
-            val angle = carousel.state.shootInitialAngle()
-
-            if(angle != null) {
-
+            carousel.state.shootInitialAngle()?.let { angle ->
                 carousel.set(angle)
 
                 launch { flywheel.set(flywheelTarget) }
