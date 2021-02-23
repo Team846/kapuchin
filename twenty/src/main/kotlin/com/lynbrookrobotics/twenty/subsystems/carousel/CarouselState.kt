@@ -21,7 +21,7 @@ class CarouselState(component: Named) : Named by Named("State", component) {
     }
 
     fun shoot(): Angle? {
-        if (balls == 0) return null;
+        if (balls == 0) return null
         return (balls - 0.5).CarouselSlot
     }
 
@@ -30,7 +30,7 @@ class CarouselState(component: Named) : Named by Named("State", component) {
     }
 
     fun pop() {
-        balls--;
+        balls--
     }
 
     override fun toString() = "$balls"
