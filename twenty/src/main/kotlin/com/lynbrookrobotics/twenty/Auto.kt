@@ -251,7 +251,7 @@ private suspend fun Subsystems.autoLimelightAimAndFire() {
                 return@choreography
             }
 
-            val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
+            val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing, drivetrain.hardware))
             if (snapshot1 == null) {
                 log(Warning) { "Couldn't find snapshot1 or no shots possible" }
                 coroutineContext[Job]!!.cancelChildren()

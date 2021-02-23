@@ -132,6 +132,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         ) stampWith it
     }.with(graph("Right Position", Foot))
 
+    val pitch = sensor {
+        gyro.pitch.Degree stampWith it
+    }.with(graph("Pitch", Degree))
+
     val leftSpeed = sensor {
         conversions.encoder.left.realVelocity(
             leftMasterEsc.getSelectedSensorVelocity(idx)
