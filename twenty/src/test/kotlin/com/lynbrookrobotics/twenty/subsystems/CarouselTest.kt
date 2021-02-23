@@ -1,73 +1,52 @@
 package com.lynbrookrobotics.twenty.subsystems
 
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselState
-import info.kunalsheth.units.generated.*
 import kotlin.test.Test
 
+// http://svn.lynbrookrobotics.com/cad21/trunk/Users/Andy%20Min/CarouselStatePositions.pdf
 class CarouselTest : Named by Named("Carousel Test") {
 
     private val carousel = CarouselState(this)
 
     @Test
-    fun `carousel cycle with 3 balls`() {
-        assert(carousel.intakeAngle() == 72.Degree)
-        carousel.push()
+    fun `carousel intake n shoot n`() {
+        for (count in 1 until 5) {
+            // Intake
+            repeat(count) {
+                assert(carousel.intakeAngle() == it.CarouselSlot)
+                carousel.push()
+            }
 
-        assert(carousel.intakeAngle() == 144.Degree)
-        carousel.push()
+            assert(carousel.balls == count)
 
-        assert(carousel.intakeAngle() == 216.Degree)
-        carousel.push()
+            // Shoot initial
+            assert(carousel.shootInitialAngle() == count.CarouselSlot)
 
-        assert(carousel.shootInitialAngle() == 252.Degree)
+            // Shoot
+            repeat(count) {
+                assert(carousel.shootAngle() == ((count - it) - 0.5).CarouselSlot)
+                carousel.pop()
+            }
 
-        assert(carousel.shootAngle() == 180.Degree)
-        carousel.pop()
-
-        assert(carousel.shootAngle() == 108.Degree)
-        carousel.pop()
-
-        assert(carousel.shootAngle() == 36.Degree)
-        carousel.pop()
+            assert(carousel.balls == 0)
+        }
     }
 
     @Test
-    fun `max carousel cycle test`() {
-        assert(carousel.intakeAngle() == 72.Degree)
-        carousel.push()
-
-        assert(carousel.intakeAngle() == 144.Degree)
-        carousel.push()
-
-        assert(carousel.intakeAngle() == 216.Degree)
-        carousel.push()
-
-        assert(carousel.intakeAngle() == 288.Degree)
-        carousel.push()
-
-        assert(carousel.intakeAngle() == 360.Degree)
-        carousel.push()
-
+    fun `carousel intake returns null when full`() {
+        carousel.push(carousel.maxBalls)
         assert(carousel.intakeAngle() == null)
+    }
 
-        assert(carousel.shootInitialAngle() == 36.Degree)
+    @Test
+    fun `carousel initial returns null when empty`() {
+        assert(carousel.shootInitialAngle() == null)
+    }
 
-        assert(carousel.shootAngle() == 324.Degree)
-        carousel.pop()
-
-        assert(carousel.shootAngle() == 252.Degree)
-        carousel.pop()
-
-        assert(carousel.shootAngle() == 180.Degree)
-        carousel.pop()
-
-        assert(carousel.shootAngle() == 108.Degree)
-        carousel.pop()
-
-        assert(carousel.shootAngle() == 36.Degree)
-        carousel.pop()
-
+    @Test
+    fun `carousel shoot returns null when empty`() {
         assert(carousel.shootAngle() == null)
     }
 }
