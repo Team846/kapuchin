@@ -11,13 +11,12 @@ class CarouselState(component: Named) : Named by Named("State", component) {
 
     fun intakeAngle(): Angle? {
         if (balls == maxBalls) return null
-        return (balls + 1).CarouselSlot
+        return balls.CarouselSlot
     }
 
     fun shootInitialAngle(): Angle? {
         if (balls == 0) return null
-        if (balls == maxBalls) return 0.5.CarouselSlot
-        return (balls + 0.5).CarouselSlot
+        return balls.CarouselSlot
     }
 
     fun shootAngle(): Angle? {
