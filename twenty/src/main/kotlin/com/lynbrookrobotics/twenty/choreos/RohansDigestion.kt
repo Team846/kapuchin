@@ -158,13 +158,9 @@ suspend fun Subsystems.vision() {
                 launch { turret.fieldOrientedPosition(drivetrain) }
             } else {
                 launch {
-                    println("Turn to ")
-                    print(turretPos.Degree - reading.tx.Degree)
-                    println(turretPos.Degree)
-                    println(reading.tx.Degree)
-
                     turret.set(turretPos - reading.tx)
                 }
+                limelight.hardware.conversions.goalPositions(reading,0.Degree,drivetrain.hardware)
 //                turret.fieldOrientedPosition(drivetrain, turretPos - reading.tx)}}
                 withTimeout(1.Second) { limelight.autoZoom() }
             }
@@ -212,7 +208,7 @@ suspend fun Subsystems.visionAim() {
             launch {
                 turret.fieldOrientedPosition(
                     drivetrain,
-                    turretPosition + reading1.tx + limelight.hardware.conversions.mountingBearing
+                    turretPosition - reading1.tx + limelight.hardware.conversions.mountingBearing
                 )
             }
 
@@ -242,7 +238,7 @@ suspend fun Subsystems.visionAim() {
             launch {
                 turret.fieldOrientedPosition(
                     drivetrain,
-                    turretPosition + reading2.tx + limelight.hardware.conversions.mountingBearing
+                    turretPosition - reading2.tx + limelight.hardware.conversions.mountingBearing
                 )
             }
             spinUpShooter(snapshot2.flywheel, snapshot2.hood)

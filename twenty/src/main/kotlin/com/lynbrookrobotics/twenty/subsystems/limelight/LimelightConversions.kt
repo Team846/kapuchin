@@ -51,15 +51,15 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
 
     private fun outerGoalPosition(sample: LimelightReading, skew: Angle, drivetrainHardware: DrivetrainHardware):Position = with(sample) {
         val pitch = drivetrainHardware.pitch.optimizedRead(0.Second, syncThreshold)
-        print(pitch)
+        println(pitch)
         val targetDistance = (targetHeight - mounting.z) / tan(
             mountingIncline + pitch.y + ty + when (pipeline) {
-                ZoomInPanHigh -> zoomOutFov.y / 2
-                ZoomInPanLow -> -zoomOutFov.y / 2
+                ZoomInPanHigh -> zoomInFov.y / 2
+                ZoomInPanLow -> -zoomInFov.y / 2
                 else -> 0.Degree
             }
         )
-
+        println(targetHeight)
         val x = tan(tx + mountingBearing) * targetDistance
         val pos = Position(x, targetDistance, skew)
         println("Goal Position: $targetDistance")
