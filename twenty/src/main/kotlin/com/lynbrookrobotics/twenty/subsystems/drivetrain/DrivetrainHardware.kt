@@ -119,6 +119,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         .with(graph("Y Location", Foot, escNamed)) { it.y }
         .with(graph("Bearing", Degree, escNamed)) { it.bearing }
 
+    val pitch = sensor {
+        gyro.pitch.Degree stampWith it
+    }.with(graph("Pitch", Degree))
 
     val leftPosition = sensor {
         conversions.encoder.right.realPosition(
@@ -131,10 +134,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
             rightMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Right Position", Foot))
-
-    val pitch = sensor {
-        gyro.pitch.Degree stampWith it
-    }
 
     val leftSpeed = sensor {
         conversions.encoder.left.realVelocity(
@@ -150,7 +149,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     init {
         uiBaselineTicker.runOnTick { time ->
-            setOf(leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
+            setOf(pitch, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
                 it.optimizedRead(time, .5.Second)
             }
         }

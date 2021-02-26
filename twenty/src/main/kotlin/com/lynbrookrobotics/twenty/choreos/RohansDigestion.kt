@@ -134,6 +134,7 @@ suspend fun Subsystems.vision() {
     {
         val reading1 by limelight.hardware.readings.readEagerly().withoutStamps
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
+        val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
         val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
         choreography {
@@ -152,7 +153,7 @@ suspend fun Subsystems.vision() {
                 launch {
                     turret.set(turretPos - reading.tx)
                 }
-                limelight.hardware.conversions.goalPositions(reading, 0.Degree, pitch)
+                limelight.hardware.conversions.goalPositions(reading, robotPosition.bearing, pitch)
 //                turret.fieldOrientedPosition(drivetrain, turretPos - reading.tx)}}
                 withTimeout(1.Second) { limelight.autoZoom() }
             }
@@ -186,11 +187,7 @@ suspend fun Subsystems.visionAim() {
             launch { limelight.set(reading1.pipeline) }
 
             val snapshot1 = bestShot(
-                limelight.hardware.conversions.goalPositions(
-                    reading1,
-                    robotPosition.bearing,
-                    pitch
-                )
+                limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing, pitch)
             )
             if (snapshot1 == null) {
                 log(Warning) { "Couldn't find snapshot1 or no shots possible" }
@@ -216,11 +213,7 @@ suspend fun Subsystems.visionAim() {
             launch { limelight.set(reading2.pipeline) }
 
             val snapshot2 = bestShot(
-                limelight.hardware.conversions.goalPositions(
-                    reading2,
-                    robotPosition.bearing,
-                    pitch
-                )
+                limelight.hardware.conversions.goalPositions(reading2, robotPosition.bearing, pitch)
             )
             if (snapshot2 == null) {
                 log(Error) { "Couldn't find snapshot2 or no shots possible" }
