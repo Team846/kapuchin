@@ -15,7 +15,7 @@ class TurretComponent(hardware: TurretHardware) :
     val preset by pref(0, Degree)
     val positionGains by pref {
         val kP by pref(12, Volt, 45, Degree)
-        val kI by pref(1, Volt, 2, Degree)
+        val kI by pref(1, Volt, 2, DegreeSecond)
         val kD by pref(0, Volt, 60, DegreePerSecond)
         ({
             OffloadedEscGains(
