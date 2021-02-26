@@ -69,7 +69,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
         it!!.getTriggerAxis(kLeft) > 0.1 && it.getTriggerAxis(kRight) > 0.1
     }.otherwise(hardw { null })
 
-    val accelerator = s { joystickMapping(stick.y.Each) }
+    val accelerator = s { joystickMapping(-stick.y.Each) }
         .with(graph("Accelerator", Percent))
 
     val steering = s { wheelMapping(wheel.x.Each) }

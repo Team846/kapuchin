@@ -227,6 +227,7 @@ private suspend fun Subsystems.autoLimelightAimAndFire() {
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
         choreography {
             launch { drivetrain.set(0.Percent) }
@@ -251,7 +252,7 @@ private suspend fun Subsystems.autoLimelightAimAndFire() {
                 return@choreography
             }
 
-            val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing))
+            val snapshot1 = bestShot(limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing, pitch))
             if (snapshot1 == null) {
                 log(Warning) { "Couldn't find snapshot1 or no shots possible" }
                 coroutineContext[Job]!!.cancelChildren()

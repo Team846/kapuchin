@@ -28,7 +28,7 @@ touch output.txt
 
 # For each line in networktables.ini
 while read -r line; do
-  ! (($DEBUG)) && killall java
+  ! (($DEBUG)) && killall -q java
 
   # Get rid of type in the beginning (first word)
   # Get rid of quotations in front and end
@@ -49,7 +49,7 @@ while read -r line; do
   fi
 done <"$ini"
 
-! (($DEBUG)) && killall java
+! (($DEBUG)) && killall -q java
 
 if (($f)); then
   echo "
@@ -62,4 +62,4 @@ else
 Run with -f to actually trim entries"
 fi
 
-! (($DEBUG)) && killall java
+! (($DEBUG)) && killall -q java

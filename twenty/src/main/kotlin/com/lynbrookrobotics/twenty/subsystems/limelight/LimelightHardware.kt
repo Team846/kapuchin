@@ -33,12 +33,23 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
         withTime - l("tl").milli(Second) - 11.milli(Second), this
     )
 
+    /**
+     * Because the Limelight is mounted sideways,
+     * "ty" is passed into the "tx" parameter and "tx" is
+     * passed into the "ty" parameter
+     *
+     * when you want to use the target's horizontal offset, call readings.tx
+     * this will return the value that is read as "ty" on the limelight dashboard
+     *
+     * Same goes for vertical offset - call readings.ty
+     */
     val readings = sensor {
         when {
             l("tv").toInt() == 1 -> LimelightReading(
-                l("ty").Degree * if (invertTy) -1 else 1,
-                l("tx").Degree * if (invertTx) -1 else 1,
-                l("ty0").Each, l("tx0").Each,
+                tx = l("ty").Degree * if (invertTy) -1 else 1,
+                ty = l("tx").Degree * if (invertTx) -1 else 1,
+                tx0 = l("ty0").Each,
+                ty0 = l("tx0").Each,
                 l("tvert").Each, l("thor").Each,
                 l("ta").Each,// this is actually Pixels Squared
                 l("getpipe").toInt().let { rawpipe ->

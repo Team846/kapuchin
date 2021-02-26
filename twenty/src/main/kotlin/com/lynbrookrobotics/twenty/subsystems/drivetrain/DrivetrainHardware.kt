@@ -17,7 +17,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.Subsystems.Companion.uiBaselineTicker
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
-import edu.wpi.first.wpilibj.SPI
+import edu.wpi.first.wpilibj.SerialPort
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -60,13 +60,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         +it.setSelectedSensorPosition(0.0)
         it.inverted = leftEscInversion
         it.setSensorPhase(leftSensorInversion)
-        it.setNeutralMode(NeutralMode.Coast)
+        it.setNeutralMode(NeutralMode.Brake)
     }
     val leftSlaveEsc by hardw { TalonFX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
         it.inverted = leftEscInversion
-        it.setNeutralMode(NeutralMode.Coast)
+        it.setNeutralMode(NeutralMode.Brake)
     }
 
     val rightMasterEsc by hardw { TalonFX(rightMasterEscId) }.configure {
@@ -74,16 +74,16 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         +it.setSelectedSensorPosition(0.0)
         it.inverted = rightEscInversion
         it.setSensorPhase(rightSensorInversion)
-        it.setNeutralMode(NeutralMode.Coast)
+        it.setNeutralMode(NeutralMode.Brake)
     }
     val rightSlaveEsc by hardw { TalonFX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
         it.inverted = rightEscInversion
-        it.setNeutralMode(NeutralMode.Coast)
+        it.setNeutralMode(NeutralMode.Brake)
     }
 
-    private val gyro by hardw { AHRS(SPI.Port.kMXP, 200.toByte()) }.configure {
+    private val gyro by hardw { AHRS(SerialPort.Port.kUSB) }.configure {
         blockUntil() { it.isConnected }
         blockUntil() { !it.isCalibrating }
         it.zeroYaw()
@@ -119,6 +119,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         .with(graph("Y Location", Foot, escNamed)) { it.y }
         .with(graph("Bearing", Degree, escNamed)) { it.bearing }
 
+    val pitch = sensor {
+        gyro.pitch.Degree stampWith it
+    }.with(graph("Pitch", Degree))
 
     val leftPosition = sensor {
         conversions.encoder.right.realPosition(
@@ -146,7 +149,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     init {
         uiBaselineTicker.runOnTick { time ->
-            setOf(leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
+            setOf(pitch, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
                 it.optimizedRead(time, .5.Second)
             }
         }
