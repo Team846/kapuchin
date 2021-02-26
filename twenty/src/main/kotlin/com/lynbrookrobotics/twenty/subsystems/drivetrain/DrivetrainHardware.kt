@@ -134,7 +134,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     val pitch = sensor {
         gyro.pitch.Degree stampWith it
-    }.with(graph("Pitch", Degree))
+    }
 
     val leftSpeed = sensor {
         conversions.encoder.left.realVelocity(

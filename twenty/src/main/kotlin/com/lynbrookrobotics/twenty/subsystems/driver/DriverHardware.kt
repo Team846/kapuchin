@@ -72,9 +72,6 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val accelerator = s { joystickMapping(-stick.y.Each) }
         .with(graph("Accelerator", Percent))
 
-    val constantAccel = s { stick[LeftTrigger] }
-        .with(graph("Constant Accel", Each)) { (if (it) 1 else 0).Each }
-
     val steering = s { wheelMapping(wheel.x.Each) }
         .with(graph("Steering", Percent))
 
@@ -86,7 +83,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->
-            setOf(accelerator, constantAccel, steering, absSteering).forEach {
+            setOf(accelerator, steering, absSteering).forEach {
                 it.optimizedRead(time, .5.Second)
             }
         }

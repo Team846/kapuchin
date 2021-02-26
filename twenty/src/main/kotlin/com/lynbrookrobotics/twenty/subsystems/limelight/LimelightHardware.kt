@@ -46,9 +46,10 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
     val readings = sensor {
         when {
             l("tv").toInt() == 1 -> LimelightReading(
-                l("ty").Degree * if (invertTy) -1 else 1,
-                l("tx").Degree * if (invertTx) -1 else 1,
-                l("ty0").Each, l("tx0").Each,
+                tx = l("ty").Degree * if (invertTy) -1 else 1,
+                ty = l("tx").Degree * if (invertTx) -1 else 1,
+                tx0 = l("ty0").Each,
+                ty0 = l("tx0").Each,
                 l("tvert").Each, l("thor").Each,
                 l("ta").Each,// this is actually Pixels Squared
                 l("getpipe").toInt().let { rawpipe ->

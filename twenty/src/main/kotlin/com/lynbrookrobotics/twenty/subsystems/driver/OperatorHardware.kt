@@ -94,7 +94,6 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val extendClimber = s { back && rb }
     val retractClimber = s { start && rb }
-    val turretTest = s { rb }
     val extendControlPanel = s { pov == 0 }
     val controlPanelStage2 = s { pov == 0 && aButton }
     val controlPanelStage3 = s { pov == 0 && bButton }

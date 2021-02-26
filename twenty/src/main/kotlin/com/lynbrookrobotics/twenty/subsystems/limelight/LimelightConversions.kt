@@ -2,9 +2,10 @@ package com.lynbrookrobotics.twenty.subsystems.limelight
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.*
+import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.ZoomInPanHigh
+import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.ZoomInPanLow
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -12,7 +13,6 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
     private val skewTolerance by pref(1, Degree)
     private val innerGoalOffset by pref(29.25, Inch)
     private val targetHeight by pref(107, Inch)
-    private val syncThreshold = 10.Millisecond
 
     private val mountingIncline by pref(38, Degree)
     val mountingBearing by pref(-0.35, Degree)
@@ -49,26 +49,28 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         ({ UomVector(x, y) })
     }
 
-    private fun outerGoalPosition(sample: LimelightReading, skew: Angle, drivetrainHardware: DrivetrainHardware):Position = with(sample) {
-        val pitch = drivetrainHardware.pitch.optimizedRead(0.Second, syncThreshold)
-        println(pitch)
+    private fun outerGoalPosition(
+        sample: LimelightReading,
+        skew: Angle,
+        pitch: Angle,
+    ): Position = with(sample) {
         val targetDistance = (targetHeight - mounting.z) / tan(
-            mountingIncline + pitch.y + ty + when (pipeline) {
+            mountingIncline + pitch + ty + when (pipeline) {
                 ZoomInPanHigh -> zoomInFov.y / 2
                 ZoomInPanLow -> -zoomInFov.y / 2
                 else -> 0.Degree
             }
         )
-        println(targetHeight)
+
         val x = tan(tx + mountingBearing) * targetDistance
         val pos = Position(x, targetDistance, skew)
-        println("Goal Position: $targetDistance")
-        return pos
 
+        log(Debug) { "Goal position: ${targetDistance.Foot}" }
+        return pos
     }
 
-    fun goalPositions(sample: LimelightReading, skew: Angle, drivetrainHardware: DrivetrainHardware): DetectedTarget {
-        val outerGoal = outerGoalPosition(sample, skew, drivetrainHardware)
+    fun goalPositions(sample: LimelightReading, skew: Angle, pitch: Angle): DetectedTarget {
+        val outerGoal = outerGoalPosition(sample, skew, pitch)
         val offsetAngle = 90.Degree - skew
 
         val innerGoal = Position(

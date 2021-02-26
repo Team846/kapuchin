@@ -23,7 +23,6 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.sign
-import kotlin.system.measureTimeMillis
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -42,17 +41,16 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
     val centerTurret by operator.centerTurret.readEagerly().withoutStamps
-    val turretPreset by operator.turretTest.readEagerly().withoutStamps
 
     choreography {
         if (turret != null && !turret.hardware.isZeroed) launch {
             turret.rezero(electrical)
         }
 
-//        withTimeout(15.Second) {
-//            carousel.rezero()
-//            carousel.whereAreMyBalls()
-//        }
+        withTimeout(15.Second) {
+            carousel.rezero()
+            carousel.whereAreMyBalls()
+        }
 
         launch {
             launchWhenever(
@@ -93,13 +91,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 rumble.set(TwoSided(0.Percent, 100.Percent))
             },
             { centerTurret } to choreography { turret?.set(0.Degree) },
-            { turretPreset } to choreography {
-                val time = measureTimeMillis {
-                    turret?.set(turret.preset, 0.1.Degree)
-                }
-                println(time)
-                freeze()
-            }
         )
     }
 
@@ -143,6 +134,7 @@ suspend fun Subsystems.vision() {
     {
         val reading1 by limelight.hardware.readings.readEagerly().withoutStamps
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
+        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
         choreography {
             launch { turret.fieldOrientedPosition(drivetrain) }
@@ -160,7 +152,7 @@ suspend fun Subsystems.vision() {
                 launch {
                     turret.set(turretPos - reading.tx)
                 }
-                limelight.hardware.conversions.goalPositions(reading,0.Degree,drivetrain.hardware)
+                limelight.hardware.conversions.goalPositions(reading, 0.Degree, pitch)
 //                turret.fieldOrientedPosition(drivetrain, turretPos - reading.tx)}}
                 withTimeout(1.Second) { limelight.autoZoom() }
             }
@@ -179,6 +171,7 @@ suspend fun Subsystems.visionAim() {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
         val turretPosition by turret.hardware.position.readEagerly().withoutStamps
+        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
         choreography {
             scope.launch { withTimeout(7.Second) { flashlight?.set(On) } }
@@ -196,7 +189,7 @@ suspend fun Subsystems.visionAim() {
                 limelight.hardware.conversions.goalPositions(
                     reading1,
                     robotPosition.bearing,
-                    drivetrain.hardware
+                    pitch
                 )
             )
             if (snapshot1 == null) {
@@ -226,7 +219,7 @@ suspend fun Subsystems.visionAim() {
                 limelight.hardware.conversions.goalPositions(
                     reading2,
                     robotPosition.bearing,
-                    drivetrain.hardware
+                    pitch
                 )
             )
             if (snapshot2 == null) {
@@ -274,8 +267,6 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
 }
 
 suspend fun Subsystems.fireAll() = startChoreo("Fire") {
-    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
-
     choreography {
         carousel.set(carousel.fireAllDutycycle)
     }
@@ -313,9 +304,9 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 delayUntil(predicate = ::feederCheck)
             } ?: log(Error) {
                 "Feeder roller never got up to speed (target = ${
-                feederRoller.feedSpeed.Rpm withDecimals 0
+                    feederRoller.feedSpeed.Rpm withDecimals 0
                 } RPM, current = ${
-                feederSpeed.Rpm withDecimals 0
+                    feederSpeed.Rpm withDecimals 0
                 })"
             }
 
@@ -324,9 +315,9 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 delayUntil(predicate = ::flywheelCheck)
             } ?: log(Error) {
                 "Flywheel never got up to speed (target = ${
-                flywheelTarget.Rpm withDecimals 0
+                    flywheelTarget.Rpm withDecimals 0
                 } RPM, current = ${
-                flywheelSpeed.Rpm withDecimals 0
+                    flywheelSpeed.Rpm withDecimals 0
                 })"
             }
 

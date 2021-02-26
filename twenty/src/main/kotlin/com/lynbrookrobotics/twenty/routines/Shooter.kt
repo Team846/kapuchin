@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Field.innerGoalDepth
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
@@ -20,9 +19,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 suspend fun FlywheelComponent.set(target: AngularVelocity) = startRoutine("Set Omega") {
-    val current by hardware.speed.readOnTick.withoutStamps
     controller {
-        println("$currentTime \t $current")
         VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.encoder.native(target))
     }
 }
@@ -60,7 +57,6 @@ suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 0.2.Degree) = 
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {
-        println("$currentTime \t $current.Degree")
         PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
             .takeUnless { target - current in `±`(tolerance) }
     }
@@ -80,13 +76,14 @@ suspend fun TurretComponent.trackTarget(
     val reading by limelight.hardware.readings.readOnTick.withoutStamps
     val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
     val current by hardware.position.readOnTick.withoutStamps
+    val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
     controller {
         reading?.let { snapshot ->
             val target = when (goal) {
                 Outer -> current + snapshot.tx + limelight.hardware.conversions.mountingBearing
                 Inner -> with(limelight.hardware.conversions) {
-                    val llTarget = goalPositions(snapshot, robotPosition.bearing, drivetrain.hardware)
+                    val llTarget = goalPositions(snapshot, robotPosition.bearing, pitch)
                     val horizontalOffset = innerGoalOffsets(llTarget, flywheel.shooterHeight).first
                     val dtheta =
                         atan(innerGoalDepth / horizontalOffset) - (90.Degree - (snapshot.tx + limelight.hardware.conversions.mountingBearing + robotPosition.bearing))

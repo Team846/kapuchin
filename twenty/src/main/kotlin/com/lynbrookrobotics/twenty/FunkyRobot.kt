@@ -1,6 +1,5 @@
 package com.lynbrookrobotics.twenty
 
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
@@ -50,37 +49,32 @@ class FunkyRobot : RobotBase() {
                 { isEnabled && isAutonomous } to choreography {
                     System.gc()
 
-                    var time = 0.Second
                     with(subsystems.drivetrain) {
-                        suspend fun manual() {
-                            val traj = File("/home/lvuser/Slalom_Path.tsv")
-                                .bufferedReader()
-                                .lineSequence()
-                                .drop(1)
-                                .map { it.split('\t') }
-                                .map { it.map { tkn -> tkn.trim() } }
-                                .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot )}
-                                .toList()
-                                .let {
-                                    pathToTrajectory(
-                                        it,
-                                        maxSpeed * speedFactor,
-                                        percentMaxOmega * maxOmega * speedFactor,
-                                        maxAcceleration
-                                    )
-                                }
-
-                            time = measureTimeMillis {
-                                followTrajectory(
-                                    traj,
-                                    maxExtrapolate = maxExtrapolate,
-                                    safetyTolerance = 3.Foot,
-                                    reverse = false,
+                        val traj = File("/home/lvuser/Slalom_Path.tsv")
+                            .bufferedReader()
+                            .lineSequence()
+                            .drop(1)
+                            .map { it.split('\t') }
+                            .map { it.map { tkn -> tkn.trim() } }
+                            .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
+                            .toList()
+                            .let {
+                                pathToTrajectory(
+                                    it,
+                                    maxSpeed * speedFactor,
+                                    percentMaxOmega * maxOmega * speedFactor,
+                                    maxAcceleration
                                 )
-                            }.milli(Second)
-                        }
+                            }
 
-                        manual()
+                        val time = measureTimeMillis {
+                            followTrajectory(
+                                traj,
+                                maxExtrapolate = maxExtrapolate,
+                                safetyTolerance = 3.Foot,
+                                reverse = false,
+                            )
+                        }.milli(Second)
                         log(Debug) { "Trajectroy finished: ${time.Second}s" }
                     }
 
