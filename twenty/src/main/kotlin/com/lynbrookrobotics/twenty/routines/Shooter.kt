@@ -6,14 +6,15 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.twenty.Field.innerGoalDepth
-import com.lynbrookrobotics.twenty.subsystems.*
-import com.lynbrookrobotics.twenty.subsystems.driver.*
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.*
-import com.lynbrookrobotics.twenty.subsystems.limelight.*
+import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
+import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
+import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
+import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.Goal.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.turret.*
+import com.lynbrookrobotics.twenty.subsystems.shooter.Goal.Inner
+import com.lynbrookrobotics.twenty.subsystems.shooter.Goal.Outer
+import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
+import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -52,7 +53,7 @@ suspend fun FeederRollerComponent.set(target: DutyCycle) = startRoutine("Set Dut
     }
 }
 
-suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 2.Degree) = startRoutine("Set") {
+suspend fun TurretComponent.set(target: Angle, tolerance: Angle = 0.2.Degree) = startRoutine("Set") {
     val current by hardware.position.readOnTick.withoutStamps
 
     controller {
@@ -75,13 +76,14 @@ suspend fun TurretComponent.trackTarget(
     val reading by limelight.hardware.readings.readOnTick.withoutStamps
     val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
     val current by hardware.position.readOnTick.withoutStamps
+    val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
     controller {
         reading?.let { snapshot ->
             val target = when (goal) {
                 Outer -> current + snapshot.tx + limelight.hardware.conversions.mountingBearing
                 Inner -> with(limelight.hardware.conversions) {
-                    val llTarget = goalPositions(snapshot, robotPosition.bearing)
+                    val llTarget = goalPositions(snapshot, robotPosition.bearing, pitch)
                     val horizontalOffset = innerGoalOffsets(llTarget, flywheel.shooterHeight).first
                     val dtheta =
                         atan(innerGoalDepth / horizontalOffset) - (90.Degree - (snapshot.tx + limelight.hardware.conversions.mountingBearing + robotPosition.bearing))

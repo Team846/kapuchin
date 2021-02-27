@@ -74,7 +74,6 @@ internal fun TimeStamped<Waypoint>.extrapolate(from: Waypoint, by: Length): Time
  * @param origin the starting [Position] of the robot.
  * @property drivetrain the tank drive drivetrain component.
  * @property maxExtrapolate the maximum target [Waypoint] extrapolation distance (varies with current speed).
- * @property maxSpeed the maximum speed of the robot including constraints (e.g. a speed factor).
  * @property safetyTolerance the maximum error the robot can be from a [Waypoint] before ending the [Trajectory] early.
  * @property reverse whether or not the robot should run with the back going forwards.
  *
@@ -119,7 +118,7 @@ class TrajectoryFollower(
 
     private fun finish() {
         done = true
-        drivetrain.log(Debug) { "*****Finished Trajectory*****"}
+        drivetrain.log(Debug) { "*****Finished Trajectory*****" }
 
         if (errors.size == 0) {
             drivetrain.log(Error) { "No error data points" }
@@ -162,7 +161,7 @@ class TrajectoryFollower(
             target = newTarget
 
             drivetrain.log(Debug) { "New target: ${newTarget.y.x.Foot withDecimals 2} ft, ${newTarget.y.y.Foot withDecimals 2} ft" }
-            drivetrain.log(Debug) { "Extrap Dist: ${(maxExtrapolate * speed / drivetrain.maxSpeed).Inch} in (${speed / drivetrain.maxSpeed}%)" }
+            drivetrain.log(Debug) { "Extrap Dist: ${(maxExtrapolate * speed / drivetrain.maxSpeed).Inch} in (${(speed / drivetrain.maxSpeed).Percent}%)" }
             drivetrain.log(Debug) { "Extrap Target: ${extrapolatedTarget.y.x.Foot withDecimals 2} ft, ${extrapolatedTarget.y.y.Foot withDecimals 2} ft" }
         }
 
