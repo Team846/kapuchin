@@ -101,7 +101,11 @@ suspend fun TurretComponent.fieldOrientedAngle(drivetrain: DrivetrainComponent, 
 
         controller {
             val target = initial `coterminal -` drivetrainPosition.bearing
-            PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+
+            if (target in hardware.conversions.min..hardware.conversions.max)
+                PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+            else
+                PercentOutput(hardware.escConfig, 0.Percent)
         }
     }
 
@@ -112,7 +116,11 @@ suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponen
         controller {
             val angle = atan2(targetPos.x - drivetrainPosition.x, targetPos.y - drivetrainPosition.y)
             val target = angle `coterminal -` drivetrainPosition.bearing
-            PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+
+            if (target in hardware.conversions.min..hardware.conversions.max)
+                PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+            else
+                PercentOutput(hardware.escConfig, 0.Percent)
         }
     }
 
