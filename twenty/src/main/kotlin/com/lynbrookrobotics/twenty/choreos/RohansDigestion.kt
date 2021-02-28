@@ -55,7 +55,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
         launch {
             launchWhenever(
 //                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
-//                    { shoot } to choreography { fire() }
+                    { shoot } to choreography { fire() }
             )
         }
         runWhenever(
@@ -63,7 +63,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
             { aim } to choreography { vision() },
-            { shoot } to choreography { fireAll() },
+//            { shoot } to choreography { fireAll() },
             { aimPreset } to choreography {
                 flywheel?.let { spinUpShooter(flywheel.preset, Down) }
             },

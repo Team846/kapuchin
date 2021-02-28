@@ -31,13 +31,13 @@ suspend fun CarouselComponent.set(target: DutyCycle) = startRoutine("Set") {
 }
 
 suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
-    val carouselAngle by hardware.position.readEagerly().withoutStamps
     val color by hardware.color.readEagerly().withoutStamps
     val proximity by hardware.proximity.readEagerly().withoutStamps
 
     choreography {
         rezero()
         var slotsSkipped = 0
+        state.clear()
         for (i in 0 until state.maxBalls) {
             set(i.CarouselSlot)
             val j = launch { set(i.CarouselSlot, 0.Degree) }
@@ -45,7 +45,9 @@ suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
             if (hardware.conversions.detectingBall(proximity, color)) {
                 state.push(slotsSkipped + 1)
                 slotsSkipped = 0
-            } else slotsSkipped++
+            } else {
+                slotsSkipped++
+            }
             j.cancel()
         }
     }

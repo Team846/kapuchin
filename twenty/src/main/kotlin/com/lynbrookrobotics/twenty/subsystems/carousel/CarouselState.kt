@@ -17,12 +17,12 @@ class CarouselState(component: Named) : Named by Named("State", component) {
 
     fun shootInitialAngle(): Angle? {
         if (balls == 0) return null
-        return balls.CarouselSlot
+        return (balls - 1).CarouselSlot
     }
 
     fun shootAngle(): Angle? {
         if (balls == 0) return null
-        return (balls - 0.5).CarouselSlot
+        return (balls - 1.5).CarouselSlot
     }
 
     fun push(count: Int = 1) {
@@ -31,6 +31,10 @@ class CarouselState(component: Named) : Named by Named("State", component) {
 
     fun pop() {
         balls--
+    }
+
+    fun clear() {
+        balls = 0
     }
 
     override fun toString() = "CarouselState($balls/$maxBalls)"
