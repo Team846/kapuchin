@@ -12,7 +12,6 @@ class FlywheelComponent(hardware: FlywheelHardware) :
     Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
 
     private val accuracyChallengeNamed = Named("Accuracy Challenge", this)
-
     val greenZone by accuracyChallengeNamed.pref {
         val distance by pref(0, Inch)
         val rpm by pref(2000, Rpm)
@@ -50,10 +49,10 @@ class FlywheelComponent(hardware: FlywheelHardware) :
         })
     }
 
-    val manualSpeed by pref(5000, Rpm)
+    val preset by pref(6000, Rpm)
+
 
     val maxSpeed by pref(9632, Rpm)
-    val minSpeed by pref(5000, Rpm)
     val momentFactor by pref(1.4)
     val rollerRadius by pref(2, Inch)
     val momentOfInertia by pref(1.2, PoundFootSquared)
@@ -61,7 +60,6 @@ class FlywheelComponent(hardware: FlywheelHardware) :
     val shooterHeight by pref(24, Inch) // shooter height from the floor
 
     val idleOutput by pref(50, Percent)
-    val preset by pref(3000, Rpm)
     val tolerance by pref(10, Rpm)
 
     val velocityGains by pref {

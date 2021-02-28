@@ -48,37 +48,7 @@ class FunkyRobot : RobotBase() {
                 },
                 { isEnabled && isAutonomous } to choreography {
                     System.gc()
-
-                    with(subsystems.drivetrain) {
-                        val traj = File("/home/lvuser/Slalom_Path.tsv")
-                            .bufferedReader()
-                            .lineSequence()
-                            .drop(1)
-                            .map { it.split('\t') }
-                            .map { it.map { tkn -> tkn.trim() } }
-                            .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
-                            .toList()
-                            .let {
-                                pathToTrajectory(
-                                    it,
-                                    maxSpeed * speedFactor,
-                                    percentMaxOmega * maxOmega * speedFactor,
-                                    maxAcceleration
-                                )
-                            }
-
-                        val time = measureTimeMillis {
-                            followTrajectory(
-                                traj,
-                                maxExtrapolate = maxExtrapolate,
-                                safetyTolerance = 3.Foot,
-                                reverse = false,
-                            )
-                        }.milli(Second)
-                        log(Debug) { "Trajectroy finished: ${time.Second}s" }
-                    }
-
-                    freeze()
+                    subsystems.auto()
                 },
                 { isDisabled && !isTest } to choreography {
                     subsystems.warmup()

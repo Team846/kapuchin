@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.twenty.routines
 
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
@@ -27,17 +28,6 @@ suspend fun FlywheelComponent.set(target: AngularVelocity) = startRoutine("Set O
 suspend fun FlywheelComponent.set(target: DutyCycle) = startRoutine("Set Duty Cycle") {
     controller {
         PercentOutput(hardware.escConfig, target)
-    }
-}
-
-suspend fun FlywheelComponent.manualOverride(operator: OperatorHardware) = startRoutine("Manual Override") {
-    val precision by operator.flywheelManual.readOnTick.withoutStamps
-
-    controller {
-        precision?.let {
-            val target = it * maxSpeed
-            VelocityOutput(hardware.escConfig, velocityGains, hardware.conversions.encoder.native(target))
-        }
     }
 }
 
@@ -111,6 +101,17 @@ suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponen
 
         controller {
             val target = initial `coterminal -` drivetrainPosition.bearing
+            PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+        }
+    }
+
+suspend fun TurretComponent.trackPositionFieldOriented(drivetrain: DrivetrainComponent, targetPos: UomVector<Length>) =
+    startRoutine("Track Position Field Oriented") {
+        val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
+
+        controller {
+            val angle = atan2(targetPos.x - drivetrainPosition.x, targetPos.y - drivetrainPosition.y)
+            val target = angle `coterminal -` drivetrainPosition.bearing
             PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
         }
     }

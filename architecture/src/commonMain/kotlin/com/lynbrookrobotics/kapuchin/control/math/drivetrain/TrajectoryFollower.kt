@@ -113,6 +113,7 @@ class TrajectoryFollower(
 
     private val errors = mutableSetOf<Length>()
 
+    private var firstPoint = true
     private val uni = UnicycleDrive(drivetrain, scope)
     private val position by drivetrain.hardware.positionDelegate(scope)
 
@@ -137,10 +138,18 @@ class TrajectoryFollower(
      */
     operator fun invoke(): TwoSided<Velocity>? {
         val error = distance(position.y.vector, target.y)
+        /*
+        0 0 0
+        0 1 1
+        1 0 1
+        1 1 0
+        */
+        val crossedWaypoint = (target.y isBehind position.y) xor reverse || firstPoint
 
-        if (!waypoints.hasNext() && target.y isBehind position.y) {
+        if (!waypoints.hasNext() && (crossedWaypoint || error < 2.Foot)) {
             finish()
-        } else if (waypoints.hasNext() && target.y isBehind position.y) {
+        } else if (waypoints.hasNext() && crossedWaypoint) {
+            firstPoint = false
             drivetrain.log(Debug) { "*****Hit Waypoint*****" }
             drivetrain.log(Debug) { "Current pos: ${position.y.x.Foot withDecimals 2} ft, ${position.y.y.Foot withDecimals 2} ft @${position.y.bearing.Degree withDecimals 0} deg" }
 

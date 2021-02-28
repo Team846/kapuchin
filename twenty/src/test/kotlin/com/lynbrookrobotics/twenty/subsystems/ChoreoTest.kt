@@ -90,6 +90,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
                 log(Debug) { "Reached the end of choreo. cancelling children" }
 
                 coroutineContext[Job]!!.cancelChildren()
+                log(Debug) {"aowiefjaoiejf"}
             }
         }
 

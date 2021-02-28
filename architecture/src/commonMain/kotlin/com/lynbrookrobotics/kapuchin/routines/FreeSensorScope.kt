@@ -6,6 +6,9 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Utility to manage sensor use within robot choreographies
@@ -43,9 +46,34 @@ open class FreeSensorScope {
             optimizedRead(currentTime, syncThreshold).also { value = it }
         })
 
+    fun CoroutineScope.whileHigh(sensor: Sensor<Boolean>, syncThreshold: Time = 5.milli(Second), block: Block) =
+        launch {
+            val value by sensor.readEagerly(syncThreshold).withoutStamps
+            whenever({ value }) {
+                runWhile({ value }, block)
+            }
+        }
+
+    fun CoroutineScope.whileLow(sensor: Sensor<Boolean>, syncThreshold: Time = 5.milli(Second), block: Block) =
+        whileHigh(sensor.map { !it }, syncThreshold, block)
+
+    fun CoroutineScope.launchOnRisingEdge(
+        sensor: Sensor<Boolean>,
+        syncThreshold: Time = 5.milli(Second),
+        block: Block
+    ) = launch {
+        val value by sensor.readEagerly(syncThreshold).withoutStamps
+
+        while (isActive) {
+            delayUntil(predicate = { value })
+            block()
+        }
+    }
+
     /**
      * Rely on something else to update this sensor's value
      */
     val <Input> Sensor<Input>.getOld
         get() = Sensor.UpdateSource(this)
+
 }

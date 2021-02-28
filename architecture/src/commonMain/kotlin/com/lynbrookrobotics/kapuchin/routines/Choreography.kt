@@ -10,7 +10,7 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 import com.lynbrookrobotics.kapuchin.timing.clock.EventLoop as KapuchinEventLoop
 
-private typealias Block = suspend CoroutineScope.() -> Unit
+internal typealias Block = suspend CoroutineScope.() -> Unit
 
 /**
  * Represents a sequence of subsystem routines
