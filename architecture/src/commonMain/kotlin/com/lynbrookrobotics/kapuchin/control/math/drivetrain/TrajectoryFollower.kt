@@ -108,12 +108,14 @@ class TrajectoryFollower(
     // Whether or not the trajectory is complete
     private var done = false
 
+    // Whether or not we're on the very first waypoint (we want to skip it)
+    private var firstPoint = true
+
     // The current target speed
     private var speed = 0.Foot / Second
 
     private val errors = mutableSetOf<Length>()
 
-    private var firstPoint = true
     private val uni = UnicycleDrive(drivetrain, scope)
     private val position by drivetrain.hardware.positionDelegate(scope)
 
@@ -138,20 +140,15 @@ class TrajectoryFollower(
      */
     operator fun invoke(): TwoSided<Velocity>? {
         val error = distance(position.y.vector, target.y)
-        /*
-        0 0 0
-        0 1 1
-        1 0 1
-        1 1 0
-        */
+
+        // If reverse, check if target is in front of position instead of behind
         val crossedWaypoint = (target.y isBehind position.y) xor reverse || firstPoint
 
         if (!waypoints.hasNext() && (crossedWaypoint || error < 2.Foot)) {
             finish()
         } else if (waypoints.hasNext() && crossedWaypoint) {
             firstPoint = false
-            drivetrain.log(Debug) { "*****Hit Waypoint*****" }
-            drivetrain.log(Debug) { "Current pos: ${position.y.x.Foot withDecimals 2} ft, ${position.y.y.Foot withDecimals 2} ft @${position.y.bearing.Degree withDecimals 0} deg" }
+            drivetrain.log(Debug) { "Hit Waypoint" }
 
             // Check error
             drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
@@ -168,10 +165,6 @@ class TrajectoryFollower(
             speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
             extrapolatedTarget = newTarget.extrapolate(target.y, maxExtrapolate * (speed / drivetrain.maxSpeed))
             target = newTarget
-
-            drivetrain.log(Debug) { "New target: ${newTarget.y.x.Foot withDecimals 2} ft, ${newTarget.y.y.Foot withDecimals 2} ft" }
-            drivetrain.log(Debug) { "Extrap Dist: ${(maxExtrapolate * speed / drivetrain.maxSpeed).Inch} in (${(speed / drivetrain.maxSpeed).Percent}%)" }
-            drivetrain.log(Debug) { "Extrap Target: ${extrapolatedTarget.y.x.Foot withDecimals 2} ft, ${extrapolatedTarget.y.y.Foot withDecimals 2} ft" }
         }
 
         val targetA = (extrapolatedTarget.y - position.y.vector).bearing

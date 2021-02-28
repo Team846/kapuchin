@@ -91,7 +91,7 @@ suspend fun TurretComponent.trackTarget(
     }
 }
 
-suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponent, toTurretPosition: Angle? = null) =
+suspend fun TurretComponent.fieldOrientedAngle(drivetrain: DrivetrainComponent, toTurretPosition: Angle? = null) =
     startRoutine("Field Oriented Position") {
         val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
         val turretPosition by hardware.position.readEagerly.withoutStamps
@@ -105,7 +105,7 @@ suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponen
         }
     }
 
-suspend fun TurretComponent.trackPositionFieldOriented(drivetrain: DrivetrainComponent, targetPos: UomVector<Length>) =
+suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponent, targetPos: UomVector<Length>) =
     startRoutine("Track Position Field Oriented") {
         val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
 

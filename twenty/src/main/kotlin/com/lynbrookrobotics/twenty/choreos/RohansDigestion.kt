@@ -154,7 +154,7 @@ suspend fun Subsystems.visionAim() {
 
         choreography {
             scope.launch { withTimeout(7.Second) { flashlight?.set(On) } }
-            launch { turret.fieldOrientedPosition(drivetrain) }
+            launch { turret.fieldOrientedAngle(drivetrain) }
 
             val reading1 = reading
             if (reading1?.pipeline == null) {
@@ -174,7 +174,7 @@ suspend fun Subsystems.visionAim() {
             }
 
             launch {
-                turret.fieldOrientedPosition(
+                turret.fieldOrientedAngle(
                     drivetrain,
                     turretPosition - reading1.tx + limelight.hardware.conversions.mountingBearing
                 )
@@ -200,7 +200,7 @@ suspend fun Subsystems.visionAim() {
             }
 
             launch {
-                turret.fieldOrientedPosition(
+                turret.fieldOrientedAngle(
                     drivetrain,
                     turretPosition - reading2.tx + limelight.hardware.conversions.mountingBearing
                 )

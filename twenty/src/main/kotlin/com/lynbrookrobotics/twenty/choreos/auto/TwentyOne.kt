@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.choreos.*
 import com.lynbrookrobotics.twenty.routines.*
@@ -13,8 +12,6 @@ import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Up
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlin.system.measureTimeMillis
 
@@ -67,7 +64,7 @@ suspend fun Subsystems.judgedAuto() {
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            launch { turret?.trackPositionFieldOriented(drivetrain, UomVector(-26.Foot, 0.Foot)) }
+            launch { turret?.fieldOrientedPosition(drivetrain, UomVector(-26.Foot, 0.Foot)) }
             carousel.rezero()
             carousel.whereAreMyBalls()
 
@@ -138,6 +135,6 @@ suspend fun Subsystems.judgedAuto() {
 
 suspend fun Subsystems.debug() = startChoreo("Debug Auto") {
     choreography {
-        turret?.trackPositionFieldOriented(drivetrain, UomVector(0.Foot, 5.Foot))
+        turret?.fieldOrientedPosition(drivetrain, UomVector(0.Foot, 5.Foot))
     }
 }

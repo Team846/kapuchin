@@ -113,9 +113,3 @@ fun <QInput : Quan<QInput>> Sensor<QInput>.with(graph: Grapher<QInput>) =
  */
 fun <Input, QInput : Quan<QInput>> Sensor<Input>.with(graph: Grapher<QInput>, structure: (Input) -> QInput) =
     Sensor { t -> read(t).also { graph(it.x, structure(it.y)) } }
-
-fun <Input, New> Sensor<Input>.map(transform: (Input) -> (New)) = Sensor { t ->
-    read(t).run {
-        transform(y) stampWith x
-    }
-}
