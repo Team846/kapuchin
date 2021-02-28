@@ -254,8 +254,6 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         freeze()
     } else startChoreo("Spin Up Shooter") {
 
-
-
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
@@ -263,58 +261,35 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
 
         choreography {
             launch { feederRoller.set(0.Rpm) }
-//
-//            val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-//            if (fullSlot != null) {
-//                val target = fullSlot - carousel.shootSlot
-//                if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
-//                if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
-//            }
 
-            println("ASDF ${flywheelTarget.Rpm}")
+            val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
+            if (fullSlot != null) {
+                val target = fullSlot - carousel.shootSlot
+                if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
+                if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
+            }
+
             launch { flywheel.set(flywheelTarget) }
-//            launch { feederRoller.set(feederRoller.feedSpeed) }
-//
-//            fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-//            fun flywheelCheck() = flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-//
-//            log(Debug) { "Waiting for feeder roller to get up to speed" }
-//            withTimeout(5.Second) {
-//                delayUntil(predicate = ::feederCheck)
-//            } ?: log(Error) {
-//                "Feeder roller never got up to speed (target = ${
-//                    feederRoller.feedSpeed.Rpm withDecimals 0
-//                } RPM, current = ${
-//                    feederSpeed.Rpm withDecimals 0
-//                })"
-//            }
-//
-//            log(Debug) { "Waiting for flywheel to get up to speed" }
-//            withTimeout(5.Second) {
-//                delayUntil(predicate = ::flywheelCheck)
-//            } ?: log(Error) {
-//                "Flywheel never got up to speed (target = ${
-//                    flywheelTarget.Rpm withDecimals 0
-//                } RPM, current = ${
-//                    flywheelSpeed.Rpm withDecimals 0
-//                })"
-//            }
-//
-//            log(Debug) { "Feeder roller and flywheel set" }
-//            hoodTarget?.let {
-//                launch { shooterHood?.set(it) }
-//            }
-//
-//            runWhenever({
-//                feederCheck() && flywheelCheck()
-//            } to choreography {
-//                scope.launch {
-//                    withTimeout(.5.Second) {
-//                        rumble.set(TwoSided(0.Percent, 100.Percent))
-//                    }
-//                }
-//                freeze()
-//            })
+            launch { feederRoller.set(feederRoller.feedSpeed) }
+
+            delayUntilFeederAndFlywheel(flywheelTarget)
+
+            log(Debug) { "Feeder roller and flywheel set" }
+            hoodTarget?.let {
+                launch { shooterHood?.set(it) }
+            }
+
+            runWhenever({
+                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+                        && flywheelSpeed in flywheelTarget `±` flywheel.tolerance
+            } to choreography {
+                scope.launch {
+                    withTimeout(.5.Second) {
+                        rumble.set(TwoSided(0.Percent, 100.Percent))
+                    }
+                }
+                freeze()
+            })
         }
     }
 }

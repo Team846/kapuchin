@@ -1,17 +1,20 @@
 package com.lynbrookrobotics.twenty.choreos.auto
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.twenty.Subsystems
-import com.lynbrookrobotics.twenty.choreos.*
+import com.lynbrookrobotics.twenty.choreos.delayUntilFeederAndFlywheel
+import com.lynbrookrobotics.twenty.choreos.intakeBalls
+import com.lynbrookrobotics.twenty.choreos.visionAim
 import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Up
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlin.system.measureTimeMillis
 
@@ -53,43 +56,58 @@ suspend fun Subsystems.timeTrajectory() = startChoreo("Time Trajectory") {
 
 suspend fun Subsystems.judgedAuto() {
     val flywheelTarget = 6000.Rpm
+    val speedFactor = 40.Percent
+    val pathName = "judged_arc1"
+    val targetDist = 26.Foot
 
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to run auto." }
         freeze()
     } else startChoreo("Judged Auto") {
 
-        val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
-        val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
+        val drivetrainPosition by drivetrain.hardware.position.readEagerly().withoutStamps
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            launch { turret?.fieldOrientedPosition(drivetrain, UomVector(-26.Foot, 0.Foot)) }
+            // Approximately aim towards target
+            launch {
+                turret?.fieldOrientedPosition(
+                    drivetrain,
+                    UomVector(
+                        drivetrainPosition.x + targetDist * sin(drivetrainPosition.bearing + 90.Degree),
+                        drivetrainPosition.y + targetDist * cos(drivetrainPosition.bearing + 90.Degree)
+                    )
+                )
+            }
+
+            // Reindex carousel
             carousel.rezero()
             carousel.whereAreMyBalls()
 
-
+            // Bring out intake
             val intakeJob = launch { intakeBalls() }
-            val path = loadRobotPath("judged_arc1")
-            if (path == null) {
-                log(Error) { "Unable to find arc1 path" }
 
-//                coroutineContext.job.cancelChildren()
-//                return@choreography
+            // Follow path (if exists)
+            val path = loadRobotPath(pathName)
+            if (path == null) {
+                log(Error) { "Unable to find $pathName" }
             }
+
             path?.let {
                 drivetrain.followTrajectory(
-                    fastAsFuckPath(it, speedFactor = 40.Percent),
+                    fastAsFuckPath(it, speedFactor),
                     maxExtrapolate = drivetrain.maxExtrapolate,
                     reverse = true
                 )
             }
 
+            // Stop intake
             intakeJob.cancel()
 
+            // Precise aim with limelight
             launch { visionAim() }
-            launch { feederRoller.set(0.Rpm) }
 
+            // Set carousel initial
             val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
             if (fullSlot != null) {
                 val target = fullSlot - carousel.shootSlot
@@ -97,35 +115,16 @@ suspend fun Subsystems.judgedAuto() {
                 if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
             }
 
+            // Set flywheel and feeder roller
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }
 
-            fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-            fun flywheelCheck() = flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-
-            log(Debug) { "Waiting for feeder roller to get up to speed" }
-            withTimeout(5.Second) {
-                delayUntil(predicate = ::feederCheck)
-            } ?: log(Error) {
-                "Feeder roller never got up to speed (target = ${
-                    feederRoller.feedSpeed.Rpm withDecimals 0
-                } RPM, current = ${
-                    feederSpeed.Rpm withDecimals 0
-                })"
+            if (!delayUntilFeederAndFlywheel(flywheelTarget)) {
+                log(Error) { "Feeder flywheel not set" }
+                coroutineContext.job.cancelChildren()
+                return@choreography
             }
 
-            log(Debug) { "Waiting for flywheel to get up to speed" }
-            withTimeout(5.Second) {
-                delayUntil(predicate = ::flywheelCheck)
-            } ?: log(Error) {
-                "Flywheel never got up to speed (target = ${
-                    flywheelTarget.Rpm withDecimals 0
-                } RPM, current = ${
-                    flywheelSpeed.Rpm withDecimals 0
-                })"
-            }
-
-            println(flywheelSpeed.Rpm)
             log(Debug) { "Feeder roller and flywheel set" }
             launch { shooterHood?.set(Up) }
             launch { carousel.set(carousel.fireAllDutycycle) }
