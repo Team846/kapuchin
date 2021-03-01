@@ -8,6 +8,7 @@ import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.choreos.delayUntilFeederAndFlywheel
 import com.lynbrookrobotics.twenty.choreos.intakeBalls
 import com.lynbrookrobotics.twenty.choreos.visionAim
+import com.lynbrookrobotics.twenty.choreos.visionAimTurret
 import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Up
@@ -74,8 +75,8 @@ suspend fun Subsystems.judgedAuto() {
                 turret?.fieldOrientedPosition(
                     drivetrain,
                     UomVector(
-                        drivetrainPosition.x + targetDist * sin(drivetrainPosition.bearing + 90.Degree),
-                        drivetrainPosition.y + targetDist * cos(drivetrainPosition.bearing + 90.Degree)
+                        drivetrainPosition.x + targetDist * sin(drivetrainPosition.bearing - 90.Degree),
+                        drivetrainPosition.y + targetDist * cos(drivetrainPosition.bearing - 90.Degree)
                     )
                 )
             }
@@ -105,7 +106,7 @@ suspend fun Subsystems.judgedAuto() {
             intakeJob.cancel()
 
             // Precise aim with limelight
-            launch { visionAim() }
+            launch { visionAimTurret() }
 
             // Set carousel initial
             val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
@@ -119,7 +120,10 @@ suspend fun Subsystems.judgedAuto() {
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }
 
-            if (!delayUntilFeederAndFlywheel(flywheelTarget)) {
+            withTimeout(3.Second) {
+                delayUntilFeederAndFlywheel(flywheelTarget)
+                log(Debug) {"yay"}
+            } ?: run {
                 log(Error) { "Feeder flywheel not set" }
                 coroutineContext.job.cancelChildren()
                 return@choreography
@@ -127,6 +131,7 @@ suspend fun Subsystems.judgedAuto() {
 
             log(Debug) { "Feeder roller and flywheel set" }
             launch { shooterHood?.set(Up) }
+            delay(3.Second)
             launch { carousel.set(carousel.fireAllDutycycle) }
         }
     }

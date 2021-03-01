@@ -105,6 +105,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
+    private val odometryLogTicker = ticker(Priority.High, 1.Second / 60, "Odometry Log")
 
     private val escNamed = Named("ESC Odometry", this)
     override val position = sensor {
@@ -160,6 +161,14 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
                 rightPosition.optimizedRead(time, syncThreshold).y,
                 gyro.yaw.Degree
             )
+        }
+
+        odometryLogTicker.runOnTick { time ->
+//            val pos = position.optimizedRead(time, syncThreshold).y
+//            val vl = leftSpeed.optimizedRead(time, syncThreshold).y
+//            val vr = rightSpeed.optimizedRead(time, syncThreshold).y
+//            println("tv/POSITION ${time.Second} ${pos.x.Foot} ${pos.y.Foot} ${pos.bearing.Degree}")
+//            println("tv/VELOCITY ${time.Second} ${vl.FootPerSecond} ${vr.FootPerSecond}")
         }
     }
 }

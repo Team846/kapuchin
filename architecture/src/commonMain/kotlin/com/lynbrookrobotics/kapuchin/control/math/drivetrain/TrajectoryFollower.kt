@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -144,6 +145,10 @@ class TrajectoryFollower(
         // If reverse, check if target is in front of position instead of behind
         val crossedWaypoint = (target.y isBehind position.y) xor reverse || firstPoint
 
+        if (firstPoint) {
+            println("tv/WAYPOINT ${target.y.x.Foot} ${target.y.y.Foot}")
+        }
+
         if (!waypoints.hasNext() && (crossedWaypoint || error < 2.Foot)) {
             finish()
         } else if (waypoints.hasNext() && crossedWaypoint) {
@@ -165,6 +170,9 @@ class TrajectoryFollower(
             speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
             extrapolatedTarget = newTarget.extrapolate(target.y, maxExtrapolate * (speed / drivetrain.maxSpeed))
             target = newTarget
+            println("tv/WAYPOINT ${target.y.x.Foot} ${target.y.y.Foot}")
+            println("tv/WAYPOINT_HIT ${currentTime.Second} ${target.y.x.Foot} ${target.y.y.Foot}")
+            println("tv/TARGET ${currentTime.Second} ${extrapolatedTarget.y.x.Foot} ${extrapolatedTarget.y.y.Foot}")
         }
 
         val targetA = (extrapolatedTarget.y - position.y.vector).bearing

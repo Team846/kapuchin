@@ -8,7 +8,6 @@ import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.launch
 
 suspend fun CarouselComponent.delayUntilBall() = startChoreo("Delay Until Ball") {
     val color by hardware.color.readEagerly().withoutStamps
@@ -58,11 +57,7 @@ suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball")
 
 suspend fun Subsystems.delayUntilFeederAndFlywheel(
     flywheelTarget: AngularVelocity,
-): Boolean {
-
-    var feederSet = false
-    var flywheelSet = false
-
+) {
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to run." }
     } else startChoreo("Delay until feeder and flywheel") {
@@ -71,50 +66,19 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-            val feederJob = launch {
-                log(Debug) { "Waiting for feeder roller to get up to speed" }
-                delayUntil {
-                    feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-                }
-                log(Debug) { "Feeder roller set" }
-                feederSet = true
+            log(Debug) { "Waiting for feeder roller to get up to speed" }
+            delayUntil {
+                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
             }
+            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}"}
+            log(Debug) { "Feeder roller set" }
 
-            val flywheelJob = launch {
-                log(Debug) { "Waiting for flywheel to get up to speed" }
-                delayUntil {
-                    flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-                }
-                log(Debug) { "Flywheel set" }
-                flywheelSet = true
+            log(Debug) { "Waiting for flywheel to get up to speed" }
+            delayUntil {
+                flywheelSpeed in flywheelTarget `±` flywheel.tolerance
             }
-
-            withTimeout(3.Second) {
-                feederJob.join()
-                flywheelJob.join()
-            }
-
-            if (!feederSet) {
-                log(Error) {
-                    "Feeder roller never got up to speed (target = ${
-                        feederRoller.feedSpeed.Rpm withDecimals 0
-                    } RPM, current = ${
-                        feederSpeed.Rpm withDecimals 0
-                    })"
-                }
-            }
-
-            if (!flywheelSet) {
-                log(Error) {
-                    "Flywheel never got up to speed (target = ${
-                        flywheelTarget.Rpm withDecimals 0
-                    } RPM, current = ${
-                        flywheelSpeed.Rpm withDecimals 0
-                    })"
-                }
-            }
+            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}"}
+            log(Debug) { "Flywheel set" }
         }
     }
-
-    return feederSet && flywheelSet
 }
