@@ -1,57 +1,41 @@
 package com.lynbrookrobotics.twenty.subsystems.carousel
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
-import kotlin.math.roundToInt
 
+// http://svn.lynbrookrobotics.com/cad21/trunk/Users/Andy%20Min/CarouselStatePositions.pdf
 class CarouselState(component: Named) : Named by Named("State", component) {
-    private val internal = arrayOf(false, false, false, false, false)
 
-    private fun index(robotBearing: Angle) =
-        Math.floorMod(robotBearing.CarouselSlot.roundToInt(), size)
+    var balls = 0
+        private set
+    val maxBalls = 5
 
-    operator fun get(robotBearing: Angle) = internal[index(robotBearing)]
-
-    operator fun set(robotBearing: Angle, newState: Boolean) {
-        val index = index(robotBearing)
-        log(Debug) { "Setting state of slot #$index @ ${robotBearing.Degree withDecimals 0}˚ from ${internal[index]} to $newState" }
-        if (internal[index] && newState) log(Error) { "#$index was assumed to be full. Setting to full again." }
-        internal[index] = newState
+    fun intakeAngle(): Angle? {
+        if (balls == maxBalls) return null
+        return balls.CarouselSlot
     }
 
-    //    hardware doesn't support CW & CCW turning
-    private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
-        val signum = if (bias) -1 else 1
-        for (i in 0..2) {
-            val offset = i.CarouselSlot * signum
-            if (f(slot + offset)) return slot + offset
-            if (f(slot - offset)) return slot - offset
-        }
-        return null
+    fun shootInitialAngle(): Angle? {
+        if (balls == 0) return null
+        return (balls - 1).CarouselSlot
     }
 
-//    private fun closest(slot: Angle, bias: Boolean, f: (Angle) -> Boolean): `∠`? {
-//        for (i in 0 until 5) {
-//            val position = slot - i.CarouselSlot
-//            if (f(position)) return position
-//        }
-//        return null
-//    }
+    fun shootAngle(): Angle? {
+        if (balls == 0) return null
+        return (balls - 1.5).CarouselSlot
+    }
 
-    fun closestEmpty(robotBearing: Angle): Angle? = closest(robotBearing, false) {
-        !get(it)
-    }?.roundToInt(CarouselSlot)?.CarouselSlot
+    fun push(count: Int = 1) {
+        balls += count
+    }
 
-    fun closestFull(robotBearing: Angle): Angle? = closest(robotBearing, true) {
-        get(it)
-    }?.roundToInt(CarouselSlot)?.CarouselSlot
+    fun pop() {
+        balls--
+    }
 
-    val ammo get() = internal.count { it }
-    val size = internal.size
+    fun clear() {
+        balls = 0
+    }
 
-    override fun toString() = internal.joinToString(
-        prefix = "CarouselState(", separator = ", ", postfix = ")"
-    )
+    override fun toString() = "CarouselState($balls/$maxBalls)"
 }

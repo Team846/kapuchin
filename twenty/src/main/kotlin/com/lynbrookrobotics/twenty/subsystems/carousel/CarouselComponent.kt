@@ -36,11 +36,13 @@ class CarouselComponent(hardware: CarouselHardware) :
         PercentOutput(hardware.escConfig, 0.Percent)
     }
 
-    private val ammoGraph = graph("Ammo", Each)
+
     private val isBallGraph = graph("isBall", Each)
+    private val ammoGraph = graph("ammo", Each)
     override fun CarouselHardware.output(value: OffloadedOutput) {
         value.writeTo(esc, pidController)
-        ammoGraph(currentTime, state.ammo.Each)
+
+        ammoGraph(currentTime, state.balls.Each)
 
         with(hardware) {
             isBallGraph(currentTime, conversions.detectingBall(

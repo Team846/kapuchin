@@ -53,7 +53,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         launch {
             launchWhenever(
-//                { turret?.routine == null } to choreography { turret?.trackPositionFieldOriented(drivetrain, UomVector(0.Foot, -26.Foot)) },
+//                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
             )
         }
 
@@ -79,18 +79,13 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             },
         )
     }
-
 }
 
 suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
-    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
-
     choreography {
-//        carousel.rezero()
         while (isActive) {
-            val emptySlot = carousel.state.closestEmpty(carouselAngle + carousel.collectSlot)
-
-            if (emptySlot == null) {
+            val angle = carousel.state.intakeAngle()
+            if (angle == null) {
                 log(Warning) { "I'm full. No open slots in carousel magazine." }
 
                 launch { intakeSlider?.set(IntakeSliderState.In) }
@@ -98,15 +93,16 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
                 rumble.set(TwoSided(100.Percent, 0.Percent))
             } else {
                 launch { feederRoller?.set(0.Rpm) }
-                carousel.set(emptySlot - carousel.collectSlot)
-                launch { carousel.set(emptySlot - carousel.collectSlot, 0.Degree) }
+                carousel.set(angle)
+                launch { carousel.set(angle, 0.Degree) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
                 launch { intakeRollers?.optimalEat(drivetrain, electrical) }
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
+
                 carousel.delayUntilBall()
-                carousel.state.set(carouselAngle + carousel.collectSlot, true)
+                carousel.state.push()
             }
         }
     }
@@ -130,6 +126,7 @@ suspend fun Subsystems.visionAimTurret() {
             } else {
                 launch { limelight.set(reading1.pipeline) }
                 launch {
+                    log(Debug) { "target ${(turretPos - reading1.tx).Degree}"}
                     turret.set(turretPos - reading1.tx)
                 }
 //                limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing, pitch)
@@ -212,28 +209,25 @@ suspend fun Subsystems.visionAim() {
 
 suspend fun Subsystems.shootOne() = startChoreo("Shoot One") {
     val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
-
     choreography {
-        val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-        val nextSlot = carouselAngle.roundToInt(CarouselSlot).CarouselSlot
-
-        if (fullSlot == null) {
+        val angle = carousel.state.shootAngle()
+        if (angle == null) {
             log(Warning) { "I feel empty. I want to eat some balls." }
             withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
+        } else {
+            launch {
+                carousel.set(angle, 0.CarouselSlot)
+            }
+
+            log(Debug) { "Waiting for ball to launch." }
+            withTimeout(1.5.Second) {
+                flywheel?.delayUntilBall()
+            } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
+            carousel.state.pop()
+
+            coroutineContext[Job]!!.cancelChildren()
+            delay(100.milli(Second)) // Prevent accidentally shooting twice
         }
-
-        launch {
-            carousel.set((fullSlot ?: nextSlot) - carousel.shootSlot, 0.CarouselSlot)
-        }
-
-        log(Debug) { "Waiting for ball to launch." }
-        withTimeout(1.5.Second) {
-            flywheel?.delayUntilBall()
-        } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
-        carousel.state.set(carouselAngle + carousel.shootSlot, false)
-
-        coroutineContext[Job]!!.cancelChildren()
-        delay(100.milli(Second)) // Prevent accidentally shooting twice
     }
 }
 
@@ -243,7 +237,7 @@ suspend fun Subsystems.shootAll() = startChoreo("Shoot All") {
         while (isActive) {
             flywheel?.delayUntilBall()
             log(Debug) { "Ball shot" }
-//            carousel.state.pop()
+            carousel.state.pop()
         }
     }
 }
@@ -254,42 +248,37 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         freeze()
     } else startChoreo("Spin Up Shooter") {
 
-        val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
-
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
-            val fullSlot = carousel.state.closestFull(carouselAngle + carousel.shootSlot)
-            if (fullSlot != null) {
-                val target = fullSlot - carousel.shootSlot
-                if (target > carouselAngle) carousel.set(target - 0.5.CarouselSlot)
-                if (target < carouselAngle) carousel.set(target + 0.5.CarouselSlot)
-            }
+            carousel.state.shootInitialAngle()?.let { angle ->
+                carousel.set(angle)
 
-            launch { flywheel.set(flywheelTarget) }
-            launch { feederRoller.set(feederRoller.feedSpeed) }
+                launch { flywheel.set(flywheelTarget) }
+                launch { feederRoller.set(feederRoller.feedSpeed) }
 
-            delayUntilFeederAndFlywheel(flywheelTarget)
+                delayUntilFeederAndFlywheel(flywheelTarget)
 
-            log(Debug) { "Feeder roller and flywheel set" }
-            hoodTarget?.let {
-                launch { shooterHood?.set(it) }
-            }
-
-            runWhenever({
-                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-                        && flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-            } to choreography {
-                scope.launch {
-                    withTimeout(.5.Second) {
-                        rumble.set(TwoSided(0.Percent, 100.Percent))
-                    }
+                log(Debug) { "Feeder roller and flywheel set" }
+                hoodTarget?.let {
+                    launch { shooterHood?.set(it) }
                 }
-                freeze()
-            })
+
+                runWhenever({
+                    feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+                            && flywheelSpeed in flywheelTarget `±` flywheel.tolerance
+                } to choreography {
+                    scope.launch {
+                        withTimeout(.5.Second) {
+                            rumble.set(TwoSided(0.Percent, 100.Percent))
+                        }
+                    }
+                    freeze()
+                })
+            }
         }
     }
 }
