@@ -48,7 +48,10 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     }
     val pidController by hardw { esc.pidController }
 
-    val encoder by hardw { esc.encoder }
+    val encoder by hardw { esc.encoder }.configure {
+        it.position = 0.0
+    }
+
     val position = sensor(encoder) {
         conversions.encoder.realPosition(position) stampWith it
     }.with(graph("Angle", Degree))

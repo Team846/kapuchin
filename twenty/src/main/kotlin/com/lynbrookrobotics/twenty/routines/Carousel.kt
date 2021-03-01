@@ -3,7 +3,8 @@ package com.lynbrookrobotics.twenty.routines
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.twenty.subsystems.carousel.*
+import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
+import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
@@ -30,21 +31,23 @@ suspend fun CarouselComponent.set(target: DutyCycle) = startRoutine("Set") {
 }
 
 suspend fun CarouselComponent.whereAreMyBalls() = startChoreo("Re-Index") {
-    val carouselAngle by hardware.position.readEagerly().withoutStamps
     val color by hardware.color.readEagerly().withoutStamps
     val proximity by hardware.proximity.readEagerly().withoutStamps
 
     choreography {
         rezero()
-        val start = carouselAngle.roundToInt(CarouselSlot).CarouselSlot
-        for (i in 0 until state.size) {
-            set(start + i.CarouselSlot - collectSlot)
-            val j = launch { set(start + i.CarouselSlot - collectSlot, 0.Degree) }
+        var slotsSkipped = 0
+        state.clear()
+        for (i in 0 until state.maxBalls) {
+            set(i.CarouselSlot)
+            val j = launch { set(i.CarouselSlot, 0.Degree) }
             delay(0.1.Second)
-            state.set(
-                carouselAngle + collectSlot,
-                hardware.conversions.detectingBall(proximity, color)
-            )
+            if (hardware.conversions.detectingBall(proximity, color)) {
+                state.push(slotsSkipped + 1)
+                slotsSkipped = 0
+            } else {
+                slotsSkipped++
+            }
             j.cancel()
         }
     }
