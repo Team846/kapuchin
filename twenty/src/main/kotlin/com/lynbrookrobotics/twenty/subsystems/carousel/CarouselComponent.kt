@@ -30,7 +30,7 @@ class CarouselComponent(hardware: CarouselHardware) :
     val collectSlot by pref(0, CarouselSlot)
     val shootSlot by pref(0.5, CarouselSlot)
 
-    val state = CarouselState(this)
+    var state = CarouselState(this)
 
     override val fallbackController: CarouselComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)

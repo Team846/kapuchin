@@ -93,9 +93,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         !it.isCalibrating
     }/*.verify("NavX magnetometer should be calibrated") {
         it.isMagnetometerCalibrated
-    }*/.verify("NavX should be configured to update at 200hz") {
+    }*//*.verify("NavX should be configured to update at 200hz") {
         it.actualUpdateRate == 200
-    }/*.verify("RoboRIO should receive NavX updates at 200hz") {
+    }*//*.verify("RoboRIO should receive NavX updates at 200hz") {
         val desiredUpdates = 10
         val startingIndex = it.updateCount
         blockingDelay(desiredUpdates.Each / 200.Hertz * 1.1)
@@ -104,7 +104,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.rate.DegreePerSecond in `±`(driftTolerance)
     }
 
-    private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
+    private val odometryTicker = ticker(Priority.RealTime, 10.milli(Second), "Odometry")
     private val odometryLogTicker = ticker(Priority.High, 1.Second / 60, "Odometry Log")
 
     private val escNamed = Named("ESC Odometry", this)
@@ -164,11 +164,11 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         }
 
         odometryLogTicker.runOnTick { time ->
-//            val pos = position.optimizedRead(time, syncThreshold).y
-//            val vl = leftSpeed.optimizedRead(time, syncThreshold).y
-//            val vr = rightSpeed.optimizedRead(time, syncThreshold).y
-//            println("tv/POSITION ${time.Second} ${pos.x.Foot} ${pos.y.Foot} ${pos.bearing.Degree}")
-//            println("tv/VELOCITY ${time.Second} ${vl.FootPerSecond} ${vr.FootPerSecond}")
+            val pos = position.optimizedRead(time, syncThreshold).y
+            val vl = leftSpeed.optimizedRead(time, syncThreshold).y
+            val vr = rightSpeed.optimizedRead(time, syncThreshold).y
+            println("tv/POSITION ${time.Second} ${pos.x.Foot} ${pos.y.Foot} ${pos.bearing.Degree}")
+            println("tv/VELOCITY ${time.Second} ${vl.FootPerSecond} ${vr.FootPerSecond}")
         }
     }
 }

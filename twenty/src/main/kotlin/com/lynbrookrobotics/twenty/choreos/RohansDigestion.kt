@@ -39,6 +39,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val turretManual by operator.turretManual.readEagerly().withoutStamps
 
+    val ball0 by operator.ball0.readEagerly().withoutStamps
+    val ball1 by operator.ball1.readEagerly().withoutStamps
+    val ball2 by operator.ball2.readEagerly().withoutStamps
+    val ball3 by operator.ball3.readEagerly().withoutStamps
+
     choreography {
         if (turret != null && !turret.hardware.isZeroed) launch {
             log(Debug) { "Rezeroing turret" }
@@ -77,6 +82,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
                 turret?.manualOverride(operator) ?: freeze()
             },
+
+            { ball0 } to choreography { carousel.state.balls = 0 },
+            { ball1 } to choreography { carousel.state.balls = 1 },
+            { ball2 } to choreography { carousel.state.balls = 2 },
+            { ball3 } to choreography { carousel.state.balls = 3 },
         )
     }
 }
@@ -116,22 +126,13 @@ suspend fun Subsystems.visionAimTurret() {
     {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
-        val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
-        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
         choreography {
-            val reading1 = reading?.copy()
-            if (reading1?.pipeline == null) {
-                log(Error) { "Limelight reading1 == $reading" }
-            } else {
-                launch { limelight.set(reading1.pipeline) }
-                launch {
-                    log(Debug) { "target ${(turretPos - reading1.tx).Degree}"}
-                    turret.set(turretPos - reading1.tx)
-                }
-//                limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing, pitch)
-                withTimeout(1.Second) { limelight.autoZoom() }
-            }
+            log(Debug) { "target ${(turretPos - reading!!.tx).Degree}" }
+            turret.set(
+                turretPos - reading!!.tx
+            )
+            freeze()
         }
 
     }

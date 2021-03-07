@@ -8,6 +8,8 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.E
+import kotlin.math.pow
 
 /**
  * Check if a [Waypoint] is behind the line that goes through a [Position] that is perpendicular to its bearing.
@@ -87,6 +89,7 @@ class TrajectoryFollower(
     private val drivetrain: GenericDrivetrainComponent,
     private val maxExtrapolate: Length,
     private val safetyTolerance: Length,
+//    private val speedFactor: Dimensionless,
     private val reverse: Boolean,
 ) {
 
@@ -145,11 +148,7 @@ class TrajectoryFollower(
         // If reverse, check if target is in front of position instead of behind
         val crossedWaypoint = (target.y isBehind position.y) xor reverse || firstPoint
 
-        if (firstPoint) {
-            println("tv/WAYPOINT ${target.y.x.Foot} ${target.y.y.Foot}")
-        }
-
-        if (!waypoints.hasNext() && (crossedWaypoint || error < 2.Foot)) {
+        if (!waypoints.hasNext() && (crossedWaypoint || error < 3.Foot)) {
             finish()
         } else if (waypoints.hasNext() && crossedWaypoint) {
             firstPoint = false
@@ -168,11 +167,13 @@ class TrajectoryFollower(
             // Set new target and speed
             val newTarget = waypoints.next()
             speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
-            extrapolatedTarget = newTarget.extrapolate(target.y, maxExtrapolate * (speed / drivetrain.maxSpeed))
+
+            val extrapDist =
+                maxExtrapolate / (1 + E.pow((-(speed - drivetrain.maxSpeed / 2) * Second / Metre).Each))
+
+            extrapolatedTarget = newTarget.extrapolate(target.y, extrapDist)
+            println("tv/WAYPOINT_HIT ${currentTime.Second} ${target.y.x.Foot} ${target.y.y.Foot} ${extrapolatedTarget.y.x.Foot} ${extrapolatedTarget.y.y.Foot}")
             target = newTarget
-            println("tv/WAYPOINT ${target.y.x.Foot} ${target.y.y.Foot}")
-            println("tv/WAYPOINT_HIT ${currentTime.Second} ${target.y.x.Foot} ${target.y.y.Foot}")
-            println("tv/TARGET ${currentTime.Second} ${extrapolatedTarget.y.x.Foot} ${extrapolatedTarget.y.y.Foot}")
         }
 
         val targetA = (extrapolatedTarget.y - position.y.vector).bearing

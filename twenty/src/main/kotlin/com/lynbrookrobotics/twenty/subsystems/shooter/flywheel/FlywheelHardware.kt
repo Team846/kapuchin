@@ -31,8 +31,8 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
 
     val conversions = FlywheelConversions(this)
 
-    private val masterEscId = 51
-    private val slaveEscId = 50
+    private val masterEscId = 50
+    private val slaveEscId = 51
 
     val masterEsc by hardw { CANSparkMax(masterEscId, kBrushless) }.configure {
         setupMaster(it, escConfig, false)

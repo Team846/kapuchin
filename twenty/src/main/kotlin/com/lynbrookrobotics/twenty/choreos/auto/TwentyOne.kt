@@ -7,7 +7,6 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.choreos.delayUntilFeederAndFlywheel
 import com.lynbrookrobotics.twenty.choreos.intakeBalls
-import com.lynbrookrobotics.twenty.choreos.visionAimTurret
 import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Up
 import info.kunalsheth.units.generated.*
@@ -23,9 +22,10 @@ suspend fun Subsystems.timePath() = startChoreo("Time Path") {
             loadRobotPath(autoPath)?.let { path ->
                 val time = measureTimeMillis {
                     followTrajectory(
-                        fastAsFuckPath(path),
+                        fastAsFuckPath(path, drivetrain.speedFactor),
                         maxExtrapolate = maxExtrapolate,
                         safetyTolerance = 3.Foot,
+//                        speedFactor = speedFactor,
                         reverse = false,
                     )
                 }.milli(Second)
@@ -66,10 +66,12 @@ suspend fun Subsystems.judgedAuto() {
 
         val drivetrainPosition by drivetrain.hardware.position.readEagerly().withoutStamps
         val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+        val reading by limelight.hardware.readings.readEagerly().withoutStamps
+        val turretPos by turret!!.hardware.position.readEagerly().withoutStamps
 
         choreography {
             // Approximately aim towards target
-            launch {
+            val j = launch {
                 turret?.fieldOrientedPosition(
                     drivetrain,
                     UomVector(
@@ -81,7 +83,7 @@ suspend fun Subsystems.judgedAuto() {
 
             // Reindex carousel
             carousel.rezero()
-            carousel.whereAreMyBalls()
+//            carousel.whereAreMyBalls()
 
             // Bring out intake
             val intakeJob = launch { intakeBalls() }
@@ -102,9 +104,21 @@ suspend fun Subsystems.judgedAuto() {
 
             // Stop intake
             intakeJob.cancel()
+            carousel.state.clear()
+            carousel.state.push(3)
 
-            // Precise aim with limelight
-            visionAimTurret()
+//            // Precise aim with limelight
+            j.cancel()
+            log(Debug) { "Field Oriented Cancelled" }
+
+
+            coroutineContext.job.cancelChildren()
+            delay(1.Second)
+            turret!!.set(turretPos - reading!!.tx.also { println(it) })
+//            delay(0.5.Second)
+//            withTimeout(1.Second) {
+//                turret!!.set(turretPos - reading!!.tx.also { println(it) })
+//            }
 
             // Set carousel initial
             val initialAngle = carousel.state.shootInitialAngle()
@@ -120,17 +134,18 @@ suspend fun Subsystems.judgedAuto() {
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }
 
-            withTimeout(3.Second) {
-                delayUntilFeederAndFlywheel(flywheelTarget)
-            } ?: run {
-                log(Error) { "Feeder flywheel not set" }
-                coroutineContext.job.cancelChildren()
-                return@choreography
-            }
+            delay(2.Second)
+//            withTimeout(3.Second) {
+//                delayUntilFeederAndFlywheel(flywheelTarget)
+//            } ?: run {
+//                log(Error) { "Feeder flywheel not set" }
+//                coroutineContext.job.cancelChildren()
+//                return@choreography
+//            }
 
             log(Debug) { "Feeder roller and flywheel set, aim complete" }
             launch { shooterHood?.set(Up) }
-            delay(2.Second)
+            delay(0.5.Second)
             launch { carousel.set(carousel.fireAllDutycycle) }
         }
     }

@@ -50,6 +50,11 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val shooterPreset = s { xbox.aButton }
 
+    val ball0 = s { rb }
+    val ball1 = s { xbox.xButton}
+    val ball2 = s { xbox.yButton}
+    val ball3 = s { xbox.bButton}
+
     val rezeroTurret = s { xbox.startButton }
     val reindexCarousel = s { xbox.backButton }
 
