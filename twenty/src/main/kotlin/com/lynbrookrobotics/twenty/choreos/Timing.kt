@@ -70,14 +70,14 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
             delayUntil {
                 feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
             }
-            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}"}
+            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}" }
             log(Debug) { "Feeder roller set" }
 
             log(Debug) { "Waiting for flywheel to get up to speed" }
             delayUntil {
                 flywheelSpeed in flywheelTarget `±` flywheel.tolerance
             }
-            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}"}
+            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
             log(Debug) { "Flywheel set" }
         }
     }

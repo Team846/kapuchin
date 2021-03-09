@@ -7,8 +7,9 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.*
-import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.*
+import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.BottomTrigger
+import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.Trigger
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
