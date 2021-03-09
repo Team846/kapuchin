@@ -9,7 +9,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.auto.debug
 import com.lynbrookrobotics.twenty.choreos.auto.judgedAuto
 import com.lynbrookrobotics.twenty.choreos.auto.timePath
 import com.lynbrookrobotics.twenty.choreos.auto.timeTrajectory
@@ -17,7 +16,6 @@ import com.lynbrookrobotics.twenty.choreos.climberTeleop
 import com.lynbrookrobotics.twenty.choreos.controlPanelTeleop
 import com.lynbrookrobotics.twenty.choreos.digestionTeleop
 import com.lynbrookrobotics.twenty.routines.autoZoom
-import com.lynbrookrobotics.twenty.routines.set
 import com.lynbrookrobotics.twenty.routines.teleop
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
@@ -47,7 +45,6 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelHardware
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretHardware
-import edu.wpi.first.hal.HAL
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -87,7 +84,6 @@ class Subsystems(
         Subsystems::timePath,
         Subsystems::timeTrajectory,
         Subsystems::judgedAuto,
-        Subsystems::debug,
     )
 
     private val autoIdGraph = graph("Auto ID", Each)
@@ -108,7 +104,6 @@ class Subsystems(
     val autoTrajectory: String by pref("0")
 
     suspend fun teleop() {
-        HAL.observeUserProgramTeleop()
         runAll(
             { climberTeleop() },
             { controlPanelTeleop() },
@@ -123,15 +118,11 @@ class Subsystems(
     }
 
     suspend fun auto() {
-        HAL.observeUserProgramAutonomous()
         when (autoId) {
             -1 -> log(Error) { "DB Slider 0 is set to -1, running wall auto" }
             !in autos.indices -> log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
             else -> autos[autoId].invoke(this@Subsystems)
         }
-
-//        flywheel?.set(flywheel!!.preset)
-        freeze()
     }
 
     suspend fun warmup() {

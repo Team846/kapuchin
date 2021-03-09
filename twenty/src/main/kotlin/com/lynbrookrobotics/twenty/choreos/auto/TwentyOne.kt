@@ -150,9 +150,3 @@ suspend fun Subsystems.judgedAuto() {
         }
     }
 }
-
-suspend fun Subsystems.debug() = startChoreo("Debug Auto") {
-    choreography {
-        turret?.fieldOrientedPosition(drivetrain, UomVector(0.Foot, 5.Foot))
-    }
-}

@@ -83,10 +83,21 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 turret?.manualOverride(operator) ?: freeze()
             },
 
-            { ball0 } to choreography { carousel.state.balls = 0 },
-            { ball1 } to choreography { carousel.state.balls = 1 },
-            { ball2 } to choreography { carousel.state.balls = 2 },
-            { ball3 } to choreography { carousel.state.balls = 3 },
+            { ball0 } to {
+                carousel.state.clear()
+            },
+            { ball1 } to {
+                carousel.state.clear()
+                carousel.state.push(1)
+            },
+            { ball2 } to {
+                carousel.state.clear()
+                carousel.state.push(2)
+            },
+            { ball3 } to {
+                carousel.state.clear()
+                carousel.state.push(3)
+            },
         )
     }
 }

@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.E
@@ -146,34 +145,33 @@ class TrajectoryFollower(
         val error = distance(position.y.vector, target.y)
 
         // If reverse, check if target is in front of position instead of behind
-        val crossedWaypoint = (target.y isBehind position.y) xor reverse || firstPoint
-
-        if (!waypoints.hasNext() && (crossedWaypoint || error < 3.Foot)) {
-            finish()
-        } else if (waypoints.hasNext() && crossedWaypoint) {
-            firstPoint = false
-            drivetrain.log(Debug) { "Hit Waypoint" }
-
-            // Check error
-            drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
-            if (error > safetyTolerance) {
-                drivetrain.log(Error) { "*****ABORTING TRAJECTORY*****" }
-                drivetrain.log(Error) { "Error (${error.Inch} in) exceeds safety tolerance (${safetyTolerance.Inch} in)" }
+        if (((target.y isBehind position.y) xor reverse) || firstPoint) {
+            if (!waypoints.hasNext()) {
                 finish()
+            } else {
+                firstPoint = false
+                drivetrain.log(Debug) { "Hit Waypoint" }
+
+                // Check error
+                drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
+                if (error > safetyTolerance) {
+                    drivetrain.log(Error) { "*****ABORTING TRAJECTORY*****" }
+                    drivetrain.log(Error) { "Error (${error.Inch} in) exceeds safety tolerance (${safetyTolerance.Inch} in)" }
+                    finish()
+                }
+
+                errors += error
+
+                // Set new target and speed
+                val newTarget = waypoints.next()
+                speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
+
+                val extrapDist =
+                    maxExtrapolate / (1 + E.pow((-(speed - drivetrain.maxSpeed / 2) * Second / Metre).Each))
+
+                extrapolatedTarget = newTarget.extrapolate(target.y, extrapDist)
+                target = newTarget
             }
-
-            errors += error
-
-            // Set new target and speed
-            val newTarget = waypoints.next()
-            speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
-
-            val extrapDist =
-                maxExtrapolate / (1 + E.pow((-(speed - drivetrain.maxSpeed / 2) * Second / Metre).Each))
-
-            extrapolatedTarget = newTarget.extrapolate(target.y, extrapDist)
-            println("tv/WAYPOINT_HIT ${currentTime.Second} ${target.y.x.Foot} ${target.y.y.Foot} ${extrapolatedTarget.y.x.Foot} ${extrapolatedTarget.y.y.Foot}")
-            target = newTarget
         }
 
         val targetA = (extrapolatedTarget.y - position.y.vector).bearing

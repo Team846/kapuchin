@@ -23,13 +23,12 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
     val logDir = "/home/lvuser/"
 
     val logPath = run {
-//        var logName = "$journalId.tsv"
-//        while (File("$logDir$logName").exists()) {
-//            logName = "old_$logName"
-//        }
+        var logName = "$journalId.tsv"
+        while (File("$logDir$logName").exists()) {
+            logName = "old_$logName"
+        }
 
-//        "$logDir$logName"
-        "${logDir}judged_arc1.tsv"
+        "$logDir$logName"
     }
 
     val log = File(logPath).printWriter().also {
@@ -51,8 +50,6 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
                 val (x, y) = startingRot rz (pos.vector - startingLoc)
 
                 if (distance(pos.vector, last.vector) > cut) {
-                    val pos1 = pos.copy()
-                    println("tv/WAYPOINT ${currentTime.Second} ${pos1.x.Foot} ${pos1.y.Foot}")
                     log.println("${x.Foot}\t${y.Foot}")
                     last = pos
                 }

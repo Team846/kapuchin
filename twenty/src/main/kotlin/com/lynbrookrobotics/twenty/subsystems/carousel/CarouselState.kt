@@ -7,7 +7,7 @@ import info.kunalsheth.units.generated.*
 class CarouselState(component: Named) : Named by Named("State", component) {
 
     var balls = 0
-//        private set
+        private set
     val maxBalls = 5
 
     fun intakeAngle(): Angle? {

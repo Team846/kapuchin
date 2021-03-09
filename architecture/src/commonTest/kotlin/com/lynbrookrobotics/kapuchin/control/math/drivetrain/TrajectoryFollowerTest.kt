@@ -4,8 +4,6 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import info.kunalsheth.units.generated.*
-import kotlin.math.E
-import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.test.Test
 
@@ -75,15 +73,5 @@ class TrajectoryFollowerTest {
 
         p2.x `is equal to?` 3.Foot
         p2.y `is equal to?` 4.Foot
-    }
-
-    @Test
-    fun blah() {
-        val maxExtrapolate = 50.Inch
-        val maxSpeed = 15.Foot / Second
-        fun extrapDist(speed: Velocity) =
-            maxExtrapolate / (1 + E.pow((-(speed - maxSpeed / 2) * Second / Metre).Each))
-
-        assert(extrapDist(7.5.Foot / Second) == maxExtrapolate / 2)
     }
 }
