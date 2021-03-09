@@ -4,8 +4,9 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.twenty.subsystems.carousel.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.*
+import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
+import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import info.kunalsheth.units.generated.*
 
 suspend fun CarouselComponent.delayUntilBall() = startChoreo("Delay Until Ball") {
@@ -50,6 +51,34 @@ suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball")
                     lastAcceleration = acceleration
                     lastPercentSpeed = percentSpeed
                 }
+        }
+    }
+}
+
+suspend fun Subsystems.delayUntilFeederAndFlywheel(
+    flywheelTarget: AngularVelocity,
+) {
+    if (flywheel == null || feederRoller == null) {
+        log(Error) { "Need flywheel and feeder to run." }
+    } else startChoreo("Delay until feeder and flywheel") {
+
+        val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
+        val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
+
+        choreography {
+            log(Debug) { "Waiting for feeder roller to get up to speed" }
+            delayUntil {
+                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+            }
+            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}" }
+            log(Debug) { "Feeder roller set" }
+
+            log(Debug) { "Waiting for flywheel to get up to speed" }
+            delayUntil {
+                flywheelSpeed in flywheelTarget `±` flywheel.tolerance
+            }
+            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
+            log(Debug) { "Flywheel set" }
         }
     }
 }

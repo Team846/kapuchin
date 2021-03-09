@@ -7,6 +7,8 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.E
+import kotlin.math.pow
 
 /**
  * Check if a [Waypoint] is behind the line that goes through a [Position] that is perpendicular to its bearing.
@@ -86,6 +88,7 @@ class TrajectoryFollower(
     private val drivetrain: GenericDrivetrainComponent,
     private val maxExtrapolate: Length,
     private val safetyTolerance: Length,
+//    private val speedFactor: Dimensionless,
     private val reverse: Boolean,
 ) {
 
@@ -107,6 +110,9 @@ class TrajectoryFollower(
 
     // Whether or not the trajectory is complete
     private var done = false
+
+    // Whether or not we're on the very first waypoint (we want to skip it)
+    private var firstPoint = true
 
     // The current target speed
     private var speed = 0.Foot / Second
@@ -138,31 +144,34 @@ class TrajectoryFollower(
     operator fun invoke(): TwoSided<Velocity>? {
         val error = distance(position.y.vector, target.y)
 
-        if (!waypoints.hasNext() && target.y isBehind position.y) {
-            finish()
-        } else if (waypoints.hasNext() && target.y isBehind position.y) {
-            drivetrain.log(Debug) { "*****Hit Waypoint*****" }
-            drivetrain.log(Debug) { "Current pos: ${position.y.x.Foot withDecimals 2} ft, ${position.y.y.Foot withDecimals 2} ft @${position.y.bearing.Degree withDecimals 0} deg" }
-
-            // Check error
-            drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
-            if (error > safetyTolerance) {
-                drivetrain.log(Error) { "*****ABORTING TRAJECTORY*****" }
-                drivetrain.log(Error) { "Error (${error.Inch} in) exceeds safety tolerance (${safetyTolerance.Inch} in)" }
+        // If reverse, check if target is in front of position instead of behind
+        if (((target.y isBehind position.y) xor reverse) || firstPoint) {
+            if (!waypoints.hasNext()) {
                 finish()
+            } else {
+                firstPoint = false
+                drivetrain.log(Debug) { "Hit Waypoint" }
+
+                // Check error
+                drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
+                if (error > safetyTolerance) {
+                    drivetrain.log(Error) { "*****ABORTING TRAJECTORY*****" }
+                    drivetrain.log(Error) { "Error (${error.Inch} in) exceeds safety tolerance (${safetyTolerance.Inch} in)" }
+                    finish()
+                }
+
+                errors += error
+
+                // Set new target and speed
+                val newTarget = waypoints.next()
+                speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
+
+                val extrapDist =
+                    maxExtrapolate / (1 + E.pow((-(speed - drivetrain.maxSpeed / 2) * Second / Metre).Each))
+
+                extrapolatedTarget = newTarget.extrapolate(target.y, extrapDist)
+                target = newTarget
             }
-
-            errors += error
-
-            // Set new target and speed
-            val newTarget = waypoints.next()
-            speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
-            extrapolatedTarget = newTarget.extrapolate(target.y, maxExtrapolate * (speed / drivetrain.maxSpeed))
-            target = newTarget
-
-            drivetrain.log(Debug) { "New target: ${newTarget.y.x.Foot withDecimals 2} ft, ${newTarget.y.y.Foot withDecimals 2} ft" }
-            drivetrain.log(Debug) { "Extrap Dist: ${(maxExtrapolate * speed / drivetrain.maxSpeed).Inch} in (${(speed / drivetrain.maxSpeed).Percent}%)" }
-            drivetrain.log(Debug) { "Extrap Target: ${extrapolatedTarget.y.x.Foot withDecimals 2} ft, ${extrapolatedTarget.y.y.Foot withDecimals 2} ft" }
         }
 
         val targetA = (extrapolatedTarget.y - position.y.vector).bearing

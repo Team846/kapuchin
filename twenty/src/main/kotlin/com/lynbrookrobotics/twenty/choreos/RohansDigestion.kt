@@ -22,7 +22,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.math.sign
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -30,74 +29,81 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val unjamBalls by driver.unjamBalls.readEagerly().withoutStamps
 
     val aim by operator.aim.readEagerly().withoutStamps
-    val aimPreset by operator.aimPreset.readEagerly().withoutStamps
-    val shoot by operator.shoot.readEagerly().withoutStamps
     val hoodUp by operator.hoodUp.readEagerly().withoutStamps
+    val shoot by operator.shoot.readEagerly().withoutStamps
 
-    val flywheelManual by operator.flywheelManual.readEagerly().withoutStamps
-    val turretManual by operator.turretManual.readEagerly().withoutStamps
+    val shooterPreset by operator.shooterPreset.readEagerly().withoutStamps
 
-    val unjamCarousel by operator.unjamCarousel.readEagerly().withoutStamps
     val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
-    val centerTurret by operator.centerTurret.readEagerly().withoutStamps
+
+    val turretManual by operator.turretManual.readEagerly().withoutStamps
+
+    val ball0 by operator.ball0.readEagerly().withoutStamps
+    val ball1 by operator.ball1.readEagerly().withoutStamps
+    val ball2 by operator.ball2.readEagerly().withoutStamps
+    val ball3 by operator.ball3.readEagerly().withoutStamps
 
     choreography {
         if (turret != null && !turret.hardware.isZeroed) launch {
+            log(Debug) { "Rezeroing turret" }
             turret.rezero(electrical)
         }
 
-        withTimeout(15.Second) {
-            carousel.rezero()
-            carousel.whereAreMyBalls()
-        }
+//        withTimeout(15.Second) {
+//            log(Debug) { "Reindexing carousel" }
+//            carousel.rezero()
+//            carousel.whereAreMyBalls()
+//        }
 
         launch {
             launchWhenever(
 //                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
-                    { shoot } to choreography { fire() }
             )
         }
+
         runWhenever(
-            { intakeBalls } to choreography { eat() },
+            { intakeBalls } to choreography { intakeBalls() },
             { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
-            { aim } to choreography { vision() },
-//            { shoot } to choreography { fireAll() },
-            { aimPreset } to choreography {
-                flywheel?.let { spinUpShooter(flywheel.preset, Down) }
-            },
+            { aim } to choreography { visionAimTurret() },
             { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
+            { shoot } to choreography { shootAll() },
 
-            { flywheelManual != null } to choreography {
-                scope.launch { withTimeout(2.Second) { flashlight?.set(On) } }
-                flywheel?.let {
-                    spinUpShooter(
-                        flywheel.manualSpeed,
-                        if (hoodUp) Up else Down
-                    )
-                } ?: freeze()
+            { shooterPreset } to choreography { flywheel?.let { spinUpShooter(it.preset) } ?: freeze() },
 
-            },
-            { !turretManual.isZero } to choreography {
-                scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
-                turret?.manualOverride(operator) ?: freeze()
-            },
-
-            { unjamCarousel } to choreography { unjam() },
             { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
             { reindexCarousel } to choreography {
                 carousel.whereAreMyBalls()
                 rumble.set(TwoSided(0.Percent, 100.Percent))
             },
-            { centerTurret } to choreography { turret?.set(0.Degree) },
+
+            { !turretManual.isZero } to choreography {
+                scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
+                turret?.manualOverride(operator) ?: freeze()
+            },
+
+            { ball0 } to {
+                carousel.state.clear()
+            },
+            { ball1 } to {
+                carousel.state.clear()
+                carousel.state.push(1)
+            },
+            { ball2 } to {
+                carousel.state.clear()
+                carousel.state.push(2)
+            },
+            { ball3 } to {
+                carousel.state.clear()
+                carousel.state.push(3)
+            },
         )
     }
 }
 
-suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
+suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
     choreography {
-
         while (isActive) {
             val angle = carousel.state.intakeAngle()
             if (angle == null) {
@@ -123,37 +129,21 @@ suspend fun Subsystems.eat() = startChoreo("Collect Balls") {
     }
 }
 
-suspend fun Subsystems.vision() {
+suspend fun Subsystems.visionAimTurret() {
     if (turret == null) {
         log(Error) { "Need turret for vision" }
         freeze()
-    } else startChoreo("Vision Turret")
+    } else startChoreo("Vision Aim Turret")
     {
-        val reading1 by limelight.hardware.readings.readEagerly().withoutStamps
+        val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
-        val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
-        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
         choreography {
-            launch { turret.fieldOrientedPosition(drivetrain) }
-
-            val reading = reading1
-            if (reading?.pipeline == null) {
-                log(Error) { "Limelight reading1 == $reading" }
-                return@choreography
-            }
-
-            launch { limelight.set(reading.pipeline) }
-            if (reading == null) {
-                launch { turret.fieldOrientedPosition(drivetrain) }
-            } else {
-                launch {
-                    turret.set(turretPos - reading.tx)
-                }
-                limelight.hardware.conversions.goalPositions(reading, robotPosition.bearing, pitch)
-//                turret.fieldOrientedPosition(drivetrain, turretPos - reading.tx)}}
-                withTimeout(1.Second) { limelight.autoZoom() }
-            }
+            log(Debug) { "target ${(turretPos - reading!!.tx).Degree}" }
+            turret.set(
+                turretPos - reading!!.tx
+            )
+            freeze()
         }
 
     }
@@ -164,7 +154,7 @@ suspend fun Subsystems.visionAim() {
     if (flywheel == null || feederRoller == null || turret == null) {
         log(Error) { "Need flywheel and feederRoller for vision aiming" }
         freeze()
-    } else startChoreo("Vision Aim") {
+    } else startChoreo("Vision Flywheel") {
 
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
@@ -173,7 +163,7 @@ suspend fun Subsystems.visionAim() {
 
         choreography {
             scope.launch { withTimeout(7.Second) { flashlight?.set(On) } }
-            launch { turret.fieldOrientedPosition(drivetrain) }
+            launch { turret.fieldOrientedAngle(drivetrain) }
 
             val reading1 = reading
             if (reading1?.pipeline == null) {
@@ -193,7 +183,7 @@ suspend fun Subsystems.visionAim() {
             }
 
             launch {
-                turret.fieldOrientedPosition(
+                turret.fieldOrientedAngle(
                     drivetrain,
                     turretPosition - reading1.tx + limelight.hardware.conversions.mountingBearing
                 )
@@ -219,7 +209,7 @@ suspend fun Subsystems.visionAim() {
             }
 
             launch {
-                turret.fieldOrientedPosition(
+                turret.fieldOrientedAngle(
                     drivetrain,
                     turretPosition - reading2.tx + limelight.hardware.conversions.mountingBearing
                 )
@@ -229,7 +219,8 @@ suspend fun Subsystems.visionAim() {
     }
 }
 
-suspend fun Subsystems.fire() = startChoreo("Fire") {
+suspend fun Subsystems.shootOne() = startChoreo("Shoot One") {
+    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
     choreography {
         val angle = carousel.state.shootAngle()
         if (angle == null) {
@@ -252,18 +243,22 @@ suspend fun Subsystems.fire() = startChoreo("Fire") {
     }
 }
 
-suspend fun Subsystems.fireAll() = startChoreo("Fire") {
+suspend fun Subsystems.shootAll() = startChoreo("Shoot All") {
     choreography {
-        carousel.set(carousel.fireAllDutycycle)
+        launch { carousel.set(carousel.fireAllDutycycle) }
+        while (isActive) {
+            flywheel?.delayUntilBall()
+            log(Debug) { "Ball shot" }
+            carousel.state.pop()
+        }
     }
 }
 
-suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState) {
+suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState? = null) {
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to spin up shooter" }
         freeze()
     } else startChoreo("Spin Up Shooter") {
-
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
@@ -277,36 +272,16 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 launch { flywheel.set(flywheelTarget) }
                 launch { feederRoller.set(feederRoller.feedSpeed) }
 
-                fun feederCheck() = feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-                fun flywheelCheck() = flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-
-                log(Debug) { "Waiting for feeder roller to get up to speed" }
-                withTimeout(5.Second) {
-                    delayUntil(predicate = ::feederCheck)
-                } ?: log(Error) {
-                    "Feeder roller never got up to speed (target = ${
-                        feederRoller.feedSpeed.Rpm withDecimals 0
-                    } RPM, current = ${
-                        feederSpeed.Rpm withDecimals 0
-                    })"
-                }
-
-                log(Debug) { "Waiting for flywheel to get up to speed" }
-                withTimeout(5.Second) {
-                    delayUntil(predicate = ::flywheelCheck)
-                } ?: log(Error) {
-                    "Flywheel never got up to speed (target = ${
-                        flywheelTarget.Rpm withDecimals 0
-                    } RPM, current = ${
-                        flywheelSpeed.Rpm withDecimals 0
-                    })"
-                }
+                delayUntilFeederAndFlywheel(flywheelTarget)
 
                 log(Debug) { "Feeder roller and flywheel set" }
-                launch { shooterHood?.set(hoodTarget) }
+                hoodTarget?.let {
+                    launch { shooterHood?.set(it) }
+                }
 
                 runWhenever({
-                    feederCheck() && flywheelCheck()
+                    feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+                            && flywheelSpeed in flywheelTarget `±` flywheel.tolerance
                 } to choreography {
                     scope.launch {
                         withTimeout(.5.Second) {
@@ -317,29 +292,5 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
                 })
             }
         }
-    }
-}
-
-suspend fun Subsystems.unjam() = startChoreo("Unjam") {
-
-    val carouselPosition by carousel.hardware.position.readEagerly().withoutStamps
-
-    choreography {
-        val period = 1.Second
-        val delay = 1.Second
-
-        val initPosition = carouselPosition
-        val initDirection = carousel.hardware.esc.appliedOutput.sign
-
-        runWhile({
-            carouselPosition in initPosition `±` 1.CarouselSlot
-        }, {
-            withTimeout(period) { carousel.set(100.Percent * -initDirection) }
-            delay(delay)
-            withTimeout(period) { carousel.set(50.Percent * initDirection) }
-            delay(delay)
-        })
-
-        rumble.set(TwoSided(0.Percent, 100.Percent))
     }
 }

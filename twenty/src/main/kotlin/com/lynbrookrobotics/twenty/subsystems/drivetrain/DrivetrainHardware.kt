@@ -93,9 +93,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         !it.isCalibrating
     }/*.verify("NavX magnetometer should be calibrated") {
         it.isMagnetometerCalibrated
-    }*/.verify("NavX should be configured to update at 200hz") {
+    }*//*.verify("NavX should be configured to update at 200hz") {
         it.actualUpdateRate == 200
-    }/*.verify("RoboRIO should receive NavX updates at 200hz") {
+    }*//*.verify("RoboRIO should receive NavX updates at 200hz") {
         val desiredUpdates = 10
         val startingIndex = it.updateCount
         blockingDelay(desiredUpdates.Each / 200.Hertz * 1.1)
@@ -104,7 +104,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.rate.DegreePerSecond in `±`(driftTolerance)
     }
 
-    private val odometryTicker = ticker(Priority.RealTime, 5.milli(Second), "Odometry")
+    private val odometryTicker = ticker(Priority.RealTime, 10.milli(Second), "Odometry")
 
     private val escNamed = Named("ESC Odometry", this)
     override val position = sensor {

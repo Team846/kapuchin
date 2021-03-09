@@ -7,8 +7,9 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.*
-import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.*
+import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.BottomTrigger
+import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.Trigger
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
@@ -51,15 +52,15 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     val station by hardw { DriverStation.getInstance() }
 
-    val stick by hardw { Joystick(0) }.verify("the driver joystick is connected") {
+    private val stick by hardw { Joystick(0) }.verify("the driver joystick is connected") {
         it.name == "T.16000M"
     }
 
-    val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
+    private val wheel by hardw { Joystick(2) }.verify("the driver wheel is connected") {
         it.name == "FGT Rumble 3-in-1"
     }
 
-    val absoluteWheel by hardw { Joystick(3) }.verify("the absolute wheel is connected") {
+    private val absoluteWheel by hardw { Joystick(3) }.verify("the absolute wheel is connected") {
         it.name == "Kunals Absolute Steering Wheel"
     }
 

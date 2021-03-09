@@ -1,14 +1,11 @@
 package com.lynbrookrobotics.twenty
 
-import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.choreos.journalPath
-import com.lynbrookrobotics.twenty.routines.followTrajectory
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
@@ -16,7 +13,6 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.io.File
 import kotlin.system.measureTimeMillis
 
 
@@ -42,52 +38,31 @@ class FunkyRobot : RobotBase() {
 
         scope.launch {
             runWhenever(
-                { isEnabled && isOperatorControl } to choreography {
+                { isEnabled && isOperatorControl } to {
                     System.gc()
+                    HAL.observeUserProgramTeleop()
+
                     subsystems.teleop()
-                },
-                { isEnabled && isAutonomous } to choreography {
-                    System.gc()
-
-                    with(subsystems.drivetrain) {
-                        val traj = File("/home/lvuser/Slalom_Path.tsv")
-                            .bufferedReader()
-                            .lineSequence()
-                            .drop(1)
-                            .map { it.split('\t') }
-                            .map { it.map { tkn -> tkn.trim() } }
-                            .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
-                            .toList()
-                            .let {
-                                pathToTrajectory(
-                                    it,
-                                    maxSpeed * speedFactor,
-                                    percentMaxOmega * maxOmega * speedFactor,
-                                    maxAcceleration
-                                )
-                            }
-
-                        val time = measureTimeMillis {
-                            followTrajectory(
-                                traj,
-                                maxExtrapolate = maxExtrapolate,
-                                safetyTolerance = 3.Foot,
-                                reverse = false,
-                            )
-                        }.milli(Second)
-                        log(Debug) { "Trajectroy finished: ${time.Second}s" }
-                    }
-
                     freeze()
                 },
-                { isDisabled && !isTest } to choreography {
-                    subsystems.warmup()
-                },
-                { isTest } to choreography {
+                { isEnabled && isAutonomous } to {
                     System.gc()
+                    HAL.observeUserProgramAutonomous()
+
+                    subsystems.auto()
+                    freeze()
+                },
+                { isTest } to {
+                    System.gc()
+
                     launch { subsystems.journalPath() }
                     subsystems.teleop()
-                }
+                    freeze()
+                },
+                { isDisabled && !isTest } to {
+                    subsystems.warmup()
+                    freeze()
+                },
             )
         }
 
