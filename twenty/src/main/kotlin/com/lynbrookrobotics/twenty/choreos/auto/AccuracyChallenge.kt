@@ -64,7 +64,7 @@ suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, Z
             // Spin up the flywheel and feeder roller
             launch { flywheel.set(zoneTarget.second) }
             launch { feederRoller.set(feederRoller.feedSpeed) }
-            launch { shooterHood?.set(Up) }
+            launch { shooterHood?.set(Down) }
             delay(0.5.Second)
             launch { carousel.set(carousel.fireAllDutycycle) }
 
