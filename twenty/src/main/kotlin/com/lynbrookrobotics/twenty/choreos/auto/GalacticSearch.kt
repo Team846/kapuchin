@@ -1,5 +1,4 @@
 package com.lynbrookrobotics.twenty.choreos.auto
-package com.lynbrookrobotics.twenty.choreos
 
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.twenty.*
@@ -52,30 +51,32 @@ private fun getPathToRun(): Int{
  */
 suspend fun Subsystems.galacticSearch(){
     val speedFactor = 40.Percent
-    val pathName = ""
-    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
+    var pathName = ""
+    //val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     startChoreo("Galactic Search"){
+        choreography {
 
-        carousel.rezero()
-        val intakeJob = launch { intakeBalls() }
-        if(getPathToRun == 1) pathName = "red"
-        else pathName = "blue"
+            carousel.rezero()
+            val intakeJob = launch { intakeBalls() }
+            if (getPathToRun() == 1) pathName = "red"
+            else pathName = "blue"
 
-        val path = loadRobotPath(pathName)
-        if (path == null) {
-            log(Error) { "Unable to find $pathName" }
+            val path = loadRobotPath(pathName)
+            if (path == null) {
+                log(Error) { "Unable to find $pathName" }
+            }
+
+            path?.let {
+                drivetrain.followTrajectory(
+                    fastAsFuckPath(it, speedFactor),
+                    maxExtrapolate = drivetrain.maxExtrapolate,
+                    reverse = true
+                )
+            }
+
+            intakeJob.cancel()
         }
-
-        path?.let {
-            drivetrain.followTrajectory(
-                fastAsFuckPath(it, speedFactor),
-                maxExtrapolate = drivetrain.maxExtrapolate,
-                reverse = true
-            )
-        }
-
-        intakeJob.cancel()
 
     }
     //High level function for path
