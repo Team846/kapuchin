@@ -43,12 +43,15 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val rt get() = xbox.getTriggerAxis(kRight) > triggerPressure.Each
     private val lb get() = xbox.getBumper(kLeft)
     private val rb get() = xbox.getBumper(kRight)
+    private val rsb get() = xbox.getStickButton(kRight)
 
     val aim = s { lt }
     val hoodUp = s { lb }
     val shoot = s { rt }
 
     val shooterPreset = s { xbox.aButton }
+
+    val accuracyChallenge = s { rsb }
 
     val ball0 = s { rb }
     val ball1 = s { xbox.xButton }

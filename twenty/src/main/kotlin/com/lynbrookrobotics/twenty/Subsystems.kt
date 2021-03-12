@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.choreos.auto.accuracyChallenge
 import com.lynbrookrobotics.twenty.choreos.auto.judgedAuto
 import com.lynbrookrobotics.twenty.choreos.auto.timePath
 import com.lynbrookrobotics.twenty.choreos.auto.timeTrajectory
@@ -84,6 +85,7 @@ class Subsystems(
         Subsystems::timePath,
         Subsystems::timeTrajectory,
         Subsystems::judgedAuto,
+        Subsystems::accuracyChallenge,
     )
 
     private val autoIdGraph = graph("Auto ID", Each)

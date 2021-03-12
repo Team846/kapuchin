@@ -33,8 +33,7 @@ suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, z
     } else startChoreo("Finish Each Zone") {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val turretPos by turret!!.hardware.position.readEagerly().withoutStamps
-        // TODO: Replace with another button
-        val ball0 by operator.ball0.readEagerly().withoutStamps
+        val accuracyChallenge by operator.accuracyChallenge.readEagerly().withoutStamps
 
         choreography {
             // Keep the intake out as long as balls < 3
@@ -44,7 +43,6 @@ suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, z
             val firstPathName = zone.first
             val firstPath = loadRobotPath(firstPathName)
             if (firstPath == null) {
-
                 // Doesn't run the initial "drive to zone"
                 if (firstPathName === "undefined") {
                     log(Debug) { "Initial Green Zone ... Skipping driving to zone"}
@@ -64,7 +62,7 @@ suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, z
             turret!!.set(turretPos - reading!!.tx.also { println(it) })
 
             // Wait to shoot until confirmation
-            delayUntil { ball0 }
+            delayUntil { accuracyChallenge }
 
             // Set carousel initial
             val initialAngle = carousel.state.shootInitialAngle()
@@ -124,8 +122,7 @@ suspend fun Subsystems.accuracyChallenge() {
         log(Error) { "Need flywheel and feeder to run" }
         freeze()
     } else startChoreo("Accuracy Challenge") {
-        // TODO: Replace with another button
-        val ball0 by operator.ball0.readEagerly().withoutStamps
+        val accuracyChallenge by operator.accuracyChallenge.readEagerly().withoutStamps
 
         choreography {
             // Reindex carousel
@@ -133,15 +130,14 @@ suspend fun Subsystems.accuracyChallenge() {
 
             // Shoot balls + drive back and forth for each zone (green + yellow + blue + red + red)
             launch { zoneMoveThenShoot(flywheel.greenZone, greenPathWithoutStartDrive, Down) }
-            delayUntil { ball0 }
+            delayUntil { accuracyChallenge }
             launch { zoneMoveThenShoot(flywheel.yellowZone, yellowPaths) }
-            delayUntil { ball0 }
+            delayUntil { accuracyChallenge }
             launch { zoneMoveThenShoot(flywheel.blueZone, bluePaths) }
-            delayUntil { ball0 }
+            delayUntil { accuracyChallenge }
             launch { zoneMoveThenShoot(flywheel.redZone, redPaths) }
-            delayUntil { ball0 }
+            delayUntil { accuracyChallenge }
             launch { zoneMoveThenShoot(flywheel.redZone, redPaths) }
-            delayUntil { ball0 }
         }
     }
 }
