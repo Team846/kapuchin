@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import edu.wpi.first.wpilibj.Threads
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -35,17 +35,17 @@ actual class PlatformThread internal actual constructor(
         val formattedName = "${parent.name} $name Thread"
         thread = parent.run {
             thread(name = formattedName, priority = jvmPriority) {
-                log(Debug) { "Starting $formattedName" }
+                log(INFO) { "Starting $formattedName" }
 
                 Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
-                    log(Error, e) { "$e thrown from $formattedName" }
+                    logStackTrace(e) { "$e thrown from $formattedName" }
                 }
 
                 Threads.setCurrentThreadPriority(priority == Priority.RealTime, roboRioPriority)
 
                 run()
 
-                log(Debug) { "$formattedName Exiting" }
+                log(INFO) { "$formattedName Exiting" }
             }
         }
     }
@@ -63,7 +63,7 @@ private val pool = Executors.newFixedThreadPool(4) {
 actual val scope = CoroutineScope(pool.asCoroutineDispatcher() +
         CoroutineName("Kapuchin Coroutine Scope") +
         CoroutineExceptionHandler { _, throwable: Throwable ->
-            coroutineNamed.log(Level.Error, throwable) { "Exception thrown from coroutine" }
+            coroutineNamed.logStackTrace(throwable) { "Exception thrown from coroutine" } }
         }
 )
 

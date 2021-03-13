@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin.hardware
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import kotlin.properties.ReadOnlyProperty
@@ -33,7 +33,7 @@ class HardwareInit<Hardw> internal constructor(
     override fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, Hardw> =
         Named(prop.name + nameSuffix, parent).run {
             try {
-                log(Debug) { "Initializing" }
+                log(DEBUG) { "Initializing" }
                 val value = initialize()
                     .also { configure(it) }
                     .also {
@@ -46,7 +46,7 @@ class HardwareInit<Hardw> internal constructor(
                 }
 
             } catch (t: Throwable) {
-                log(Error, t) { "Error during creation.\nMessage: ${t.message}\nCause: ${t.cause}" }
+                logStackTrace(t) { "Error during creation.\nMessage: ${t.message}\nCause: ${t.cause}" }
                 alternative?.provideDelegate(thisRef, prop) ?: throw t
             }
         }
@@ -70,7 +70,7 @@ class HardwareInit<Hardw> internal constructor(
      */
     fun verify(that: String, f: Named.(Hardw) -> Boolean) = HardwareInit(
         parent, initialize, configure,
-        { validate(it) && f(it).also { if (!it) log(Error) { that } } },
+        { validate(it) && f(it).also { if (!it) log(ERROR) { that } } },
         alternative, nameSuffix
     )
 

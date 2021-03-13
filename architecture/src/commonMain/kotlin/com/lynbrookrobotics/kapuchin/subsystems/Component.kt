@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -70,7 +70,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
         val sensorScope = BoundSensorScope(this)
         var routine: Routine<This, H, Output>? = null
         try {
-            routine?.log(Debug) { "Starting" }
+            routine?.log(INFO) { "Starting" }
             val controller = sensorScope.run(setup)
             suspendCancellableCoroutine<Unit> { cont ->
                 Routine(thisAsThis, name, controller, cont).also {
@@ -78,12 +78,12 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
                     this.routine = it
                 }
             }
-            routine?.log(Debug) { "Completed" }
+            routine?.log(INFO) { "Completed" }
         } catch (c: CancellationException) {
-            routine?.log(Debug) { "Cancelled" }
+            routine?.log(INFO) { "Cancelled" }
             throw c
         } catch (t: Throwable) {
-            routine?.log(Error, t)
+            routine?.log(ERROR, t)
         } finally {
             sensorScope.close()
         }
@@ -116,7 +116,7 @@ abstract class Component<This, H, Output>(val hardware: H, customClock: Clock? =
                     .invoke(thisAsThis, tickStart)
                     .let { hardware.output(it) }
             } catch (t: Throwable) {
-                routine?.resumeWithException(t) ?: log(Error, t)
+                routine?.resumeWithException(t) ?: log(ERROR, t)
             }
         }
     }

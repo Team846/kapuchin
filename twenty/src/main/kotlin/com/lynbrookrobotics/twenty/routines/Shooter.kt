@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.twenty.Field.innerGoalDepth
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
@@ -85,7 +85,7 @@ suspend fun TurretComponent.trackTarget(
                 hardware.escConfig, positionGains, hardware.conversions.encoder.native(target)
             ).takeUnless { (snapshot.tx + limelight.hardware.conversions.mountingBearing).abs < tolerance ?: -1.Degree }
         } ?: run {
-            log(Debug) { "Lost sight of target!" }
+            log(WARN) { "Lost sight of target!" }
             null
         }
     }

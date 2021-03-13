@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.control.electrical
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import info.kunalsheth.units.generated.*
 
 /**
@@ -16,7 +16,7 @@ import info.kunalsheth.units.generated.*
  * @return duty cycle
  */
 fun Named.voltageToDutyCycle(target: V, vBat: V, logLowVoltage: Boolean = false): Dimensionless {
-    if (target > vBat && logLowVoltage) log(Warning) {
+    if (target > vBat && logLowVoltage) log(WARN) {
         "${target withDecimals 1} target cannot be reached with a ${vBat withDecimals 1} battery."
     }
     return target / vBat

@@ -1,9 +1,7 @@
-@file:Suppress("EXPERIMENTAL_UNSIGNED_LITERALS")
-
 package com.lynbrookrobotics.kapuchin.timing.clock
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import edu.wpi.first.hal.NotifierJNI
@@ -61,8 +59,8 @@ actual class Ticker internal actual constructor(
             totalRuns++
             if (computeTime > period) overruns++
             if (overruns * 100u / totalRuns > overrunFrequencyThreshold.Percent.toUInt()) {
-                log(Error) {
-                    "more than ${overrunFrequencyThreshold.Percent withDecimals 0}% of loops overrun"
+                log(ERROR) {
+                    "More than ${overrunFrequencyThreshold.Percent withDecimals 0}% of loops overrun"
                 }
                 overruns = 0uL
                 totalRuns = 0uL
@@ -70,8 +68,8 @@ actual class Ticker internal actual constructor(
 
             if (computeTime > period + overrunLogThreshold) {
                 val computeTimeCopy = computeTime
-                log(Warning) {
-                    "overran ${period withDecimals 4} loop by ${(computeTimeCopy - period) withDecimals 4}"
+                log(WARN) {
+                    "Overran ${period withDecimals 4} loop by ${(computeTimeCopy - period) withDecimals 4}"
                 }
             }
         }

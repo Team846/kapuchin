@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin.timing.monitoring
 
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.clock.Clock.ExecutionOrder.*
@@ -38,14 +38,14 @@ class RealtimeChecker private constructor(
 
         val memoryUsage = EventLoop.runOnTick { loopStart ->
             val usage = usedMemory.Each / maxMemory
-            if (usage > 80.Percent) log(Warning) { "RAM usage ≥ 80%. (Using $usedMemory of $maxMemory bytes)" }
+            if (usage > 80.Percent) log(WARN) { "RAM usage ≥ 80%. (Using $usedMemory of $maxMemory bytes)" }
 
             val deriv = deriv(loopStart, usage)
 
             memoryUsageGraph(loopStart, usage)
             garbageProductionGraph(loopStart, deriv)
 
-            if (logGc && deriv.isNegative) log(Debug) { "Collected Garbage" }
+            if (logGc && deriv.isNegative) log(DEBUG) { "Collected Garbage" }
         }
 
         fun Ticker.realtimeChecker(setJitterPin: (Boolean) -> Unit, getPeriod: () -> Time) =

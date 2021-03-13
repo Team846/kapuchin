@@ -3,7 +3,7 @@ package com.lynbrookrobotics.kapuchin.control.math.drivetrain
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -124,16 +124,16 @@ class TrajectoryFollower(
 
     private fun finish() {
         done = true
-        drivetrain.log(Debug) { "*****Finished Trajectory*****" }
+        drivetrain.log(INFO) { "*****Finished Trajectory*****" }
 
         if (errors.size == 0) {
-            drivetrain.log(Error) { "No error data points" }
+            drivetrain.log(ERROR) { "No error data points" }
             return
         }
 
         val avg = errors.sumOf { it.Inch }.Inch / errors.size
         val max = errors.maxByOrNull { it.Inch }!!
-        drivetrain.log(Debug) { "Avg error: ${avg.Inch} in | Max error: ${max.Inch} in" }
+        drivetrain.log(INFO) { "Avg error: ${avg.Inch} in | Max error: ${max.Inch} in" }
     }
 
     /**
@@ -150,13 +150,13 @@ class TrajectoryFollower(
                 finish()
             } else {
                 firstPoint = false
-                drivetrain.log(Debug) { "Hit Waypoint" }
+                drivetrain.log(DEBUG) { "Hit Waypoint" }
 
                 // Check error
-                drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
+                drivetrain.log(DEBUG) { "Error: ${error.Inch withDecimals 2} in" }
                 if (error > safetyTolerance) {
-                    drivetrain.log(Error) { "*****ABORTING TRAJECTORY*****" }
-                    drivetrain.log(Error) { "Error (${error.Inch} in) exceeds safety tolerance (${safetyTolerance.Inch} in)" }
+                    drivetrain.log(ERROR) { "*****ABORTING TRAJECTORY*****" }
+                    drivetrain.log(ERROR) { "Error (${error.Inch} in) exceeds safety tolerance (${safetyTolerance.Inch} in)" }
                     finish()
                 }
 

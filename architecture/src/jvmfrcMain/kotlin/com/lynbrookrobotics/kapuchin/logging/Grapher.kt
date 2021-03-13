@@ -9,12 +9,6 @@ import java.io.Closeable
 import java.io.File
 import java.io.Flushable
 
-actual fun printAtLevel(level: Level, formattedMessage: String) = when (level) {
-    Level.Error -> println("ERROR $formattedMessage")
-    Level.Warning -> println("WARNING $formattedMessage")
-    Level.Debug -> println("DEBUG $formattedMessage")
-}
-
 actual class Grapher<Q : Quan<Q>> internal actual constructor(
     parent: Named,
     of: String,
@@ -48,10 +42,3 @@ actual class Grapher<Q : Quan<Q>> internal actual constructor(
         val graphToDashboard by pref(true)
     }
 }
-
-actual val stackTraceLimit = 5
-actual typealias StackTraceElement = java.lang.StackTraceElement
-
-actual val Throwable.platformStackTrace: Array<StackTraceElement> get() = stackTrace
-
-actual fun nameLayer(parent: Named?, child: String): String = "${parent?.name?.plus('/') ?: ""}$child"

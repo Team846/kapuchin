@@ -3,7 +3,7 @@ package com.lynbrookrobotics.twenty.routines
 import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.subsystems.*
 import com.lynbrookrobotics.twenty.subsystems.controlpanel.*
@@ -35,7 +35,7 @@ suspend fun ControlPanelSpinnerComponent.spinStage2(electrical: ElectricalSystem
         val lastColorIndexCopy = lastColorIndex
 
         if (lastColorIndexCopy == null || colorIndex == null) {
-            log(Warning) {
+            log(WARN) {
                 "Could not read control panel colors\n" +
                         "lastColorIndex == ${lastColorIndex}\n" +
                         "color == ${color.y.red withDecimals 2} R, ${color.y.green withDecimals 2} G, ${color.y.blue withDecimals 2} B\n" +

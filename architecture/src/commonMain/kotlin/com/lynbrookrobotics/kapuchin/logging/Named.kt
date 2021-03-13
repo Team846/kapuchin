@@ -43,4 +43,6 @@ interface Named {
  * @param child object to generate full-length name for
  * @return full-length name
  */
-expect fun nameLayer(parent: Named?, child: String): String
+fun nameLayer(parent: Named?, child: String): String = "${parent?.name?.plus('/') ?: ""}$child"
+
+object GlobalNamed : Named by Named("")

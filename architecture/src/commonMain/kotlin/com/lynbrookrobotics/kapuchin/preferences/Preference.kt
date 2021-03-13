@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.preferences
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
@@ -119,7 +120,7 @@ open class Preference<Value>(
         name = nameLayer(parent, prop.name + prefNameSuffix)
 
         if (!contains(name)) {
-            log(Level.Warning) { "initializing to fallback $fallback" }
+            log(WARN) { "Initializing to fallback $fallback" }
             init(name, fallback)
             value = fallback
         }
@@ -137,7 +138,7 @@ open class Preference<Value>(
      * @author Andy
      */
     override operator fun invoke() {
-        log(Level.Debug) { "updated value" }
+        log(DEBUG) { "Updated value" }
         value = get(name, fallback)
 
         //If the Preference is in a PreferenceLayer, update the parent too

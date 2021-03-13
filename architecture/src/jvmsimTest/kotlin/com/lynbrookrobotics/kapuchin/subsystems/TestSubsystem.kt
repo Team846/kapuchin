@@ -2,6 +2,7 @@ package com.lynbrookrobotics.kapuchin.subsystems
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
@@ -21,7 +22,7 @@ abstract class TC<This, H>(hardware: H, customClock: Clock? = null) : Component<
         count++
         if (value != fallbackOutput) {
             out += value
-            log(Level.Debug) { "$name output #$count @ ${currentTime withDecimals 2} by ${Thread.currentThread().name} thread = $value" }
+            log(DEBUG) { "$name output #$count @ ${currentTime withDecimals 2} by ${Thread.currentThread().name} thread = $value" }
         }
     }
 

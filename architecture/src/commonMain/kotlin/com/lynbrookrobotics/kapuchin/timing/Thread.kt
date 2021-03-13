@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.kapuchin.timing
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.CoroutineScope
 
@@ -50,7 +49,6 @@ fun Named.blockUntil(
     f: () -> Boolean
 ): Boolean {
     if (!f()) {
-        log(Debug) { "Waiting for predicated to return true..." }
         val startTime = currentTime
         while (!f() && currentTime - startTime < timeout) blockingDelay(poll)
     }

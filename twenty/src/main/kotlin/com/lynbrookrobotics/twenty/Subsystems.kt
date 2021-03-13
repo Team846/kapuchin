@@ -2,7 +2,7 @@ package com.lynbrookrobotics.twenty
 
 import com.lynbrookrobotics.kapuchin.hardware.HardwareInit.Companion.crashOnFailure
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -92,8 +92,8 @@ class Subsystems(
     private val autoId
         get() = SmartDashboard.getEntry("DB/Slider 0").getDouble(-1.0).roundToInt().also {
             if (it != prevAutoId) {
-                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
-                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
+                if (it in autos.indices) log(INFO) { "Selected auto ${autos[it].name}" }
+                else log(ERROR) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
                 prevAutoId = it
             }
         }
@@ -119,8 +119,8 @@ class Subsystems(
 
     suspend fun auto() {
         when (autoId) {
-            -1 -> log(Error) { "DB Slider 0 is set to -1, running wall auto" }
-            !in autos.indices -> log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
+            -1 -> log(ERROR) { "DB Slider 0 is set to -1, running wall auto" }
+            !in autos.indices -> log(ERROR) { "$autoId isn't an auto!! you fucked up!!!" }
             else -> autos[autoId].invoke(this@Subsystems)
         }
     }
@@ -150,7 +150,7 @@ class Subsystems(
 
         init {
             if (isCorrupted) {
-                log(Error) { "The config seems to be corrupted. Attempting restoration." }
+                log(ERROR) { "The config seems to be corrupted. Attempting restoration." }
                 NetworkTableInstance.getDefault().stopServer()
 
                 val ntPath = "/home/lvuser/networktables.ini"
@@ -187,7 +187,7 @@ class Subsystems(
         val SubsystemHardware<*, *>.sharedTickerTiming
             get() = object : ReadOnlyProperty<SubsystemHardware<*, *>, Time> {
                 override fun getValue(thisRef: SubsystemHardware<*, *>, property: KProperty<*>): Time {
-                    thisRef.log(Error) { "Subsystem should use shared ticker values!" }
+                    thisRef.log(ERROR) { "Subsystem should use shared ticker values!" }
                     return 20.milli(Second)
                 }
             }

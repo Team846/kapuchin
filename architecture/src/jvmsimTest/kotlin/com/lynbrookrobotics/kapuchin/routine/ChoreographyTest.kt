@@ -2,7 +2,7 @@ package com.lynbrookrobotics.kapuchin.routine
 
 import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -18,7 +18,7 @@ class ChoreographyTest {
     private class ChoreographyTestC : TC<ChoreographyTestC, ChoreographyTestSH>(ChoreographyTestSH())
 
     private suspend fun ChoreographyTestC.countTo(n: Int) = startRoutine("count to $n") {
-        log(Debug) { "Starting countTo($n)" }
+        log(INFO) { "Starting countTo($n)" }
         var counter = 0
         controller {
             "countTo($n)".takeIf { counter++ < n }

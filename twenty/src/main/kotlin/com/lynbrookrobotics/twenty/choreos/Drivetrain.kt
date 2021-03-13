@@ -5,7 +5,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode.Coast
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.*
@@ -63,7 +63,7 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
 
             scope.launch {
                 ProcessBuilder("sync").directory(File(logDir)).inheritIO().start().waitFor(5, TimeUnit.SECONDS)
-                log(Debug) { "Done syncing $logDir." }
+                log(DEBUG) { "Done syncing $logDir." }
             }
             drivetrainEscs.forEach { it.setNeutralMode(Brake) }
         }

@@ -2,7 +2,7 @@ package com.lynbrookrobotics.twenty.subsystems.limelight
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.ZoomInPanHigh
 import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.ZoomInPanLow
@@ -65,7 +65,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         val x = tan(tx + mountingBearing) * targetDistance
         val pos = Position(x, targetDistance, skew)
 
-        log(Debug) { "Goal position: ${targetDistance.Foot}" }
+        log(DEBUG) { "Goal position: ${targetDistance.Foot}" }
         return pos
     }
 

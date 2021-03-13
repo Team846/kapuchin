@@ -41,6 +41,6 @@ private val pool = Executors.newFixedThreadPool(4) {
 actual val scope = CoroutineScope(pool.asCoroutineDispatcher() +
         CoroutineName("Kapuchin Coroutine Scope") +
         CoroutineExceptionHandler { _, throwable: Throwable ->
-            coroutineNamed.log(Level.Error, throwable) { "Exception thrown from coroutine" }
+            coroutineNamed.logStackTrace(throwable) { "Exception thrown from coroutine" }
         }
 )

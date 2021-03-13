@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import info.kunalsheth.units.generated.*
@@ -62,11 +63,11 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     val tracking = CircularArcTracking(Position(0.Foot, 0.Foot, 0.Degree))
 
     fun odometry(totalLeft: Length, totalRight: Length, bearing: Angle) {
-        if (noTicksL && totalLeft != 0.Foot) log(Level.Debug) {
+        if (noTicksL && totalLeft != 0.Foot) log(DEBUG) {
             "Received first left tick at ${currentTime withDecimals 2}"
         }.also { noTicksL = false }
 
-        if (noTicksR && totalRight != 0.Foot) log(Level.Debug) {
+        if (noTicksR && totalRight != 0.Foot) log(DEBUG) {
             "Received first right tick at ${currentTime withDecimals 2}"
         }.also { noTicksR = false }
 

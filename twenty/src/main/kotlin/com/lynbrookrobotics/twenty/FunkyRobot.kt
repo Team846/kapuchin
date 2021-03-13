@@ -1,6 +1,7 @@
 package com.lynbrookrobotics.twenty
 
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -17,23 +18,23 @@ import kotlin.system.measureTimeMillis
 
 
 fun main() {
+    defaultRobotLogger
     printBuildInfo()
     RobotBase.startRobot(::FunkyRobot)
 }
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-        println("Initializing hardware...")
+        GlobalNamed.log(INFO) { "Initializing hardware..." }
 
         Compressor()
         Field // Initialize preferences
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
-        println("Printing key list to `keylist.txt`...")
         printKeys()
 
-        println("Loading classes...")
+        GlobalNamed.log(INFO) { "Loading classes..." }
         runBlocking { withTimeout(5.Second) { classPreloading.join() } }
 
         scope.launch {
@@ -70,7 +71,7 @@ class FunkyRobot : RobotBase() {
         HAL.observeUserProgramStarting()
 
         val eventLoopPeriod = 20.milli(Second)
-        println("Starting event loop...")
+        GlobalNamed.log(INFO) { "Starting event loop..." }
         while (true) {
             Thread.yield()
             m_ds.waitForData(eventLoopPeriod.Second)
@@ -80,17 +81,17 @@ class FunkyRobot : RobotBase() {
             }.milli(Second)
 
             if (eventLoopTime > eventLoopPeriod * 5)
-                println("Overran event loop by ${(eventLoopTime - eventLoopPeriod) withDecimals 3}")
+                GlobalNamed.log(WARN) { "Overran event loop by ${(eventLoopTime - eventLoopPeriod) withDecimals 3}" }
         }
     }
 
     override fun endCompetition() {
-        println("Rohan has fallen")
+        GlobalNamed.log(ERROR) { "Rohan has fallen" }
+        runBlocking { EventLogger.flushAll() }
     }
 }
 
 val classPreloading = scope.launch {
-    println("Loading classes...")
     val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
     Thread.currentThread()
         .contextClassLoader
@@ -110,8 +111,6 @@ val classPreloading = scope.launch {
 }
 
 private fun printBuildInfo() {
-    println("BUILD INFO:")
-
     arrayOf("User", "DateTime", "GitBranch", "GitHash", "GitHasUncommited").forEach {
         val fileContents = Thread.currentThread()
             .contextClassLoader
@@ -119,6 +118,6 @@ private fun printBuildInfo() {
             ?.bufferedReader()
             ?.readText() ?: "Unknown"
 
-        println("\t$it: $fileContents")
+        GlobalNamed.log(INFO) { "$it: $fileContents" }
     }
 }

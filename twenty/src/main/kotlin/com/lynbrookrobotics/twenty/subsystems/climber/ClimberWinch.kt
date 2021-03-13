@@ -3,7 +3,7 @@ package com.lynbrookrobotics.twenty.subsystems.climber
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -45,7 +45,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
             ) {
                 chodeSolenoid.set(erect)
                 lastErection = currentTime
-            } else log(Warning) {
+            } else log(WARN) {
                 "Cannot brake while \n" +
                         "currentTime - lastWinch == ${currentTime - lastWinchRun withDecimals 2}\n" +
                         "masterEsc.appliedOutput == ${masterEsc.appliedOutput withDecimals 2}\n" +
@@ -58,7 +58,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
             if (currentTime - lastErection >= chodeDelaySafety && chodeSolenoid.get() != erect) {
                 value.esc.writeTo(masterEsc, pidController)
                 lastWinchRun = currentTime
-            } else log(Warning) {
+            } else log(WARN) {
                 "Cannot run while \n" +
                         "currentTime - lastErection == ${currentTime - lastErection withDecimals 2}\n" +
                         "chodeSolenoid.get() == erect"

@@ -2,7 +2,7 @@ package com.lynbrookrobotics.twenty.choreos
 
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
@@ -35,11 +35,11 @@ suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball")
             val percentSpeed = (speed.y - initialSpeed) / initialSpeed
 
             val accelerating = percentSpeed > lastPercentSpeed
-            if (acceleration > lastAcceleration) log(Debug) {
+            if (acceleration > lastAcceleration) log(DEBUG) {
                 "Peak deceleration: ${lastAcceleration.RpmPerSecond withDecimals 2} RPM/sec"
             }
 
-            if (percentSpeed > lastPercentSpeed) log(Debug) {
+            if (percentSpeed > lastPercentSpeed) log(DEBUG) {
                 "Peak percent drop: ${lastPercentSpeed.Percent withDecimals 1}%"
             }
 
@@ -59,26 +59,26 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
     flywheelTarget: AngularVelocity,
 ) {
     if (flywheel == null || feederRoller == null) {
-        log(Error) { "Need flywheel and feeder to run." }
+        log(ERROR) { "Need flywheel and feeder to run." }
     } else startChoreo("Delay until feeder and flywheel") {
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-            log(Debug) { "Waiting for feeder roller to get up to speed" }
+            log(INFO) { "Waiting for feeder roller to get up to speed" }
             delayUntil {
                 feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
             }
-            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}" }
-            log(Debug) { "Feeder roller set" }
+            log(DEBUG) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}" }
+            log(INFO) { "Feeder roller set" }
 
-            log(Debug) { "Waiting for flywheel to get up to speed" }
+            log(INFO) { "Waiting for flywheel to get up to speed" }
             delayUntil {
                 flywheelSpeed in flywheelTarget `±` flywheel.tolerance
             }
-            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
-            log(Debug) { "Flywheel set" }
+            log(DEBUG) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
+            log(INFO) { "Flywheel set" }
         }
     }
 }

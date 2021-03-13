@@ -2,7 +2,7 @@ package com.lynbrookrobotics.twenty.choreos.auto
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.choreos.intakeBalls
@@ -28,8 +28,8 @@ suspend fun Subsystems.timePath() = startChoreo("Time Path") {
                         reverse = false,
                     )
                 }.milli(Second)
-                log(Debug) { "Path finished: ${time.Second}s" }
-            } ?: log(Error) { "Couldn't find path $name" }
+                log(INFO) { "Path finished: ${time.Second}s" }
+            } ?: log(ERROR) { "Couldn't find path $name" }
         }
     }
 }
@@ -46,8 +46,8 @@ suspend fun Subsystems.timeTrajectory() = startChoreo("Time Trajectory") {
                         reverse = false,
                     )
                 }.milli(Second)
-                log(Debug) { "Trajectory finished: ${time.Second}s" }
-            } ?: log(Error) { "Couldn't find trajectory $name" }
+                log(INFO) { "Trajectory finished: ${time.Second}s" }
+            } ?: log(ERROR) { "Couldn't find trajectory $name" }
         }
     }
 }
@@ -59,7 +59,7 @@ suspend fun Subsystems.judgedAuto() {
     val targetDist = 26.Foot
 
     if (flywheel == null || feederRoller == null) {
-        log(Error) { "Need flywheel and feeder to run auto." }
+        log(ERROR) { "Need flywheel and feeder to run auto." }
         freeze()
     } else startChoreo("Judged Auto") {
 
@@ -90,7 +90,7 @@ suspend fun Subsystems.judgedAuto() {
             // Follow path (if exists)
             val path = loadRobotPath(pathName)
             if (path == null) {
-                log(Error) { "Unable to find $pathName" }
+                log(ERROR) { "Unable to find $pathName" }
             }
 
             path?.let {
@@ -108,7 +108,7 @@ suspend fun Subsystems.judgedAuto() {
 
 //            // Precise aim with limelight
             j.cancel()
-            log(Debug) { "Field Oriented Cancelled" }
+            log(DEBUG) { "Field Oriented Cancelled" }
 
 
             coroutineContext.job.cancelChildren()
@@ -124,7 +124,7 @@ suspend fun Subsystems.judgedAuto() {
             if (initialAngle != null) {
                 carousel.set(initialAngle)
             } else {
-                log(Error) { "No balls to shoot" }
+                log(ERROR) { "No balls to shoot" }
                 coroutineContext.job.cancelChildren()
                 return@choreography
             }
@@ -137,12 +137,12 @@ suspend fun Subsystems.judgedAuto() {
 //            withTimeout(3.Second) {
 //                delayUntilFeederAndFlywheel(flywheelTarget)
 //            } ?: run {
-//                log(Error) { "Feeder flywheel not set" }
+//                log(ERROR) { "Feeder flywheel not set" }
 //                coroutineContext.job.cancelChildren()
 //                return@choreography
 //            }
 
-            log(Debug) { "Feeder roller and flywheel set, aim complete" }
+            log(INFO) { "Feeder roller and flywheel set, aim complete" }
             launch { shooterHood?.set(Up) }
             delay(0.5.Second)
             launch { carousel.set(carousel.fireAllDutycycle) }

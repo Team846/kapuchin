@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.twenty.subsystems
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
@@ -16,7 +16,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             choreography {
                 launch { freeze() }
                 launch { freeze() }
-                log(Debug) { "Reached the end choreo. Not touching the jobs" }
+                log(DEBUG) { "Reached the end choreo. Not touching the jobs" }
             }
         }
 
@@ -26,7 +26,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             complete = true
         }
 
-        log(Debug) { "Choreo is ${if (!complete) "not" else ""} complete. Should not be complete" }
+        log(DEBUG) { "Choreo is ${if (!complete) "not" else ""} complete. Should not be complete" }
         assert(!complete)
     }
 
@@ -37,7 +37,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             choreography {
                 launch { freeze() }
                 launch { freeze() }
-                log(Debug) { "Reached the end of choreo. returning@choreography" }
+                log(DEBUG) { "Reached the end of choreo. returning@choreography" }
 
                 return@choreography
             }
@@ -49,7 +49,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             complete = true
         }
 
-        log(Debug) { "Choreo is ${if (!complete) "not" else ""} complete. Should not be complete" }
+        log(DEBUG) { "Choreo is ${if (!complete) "not" else ""} complete. Should not be complete" }
         assert(!complete)
     }
 
@@ -61,11 +61,11 @@ class ChoreoTest : Named by Named("Choreo Test") {
                 try {
                     launch { freeze() }
                     launch { freeze() }
-                    log(Debug) { "Reached the end of choreo. Throwing cancellation exception and being wrapped in a try/catch." }
+                    log(DEBUG) { "Reached the end of choreo. Throwing cancellation exception and being wrapped in a try/catch." }
 
                     throw CancellationException()
                 } catch (c: CancellationException) {
-                    log(Debug) { "Caught cancellation" }
+                    log(DEBUG) { "Caught cancellation" }
                 }
             }
         }
@@ -76,7 +76,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             complete = true
         }
 
-        log(Debug) { "Choreo is ${if (!complete) "not" else ""} complete. Should not be complete" }
+        log(DEBUG) { "Choreo is ${if (!complete) "not" else ""} complete. Should not be complete" }
         assert(!complete)
     }
 
@@ -87,7 +87,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             choreography {
                 launch { freeze() }
                 launch { freeze() }
-                log(Debug) { "Reached the end of choreo. cancelling children" }
+                log(DEBUG) { "Reached the end of choreo. cancelling children" }
 
                 coroutineContext[Job]!!.cancelChildren()
             }
@@ -99,7 +99,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             complete = true
         }
 
-        log(Debug) { "Choreo is ${if (!complete) "not " else ""}complete. Should be complete" }
+        log(DEBUG) { "Choreo is ${if (!complete) "not " else ""}complete. Should be complete" }
         assert(complete)
     }
 
@@ -110,7 +110,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             choreography {
                 val j1 = launch { freeze() }
                 val j2 = launch { freeze() }
-                log(Debug) { "Reached the end of choreo. Explicity cancelling jobs" }
+                log(DEBUG) { "Reached the end of choreo. Explicity cancelling jobs" }
 
                 j1.cancel()
                 j2.cancel()
@@ -123,7 +123,7 @@ class ChoreoTest : Named by Named("Choreo Test") {
             complete = true
         }
 
-        log(Debug) { "Choreo is ${if (!complete) "not " else ""}complete. Should be complete" }
+        log(DEBUG) { "Choreo is ${if (!complete) "not " else ""}complete. Should be complete" }
         assert(complete)
     }
 

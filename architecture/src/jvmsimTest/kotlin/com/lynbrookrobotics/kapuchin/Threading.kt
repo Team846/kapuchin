@@ -8,7 +8,7 @@ fun threadDumpOnFailure(f: () -> Unit) {
             f()
         } catch (t: Throwable) {
             Thread.getAllStackTraces().forEach { (t, u) ->
-                log(Level.Error, u) { t.name }
+                logStackTrace(u) { t.name }
             }
             throw t
         }

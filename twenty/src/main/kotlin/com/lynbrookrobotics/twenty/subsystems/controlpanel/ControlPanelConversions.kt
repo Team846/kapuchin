@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.twenty.subsystems.controlpanel
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.revrobotics.ColorMatch
 import edu.wpi.first.wpilibj.util.Color
@@ -48,7 +48,7 @@ class ControlPanelConversions(hardware: ControlPanelSpinnerHardware) : Named by 
             positiveIndex -> 45.Degree
             negativeIndex -> -45.Degree
             else -> {
-                log(Error) {
+                log(ERROR) {
                     "Seem to have missed color transition.\n" +
                             "Transitioned from $lastIndex to $currentIndex"
                 }

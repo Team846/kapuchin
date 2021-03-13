@@ -4,7 +4,7 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -46,7 +46,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     choreography {
         if (turret != null && !turret.hardware.isZeroed) launch {
-            log(Debug) { "Rezeroing turret" }
+            log(INFO) { "Rezeroing turret" }
             turret.rezero(electrical)
         }
 
@@ -107,7 +107,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
         while (isActive) {
             val angle = carousel.state.intakeAngle()
             if (angle == null) {
-                log(Warning) { "I'm full. No open slots in carousel magazine." }
+                log(WARN) { "I'm full. No open slots in carousel magazine." }
 
                 launch { intakeSlider?.set(IntakeSliderState.In) }
                 launch { intakeRollers?.set(0.Percent) }
@@ -120,7 +120,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
                 launch { intakeRollers?.optimalEat(drivetrain, electrical) }
 
-                log(Debug) { "Waiting for a yummy mouthful of balls." }
+                log(INFO) { "Waiting for a yummy mouthful of balls." }
 
                 carousel.delayUntilBall()
                 carousel.state.push()
@@ -131,7 +131,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 
 suspend fun Subsystems.visionAimTurret() {
     if (turret == null) {
-        log(Error) { "Need turret for vision" }
+        log(ERROR) { "Need turret for vision" }
         freeze()
     } else startChoreo("Vision Aim Turret")
     {
@@ -139,7 +139,7 @@ suspend fun Subsystems.visionAimTurret() {
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            log(Debug) { "target ${(turretPos - reading!!.tx).Degree}" }
+            log(DEBUG) { "target ${(turretPos - reading!!.tx).Degree}" }
             turret.set(
                 turretPos - reading!!.tx
             )
@@ -152,7 +152,7 @@ suspend fun Subsystems.visionAimTurret() {
 
 suspend fun Subsystems.visionAim() {
     if (flywheel == null || feederRoller == null || turret == null) {
-        log(Error) { "Need flywheel and feederRoller for vision aiming" }
+        log(ERROR) { "Need flywheel and feederRoller for vision aiming" }
         freeze()
     } else startChoreo("Vision Flywheel") {
 
@@ -167,7 +167,7 @@ suspend fun Subsystems.visionAim() {
 
             val reading1 = reading
             if (reading1?.pipeline == null) {
-                log(Error) { "Limelight reading1 == $reading1" }
+                log(ERROR) { "Limelight reading1 == $reading1" }
                 return@choreography
             }
 
@@ -177,7 +177,7 @@ suspend fun Subsystems.visionAim() {
                 limelight.hardware.conversions.goalPositions(reading1, robotPosition.bearing, pitch)
             )
             if (snapshot1 == null) {
-                log(Warning) { "Couldn't find snapshot1 or no shots possible" }
+                log(WARN) { "Couldn't find snapshot1 or no shots possible" }
                 coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
@@ -193,7 +193,7 @@ suspend fun Subsystems.visionAim() {
 
             val reading2 = reading
             if (reading2?.pipeline == null) {
-                log(Error) { "Limelight reading2 == $reading2" }
+                log(ERROR) { "Limelight reading2 == $reading2" }
                 return@choreography
             }
 
@@ -203,7 +203,7 @@ suspend fun Subsystems.visionAim() {
                 limelight.hardware.conversions.goalPositions(reading2, robotPosition.bearing, pitch)
             )
             if (snapshot2 == null) {
-                log(Error) { "Couldn't find snapshot2 or no shots possible" }
+                log(ERROR) { "Couldn't find snapshot2 or no shots possible" }
                 coroutineContext[Job]!!.cancelChildren()
                 return@choreography
             }
@@ -224,17 +224,17 @@ suspend fun Subsystems.shootOne() = startChoreo("Shoot One") {
     choreography {
         val angle = carousel.state.shootAngle()
         if (angle == null) {
-            log(Warning) { "I feel empty. I want to eat some balls." }
+            log(ERROR) { "I feel empty. I want to eat some balls." }
             withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
         } else {
             launch {
                 carousel.set(angle, 0.CarouselSlot)
             }
 
-            log(Debug) { "Waiting for ball to launch." }
+            log(INFO) { "Waiting for ball to launch." }
             withTimeout(1.5.Second) {
                 flywheel?.delayUntilBall()
-            } ?: log(Error) { "Did not detect ball launch. Assuming slot was actually empty." }
+            } ?: log(ERROR) { "Did not detect ball launch. Assuming slot was actually empty." }
             carousel.state.pop()
 
             coroutineContext[Job]!!.cancelChildren()
@@ -248,7 +248,7 @@ suspend fun Subsystems.shootAll() = startChoreo("Shoot All") {
         launch { carousel.set(carousel.fireAllDutycycle) }
         while (isActive) {
             flywheel?.delayUntilBall()
-            log(Debug) { "Ball shot" }
+            log(DEBUG) { "Ball shot" }
             carousel.state.pop()
         }
     }
@@ -256,7 +256,7 @@ suspend fun Subsystems.shootAll() = startChoreo("Shoot All") {
 
 suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget: ShooterHoodState? = null) {
     if (flywheel == null || feederRoller == null) {
-        log(Error) { "Need flywheel and feeder to spin up shooter" }
+        log(ERROR) { "Need flywheel and feeder to spin up shooter" }
         freeze()
     } else startChoreo("Spin Up Shooter") {
 
@@ -274,7 +274,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
 
                 delayUntilFeederAndFlywheel(flywheelTarget)
 
-                log(Debug) { "Feeder roller and flywheel set" }
+                log(INFO) { "Feeder roller and flywheel set" }
                 hoodTarget?.let {
                     launch { shooterHood?.set(it) }
                 }

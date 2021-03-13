@@ -1,7 +1,7 @@
 package com.lynbrookrobotics.kapuchin.routines
 
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.logging.LogLevel.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import info.kunalsheth.units.generated.*
@@ -31,15 +31,15 @@ suspend fun startChoreo(
     val named = Named(name)
     val sensorScope = FreeSensorScope()
     try {
-        named.log(Debug) { "Started $name choreography." }
+        named.log(INFO) { "Started $name choreography." }
         val controller = sensorScope.run(setup)
         coroutineScope { controller() }
-        named.log(Debug) { "Completed $name choreography." }
+        named.log(INFO) { "Completed $name choreography." }
     } catch (c: CancellationException) {
-        named.log(Debug) { "Cancelled $name choreography.\n${c.message}" }
+        named.log(INFO) { "Cancelled $name choreography.\n${c.message}" }
         throw c
     } catch (t: Throwable) {
-        named.log(Error, t)
+        named.log(ERROR, t)
     } finally {
         sensorScope.close()
     }
