@@ -14,6 +14,7 @@ import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
+import com.lynbrookrobotics.twenty.choreos.auto.galacticSearch
 
 
 fun main() {
@@ -49,7 +50,8 @@ class FunkyRobot : RobotBase() {
                     System.gc()
                     HAL.observeUserProgramAutonomous()
 
-                    subsystems.auto()
+                    //subsystems.auto()
+                    subsystems.galacticSearch()
                     freeze()
                 },
                 { isTest } to {

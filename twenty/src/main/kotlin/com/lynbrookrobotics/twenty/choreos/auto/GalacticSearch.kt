@@ -33,16 +33,16 @@ import kotlinx.coroutines.launch
 import kotlin.system.measureTimeMillis
 
 
-private fun getPathToRun(): Int{
-    NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").setNumber(0)
-    var path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
-
-    while(path == 0){ //waits for jetson to detect red
-        println("Waiting for Jetson to run")
-        path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
-    }
-    return path
-}
+//private fun getPathToRun(): Int{
+//    NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").setNumber(0)
+//    var path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
+//
+//    while(path == 0){ //waits for jetson to detect red
+//        println("Waiting for Jetson to run")
+//        path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
+//    }
+//    return path
+//}
 
 /**
  * Autonomous routing for Galactic Search challenge
@@ -50,18 +50,24 @@ private fun getPathToRun(): Int{
  * @author Kaustubh Khulbe
  */
 suspend fun Subsystems.galacticSearch(){
-    val speedFactor = 40.Percent
     var pathName = ""
+    //val speedFactor = 20.Percent
     //val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
 
     startChoreo("Galactic Search"){
         choreography {
 
             carousel.rezero()
+            //val pathRun = getPathToRun();
             val intakeJob = launch { intakeBalls() }
-            if (getPathToRun() == 1) pathName = "red"
-            else pathName = "blue"
 
+//            if (pathRun == "1") pathName = "GalacticSearch_A_RED.tsv"
+//            else if(pathRun == "2") pathName = ""
+//            else if(pathRun == "3") pathName = ""
+//            else if(pathRun == "4") pathName = ""
+            
+            val pathName = "GalacticSearch_A_RED" //TEMPORARY
+            
             val path = loadRobotPath(pathName)
             if (path == null) {
                 log(Error) { "Unable to find $pathName" }
@@ -69,7 +75,7 @@ suspend fun Subsystems.galacticSearch(){
 
             path?.let {
                 drivetrain.followTrajectory(
-                    fastAsFuckPath(it, speedFactor),
+                    fastAsFuckPath(it, drivetrain.speedFactor),
                     maxExtrapolate = drivetrain.maxExtrapolate,
                     reverse = true
                 )
