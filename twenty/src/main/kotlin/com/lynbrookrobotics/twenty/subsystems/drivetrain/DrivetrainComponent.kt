@@ -51,23 +51,27 @@ class DrivetrainState <States:Num, Inputs:Num>  (val rows: Nat<States>,
         return desiredInput.minus(u)
     }
 }
+class LQRWaypoint<States: Num, Inputs: Num> (desiredState: DrivetrainState<States, Inputs>, input_jacobian: Matrix<States, Inputs>, state_jacobian: Matrix<States, States>){
+    val desiredState = desiredState
+    val input_jacobian = input_jacobian
+    val state_jacobian = state_jacobian
+}
 
-class OptimalGainMatrix<States: Num, Inputs: Num>(Q: Matrix<States, States>, R: Matrix<Inputs, Inputs>){
+typealias LQRTrajectory<States, Inputs> = List<LQRWaypoint<States, Inputs>>
+
+class LQR<States: Num, Inputs: Num>(Q: Matrix<States, States>, R: Matrix<Inputs, Inputs>){
 
     private val Q_matrix = Q
     private val R_matrix = R
 
-    fun compute (hardware: DrivetrainHardware,
-                rows: Nat<States>, cols: Nat<States>,
+    fun compute(hardware: DrivetrainHardware,
                 state: DrivetrainState<States, Inputs>,
-                desiredState: DrivetrainState<States,Inputs>,
-                state_jacobian: Matrix<States, States>,
-                input_jacobian: Matrix<States, Inputs>) : Matrix<Inputs, N1>
+                waypoint: LQRWaypoint<States, Inputs>) : Matrix<Inputs, N1>
     {
-        val stateError = desiredState.getStateError(state.x)
+        val stateError = waypoint.desiredState.getStateError(state.x)
 
         val discABPair =
-            Discretization.discretizeAB(state_jacobian, input_jacobian, hardware.period.Millisecond)
+            Discretization.discretizeAB(waypoint.state_jacobian, waypoint.input_jacobian, hardware.period.Millisecond)
         val discA = discABPair.first
         val discB = discABPair.second
 
@@ -79,15 +83,29 @@ class OptimalGainMatrix<States: Num, Inputs: Num>(Q: Matrix<States, States>, R: 
         //the optimal gain matrix
         val m_K = temp.solve(discB.transpose().times(S).times(discA))
 
-        return desiredState.u.plus(m_K.times(stateError))
+        return waypoint.desiredState.u.plus(m_K.times(stateError))
 
 
     }
 
 }
+
+class LQRFollower()
 class DrivetrainComponent(hardware: DrivetrainHardware) :
     Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware),
     GenericDrivetrainComponent {
+
+    val Q = Matrix.mat(Nat.N5(), Nat.N5()).fill(
+        1.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 1.0
+    )
+    val R = Matrix.mat(Nat.N2(), Nat.N2()).fill(
+        1.0, 0.0,
+        0.0, 1.0
+    )
 
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
@@ -96,7 +114,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
 
     val speedFactor by pref(50, Percent)
     val maxExtrapolate by pref(40, Inch)
-    
+
     override val maxSpeed get() = maxLeftSpeed min maxRightSpeed
     val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian
 

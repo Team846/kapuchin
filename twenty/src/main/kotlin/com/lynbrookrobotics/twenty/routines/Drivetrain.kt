@@ -11,6 +11,8 @@ import com.lynbrookrobotics.twenty.subsystems.*
 import com.lynbrookrobotics.twenty.subsystems.driver.*
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.*
 import edu.wpi.first.wpilibj.controller.LinearQuadraticRegulator
+import edu.wpi.first.wpiutil.math.Nat
+import edu.wpi.first.wpiutil.math.numbers.*
 import info.kunalsheth.units.generated.*
 
 suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
@@ -84,6 +86,37 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
     }
 }
 
+suspend fun DrivetrainComponent.followGeneratedTrajectory(
+    trajectory: LQRTrajectory<N5, N2>
+) = startRoutine("Follow Generated Trajectory") {
+    val position by hardware.position.readOnTick.withStamps
+    val speedL by hardware.leftSpeed.readOnTick.withoutStamps
+    val speedR by hardware.rightSpeed.readOnTick.withoutStamps
+
+    val generator = LQR(Q, R)
+    val waypoints = trajectory.iterator()
+
+    controller{t ->
+            val output = generator.compute(hardware,
+                DrivetrainState(Nat.N5(),
+                    Nat.N2(),
+                    position.y.x,
+                    position.y.y,
+                    position.y.bearing,
+                    (speedL + speedR)/2.0,
+                    ((speedR-speedL)/hardware.conversions.trackLength)*1.Radian
+                ),
+                waypoints.next()
+            )
+            TwoSided(
+                PercentOutput(hardware.escConfig, output.get(1,1).Volt/12.Volt),
+                PercentOutput(hardware.escConfig, output.get(2, 1).Volt/12.Volt)
+            ).takeUnless{
+                !waypoints.hasNext()
+            }
+    }
+
+}
 suspend fun DrivetrainComponent.followTrajectory(
     trajectory: Trajectory,
     maxExtrapolate: Length,
