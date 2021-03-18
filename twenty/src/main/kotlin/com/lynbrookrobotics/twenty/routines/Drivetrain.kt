@@ -1,8 +1,10 @@
 package com.lynbrookrobotics.twenty.routines
 
+import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
+import com.lynbrookrobotics.kapuchin.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -95,7 +97,7 @@ suspend fun DrivetrainComponent.followGeneratedTrajectory(
     val generator = LQR(Q, R)
     val waypoints = trajectory.iterator()
 
-    controller{t ->
+    controller{
             val output = generator.compute(hardware,
                 DrivetrainState(Nat.N5(),
                     Nat.N2(),
