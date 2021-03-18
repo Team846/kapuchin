@@ -19,9 +19,6 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import edu.wpi.first.math.Drake
 import edu.wpi.first.wpilibj.math.Discretization
-import edu.wpi.first.wpilibj.system.LinearSystemLoop
-import edu.wpi.first.wpiutil.math.Pair
-import org.ejml.simple.SimpleMatrix
 
 class DrivetrainState <States:Num, Inputs:Num>  (val rows: Nat<States>,
                                                  val cols: Nat<Inputs>,
@@ -74,10 +71,12 @@ class OptimalGainMatrix<States: Num, Inputs: Num>(Q: Matrix<States, States>, R: 
         val discA = discABPair.first
         val discB = discABPair.second
 
+        //the solution to our DARE
         val S = Matrix<States,States>(Drake.discreteAlgebraicRiccatiEquation(discA.storage, discB.storage, Q_matrix.storage, R_matrix.storage))
 
         val temp: Matrix<Inputs, Inputs> = discB.transpose().times(S).times(discB).plus(R_matrix)
 
+        //the optimal gain matrix
         val m_K = temp.solve(discB.transpose().times(S).times(discA))
 
         return desiredState.u.plus(m_K.times(stateError))
@@ -97,13 +96,7 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
 
     val speedFactor by pref(50, Percent)
     val maxExtrapolate by pref(40, Inch)
-
-    private val LQR = Named("LQR", this)
-    val robotMoment by LQR.pref(67.212, PoundFootSquared)
-    //motor constant for the falcon, unit is VoltSeconds
-    val k_emf by LQR.pref(0.1508, Volt * Second)
-    val k_stall by LQR.pref(6.566, Newton * Metre / Volt)
-
+    
     override val maxSpeed get() = maxLeftSpeed min maxRightSpeed
     val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian
 
