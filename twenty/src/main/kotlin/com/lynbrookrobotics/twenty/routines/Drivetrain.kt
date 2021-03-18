@@ -10,7 +10,6 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.subsystems.*
 import com.lynbrookrobotics.twenty.subsystems.driver.*
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.*
-import edu.wpi.first.wpilibj.controller.LinearQuadraticRegulator
 import edu.wpi.first.wpiutil.math.Nat
 import edu.wpi.first.wpiutil.math.numbers.*
 import info.kunalsheth.units.generated.*
@@ -104,13 +103,15 @@ suspend fun DrivetrainComponent.followGeneratedTrajectory(
                     position.y.y,
                     position.y.bearing,
                     (speedL + speedR)/2.0,
-                    ((speedR-speedL)/hardware.conversions.trackLength)*1.Radian
+                    ((speedR-speedL)/hardware.conversions.trackLength)*1.Radian,
+                    hardware.leftMasterEsc.motorOutputVoltage.Volt,
+                    hardware.rightMasterEsc.motorOutputVoltage.Volt
                 ),
                 waypoints.next()
             )
             TwoSided(
-                PercentOutput(hardware.escConfig, output.get(1,1).Volt/12.Volt),
-                PercentOutput(hardware.escConfig, output.get(2, 1).Volt/12.Volt)
+                PercentOutput(hardware.escConfig, output.get(2,1).Volt/12.Volt),
+                PercentOutput(hardware.escConfig, output.get(1, 1).Volt/12.Volt)
             ).takeUnless{
                 !waypoints.hasNext()
             }

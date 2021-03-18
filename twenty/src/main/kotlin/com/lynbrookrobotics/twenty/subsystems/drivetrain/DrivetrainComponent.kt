@@ -9,48 +9,14 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
-import edu.wpi.first.wpilibj.controller.LinearQuadraticRegulator
-import edu.wpi.first.wpilibj.system.NumericalJacobian
 import edu.wpi.first.wpiutil.math.Matrix
 import edu.wpi.first.wpiutil.math.Nat
 import edu.wpi.first.wpiutil.math.Num
 import edu.wpi.first.wpiutil.math.numbers.*
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 import edu.wpi.first.math.Drake
 import edu.wpi.first.wpilibj.math.Discretization
 
-class DrivetrainState <States:Num, Inputs:Num>  (val rows: Nat<States>,
-                                                 val cols: Nat<Inputs>,
-                                                 val x_pos: Length,
-                           val y_pos: Length,
-                           val bearing: Angle,
-                           val velocity: Velocity,
-                           val omega: AngularVelocity, val leftInput: Volt, val rightInput: Volt){
-    // state vector
-    val x: Matrix<States, N1>
-    //input vector
-    val u: Matrix<Inputs, N1>
-    init {
-        x = Matrix.mat(rows, Nat.N1()).fill(
-            x_pos.Foot,
-            y_pos.Foot,
-            bearing.Degree,
-            velocity.FootPerSecond,
-            omega.DegreePerSecond
-        )
-        u = Matrix.mat(cols, Nat.N1()).fill(
-            leftInput.siValue,
-            rightInput.siValue
-        )
-    }
-    fun getStateError (desiredState: Matrix<States, N1>): Matrix<States, N1>? {
-        return desiredState.minus(x)
-    }
-    fun getInputError (desiredInput: Matrix<Inputs, N1>): Matrix<Inputs, N1>? {
-        return desiredInput.minus(u)
-    }
-}
 class LQRWaypoint<States: Num, Inputs: Num> (desiredState: DrivetrainState<States, Inputs>, input_jacobian: Matrix<States, Inputs>, state_jacobian: Matrix<States, States>){
     val desiredState = desiredState
     val input_jacobian = input_jacobian
