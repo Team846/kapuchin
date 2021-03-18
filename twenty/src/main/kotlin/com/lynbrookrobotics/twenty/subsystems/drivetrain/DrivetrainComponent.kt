@@ -9,8 +9,83 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
+import edu.wpi.first.wpilibj.controller.LinearQuadraticRegulator
+import edu.wpi.first.wpilibj.system.NumericalJacobian
+import edu.wpi.first.wpiutil.math.Matrix
+import edu.wpi.first.wpiutil.math.Nat
+import edu.wpi.first.wpiutil.math.Num
+import edu.wpi.first.wpiutil.math.numbers.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
+import edu.wpi.first.math.Drake
+import edu.wpi.first.wpilibj.math.Discretization
+import edu.wpi.first.wpilibj.system.LinearSystemLoop
+import edu.wpi.first.wpiutil.math.Pair
+import org.ejml.simple.SimpleMatrix
 
+class DrivetrainState <States:Num, Inputs:Num>  (val rows: Nat<States>,
+                                                 val cols: Nat<Inputs>,
+                                                 val x_pos: Length,
+                           val y_pos: Length,
+                           val bearing: Angle,
+                           val velocity: Velocity,
+                           val omega: AngularVelocity, val leftInput: Volt, val rightInput: Volt){
+    // state vector
+    val x: Matrix<States, N1>
+    //input vector
+    val u: Matrix<Inputs, N1>
+    init {
+        x = Matrix.mat(rows, Nat.N1()).fill(
+            x_pos.Foot,
+            y_pos.Foot,
+            bearing.Degree,
+            velocity.FootPerSecond,
+            omega.DegreePerSecond
+        )
+        u = Matrix.mat(cols, Nat.N1()).fill(
+            leftInput.siValue,
+            rightInput.siValue
+        )
+    }
+    fun getStateError (desiredState: Matrix<States, N1>): Matrix<States, N1>? {
+        return desiredState.minus(x)
+    }
+    fun getInputError (desiredInput: Matrix<Inputs, N1>): Matrix<Inputs, N1>? {
+        return desiredInput.minus(u)
+    }
+}
+
+class OptimalGainMatrix<States: Num, Inputs: Num>(Q: Matrix<States, States>, R: Matrix<Inputs, Inputs>){
+
+    private val Q_matrix = Q
+    private val R_matrix = R
+
+    fun compute (hardware: DrivetrainHardware,
+                rows: Nat<States>, cols: Nat<States>,
+                state: DrivetrainState<States, Inputs>,
+                desiredState: DrivetrainState<States,Inputs>,
+                state_jacobian: Matrix<States, States>,
+                input_jacobian: Matrix<States, Inputs>) : Matrix<Inputs, N1>
+    {
+        val stateError = desiredState.getStateError(state.x)
+
+        val discABPair =
+            Discretization.discretizeAB(state_jacobian, input_jacobian, hardware.period.Millisecond)
+        val discA = discABPair.first
+        val discB = discABPair.second
+
+        val S = Matrix<States,States>(Drake.discreteAlgebraicRiccatiEquation(discA.storage, discB.storage, Q_matrix.storage, R_matrix.storage))
+
+        val temp: Matrix<Inputs, Inputs> = discB.transpose().times(S).times(discB).plus(R_matrix)
+
+        val m_K = temp.solve(discB.transpose().times(S).times(discA))
+
+        return desiredState.u.plus(m_K.times(stateError))
+
+
+    }
+
+}
 class DrivetrainComponent(hardware: DrivetrainHardware) :
     Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware),
     GenericDrivetrainComponent {
@@ -21,8 +96,13 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
     val percentMaxOmega by pref(75, Percent)
 
     val speedFactor by pref(50, Percent)
-    val constantSpeed by pref(5, FootPerSecond)
     val maxExtrapolate by pref(40, Inch)
+
+    private val LQR = Named("LQR", this)
+    val robotMoment by LQR.pref(67.212, PoundFootSquared)
+    //motor constant for the falcon, unit is VoltSeconds
+    val k_emf by LQR.pref(0.1508, Volt * Second)
+    val k_stall by LQR.pref(6.566, Newton * Metre / Volt)
 
     override val maxSpeed get() = maxLeftSpeed min maxRightSpeed
     val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian

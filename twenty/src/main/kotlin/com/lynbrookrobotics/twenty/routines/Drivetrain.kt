@@ -10,6 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.subsystems.*
 import com.lynbrookrobotics.twenty.subsystems.driver.*
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.*
+import edu.wpi.first.wpilibj.controller.LinearQuadraticRegulator
 import info.kunalsheth.units.generated.*
 
 suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
