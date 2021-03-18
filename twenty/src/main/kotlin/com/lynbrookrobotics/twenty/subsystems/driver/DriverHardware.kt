@@ -8,8 +8,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
-import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.BottomTrigger
-import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.Trigger
+import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.*
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
@@ -81,6 +80,11 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     val intakeBalls = s { stick[Trigger] }
     val unjamBalls = s { stick[Trigger] && stick[BottomTrigger] }
+
+    val accGreenZone = s { stick[RightOne] }
+    val accYellowZone = s { stick[RightTwo] }
+    val accBlueZone = s { stick[RightThree] }
+    val accRedZone = s { stick[RightFour] }
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

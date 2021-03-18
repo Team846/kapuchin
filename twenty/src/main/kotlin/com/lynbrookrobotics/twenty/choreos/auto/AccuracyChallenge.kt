@@ -10,7 +10,6 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.*
-import com.lynbrookrobotics.twenty.choreos.intakeBalls
 import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.*
@@ -20,12 +19,9 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState.*
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
-suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, zone: Pair<String, String>, hoodTarget: ShooterHoodState = Up) {
-    val speedFactor = 40.Percent
+suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, hoodTarget: ShooterHoodState = Up) {
 
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to run" }
@@ -36,28 +32,6 @@ suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, z
         val accuracyChallenge by operator.accuracyChallenge.readEagerly().withoutStamps
 
         choreography {
-            // Keep the intake out as long as balls < 3
-            launch { runWhile({ carousel.state.balls < 3 }, choreography { intakeBalls() }) }
-
-            // Drive to Zone
-            val firstPathName = zone.first
-            val firstPath = loadRobotPath(firstPathName)
-            if (firstPath == null) {
-                // Doesn't run the initial "drive to zone"
-                if (firstPathName === "undefined") {
-                    log(Debug) { "Initial Green Zone ... Skipping driving to zone"}
-                }
-                log(Error) { "Unable to find $firstPathName" }
-            }
-
-            firstPath?.let {
-                drivetrain.followTrajectory(
-                    fastAsFuckPath(it, speedFactor),
-                    maxExtrapolate = drivetrain.maxExtrapolate,
-                    reverse = true
-                )
-            }
-
             // Auto Aim Turret
             turret!!.set(turretPos - reading!!.tx.also { println(it) })
 
@@ -69,9 +43,8 @@ suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, z
             if (initialAngle != null) {
                 carousel.set(initialAngle)
             } else {
-                log(Error) { "No balls to shoot" }
-                coroutineContext.job.cancelChildren()
-                return@choreography
+                log(Warning) { "No Balls" }
+                withTimeout(2.Second) { rumble.set(TwoSided(100.Percent, 0.Percent)) }
             }
 
             // Spin up the flywheel and feeder roller
@@ -81,63 +54,29 @@ suspend fun Subsystems.zoneMoveThenShoot(zoneTarget: Pair<L, AngularVelocity>, z
             delay(0.5.Second)
             launch { carousel.set(carousel.fireAllDutycycle) }
             delay(0.5.Second)
-
-            // Drive back to re-intro zone
-            val secondPathName = zone.second
-            val secondPath = loadRobotPath(secondPathName)
-            if (secondPath == null) {
-                log(Error) { "Unable to find $secondPathName" }
-            }
-
-            secondPath?.let {
-                drivetrain.followTrajectory(
-                    fastAsFuckPath(it, speedFactor),
-                    maxExtrapolate = drivetrain.maxExtrapolate,
-                    reverse = true
-                )
-            }
-
         }
     }
 }
 
-suspend fun Subsystems.accuracyChallenge() {
-    val greenToReIntroPath = "greenToReIntro"
-    val reIntroToGreenPath = "reIntroToGreen"
-    val yellowToReIntroPath = "yellowToReIntro"
-    val reIntroToYellowPath = "reIntroToYellow"
-    val blueToReIntroPath = "blueToReIntro"
-    val reIntroToBluePath = "reIntroToBlue"
-    val redToReIntroPath = "greenToReIntro"
-    val reIntroToRedPath = "reIntroToRed"
-
-    val greenPathWithoutStartDrive = "undefined" to greenToReIntroPath
-    val greenPaths = reIntroToGreenPath to greenToReIntroPath
-    val yellowPaths = reIntroToYellowPath to yellowToReIntroPath
-    val bluePaths = reIntroToBluePath to blueToReIntroPath
-    val redPaths = reIntroToRedPath to redToReIntroPath
-
+suspend fun Subsystems.accuracyChallengeShoot() {
 
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to run" }
         freeze()
     } else startChoreo("Accuracy Challenge") {
-        val accuracyChallenge by operator.accuracyChallenge.readEagerly().withoutStamps
+        val accGreenZone by driver.accGreenZone.readEagerly().withoutStamps
+        val accYellowZone by driver.accYellowZone.readEagerly().withoutStamps
+        val accBlueZone by driver.accBlueZone.readEagerly().withoutStamps
+        val accRedZone by driver.accRedZone.readEagerly().withoutStamps
 
         choreography {
-            // Reindex carousel
-            carousel.rezero()
-
-            // Shoot balls + drive back and forth for each zone (green + yellow + blue + red + red)
-            launch { zoneMoveThenShoot(flywheel.greenZone, greenPathWithoutStartDrive, Down) }
-            delayUntil { accuracyChallenge }
-            launch { zoneMoveThenShoot(flywheel.yellowZone, yellowPaths) }
-            delayUntil { accuracyChallenge }
-            launch { zoneMoveThenShoot(flywheel.blueZone, bluePaths) }
-            delayUntil { accuracyChallenge }
-            launch { zoneMoveThenShoot(flywheel.redZone, redPaths) }
-            delayUntil { accuracyChallenge }
-            launch { zoneMoveThenShoot(flywheel.redZone, redPaths) }
+            // Shoot based on Zone
+            runWhenever(
+                { accGreenZone } to choreography { zoneMoveThenShoot(flywheel.greenZone, Down) },
+                { accYellowZone } to choreography { zoneMoveThenShoot(flywheel.yellowZone, Down) },
+                { accBlueZone } to choreography { zoneMoveThenShoot(flywheel.blueZone, Down) },
+                { accRedZone } to choreography { zoneMoveThenShoot(flywheel.redZone, Down) },
+            )
         }
     }
 }
