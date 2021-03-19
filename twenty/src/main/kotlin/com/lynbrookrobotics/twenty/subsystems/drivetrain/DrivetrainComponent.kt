@@ -2,6 +2,7 @@ package com.lynbrookrobotics.twenty.subsystems.drivetrain
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
+import com.lynbrookrobotics.kapuchin.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
@@ -9,11 +10,29 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
+import edu.wpi.first.wpiutil.math.Matrix
+import edu.wpi.first.wpiutil.math.Nat
+import edu.wpi.first.wpiutil.math.Num
+import edu.wpi.first.wpiutil.math.numbers.*
 import info.kunalsheth.units.generated.*
+import edu.wpi.first.math.Drake
+import edu.wpi.first.wpilibj.math.Discretization
 
 class DrivetrainComponent(hardware: DrivetrainHardware) :
     Component<DrivetrainComponent, DrivetrainHardware, TwoSided<OffloadedOutput>>(hardware),
     GenericDrivetrainComponent {
+
+    val Q = Matrix.mat(Nat.N5(), Nat.N5()).fill(
+        1.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 1.0
+    )
+    val R = Matrix.mat(Nat.N2(), Nat.N2()).fill(
+        1.0, 0.0,
+        0.0, 1.0
+    )
 
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
@@ -21,7 +40,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
     val percentMaxOmega by pref(75, Percent)
 
     val speedFactor by pref(50, Percent)
-    val constantSpeed by pref(5, FootPerSecond)
     val maxExtrapolate by pref(40, Inch)
 
     override val maxSpeed get() = maxLeftSpeed min maxRightSpeed
