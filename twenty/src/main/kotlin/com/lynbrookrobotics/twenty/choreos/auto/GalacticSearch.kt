@@ -33,16 +33,16 @@ import kotlinx.coroutines.launch
 import kotlin.system.measureTimeMillis
 
 
-//private fun getPathToRun(): Int{
-//    NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").setNumber(0)
-//    var path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
-//
-//    while(path == 0){ //waits for jetson to detect red
-//        println("Waiting for Jetson to run")
-//        path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toString().toInt()
-//    }
-//    return path
-//}
+private fun getPathToRun(): Int{
+    NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").setNumber(0)
+    var path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toDouble().toInt()
+
+    while(path == 0){ //waits for jetson to detect red
+        println("Waiting for Jetson to run")
+        path =  NetworkTableInstance.getDefault().getTable("/SmartDashboard").getEntry("path").toInt()
+    }
+    return path
+}
 
 /**
  * Autonomous routing for Galactic Search challenge
@@ -58,15 +58,13 @@ suspend fun Subsystems.galacticSearch(){
         choreography {
 
             carousel.rezero()
-            //val pathRun = getPathToRun();
+            val pathRun = getPathToRun();
             val intakeJob = launch { intakeBalls() }
 
-//            if (pathRun == "1") pathName = "GalacticSearch_A_RED.tsv"
-//            else if(pathRun == "2") pathName = ""
-//            else if(pathRun == "3") pathName = ""
-//            else if(pathRun == "4") pathName = ""
-            
-            val pathName = "GalacticSearch_A_RED" //TEMPORARY
+            if (pathRun == 1) pathName = "GalacticSearch_A_RED.tsv"
+            else if(pathRun == 2) pathName = "GalacticSearch_A_RED.tsv"
+            else if(pathRun == 3) pathName = "
+            else if(pathRun == 4) pathName = ""
             
             val path = loadRobotPath(pathName)
             if (path == null) {
