@@ -86,16 +86,16 @@ fun SubsystemHardware<*, *>.escConfigPref(
 
 fun Named.autoPathConfigPref(
     defaultFileName: String,
-    defaultIsReverse: Boolean = false,
+    defaultReverse: Boolean = false,
     defaultSpeedFactor: DutyCycle = 100.Percent,
     defaultMaxAccel: Acceleration = 12.4.Foot / Second / Second,
     defaultPercentMaxOmega: Dimensionless = 100.Percent,
     defaultMaxExtrap: Length = 50.Inch,
-    defaultExtrapK: Double = 1.0,
+    defaultExtrapK: Double = 10.0,
 ) = pref {
 
     val fileName by pref(defaultFileName)
-    val isReverse by pref(defaultIsReverse)
+    val reverse by pref(defaultReverse)
 
     val speedFactor by pref(defaultSpeedFactor.Percent, Percent)
     val maxAccel by pref(defaultMaxAccel.FootPerSecondSquared, FootPerSecondSquared)
@@ -107,7 +107,7 @@ fun Named.autoPathConfigPref(
     ({
         AutoPathConfiguration(
             name = fileName,
-            isReverse = isReverse,
+            reverse = reverse,
 
             speedFactor = speedFactor,
             maxAccel = maxAccel,

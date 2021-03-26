@@ -18,8 +18,6 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
     val maxLeftSpeed by pref(11.9, FootPerSecond)
     val maxRightSpeed by pref(12.5, FootPerSecond)
 
-    val defaultPathConfig by autoPathConfigPref("0")
-
     override val maxSpeed get() = maxLeftSpeed min maxRightSpeed
     val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian
 

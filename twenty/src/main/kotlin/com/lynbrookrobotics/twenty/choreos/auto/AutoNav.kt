@@ -3,6 +3,7 @@ package com.lynbrookrobotics.twenty.choreos.auto
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.twenty.Auto
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.routines.followTrajectory
 import info.kunalsheth.units.generated.*

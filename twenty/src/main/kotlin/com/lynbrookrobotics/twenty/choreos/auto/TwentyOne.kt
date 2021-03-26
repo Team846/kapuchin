@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.twenty.Auto
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.choreos.intakeBalls
 import com.lynbrookrobotics.twenty.routines.*
@@ -58,8 +59,8 @@ suspend fun Subsystems.judgedAuto() {
 
             path?.let {
                 drivetrain.followTrajectory(
-                    fastAsFuckPath(it, drivetrain.defaultPathConfig),
-                    drivetrain.defaultPathConfig,
+                    fastAsFuckPath(it, Auto.defaultPathConfig),
+                    Auto.defaultPathConfig,
                 )
             }
 

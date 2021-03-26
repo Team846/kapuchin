@@ -54,6 +54,11 @@ internal fun TimeStamped<Waypoint>.extrapolate(from: Waypoint, by: Length): Time
     return Waypoint(y.x + by * sin(bearing), y.y + by * cos(bearing)) stampWith x
 }
 
+internal fun extrapolateDist(maxExtrap: Length, extrapK: Double, speed: Velocity, maxSpeed: Velocity): Length {
+    val exponent = (-extrapK / (maxSpeed * Second / Foot).Each) * ((speed - maxSpeed / 2) * Second / Foot).Each
+    return maxExtrap / (1 + E.pow(exponent))
+}
+
 /**
  * Given a differential drivetrain, follow a [Trajectory] by constantly calculating left and right velocity outputs.
  *
@@ -75,9 +80,10 @@ internal fun TimeStamped<Waypoint>.extrapolate(from: Waypoint, by: Length): Time
  * @param trajectory the [Trajectory] to follow.
  * @param origin the starting [Position] of the robot.
  * @property drivetrain the tank drive drivetrain component.
- * @property maxExtrapolate the maximum target [Waypoint] extrapolation distance (varies with current speed).
  * @property safetyTolerance the maximum error the robot can be from a [Waypoint] before ending the [Trajectory] early.
  * @property reverse whether or not the robot should run with the back going forwards.
+ * @property maxExtrap the maximum target [Waypoint] extrapolation distance (varies with current speed).
+ * @property extrapK the extrapolation function constant.
  *
  * @author Andy, Alvyn
  */
@@ -86,9 +92,10 @@ class TrajectoryFollower(
     trajectory: Trajectory,
     origin: Position,
     private val drivetrain: GenericDrivetrainComponent,
-    private val maxExtrapolate: Length,
     private val safetyTolerance: Length,
     private val reverse: Boolean,
+    private val maxExtrap: Length,
+    private val extrapK: Double,
 ) {
 
     // Make waypoints relative to origin
@@ -165,10 +172,8 @@ class TrajectoryFollower(
                 val newTarget = waypoints.next()
                 speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
 
-                val extrapDist =
-                    maxExtrapolate / (1 + E.pow((-(speed - drivetrain.maxSpeed / 2) * Second / Metre).Each))
-
-                extrapolatedTarget = newTarget.extrapolate(target.y, extrapDist)
+                extrapolatedTarget =
+                    newTarget.extrapolate(target.y, extrapolateDist(maxExtrap, extrapK, speed, drivetrain.maxSpeed))
                 target = newTarget
             }
         }

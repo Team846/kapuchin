@@ -95,9 +95,10 @@ suspend fun DrivetrainComponent.followTrajectory(
         trajectory,
         origin,
         this@followTrajectory,
-        config.maxExtrap,
         safetyTolerance,
-        config.isReverse,
+        config.reverse,
+        config.maxExtrap,
+        config.extrapK,
     )
 
     controller {

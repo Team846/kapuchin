@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.auto.Auto
 import com.lynbrookrobotics.twenty.choreos.journalPath
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.Compressor
