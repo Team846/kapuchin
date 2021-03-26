@@ -8,7 +8,8 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.*
+import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.choreos.auto.Auto
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
@@ -21,15 +22,7 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
     val pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
 
     val logDir = "/home/lvuser/"
-
-    val logPath = run {
-        var logName = "$journalId.tsv"
-        while (File("$logDir$logName").exists()) {
-            logName = "old_$logName"
-        }
-
-        "$logDir$logName"
-    }
+    val logPath = "$logDir${Auto.pathRecordFile}.tsv"
 
     val log = File(logPath).printWriter().also {
         it.println("x\ty")

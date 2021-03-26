@@ -88,7 +88,6 @@ class TrajectoryFollower(
     private val drivetrain: GenericDrivetrainComponent,
     private val maxExtrapolate: Length,
     private val safetyTolerance: Length,
-//    private val speedFactor: Dimensionless,
     private val reverse: Boolean,
 ) {
 

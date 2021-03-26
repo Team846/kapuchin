@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.kapuchin.preferences
 
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
@@ -79,6 +80,41 @@ fun SubsystemHardware<*, *>.escConfigPref(
             continuousCurrentLimit = continuousCurrentLimit,
             peakCurrentLimit = peakCurrentLimit,
             peakCurrentDuration = peakCurrentDuration
+        )
+    })
+}
+
+fun Named.autoPathConfigPref(
+    defaultFileName: String,
+    defaultIsReverse: Boolean = false,
+    defaultSpeedFactor: DutyCycle = 100.Percent,
+    defaultMaxAccel: Acceleration = 12.4.Foot / Second / Second,
+    defaultPercentMaxOmega: Dimensionless = 100.Percent,
+    defaultMaxExtrap: Length = 50.Inch,
+    defaultExtrapK: Double = 1.0,
+) = pref {
+
+    val fileName by pref(defaultFileName)
+    val isReverse by pref(defaultIsReverse)
+
+    val speedFactor by pref(defaultSpeedFactor.Percent, Percent)
+    val maxAccel by pref(defaultMaxAccel.FootPerSecondSquared, FootPerSecondSquared)
+    val percentMaxOmega by pref(defaultPercentMaxOmega.Percent, Percent)
+
+    val maxExtrap by pref(defaultMaxExtrap.Inch, Inch)
+    val extrapK by pref(defaultExtrapK)
+
+    ({
+        AutoPathConfiguration(
+            name = fileName,
+            isReverse = isReverse,
+
+            speedFactor = speedFactor,
+            maxAccel = maxAccel,
+            percentMaxOmega = percentMaxOmega,
+
+            maxExtrap = maxExtrap,
+            extrapK = extrapK
         )
     })
 }

@@ -85,10 +85,8 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
 
 suspend fun DrivetrainComponent.followTrajectory(
     trajectory: Trajectory,
-    maxExtrapolate: Length,
+    config: AutoPathConfiguration,
     safetyTolerance: Length = 3.Foot,
-//    speedFactor: Dimensionless,
-    reverse: Boolean,
     origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
 ) = startRoutine("Follow Trajectory") {
 
@@ -97,10 +95,9 @@ suspend fun DrivetrainComponent.followTrajectory(
         trajectory,
         origin,
         this@followTrajectory,
-        maxExtrapolate,
+        config.maxExtrap,
         safetyTolerance,
-//        speedFactor,
-        reverse
+        config.isReverse,
     )
 
     controller {

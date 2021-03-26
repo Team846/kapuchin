@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.choreos.auto.Auto
 import com.lynbrookrobotics.twenty.choreos.journalPath
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.Compressor
@@ -23,10 +24,12 @@ fun main() {
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-        println("Initializing hardware...")
+        // Initialize preferences
+        Field
+        Auto
 
+        println("Initializing hardware...")
         Compressor()
-        Field // Initialize preferences
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
