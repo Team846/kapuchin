@@ -3,6 +3,7 @@ package com.lynbrookrobotics.twenty.choreos.auto
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Auto
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.routines.followTrajectory
@@ -10,11 +11,27 @@ import info.kunalsheth.units.generated.*
 import kotlin.system.measureTimeMillis
 
 suspend fun Subsystems.autoNavBarrel() = startChoreo("AutoNav Barrel") {
-    choreography { timePath(Auto.AutoNav.barrel) }
+    choreography {
+        val start = currentTime
+        try {
+            timePath(Auto.AutoNav.barrel)
+        } finally {
+            val time = currentTime - start
+            println("Finish in ${time.Second}s")
+        }
+    }
 }
 
 suspend fun Subsystems.autoNavSlalom() = startChoreo("AutoNav Slalom") {
-    choreography { timePath(Auto.AutoNav.slalom) }
+    choreography {
+        val start = currentTime
+        try {
+            timePath(Auto.AutoNav.slalom)
+        } finally {
+            val time = currentTime - start
+            println("Finish in ${time.Second}s")
+        }
+    }
 }
 
 suspend fun Subsystems.autoNavBounce() = startChoreo("AutoNav Bounce") {

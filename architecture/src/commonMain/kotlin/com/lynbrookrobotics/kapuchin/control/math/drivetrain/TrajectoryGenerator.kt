@@ -55,7 +55,8 @@ fun pathToTrajectory(
     val forwardPath = path.toMutableList()
     val forwardSegments = oneWayAccelCap(
         forwardPath, maxVelocity, maxOmega,
-        f = { curVelocity -> maxAcceleration - (curVelocity / maxVelocity) * maxAcceleration }
+//        f = { curVelocity -> maxAcceleration - (curVelocity / maxVelocity) * maxAcceleration }
+        f = { _ -> maxAcceleration }
     )
 
 
@@ -64,7 +65,8 @@ fun pathToTrajectory(
     val reversePath = path.toMutableList().reversed()
     val reverseSegments = oneWayAccelCap(
         reversePath, maxVelocity, maxOmega,
-        f = { curVelocity -> maxAcceleration + (curVelocity / maxVelocity) * maxAcceleration }
+//        f = { curVelocity -> maxAcceleration + (curVelocity / maxVelocity) * maxAcceleration }
+        f = { _ -> maxAcceleration }
     ).reversed()
 
 

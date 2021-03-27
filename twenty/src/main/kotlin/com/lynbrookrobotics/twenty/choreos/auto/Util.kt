@@ -94,9 +94,9 @@ fun Subsystems.fastAsFuckPath(path: Path, config: AutoPathConfiguration): Trajec
 
 suspend fun Subsystems.timePath(config: AutoPathConfiguration) = loadRobotPath(config.name)?.let { path ->
     val trajectory = fastAsFuckPath(path, config)
-    val time = measureTimeMillis {
+//    val time = measureTimeMillis {
         drivetrain.followTrajectory(trajectory, config)
-    }.milli(Second)
+//    }.milli(Second)
 
-    log(Debug) { "${config.name} finished: ${time.Second withDecimals 3}s" }
+//    log(Debug) { "${config.name} finished: ${time.Second withDecimals 3}s" }
 } ?: log(Error) { "Couldn't find path ${config.name}" }

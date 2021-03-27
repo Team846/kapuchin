@@ -74,4 +74,17 @@ class TrajectoryFollowerTest {
         p2.x `is equal to?` 3.Foot
         p2.y `is equal to?` 4.Foot
     }
+
+    @Test
+    fun `extrapolation distance works`() {
+        val maxExtrap = 50.Inch
+        val extrapK = 1.0
+        val maxSpeed = 10.Foot / Second
+
+        listOf(0.Foot / Second, maxSpeed / 2, maxSpeed)
+            .map { extrapolateDist(maxExtrap, extrapK, it, maxSpeed)}
+            .map { it.Inch}
+            .forEach(::println)
+
+    }
 }

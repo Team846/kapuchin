@@ -54,6 +54,7 @@ internal fun TimeStamped<Waypoint>.extrapolate(from: Waypoint, by: Length): Time
     return Waypoint(y.x + by * sin(bearing), y.y + by * cos(bearing)) stampWith x
 }
 
+//https://www.desmos.com/calculator/eeae36gz0h
 internal fun extrapolateDist(maxExtrap: Length, extrapK: Double, speed: Velocity, maxSpeed: Velocity): Length {
     val exponent = (-extrapK / (maxSpeed * Second / Foot).Each) * ((speed - maxSpeed / 2) * Second / Foot).Each
     return maxExtrap / (1 + E.pow(exponent))
@@ -94,6 +95,7 @@ class TrajectoryFollower(
     private val drivetrain: GenericDrivetrainComponent,
     private val safetyTolerance: Length,
     private val reverse: Boolean,
+    private val speedFactor: DutyCycle,
     private val maxExtrap: Length,
     private val extrapK: Double,
 ) {
@@ -173,7 +175,7 @@ class TrajectoryFollower(
                 speed = distance(newTarget.y, target.y) / (newTarget.x - target.x)
 
                 extrapolatedTarget =
-                    newTarget.extrapolate(target.y, extrapolateDist(maxExtrap, extrapK, speed, drivetrain.maxSpeed))
+                    newTarget.extrapolate(target.y, extrapolateDist(maxExtrap, extrapK, speed, drivetrain.maxSpeed * speedFactor))
                 target = newTarget
             }
         }

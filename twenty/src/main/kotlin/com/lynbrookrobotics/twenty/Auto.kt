@@ -19,4 +19,7 @@ object Auto : Named by Named("Auto") {
         val bounce by autoPathConfigPref("bounce")
     }
 
+    init {
+        AutoNav
+    }
 }
