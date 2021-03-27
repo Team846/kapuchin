@@ -95,6 +95,7 @@ class Subsystems(
         Subsystems::autoNavBarrel,
         Subsystems::autoNavSlalom,
         Subsystems::autoNavBounce,
+        Subsystems::galacticSearch,
     )
 
     suspend fun auto() {

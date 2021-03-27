@@ -19,7 +19,12 @@ object Auto : Named by Named("Auto") {
         val bounce by autoPathConfigPref("bounce")
     }
 
+    object GalacticSearch : Named by Named("Galactic Search", this) {
+        val default by autoPathConfigPref("")
+    }
+
     init {
         AutoNav
+        GalacticSearch
     }
 }

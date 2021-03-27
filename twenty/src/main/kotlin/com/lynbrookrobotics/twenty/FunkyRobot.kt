@@ -52,8 +52,8 @@ class FunkyRobot : RobotBase() {
                     System.gc()
                     HAL.observeUserProgramAutonomous()
 
-                    //subsystems.auto()
-                    subsystems.galacticSearch()
+                    subsystems.auto()
+//                    subsystems.galacticSearch()
                     freeze()
                 },
                 { isTest } to {
