@@ -9,9 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.auto.judgedAuto
-import com.lynbrookrobotics.twenty.choreos.auto.timePath
-import com.lynbrookrobotics.twenty.choreos.auto.timeTrajectory
+import com.lynbrookrobotics.twenty.choreos.auto.*
 import com.lynbrookrobotics.twenty.choreos.climberTeleop
 import com.lynbrookrobotics.twenty.choreos.controlPanelTeleop
 import com.lynbrookrobotics.twenty.choreos.digestionTeleop
@@ -47,12 +45,10 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretHardware
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.io.File
-import kotlin.math.roundToInt
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
@@ -80,29 +76,6 @@ class Subsystems(
     val shooterHood: ShooterHoodComponent?
 ) : Named by Named("Subsystems") {
 
-    private val autos = listOf(
-        Subsystems::timePath,
-        Subsystems::timeTrajectory,
-        Subsystems::judgedAuto,
-    )
-
-    private val autoIdGraph = graph("Auto ID", Each)
-
-    private var prevAutoId = -1
-    private val autoId
-        get() = SmartDashboard.getEntry("DB/Slider 0").getDouble(-1.0).roundToInt().also {
-            if (it != prevAutoId) {
-                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
-                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
-                prevAutoId = it
-            }
-        }
-
-    val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
-
-    val autoPath: String by pref("0")
-    val autoTrajectory: String by pref("0")
-
     suspend fun teleop() {
         runAll(
             { climberTeleop() },
@@ -117,11 +90,20 @@ class Subsystems(
         )
     }
 
+    private val autos = listOf(
+        Subsystems::judgedAuto,
+        Subsystems::autoNavBarrel,
+        Subsystems::autoNavSlalom,
+        Subsystems::autoNavBounce,
+    )
+
     suspend fun auto() {
-        when (autoId) {
-            -1 -> log(Error) { "DB Slider 0 is set to -1, running wall auto" }
-            !in autos.indices -> log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
-            else -> autos[autoId].invoke(this@Subsystems)
+        when (Auto.id) {
+            !in autos.indices -> log(Error) { "${Auto.id} isn't an auto!! you fucked up!!!" }
+            else -> {
+                log(Debug) { "Running ${autos[Auto.id].name}" }
+                autos[Auto.id].invoke(this@Subsystems)
+            }
         }
     }
 
@@ -136,12 +118,6 @@ class Subsystems(
                 }
             }
         )
-    }
-
-    init {
-        uiBaselineTicker.runOnTick { time ->
-            autoIdGraph(time, autoId.Each)
-        }
     }
 
     companion object : Named by Named("Subsystems") {

@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
+import com.lynbrookrobotics.twenty.Auto
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.choreos.intakeBalls
 import com.lynbrookrobotics.twenty.routines.*
@@ -14,43 +15,6 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlin.system.measureTimeMillis
-
-suspend fun Subsystems.timePath() = startChoreo("Time Path") {
-    choreography {
-        with(drivetrain) {
-            loadRobotPath(autoPath)?.let { path ->
-                val time = measureTimeMillis {
-                    followTrajectory(
-                        fastAsFuckPath(path, drivetrain.speedFactor),
-                        maxExtrapolate = maxExtrapolate,
-                        safetyTolerance = 3.Foot,
-//                        speedFactor = speedFactor,
-                        reverse = false,
-                    )
-                }.milli(Second)
-                log(Debug) { "Path finished: ${time.Second}s" }
-            } ?: log(Error) { "Couldn't find path $name" }
-        }
-    }
-}
-
-suspend fun Subsystems.timeTrajectory() = startChoreo("Time Trajectory") {
-    choreography {
-        with(drivetrain) {
-            loadRobotTrajectory(autoTrajectory)?.let { traj ->
-                val time = measureTimeMillis {
-                    followTrajectory(
-                        traj.map { it.copy(x = it.x / speedFactor) },
-                        maxExtrapolate = maxExtrapolate,
-                        safetyTolerance = 3.Foot,
-                        reverse = false,
-                    )
-                }.milli(Second)
-                log(Debug) { "Trajectory finished: ${time.Second}s" }
-            } ?: log(Error) { "Couldn't find trajectory $name" }
-        }
-    }
-}
 
 suspend fun Subsystems.judgedAuto() {
     val flywheelTarget = 6000.Rpm
@@ -95,9 +59,8 @@ suspend fun Subsystems.judgedAuto() {
 
             path?.let {
                 drivetrain.followTrajectory(
-                    fastAsFuckPath(it, speedFactor),
-                    maxExtrapolate = drivetrain.maxExtrapolate,
-                    reverse = true
+                    fastAsFuckPath(it, Auto.defaultPathConfig),
+                    Auto.defaultPathConfig,
                 )
             }
 
