@@ -18,6 +18,7 @@ import com.lynbrookrobotics.twenty.Subsystems.Companion.uiBaselineTicker
 import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import edu.wpi.first.wpilibj.SerialPort
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

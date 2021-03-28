@@ -7,23 +7,12 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Auto
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.choreos.intakeBalls
-import com.lynbrookrobotics.twenty.routines.followTrajectory
 import com.lynbrookrobotics.twenty.routines.rezero
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 
-private suspend fun getPathToRun(): Int {
-    SmartDashboard.getEntry("path").setNumber(0)
-    var path = SmartDashboard.getEntry("path").toString().toInt()
-
-    while (path == 0) { // waits for jetson to detect red
-        println("Waiting for Jetson to run")
-        path = SmartDashboard.getEntry("path").toString().toInt()
-        delay(500.Second)
-    }
-    return path
-}
+private suspend fun getPathToRun(): Int =SmartDashboard.getEntry("ROBOT_PATH").getDouble(0.0).toInt()
 
 /**
  * Autonomous routing for Galactic Search challenge
@@ -41,14 +30,18 @@ suspend fun Subsystems.galacticSearch() {
             val pathRun = getPathToRun()
             val intakeJob = launch { intakeBalls() }
 
-            if (pathRun == 1) pathName = "GalacticSearch_A_RED.tsv"
-            else if (pathRun == 2) pathName = "GalacticSearch_A_BLUE.tsv"
-            else if (pathRun == 3) pathName = "GalacticSearch_B_RED.tsv"
-            else if (pathRun == 4) pathName = "GalacticSearch_B_BLUE.tsv"
+            println("lawefjalkwefjlwakejf $pathRun")
+            if (pathRun == 1) pathName = "GalacticSearch_A_RED"
+            else if (pathRun == 2) pathName = "GalacticSearch_A_BLUE"
+            else if (pathRun == 3) pathName = "GalacticSearch_B_RED"
+            else if (pathRun == 4) pathName = "GalacticSearch_B_BLUE"
             else log(Error) { "no path number recieved from getPathToRun()" }
 
             val start = currentTime
             try {
+                val config = Auto.GalacticSearch.default.copy(name = pathName)
+
+                println(config)
                 timePath(Auto.GalacticSearch.default.copy(name = pathName))
             } finally {
                 val time = currentTime - start
