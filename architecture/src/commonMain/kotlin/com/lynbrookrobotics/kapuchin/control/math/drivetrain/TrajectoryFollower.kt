@@ -40,8 +40,8 @@ internal fun Position.isBehind(curr_target: Waypoint, prev_waypoint: Waypoint, e
 //    val p1 = Waypoint(pos.x + 1.Foot * sin(pos.bearing - 90.Degree), pos.y + 1.Foot * cos(pos.bearing - 90.Degree))
 //    val p2 = Waypoint(pos.x + 1.Foot * sin(pos.bearing + 90.Degree), pos.y + 1.Foot * cos(pos.bearing + 90.Degree))
 
-    print(d(extrap_target, p1, p2))
-    print(d(curr_target, p1, p2))
+//    print(d(extrap_target, p1, p2))
+//    print(d(curr_target, p1, p2))
     return d(extrap_target, p1, p2) != d(Waypoint(this.x, this.y), p1, p2)
 }
 
@@ -164,18 +164,18 @@ class TrajectoryFollower(
         val error = distance(position.y.vector, target.y)
 
         // If reverse, check if target is in front of position instead of behind
-        if ((!(position.y.isBehind(target.y, prev_target.y, extrapolatedTarget.y)) xor reverse) || firstPoint) {
+        if (!position.y.isBehind(target.y, prev_target.y, extrapolatedTarget.y) || firstPoint) {
             if (!waypoints.hasNext()) {
                 finish()
             } else {
                 firstPoint = false
-                drivetrain.log(Debug) { "Hit Waypoint" }
+//                drivetrain.log(Debug) { "Hit Waypoint" }
 
                 // Check error
-                drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
+//                drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
                 if (error > safetyTolerance) {
                     drivetrain.log(Error) { "*****ABORTING TRAJECTORY*****" }
-                    drivetrain.log(Error) { "Error (${error.Inch} in) exceeds safety tolerance (${safetyTolerance.Inch} in)" }
+                    drivetrain.log(Error) { "Current pos: ${position.y} | Waypoint: ${target.y} | Safety tolerance: (${safetyTolerance.Inch} in)" }
                     finish()
                 }
 
