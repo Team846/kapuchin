@@ -35,7 +35,8 @@ typealias Trajectory = List<TimeStamped<Waypoint>>
  * @param path a path consisting of a list of [Waypoint]s.
  * @param maxVelocity the maximum linear velocity of the robot.
  * @param maxOmega the maximum angular velocity of the robot.
- * @param maxAcceleration the maximum linear acceleration of the robot.
+ * @param maxAccel the maximum linear acceleration of the robot.
+ * @param maxDecel the maximum linear deceleration of the robot.
  *
  * @return a trajectory containing [Waypoint]s with timestamps.
  */
@@ -43,12 +44,14 @@ fun pathToTrajectory(
     path: Path,
     maxVelocity: Velocity,
     maxOmega: AngularVelocity,
-    maxAcceleration: Acceleration
+    maxAccel: Acceleration,
+    maxDecel: Acceleration,
 ): Trajectory {
 
     check(maxVelocity > 0.Foot / Second)
-    check(maxAcceleration > 0.Foot / Second / Second)
     check(maxOmega > 0.Radian / Second)
+    check(maxAccel > 0.Foot / Second / Second)
+    check(maxDecel > 0.Foot / Second / Second)
 
     // (1)
 
@@ -56,7 +59,7 @@ fun pathToTrajectory(
     val forwardSegments = oneWayAccelCap(
         forwardPath, maxVelocity, maxOmega,
 //        f = { curVelocity -> maxAcceleration - (curVelocity / maxVelocity) * maxAcceleration }
-        f = { _ -> maxAcceleration }
+        f = { maxAccel }
     )
 
 
@@ -66,7 +69,7 @@ fun pathToTrajectory(
     val reverseSegments = oneWayAccelCap(
         reversePath, maxVelocity, maxOmega,
 //        f = { curVelocity -> maxAcceleration + (curVelocity / maxVelocity) * maxAcceleration }
-        f = { _ -> maxAcceleration }
+        f = { maxDecel }
     ).reversed()
 
 

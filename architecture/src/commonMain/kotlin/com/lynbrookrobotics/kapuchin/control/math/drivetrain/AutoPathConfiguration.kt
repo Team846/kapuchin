@@ -8,6 +8,8 @@ import info.kunalsheth.units.generated.*
  * @property name name of the path file on the robot.
  * @property reverse follow path forward or in reverse.
  * @property speedFactor robot max speed and acceleration proportion.
+ * @property maxAccel robot max acceleration.
+ * @property maxAccel robot max deceleration.
  * @property percentMaxOmega robot max omega proportion.
  * @property maxExtrap max follower extrapolation distance.
  * @property extrapK follower extrapolation distance formula constant.
@@ -19,6 +21,7 @@ data class AutoPathConfiguration(
     val reverse: Boolean,
     val speedFactor: DutyCycle,
     val maxAccel: Acceleration,
+    val maxDecel: Acceleration,
     val percentMaxOmega: DutyCycle,
     val maxExtrap: Length,
     val extrapK: Double,

@@ -7,10 +7,8 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.routines.followTrajectory
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 import java.io.BufferedReader
 import java.io.File
-import kotlin.system.measureTimeMillis
 
 /**
  * Load a path bundled in twenty/resources/paths.
@@ -80,22 +78,24 @@ fun Subsystems.fastAsFuckLine(dist: Length, config: AutoPathConfiguration): Traj
     pathToTrajectory(
         nSect(Waypoint(0.Foot, 0.Foot), Waypoint(0.Foot, dist), 3.Inch),
         drivetrain.maxSpeed * config.speedFactor,
-        config.percentMaxOmega * drivetrain.maxOmega * config.speedFactor,
-        config.maxAccel
+        drivetrain.maxOmega * config.percentMaxOmega * config.speedFactor,
+        config.maxAccel,
+        config.maxDecel
     )
 
 fun Subsystems.fastAsFuckPath(path: Path, config: AutoPathConfiguration): Trajectory =
     pathToTrajectory(
         path,
         drivetrain.maxSpeed * config.speedFactor,
-        config.percentMaxOmega * drivetrain.maxOmega * config.speedFactor,
-        config.maxAccel
+        drivetrain.maxOmega * config.percentMaxOmega * config.speedFactor,
+        config.maxAccel,
+        config.maxDecel
     )
 
 suspend fun Subsystems.timePath(config: AutoPathConfiguration) = loadRobotPath(config.name)?.let { path ->
     val trajectory = fastAsFuckPath(path, config)
 //    val time = measureTimeMillis {
-        drivetrain.followTrajectory(trajectory, config)
+    drivetrain.followTrajectory(trajectory, config)
 //    }.milli(Second)
 
 //    log(Debug) { "${config.name} finished: ${time.Second withDecimals 3}s" }
