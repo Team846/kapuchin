@@ -10,37 +10,44 @@ import kotlin.test.Test
 class TrajectoryFollowerTest {
 
     @Test
-    fun `isBehind correctly returns true at 0 deg bearing`() {
+    fun `isBehind correctly returns true when robot is behind line at 0 bearing`() {
         val point = Waypoint(0.Foot, 0.Foot)
-        val pos = Position(0.Foot, 1.Foot, 0.Degree)
+        val prev = Waypoint(0.Foot, -1.Foot)
+        val pos = Position(0.Foot, -1.Foot, 0.Degree)
+        val known = Waypoint(0.Foot, 1.Foot)
 
-        point isBehind pos `is equal to?` true
+        pos.isBehind(point, prev, known) `is equal to?` true
     }
 
     @Test
-    fun `isBehind correctly returns false at 0 deg bearing`() {
+    fun `isBehind correctly returns false when robot is past point at 0 deg bearing`() {
         val point = Waypoint(0.Foot, 0.Foot)
-        val pos = Position(0.Foot, -1.Foot, 0.Degree)
+        val prev = Waypoint(0.Foot, -1.Foot)
+        val pos = Position(0.Foot, 1.Foot, 0.Degree)
+        val known = Waypoint(0.Foot, 2.Foot)
 
-        point isBehind pos `is equal to?` false
+        pos.isBehind(point, prev, known) `is equal to?` false
     }
 
     @Test
     fun `isBehind correctly returns true at non-zero bearing`() {
         // 30 60 90 triangle
-        val point = Waypoint(0.Foot, (sqrt(3.0)).Foot)
+        val point = Waypoint(1.Foot, 0.Foot)
+        val prev = Waypoint(0.Foot, 0.Foot)
         val pos = Position(1.Foot, 0.Foot, -29.Degree + 90.Degree)
+        val known = Waypoint(2.Foot, 0.Foot)
 
-        point isBehind pos `is equal to?` true
+        pos.isBehind(point, prev, known) `is equal to?` true
     }
 
     @Test
     fun `isBehind correctly returns false at non-zero bearing`() {
-        // 30 60 90 triangle
-        val point = Waypoint(0.Foot, (sqrt(3.0)).Foot)
-        val pos = Position(1.Foot, 0.Foot, -31.Degree + 90.Degree)
+        val point = Waypoint(10.Foot, 10.Foot)
+        val prev = Waypoint(8.Foot, 8.Foot)
+        val pos = Position(11.Foot, 10.Foot, 47.Degree)
+        val known = Waypoint(30.Foot, 30.Foot)
 
-        point isBehind pos `is equal to?` false
+        pos.isBehind(point, prev, known) `is equal to?` false
     }
 
     @Test
@@ -82,8 +89,8 @@ class TrajectoryFollowerTest {
         val maxSpeed = 10.Foot / Second
 
         listOf(0.Foot / Second, maxSpeed / 2, maxSpeed)
-            .map { extrapolateDist(maxExtrap, extrapK, it, maxSpeed)}
-            .map { it.Inch}
+            .map { extrapolateDist(maxExtrap, extrapK, it, maxSpeed) }
+            .map { it.Inch }
             .forEach(::println)
 
     }
