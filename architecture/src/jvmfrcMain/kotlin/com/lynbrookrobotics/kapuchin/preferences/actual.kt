@@ -87,6 +87,7 @@ fun SubsystemHardware<*, *>.escConfigPref(
 fun Named.autoPathConfigPref(
     defaultName: String,
     defaultReverse: Boolean = false,
+    defaultEndingVelocity: Velocity = 0.Foot / Second,
     defaultSpeedFactor: DutyCycle = 100.Percent,
     defaultMaxAccel: Acceleration = 6.Foot / Second / Second,
     defaultMaxDecel: Acceleration = 6.Foot / Second / Second,
@@ -97,6 +98,7 @@ fun Named.autoPathConfigPref(
 
     val name by pref(defaultName)
     val reverse by pref(defaultReverse)
+    val endingVelocity by pref(defaultEndingVelocity.FootPerSecond, FootPerSecond)
 
     val speedFactor by pref(defaultSpeedFactor.Percent, Percent)
     val maxAccel by pref(defaultMaxAccel.FootPerSecondSquared, FootPerSecondSquared)
@@ -110,6 +112,7 @@ fun Named.autoPathConfigPref(
         AutoPathConfiguration(
             name = name,
             reverse = reverse,
+            endingVelocity = endingVelocity,
 
             speedFactor = speedFactor,
             maxAccel = maxAccel,

@@ -80,7 +80,8 @@ fun Subsystems.fastAsFuckLine(dist: Length, config: AutoPathConfiguration): Traj
         drivetrain.maxSpeed * config.speedFactor,
         drivetrain.maxOmega * config.percentMaxOmega * config.speedFactor,
         config.maxAccel,
-        config.maxDecel
+        config.maxDecel,
+        config.endingVelocity,
     )
 
 fun Subsystems.fastAsFuckPath(path: Path, config: AutoPathConfiguration): Trajectory =
@@ -89,14 +90,10 @@ fun Subsystems.fastAsFuckPath(path: Path, config: AutoPathConfiguration): Trajec
         drivetrain.maxSpeed * config.speedFactor,
         drivetrain.maxOmega * config.percentMaxOmega * config.speedFactor,
         config.maxAccel,
-        config.maxDecel
+        config.maxDecel,
+        config.endingVelocity,
     )
 
-suspend fun Subsystems.timePath(config: AutoPathConfiguration) = loadRobotPath(config.name)?.let { path ->
-    val trajectory = fastAsFuckPath(path, config)
-//    val time = measureTimeMillis {
-    drivetrain.followTrajectory(trajectory, config)
-//    }.milli(Second)
-
-//    log(Debug) { "${config.name} finished: ${time.Second withDecimals 3}s" }
+suspend fun Subsystems.followPath(config: AutoPathConfiguration) = loadRobotPath(config.name)?.let { path ->
+    drivetrain.followTrajectory(fastAsFuckPath(path, config), config)
 } ?: log(Error) { "Couldn't find path ${config.name}" }

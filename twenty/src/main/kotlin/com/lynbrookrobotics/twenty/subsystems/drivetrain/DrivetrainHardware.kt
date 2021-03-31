@@ -147,6 +147,12 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         ) stampWith it
     }.with(graph("Right Speed", FootPerSecond))
 
+    fun zeroOdometry() {
+        conversions.tracking.x = 0.Foot
+        conversions.tracking.y = 0.Foot
+        gyro.zeroYaw()
+    }
+
     init {
         uiBaselineTicker.runOnTick { time ->
             setOf(pitch, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
