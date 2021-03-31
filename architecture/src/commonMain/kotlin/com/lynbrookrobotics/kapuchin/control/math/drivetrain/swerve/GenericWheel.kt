@@ -1,4 +1,4 @@
-package com.lynbrookrobotics.kapuchin.control.math.drivetrain.Swerve
+package com.lynbrookrobotics.kapuchin.control.math.drivetrain.swerve
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.*
