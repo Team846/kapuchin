@@ -26,7 +26,7 @@ suspend fun Subsystems.galacticSearch() {
 
     startChoreo("Galactic Search") {
         choreography {
-            carousel.rezero()
+//            carousel.rezero()
             val pathRun = getPathToRun()
             val intakeJob = launch { intakeBalls() }
 
@@ -42,7 +42,7 @@ suspend fun Subsystems.galacticSearch() {
                 val config = Auto.GalacticSearch.default.copy(name = pathName)
 
                 println(config)
-                timePath(Auto.GalacticSearch.default.copy(name = pathName))
+                followPath(Auto.GalacticSearch.default.copy(name = pathName))
             } finally {
                 val time = currentTime - start
                 println("Finish in ${time.Second}s")
