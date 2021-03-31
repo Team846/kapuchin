@@ -14,6 +14,7 @@ import info.kunalsheth.units.generated.*
  * @property z z-coordinate
  */
 interface Vector<T> {
+
     val x: T
     val y: T
     val z: T
