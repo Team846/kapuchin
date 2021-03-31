@@ -44,6 +44,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val ball2 by operator.ball2.readEagerly().withoutStamps
     val ball3 by operator.ball3.readEagerly().withoutStamps
 
+    val zeroOdometry by driver.zeroOdometry.readEagerly().withoutStamps
+
     choreography {
         if (turret != null && !turret.hardware.isZeroed) launch {
             log(Debug) { "Rezeroing turret" }
@@ -98,6 +100,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 carousel.state.clear()
                 carousel.state.push(3)
             },
+            { zeroOdometry } to {
+                drivetrain.hardware.conversions.tracking.bearing = 0.Degree
+                drivetrain.hardware.conversions.tracking.x = 0.Foot
+                drivetrain.hardware.conversions.tracking.y = 0.Foot
+            }
         )
     }
 }

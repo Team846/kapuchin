@@ -144,6 +144,8 @@ class TrajectoryFollower(
     private fun finish() {
         done = true
         drivetrain.log(Debug) { "*****Finished Trajectory*****" }
+        drivetrain.log(Debug) { "TRAJ End pos: ${position.y}"}
+        drivetrain.log(Debug) { "TRAJ Last waypoint: ${target.y.x.Foot},${target.y.y.Foot}"}
 
         if (errors.size == 0) {
             drivetrain.log(Error) { "No error data points" }
@@ -153,6 +155,10 @@ class TrajectoryFollower(
         val avg = errors.sumOf { it.Inch }.Inch / errors.size
         val max = errors.maxByOrNull { it.Inch }!!
         drivetrain.log(Debug) { "Avg error: ${avg.Inch} in | Max error: ${max.Inch} in" }
+    }
+
+    init {
+        drivetrain.log(Debug) { "TRAJ Start pos: ${position.y}"}
     }
 
     /**
@@ -187,10 +193,12 @@ class TrajectoryFollower(
 
                 prev_target = target
 
+                val extrapDist = max(extrapolateDist(maxExtrap, extrapK, speed, drivetrain.maxSpeed * speedFactor), 5.Inch)
+                println("Extrap: ${extrapDist.Inch} (${(speed / drivetrain.maxSpeed * speedFactor).Percent}%)")
                 extrapolatedTarget =
                     newTarget.extrapolate(
                         target.y,
-                        extrapolateDist(maxExtrap, extrapK, speed, drivetrain.maxSpeed * speedFactor)
+                        extrapDist
                     )
                 target = newTarget
             }

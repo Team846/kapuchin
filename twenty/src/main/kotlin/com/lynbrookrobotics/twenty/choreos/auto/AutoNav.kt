@@ -54,7 +54,7 @@ suspend fun Subsystems.autoNavBounce() = startChoreo("AutoNav Bounce") {
             }
 
         val time = measureTimeMillis {
-            val pathThetas = listOf(-15.11.Degree, 90.Degree, 90.Degree, 90.Degree)
+            val pathThetas = listOf(-14.21.Degree, 90.Degree, 90.Degree, 90.Degree)
             val origin = robotPos.copy()
 
             var reverse = false
@@ -62,14 +62,15 @@ suspend fun Subsystems.autoNavBounce() = startChoreo("AutoNav Bounce") {
 
             for (i in trajectories.indices) {
                 val p = (RotationMatrix(origin.bearing) rz sum) + origin.vector
-                val pTheta = (origin.bearing `coterminal +` pathThetas[i])
+                val pTheta = (origin.bearing `coterminal +` (pathThetas[i] - pathThetas[0]))
                     .let { if (reverse) it `coterminal +` 180.Degree else it }
 
                 val pos = Position(p.x, p.y, pTheta)
+                drivetrain.log(Debug) {"Starting position #$i: $pos" }
 
                 drivetrain.followTrajectory(trajectories[i], Auto.AutoNav.bounce.copy(reverse = reverse), origin = pos)
 
-                sum += RotationMatrix(pathThetas[i]) rz trajectories[i].last().y
+                sum += RotationMatrix(pathThetas[i] - pathThetas[0]) rz trajectories[i].last().y
                 reverse = !reverse
             }
         }
