@@ -31,5 +31,7 @@ interface GenericDriveComponent: Named {
     val maxSpeed: Velocity
     val bearingKp: Gain<Velocity, Angle>
     val bearingKd: Gain<Velocity, AngularVelocity>
+    val kP: Gain<Velocity, Length>
+    val kD: Gain<Velocity, Velocity>
     // not sure if there should be positionKp and positionKd
 }

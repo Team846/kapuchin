@@ -1,0 +1,68 @@
+package com.lynbrookrobotics.twenty.subsystems.drivetrain.swerve
+
+import com.lynbrookrobotics.kapuchin.control.conversion.*
+import com.lynbrookrobotics.kapuchin.control.data.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.swerve.*
+import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainHardware
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
+
+class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversions", hardware),
+    GenericDriveConversions {
+    override val trackLength: Length by pref (2, Foot)
+    override val botRadius: Length by pref (1, Foot)
+
+    private val TRTrim by pref(1.0)
+    private val TLTrim by pref(1.0)
+    private val BRTrim by pref(1.0)
+    private val BLTrim by pref(1.0)
+
+
+    private val wheelRadius by pref {
+        val TR by pref(3.0)
+        val TL by pref(3.0)
+        val BR by pref(3.0)
+        val BL by pref(3.0)
+        ({ FourSided(TR, TL, BR, BL) })
+    }
+
+    val encoder by pref {
+        val motorGear by pref(18)
+        val stage1Gear by pref(50)
+        val stage2Gear by pref(16)
+        val wheelGear by pref(60)
+        val resolution by pref(2048)
+        val nativeEncoderCountMultiplier by pref(1)
+        ({
+            val stage1 = GearTrain(motorGear, stage1Gear)
+            val stage2 = GearTrain(stage2Gear, wheelGear)
+
+            val nativeResolution = resolution * nativeEncoderCountMultiplier
+            val enc = EncoderConversion(
+                nativeResolution,
+                stage1.inputToOutput(1.Turn).let(stage2::inputToOutput)
+            )
+
+            val topRight = LinearOffloadedNativeConversion(
+                ::p, ::p, ::p, ::p,
+                nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
+                nativeFeedbackUnits = nativeResolution,
+                perFeedbackQuantity = wheelRadius.TR * enc.angle(nativeResolution) * TRTrim / Radian,
+                nativeTimeUnit = 100.milli(Second), nativeRateUnit = 1.Second
+            )
+            val topLeft = topRight.copy(
+                perFeedbackQuantity = wheelRadius.TL * enc.angle(nativeResolution) * TLTrim / Radian
+            )
+            val topLeft = topRight.copy(
+                perFeedbackQuantity = wheelRadius.TL * enc.angle(nativeResolution) * TLTrim / Radian
+            )
+            val topLeft = topRight.copy(
+                perFeedbackQuantity = wheelRadius.TL * enc.angle(nativeResolution) * TLTrim / Radian
+            )
+            TwoSided(left, right)
+        })
+    }
+}
