@@ -22,10 +22,10 @@ class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversi
 
 
     private val wheelRadius by pref {
-        val TR by pref(3.0)
-        val TL by pref(3.0)
-        val BR by pref(3.0)
-        val BL by pref(3.0)
+        val TR by pref(3, Inch)
+        val TL by pref(3, Inch)
+        val BR by pref(3, Inch)
+        val BL by pref(3, Inch)
         ({ FourSided(TR, TL, BR, BL) })
     }
 
@@ -56,13 +56,13 @@ class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversi
             val topLeft = topRight.copy(
                 perFeedbackQuantity = wheelRadius.TL * enc.angle(nativeResolution) * TLTrim / Radian
             )
-            val topLeft = topRight.copy(
-                perFeedbackQuantity = wheelRadius.TL * enc.angle(nativeResolution) * TLTrim / Radian
+            val bottomRight = topRight.copy(
+                perFeedbackQuantity = wheelRadius.BR * enc.angle(nativeResolution) * BRTrim / Radian
             )
-            val topLeft = topRight.copy(
-                perFeedbackQuantity = wheelRadius.TL * enc.angle(nativeResolution) * TLTrim / Radian
+            val bottomLeft = topRight.copy(
+                perFeedbackQuantity = wheelRadius.BL * enc.angle(nativeResolution) * BLTrim / Radian
             )
-            TwoSided(left, right)
+            FourSided(topRight, topLeft, bottomRight, bottomLeft)
         })
     }
 }

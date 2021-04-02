@@ -20,19 +20,23 @@ class SwerveComponent(hardware: SwerveHardware,
         val kP by pref(5, Volt, 2, FootPerSecond)
         val kF by pref(110, Percent)
         ({
-            val left = OffloadedEscGains(
-                kP = hardware.conversions.encoder.left.native(kP),
-                kF = hardware.conversions.encoder.left.native(
+            val TR = OffloadedEscGains(
+                kP = hardware.conversions.encoder.topRight.native(kP),
+                kF = hardware.conversions.encoder.topRight.native(
                     Gain(hardware.escConfig.voltageCompSaturation, maxLeftSpeed)
                 ) * kF.Each
             )
-            val right = OffloadedEscGains(
-                kP = hardware.conversions.encoder.right.native(kP),
-                kF = hardware.conversions.encoder.right.native(
+            val TL = OffloadedEscGains(
+                kP = hardware.conversions.encoder.topLeft.native(kP),
+                kF = hardware.conversions.encoder.topLeft.native(
                     Gain(hardware.escConfig.voltageCompSaturation, maxRightSpeed)
                 ) * kF.Each
             )
-            TwoSided(left, right)
+//            val BR = OffloadedEscGains(
+//                kP = hardware.conversions.encoder.BottomRight.native(kP),
+//                kF = har
+//            )
+//            TwoSided(left, right)
         })
     }
 

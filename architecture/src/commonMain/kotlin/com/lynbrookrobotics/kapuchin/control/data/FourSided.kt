@@ -1,4 +1,4 @@
 package com.lynbrookrobotics.kapuchin.control.data
 
-data class FourSided<out T>(val TR: T, val TL: T, val BL: T, val BR: T) {
+data class FourSided<out T>(val topRight: T, val topLeft: T, val bottomRight: T, val bottomLeft: T) {
 }
