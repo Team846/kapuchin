@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.swerve.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainHardware
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -64,5 +65,35 @@ class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversi
             )
             FourSided(topRight, topLeft, bottomRight, bottomLeft)
         })
+    }
+
+    val tracking = SwerveOdometry(Position(0.Foot,0.Foot,0.Degree), botRadius, trackLength)
+
+    private var noTicksTL = true
+    private var noTicksTR = true
+    private var noTicksBR = true
+    private var noTicksBL = true
+    private var lastTopLeft = 0.Foot
+    private var lastTopRight = 0.Foot
+    private var lastBottomRight = 0.Foot
+    private var lastBottomRight = 0.Foot
+
+    fun odometry(modules: Array<Pair<Vector<Length>, Angle>>, bearing: Angle) {
+        //odom.updatePosition(wheelDist)
+//        if (noTicksTL && totalTopLeft != 0.Foot) log(Level.Debug) {
+//            "Received first top left tick at ${currentTime withDecimals 2}"
+//        }.also { noTicksTL = false }
+//
+//        if (noTicksTR && totalTopRight != 0.Foot) log(Level.Debug) {
+//            "Received first top right tick at ${currentTime withDecimals 2}"
+//        }.also { noTicksTR = false }
+//
+//        if (noTicksBR && totalBottomRight != 0.Foot) log(Level.Debug) {
+//            "Received first bottom right tick at ${currentTime withDecimals 2}"
+//        }.also { noTicksBR = false }
+//
+//        if (noTicksBL && totalBottomLeft != 0.Foot) log(Level.Debug) {
+//            "Received first bottom left tick at ${currentTime withDecimals 2}"
+//        }.also { noTicksBL = false }
     }
 }
