@@ -20,13 +20,13 @@ class SwerveOdometry(var pos: Position, private val radius: Length, private val 
      * is distance traveled by the wheel and Angle is the current angle of the wheel
      * @return Position --> new position of the robot given starting position and `modules`
      */
-    fun updatePosition(modules: Array<Pair<Vector<Length>, Angle>>): Position? {
+    fun updatePosition(modules: Array<Pair<Length, Angle>>): Position? {
         val xTop =
-            (modules[0].first.x * cos(modules[0].second)) avg (modules[1].first.x * cos(modules[1].second)) // may need to be something other than avg
-        val xBottom = (modules[2].first.x * cos(modules[2].second)) avg (modules[3].first.x * cos(modules[3].second))
+            (modules[0].first * cos(modules[0].second)) avg (modules[1].first * cos(modules[1].second)) // may need to be something other than avg
+        val xBottom = (modules[2].first * cos(modules[2].second)) avg (modules[3].first * cos(modules[3].second))
 
-        val yLeft = (modules[0].first.y * sin(modules[0].second)) avg (modules[2].first.y * sin(modules[2].second))
-        val yRight = (modules[1].first.y * sin(modules[1].second)) avg (modules[3].first.y * sin(modules[3].second))
+        val yLeft = (modules[0].first * sin(modules[0].second)) avg (modules[2].first * sin(modules[2].second))
+        val yRight = (modules[1].first * sin(modules[1].second)) avg (modules[3].first * sin(modules[3].second))
 
         val xDisplacement = getPoint(xTop, xBottom, r=radius)
         val yDisplacement = getPoint(yLeft, yRight, pos.bearing + (PI / 2) * Radian, lenBy2)

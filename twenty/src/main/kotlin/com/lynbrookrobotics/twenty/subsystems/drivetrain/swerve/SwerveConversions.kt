@@ -78,22 +78,24 @@ class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversi
     private var lastBottomRight = 0.Foot
     private var lastBottomRight = 0.Foot
 
-    fun odometry(modules: Array<Pair<Vector<Length>, Angle>>, bearing: Angle) {
+    fun odometry(modules: Array<Pair<Length, Angle>>, bearing: Angle) {
         //odom.updatePosition(wheelDist)
-//        if (noTicksTL && totalTopLeft != 0.Foot) log(Level.Debug) {
-//            "Received first top left tick at ${currentTime withDecimals 2}"
-//        }.also { noTicksTL = false }
-//
-//        if (noTicksTR && totalTopRight != 0.Foot) log(Level.Debug) {
-//            "Received first top right tick at ${currentTime withDecimals 2}"
-//        }.also { noTicksTR = false }
-//
-//        if (noTicksBR && totalBottomRight != 0.Foot) log(Level.Debug) {
-//            "Received first bottom right tick at ${currentTime withDecimals 2}"
-//        }.also { noTicksBR = false }
-//
-//        if (noTicksBL && totalBottomLeft != 0.Foot) log(Level.Debug) {
-//            "Received first bottom left tick at ${currentTime withDecimals 2}"
-//        }.also { noTicksBL = false }
+        if (noTicksTL && modules[0].first != 0.Foot) log(Level.Debug) {
+            "Received first top left tick at ${currentTime withDecimals 2}"
+        }.also { noTicksTL = false }
+
+        if (noTicksTR && modules[1].first != 0.Foot) log(Level.Debug) {
+            "Received first top right tick at ${currentTime withDecimals 2}"
+        }.also { noTicksTR = false }
+
+        if (noTicksBR && modules[2].first != 0.Foot) log(Level.Debug) {
+            "Received first bottom right tick at ${currentTime withDecimals 2}"
+        }.also { noTicksBR = false }
+
+        if (noTicksBL && modules[3].first != 0.Foot) log(Level.Debug) {
+            "Received first bottom left tick at ${currentTime withDecimals 2}"
+        }.also { noTicksBL = false }
+
+        tracking.updatePosition(modules)
     }
 }

@@ -19,6 +19,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.kauailabs.navx.frc.AHRS
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
 
 class SwerveHardware(
 ) : SubsystemHardware<SwerveHardware, SwerveComponent>(), GenericDriveHardware {
@@ -40,6 +41,18 @@ class SwerveHardware(
     private val BRSensorInversion by pref(false)
     private val BLSensorInversion by pref(false)
 
+
+
+    private val TRAngleEscInversion by pref(false)
+    private val TLAngleEscInversion by pref(true)
+    private val BRAngleEscInversion by pref(true)
+    private val BLAngleEscInversion by pref(true)
+
+    private val TRAngleSensorInversion by pref(true)
+    private val TLAngleSensorInversion by pref(false)
+    private val BRAngleSensorInversion by pref(false)
+    private val BLAngleSensorInversion by pref(false)
+
     private val driftTolerance by pref(0.2, DegreePerSecond)
 
     val escConfig by escConfigPref(
@@ -53,6 +66,11 @@ class SwerveHardware(
     private val TLId = 32
     private val BRId = 33
     private val BLId = 31
+
+    private val TRAngleId = 30
+    private val TLAngleId = 32
+    private val BRAngleId = 33
+    private val BLAngleId = 31
 
     override val conversions = SwerveConversions(this)
 
@@ -88,6 +106,37 @@ class SwerveHardware(
         it.setNeutralMode(NeutralMode.Brake)
     }
 
+
+
+    val topRightAngle by hardw {TalonFX(TRId)}.configure {
+        setupMaster(it, escConfig, IntegratedSensor, true)
+        +it.setSelectedSensorPosition(0.0)
+        it.inverted = TRAngleEscInversion
+        it.setSensorPhase(TRAngleSensorInversion)
+        it.setNeutralMode(NeutralMode.Brake)
+    }
+    val topLeftAngle by hardw {TalonFX(TLId)}.configure {
+        setupMaster(it, escConfig, IntegratedSensor, true)
+        +it.setSelectedSensorPosition(0.0)
+        it.inverted = TLAngleEscInversion
+        it.setSensorPhase(TLAngleSensorInversion)
+        it.setNeutralMode(NeutralMode.Brake)
+    }
+    val bottomRightAngle by hardw {TalonFX(BRId)}.configure {
+        setupMaster(it, escConfig, IntegratedSensor, true)
+        +it.setSelectedSensorPosition(0.0)
+        it.inverted = BRAngleEscInversion
+        it.setSensorPhase(BRAngleSensorInversion)
+        it.setNeutralMode(NeutralMode.Brake)
+    }
+    val bottomLeftAngle by hardw {TalonFX(BLId)}.configure {
+        setupMaster(it, escConfig, IntegratedSensor, true)
+        +it.setSelectedSensorPosition(0.0)
+        it.inverted = BLAngleEscInversion
+        it.setSensorPhase(BLAngleSensorInversion)
+        it.setNeutralMode(NeutralMode.Brake)
+    }
+
     private val gyro by hardw { AHRS(SerialPort.Port.kUSB) }.configure {
         blockUntil() { it.isConnected }
         blockUntil() { !it.isCalibrating }
@@ -100,9 +149,13 @@ class SwerveHardware(
         it.rate.DegreePerSecond in `±`(driftTolerance)
     }
 
-    override val position = sensor {
-        conversions.tracking.run { Position(x, y, bearing) } stampWith it
-    }
+    private val odometryTicker = ticker(Priority.RealTime, 10.milli(Second), "Odometry")
+    private val escNamed = Named("ESC Odometry", this)
+
+//    override val position = sensor {
+//        //conversions.tracking.run { Position(x, y, bearing) } stampWith it
+//        //conversions.odometry(arrayOf(Pair<topRight.>))
+//    }
         .with(graph("X Location", Foot, escNamed)) { it.x }
         .with(graph("Y Location", Foot, escNamed)) { it.y }
         .with(graph("Bearing", Degree, escNamed)) { it.bearing }
