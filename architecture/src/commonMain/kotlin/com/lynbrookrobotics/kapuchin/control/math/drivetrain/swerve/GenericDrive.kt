@@ -21,9 +21,8 @@ interface GenericDriveHardware {
         position.readOnTick.withStamps
     }
 
-    fun angleDelegate(scope: BoundSensorScope): DelegateProvider<Any?, TimeStamped<Array<Angle>>> = with(scope) {
-
-    }
+//    fun angleDelegate(scope: BoundSensorScope): DelegateProvider<Any?, TimeStamped<Array<Angle>>> = with(scope) {
+//    }
 }
 
 interface GenericDriveComponent: Named {
@@ -31,7 +30,7 @@ interface GenericDriveComponent: Named {
     val maxSpeed: Velocity
     val bearingKp: Gain<Velocity, Angle>
     val bearingKd: Gain<Velocity, AngularVelocity>
-    val kP: Gain<Velocity, Length>
-    val kD: Gain<Velocity, Velocity>
+//    val kP: Gain<Velocity, Length>
+//    val kD: Gain<Velocity, Velocity>
     // not sure if there should be positionKp and positionKd
 }
