@@ -2,12 +2,10 @@ package com.lynbrookrobotics.twenty.subsystems.drivetrain.swerve
 
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.swerve.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainHardware
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -16,18 +14,18 @@ class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversi
     override val trackLength: Length by pref (2, Foot)
     override val botRadius: Length by pref (1, Foot)
 
-    private val TRTrim by pref(1.0)
-    private val TLTrim by pref(1.0)
-    private val BRTrim by pref(1.0)
-    private val BLTrim by pref(1.0)
+    private val fRTrim by pref(1.0)
+    private val fLTrim by pref(1.0)
+    private val bRTrim by pref(1.0)
+    private val bLTrim by pref(1.0)
 
 
     private val wheelRadius by pref {
-        val TR by pref(3, Inch)
-        val TL by pref(3, Inch)
-        val BR by pref(3, Inch)
-        val BL by pref(3, Inch)
-        ({ FourSided(TR, TL, BR, BL) })
+        val fR by pref(3, Inch)
+        val fL by pref(3, Inch)
+        val bR by pref(3, Inch)
+        val bL by pref(3, Inch)
+        ({ FourSided(fR, fL, bR, bL) })
     }
 
     val encoder by pref {
@@ -47,46 +45,46 @@ class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversi
                 stage1.inputToOutput(1.Turn).let(stage2::inputToOutput)
             )
 
-            val topRight = LinearOffloadedNativeConversion(
+            val frontRight = LinearOffloadedNativeConversion(
                 ::p, ::p, ::p, ::p,
                 nativeOutputUnits = 1023, perOutputQuantity = hardware.escConfig.voltageCompSaturation,
                 nativeFeedbackUnits = nativeResolution,
-                perFeedbackQuantity = wheelRadius.TR * enc.angle(nativeResolution) * TRTrim / Radian,
+                perFeedbackQuantity = wheelRadius.frontRight * enc.angle(nativeResolution) * fRTrim / Radian,
                 nativeTimeUnit = 100.milli(Second), nativeRateUnit = 1.Second
             )
-            val topLeft = topRight.copy(
-                perFeedbackQuantity = wheelRadius.TL * enc.angle(nativeResolution) * TLTrim / Radian
+            val frontLeft = frontRight.copy(
+                perFeedbackQuantity = wheelRadius.frontLeft * enc.angle(nativeResolution) * fLTrim / Radian
             )
-            val bottomRight = topRight.copy(
-                perFeedbackQuantity = wheelRadius.BR * enc.angle(nativeResolution) * BRTrim / Radian
+            val backRight = frontRight.copy(
+                perFeedbackQuantity = wheelRadius.backRight * enc.angle(nativeResolution) * bRTrim / Radian
             )
-            val bottomLeft = topRight.copy(
-                perFeedbackQuantity = wheelRadius.BL * enc.angle(nativeResolution) * BLTrim / Radian
+            val backLeft = frontRight.copy(
+                perFeedbackQuantity = wheelRadius.backLeft * enc.angle(nativeResolution) * bLTrim / Radian
             )
-            FourSided(topRight, topLeft, bottomRight, bottomLeft)
+            FourSided(frontRight, frontLeft, backRight, backLeft)
         })
     }
 
     val tracking = SwerveOdometry(Position(0.Foot,0.Foot,0.Degree), botRadius, trackLength)
 
-    private var noTicksTL = true
-    private var noTicksTR = true
+    private var noTicksFL = true
+    private var noTicksFR = true
     private var noTicksBR = true
     private var noTicksBL = true
-    private var lastTopLeft = 0.Foot
-    private var lastTopRight = 0.Foot
-    private var lastBottomRight = 0.Foot
-    private var lastBottomRight = 0.Foot
+    private var lastFrontLeft = 0.Foot
+    private var lastFrontRight = 0.Foot
+    private var lastBackLeft = 0.Foot
+    private var lastBackRight = 0.Foot
 
     fun odometry(modules: Array<Pair<Length, Angle>>, bearing: Angle) {
         //odom.updatePosition(wheelDist)
-        if (noTicksTL && modules[0].first != 0.Foot) log(Level.Debug) {
+        if (noTicksFL && modules[0].first != 0.Foot) log(Level.Debug) {
             "Received first top left tick at ${currentTime withDecimals 2}"
-        }.also { noTicksTL = false }
+        }.also { noTicksFL = false }
 
-        if (noTicksTR && modules[1].first != 0.Foot) log(Level.Debug) {
+        if (noTicksFR && modules[1].first != 0.Foot) log(Level.Debug) {
             "Received first top right tick at ${currentTime withDecimals 2}"
-        }.also { noTicksTR = false }
+        }.also { noTicksFR = false }
 
         if (noTicksBR && modules[2].first != 0.Foot) log(Level.Debug) {
             "Received first bottom right tick at ${currentTime withDecimals 2}"

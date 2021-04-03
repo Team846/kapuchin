@@ -7,8 +7,6 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainHardware
 import info.kunalsheth.units.generated.*
 
 class SwerveComponent(hardware: SwerveHardware
@@ -16,10 +14,10 @@ class SwerveComponent(hardware: SwerveHardware
     Component<SwerveComponent, SwerveHardware, FourSided<OffloadedOutput>>(hardware),
     GenericDriveComponent {
 
-    val maxTopLeftSpeed by pref(11.9, FootPerSecond)
-    val maxTopRightSpeed by pref(12.5, FootPerSecond)
-    val maxBottomRightSpeed by pref(12.5, FootPerSecond)
-    val maxBottomLeftSpeed by pref(12.5, FootPerSecond)
+    val maxFrontLeftSpeed by pref(11.9, FootPerSecond)
+    val maxFrontRightSpeed by pref(12.5, FootPerSecond)
+    val maxBackRightSpeed by pref(12.5, FootPerSecond)
+    val maxBackLeftSpeed by pref(12.5, FootPerSecond)
     val maxAcceleration by pref(10, FootPerSecondSquared)
     val percentMaxOmega by pref(75, Percent)
 
@@ -27,7 +25,7 @@ class SwerveComponent(hardware: SwerveHardware
     val constantSpeed by pref(5, FootPerSecond)
     val maxExtrapolate by pref(40, Inch)
 
-    override val maxSpeed get() = maxTopLeftSpeed min maxTopRightSpeed min maxBottomRightSpeed min maxBottomLeftSpeed
+    override val maxSpeed get() = maxFrontLeftSpeed min maxFrontRightSpeed min maxBackRightSpeed min maxBackLeftSpeed
     val maxOmega get() = maxSpeed / hardware.conversions.trackLength / 2 * Radian
 
     val velocityGains by pref {
@@ -35,27 +33,27 @@ class SwerveComponent(hardware: SwerveHardware
         val kF by pref(110, Percent)
         ({
             val TR = OffloadedEscGains(
-                kP = hardware.conversions.encoder.topRight.native(kP),
-                kF = hardware.conversions.encoder.topRight.native(
-                    Gain(hardware.escConfig.voltageCompSaturation, maxTopLeftSpeed)
+                kP = hardware.conversions.encoder.frontRight.native(kP),
+                kF = hardware.conversions.encoder.frontRight.native(
+                    Gain(hardware.escConfig.voltageCompSaturation, maxFrontLeftSpeed)
                 ) * kF.Each
             )
             val TL = OffloadedEscGains(
-                kP = hardware.conversions.encoder.topLeft.native(kP),
-                kF = hardware.conversions.encoder.topLeft.native(
-                    Gain(hardware.escConfig.voltageCompSaturation, maxTopRightSpeed)
+                kP = hardware.conversions.encoder.frontLeft.native(kP),
+                kF = hardware.conversions.encoder.frontLeft.native(
+                    Gain(hardware.escConfig.voltageCompSaturation, maxFrontRightSpeed)
                 ) * kF.Each
             )
             val BR = OffloadedEscGains(
-                kP = hardware.conversions.encoder.bottomRight.native(kP),
-                kF = hardware.conversions.encoder.bottomRight.native(
-                    Gain(hardware.escConfig.voltageCompSaturation, maxBottomRightSpeed)
+                kP = hardware.conversions.encoder.backRight.native(kP),
+                kF = hardware.conversions.encoder.backRight.native(
+                    Gain(hardware.escConfig.voltageCompSaturation, maxBackRightSpeed)
                 ) * kF.Each
             )
             val BL = OffloadedEscGains(
-                kP = hardware.conversions.encoder.bottomLeft.native(kP),
-                kF = hardware.conversions.encoder.bottomLeft.native(
-                    Gain(hardware.escConfig.voltageCompSaturation, maxBottomLeftSpeed)
+                kP = hardware.conversions.encoder.backLeft.native(kP),
+                kF = hardware.conversions.encoder.backLeft.native(
+                    Gain(hardware.escConfig.voltageCompSaturation, maxBackLeftSpeed)
                 ) * kF.Each
             )
 
@@ -71,15 +69,15 @@ class SwerveComponent(hardware: SwerveHardware
         FourSided(PercentOutput(hardware.escConfig, 0.Percent))
     }
 
-    private val topLeftEscOutputGraph = graph("Top Left ESC Output", Volt)
-    private val topRightEscOutputGraph = graph("Top Right ESC Output", Volt)
-    private val bottomLeftEscOutputGraph = graph("Bottom Left ESC Output", Volt)
-    private val bottomRightEscOutputGraph = graph("Bottom Right ESC Output", Volt)
+    private val frontLeftEscOutputGraph = graph("Front Left ESC Output", Volt)
+    private val frontRightEscOutputGraph = graph("Front Right ESC Output", Volt)
+    private val backLeftEscOutputGraph = graph("Back Left ESC Output", Volt)
+    private val backRightEscOutputGraph = graph("Back Right ESC Output", Volt)
 
-    private val topLeftEscErrorGraph = graph("Top Left ESC Error", Each)
-    private val topRightEscErrorGraph = graph("Top Right ESC Error", Each)
-    private val bottomLeftEscErrorGraph = graph("Bottom Left ESC Error", Each)
-    private val bottomRightEscErrorGraph = graph("Bottom Right ESC Error", Each)
+    private val frontLeftEscErrorGraph = graph("Front Left ESC Error", Each)
+    private val frontRightEscErrorGraph = graph("Front Right ESC Error", Each)
+    private val backLeftEscErrorGraph = graph("Back Left ESC Error", Each)
+    private val backRightEscErrorGraph = graph("Back Right ESC Error", Each)
 
     override fun SwerveHardware.output(value: FourSided<OffloadedOutput>) {
         TODO("Not implemented")

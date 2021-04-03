@@ -1,25 +1,22 @@
 package com.lynbrookrobotics.twenty.subsystems.drivetrain.swerve
 
-import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.math.drivetrain.swerve.*
-import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainConversions
-import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
-import edu.wpi.first.wpilibj.Counter
-import edu.wpi.first.wpilibj.DigitalOutput
-import edu.wpi.first.wpilibj.*
 import com.ctre.phoenix.motorcontrol.FeedbackDevice.IntegratedSensor
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.kauailabs.navx.frc.AHRS
+import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.swerve.*
+import com.lynbrookrobotics.kapuchin.hardware.*
+import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
+import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.kapuchin.subsystems.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import edu.wpi.first.wpilibj.*
+import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 
 class SwerveHardware(
 ) : SubsystemHardware<SwerveHardware, SwerveComponent>(), GenericDriveHardware {
@@ -31,27 +28,26 @@ class SwerveHardware(
     private val jitterPulsePinNumber by pref(8)
     private val jitterReadPinNumber by pref(9)
 
-    private val TREscInversion by pref(false)
-    private val TLEscInversion by pref(true)
-    private val BREscInversion by pref(true)
-    private val BLEscInversion by pref(true)
+    private val fREscInversion by pref(false)
+    private val fLEscInversion by pref(true)
+    private val bREscInversion by pref(true)
+    private val bLEscInversion by pref(true)
 
-    private val TRSensorInversion by pref(true)
-    private val TLSensorInversion by pref(false)
-    private val BRSensorInversion by pref(false)
-    private val BLSensorInversion by pref(false)
+    private val fRSensorInversion by pref(true)
+    private val fLSensorInversion by pref(false)
+    private val bRSensorInversion by pref(false)
+    private val bLSensorInversion by pref(false)
 
 
+    private val fRAngleEscInversion by pref(false)
+    private val fLAngleEscInversion by pref(true)
+    private val bRAngleEscInversion by pref(true)
+    private val bLAngleEscInversion by pref(true)
 
-    private val TRAngleEscInversion by pref(false)
-    private val TLAngleEscInversion by pref(true)
-    private val BRAngleEscInversion by pref(true)
-    private val BLAngleEscInversion by pref(true)
-
-    private val TRAngleSensorInversion by pref(true)
-    private val TLAngleSensorInversion by pref(false)
-    private val BRAngleSensorInversion by pref(false)
-    private val BLAngleSensorInversion by pref(false)
+    private val fRAngleSensorInversion by pref(true)
+    private val fLAngleSensorInversion by pref(false)
+    private val bRAngleSensorInversion by pref(false)
+    private val bLAngleSensorInversion by pref(false)
 
     private val driftTolerance by pref(0.2, DegreePerSecond)
 
@@ -62,78 +58,77 @@ class SwerveHardware(
     )
 
     private val idx = 0
-    private val TRId = 30
-    private val TLId = 32
-    private val BRId = 33
-    private val BLId = 31
+    private val fRId = 30
+    private val fLId = 32
+    private val bRId = 33
+    private val bLId = 31
 
-    private val TRAngleId = 30
-    private val TLAngleId = 32
-    private val BRAngleId = 33
-    private val BLAngleId = 31
+    private val fRAngleId = 30
+    private val fLAngleId = 32
+    private val bRAngleId = 33
+    private val bLAngleId = 31
 
     override val conversions = SwerveConversions(this)
 
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
-    val topRight by hardw {TalonFX(TRId)}.configure {
+    val frontRight by hardw { TalonFX(fRId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = TREscInversion
-        it.setSensorPhase(TRSensorInversion)
+        it.inverted = fREscInversion
+        it.setSensorPhase(fRSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val topLeft by hardw {TalonFX(TLId)}.configure {
+    val frontLeft by hardw { TalonFX(fLId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = TLEscInversion
-        it.setSensorPhase(TLSensorInversion)
+        it.inverted = fLEscInversion
+        it.setSensorPhase(fLSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val bottomRight by hardw {TalonFX(BRId)}.configure {
+    val backRight by hardw { TalonFX(bRId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = BREscInversion
-        it.setSensorPhase(BRSensorInversion)
+        it.inverted = bREscInversion
+        it.setSensorPhase(bRSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val bottomLeft by hardw {TalonFX(BLId)}.configure {
+    val backLeft by hardw { TalonFX(bLId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = BLEscInversion
-        it.setSensorPhase(BLSensorInversion)
+        it.inverted = bLEscInversion
+        it.setSensorPhase(bLSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
 
 
-
-    val topRightAngle by hardw {TalonFX(TRId)}.configure {
+    val frontRightAngle by hardw { TalonFX(fRId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = TRAngleEscInversion
-        it.setSensorPhase(TRAngleSensorInversion)
+        it.inverted = fRAngleEscInversion
+        it.setSensorPhase(fRAngleSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val topLeftAngle by hardw {TalonFX(TLId)}.configure {
+    val frontLeftAngle by hardw { TalonFX(fLId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = TLAngleEscInversion
-        it.setSensorPhase(TLAngleSensorInversion)
+        it.inverted = fLAngleEscInversion
+        it.setSensorPhase(fLAngleSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val bottomRightAngle by hardw {TalonFX(BRId)}.configure {
+    val backRightAngle by hardw { TalonFX(bRId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = BRAngleEscInversion
-        it.setSensorPhase(BRAngleSensorInversion)
+        it.inverted = bRAngleEscInversion
+        it.setSensorPhase(bRAngleSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val bottomLeftAngle by hardw {TalonFX(BLId)}.configure {
+    val backLeftAngle by hardw { TalonFX(bLId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = BLAngleEscInversion
-        it.setSensorPhase(BLAngleSensorInversion)
+        it.inverted = bLAngleEscInversion
+        it.setSensorPhase(bLAngleSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
 
