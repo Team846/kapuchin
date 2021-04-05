@@ -65,22 +65,22 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
         }
 
         runWhenever(
-            { intakeBalls } to choreography { intakeBalls() },
-            { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
+            { intakeBalls } to { intakeBalls() },
+            { unjamBalls } to { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
-            { aim } to choreography { visionAimTurret() },
-            { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
-            { shoot } to choreography { shootAll() },
+            { aim } to { visionAimTurret() },
+            { hoodUp } to { shooterHood?.set(Up) ?: freeze() },
+            { shoot } to { shootAll() },
 
-            { shooterPreset } to choreography { flywheel?.let { spinUpShooter(it.preset) } ?: freeze() },
+            { shooterPreset } to { flywheel?.let { spinUpShooter(it.preset) } ?: freeze() },
 
-            { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
-            { reindexCarousel } to choreography {
+            { rezeroTurret } to { turret?.rezero(electrical) ?: freeze() },
+            { reindexCarousel } to {
                 carousel.whereAreMyBalls()
                 rumble.set(TwoSided(0.Percent, 100.Percent))
             },
 
-            { !turretManual.isZero } to choreography {
+            { !turretManual.isZero } to {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
                 turret?.manualOverride(operator) ?: freeze()
             },

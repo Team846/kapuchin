@@ -76,11 +76,25 @@ class Subsystems(
     val shooterHood: ShooterHoodComponent?
 ) : Named by Named("Subsystems") {
 
+    private val teleops = listOf(
+        Subsystems::digestionTeleop,
+        Subsystems::interstellarAccuracyTeleop,
+        Subsystems::powerPortTeleop
+    )
+
     suspend fun teleop() {
         runAll(
             { climberTeleop() },
             { controlPanelTeleop() },
-            { digestionTeleop() },
+            {
+                when (Auto.teleopID) {
+                    !in teleops.indices -> log(Error) { "${Auto.teleopID} isn't an teleop!! you fucked up!!!" }
+                    else -> {
+                        log(Debug) { "Running ${teleops[Auto.teleopID].name}" }
+                        teleops[Auto.teleopID].invoke(this@Subsystems)
+                    }
+                }
+            },
             {
                 launchWhenever(
                     { limelight.routine == null } to choreography { limelight.autoZoom() },
@@ -98,11 +112,11 @@ class Subsystems(
     )
 
     suspend fun auto() {
-        when (Auto.id) {
-            !in autos.indices -> log(Error) { "${Auto.id} isn't an auto!! you fucked up!!!" }
+        when (Auto.autoID) {
+            !in autos.indices -> log(Error) { "${Auto.autoID} isn't an auto!! you fucked up!!!" }
             else -> {
-                log(Debug) { "Running ${autos[Auto.id].name}" }
-                autos[Auto.id].invoke(this@Subsystems)
+                log(Debug) { "Running ${autos[Auto.autoID].name}" }
+                autos[Auto.autoID].invoke(this@Subsystems)
             }
         }
     }

@@ -55,6 +55,11 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val ball2 = s { xbox.yButton }
     val ball3 = s { xbox.bButton }
 
+    val zone1 = s { pov == 0 }
+    val zone2 = s { pov == 90 }
+    val zone3 = s { pov == 180 }
+    val zone4 = s { pov == 270 }
+
     val rezeroTurret = s { xbox.startButton }
     val reindexCarousel = s { xbox.backButton }
 

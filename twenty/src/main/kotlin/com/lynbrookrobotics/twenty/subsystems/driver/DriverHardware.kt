@@ -83,6 +83,10 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     val zeroOdometry = s { stick[RightTrigger]}
 
+    val powerPortIntake = s { stick[BottomTrigger] }
+    val powerPortShoot = s { stick[Trigger]}
+    val powerPortIntakeNoDrive = s { stick[RightTrigger]}
+
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->
             setOf(accelerator, steering, absSteering).forEach {
