@@ -14,6 +14,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainConversions
 import edu.wpi.first.wpilibj.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -23,136 +24,67 @@ class SwerveHardware(
     override val priority = Priority.RealTime
     override val period = 30.milli(Second)
     override val syncThreshold = 5.milli(Second)
-    override val name = "Drivetrain"
+    override val name = "SwerveDrive"
 
     private val jitterPulsePinNumber by pref(8)
     private val jitterReadPinNumber by pref(9)
 
-    private val fREscInversion by pref(false)
-    private val fLEscInversion by pref(true)
-    private val bREscInversion by pref(true)
-    private val bLEscInversion by pref(true)
+    private val frontLeftEscInversion by pref(false)
+    private val frontRightEscInversion by pref(true)
+    private val backLeftEscInversion by pref(false)
+    private val backRightEscInversion by pref(true)
 
-    private val fRSensorInversion by pref(true)
-    private val fLSensorInversion by pref(false)
-    private val bRSensorInversion by pref(false)
-    private val bLSensorInversion by pref(false)
-
-
-    private val fRAngleEscInversion by pref(false)
-    private val fLAngleEscInversion by pref(true)
-    private val bRAngleEscInversion by pref(true)
-    private val bLAngleEscInversion by pref(true)
-
-    private val fRAngleSensorInversion by pref(true)
-    private val fLAngleSensorInversion by pref(false)
-    private val bRAngleSensorInversion by pref(false)
-    private val bLAngleSensorInversion by pref(false)
+    private val frontLeftSensorInversion by pref(true)
+    private val frontRightSensorInversion by pref(false)
+    private val backLeftSensorInversion by pref(true)
+    private val backRightSensorInversion by pref(false)
 
     private val driftTolerance by pref(0.2, DegreePerSecond)
 
     val escConfig by escConfigPref(
         defaultNominalOutput = 1.5.Volt,
+
         defaultContinuousCurrentLimit = 25.Ampere,
         defaultPeakCurrentLimit = 35.Ampere
     )
 
-    private val idx = 0
-    private val fRId = 30
-    private val fLId = 32
-    private val bRId = 33
-    private val bLId = 31
-
-    private val fRAngleId = 30
-    private val fLAngleId = 32
-    private val bRAngleId = 33
-    private val bLAngleId = 31
+    private val idx = 0 //need to check this later
+    private val frontLeftMasterEscId = 30
+    private val frontRightSlaveEscId = 32
+    private val backLeftMasterEscId = 33
+    private val backRightSlaveEscId = 31
 
     override val conversions = SwerveConversions(this)
 
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
-    val frontRight by hardw { TalonFX(fRId) }.configure {
+    val frontRightMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = fREscInversion
-        it.setSensorPhase(fRSensorInversion)
+        it.inverted = frontLeftEscInversion
+        it.setSensorPhase(frontLeftSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val frontLeft by hardw { TalonFX(fLId) }.configure {
+    val frontLeftMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = fLEscInversion
-        it.setSensorPhase(fLSensorInversion)
+        it.inverted = frontLeftEscInversion
+        it.setSensorPhase(frontLeftSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val backRight by hardw { TalonFX(bRId) }.configure {
+    val backRightMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = bREscInversion
-        it.setSensorPhase(bRSensorInversion)
+        it.inverted = backRightEscInversion
+        it.setSensorPhase(backRightSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-    val backLeft by hardw { TalonFX(bLId) }.configure {
+    val backLeftMasterEsc by hardw { TalonFX(leftMasterEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
-        it.inverted = bLEscInversion
-        it.setSensorPhase(bLSensorInversion)
+        it.inverted = backLeftEscInversion
+        it.setSensorPhase(backLeftSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
-
-
-    val frontRightAngle by hardw { TalonFX(fRId) }.configure {
-        setupMaster(it, escConfig, IntegratedSensor, true)
-        +it.setSelectedSensorPosition(0.0)
-        it.inverted = fRAngleEscInversion
-        it.setSensorPhase(fRAngleSensorInversion)
-        it.setNeutralMode(NeutralMode.Brake)
-    }
-    val frontLeftAngle by hardw { TalonFX(fLId) }.configure {
-        setupMaster(it, escConfig, IntegratedSensor, true)
-        +it.setSelectedSensorPosition(0.0)
-        it.inverted = fLAngleEscInversion
-        it.setSensorPhase(fLAngleSensorInversion)
-        it.setNeutralMode(NeutralMode.Brake)
-    }
-    val backRightAngle by hardw { TalonFX(bRId) }.configure {
-        setupMaster(it, escConfig, IntegratedSensor, true)
-        +it.setSelectedSensorPosition(0.0)
-        it.inverted = bRAngleEscInversion
-        it.setSensorPhase(bRAngleSensorInversion)
-        it.setNeutralMode(NeutralMode.Brake)
-    }
-    val backLeftAngle by hardw { TalonFX(bLId) }.configure {
-        setupMaster(it, escConfig, IntegratedSensor, true)
-        +it.setSelectedSensorPosition(0.0)
-        it.inverted = bLAngleEscInversion
-        it.setSensorPhase(bLAngleSensorInversion)
-        it.setNeutralMode(NeutralMode.Brake)
-    }
-
-    private val gyro by hardw { AHRS(SerialPort.Port.kUSB) }.configure {
-        blockUntil() { it.isConnected }
-        blockUntil() { !it.isCalibrating }
-        it.zeroYaw()
-    }.verify("NavX should be connected") {
-        it.isConnected
-    }.verify("NavX should be finished calibrating on startup") {
-        !it.isCalibrating
-    }.verify("NavX yaw should not drift after calibration") {
-        it.rate.DegreePerSecond in `±`(driftTolerance)
-    }
-
-    private val odometryTicker = ticker(Priority.RealTime, 10.milli(Second), "Odometry")
-    private val escNamed = Named("ESC Odometry", this)
-
-//    override val position = sensor {
-//        //conversions.tracking.run { Position(x, y, bearing) } stampWith it
-//        //conversions.odometry(arrayOf(Pair<topRight.>))
-//    }
-        .with(graph("X Location", Foot, escNamed)) { it.x }
-        .with(graph("Y Location", Foot, escNamed)) { it.y }
-        .with(graph("Bearing", Degree, escNamed)) { it.bearing }
-
 }
