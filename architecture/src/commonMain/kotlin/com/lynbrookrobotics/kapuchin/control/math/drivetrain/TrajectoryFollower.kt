@@ -144,8 +144,8 @@ class TrajectoryFollower(
     private fun finish() {
         done = true
         drivetrain.log(Debug) { "*****Finished Trajectory*****" }
-        drivetrain.log(Debug) { "TRAJ End pos: ${position.y}"}
-        drivetrain.log(Debug) { "TRAJ Last waypoint: ${target.y.x.Foot},${target.y.y.Foot}"}
+        drivetrain.log(Debug) { "TRAJ End pos: ${position.y}" }
+        drivetrain.log(Debug) { "TRAJ Last waypoint: ${target.y.x.Foot},${target.y.y.Foot}" }
 
         if (errors.size == 0) {
             drivetrain.log(Error) { "No error data points" }
@@ -158,7 +158,7 @@ class TrajectoryFollower(
     }
 
     init {
-        drivetrain.log(Debug) { "TRAJ Start pos: ${position.y}"}
+        drivetrain.log(Debug) { "TRAJ Start pos: ${position.y}" }
     }
 
     /**
@@ -175,10 +175,7 @@ class TrajectoryFollower(
                 finish()
             } else {
                 firstPoint = false
-//                drivetrain.log(Debug) { "Hit Waypoint" }
 
-                // Check error
-//                drivetrain.log(Debug) { "Error: ${error.Inch withDecimals 2} in" }
                 if (error > safetyTolerance) {
                     drivetrain.log(Error) { "*****ABORTING TRAJECTORY*****" }
                     drivetrain.log(Error) { "Current pos: ${position.y} | Waypoint: ${target.y} | Safety tolerance: (${safetyTolerance.Inch} in)" }
@@ -193,8 +190,9 @@ class TrajectoryFollower(
 
                 prev_target = target
 
-                val extrapDist = max(extrapolateDist(maxExtrap, extrapK, speed, drivetrain.maxSpeed * speedFactor), 5.Inch)
-                println("Extrap: ${extrapDist.Inch} (${(speed / drivetrain.maxSpeed * speedFactor).Percent}%)")
+                val extrapDist =
+                    max(extrapolateDist(maxExtrap, extrapK, speed, drivetrain.maxSpeed * speedFactor), 5.Inch)
+
                 extrapolatedTarget =
                     newTarget.extrapolate(
                         target.y,

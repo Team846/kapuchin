@@ -128,7 +128,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
 
-                carousel.delayUntilBall()
+                withTimeout(carousel.intakeTimeout) { carousel.delayUntilBall() }
                 carousel.state.push()
             }
         }

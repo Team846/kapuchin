@@ -22,12 +22,12 @@ suspend fun Subsystems.powerPortTeleop() = startChoreo("Power Port Teleop") {
     val zeroOdometry by driver.zeroOdometry.readEagerly().withoutStamps
 
     choreography {
-        if (turret != null && !turret.hardware.isZeroed) launch {
-            log(Debug) { "Rezeroing turret" }
-            turret.rezero(electrical)
-            turret.hardware.zero()
-        }
-        turret?.set(0.Degree, 2.Degree)
+//        if (turret != null && !turret.hardware.isZeroed) launch {
+//            log(Debug) { "Rezeroing turret" }
+//            turret.rezero(electrical)
+//            turret.hardware.zero()
+//        }
+//        turret?.set(0.Degree, 2.Degree)
 
         drivetrain.hardware.zeroOdometry()
         launch { flywheel?.set(Auto.PowerPort.shootSpeed) }
