@@ -12,6 +12,8 @@ import com.lynbrookrobotics.twenty.subsystems.driver.*
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.*
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.swerve.SwerveComponent
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
+import kotlin.math.sqrt
 
 suspend fun SwerveComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
@@ -21,50 +23,56 @@ suspend fun SwerveComponent.teleop(driver: DriverHardware) = startRoutine("Teleo
     val position by hardware.position.readOnTick.withStamps
 
 
-    // x1 = strafe, y1 = speed, x2 = rotation
-    // TODO: Replace L, W, and r
-    // TODO: get x1, y1, and x2
-    // TODO: Supply angles + velocities to wheel states
-    // TODO: Replace math funcs
-    
-    val a = x1 - x2 *( L/r)
-    val b = x1 + x2 * (L/r)
-    val c = y1 - x2 * (W/r)
-    val d = y1 + x2 * (W/r)
-
-    val fLSpeed = kotlin.math.sqrt(b * b + c * c)
-    val fRSpeed = kotlin.math.sqrt(b*b + d*d)
-    val bLSpeed = kotlin.math.sqrt(a*a + d*d)
-    val bRSpeed = kotlin.math.sqrt(a*a + c*c)
-
-    val fLAngle = Math.atan2(b, c) * 180 / Math.PI
-    val fRAngle = Math.atan2(b, d) * 180 / Math.PI
-    val bLAngle = Math.atan2(a, c) * 180 / Math.PI
-    val bRAngle = Math.atan2(a, d) * 180 / Math.PI
-
-    // Normalize Speed
-
-    var max = fLSpeed
-
-    max = Math.max(max, fRSpeed)
-    max = Math.max(max, bLSpeed)
-    max = Math.max(max, fRSpeed)
-
-    if (max > 1) {
-        fLSpeed /= max
-        fRSpeed /= max
-        bRSpeed /= max
-        bLSpeed /= max
-    }
-
-
-    // Set Angle of Each wheel here
-
-    // Set Speed for each wheel here```
-
-
-
     controller {
+        /*
+        strafe = joystick left/right, forward = joystick forward, rotation = steering
+        TODO: Supply angles + velocities to wheel states
 
+        Counter-Clockwise Order
+
+        Wheel 1 is frontRight
+        Wheel 2 is frontLeft
+        Wheel 3 is backLeft
+        Wheel 4 is backRight
+        */
+
+        val wheel1 = strafe - rotate * (hardware.conversions.trackLength / hardware.conversions.radius)
+        val wheel2 = strafe + rotate * (hardware.conversions.trackLength / hardware.conversions.radius)
+        val wheel3 = forward - rotate * (hardware.conversions.trackWidth / hardware.conversions.radius)
+        val wheel4 = forward + rotate * (hardware.conversions.trackWidth / hardware.conversions.radius)
+
+        var frontLeftSpeed = sqrt(wheel2.pow(2) + wheel3.pow(2))
+        var frontRightSpeed = sqrt(wheel2.pow(2) + wheel4.pow(2))
+        var backLeftSpeed = sqrt(wheel1.pow(2) + wheel4.pow(2))
+        var backRightSpeed = sqrt(wheel1.pow(2) + wheel3.pow(2))
+
+        val frontLeftAngle = atan2(wheel2, wheel3) * 180 / Math.PI
+        val frontRightAngle = atan2(wheel2, wheel4) * 180 / Math.PI
+        val backLeftAngle = atan2(wheel1, wheel3) * 180 / Math.PI
+        val backRightAngle = atan2(wheel1, wheel4) * 180 / Math.PI
+
+
+        // Normalize Speeds
+
+        val max = maxOf(frontRightSpeed, frontLeftSpeed, backLeftSpeed, backRightSpeed)
+        val min = minOf(frontRightSpeed, frontLeftSpeed, backLeftSpeed, backRightSpeed)
+
+        if (max > 1) {
+            frontRightSpeed /= max
+            frontLeftSpeed /= max
+            backRightSpeed /= max
+            backLeftSpeed /= max
+        }
+
+        if (min < -1) {
+            frontRightSpeed /= min * (-1)
+            frontLeftSpeed /= min * (-1)
+            backRightSpeed /= min * (-1)
+            backLeftSpeed /= min * (-1)
+        }
+
+        // Rotate each module here
+
+        // Set Speed for each wheel here
     }
 }
