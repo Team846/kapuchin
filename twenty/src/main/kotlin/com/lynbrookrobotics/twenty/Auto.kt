@@ -1,5 +1,6 @@
 package com.lynbrookrobotics.twenty
 
+import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import info.kunalsheth.units.generated.*
@@ -34,8 +35,17 @@ object Auto : Named by Named("Auto") {
     object PowerPort : Named by Named("PowerPort", this) {
         val shootSpeed by pref(6000, Rpm)
         val pathConfig by autoPathConfigPref("")
-        val distance by pref(12, Foot)
         val shootDelay by pref(0.5, Second)
+
+        val goalPos by pref {
+            val x by pref(0, Foot)
+            val y by pref(0, Foot)
+            ({ Waypoint(x, y) })
+        }
+
+        val distance by pref(8.8, Foot)
+
+        val aimMode by pref(0)
     }
 
     init {

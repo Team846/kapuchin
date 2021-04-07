@@ -9,6 +9,7 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.*
+import com.lynbrookrobotics.twenty.Auto.PowerPort
 import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.*
@@ -47,7 +48,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val zeroOdometry by driver.zeroOdometry.readEagerly().withoutStamps
 
     choreography {
-        if (turret != null && !turret.hardware.isZeroed) launch {
+        if (turret != null) launch {
             log(Debug) { "Rezeroing turret" }
             turret.rezero(electrical)
         }
@@ -60,7 +61,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         launch {
             launchWhenever(
-//                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
+                { turret?.routine == null } to listOf(
+                    choreography { log(Debug) { "No-op aim" } },
+                    choreography { turret?.fieldOrientedPosition(drivetrain, PowerPort.goalPos) },
+                    choreography { turret?.trackTarget(limelight, flywheel!!, drivetrain) }
+                )[Auto.PowerPort.aimMode],
             )
         }
 
