@@ -23,7 +23,7 @@ suspend fun Subsystems.powerPortTeleop() = startChoreo("Power Port Teleop") {
     val zeroOdometry by driver.zeroOdometry.readEagerly().withoutStamps
 
     val aimJobs = listOf(
-        choreography { log(Debug) {"No-op aim"} },
+        choreography {  },
         choreography { turret?.fieldOrientedPosition(drivetrain, PowerPort.goalPos) },
         choreography { turret?.trackTarget(limelight, flywheel!!, drivetrain )}
     )

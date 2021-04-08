@@ -113,7 +113,7 @@ class TrajectoryFollower(
         .let { RotationMatrix(it) }
         .let { mtrx ->
             trajectory
-                .map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
+                .map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t / speedFactor }
                 .iterator()
         }
 

@@ -16,7 +16,9 @@ object Auto : Named by Named("Auto") {
 
     object AutoNav : Named by Named("AutoNav", this) {
         val barrel by autoPathConfigPref("barrel")
+        val barrel_traj by autoPathConfigPref("barrel_traj")
         val slalom by autoPathConfigPref("slalom")
+        val slalom_traj by autoPathConfigPref("slalom_traj")
 
         // Bounce path files are split into bounce{1,2,3,4}.tsv
         val bounce1 by autoPathConfigPref("bounce1")

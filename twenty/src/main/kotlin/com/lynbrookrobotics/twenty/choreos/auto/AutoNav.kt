@@ -16,7 +16,7 @@ suspend fun Subsystems.autoNavBarrel() = startChoreo("AutoNav Barrel") {
     choreography {
         val start = currentTime
         try {
-            followPath(Auto.AutoNav.barrel)
+            followTraj(Auto.AutoNav.barrel_traj)
         } finally {
             log(Debug) { "Finish in ${(currentTime - start).Second}s" }
         }
@@ -27,7 +27,7 @@ suspend fun Subsystems.autoNavSlalom() = startChoreo("AutoNav Slalom") {
     choreography {
         val start = currentTime
         try {
-            followPath(Auto.AutoNav.slalom)
+            followTraj(Auto.AutoNav.slalom_traj)
         } finally {
             log(Debug) { "Finish in ${(currentTime - start).Second}s" }
         }

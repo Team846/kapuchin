@@ -62,7 +62,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
         launch {
             launchWhenever(
                 { turret?.routine == null } to listOf(
-                    choreography { log(Debug) { "No-op aim" } },
+                    choreography { },
                     choreography { turret?.fieldOrientedPosition(drivetrain, PowerPort.goalPos) },
                     choreography { turret?.trackTarget(limelight, flywheel!!, drivetrain) }
                 )[Auto.PowerPort.aimMode],

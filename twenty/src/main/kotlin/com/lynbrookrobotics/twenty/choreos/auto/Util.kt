@@ -97,3 +97,7 @@ fun Subsystems.fastAsFuckPath(path: Path, config: AutoPathConfiguration): Trajec
 suspend fun Subsystems.followPath(config: AutoPathConfiguration) = loadRobotPath(config.name)?.let { path ->
     drivetrain.followTrajectory(fastAsFuckPath(path, config), config)
 } ?: log(Error) { "Couldn't find path ${config.name}" }
+
+suspend fun Subsystems.followTraj(config: AutoPathConfiguration) = loadRobotTrajectory(config.name)?.let {
+        traj -> drivetrain.followTrajectory(traj, config)
+} ?: log(Error){ "Couldn't find traj ${config.name}"}
