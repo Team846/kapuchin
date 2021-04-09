@@ -9,6 +9,9 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
+import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
+import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
@@ -16,7 +19,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-class ModuleHardware : SubsystemHardware<ModuleHardware, ModuleComponent>(), GenericWheelHardware {
+class ModuleHardware(
+    private val escId,
+    private val hallEffectChannel,
+    private val idx,
+    private val wheelEscId
+
+) : SubsystemHardware<ModuleHardware, ModuleComponent>(), GenericWheelHardware {
     override val angle: Sensor<Angle>
         get() = TODO("Not yet implemented")
     override val conversions = ModuleConversions(this)
@@ -31,8 +40,6 @@ class ModuleHardware : SubsystemHardware<ModuleHardware, ModuleComponent>(), Gen
         defaultPeakCurrentLimit = 35.Ampere
     )
 
-    private val escId = 60
-    private val hallEffectChannel = 1
     val invert by pref(false)
 
     val angleEsc by hardw { CANSparkMax(escId, kBrushless) }.configure {
@@ -46,21 +53,9 @@ class ModuleHardware : SubsystemHardware<ModuleHardware, ModuleComponent>(), Gen
         it.position = 0.0
     }
 
-    val position = sensor(angleEncoder) {
+    val anglePosition = sensor(angleEncoder) {
         conversions.angleEncoder.realPosition(position) stampWith it
     }.with(graph("Angle", Degree))
-
-    private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
-        dio.requestInterrupts {
-            angleEncoder.position = conversions.angleEncoder.native(
-                position.optimizedRead(
-                    dio.readFallingTimestamp().Second, syncThreshold
-                ).y
-            )
-        }
-        dio.setUpSourceEdge(false, true)
-        dio.enableInterrupts()
-    }
 
     private val jitterPulsePinNumber by pref(8)
     private val jitterReadPinNumber by pref(9)
@@ -70,13 +65,10 @@ class ModuleHardware : SubsystemHardware<ModuleHardware, ModuleComponent>(), Gen
 
     private val driftTolerance by pref(0.2, DegreePerSecond)
 
-    private val idx = 0
-    private val wheelEscId = 30
-
     val jitterPulsePin by hardw { DigitalOutput(jitterPulsePinNumber) }
     val jitterReadPin by hardw { Counter(jitterReadPinNumber) }
 
-    val wheelEsc by hardw { TalonFX(leftMasterEscId) }.configure {
+    val wheelEsc by hardw { TalonFX(wheelEscId) }.configure {
         setupMaster(it, escConfig, IntegratedSensor, true)
         +it.setSelectedSensorPosition(0.0)
         it.inverted = wheelEscInversion
@@ -85,8 +77,34 @@ class ModuleHardware : SubsystemHardware<ModuleHardware, ModuleComponent>(), Gen
     }
 
     val wheelPosition = sensor {
-        conversions.wheelEncoder.encoder.realPosition(
+        conversions.wheelEncoder.realPosition(
             wheelEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Wheel Position", Foot))
+
+    private val odometryTicker = ticker(Priority.RealTime, 10.milli(Second), "Odometry")
+
+    private val escNamed = Named("Wheel ESC Odometry", this)
+    override val position = sensor {
+        conversions.odometry(
+            wheelPosition.optimizedRead(it, syncThreshold).y,
+        )
+    }
+    
+    wheelVelocity = sensor {
+        conversions.wheelEncoder.rsealVelocity (
+            wheelEsc.getSelectedSensorVelocity(idx)
+                ) stampWith it
+    .with(graph("Wheel Speed", FootPerSecond))
+
+    init {
+        uiBaselineTicker.runOnTick { time ->
+            setOf(anglePosition, angularVelocity, wheelPosition, wheelVelocity).forEach{
+                it.optimizedRead(time, 0.5.Second)
+            }
+        }
+        odometryTicker.runOnTick{time ->
+            conversions.odometry(wheelPosition.optimizedRead(time, syncThreshold).y)
+        }
+    }
 }

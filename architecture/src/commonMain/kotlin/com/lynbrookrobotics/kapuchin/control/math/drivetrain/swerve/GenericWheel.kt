@@ -11,6 +11,7 @@ interface GenericWheelConversions {
 
 interface GenericWheelHardware {
     val angle: Sensor<Angle>
+    var position: Sensor<Time>
     val conversions: GenericWheelConversions
 }
 
