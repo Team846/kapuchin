@@ -13,6 +13,7 @@ class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversi
     GenericDriveConversions {
 
     override val trackLength by pref(2, Foot)
+    override val trackWidth by pref(2, Foot)
     override val radius by pref(2, Foot)
 
     private val frontLeftTrim by pref(1.0)
