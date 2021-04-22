@@ -1,5 +1,7 @@
 package com.lynbrookrobotics.twenty.subsystems.drivetrain.swerve.module
 
+import com.ctre.phoenix.motorcontrol.NeutralMode
+import com.ctre.phoenix.motorcontrol.can.TalonFX
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.swerve.*
 import com.lynbrookrobotics.kapuchin.hardware.*
@@ -12,18 +14,21 @@ import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.Subsystems.Companion.uiBaselineTicker
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import edu.wpi.first.wpilibj.Counter
+import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class ModuleHardware(
-    private val escId,
-    private val hallEffectChannel,
-    private val idx,
-    private val wheelEscId
+    private val escId: Int,
+    private val hallEffectChannel: Int,
+    private val idx: Int,
+    private val wheelEscId: Int
 
 ) : SubsystemHardware<ModuleHardware, ModuleComponent>(), GenericWheelHardware {
     override val angle: Sensor<Angle>
@@ -85,26 +90,21 @@ class ModuleHardware(
     private val odometryTicker = ticker(Priority.RealTime, 10.milli(Second), "Odometry")
 
     private val escNamed = Named("Wheel ESC Odometry", this)
-    override val position = sensor {
-        conversions.odometry(
-            wheelPosition.optimizedRead(it, syncThreshold).y,
-        )
-    }
     
-    wheelVelocity = sensor {
-        conversions.wheelEncoder.rsealVelocity (
+    val wheelVelocity = sensor{
+        conversions.wheelEncoder.realVelocity(
             wheelEsc.getSelectedSensorVelocity(idx)
-                ) stampWith it
-    .with(graph("Wheel Speed", FootPerSecond))
+        ) stampWith it
+    }.with(graph("Wheel Speed", FootPerSecond))
 
     init {
         uiBaselineTicker.runOnTick { time ->
-            setOf(anglePosition, angularVelocity, wheelPosition, wheelVelocity).forEach{
+            setOf(anglePosition, wheelPosition, wheelVelocity).forEach{
                 it.optimizedRead(time, 0.5.Second)
             }
         }
         odometryTicker.runOnTick{time ->
-            conversions.odometry(wheelPosition.optimizedRead(time, syncThreshold).y)
+            conversions.wheelOdometry(wheelPosition.optimizedRead(time, syncThreshold).y)
         }
     }
 }

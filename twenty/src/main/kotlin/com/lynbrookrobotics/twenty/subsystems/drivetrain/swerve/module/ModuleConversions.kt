@@ -66,9 +66,9 @@ class ModuleConversions(val hardware: ModuleHardware) : Named by Named("Conversi
     private var ticks = true
     private var lastTicks = 0.Foot
 
-    override fun toString() = "$name"
+    override fun toString() = name
 
-    fun wheelOdometry(totalDist: Length){
+    fun wheelOdometry(totalDist: Length){ //may not be needed
         if (ticks && totalDist != 0.Foot) log(Level.Debug) {
             "Received first tick from $name at ${currentTime withDecimals 2}"
         }.also { ticks = false }
