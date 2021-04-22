@@ -158,7 +158,14 @@ class TrajectoryFollower(
     }
 
     init {
-        drivetrain.log(Debug) { "TRAJ Start pos: ${position.y}" }
+        drivetrain.log(Debug) { "TRAJ robot Start pos: ${position.y}" }
+        val waypoints = origin.bearing
+            .let { if (reverse) 180.Degree `coterminal +` it else it }
+            .let { RotationMatrix(it) }
+            .let { mtrx ->
+                trajectory.map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
+            }
+        drivetrain.log(Debug) { "TRAJ path start pos: ${waypoints.first().y.x.Foot},${waypoints.first().y.x.Foot}"}
     }
 
     /**
