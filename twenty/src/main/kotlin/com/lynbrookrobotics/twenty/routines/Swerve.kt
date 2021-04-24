@@ -36,6 +36,14 @@ suspend fun SwerveComponent.teleop(driver: DriverHardware) = startRoutine("Teleo
         Wheel 4 is backRight
         */
 
+        if (isFieldOriented === true && gyroEnabled === true) {
+            // Convert gyro angle to radians
+            val gyro = gyroAngle * Math.PI / 180
+            val temp = strafe * Math.cos(gyro) + forward * Math.sin(gyro)
+            forward = -strafe * Math.sin(gyro) + forward * Math.cos(gyro)
+            strafe = temp
+        }
+
         val wheel1 = strafe - rotate * (hardware.conversions.trackLength / hardware.conversions.radius)
         val wheel2 = strafe + rotate * (hardware.conversions.trackLength / hardware.conversions.radius)
         val wheel3 = forward - rotate * (hardware.conversions.trackWidth / hardware.conversions.radius)
@@ -72,7 +80,18 @@ suspend fun SwerveComponent.teleop(driver: DriverHardware) = startRoutine("Teleo
         }
 
         // Rotate each module here
-
+        // Position Output for each angle
+        FourSided(
+            VelocityOutput()
+            VelocityOutput()
+            Velocity
+        )
         // Set Speed for each wheel here
+        // Velocity Output here
+        FourSided(
+            PositionOutput(
+
+            )
+        )
     }
 }
