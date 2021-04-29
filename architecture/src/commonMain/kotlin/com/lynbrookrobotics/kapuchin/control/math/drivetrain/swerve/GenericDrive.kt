@@ -14,10 +14,10 @@ interface GenericDriveConversions {
 
 interface GenericDriveHardware {
 //    val modules: Array<GenericWheelComponent> //size of 4
-    val position: Sensor<Position>
+    val position: Sensor<Position?>
     val conversions: GenericDriveConversions
 
-    fun positionDelegate(scope: BoundSensorScope): DelegateProvider<Any?, TimeStamped<Position>> = with(scope) {
+    fun positionDelegate(scope: BoundSensorScope): DelegateProvider<Any?, TimeStamped<Position?>> = with(scope) {
         position.readOnTick.withStamps
     }
 
@@ -26,7 +26,7 @@ interface GenericDriveHardware {
 }
 
 interface GenericDriveComponent: Named {
-    val hardware: GenericDriveHardware
+//    val hardware: GenericDriveHardware
     val maxSpeed: Velocity
     val bearingKp: Gain<Velocity, Angle>
     val bearingKd: Gain<Velocity, AngularVelocity>

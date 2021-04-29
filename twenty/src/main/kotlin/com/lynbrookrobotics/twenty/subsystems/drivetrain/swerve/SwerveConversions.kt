@@ -42,7 +42,7 @@ class SwerveConversions(val hardware: SwerveHardware) : Named by Named("Conversi
 
     val tracking = SwerveOdometry(position, trackWidth/2, trackLength/2)
 
-    fun odometry(modulesMovements: Array<Pair<Length, Angle>>){
-        tracking.updatePosition(modulesMovements)
+    fun odometry(modulesMovements: Array<Pair<Length, Angle>>, degree: Angle): Position? {
+        return tracking.updatePosition(modulesMovements)
     }
 }
