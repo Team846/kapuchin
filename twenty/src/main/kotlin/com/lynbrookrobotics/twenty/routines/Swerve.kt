@@ -79,19 +79,17 @@ suspend fun SwerveComponent.teleop(driver: DriverHardware) = startRoutine("Teleo
             backLeftSpeed /= min * (-1)
         }
 
-        // Rotate each module here
-        // Position Output for each angle
-        FourSided(
-            VelocityOutput()
-            VelocityOutput()
-            Velocity
-        )
-        // Set Speed for each wheel here
-        // Velocity Output here
-        FourSided(
-            PositionOutput(
-
-            )
-        )
+//        // Rotate each module here
+//        // Position Output for each angle
+//        FourSided(
+//
+//        )
+//        // Set Speed for each wheel here
+//        // Velocity Output here
+//        FourSided(
+//            PositionOutput(
+//
+//            )
+//        )
     }
 }

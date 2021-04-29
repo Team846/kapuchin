@@ -12,7 +12,7 @@ import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.kapuchin.timing.monitoring.RealtimeChecker.Companion.realtimeChecker
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.swerve.module.ModuleComponent
+import com.lynbrookrobotics.twenty.subsystems.drivetrain.swerve.module.*
 import info.kunalsheth.units.generated.*
 
 class SwerveComponent(hardware: SwerveHardware,
@@ -24,14 +24,33 @@ class SwerveComponent(hardware: SwerveHardware,
     Component<SwerveComponent, SwerveHardware, FourSided<OffloadedOutput>>(hardware),
     GenericDriveComponent {
 
-    val modules = mutableListOf<ModuleComponent>(Module)
+    val m1Hardware = ModuleHardware(1,2,3,4)
+    val m2Hardware = ModuleHardware(1,2,3,4)
+    val m3Hardware = ModuleHardware(1,2,3,4)
+    val m4Hardware = ModuleHardware(1,2,3,4)
+
+    val m1Comp = ModuleComponent(m1Hardware)
+    val m2Comp = ModuleComponent(m1Hardware)
+    val m3Comp = ModuleComponent(m1Hardware)
+    val m4Comp = ModuleComponent(m1Hardware)
+
+    val modules = mutableListOf<ModuleComponent>(m1Comp, m2Comp, m3Comp, m4Comp)
 
     override fun SwerveHardware.output(value: FourSided<OffloadedOutput>) {
+        TODO("Not yet implemented")
+    }
+
+    fun SwerveHardware.output(value: List<Pair<OffloadedOutput, OffloadedOutput>>) {
+        for(i in 0 until modules.size){
+            with(modules[i]){
+                hardware.output(value[i].first, value[i].second)
+            }
+        }
 
     }
 
     init {
-        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set) { hardware.jitterReadPin.period.Second }
+//        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set) { hardware.jitterReadPin.period.Second }
     }
 
 }

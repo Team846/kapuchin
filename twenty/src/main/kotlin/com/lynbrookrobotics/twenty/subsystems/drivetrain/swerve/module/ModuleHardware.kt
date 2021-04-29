@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.Counter
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import com.ctre.phoenix.motorcontrol.FeedbackDevice.IntegratedSensor
 
 class ModuleHardware(
     private val escId: Int,
@@ -33,6 +34,9 @@ class ModuleHardware(
 ) : SubsystemHardware<ModuleHardware, ModuleComponent>(), GenericWheelHardware {
     override val angle: Sensor<Angle>
         get() = TODO("Not yet implemented")
+    override var position: Sensor<Angle>
+        get() = TODO("Not yet implemented")
+        set(value) {}
     override val conversions = ModuleConversions(this)
     override val priority: Priority = Priority.RealTime
     override val name: String = "Module"

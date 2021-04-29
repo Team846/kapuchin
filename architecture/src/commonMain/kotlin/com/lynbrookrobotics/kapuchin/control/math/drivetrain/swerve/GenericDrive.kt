@@ -9,11 +9,11 @@ import info.kunalsheth.units.generated.*
 
 interface GenericDriveConversions {
     val trackLength: Length
-    val botRadius: Length
+    val trackWidth: Length
 }
 
 interface GenericDriveHardware {
-    val modules: Array<GenericWheelComponent> //size of 4
+//    val modules: Array<GenericWheelComponent> //size of 4
     val position: Sensor<Position>
     val conversions: GenericDriveConversions
 
