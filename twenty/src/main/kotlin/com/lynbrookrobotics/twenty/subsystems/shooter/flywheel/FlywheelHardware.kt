@@ -7,7 +7,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.*
+import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode

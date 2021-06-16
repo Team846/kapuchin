@@ -7,14 +7,16 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.twenty.Auto
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.choreos.intakeBalls
-import com.lynbrookrobotics.twenty.routines.*
+import com.lynbrookrobotics.twenty.routines.fieldOrientedPosition
+import com.lynbrookrobotics.twenty.routines.followTrajectory
+import com.lynbrookrobotics.twenty.routines.rezero
+import com.lynbrookrobotics.twenty.routines.set
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Up
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import kotlin.system.measureTimeMillis
 
 suspend fun Subsystems.judgedAuto() {
     val flywheelTarget = 6000.Rpm

@@ -11,7 +11,6 @@ import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.FeederRollerComponent
-import com.lynbrookrobotics.twenty.subsystems.shooter.Goal
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent

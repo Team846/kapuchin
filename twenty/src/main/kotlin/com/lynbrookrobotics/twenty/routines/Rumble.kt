@@ -1,7 +1,8 @@
 package com.lynbrookrobotics.twenty.routines
 
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.subsystems.driver.*
+import com.lynbrookrobotics.twenty.subsystems.driver.Rumble
+import com.lynbrookrobotics.twenty.subsystems.driver.RumbleComponent
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

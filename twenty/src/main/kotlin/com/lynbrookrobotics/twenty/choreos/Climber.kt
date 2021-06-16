@@ -2,9 +2,10 @@ package com.lynbrookrobotics.twenty.choreos
 
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.*
-import com.lynbrookrobotics.twenty.routines.*
-import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotState.*
+import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.routines.set
+import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotState.Down
+import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotState.Up
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch

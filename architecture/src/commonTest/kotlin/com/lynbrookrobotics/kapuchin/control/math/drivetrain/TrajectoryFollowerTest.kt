@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import info.kunalsheth.units.generated.*
-import kotlin.math.sqrt
 import kotlin.test.Test
 
 class TrajectoryFollowerTest {

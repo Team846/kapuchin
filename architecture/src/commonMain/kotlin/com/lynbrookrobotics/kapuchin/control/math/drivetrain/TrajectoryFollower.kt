@@ -165,7 +165,7 @@ class TrajectoryFollower(
             .let { mtrx ->
                 trajectory.map { (t, waypoint) -> (mtrx rz waypoint) + origin.vector stampWith t }
             }
-        drivetrain.log(Debug) { "TRAJ path start pos: ${waypoints.first().y.x.Foot},${waypoints.first().y.x.Foot}"}
+        drivetrain.log(Debug) { "TRAJ path start pos: ${waypoints.first().y.x.Foot},${waypoints.first().y.x.Foot}" }
     }
 
     /**

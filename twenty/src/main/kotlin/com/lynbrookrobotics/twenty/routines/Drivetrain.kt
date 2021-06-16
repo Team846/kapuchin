@@ -5,11 +5,9 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.subsystems.*
-import com.lynbrookrobotics.twenty.subsystems.driver.*
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.*
+import com.lynbrookrobotics.twenty.subsystems.driver.DriverHardware
+import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
 suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {

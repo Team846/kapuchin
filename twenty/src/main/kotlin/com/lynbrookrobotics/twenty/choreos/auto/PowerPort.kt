@@ -1,8 +1,6 @@
 package com.lynbrookrobotics.twenty.choreos.auto
 
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Auto.PowerPort
@@ -23,9 +21,9 @@ suspend fun Subsystems.powerPortTeleop() = startChoreo("Power Port Teleop") {
     val zeroOdometry by driver.zeroOdometry.readEagerly().withoutStamps
 
     val aimJobs = listOf(
-        choreography {  },
+        choreography { },
         choreography { turret?.fieldOrientedPosition(drivetrain, PowerPort.goalPos) },
-        choreography { turret?.trackTarget(limelight, flywheel!!, drivetrain )}
+        choreography { turret?.trackTarget(limelight, flywheel!!, drivetrain) }
     )
 
     choreography {
