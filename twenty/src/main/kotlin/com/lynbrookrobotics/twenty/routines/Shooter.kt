@@ -6,14 +6,13 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
-import com.lynbrookrobotics.twenty.Field.innerGoalDepth
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
-import com.lynbrookrobotics.twenty.subsystems.shooter.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.Goal.Inner
-import com.lynbrookrobotics.twenty.subsystems.shooter.Goal.Outer
+import com.lynbrookrobotics.twenty.subsystems.shooter.FeederRollerComponent
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodComponent
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import info.kunalsheth.units.generated.*
@@ -57,36 +56,23 @@ suspend fun TurretComponent.manualOverride(operator: OperatorHardware) = startRo
     controller { PercentOutput(hardware.escConfig, precision) }
 }
 
-@Deprecated("Do not use. Doesn't work accross limelight pipeline shifts.")
 suspend fun TurretComponent.trackTarget(
-    limelight: LimelightComponent, flywheel: FlywheelComponent, drivetrain: DrivetrainComponent,
-    goal: Goal, tolerance: Angle? = null
+    limelight: LimelightComponent, flywheel: FlywheelComponent, drivetrain: DrivetrainComponent
 ) = startRoutine("Track Target") {
 
     val reading by limelight.hardware.readings.readOnTick.withoutStamps
-    val robotPosition by drivetrain.hardware.position.readEagerly().withoutStamps
     val current by hardware.position.readOnTick.withoutStamps
-    val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
     controller {
         reading?.let { snapshot ->
-            val target = when (goal) {
-                Outer -> current + snapshot.tx + limelight.hardware.conversions.mountingBearing
-                Inner -> with(limelight.hardware.conversions) {
-                    val llTarget = goalPositions(snapshot, robotPosition.bearing, pitch)
-                    val horizontalOffset = innerGoalOffsets(llTarget, flywheel.shooterHeight).first
-                    val dtheta =
-                        atan(innerGoalDepth / horizontalOffset) - (90.Degree - (snapshot.tx + limelight.hardware.conversions.mountingBearing + robotPosition.bearing))
-                    current + snapshot.tx + limelight.hardware.conversions.mountingBearing - dtheta
-                }
-            }
+            val target = current + snapshot.tx + limelight.hardware.conversions.mountingBearing
 
             PositionOutput(
                 hardware.escConfig, positionGains, hardware.conversions.encoder.native(target)
-            ).takeUnless { (snapshot.tx + limelight.hardware.conversions.mountingBearing).abs < tolerance ?: -1.Degree }
+            )
         } ?: run {
             log(Debug) { "Lost sight of target!" }
-            null
+            PercentOutput(hardware.escConfig, 0.Percent)
         }
     }
 }

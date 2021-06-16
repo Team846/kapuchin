@@ -1,21 +1,21 @@
 package com.lynbrookrobotics.twenty.choreos
 
-import com.lynbrookrobotics.kapuchin.*
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.*
+import com.lynbrookrobotics.twenty.Auto
+import com.lynbrookrobotics.twenty.Auto.PowerPort
+import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.routines.*
-import com.lynbrookrobotics.twenty.subsystems.*
-import com.lynbrookrobotics.twenty.subsystems.carousel.*
-import com.lynbrookrobotics.twenty.subsystems.intake.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.*
+import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
+import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
+import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState.On
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Up
+import com.lynbrookrobotics.twenty.subsystems.shooter.bestShot
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.Job
@@ -44,8 +44,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val ball2 by operator.ball2.readEagerly().withoutStamps
     val ball3 by operator.ball3.readEagerly().withoutStamps
 
+    val zeroOdometry by driver.zeroOdometry.readEagerly().withoutStamps
+
     choreography {
-        if (turret != null && !turret.hardware.isZeroed) launch {
+        if (turret != null) launch {
             log(Debug) { "Rezeroing turret" }
             turret.rezero(electrical)
         }
@@ -58,27 +60,31 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         launch {
             launchWhenever(
-//                { turret?.routine == null } to choreography { turret?.fieldOrientedPosition(drivetrain) },
+                { turret?.routine == null } to listOf(
+                    choreography { },
+                    choreography { turret?.fieldOrientedPosition(drivetrain, PowerPort.goalPos) },
+                    choreography { turret?.trackTarget(limelight, flywheel!!, drivetrain) }
+                )[Auto.PowerPort.aimMode],
             )
         }
 
         runWhenever(
-            { intakeBalls } to choreography { intakeBalls() },
-            { unjamBalls } to choreography { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
+            { intakeBalls } to { intakeBalls() },
+            { unjamBalls } to { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
-            { aim } to choreography { visionAimTurret() },
-            { hoodUp } to choreography { shooterHood?.set(Up) ?: freeze() },
-            { shoot } to choreography { shootAll() },
+            { aim } to { visionAimTurret() },
+            { hoodUp } to { shooterHood?.set(Up) ?: freeze() },
+            { shoot } to { shootAll() },
 
-            { shooterPreset } to choreography { flywheel?.let { spinUpShooter(it.preset) } ?: freeze() },
+            { shooterPreset } to { flywheel?.let { spinUpShooter(it.preset) } ?: freeze() },
 
-            { rezeroTurret } to choreography { turret?.rezero(electrical) ?: freeze() },
-            { reindexCarousel } to choreography {
+            { rezeroTurret } to { turret?.rezero(electrical) ?: freeze() },
+            { reindexCarousel } to {
                 carousel.whereAreMyBalls()
                 rumble.set(TwoSided(0.Percent, 100.Percent))
             },
 
-            { !turretManual.isZero } to choreography {
+            { !turretManual.isZero } to {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
                 turret?.manualOverride(operator) ?: freeze()
             },
@@ -98,6 +104,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 carousel.state.clear()
                 carousel.state.push(3)
             },
+            { zeroOdometry } to {
+                drivetrain.hardware.zeroOdometry()
+                freeze()
+            }
         )
     }
 }
@@ -122,7 +132,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
 
-                carousel.delayUntilBall()
+                withTimeout(carousel.intakeTimeout) { carousel.delayUntilBall() }
                 carousel.state.push()
             }
         }

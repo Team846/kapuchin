@@ -5,8 +5,10 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.subsystems.*
-import com.lynbrookrobotics.twenty.subsystems.controlpanel.*
+import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
+import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelPivotComponent
+import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelPivotState
+import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelSpinnerComponent
 import info.kunalsheth.units.generated.*
 
 suspend fun ControlPanelPivotComponent.set(state: ControlPanelPivotState) = startRoutine("Set") {

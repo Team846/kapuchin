@@ -23,10 +23,12 @@ fun main() {
 
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
-        println("Initializing hardware...")
+        // Initialize preferences
+        Field
+        Auto
 
+        println("Initializing hardware...")
         Compressor()
-        Field // Initialize preferences
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 

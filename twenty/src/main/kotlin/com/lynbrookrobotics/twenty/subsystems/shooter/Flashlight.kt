@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.twenty.Subsystems.Companion.uiBaselineTicker
-import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState.*
+import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState.Off
 import edu.wpi.first.wpilibj.DigitalOutput
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*

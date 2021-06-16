@@ -2,15 +2,17 @@ package com.lynbrookrobotics.twenty.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.twenty.*
 import com.lynbrookrobotics.twenty.Field.ballDiameter
 import com.lynbrookrobotics.twenty.Field.ballMass
 import com.lynbrookrobotics.twenty.Field.innerGoalDepth
 import com.lynbrookrobotics.twenty.Field.targetDiameter
 import com.lynbrookrobotics.twenty.Field.targetHeight
-import com.lynbrookrobotics.twenty.subsystems.limelight.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.Goal.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.*
+import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.subsystems.limelight.DetectedTarget
+import com.lynbrookrobotics.twenty.subsystems.shooter.Goal.Inner
+import com.lynbrookrobotics.twenty.subsystems.shooter.Goal.Outer
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Down
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Up
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlin.math.sqrt

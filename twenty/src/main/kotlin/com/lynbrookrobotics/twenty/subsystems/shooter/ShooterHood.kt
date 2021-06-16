@@ -6,7 +6,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.twenty.Subsystems.Companion.shooterTicker
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.*
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Down
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*

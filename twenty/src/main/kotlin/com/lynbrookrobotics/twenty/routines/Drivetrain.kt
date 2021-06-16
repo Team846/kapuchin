@@ -5,11 +5,9 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.subsystems.*
-import com.lynbrookrobotics.twenty.subsystems.driver.*
-import com.lynbrookrobotics.twenty.subsystems.drivetrain.*
+import com.lynbrookrobotics.twenty.subsystems.driver.DriverHardware
+import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import info.kunalsheth.units.generated.*
 
 suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
@@ -85,10 +83,8 @@ suspend fun DrivetrainComponent.turn(target: Angle, tolerance: Angle) = startRou
 
 suspend fun DrivetrainComponent.followTrajectory(
     trajectory: Trajectory,
-    maxExtrapolate: Length,
-    safetyTolerance: Length = 3.Foot,
-//    speedFactor: Dimensionless,
-    reverse: Boolean,
+    config: AutoPathConfiguration,
+    safetyTolerance: Length = 999999.Foot,
     origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
 ) = startRoutine("Follow Trajectory") {
 
@@ -97,10 +93,11 @@ suspend fun DrivetrainComponent.followTrajectory(
         trajectory,
         origin,
         this@followTrajectory,
-        maxExtrapolate,
         safetyTolerance,
-//        speedFactor,
-        reverse
+        config.reverse,
+        config.speedFactor,
+        config.maxExtrap,
+        config.extrapK,
     )
 
     controller {

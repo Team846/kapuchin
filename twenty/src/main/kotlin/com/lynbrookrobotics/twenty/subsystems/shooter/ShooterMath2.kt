@@ -1,8 +1,9 @@
 package com.lynbrookrobotics.twenty.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.twenty.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.*
+import com.lynbrookrobotics.twenty.Field
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Down
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState.Up
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

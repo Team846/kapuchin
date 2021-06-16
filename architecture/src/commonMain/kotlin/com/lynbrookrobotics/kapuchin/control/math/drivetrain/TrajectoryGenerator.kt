@@ -35,7 +35,9 @@ typealias Trajectory = List<TimeStamped<Waypoint>>
  * @param path a path consisting of a list of [Waypoint]s.
  * @param maxVelocity the maximum linear velocity of the robot.
  * @param maxOmega the maximum angular velocity of the robot.
- * @param maxAcceleration the maximum linear acceleration of the robot.
+ * @param maxAccel the maximum linear acceleration of the robot.
+ * @param maxDecel the maximum linear deceleration of the robot.
+ * @param endingVelocity the ending linear velocity of the robot.
  *
  * @return a trajectory containing [Waypoint]s with timestamps.
  */
@@ -43,19 +45,24 @@ fun pathToTrajectory(
     path: Path,
     maxVelocity: Velocity,
     maxOmega: AngularVelocity,
-    maxAcceleration: Acceleration
+    maxAccel: Acceleration,
+    maxDecel: Acceleration = maxAccel,
+    endingVelocity: Velocity = 0.Foot / Second,
 ): Trajectory {
 
     check(maxVelocity > 0.Foot / Second)
-    check(maxAcceleration > 0.Foot / Second / Second)
     check(maxOmega > 0.Radian / Second)
+    check(maxAccel > 0.Foot / Second / Second)
+    check(maxDecel > 0.Foot / Second / Second)
 
     // (1)
 
     val forwardPath = path.toMutableList()
     val forwardSegments = oneWayAccelCap(
         forwardPath, maxVelocity, maxOmega,
-        f = { curVelocity -> maxAcceleration - (curVelocity / maxVelocity) * maxAcceleration }
+        initialVelocity = 0.Foot / Second,
+//        f = { curVelocity -> maxAcceleration - (curVelocity / maxVelocity) * maxAcceleration }
+        f = { maxAccel }
     )
 
 
@@ -64,7 +71,9 @@ fun pathToTrajectory(
     val reversePath = path.toMutableList().reversed()
     val reverseSegments = oneWayAccelCap(
         reversePath, maxVelocity, maxOmega,
-        f = { curVelocity -> maxAcceleration + (curVelocity / maxVelocity) * maxAcceleration }
+        initialVelocity = endingVelocity,
+//        f = { curVelocity -> maxAcceleration + (curVelocity / maxVelocity) * maxAcceleration }
+        f = { maxDecel }
     ).reversed()
 
 
@@ -115,11 +124,12 @@ private fun oneWayAccelCap(
     path: Path,
     maxVelocity: Velocity,
     maxOmega: AngularVelocity,
+    initialVelocity: Velocity,
     f: (Velocity) -> Acceleration
 ): List<Pair<Waypoint, Velocity>> {
 
-    // First point always as 0 velocity and the second point always has max velocity.
-    val velocities = mutableListOf(0.Foot / Second, maxVelocity)
+    // Second point always has max velocity.
+    val velocities = mutableListOf(initialVelocity, maxVelocity)
 
     // (1)
 
@@ -145,10 +155,12 @@ private fun oneWayAccelCap(
     for (i in 1 until path.size) {
         // Find Δt based on the target velocity and Δx.
         // The target velocity is the minimum velocity cap of either the current or the next segment.
-        // (if we are at the last waypoint, the "next segment" has 0 velocity.
         // The area under the segment in a velocity vs. time graph must equal Δx.
         val dx = distance(path[i], path[i - 1])
-        val minVelocity = if (i != path.size - 1) min(velocities[i], velocities[i + 1]) else 0.Foot / Second
+        val minVelocity = min(
+            velocities[i],
+            if (i != path.size - 1) velocities[i + 1] else Double.MAX_VALUE.Foot / Second
+        )
         var dt = dx / (velocities[i - 1] + (minVelocity - velocities[i - 1]) / 2)
 
         velocities[i] = dx / dt

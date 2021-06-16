@@ -1,7 +1,8 @@
 package com.lynbrookrobotics.twenty.routines
 
 import com.lynbrookrobotics.kapuchin.control.math.*
-import com.lynbrookrobotics.twenty.subsystems.limelight.*
+import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
+import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline
 import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*

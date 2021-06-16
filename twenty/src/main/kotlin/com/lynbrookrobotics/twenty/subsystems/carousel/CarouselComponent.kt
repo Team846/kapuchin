@@ -27,8 +27,7 @@ class CarouselComponent(hardware: CarouselHardware) :
 
     val zeroSpeed by pref(30, Percent)
 
-    val collectSlot by pref(0, CarouselSlot)
-    val shootSlot by pref(0.5, CarouselSlot)
+    val intakeTimeout by pref(3, Second)
 
     val state = CarouselState(this)
 

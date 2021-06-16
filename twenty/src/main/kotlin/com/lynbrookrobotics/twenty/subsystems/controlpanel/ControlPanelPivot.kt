@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems.Companion.pneumaticTicker
 import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
-import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelPivotState.*
+import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelPivotState.Down
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*

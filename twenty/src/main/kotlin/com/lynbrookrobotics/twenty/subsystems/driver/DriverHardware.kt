@@ -8,8 +8,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
-import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.BottomTrigger
-import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.Trigger
+import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.*
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
 import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
@@ -70,7 +69,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
         it!!.getTriggerAxis(kLeft) > 0.1 && it.getTriggerAxis(kRight) > 0.1
     }.otherwise(hardw { null })
 
-    val accelerator = s { joystickMapping(-stick.y.Each) }
+    val accelerator = s { joystickMapping(-stick.y.Each).takeIf { stick[LeftTrigger] } ?: 0.Each }
         .with(graph("Accelerator", Percent))
 
     val steering = s { wheelMapping(wheel.x.Each) }
@@ -81,6 +80,12 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     val intakeBalls = s { stick[Trigger] }
     val unjamBalls = s { stick[Trigger] && stick[BottomTrigger] }
+
+    val zeroOdometry = s { stick[RightTrigger] }
+
+    val powerPortIntake = s { stick[BottomTrigger] }
+    val powerPortShoot = s { stick[Trigger] }
+    val powerPortIntakeNoDrive = s { stick[RightTrigger] }
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

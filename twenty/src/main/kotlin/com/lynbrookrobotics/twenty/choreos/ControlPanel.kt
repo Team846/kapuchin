@@ -1,9 +1,7 @@
 package com.lynbrookrobotics.twenty.choreos
 
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.twenty.*
-import com.lynbrookrobotics.twenty.routines.*
-import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelPivotState.*
+import com.lynbrookrobotics.twenty.Subsystems
 
 suspend fun Subsystems.controlPanelTeleop() = startChoreo("Control Panel Teleop") {
 
