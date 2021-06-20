@@ -72,7 +72,7 @@ class ModuleComponent(hardware: ModuleHardware
     }
 
     init {
-        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set) { hardware.jitterReadPin.period.Second }
+        if (clock is Ticker) clock.realtimeChecker(hardware.jitterPulsePin::set) { hardware.jitterReadPin.period.Second } //May not need?
     }
 
     override fun ModuleHardware.output(value: OffloadedOutput) {
