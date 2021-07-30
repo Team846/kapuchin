@@ -54,18 +54,20 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         skew: Angle,
         pitch: Angle,
     ): Position = with(sample) {
-        val targetDistance = (targetHeight - mounting.z) / tan(
-            mountingIncline + pitch + ty + when (pipeline) {
-                ZoomInPanHigh -> zoomInFov.y / 2
-                ZoomInPanLow -> -zoomInFov.y / 2
-                else -> 0.Degree
-            }
-        )
+        val angle = when (hardware.invertTx) {
+            true -> -mountingIncline + pitch
+            else -> mountingIncline + pitch
+        } + ty + when (pipeline) {
+            ZoomInPanHigh -> zoomInFov.y / 2
+            ZoomInPanLow -> -zoomInFov.y / 2
+            else -> 0.Degree
+        }
+        val targetDistance = (targetHeight - mounting.z) / tan(angle)
 
         val x = tan(tx + mountingBearing) * targetDistance
         val pos = Position(x, targetDistance, skew)
 
-        log(Debug) { "Goal position: ${targetDistance.Foot}" }
+        log(Debug) { "Goal position: ${targetDistance.Foot} Feet" }
         return pos
     }
 
