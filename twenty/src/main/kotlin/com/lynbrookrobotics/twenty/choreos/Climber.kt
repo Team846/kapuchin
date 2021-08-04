@@ -12,13 +12,13 @@ import kotlinx.coroutines.launch
 
 suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
 
-//    val extendClimber by operator.extendClimber.readEagerly().withoutStamps
-//    val retractClimber by operator.retractClimber.readEagerly().withoutStamps
+    val extendClimber by operator.extendClimber.readEagerly().withoutStamps
+    val retractClimber by operator.retractClimber.readEagerly().withoutStamps
 
     choreography {
         runWhenever(
-//            { extendClimber } to choreography { extendClimber() },
-//            { retractClimber } to choreography { retractClimber() }
+            { extendClimber } to choreography { extendClimber() },
+            { retractClimber } to choreography { retractClimber()  },
         )
     }
 }

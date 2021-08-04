@@ -6,8 +6,6 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.Auto
-import com.lynbrookrobotics.twenty.Auto.PowerPort
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
@@ -39,33 +37,16 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val turretManual by operator.turretManual.readEagerly().withoutStamps
 
-    val ball0 by operator.ball0.readEagerly().withoutStamps
-    val ball1 by operator.ball1.readEagerly().withoutStamps
-    val ball2 by operator.ball2.readEagerly().withoutStamps
-    val ball3 by operator.ball3.readEagerly().withoutStamps
-
-    val zeroOdometry by driver.zeroOdometry.readEagerly().withoutStamps
-
     choreography {
         if (turret != null) launch {
             log(Debug) { "Rezeroing turret" }
             turret.rezero(electrical)
         }
 
-//        withTimeout(15.Second) {
-//            log(Debug) { "Reindexing carousel" }
-//            carousel.rezero()
-//            carousel.whereAreMyBalls()
-//        }
-
-        launch {
-            launchWhenever(
-                { turret?.routine == null } to listOf(
-                    choreography { },
-                    choreography { turret?.fieldOrientedPosition(drivetrain, PowerPort.goalPos) },
-                    choreography { turret?.trackTarget(limelight, flywheel!!, drivetrain) }
-                )[Auto.PowerPort.aimMode],
-            )
+        withTimeout(15.Second) {
+            log(Debug) { "Reindexing carousel" }
+            carousel.rezero()
+            carousel.whereAreMyBalls()
         }
 
         runWhenever(
@@ -88,26 +69,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
                 turret?.manualOverride(operator) ?: freeze()
             },
-
-            { ball0 } to {
-                carousel.state.clear()
-            },
-            { ball1 } to {
-                carousel.state.clear()
-                carousel.state.push(1)
-            },
-            { ball2 } to {
-                carousel.state.clear()
-                carousel.state.push(2)
-            },
-            { ball3 } to {
-                carousel.state.clear()
-                carousel.state.push(3)
-            },
-            { zeroOdometry } to {
-                drivetrain.hardware.zeroOdometry()
-                freeze()
-            }
         )
     }
 }
