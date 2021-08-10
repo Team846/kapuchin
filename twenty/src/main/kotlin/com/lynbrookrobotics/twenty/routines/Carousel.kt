@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 suspend fun CarouselComponent.rezero(flipDirection: Boolean = false) = startRoutine("Re-Zero") {
     hardware.isZeroed = false
-    val speed = if(flipDirection) -zeroSpeed else zeroSpeed
+    val speed = if (flipDirection) -zeroSpeed else zeroSpeed
     controller {
         PercentOutput(hardware.escConfig, speed).takeUnless { hardware.isZeroed }
     }
