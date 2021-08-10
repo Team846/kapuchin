@@ -37,6 +37,9 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val turretManual by operator.turretManual.readEagerly().withoutStamps
 
+    val carouselClockwise by driver.indexCarouselRight.readEagerly().withoutStamps
+    val carouselCounterclockwise by driver.indexCarouselLeft.readEagerly().withoutStamps
+
     choreography {
         if (turret != null) launch {
             log(Debug) { "Rezeroing turret" }
@@ -69,6 +72,19 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
                 turret?.manualOverride(operator) ?: freeze()
             },
+
+            { carouselClockwise } to {
+                carousel.rezero(true)
+                val position by carousel.hardware.position.readEagerly().withoutStamps
+                carousel.set(position + 1.CarouselSlot)
+                freeze()
+            },
+            { carouselCounterclockwise } to {
+                carousel.rezero()
+                val position by carousel.hardware.position.readEagerly().withoutStamps
+                carousel.set(position - 1.CarouselSlot)
+                freeze()
+            }
         )
     }
 }

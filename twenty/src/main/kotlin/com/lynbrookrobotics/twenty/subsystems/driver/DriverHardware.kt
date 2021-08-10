@@ -80,6 +80,8 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     val intakeBalls = s { stick[Trigger] }
     val unjamBalls = s { stick[Trigger] && stick[BottomTrigger] }
+    val indexCarouselLeft = s {stick[LeftTrigger]}
+    val indexCarouselRight = s{ stick[RightTrigger]}
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->
