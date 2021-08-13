@@ -20,6 +20,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.ceil
+import kotlin.math.floor
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -74,15 +76,17 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             },
 
             { carouselClockwise } to {
-                carousel.rezero(true)
+//                carousel.rezero(true)
                 val position by carousel.hardware.position.readEagerly().withoutStamps
-                carousel.set(position + 1.CarouselSlot)
+
+                carousel.set((position / 1.CarouselSlot).roundToInt(Each).CarouselSlot + 1.CarouselSlot)
                 freeze()
             },
             { carouselCounterclockwise } to {
-                carousel.rezero()
+//                carousel.rezero()
                 val position by carousel.hardware.position.readEagerly().withoutStamps
-                carousel.set(position - 1.CarouselSlot)
+
+                carousel.set((position / 1.CarouselSlot).roundToInt(Each).CarouselSlot - 1.CarouselSlot)
                 freeze()
             }
         )
@@ -207,7 +211,6 @@ suspend fun Subsystems.visionAim() {
 }
 
 suspend fun Subsystems.shootOne() = startChoreo("Shoot One") {
-    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
     choreography {
         val angle = carousel.state.shootAngle()
         if (angle == null) {
