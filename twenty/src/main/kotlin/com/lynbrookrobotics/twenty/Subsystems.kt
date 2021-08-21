@@ -9,7 +9,6 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.auto.*
 import com.lynbrookrobotics.twenty.choreos.climberTeleop
 import com.lynbrookrobotics.twenty.choreos.controlPanelTeleop
 import com.lynbrookrobotics.twenty.choreos.digestionTeleop
@@ -45,10 +44,12 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretHardware
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.io.File
+import kotlin.math.roundToInt
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
@@ -76,25 +77,32 @@ class Subsystems(
     val shooterHood: ShooterHoodComponent?
 ) : Named by Named("Subsystems") {
 
-    private val teleops = listOf(
-        Subsystems::digestionTeleop,
-        Subsystems::interstellarAccuracyTeleop,
-        Subsystems::powerPortTeleop
-    )
+//    private val autos = listOf(
+//        ::`shoot wall`,
+//        ::`I1 shoot C1 I2 shoot`,
+//        ::`I2 shoot C1 I2 shoot`,
+//        ::`verify odometry`
+//    )
+
+    private val autoIdGraph = graph("Auto ID", Each)
+
+    private var prevAutoId = -1
+    private val autoId
+        get() = SmartDashboard.getEntry("DB/Slider 0").getDouble(-1.0).roundToInt().also {
+            if (it != prevAutoId) {
+//                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
+//                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
+                prevAutoId = it
+            }
+        }
+
+    val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
 
     suspend fun teleop() {
         runAll(
             { climberTeleop() },
             { controlPanelTeleop() },
-            {
-                when (Auto.teleopID) {
-                    !in teleops.indices -> log(Error) { "${Auto.teleopID} isn't an teleop!! you fucked up!!!" }
-                    else -> {
-                        log(Debug) { "Running ${teleops[Auto.teleopID].name}" }
-                        teleops[Auto.teleopID].invoke(this@Subsystems)
-                    }
-                }
-            },
+            { digestionTeleop() },
             {
                 launchWhenever(
                     { limelight.routine == null } to choreography { limelight.autoZoom() },
@@ -104,21 +112,14 @@ class Subsystems(
         )
     }
 
-    private val autos = listOf(
-        Subsystems::judgedAuto,
-        Subsystems::autoNavBarrel,
-        Subsystems::autoNavSlalom,
-        Subsystems::autoNavBounce,
-    )
-
-    suspend fun auto() {
-        when (Auto.autoID) {
-            !in autos.indices -> log(Error) { "${Auto.autoID} isn't an auto!! you fucked up!!!" }
-            else -> {
-                log(Debug) { "Running ${autos[Auto.autoID].name}" }
-                autos[Auto.autoID].invoke(this@Subsystems)
-            }
-        }
+    suspend fun auto() = coroutineScope {
+//        if (autoId == -1) {
+//            log(Error) { "DB Slider 0 is set to -1, running wall auto" }
+//            `wall`()
+//        } else if (autoId !in autos.indices) {
+//            log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
+//            freeze()
+//        } else autos[autoId].get().invoke(this@Subsystems).invoke(this@coroutineScope)
     }
 
     suspend fun warmup() {
@@ -132,6 +133,12 @@ class Subsystems(
                 }
             }
         )
+    }
+
+    init {
+        uiBaselineTicker.runOnTick { time ->
+            autoIdGraph(time, autoId.Each)
+        }
     }
 
     companion object : Named by Named("Subsystems") {

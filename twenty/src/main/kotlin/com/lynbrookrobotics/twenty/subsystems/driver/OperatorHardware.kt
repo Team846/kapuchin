@@ -50,18 +50,11 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val shooterPreset = s { xbox.aButton }
 
-    val ball0 = s { rb }
-    val ball1 = s { xbox.xButton }
-    val ball2 = s { xbox.yButton }
-    val ball3 = s { xbox.bButton }
+    val extendClimber = s { xbox.backButton }
+    val retractClimber = s { xbox.startButton }
 
-    val zone1 = s { pov == 0 }
-    val zone2 = s { pov == 90 }
-    val zone3 = s { pov == 180 }
-    val zone4 = s { pov == 270 }
-
-    val rezeroTurret = s { xbox.startButton }
-    val reindexCarousel = s { xbox.backButton }
+    val rezeroTurret = s { xbox.xButton }
+    val reindexCarousel = s { xbox.bButton }
 
     val turretManual = s {
         turretMapping(getX(kRight).Each)
