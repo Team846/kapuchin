@@ -4,11 +4,11 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.Subsystems.Companion.shooterTicker
+import com.lynbrookrobotics.twenty.Subsystems
 import info.kunalsheth.units.generated.*
 
 class TurretComponent(hardware: TurretHardware) :
-    Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, shooterTicker) {
+    Component<TurretComponent, TurretHardware, OffloadedOutput>(hardware, Subsystems.shooterTicker) {
 
     val safeSpeed by pref(1, Volt)
     val windupPosition by pref(-90, Degree)

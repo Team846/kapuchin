@@ -4,9 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
-import com.lynbrookrobotics.twenty.subsystems.intake.IntakeRollersComponent
-import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderComponent
-import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
+import com.lynbrookrobotics.twenty.subsystems.intake.*
 import info.kunalsheth.units.generated.*
 
 suspend fun IntakeSliderComponent.set(target: IntakeSliderState) = startRoutine("Set") {

@@ -58,7 +58,7 @@ fun bestShot(
     rollerRadius: Length,
     momentOfInertia: MomentOfInertia,
     fudgeFactor: Dimensionless,
-    shooterHeight: Length
+    shooterHeight: Length,
 ): ShotState? {
 
     val innerLimits = innerEntryAngleLimits(target, shooterHeight)
@@ -120,7 +120,7 @@ private fun calculateShot(
     rollerRadius: Length,
     momentOfInertia: MomentOfInertia,
     fudgeFactor: Dimensionless,
-    shooterHeight: Length
+    shooterHeight: Length,
 ): ShotState? {
     val distToBase = sqrt(target.x.squared + target.y.squared)
     val height = targetHeight - shooterHeight

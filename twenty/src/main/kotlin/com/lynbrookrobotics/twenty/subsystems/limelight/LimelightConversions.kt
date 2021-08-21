@@ -4,8 +4,6 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.ZoomInPanHigh
-import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.ZoomInPanLow
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -56,8 +54,8 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
     ): Position = with(sample) {
         val targetDistance = (targetHeight - mounting.z) / tan(
             mountingIncline + pitch + ty + when (pipeline) {
-                ZoomInPanHigh -> zoomInFov.y / 2
-                ZoomInPanLow -> -zoomInFov.y / 2
+                Pipeline.ZoomInPanHigh -> zoomInFov.y / 2
+                Pipeline.ZoomInPanLow -> -zoomInFov.y / 2
                 else -> 0.Degree
             }
         )
@@ -81,5 +79,4 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
 
         return DetectedTarget(innerGoal.takeUnless { skew > skewTolerance }, outerGoal)
     }
-
 }

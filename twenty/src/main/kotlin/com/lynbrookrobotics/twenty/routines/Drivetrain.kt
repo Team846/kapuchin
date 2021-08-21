@@ -85,7 +85,7 @@ suspend fun DrivetrainComponent.followTrajectory(
     trajectory: Trajectory,
     config: AutoPathConfiguration,
     safetyTolerance: Length = 999999.Foot,
-    origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y
+    origin: Position = hardware.position.optimizedRead(currentTime, 0.Second).y,
 ) = startRoutine("Follow Trajectory") {
 
     val follower = TrajectoryFollower(
@@ -118,7 +118,7 @@ suspend fun DrivetrainComponent.followTrajectory(
 suspend fun DrivetrainComponent.waypoint(
     motionProfile: (Length) -> Velocity,
     target: Waypoint,
-    tolerance: Length
+    tolerance: Length,
 ) = startRoutine("Waypoint") {
     val position by hardware.position.readOnTick.withStamps
     val uni = UnicycleDrive(this@waypoint, this@startRoutine)

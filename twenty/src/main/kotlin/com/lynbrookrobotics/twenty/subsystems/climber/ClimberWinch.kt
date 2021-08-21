@@ -7,38 +7,36 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.Subsystems.Companion.pneumaticTicker
-import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
-import com.lynbrookrobotics.twenty.subsystems.climber.ClimberWinchOutput.Running
-import com.lynbrookrobotics.twenty.subsystems.climber.ClimberWinchOutput.Stopped
+import com.lynbrookrobotics.twenty.Subsystems
 import com.revrobotics.CANSparkMax
-import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-sealed class ClimberWinchOutput() {
+sealed class ClimberWinchOutput {
     data class Running(val esc: OffloadedOutput) : ClimberWinchOutput()
     object Stopped : ClimberWinchOutput()
 }
 
 class ClimberWinchComponent(hardware: ClimberWinchHardware) :
-    Component<ClimberWinchComponent, ClimberWinchHardware, ClimberWinchOutput>(hardware, pneumaticTicker) {
+    Component<ClimberWinchComponent, ClimberWinchHardware, ClimberWinchOutput>(hardware, Subsystems.pneumaticTicker) {
 
     val extendSpeed by pref(20, Percent)
     val retractSpeed by pref(20, Percent)
 
-    val chodeDelaySafety by pref(1, Second)
+    private val chodeDelaySafety by pref(1, Second)
 
-    override val fallbackController: ClimberWinchComponent.(Time) -> ClimberWinchOutput = { Stopped }
+    override val fallbackController: ClimberWinchComponent.(Time) -> ClimberWinchOutput = { ClimberWinchOutput.Stopped }
 
     private val flaccid = true
     private val erect = false
 
     private var lastErection = currentTime
     private var lastWinchRun = currentTime
+
     override fun ClimberWinchHardware.output(value: ClimberWinchOutput) = when (value) {
-        is Stopped -> {
+        is ClimberWinchOutput.Stopped -> {
             if (currentTime - lastWinchRun >= chodeDelaySafety &&
                 masterEsc.appliedOutput == 0.0 &&
                 slaveEsc.appliedOutput == 0.0
@@ -54,7 +52,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 
             PercentOutput(escConfig, 0.Percent).writeTo(masterEsc, pidController)
         }
-        is Running -> {
+        is ClimberWinchOutput.Running -> {
             if (currentTime - lastErection >= chodeDelaySafety && chodeSolenoid.get() != erect) {
                 value.esc.writeTo(masterEsc, pidController)
                 lastWinchRun = currentTime
@@ -70,7 +68,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 }
 
 class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinchComponent>() {
-    override val period by sharedTickerTiming
+    override val period by Subsystems.sharedTickerTiming
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.Medium
     override val name = "Climber Winch"
@@ -87,15 +85,15 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
 
     val chodeSolenoid by hardw { Solenoid(chodeSolenoidChannel) }
 
-    val masterEsc by hardw { CANSparkMax(masterEscId, kBrushless) }.configure {
+    val masterEsc by hardw { CANSparkMax(masterEscId, MotorType.kBrushless) }.configure {
         generalSetup(it, escConfig)
         it.inverted = invert
     }
 
-    val slaveEsc by hardw { CANSparkMax(slaveEscId, kBrushless) }.configure {
+    val slaveEsc by hardw { CANSparkMax(slaveEscId, MotorType.kBrushless) }.configure {
         generalSetup(it, escConfig)
         +it.follow(masterEsc)
     }
 
-    val pidController by hardw { masterEsc.pidController }
+    val pidController by hardw { masterEsc.pidController!! }
 }

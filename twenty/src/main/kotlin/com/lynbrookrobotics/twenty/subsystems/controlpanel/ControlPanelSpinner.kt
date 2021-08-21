@@ -8,11 +8,10 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
-import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
 import com.lynbrookrobotics.twenty.subsystems.driver.DriverHardware
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
-import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import com.revrobotics.ColorSensorV3
 import com.revrobotics.ColorSensorV3.*
 import edu.wpi.first.wpilibj.I2C.Port
@@ -34,7 +33,7 @@ class ControlPanelSpinnerComponent(hardware: ControlPanelSpinnerHardware) :
 
 class ControlPanelSpinnerHardware(driver: DriverHardware) :
     SubsystemHardware<ControlPanelSpinnerHardware, ControlPanelSpinnerComponent>() {
-    override val period by sharedTickerTiming
+    override val period by Subsystems.sharedTickerTiming
     override val syncThreshold = 20.milli(Second)
     override val priority = Priority.High
     override val name = "Control Panel"
@@ -46,16 +45,17 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) :
 
     private val escId = 20
 
-    val spinnerEsc by hardw { CANSparkMax(escId, kBrushless) }.configure {
+    val spinnerEsc by hardw { CANSparkMax(escId, MotorType.kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         +it.setIdleMode(IdleMode.kCoast)
         it.inverted = invert
     }
-    val encoder by hardw { spinnerEsc.encoder }
+
+    val encoder by hardw { spinnerEsc.encoder!! }
 
     val encoderPosition = sensor(encoder) { conversions.encoderPositionDelta(position.Turn) stampWith it }
 
-    val colorSensor by hardw { ColorSensorV3(Port.kOnboard) }.configure {
+    private val colorSensor by hardw { ColorSensorV3(Port.kOnboard) }.configure {
         it.configureColorSensor(
             ColorSensorResolution.kColorSensorRes18bit,
             ColorSensorMeasurementRate.kColorRate25ms,
@@ -77,10 +77,10 @@ class ControlPanelSpinnerHardware(driver: DriverHardware) :
         .with(graph("G", Percent, colorNamed)) { it.green.Each }
         .with(graph("B", Percent, colorNamed)) { it.blue.Each }
 
-    val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
+    private val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
         .with(graph("IR", Percent, colorNamed))
 
-    val targetColor = sensor {
+    private val targetColor = sensor {
         when (driver.station.gameSpecificMessage.trim()) {
             "" -> null
             "B" -> conversions.blue

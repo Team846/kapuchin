@@ -21,13 +21,13 @@ class ControlPanelConversions(hardware: ControlPanelSpinnerHardware) : Named by 
     val blue by pref(0.304, 0.543, 0.153)
     val yellow by pref(0.304, 0.543, 0.153)
 
-    val panelPattern = listOf(red, green, blue, yellow)
-    val colorMatcher = ColorMatch().apply {
+    private val panelPattern = listOf(red, green, blue, yellow)
+    private val colorMatcher = ColorMatch().apply {
         panelPattern.forEach { addColorMatch(it) }
     }
 
-    val controlPanelRadius by pref(16, Inch)
-    val complianceWheelRadius by pref(1.5, Inch)
+    private val controlPanelRadius by pref(16, Inch)
+    private val complianceWheelRadius by pref(1.5, Inch)
 
     fun encoderPositionDelta(motor: Angle): Angle = motor * complianceWheelRadius / controlPanelRadius
 

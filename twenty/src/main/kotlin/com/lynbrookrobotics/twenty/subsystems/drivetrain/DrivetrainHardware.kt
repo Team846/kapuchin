@@ -14,10 +14,8 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.Subsystems.Companion.uiBaselineTicker
-import edu.wpi.first.wpilibj.Counter
-import edu.wpi.first.wpilibj.DigitalOutput
-import edu.wpi.first.wpilibj.SerialPort
+import com.lynbrookrobotics.twenty.Subsystems
+import edu.wpi.first.wpilibj.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -62,6 +60,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.setSensorPhase(leftSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
+
     val leftSlaveEsc by hardw { TalonFX(leftSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(leftMasterEsc)
@@ -76,6 +75,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         it.setSensorPhase(rightSensorInversion)
         it.setNeutralMode(NeutralMode.Brake)
     }
+
     val rightSlaveEsc by hardw { TalonFX(rightSlaveEscId) }.configure {
         generalSetup(it, escConfig)
         it.follow(rightMasterEsc)
@@ -84,8 +84,10 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }
 
     private val gyro by hardw { AHRS(SerialPort.Port.kUSB) }.configure {
-        blockUntil() { it.isConnected }
-        blockUntil() { !it.isCalibrating }
+        blockUntil {
+            it.isConnected
+            !it.isCalibrating
+        }
         it.zeroYaw()
     }.verify("NavX should be connected") {
         it.isConnected
@@ -123,13 +125,13 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
         gyro.pitch.Degree stampWith it
     }.with(graph("Pitch", Degree))
 
-    val leftPosition = sensor {
+    private val leftPosition = sensor {
         conversions.encoder.right.realPosition(
             leftMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
     }.with(graph("Left Position", Foot))
 
-    val rightPosition = sensor {
+    private val rightPosition = sensor {
         conversions.encoder.left.realPosition(
             rightMasterEsc.getSelectedSensorPosition(idx)
         ) stampWith it
@@ -148,7 +150,7 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }.with(graph("Right Speed", FootPerSecond))
 
     init {
-        uiBaselineTicker.runOnTick { time ->
+        Subsystems.uiBaselineTicker.runOnTick { time ->
             setOf(pitch, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
                 it.optimizedRead(time, .5.Second)
             }

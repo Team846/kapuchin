@@ -3,7 +3,6 @@ package com.lynbrookrobotics.twenty.routines
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
 import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline
-import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline.*
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -23,73 +22,76 @@ suspend fun LimelightComponent.autoZoom() = startRoutine("Auto Zoom") {
 
     controller {
         with(hardware.conversions) {
-            visionTarget?.let { t ->
-                val insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
+            val target = visionTarget?.copy()
+            if (target != null) {
+                var insideBoxBoundsX = `±`(zoomInResolution.x / 2 - zoomInSafetyZone)
                 val insideBoxBoundsY = `±`(zoomInResolution.y / 2 - zoomInSafetyZone)
 
-                val angleToPixelsX = zoomInResolution.x / zoomInFov.x
-                val centerInPixX = t.tx * angleToPixelsX
-                val targetBoxBoundsX = centerInPixX `±` (t.thor / 2)
+                var angleToPixelsX = zoomInResolution.x / zoomInFov.x
+                val centerInPixX = target.tx * angleToPixelsX
+                var targetBoxBoundsX = centerInPixX `±` (target.thor / 2)
 
-                val angleToPixelsY = zoomInResolution.y / zoomInFov.y
-                val centerInPixY = t.ty * angleToPixelsY
-                val targetBoxBoundsY = (centerInPixY) `±` (t.tvert / 2)
+                var angleToPixelsY = zoomInResolution.y / zoomInFov.y
+                val centerInPixY = target.ty * angleToPixelsY
+                var targetBoxBoundsY = (centerInPixY) `±` (target.tvert / 2)
 
-                when (t.pipeline) {
-                    ZoomOut -> {
+                when (target.pipeline) {
+                    Pipeline.ZoomOut -> {
                         val insideBoxResolution = zoomOutResolution / zoomMultiplier.toDouble()
 
-                        val insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomOutSafetyZone)
-                        val highInsideBoxBoundsY = 0.0.Each..(insideBoxResolution.y - zoomOutSafetyZone)
-                        val midInsideBoxBoundsY = `±`(insideBoxResolution.y / 2 - zoomOutSafetyZone)
+                        insideBoxBoundsX = `±`(insideBoxResolution.x / 2 - zoomOutSafetyZone)
                         val lowInsideBoxBoundsY = -(insideBoxResolution.y - zoomOutSafetyZone)..0.0.Each
+                        val midInsideBoxBoundsY = `±`(insideBoxResolution.y / 2 - zoomOutSafetyZone)
+                        val highInsideBoxBoundsY = 0.0.Each..(insideBoxResolution.y - zoomOutSafetyZone)
 
-                        val angleToPixelsX = (zoomOutResolution.x / zoomOutFov.x)
-                        val targetBoxBoundsX = (t.tx * angleToPixelsX) `±` (t.thor / 2)
+                        angleToPixelsX = (zoomOutResolution.x / zoomOutFov.x)
+                        targetBoxBoundsX = (target.tx * angleToPixelsX) `±` (target.thor / 2)
 
-                        val angleToPixelsY = (zoomOutResolution.y / zoomOutFov.y)
-                        val targetBoxBoundsY = (t.ty * angleToPixelsY) `±` (t.tvert / 2)
+                        angleToPixelsY = (zoomOutResolution.y / zoomOutFov.y)
+                        targetBoxBoundsY = (target.ty * angleToPixelsY) `±` (target.tvert / 2)
 
                         if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
                             when {
-                                targetBoxBoundsY `⊆` lowInsideBoxBoundsY -> ZoomInPanLow
-                                targetBoxBoundsY `⊆` midInsideBoxBoundsY -> ZoomInPanMid
-                                targetBoxBoundsY `⊆` highInsideBoxBoundsY -> ZoomInPanHigh
-                                else -> ZoomOut
+                                targetBoxBoundsY `⊆` lowInsideBoxBoundsY -> Pipeline.ZoomInPanLow
+                                targetBoxBoundsY `⊆` midInsideBoxBoundsY -> Pipeline.ZoomInPanMid
+                                targetBoxBoundsY `⊆` highInsideBoxBoundsY -> Pipeline.ZoomInPanHigh
+                                else -> Pipeline.ZoomOut
                             }
-                        } else ZoomOut
+                        } else Pipeline.ZoomOut
                     }
-                    ZoomInPanMid -> {
+                    Pipeline.ZoomInPanMid -> {
                         if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
                             when {
-                                targetBoxBoundsY.less(insideBoxBoundsY) -> ZoomInPanLow
-                                targetBoxBoundsY.more(insideBoxBoundsY) -> ZoomInPanHigh
-                                else -> ZoomInPanMid
+                                targetBoxBoundsY.less(insideBoxBoundsY) -> Pipeline.ZoomInPanLow
+                                targetBoxBoundsY.more(insideBoxBoundsY) -> Pipeline.ZoomInPanHigh
+                                else -> Pipeline.ZoomInPanMid
                             }
-                        } else ZoomOut
+                        } else Pipeline.ZoomOut
                     }
-                    ZoomInPanLow -> {
+                    Pipeline.ZoomInPanLow -> {
                         if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
                             when {
-                                targetBoxBoundsY.less(insideBoxBoundsY) -> ZoomOut
-                                targetBoxBoundsY.more(insideBoxBoundsY) -> ZoomInPanMid
-                                else -> ZoomInPanLow
+                                targetBoxBoundsY.less(insideBoxBoundsY) -> Pipeline.ZoomOut
+                                targetBoxBoundsY.more(insideBoxBoundsY) -> Pipeline.ZoomInPanMid
+                                else -> Pipeline.ZoomInPanLow
                             }
-                        } else ZoomOut
+                        } else Pipeline.ZoomOut
                     }
-                    ZoomInPanHigh -> {
+                    Pipeline.ZoomInPanHigh -> {
                         if (targetBoxBoundsX `⊆` insideBoxBoundsX) {
                             when {
-                                targetBoxBoundsY.less(insideBoxBoundsY) -> ZoomInPanMid
-                                targetBoxBoundsY.more(insideBoxBoundsY) -> ZoomOut
-                                else -> ZoomInPanHigh
+                                targetBoxBoundsY.less(insideBoxBoundsY) -> Pipeline.ZoomInPanMid
+                                targetBoxBoundsY.more(insideBoxBoundsY) -> Pipeline.ZoomOut
+                                else -> Pipeline.ZoomInPanHigh
                             }
-                        } else ZoomOut
+                        } else Pipeline.ZoomOut
                     }
-                    else -> ZoomOut
+                    else -> Pipeline.ZoomOut
                 }
 
-            } ?: ZoomOut
+            } else {
+                Pipeline.ZoomOut
+            }
         }
     }
 }

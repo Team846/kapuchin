@@ -21,9 +21,9 @@ import info.kunalsheth.units.generated.*
  */
 fun Named.checkInSync(tolerance: Time, vararg sensorReadings: TimeStamped<*>): Boolean {
     val timings = sensorReadings.map(TimeStamped<*>::x)
-        .let { if (it.isEmpty()) listOf(0.Second) else it }
+        .let { it.ifEmpty { listOf(0.Second) } }
 
-    return (timings.max()!! - timings.min()!! < tolerance).also {
+    return (timings.maxOrNull()!! - timings.minOrNull()!! < tolerance).also {
         if (!it) log(Warning) { "$name sensor readings are out of sync.\ntolerance: $tolerance\ntimings: $timings" }
     }
 }

@@ -8,15 +8,12 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
-import com.lynbrookrobotics.twenty.subsystems.driver.ThrustmasterButtons.*
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.GenericHID.Hand.kLeft
-import edu.wpi.first.wpilibj.GenericHID.Hand.kRight
-import edu.wpi.first.wpilibj.Joystick
-import edu.wpi.first.wpilibj.XboxController
+import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.GenericHID.Hand
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
+@Suppress("unused")
 enum class ThrustmasterButtons(val raw: Int) {
     Trigger(1), LeftTrigger(3), BottomTrigger(2), RightTrigger(4),
     LeftOne(5), LeftTwo(6), LeftThree(7), LeftFour(10), LeftFive(9), LeftSix(8),
@@ -49,7 +46,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val station by hardw { DriverStation.getInstance() }
+    val station by hardw { DriverStation.getInstance()!! }
 
     private val stick by hardw { Joystick(0) }.verify("the driver joystick is connected") {
         it.name == "T.16000M"
@@ -66,7 +63,7 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val rumble by hardw<XboxController?> { XboxController(4) }.verify("the rumblr is connected") {
         it!!.name == "Controller (XBOX 360 For Windows)"
     }.verify("xbox controller and rumblr are not swapped") {
-        it!!.getTriggerAxis(kLeft) > 0.1 && it.getTriggerAxis(kRight) > 0.1
+        it!!.getTriggerAxis(Hand.kLeft) > 0.1 && it.getTriggerAxis(Hand.kRight) > 0.1
     }.otherwise(hardw { null })
 
     val accelerator = s { joystickMapping(-stick.y.Each) }
@@ -78,8 +75,8 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val absSteering = s { (-180).Degree * absoluteWheel.x }
         .with(graph("Absolute Steering", Degree))
 
-    val intakeBalls = s { stick[Trigger] }
-    val unjamBalls = s { stick[Trigger] && stick[BottomTrigger] }
+    val intakeBalls = s { stick[ThrustmasterButtons.Trigger] }
+    val unjamBalls = s { stick[ThrustmasterButtons.Trigger] && stick[ThrustmasterButtons.BottomTrigger] }
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

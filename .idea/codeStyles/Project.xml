@@ -21,9 +21,14 @@
           <package name="info.kunalsheth.units.math" alias="false" withSubpackages="true" />
         </value>
       </option>
+      <option name="NAME_COUNT_TO_USE_STAR_IMPORT" value="3" />
       <option name="IMPORT_NESTED_CLASSES" value="true" />
+      <option name="ALLOW_TRAILING_COMMA" value="true" />
       <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
     </JetCodeStyleSettings>
+    <ScalaCodeStyleSettings>
+      <option name="MULTILINE_STRING_CLOSING_QUOTES_ON_NEW_LINE" value="true" />
+    </ScalaCodeStyleSettings>
     <codeStyleSettings language="kotlin">
       <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
     </codeStyleSettings>

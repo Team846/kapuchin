@@ -10,9 +10,7 @@ import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
-import com.lynbrookrobotics.twenty.subsystems.shooter.FeederRollerComponent
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodComponent
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
+import com.lynbrookrobotics.twenty.subsystems.shooter.*
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import info.kunalsheth.units.generated.*
@@ -56,9 +54,13 @@ suspend fun TurretComponent.manualOverride(operator: OperatorHardware) = startRo
     controller { PercentOutput(hardware.escConfig, precision) }
 }
 
-suspend fun TurretComponent.trackTarget(
-    limelight: LimelightComponent, flywheel: FlywheelComponent, drivetrain: DrivetrainComponent
-) = startRoutine("Track Target") {
+suspend fun TurretComponent.manualPrecisionOverride(operator: OperatorHardware) =
+    startRoutine("Manual Precision Override") {
+        val precision by operator.turretPrecisionManual.readOnTick.withoutStamps
+        controller { PercentOutput(hardware.escConfig, precision) }
+    }
+
+suspend fun TurretComponent.trackTarget(limelight: LimelightComponent) = startRoutine("Track Target") {
 
     val reading by limelight.hardware.readings.readOnTick.withoutStamps
     val current by hardware.position.readOnTick.withoutStamps

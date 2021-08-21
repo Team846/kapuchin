@@ -6,13 +6,12 @@ import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.Subsystems.Companion.pneumaticTicker
-import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
+import com.lynbrookrobotics.twenty.Subsystems
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class IntakeRollersComponent(hardware: IntakeRollersHardware) :
-    Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, pneumaticTicker) {
+    Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, Subsystems.pneumaticTicker) {
 
     val eatSpeed by pref(6, Volt)
     val pukeSpeed by pref(50, Percent)
@@ -27,12 +26,13 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) :
 }
 
 class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRollersComponent>() {
-    override val period by sharedTickerTiming
+    override val period by Subsystems.sharedTickerTiming
     override val syncThreshold = 20.milli(Second)
     override val priority = Priority.Low
     override val name = "Intake Rollers"
 
     private val invert by pref(false)
+
     val escConfig by escConfigPref(
         defaultNominalOutput = 0.5.Volt,
         defaultContinuousCurrentLimit = 10.Ampere,

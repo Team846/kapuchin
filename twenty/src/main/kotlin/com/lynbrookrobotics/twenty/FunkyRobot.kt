@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-
 fun main() {
     printBuildInfo()
     RobotBase.startRobot(::FunkyRobot)

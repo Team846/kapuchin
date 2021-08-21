@@ -9,18 +9,15 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
-import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
-import com.lynbrookrobotics.twenty.Subsystems.Companion.shooterTicker
 import com.revrobotics.CANSparkMax
-import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class FeederRollerComponent(hardware: FeederRollerHardware) :
-    Component<FeederRollerComponent, FeederRollerHardware, OffloadedOutput>(hardware, shooterTicker) {
+    Component<FeederRollerComponent, FeederRollerHardware, OffloadedOutput>(hardware, Subsystems.shooterTicker) {
 
     val maxSpeed by pref(11000, Rpm)
-
     val feedSpeed by pref(2500, Rpm)
     val tolerance by pref(10, Rpm)
 
@@ -47,12 +44,13 @@ class FeederRollerComponent(hardware: FeederRollerHardware) :
 }
 
 class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRollerComponent>() {
-    override val period by sharedTickerTiming
+    override val period by Subsystems.sharedTickerTiming
     override val syncThreshold = 15.milli(Second)
     override val priority = Priority.Medium
     override val name = "Feeder Roller"
 
     private val invert by pref(false)
+
     val escConfig by escConfigPref(
         defaultNominalOutput = 0.5.Volt,
         defaultContinuousCurrentLimit = 25.Ampere,
@@ -62,14 +60,13 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
 
     private val escId = 61
 
-    val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
+    val esc by hardw { CANSparkMax(escId, MotorType.kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invert
     }
 
-    val encoder by hardw { esc.encoder }
-
-    val pidController by hardw { esc.pidController }
+    val encoder by hardw { esc.encoder!! }
+    val pidController by hardw { esc.pidController!! }
 
     val speed = sensor(encoder) {
         conversions.realVelocity(encoder.velocity) stampWith it
