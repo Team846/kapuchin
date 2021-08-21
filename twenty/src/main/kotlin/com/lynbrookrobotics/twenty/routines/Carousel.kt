@@ -9,7 +9,6 @@ import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 
 suspend fun CarouselComponent.rezero() = startRoutine("Re-Zero") {
-    hardware.isZeroed = false
     controller {
         PercentOutput(hardware.escConfig, zeroSpeed).takeUnless { hardware.isZeroed }
     }

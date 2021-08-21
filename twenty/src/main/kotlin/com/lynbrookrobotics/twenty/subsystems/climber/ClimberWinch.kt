@@ -32,10 +32,10 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 
     override val fallbackController: ClimberWinchComponent.(Time) -> ClimberWinchOutput = { Stopped }
 
-    private val flaccid = true
-    private val erect = false
+    private val down = true
+    private val up = false
 
-    private var lastErection = currentTime
+    private var lastUp = currentTime
     private var lastWinchRun = currentTime
     override fun ClimberWinchHardware.output(value: ClimberWinchOutput) = when (value) {
         is Stopped -> {
@@ -43,8 +43,8 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
                 masterEsc.appliedOutput == 0.0 &&
                 slaveEsc.appliedOutput == 0.0
             ) {
-                chodeSolenoid.set(erect)
-                lastErection = currentTime
+                climberSolenoid.set(up)
+                lastUp = currentTime
             } else log(Warning) {
                 "Cannot brake while \n" +
                         "currentTime - lastWinch == ${currentTime - lastWinchRun withDecimals 2}\n" +
@@ -55,16 +55,16 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
             PercentOutput(escConfig, 0.Percent).writeTo(masterEsc, pidController)
         }
         is Running -> {
-            if (currentTime - lastErection >= chodeDelaySafety && chodeSolenoid.get() != erect) {
+            if (currentTime - lastUp >= chodeDelaySafety && climberSolenoid.get() != up) {
                 value.esc.writeTo(masterEsc, pidController)
                 lastWinchRun = currentTime
             } else log(Warning) {
                 "Cannot run while \n" +
-                        "currentTime - lastErection == ${currentTime - lastErection withDecimals 2}\n" +
-                        "chodeSolenoid.get() == erect"
+                        "currentTime - lastUp == ${currentTime - lastUp withDecimals 2}\n" +
+                        "climberSolenoid.get() == up"
             }
 
-            chodeSolenoid.set(flaccid)
+            climberSolenoid.set(down)
         }
     }
 }
@@ -83,9 +83,9 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
 
     private val masterEscId = 10
     private val slaveEscId = 11
-    private val chodeSolenoidChannel = 0
+    private val climberSolenoidChannel = 0
 
-    val chodeSolenoid by hardw { Solenoid(chodeSolenoidChannel) }
+    val climberSolenoid by hardw { Solenoid(climberSolenoidChannel) }
 
     val masterEsc by hardw { CANSparkMax(masterEscId, kBrushless) }.configure {
         generalSetup(it, escConfig)

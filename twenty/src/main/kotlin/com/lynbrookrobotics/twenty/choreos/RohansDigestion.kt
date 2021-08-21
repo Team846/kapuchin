@@ -20,6 +20,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.ceil
+import kotlin.math.floor
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -36,6 +38,9 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
 
     val turretManual by operator.turretManual.readEagerly().withoutStamps
+
+    val carouselClockwise by driver.indexCarouselRight.readEagerly().withoutStamps
+    val carouselCounterclockwise by driver.indexCarouselLeft.readEagerly().withoutStamps
 
     choreography {
         if (turret != null) launch {
@@ -69,6 +74,15 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(On) } }
                 turret?.manualOverride(operator) ?: freeze()
             },
+
+            { carouselClockwise } to {
+                carousel.set((carousel.hardware.position.optimizedRead(currentTime, 0.Second).y / 1.CarouselSlot).roundToInt(Each).CarouselSlot + 1.CarouselSlot)
+                freeze()
+            },
+            { carouselCounterclockwise } to {
+                carousel.set((carousel.hardware.position.optimizedRead(currentTime, 0.Second).y / 1.CarouselSlot).roundToInt(Each).CarouselSlot - 1.CarouselSlot)
+                freeze()
+            }
         )
     }
 }
@@ -191,7 +205,6 @@ suspend fun Subsystems.visionAim() {
 }
 
 suspend fun Subsystems.shootOne() = startChoreo("Shoot One") {
-    val carouselAngle by carousel.hardware.position.readEagerly().withoutStamps
     choreography {
         val angle = carousel.state.shootAngle()
         if (angle == null) {
