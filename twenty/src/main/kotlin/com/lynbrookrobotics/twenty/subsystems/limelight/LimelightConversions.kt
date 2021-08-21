@@ -61,7 +61,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
             else -> 0.Degree
         }
 
-        val targetDistance = (targetHeight - mounting.z) / tan(angle)
+        val targetDistance = -(targetHeight - mounting.z) / tan(angle)
 
         val x = tan(tx + mountingBearing) * targetDistance
         val pos = Position(x, targetDistance, skew)
