@@ -53,7 +53,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { intakeBalls } to { intakeBalls() },
             { unjamBalls } to { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
-            { aim } to { visionAimTurret() },
+            { aim } to { visionAim() },
             { hoodUp } to { shooterHood?.set(Up) ?: freeze() },
             { shoot } to { shootAll() },
 
