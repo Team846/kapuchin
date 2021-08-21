@@ -76,14 +76,12 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             },
 
             { carouselClockwise } to {
-//                carousel.rezero(true)
                 val position by carousel.hardware.position.readEagerly().withoutStamps
 
                 carousel.set((position / 1.CarouselSlot).roundToInt(Each).CarouselSlot + 1.CarouselSlot)
                 freeze()
             },
             { carouselCounterclockwise } to {
-//                carousel.rezero()
                 val position by carousel.hardware.position.readEagerly().withoutStamps
 
                 carousel.set((position / 1.CarouselSlot).roundToInt(Each).CarouselSlot - 1.CarouselSlot)

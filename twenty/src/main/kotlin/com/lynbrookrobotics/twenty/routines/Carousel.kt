@@ -8,11 +8,9 @@ import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.launch
 
-suspend fun CarouselComponent.rezero(flipDirection: Boolean = false) = startRoutine("Re-Zero") {
-    hardware.isZeroed = false
-    val speed = if (flipDirection) -zeroSpeed else zeroSpeed
+suspend fun CarouselComponent.rezero() = startRoutine("Re-Zero") {
     controller {
-        PercentOutput(hardware.escConfig, speed).takeUnless { hardware.isZeroed }
+        PercentOutput(hardware.escConfig, zeroSpeed).takeUnless { hardware.isZeroed }
     }
 }
 
