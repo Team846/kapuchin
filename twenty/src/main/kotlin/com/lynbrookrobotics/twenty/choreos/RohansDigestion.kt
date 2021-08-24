@@ -147,8 +147,15 @@ suspend fun Subsystems.visionAimTurret() {
     {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
-
         choreography {
+            if (reading == null ) {
+                log(Debug ) {"No target in sight"}
+                return@choreography
+            }
+            if (reading!!.tx == null) {
+                log(Debug) { "Something went completely wrong"}
+                return@choreography
+            }
             log(Debug) { "target ${(turretPos - reading!!.tx).Degree}" }
             turret.set(
                 turretPos - reading!!.tx
