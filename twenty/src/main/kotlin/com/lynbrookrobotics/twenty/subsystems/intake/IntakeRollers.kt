@@ -15,7 +15,7 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) :
 
     val eatSpeed by pref(6, Volt)
     val pukeSpeed by pref(50, Percent)
-    val defaultVoltage by pref(6, Volt)
+    val defaultVoltage by pref(5, Volt)
     val scale by pref(2, Each)
 
     override val fallbackController: IntakeRollersComponent.(Time) -> OffloadedOutput = {
