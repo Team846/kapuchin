@@ -29,10 +29,10 @@ suspend fun IntakeRollersComponent.optimalEat(drivetrain: DrivetrainComponent, e
 //            val voltage =
 //                eatSpeed - hardware.escConfig.voltageCompSaturation * ((leftSpeed + rightSpeed) / (drivetrain.maxSpeed * 2))
             val rpm = (leftSpeed / drivetrain.hardware.conversions.wheelRadius.left + rightSpeed / drivetrain.hardware.conversions.wheelRadius.right) / 2.0
-            var voltage = hardware.escConfig.voltageCompSaturation * 2.0.Each * rpm / (18700.Each / 1.Minute)
+            var voltage = hardware.escConfig.voltageCompSaturation * scale * rpm / (motorRPM / 1.Minute)
             if (voltage < defaultVoltage) voltage = defaultVoltage
             log(Debug) {"$voltage"}
-            PercentOutput(hardware.escConfig, voltageToDutyCycle(-voltage, vBat))
+            PercentOutput(hardware.escConfig, voltageToDutyCycle(voltage, vBat))
 
         }
     }
