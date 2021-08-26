@@ -15,6 +15,8 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) :
 
     val eatSpeed by pref(6, Volt)
     val pukeSpeed by pref(50, Percent)
+    val defaultVoltage by pref(6, Volt)
+    val scale by pref(2, Each)
 
     override val fallbackController: IntakeRollersComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
@@ -40,6 +42,7 @@ class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRol
     )
 
     private val escId = 40
+    val threshold by pref(2, FootPerSecond)
 
     val esc by hardw { VictorSPX(escId) }.configure {
         generalSetup(it, escConfig)
