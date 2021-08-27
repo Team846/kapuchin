@@ -17,7 +17,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
     override val priority = Priority.High
     override val name = "Limelight"
 
-    private val invertTx by pref(false)
+    val invertTx by pref(false)
     private val invertTy by pref(true)
 
     private val table by hardw {

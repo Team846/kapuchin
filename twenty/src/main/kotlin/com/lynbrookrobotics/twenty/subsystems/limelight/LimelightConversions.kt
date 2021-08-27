@@ -4,6 +4,7 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
+import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -52,18 +53,19 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         skew: Angle,
         pitch: Angle,
     ): Position = with(sample) {
-        val targetDistance = (targetHeight - mounting.z) / tan(
-            mountingIncline + pitch + ty + when (pipeline) {
-                Pipeline.ZoomInPanHigh -> zoomInFov.y / 2
-                Pipeline.ZoomInPanLow -> -zoomInFov.y / 2
-                else -> 0.Degree
-            }
-        )
+        val angle = (if (hardware.invertTx) -mountingIncline + pitch else mountingIncline - pitch)
+        +ty + when (pipeline) {
+            Pipeline.ZoomInPanHigh -> zoomInFov.y / 2
+            Pipeline.ZoomInPanLow -> -zoomInFov.y / 2
+            else -> 0.Degree
+        }
+
+        val targetDistance = -(targetHeight - mounting.z) / tan(angle)
 
         val x = tan(tx + mountingBearing) * targetDistance
         val pos = Position(x, targetDistance, skew)
 
-        log(Debug) { "Goal position: ${targetDistance.Foot}" }
+        log(Debug) { "Goal position: ${targetDistance.Foot} Feet" }
         return pos
     }
 
