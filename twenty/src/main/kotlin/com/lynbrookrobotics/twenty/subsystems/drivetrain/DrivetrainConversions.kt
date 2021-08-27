@@ -16,7 +16,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     override val trackLength by pref(2, Foot)
     private val leftTrim by pref(1.0)
     private val rightTrim by pref(1.0)
-    val wheelRadius by pref {
+    private val wheelRadius by pref {
         val left by pref(3, Inch)
         val right by pref(3, Inch)
         ({ TwoSided(left, right) })
@@ -29,7 +29,7 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
         val wheelGear by pref(60)
         val resolution by pref(2048)
         val nativeEncoderCountMultiplier by pref(1)
-        
+
         ({
             val stage1 = GearTrain(motorGear, stage1Gear)
             val stage2 = GearTrain(stage2Gear, wheelGear)

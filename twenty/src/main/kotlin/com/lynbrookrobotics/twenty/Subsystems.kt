@@ -149,8 +149,8 @@ class Subsystems(
         private val initClimberPivot by pref(false)
         private val initClimberWinch by pref(false)
 
-//        private val initControlPanelPivot by pref(false)
-//        private val initControlPanelSpinner by pref(false)
+        //        private val initControlPanelPivot by pref(false)
+        //        private val initControlPanelSpinner by pref(false)
         private val initIntakeRollers by pref(false)
         private val initIntakeSlider by pref(false)
         private val initFlywheel by pref(false)

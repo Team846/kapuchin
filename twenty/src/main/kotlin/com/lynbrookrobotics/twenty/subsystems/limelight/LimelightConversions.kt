@@ -4,7 +4,6 @@ import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
-import com.lynbrookrobotics.twenty.subsystems.limelight.Pipeline
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 

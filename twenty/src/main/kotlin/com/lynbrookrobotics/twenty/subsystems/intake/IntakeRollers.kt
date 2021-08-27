@@ -13,11 +13,8 @@ import info.kunalsheth.units.math.*
 class IntakeRollersComponent(hardware: IntakeRollersHardware) :
     Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, Subsystems.pneumaticTicker) {
 
-    val eatSpeed by pref(6, Volt)
-    val pukeSpeed by pref(50, Percent)
-    val defaultVoltage by pref(5, Volt)
-    val motorRPM by pref((18700 / 4.0), Each)
-    val scale by pref(2, Each)
+    val eatSpeed by pref(3500, Rpm)
+    val maxSpeed by pref(4682.5, Rpm)
 
     override val fallbackController: IntakeRollersComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
@@ -43,7 +40,6 @@ class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRol
     )
 
     private val escId = 40
-    val threshold by pref(2, FootPerSecond)
 
     val esc by hardw { VictorSPX(escId) }.configure {
         generalSetup(it, escConfig)
