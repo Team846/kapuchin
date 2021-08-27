@@ -42,6 +42,21 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val turretManual by operator.turretManual.readEagerly().withoutStamps
     val turretPrecisionManual by operator.turretPrecisionManual.readEagerly().withoutStamps
 
+    val carouselClockwise by driver.indexCarouselRight.readEagerly().withoutStamps
+    val carouselCounterclockwise by driver.indexCarouselLeft.readEagerly().withoutStamps
+
+    var isTurnedOff = false
+
+
+    suspend fun isOff(): Boolean{
+        val color by carousel.hardware.color.readEagerly().withoutStamps
+        if(color.red == 0.0 && color.blue == 0.0 && color.green == 0.0){
+            delay(0.2.Second)
+            if(color.red == 0.0 && color.blue == 0.0 && color.green == 0.0) return true
+        }
+        return false
+    }
+
     choreography {
 //        if (turret != null) launch {
 //            log(Debug) { "Rezeroing turret" }
@@ -54,9 +69,15 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 //            carousel.whereAreMyBalls()
 //        }
 
+        scope.launch {
+            while(!isTurnedOff){
+                isTurnedOff = isOff()
+            }
+        }
+
         runWhenever(
-            { intakeBalls } to { intakeBalls() },
-            { unjamBalls } to { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
+            { intakeBalls && !isTurnedOff} to { intakeBalls() },
+            { unjamBalls && !isTurnedOff} to { intakeRollers?.set(intakeRollers.pukeSpeed) ?: freeze() },
 
             { aim } to { visionAimTurret() },
             { hoodUp } to { shooterHood?.set(ShooterHoodState.Up) ?: freeze() },
@@ -73,7 +94,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { ball4 } to { carousel.state.set(4) },
 
             { rezeroTurret } to { turret?.rezero(electrical) ?: freeze() },
-            { reindexCarousel } to { whereAreMyBalls() },
+            { reindexCarousel && !isTurnedOff} to { whereAreMyBalls() },
 
             { !turretManual.isZero && turretPrecisionManual.isZero } to {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(FlashlightState.On) } }
@@ -83,6 +104,16 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(FlashlightState.On) } }
                 turret?.manualPrecisionOverride(operator) ?: freeze()
             },
+            {carouselClockwise} to {
+                carousel.set((carousel.hardware.position.optimizedRead(currentTime, 0.Second).y / 1.CarouselSlot).roundToInt(Each).CarouselSlot + 1.CarouselSlot)
+                freeze()
+            },
+            {carouselCounterclockwise} to {
+                carousel.set((carousel.hardware.position.optimizedRead(currentTime, 0.Second).y / 1.CarouselSlot).roundToInt(Each).CarouselSlot - 1.CarouselSlot)
+                freeze()
+            }
+
+
         )
     }
 }
