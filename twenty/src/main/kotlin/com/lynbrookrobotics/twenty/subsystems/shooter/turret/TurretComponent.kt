@@ -13,6 +13,8 @@ class TurretComponent(hardware: TurretHardware) :
     val safeSpeed by pref(1, Volt)
     val windupPosition by pref(-90, Degree)
 
+    val zeroOnStart by pref(false)
+
     val positionGains by pref {
         val kP by pref(12, Volt, 45, Degree)
         val kI by pref(1, Volt, 2, DegreeSecond)

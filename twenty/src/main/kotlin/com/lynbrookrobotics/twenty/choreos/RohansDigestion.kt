@@ -48,16 +48,18 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val carouselCounterclockwise by driver.indexCarouselLeft.readEagerly().withoutStamps
 
     choreography {
-//        if (turret != null) launch {
-//            log(Debug) { "Rezeroing turret" }
-//            turret.rezero(electrical)
-//        }
-//
-//        withTimeout(15.Second) {
-//            log(Debug) { "Reindexing carousel" }
-//            carousel.rezero()
-//            carousel.whereAreMyBalls()
-//        }
+        if (turret != null && turret.zeroOnStart) launch {
+            log(Debug) { "Rezeroing turret" }
+            turret.rezero(electrical)
+        }
+
+        if (carousel.indexOnStart) {
+            withTimeout(15.Second) {
+                log(Debug) { "Reindexing carousel" }
+                carousel.rezero()
+                whereAreMyBalls()
+            }
+        }
 
         runWhenever(
             { intakeBalls } to { intakeBalls() },
@@ -124,7 +126,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
 
-                withTimeout(carousel.intakeTimeout) { carousel.delayUntilBall() }
+                carousel.delayUntilBall()
                 carousel.state.push()
             }
         }
