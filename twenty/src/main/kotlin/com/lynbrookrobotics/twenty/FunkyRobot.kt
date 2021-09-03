@@ -13,6 +13,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.*
 import kotlin.system.measureTimeMillis
 
 fun main() {
@@ -81,6 +82,16 @@ class FunkyRobot : RobotBase() {
 
             if (eventLoopTime > eventLoopPeriod * 5)
                 println("Overran event loop by ${(eventLoopTime - eventLoopPeriod) withDecimals 3}")
+
+//            val file = File("/home/lvuser/loopTimes.tsv")
+//            val fr = FileWriter(file, true)
+//            val br = BufferedWriter(fr)
+//            val pr = PrintWriter(br)
+//            pr.println("Time remaining on loop: ${eventLoopPeriod - eventLoopTime}")
+//            pr.close()
+//            br.close()
+//            fr.close()
+
         }
     }
 

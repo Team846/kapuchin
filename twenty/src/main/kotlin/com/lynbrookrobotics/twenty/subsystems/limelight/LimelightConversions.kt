@@ -68,6 +68,22 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         return pos
     }
 
+    fun distanceToGoal(
+        sample: LimelightReading,
+        pitch: Angle,
+    ): L = with(sample) {
+        val angle = (if (hardware.invertTx) -mountingIncline + pitch else mountingIncline - pitch)
+        +ty + when (pipeline) {
+            Pipeline.ZoomInPanHigh -> zoomInFov.y / 2
+            Pipeline.ZoomInPanLow -> -zoomInFov.y / 2
+            else -> 0.Degree
+        }
+
+        val targetDistance = -(targetHeight - mounting.z) / tan(angle)
+        log(Debug) { "Goal position: ${targetDistance.Foot} Feet" }
+        return targetDistance
+    }
+
     fun goalPositions(sample: LimelightReading, skew: Angle, pitch: Angle): DetectedTarget {
         val outerGoal = outerGoalPosition(sample, skew, pitch)
         val offsetAngle = 90.Degree - skew
