@@ -56,7 +56,8 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
                 l("ta").Each,// this is actually Pixels Squared
                 l("getpipe").toInt().let { rawpipe ->
                     Pipeline.values().firstOrNull { it.number == rawpipe }
-                }
+                },
+                l("ts").Degree
             )
             else -> null
         } lstamp t
