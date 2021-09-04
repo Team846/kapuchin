@@ -79,6 +79,32 @@ suspend fun TurretComponent.trackTarget(limelight: LimelightComponent) = startRo
     }
 }
 
+suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limelight: LimelightComponent) {
+    startRoutine("Field Oriented Routine") {
+        val reading by limelight.hardware.readings.readEagerly.withoutStamps
+        val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
+        val bearing = drivetrainPosition.bearing
+
+        if(reading != null) lastLimelightPos = reading
+        log(Debug) {"Outputting"}
+
+        controller {
+            if (lastLimelightPos != null) {
+                val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
+//                val position = limelight.hardware.conversions.outerGoalPosition(lastLimelightPos!!, bearing, pitch)
+                val position = Position(5.Foot, 5.Foot, 0.Degree)
+                val angle = atan2(position.x - drivetrainPosition.x, position.y - drivetrainPosition.y)
+                val target = -(angle `coterminal +` drivetrainPosition.bearing)
+                if (target in hardware.conversions.min..hardware.conversions.max) PositionOutput(hardware.escConfig,
+                    positionGains,
+                    hardware.conversions.encoder.native(target))
+                else PercentOutput(hardware.escConfig, 0.Percent)
+            } else PercentOutput(hardware.escConfig, 0.Percent)
+        }
+    }
+}
+
+
 suspend fun TurretComponent.fieldOrientedAngle(drivetrain: DrivetrainComponent, toTurretPosition: Angle? = null) =
     startRoutine("Field Oriented Position") {
         val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps

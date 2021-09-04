@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightReading
 import info.kunalsheth.units.generated.*
 
 class TurretComponent(hardware: TurretHardware) :
@@ -12,6 +13,7 @@ class TurretComponent(hardware: TurretHardware) :
 
     val safeSpeed by pref(1, Volt)
     val windupPosition by pref(-90, Degree)
+    var lastLimelightPos: LimelightReading? = null
 
     val zeroOnStart by pref(false)
 
