@@ -86,10 +86,10 @@ suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limel
         val bearing = drivetrainPosition.bearing
 
         if(reading != null) lastLimelightPos = reading
-        log(Debug) {"Outputting"}
 
         controller {
             if (lastLimelightPos != null) {
+                log(Debug) {"Target detecting ... Aiming now"}
                 val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 //                val position = limelight.hardware.conversions.outerGoalPosition(lastLimelightPos!!, bearing, pitch)
                 val position = Position(5.Foot, 5.Foot, 0.Degree)
@@ -98,8 +98,14 @@ suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limel
                 if (target in hardware.conversions.min..hardware.conversions.max) PositionOutput(hardware.escConfig,
                     positionGains,
                     hardware.conversions.encoder.native(target))
-                else PercentOutput(hardware.escConfig, 0.Percent)
-            } else PercentOutput(hardware.escConfig, 0.Percent)
+                else{
+                    log(Debug) {"No target detected ..."}
+                    PercentOutput(hardware.escConfig, 0.Percent)
+                }
+            } else{
+                log(Debug) {"No target detected ..."}
+                PercentOutput(hardware.escConfig, 0.Percent)
+            }
         }
     }
 }
