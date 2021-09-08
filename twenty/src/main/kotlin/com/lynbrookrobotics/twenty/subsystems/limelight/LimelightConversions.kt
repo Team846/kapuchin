@@ -47,7 +47,7 @@ class LimelightConversions(val hardware: LimelightHardware) : Named by Named("Co
         ({ UomVector(x, y) })
     }
 
-    private fun outerGoalPosition(
+    fun outerGoalPosition(
         sample: LimelightReading,
         skew: Angle,
         pitch: Angle,

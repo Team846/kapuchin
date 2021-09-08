@@ -13,7 +13,7 @@ class TurretComponent(hardware: TurretHardware) :
 
     val safeSpeed by pref(1, Volt)
     val windupPosition by pref(-90, Degree)
-    var lastLimelightPos: LimelightReading? = null
+    var lastLimelightPos: LimelightReading? = LimelightReading(0.Radian, 0.Radian, 0.Each, 0.Each, Pixel(0.0), Pixel(0.0), 0.Each, null, 0.Radian)
 
     val zeroOnStart by pref(false)
 

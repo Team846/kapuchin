@@ -79,7 +79,7 @@ suspend fun TurretComponent.trackTarget(limelight: LimelightComponent) = startRo
     }
 }
 
-suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limelight: LimelightComponent) {
+suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limelight: LimelightComponent, turret: TurretComponent) {
     startRoutine("Field Oriented Routine") {
         val reading by limelight.hardware.readings.readEagerly.withoutStamps
         val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
@@ -91,11 +91,14 @@ suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limel
             if (lastLimelightPos != null) {
                 log(Debug) {"Target detecting ... Aiming now"}
                 val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
-//                val position = limelight.hardware.conversions.outerGoalPosition(lastLimelightPos!!, bearing, pitch)
-                val position = Position(5.Foot, 5.Foot, 0.Degree)
+                val position = limelight.hardware.conversions.outerGoalPosition(lastLimelightPos!!, bearing, pitch)
+//                val position = Position(5.Foot, 5.Foot, 0.Degree)
                 val angle = atan2(position.x - drivetrainPosition.x, position.y - drivetrainPosition.y)
                 val target = -(angle `coterminal +` drivetrainPosition.bearing)
-                if (target in hardware.conversions.min..hardware.conversions.max) PositionOutput(hardware.escConfig,
+                val turretPos by turret.hardware.position.readEagerly().withoutStamps
+
+                log(Debug) {"target"}
+                if (target in hardware.conversions.min..hardware.conversions.max && abs(turretPos - target) > 1.Degree) PositionOutput(hardware.escConfig,
                     positionGains,
                     hardware.conversions.encoder.native(target))
                 else{

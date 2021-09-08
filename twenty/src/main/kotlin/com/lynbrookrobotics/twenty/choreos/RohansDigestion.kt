@@ -119,7 +119,7 @@ suspend fun Subsystems.trackTargetTurret() {
     }
     else startChoreo("FOV Track Target") {
         choreography {
-            scope.launch {turret.fieldOriented(drivetrain, limelight)}
+            scope.launch {turret.fieldOriented(drivetrain, limelight, turret)}
         }
     }
 
