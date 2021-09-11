@@ -88,6 +88,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { reindexCarousel } to { whereAreMyBalls() },
             {track} to {
                 trackTargetTurret()
+                freeze()
             },
 
             { !turretManual.isZero && turretPrecisionManual.isZero } to {

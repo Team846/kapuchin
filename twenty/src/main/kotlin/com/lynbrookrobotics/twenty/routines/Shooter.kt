@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
@@ -84,26 +85,28 @@ suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limel
         val reading by limelight.hardware.readings.readEagerly.withoutStamps
         val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
         val bearing = drivetrainPosition.bearing
+        val turretPos = turret.hardware.position.optimizedRead(currentTime, 0.Second).y
 
         if(reading != null) lastLimelightPos = reading
 
         controller {
             if (lastLimelightPos != null) {
-                log(Debug) {"Target detecting ... Aiming now"}
                 val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
                 val position = limelight.hardware.conversions.outerGoalPosition(lastLimelightPos!!, bearing, pitch)
 //                val position = Position(5.Foot, 5.Foot, 0.Degree)
                 var angle = atan2(position.x - drivetrainPosition.x, position.y - drivetrainPosition.y)
-                val target = -(angle `coterminal -` drivetrainPosition.bearing)
-                val turretPos by turret.hardware.position.readEagerly().withoutStamps
+                val target = (angle `coterminal +` drivetrainPosition.bearing)
 //                if(position.x - drivetrainPosition.x < 0) angle += 180.Degree //another possible piece of code
 //                val target = angle - drivetrainPosition.bearing
 
-                log(Debug) {"$target"}
-                if (target in hardware.conversions.min..hardware.conversions.max && abs(turretPos - target) > 3.Degree) PositionOutput(hardware.escConfig,
+                if (abs(target) > 2.Degree) {
+                    log(Debug) {"$target"}
+                    log(Debug) {"$turretPos"}
+                    PositionOutput(hardware.escConfig,
                     positionGains,
-                    hardware.conversions.encoder.native(target))
+                    hardware.conversions.encoder.native(turretPos - target))}
                 else{
+                    log(Warning) {"not outputting"}
                     PercentOutput(hardware.escConfig, 0.Percent)
                 }
             } else{
