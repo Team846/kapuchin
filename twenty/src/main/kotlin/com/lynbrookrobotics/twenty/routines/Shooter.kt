@@ -93,12 +93,8 @@ suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limel
             if (lastLimelightPos != null) {
                 val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
                 val position = limelight.hardware.conversions.outerGoalPosition(lastLimelightPos!!, bearing, pitch)
-//                val position = Position(5.Foot, 5.Foot, 0.Degree)
-                var angle = atan2(position.x - drivetrainPosition.x, position.y - drivetrainPosition.y)
+                val angle = atan2(position.x - drivetrainPosition.x, position.y - drivetrainPosition.y)
                 val target = (angle `coterminal +` drivetrainPosition.bearing)
-//                if(position.x - drivetrainPosition.x < 0) angle += 180.Degree //another possible piece of code
-//                val target = angle - drivetrainPosition.bearing
-
                 if (abs(target) > 2.Degree) {
                     log(Debug) {"$target"}
                     log(Debug) {"$turretPos"}
@@ -107,10 +103,12 @@ suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limel
                     hardware.conversions.encoder.native(turretPos - target))}
                 else{
                     log(Warning) {"not outputting"}
-                    PercentOutput(hardware.escConfig, 0.Percent)
+//                    PercentOutput(hardware.escConfig, 0.Percent)
+                    null
                 }
             } else{
-                PercentOutput(hardware.escConfig, 0.Percent)
+//                PercentOutput(hardware.escConfig, 0.Percent)
+                null
             }
         }
     }
