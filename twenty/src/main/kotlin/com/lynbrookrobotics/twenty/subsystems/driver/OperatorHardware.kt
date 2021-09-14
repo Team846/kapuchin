@@ -64,6 +64,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val shooterPreset1 = s { xbox.pov == 180 }
     val shooterPreset2 = s { xbox.pov == 90 }
     val shooterPreset3 = s { xbox.pov == 0 }
+    val trackTarget = s {xbox.pov == 270}
 
     val carouselBall0 = s { rb }
     val carouselBall1 = s { xbox.yButton }

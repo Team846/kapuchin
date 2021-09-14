@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
+import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
@@ -78,6 +79,39 @@ suspend fun TurretComponent.trackTarget(limelight: LimelightComponent) = startRo
         }
     }
 }
+
+suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limelight: LimelightComponent, turret: TurretComponent) {
+    startRoutine("Field Oriented Routine") {
+        val reading by limelight.hardware.readings.readEagerly.withoutStamps
+        val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
+        val bearing = drivetrainPosition.bearing
+        val turretPos = turret.hardware.position.optimizedRead(currentTime, 0.Second).y
+
+        if(reading != null) lastLimelightPos = reading
+
+        controller {
+            if (lastLimelightPos != null) {
+                val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
+                val position = limelight.hardware.conversions.outerGoalPosition(lastLimelightPos!!, bearing, pitch)
+                val angle = atan2(position.x - drivetrainPosition.x, position.y - drivetrainPosition.y)
+                val target = (angle `coterminal +` drivetrainPosition.bearing)
+                if (abs(target) > 2.Degree) {
+                    log(Debug) {"$angle"}
+                    log(Debug) {"$target"}
+                    log(Debug) {"$turretPos"}
+                    PositionOutput(hardware.escConfig,
+                    positionGains,
+                    hardware.conversions.encoder.native(turretPos - target))}
+                else{
+                    log(Warning) {"not outputting"}
+                    PercentOutput(hardware.escConfig, 0.Percent) }
+            } else{
+                PercentOutput(hardware.escConfig, 0.Percent)
+            }
+        }
+    }
+}
+
 
 suspend fun TurretComponent.fieldOrientedAngle(drivetrain: DrivetrainComponent, toTurretPosition: Angle? = null) =
     startRoutine("Field Oriented Position") {

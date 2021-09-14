@@ -43,6 +43,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
+    val track by operator.trackTarget.readEagerly().withoutStamps
+
 
     val turretManual by operator.turretManual.readEagerly().withoutStamps
     val turretPrecisionManual by operator.turretPrecisionManual.readEagerly().withoutStamps
@@ -84,6 +86,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
             { rezeroTurret } to { turret?.rezero(electrical) ?: freeze() },
             { reindexCarousel } to { whereAreMyBalls() },
+            {track} to {
+                trackTargetTurret()
+                freeze()
+            },
 
             { !turretManual.isZero && turretPrecisionManual.isZero } to {
                 scope.launch { withTimeout(5.Second) { flashlight?.set(FlashlightState.On) } }
@@ -105,6 +111,19 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             }
         )
     }
+}
+
+suspend fun Subsystems.trackTargetTurret() {
+    if (turret == null){
+        log(Error) {"Need turret for vision"}
+        freeze()
+    }
+    else startChoreo("FOV Track Target") {
+        choreography {
+            scope.launch {turret.fieldOriented(drivetrain, limelight, turret)}
+        }
+    }
+
 }
 
 suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
