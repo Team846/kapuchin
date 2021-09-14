@@ -96,6 +96,7 @@ suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limel
                 val angle = atan2(position.x - drivetrainPosition.x, position.y - drivetrainPosition.y)
                 val target = (angle `coterminal +` drivetrainPosition.bearing)
                 if (abs(target) > 2.Degree) {
+                    log(Debug) {"$angle"}
                     log(Debug) {"$target"}
                     log(Debug) {"$turretPos"}
                     PositionOutput(hardware.escConfig,
@@ -103,12 +104,9 @@ suspend fun TurretComponent.fieldOriented(drivetrain: DrivetrainComponent, limel
                     hardware.conversions.encoder.native(turretPos - target))}
                 else{
                     log(Warning) {"not outputting"}
-//                    PercentOutput(hardware.escConfig, 0.Percent)
-                    null
-                }
+                    PercentOutput(hardware.escConfig, 0.Percent) }
             } else{
-//                PercentOutput(hardware.escConfig, 0.Percent)
-                null
+                PercentOutput(hardware.escConfig, 0.Percent)
             }
         }
     }
