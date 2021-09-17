@@ -18,8 +18,6 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.io.FileWriter
-import java.io.IOException
 
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
@@ -66,7 +64,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         runWhenever(
             { intakeBalls } to { intakeBalls() },
-            { unjamBalls } to { intakeRollers?.set(electrical, intakeRollers.maxSpeed) ?: freeze() },
+            { unjamBalls } to { intakeRollers?.set(-100.Percent) ?: freeze() },
 
             { aim } to { visionAimTurret() },
             { hoodUp } to { shooterHood?.set(ShooterHoodState.Up) ?: freeze() },
@@ -125,7 +123,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
                 launch { carousel.set(angle, 0.Degree) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
-                launch { intakeRollers?.set(electrical, intakeRollers.eatSpeed) }
+                launch { intakeRollers?.set(intakeRollers.eatSpeed) }
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
 
@@ -137,39 +135,22 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 }
 
 suspend fun Subsystems.visionAimTurret() {
-    val logDir = "/home/lvuser/"
-    val logPath = "${"/home/lvuser/visionaim"}.tsv"
-
-    if (turret == null || flywheel == null) {
+    if (turret == null) {
         log(Error) { "Need turret for vision" }
         freeze()
     } else startChoreo("Vision Aim Turret") {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
-        val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
-        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
         choreography {
-            val reading = reading?.copy()
-            if (reading == null || turretPos == null) {
+            val snapshot = reading?.copy()
+            if (snapshot == null) {
                 return@choreography
             } else {
-                scope.launch {
-                    try {
-                        val fw = FileWriter(logPath, true)
-                        fw.write("\n${reading!!.tx}\t${reading!!.ty}\t${reading!!.tx0}\t${reading!!.ty0}\t${reading!!.tvert}\t${reading!!.thor}\t${reading!!.ta}\t${reading!!.pipeline}\t${reading!!.ts}\t${turretPos}\t${
-                            limelight.hardware.conversions.distanceToGoal(reading!!,
-                                pitch)
-                        }\t${flywheelSpeed}")
-                        fw.close()
-                    } catch (e: IOException) {
-                    }
-                }
-                log(Debug) { "target ${(turretPos - reading!!.tx).Degree}" }
-//            log.println("${reading}\t${turretPos}\t${distanceToGoal(reading}\t${flywheelSpeed}")
+                log(Debug) { "target ${(turretPos - snapshot.tx).Degree}" }
 
                 turret.set(
-                    turretPos - reading!!.tx,
+                    turretPos - snapshot.tx,
                     0.Degree
                 )
             }

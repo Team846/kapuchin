@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.choreos.journalPath
+import edu.wpi.first.cameraserver.CameraServer
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.Compressor
 import edu.wpi.first.wpilibj.RobotBase
@@ -28,6 +29,7 @@ class FunkyRobot : RobotBase() {
 
         println("Initializing hardware...")
         Compressor()
+        CameraServer.getInstance().startAutomaticCapture()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 

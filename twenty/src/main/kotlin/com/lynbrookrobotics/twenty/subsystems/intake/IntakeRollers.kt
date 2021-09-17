@@ -13,8 +13,7 @@ import info.kunalsheth.units.math.*
 class IntakeRollersComponent(hardware: IntakeRollersHardware) :
     Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, Subsystems.pneumaticTicker) {
 
-    val eatSpeed by pref(3500, Rpm)
-    val maxSpeed by pref(4682.5, Rpm)
+    val eatSpeed by pref(100, Percent)
 
     override val fallbackController: IntakeRollersComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
