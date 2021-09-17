@@ -150,11 +150,10 @@ suspend fun Subsystems.visionAimTurret() {
 
 suspend fun Subsystems.shootAll() = startChoreo("Shoot All") {
     choreography {
-        launch { carousel.set(carousel.fireAllDutycycle) }
-        while (isActive) {
-            flywheel?.delayUntilBall()
-            log(Debug) { "Ball shot" }
-            carousel.state.pop()
+        try {
+            carousel.set(carousel.fireAllDutycycle)
+        } finally {
+            carousel.state.clear()
         }
     }
 }
