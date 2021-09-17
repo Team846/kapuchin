@@ -2,8 +2,6 @@ package com.lynbrookrobotics.twenty.subsystems.climber
 
 import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
@@ -29,8 +27,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 
     override val fallbackController: ClimberWinchComponent.(Time) -> ClimberWinchOutput = { ClimberWinchOutput.Stopped }
 
-    private var lastBrake = currentTime
-    private var lastWinchRun = currentTime
+    private var lastBrakeTime = currentTime
 
     companion object {
         private const val BRAKE_OFF = true
@@ -39,29 +36,16 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 
     override fun ClimberWinchHardware.output(value: ClimberWinchOutput) = when (value) {
         is ClimberWinchOutput.Stopped -> {
-            if (currentTime - lastWinchRun >= chodeDelaySafety &&
-                masterEsc.appliedOutput == 0.0 &&
-                slaveEsc.appliedOutput == 0.0
-            ) {
+            if (masterEsc.appliedOutput == 0.0 && slaveEsc.appliedOutput == 0.0) {
                 brakeSolenoid.set(BRAKE_ON)
-                lastBrake = currentTime
-            } else log(Warning) {
-                "Cannot brake while \n" +
-                        "currentTime - lastWinch == ${currentTime - lastWinchRun withDecimals 2}\n" +
-                        "masterEsc.appliedOutput == ${masterEsc.appliedOutput withDecimals 2}\n" +
-                        "slaveEsc.appliedOutput == ${slaveEsc.appliedOutput withDecimals 2}"
+                lastBrakeTime = currentTime
             }
 
-            PercentOutput(escConfig, 0.Percent).writeTo(masterEsc, pidController)
+            masterEsc.set(0.0)
         }
         is ClimberWinchOutput.Running -> {
-            if (currentTime - lastBrake >= chodeDelaySafety && brakeSolenoid.get() != BRAKE_ON) {
+            if (currentTime - lastBrakeTime >= chodeDelaySafety && brakeSolenoid.get() != BRAKE_ON) {
                 value.esc.writeTo(masterEsc, pidController)
-                lastWinchRun = currentTime
-            } else log(Warning) {
-                "Cannot run while \n" +
-                        "currentTime - lastBrake == ${currentTime - lastBrake withDecimals 2}\n" +
-                        "climberSolenoid.get() == up"
             }
 
             brakeSolenoid.set(BRAKE_OFF)
