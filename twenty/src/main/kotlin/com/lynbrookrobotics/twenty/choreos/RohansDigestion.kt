@@ -29,16 +29,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val hoodUp by operator.hoodUp.readEagerly().withoutStamps
     val shoot by operator.shoot.readEagerly().withoutStamps
 
-    val shooterPreset1 by operator.shooterPreset1.readEagerly().withoutStamps
-    val shooterPreset2 by operator.shooterPreset2.readEagerly().withoutStamps
-    val shooterPreset3 by operator.shooterPreset3.readEagerly().withoutStamps
+    val shooterPresetLow by operator.shooterPresetLow.readEagerly().withoutStamps
+    val shooterPresetMed by operator.shooterPresetMed.readEagerly().withoutStamps
+    val shooterPresetHigh by operator.shooterPresetHigh.readEagerly().withoutStamps
 
-    val ball0 by operator.carouselBall0.readEagerly().withoutStamps
-    val ball1 by operator.carouselBall1.readEagerly().withoutStamps
-    val ball2 by operator.carouselBall2.readEagerly().withoutStamps
-    val ball3 by operator.carouselBall3.readEagerly().withoutStamps
-    val ball4 by operator.carouselBall4.readEagerly().withoutStamps
-
+    val carouselBall0 by operator.carouselBall0.readEagerly().withoutStamps
     val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
 
@@ -70,16 +65,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { hoodUp } to { shooterHood?.set(ShooterHoodState.Up) ?: freeze() },
             { shoot } to { shootAll() },
 
-            { shooterPreset1 } to { flywheel?.let { spinUpShooter(it.preset1) } ?: freeze() },
-            { shooterPreset2 } to { flywheel?.let { spinUpShooter(it.preset2) } ?: freeze() },
-            { shooterPreset3 } to { flywheel?.let { spinUpShooter(it.preset3) } ?: freeze() },
+            { shooterPresetLow } to { flywheel?.let { spinUpShooter(it.presetLow) } ?: freeze() },
+            { shooterPresetMed } to { flywheel?.let { spinUpShooter(it.presetMed) } ?: freeze() },
+            { shooterPresetHigh } to { flywheel?.let { spinUpShooter(it.presetHigh) } ?: freeze() },
 
-            { ball0 } to { carousel.state.set(0) },
-            { ball1 } to { carousel.state.set(1) },
-            { ball2 } to { carousel.state.set(2) },
-            { ball3 } to { carousel.state.set(3) },
-            { ball4 } to { carousel.state.set(4) },
-
+            { carouselBall0 } to { carousel.state.clear() },
             { rezeroTurret } to { turret?.rezero(electrical) ?: freeze() },
             { reindexCarousel } to { whereAreMyBalls() },
 

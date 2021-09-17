@@ -10,9 +10,9 @@ import info.kunalsheth.units.generated.*
 class FlywheelComponent(hardware: FlywheelHardware) :
     Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, Subsystems.shooterTicker) {
 
-    val preset1 by pref(4500, Rpm)
-    val preset2 by pref(5000, Rpm)
-    val preset3 by pref(6000, Rpm)
+    val presetLow by pref(4500, Rpm)
+    val presetMed by pref(5000, Rpm)
+    val presetHigh by pref(6000, Rpm)
 
     val maxSpeed by pref(9632, Rpm)
     val momentFactor by pref(1.4)

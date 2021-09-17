@@ -54,25 +54,20 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val lb get() = xbox.getBumper(Hand.kLeft)
     private val rb get() = xbox.getBumper(Hand.kRight)
 
-    val extendClimber = s { false }
-    val retractClimber = s { false }
+    val extendClimber = s { xbox.backButton && rb }
+    val retractClimber = s { xbox.startButton && rb }
 
     val aim = s { lt }
     val hoodUp = s { lb }
     val shoot = s { rt }
 
-    val shooterPreset1 = s { xbox.pov == 180 }
-    val shooterPreset2 = s { xbox.pov == 90 }
-    val shooterPreset3 = s { xbox.pov == 0 }
+    val shooterPresetLow = s { xbox.pov == 180 }
+    val shooterPresetMed = s { xbox.pov == 90 }
+    val shooterPresetHigh = s { xbox.pov == 0 }
 
-    val carouselBall0 = s { rb }
-    val carouselBall1 = s { xbox.yButton }
-    val carouselBall2 = s { xbox.bButton }
-    val carouselBall3 = s { xbox.aButton }
-    val carouselBall4 = s { xbox.xButton }
-
-    val rezeroTurret = s { xbox.backButton }
-    val reindexCarousel = s { xbox.startButton }
+    val carouselBall0 = s { xbox.yButton }
+    val rezeroTurret = s { xbox.xButton }
+    val reindexCarousel = s { xbox.aButton }
 
     val turretManual = s {
         turretMapping(getX(Hand.kLeft).Each)
