@@ -1,42 +1,29 @@
 package com.lynbrookrobotics.twenty.choreos
 
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.routines.set
 import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotState
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
-    val extendClimber by operator.extendClimber.readEagerly().withoutStamps
-    val retractClimber by operator.retractClimber.readEagerly().withoutStamps
+    val toggleClimberArms by operator.toggleClimberArms.readEagerly().withoutStamps
+    val chaChaRealSmooth by operator.chaChaRealSmooth.readEagerly().withoutStamps
+    val takeItBackNowYall by operator.takeItBackNowYall.readEagerly().withoutStamps
+
+    var isClimberExtended = false
 
     choreography {
         runWhenever(
-            { extendClimber } to { extendClimber() },
-            { retractClimber } to { retractClimber() },
+            { isClimberExtended } to { climberPivot?.set(ClimberPivotState.Up) },
+            { chaChaRealSmooth } to { climberWinch?.set(climberWinch.extendSpeed) },
+            { takeItBackNowYall } to { climberWinch?.set(climberWinch.retractSpeed) },
+
+            { toggleClimberArms } to {
+                delay(1.Second) // prevent accidental taps
+                isClimberExtended = !isClimberExtended
+                freeze()
+            },
         )
     }
-}
-
-suspend fun Subsystems.extendClimber() = coroutineScope {
-    turret?.set(turret.windupPosition, 5.Degree)
-
-    scope.launch { climberPivot?.set(ClimberPivotState.Up) }
-    delay(1.Second)
-    launch { climberWinch?.set(climberWinch.extendSpeed) }
-
-    freeze()
-}
-
-suspend fun Subsystems.retractClimber() = coroutineScope {
-    turret?.set(turret.windupPosition, 5.Degree)
-
-    scope.launch { climberPivot?.set(ClimberPivotState.Down) }
-    delay(1.Second)
-    launch { climberWinch?.set(-climberWinch.retractSpeed) }
-
-    freeze()
 }

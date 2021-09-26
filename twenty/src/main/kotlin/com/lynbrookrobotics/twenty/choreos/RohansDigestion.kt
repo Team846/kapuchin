@@ -15,7 +15,6 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import info.kunalsheth.units.generated.*
-import info.kunalsheth.units.math.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -82,13 +81,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 turret?.manualPrecisionOverride(operator) ?: freeze()
             },
             { carouselClockwise } to {
-                carousel.set((carousel.hardware.position.optimizedRead(currentTime,
-                    0.Second).y / 1.CarouselSlot).roundToInt(Each).CarouselSlot + 1.CarouselSlot)
+                carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot)
                 freeze()
             },
             { carouselCounterclockwise } to {
-                carousel.set((carousel.hardware.position.optimizedRead(currentTime,
-                    0.Second).y / 1.CarouselSlot).roundToInt(Each).CarouselSlot - 1.CarouselSlot)
+                carousel.set(carousel.hardware.nearestSlot() - 1.CarouselSlot)
                 freeze()
             }
         )
@@ -169,31 +166,29 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
-            carousel.state.shootInitialAngle()?.let { angle ->
-                carousel.set(angle)
+            carousel.set(carousel.state.shootInitialAngle() ?: (carousel.hardware.nearestSlot() + 0.5.CarouselSlot))
 
-                launch { flywheel.set(flywheelTarget) }
-                launch { feederRoller.set(feederRoller.feedSpeed) }
+            launch { flywheel.set(flywheelTarget) }
+            launch { feederRoller.set(feederRoller.feedSpeed) }
 
-                delayUntilFeederAndFlywheel(flywheelTarget)
+            delayUntilFeederAndFlywheel(flywheelTarget)
 
-                log(Debug) { "Feeder roller and flywheel set" }
-                hoodTarget?.let {
-                    launch { shooterHood?.set(it) }
-                }
-
-                runWhenever({
-                    feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-                            && flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-                } to {
-                    scope.launch {
-                        withTimeout(.5.Second) {
-                            rumble.set(TwoSided(0.Percent, 100.Percent))
-                        }
-                    }
-                    freeze()
-                })
+            log(Debug) { "Feeder roller and flywheel set" }
+            hoodTarget?.let {
+                launch { shooterHood?.set(it) }
             }
+
+            runWhenever({
+                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+                        && flywheelSpeed in flywheelTarget `±` flywheel.tolerance
+            } to {
+                scope.launch {
+                    withTimeout(.5.Second) {
+                        rumble.set(TwoSided(0.Percent, 100.Percent))
+                    }
+                }
+                freeze()
+            })
         }
     }
 }

@@ -14,7 +14,6 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.io.*
 import kotlin.system.measureTimeMillis
 
 fun main() {
@@ -57,9 +56,10 @@ class FunkyRobot : RobotBase() {
                 },
                 { isTest } to {
                     System.gc()
+                    HAL.observeUserProgramTest()
 
                     launch { subsystems.journalPath() }
-                    subsystems.teleop()
+                    subsystems.test()
                     freeze()
                 },
                 { isDisabled && !isTest } to {

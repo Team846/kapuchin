@@ -54,14 +54,13 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     }.with(graph("Angle", Degree))
         .with(graph("Error off slot", Degree)) { it - it.roundToInt(CarouselSlot).CarouselSlot }
 
+    fun nearestSlot() = position.optimizedRead(currentTime,
+        0.Second).y.roundToInt(CarouselSlot).CarouselSlot
+
     // Sensor is electrically inverted
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
         dio.requestInterrupts {
-            val slot = position.optimizedRead(
-                dio.readFallingTimestamp().Second, syncThreshold
-            ).y.roundToInt(CarouselSlot)
-
-            encoder.position = conversions.encoder.native((slot % 5).CarouselSlot)
+            encoder.position = conversions.encoder.native(nearestSlot())
             isZeroed = true
         }
         dio.setUpSourceEdge(false, true)
