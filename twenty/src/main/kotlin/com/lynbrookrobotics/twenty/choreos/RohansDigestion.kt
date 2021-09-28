@@ -21,8 +21,9 @@ import kotlinx.coroutines.launch
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
-    val intakeBalls by driver.intakeBalls.readEagerly().withoutStamps
-    val unjamBalls by driver.unjamBalls.readEagerly().withoutStamps
+    val eatBalls by driver.eatBalls.readEagerly().withoutStamps
+    val pukeBalls by driver.pukeBalls.readEagerly().withoutStamps
+    val intakeOut by driver.intakeOut.readEagerly().withoutStamps
 
     val aim by operator.aim.readEagerly().withoutStamps
     val hoodUp by operator.hoodUp.readEagerly().withoutStamps
@@ -43,22 +44,26 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val carouselCounterclockwise by driver.indexCarouselLeft.readEagerly().withoutStamps
 
     choreography {
+        val rezeroCarousel = launch { carousel.rezero() }
+
         if (turret != null && turret.zeroOnStart) launch {
             log(Debug) { "Rezeroing turret" }
             turret.rezero(electrical)
         }
 
+        rezeroCarousel.join()
+
         if (carousel.indexOnStart) {
             withTimeout(15.Second) {
                 log(Debug) { "Reindexing carousel" }
-                carousel.rezero()
                 whereAreMyBalls()
             }
         }
 
         runWhenever(
-            { intakeBalls } to { intakeBalls() },
-            { unjamBalls } to { intakeRollers?.set(-100.Percent) ?: freeze() },
+            { eatBalls } to { intakeBalls() },
+            { pukeBalls } to { intakeRollers?.set(-100.Percent) ?: freeze() },
+            { intakeOut } to { intakeSlider?.set(IntakeSliderState.Out) },
 
             { aim } to { visionAimTurret() },
             { hoodUp } to { shooterHood?.set(ShooterHoodState.Up) ?: freeze() },

@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.choreos.auto.Auto
 import com.lynbrookrobotics.twenty.choreos.journalPath
 import edu.wpi.first.cameraserver.CameraServer
 import edu.wpi.first.hal.HAL
@@ -25,10 +26,14 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         // Initialize preferences
         Field
+        Auto
 
         println("Initializing hardware...")
+        CameraServer.getInstance().startAutomaticCapture().also {
+            it.setResolution(240, 240)
+            it.setFPS(30)
+        }
         Compressor()
-        CameraServer.getInstance().startAutomaticCapture()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
 
@@ -104,7 +109,7 @@ class FunkyRobot : RobotBase() {
 
 val classPreloading = scope.launch {
     println("Loading classes...")
-    val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
+    val classNameRegex = """\[class,load] ([\w.$]+) source: .+""".toRegex()
     Thread.currentThread()
         .contextClassLoader
         .getResourceAsStream("com/lynbrookrobotics/twenty/preload")!!

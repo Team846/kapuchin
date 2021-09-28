@@ -7,10 +7,13 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMax.SoftLimitDirection
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+
+enum class ClimberBrakeState(val output: Boolean) { On(false), Off(true) }
 
 sealed class ClimberWinchOutput {
     data class Running(val esc: OffloadedOutput) : ClimberWinchOutput()
@@ -29,26 +32,21 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 
     private var lastBrakeTime = currentTime
 
-    companion object {
-        private const val BRAKE_OFF = true
-        private const val BRAKE_ON = false
-    }
-
     override fun ClimberWinchHardware.output(value: ClimberWinchOutput) = when (value) {
         is ClimberWinchOutput.Stopped -> {
             if (masterEsc.appliedOutput == 0.0 && slaveEsc.appliedOutput == 0.0) {
-                brakeSolenoid.set(BRAKE_ON)
+                brakeSolenoid.set(ClimberBrakeState.On.output)
                 lastBrakeTime = currentTime
             }
 
             masterEsc.set(0.0)
         }
         is ClimberWinchOutput.Running -> {
-            if (currentTime - lastBrakeTime >= chodeDelaySafety && brakeSolenoid.get() != BRAKE_ON) {
+            if (currentTime - lastBrakeTime >= chodeDelaySafety && brakeSolenoid.get() != ClimberBrakeState.On.output) {
                 value.esc.writeTo(masterEsc, pidController)
             }
 
-            brakeSolenoid.set(BRAKE_OFF)
+            brakeSolenoid.set(ClimberBrakeState.On.output)
         }
     }
 }
@@ -63,7 +61,7 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
 
     val escConfig by escConfigPref(
         defaultContinuousCurrentLimit = 40.Ampere,
-        defaultPeakOutput = 3.Volt // TODO: remove extra safe default
+        defaultPeakOutput = 3.Volt
     )
 
     private val masterEscId = 10
@@ -75,6 +73,8 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
     val masterEsc by hardw { CANSparkMax(masterEscId, MotorType.kBrushless) }.configure {
         generalSetup(it, escConfig)
         it.inverted = invert
+        +it.enableSoftLimit(SoftLimitDirection.kReverse, true)
+        +it.setSoftLimit(SoftLimitDirection.kReverse, it.encoder.position.toFloat())
     }
 
     val slaveEsc by hardw { CANSparkMax(slaveEscId, MotorType.kBrushless) }.configure {

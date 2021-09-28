@@ -9,7 +9,10 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.*
+import com.lynbrookrobotics.twenty.choreos.auto.`auto I shoot line`
+import com.lynbrookrobotics.twenty.choreos.auto.`auto line`
+import com.lynbrookrobotics.twenty.choreos.climberTeleop
+import com.lynbrookrobotics.twenty.choreos.digestionTeleop
 import com.lynbrookrobotics.twenty.routines.autoZoom
 import com.lynbrookrobotics.twenty.routines.teleop
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
@@ -50,8 +53,7 @@ class Subsystems(
 
     val climberPivot: ClimberPivotComponent?,
     val climberWinch: ClimberWinchComponent?,
-//    val controlPanelPivot: ControlPanelPivotComponent?,
-//    val controlPanelSpinner: ControlPanelSpinnerComponent?,
+
     val intakeRollers: IntakeRollersComponent?,
     val intakeSlider: IntakeSliderComponent?,
     val flywheel: FlywheelComponent?,
@@ -61,12 +63,10 @@ class Subsystems(
     val shooterHood: ShooterHoodComponent?,
 ) : Named by Named("Subsystems") {
 
-//    private val autos = listOf(
-//        ::`shoot wall`,
-//        ::`I1 shoot C1 I2 shoot`,
-//        ::`I2 shoot C1 I2 shoot`,
-//        ::`verify odometry`
-//    )
+    private val autos = listOf(
+        ::`auto line`,
+        ::`auto I shoot line`
+    )
 
     private val autoIdGraph = graph("Auto ID", Each)
 
@@ -74,8 +74,8 @@ class Subsystems(
     private val autoId
         get() = SmartDashboard.getEntry("DB/Slider 0").getDouble(-1.0).roundToInt().also {
             if (it != prevAutoId) {
-//                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
-//                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
+                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
+                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
                 prevAutoId = it
             }
         }
@@ -83,19 +83,22 @@ class Subsystems(
     val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
 
     suspend fun auto() = coroutineScope {
-//        if (autoId == -1) {
-//            log(Error) { "DB Slider 0 is set to -1, running wall auto" }
-//            `wall`()
-//        } else if (autoId !in autos.indices) {
-//            log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
-//            freeze()
-//        } else autos[autoId].get().invoke(this@Subsystems).invoke(this@coroutineScope)
+        when (autoId) {
+            -1 -> {
+                log(Warning) { "DB Slider 0 is set to -1, running `auto L`" }
+                `auto line`()
+            }
+            !in autos.indices -> {
+                log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
+                `auto line`()
+            }
+            else -> autos[autoId].invoke()
+        }
     }
 
     suspend fun teleop() =
         runAll(
             { climberTeleop() },
-            { controlPanelTeleop() },
             { digestionTeleop() },
             {
                 launchWhenever(
@@ -153,8 +156,6 @@ class Subsystems(
         private val initClimberPivot by pref(false)
         private val initClimberWinch by pref(false)
 
-        //        private val initControlPanelPivot by pref(false)
-        //        private val initControlPanelSpinner by pref(false)
         private val initIntakeRollers by pref(false)
         private val initIntakeSlider by pref(false)
         private val initFlywheel by pref(false)
@@ -200,16 +201,7 @@ class Subsystems(
 
                 val climberPivotAsync = i(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
                 val climberWinchAsync = i(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
-//                val controlPanelPivotAsync =
-//                    i(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
-//                val controlPanelSpinnerAsync =
-//                    i(initControlPanelSpinner) {
-//                        ControlPanelSpinnerComponent(
-//                            ControlPanelSpinnerHardware(
-//                                driverAsync.await()
-//                            )
-//                        )
-//                    }
+
                 val intakeRollersAsync = i(initIntakeRollers) { IntakeRollersComponent(IntakeRollersHardware()) }
                 val intakeSliderAsync = i(initIntakeSlider) { IntakeSliderComponent(IntakeSliderHardware()) }
                 val flywheelAsync = i(initFlywheel) { FlywheelComponent(FlywheelHardware()) }
@@ -230,8 +222,7 @@ class Subsystems(
 
                     t { climberPivotAsync.await() },
                     t { climberWinchAsync.await() },
-//                    t { controlPanelPivotAsync.await() },
-//                    t { controlPanelSpinnerAsync.await() },
+
                     t { intakeRollersAsync.await() },
                     t { intakeSliderAsync.await() },
                     t { flywheelAsync.await() },
