@@ -29,6 +29,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val hoodUp by operator.hoodUp.readEagerly().withoutStamps
     val shoot by operator.shoot.readEagerly().withoutStamps
 
+    val shooterPresetAnitez by operator.shooterPresetAnitez.readEagerly().withoutStamps
     val shooterPresetLow by operator.shooterPresetLow.readEagerly().withoutStamps
     val shooterPresetMed by operator.shooterPresetMed.readEagerly().withoutStamps
     val shooterPresetHigh by operator.shooterPresetHigh.readEagerly().withoutStamps
@@ -69,6 +70,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { hoodUp } to { shooterHood?.set(ShooterHoodState.Up) ?: freeze() },
             { shoot } to { shootAll() },
 
+            { shooterPresetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
             { shooterPresetLow } to { flywheel?.let { spinUpShooter(it.presetLow) } ?: freeze() },
             { shooterPresetMed } to { flywheel?.let { spinUpShooter(it.presetMed) } ?: freeze() },
             { shooterPresetHigh } to { flywheel?.let { spinUpShooter(it.presetHigh) } ?: freeze() },

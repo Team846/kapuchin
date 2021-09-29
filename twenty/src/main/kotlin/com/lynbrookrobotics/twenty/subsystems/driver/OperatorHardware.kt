@@ -62,6 +62,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val hoodUp = s { lb }
     val shoot = s { rt }
 
+    val shooterPresetAnitez = s { xbox.pov == 270 }
     val shooterPresetLow = s { xbox.pov == 180 }
     val shooterPresetMed = s { xbox.pov == 90 }
     val shooterPresetHigh = s { xbox.pov == 0 }

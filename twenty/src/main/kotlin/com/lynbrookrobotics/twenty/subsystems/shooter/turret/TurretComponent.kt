@@ -33,15 +33,9 @@ class TurretComponent(hardware: TurretHardware) :
     }
 
     override fun TurretHardware.output(value: OffloadedOutput) = with(hardware.conversions) {
-        if (atZero.optimizedRead(currentTime, 0.Second).y && !isZeroed) zero()
+        if (atZero.optimizedRead(currentTime, 0.Second).y) zero()
 
-        val safeValue = if (!isZeroed) value.with(
-            value.config.copy(
-                peakOutputForward = safeSpeed,
-                peakOutputReverse = -safeSpeed
-            )
-        )
-        else value.with(
+        val safeValue = value.with(
             OffloadedEscSafeties(
                 min = encoder.native(min),
                 max = encoder.native(max)

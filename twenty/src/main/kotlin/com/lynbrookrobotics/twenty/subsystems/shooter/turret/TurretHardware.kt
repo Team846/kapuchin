@@ -32,11 +32,11 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
 
     val conversions = TurretConversions(this)
 
-    var isZeroed = false
-        set(value) {
-            log(Debug) { "Setting isZeroed to $value" }
-            field = value
-        }
+//    var isZeroed = false
+//        set(value) {
+//            log(Debug) { "Setting isZeroed to $value" }
+//            field = value
+//        }
 
     private val escId = 52
 
@@ -60,14 +60,10 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
         .with(graph("At Zero", Each)) { (if (it) 1 else 0).Each }
 
     fun zero() {
-        if (isZeroed) log(Error) { "Already zeroed!" }
-        else {
-            val originalPosition = encoder.position
-            val zeroedPosition = conversions.encoder.native(limitSwitchOffset)
-            log(Warning) { "Zeroing ESC position from ${originalPosition withDecimals 2} to ${zeroedPosition withDecimals 2}" }
-            encoder.position = zeroedPosition
-            isZeroed = true
-        }
+        val originalPosition = encoder.position
+        val zeroedPosition = conversions.encoder.native(limitSwitchOffset)
+        log(Warning) { "Zeroing ESC position from ${originalPosition withDecimals 2} to ${zeroedPosition withDecimals 2}" }
+        encoder.position = zeroedPosition
     }
 
     init {

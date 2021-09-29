@@ -49,15 +49,7 @@ private suspend fun Subsystems.autoFire() = startChoreo("Auto fire") {
 
         delayUntilFeederAndFlywheel(Auto.flywheelLinePreset)
 
-        val j = launch { carousel.set(carousel.fireAllDutycycle) }
-
-        @Suppress("UnnecessaryVariable")
-        val carouselInitPos = carouselPosition
-        delayUntil {
-            (carouselPosition - carouselInitPos).abs > 5.CarouselSlot
-        }
-
-        j.cancel()
+        withTimeout(3.Second) { carousel.set(carousel.fireAllDutycycle) }
     }
 
 }
