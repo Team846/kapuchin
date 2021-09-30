@@ -76,11 +76,11 @@ class DriverHardware : RobotHardware<DriverHardware>() {
         .with(graph("Absolute Steering", Degree))
 
     val eatBalls = s { stick[ThrustmasterButtons.Trigger] && !stick[ThrustmasterButtons.BottomTrigger] }
-    val pukeBalls = s { stick[ThrustmasterButtons.BottomTrigger] }
-    val intakeOut = s { stick[ThrustmasterButtons.BottomTrigger] && stick[ThrustmasterButtons.LeftTrigger] }
+    val pukeBallsIntakeIn = s { stick[ThrustmasterButtons.BottomTrigger] && !stick[ThrustmasterButtons.Trigger] }
+    val pukeBallsIntakeOut = s { stick[ThrustmasterButtons.BottomTrigger] && stick[ThrustmasterButtons.Trigger] }
 
-    val carouselLeft = s { stick[ThrustmasterButtons.LeftTrigger] && !stick[ThrustmasterButtons.BottomTrigger] }
-    val carouselRight = s { stick[ThrustmasterButtons.RightTrigger] }
+    val carouselLeft = s { stick.pov in (270 - 45)..(270 + 45) }
+    val carouselRight = s { stick.pov in (90 - 45)..(90 + 45) }
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

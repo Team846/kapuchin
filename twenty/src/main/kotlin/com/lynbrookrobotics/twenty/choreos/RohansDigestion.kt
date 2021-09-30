@@ -22,8 +22,8 @@ import kotlinx.coroutines.launch
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val eatBalls by driver.eatBalls.readEagerly().withoutStamps
-    val pukeBalls by driver.pukeBalls.readEagerly().withoutStamps
-    val intakeOut by driver.intakeOut.readEagerly().withoutStamps
+    val pukeBallsIntakeIn by driver.pukeBallsIntakeIn.readEagerly().withoutStamps
+    val pukeBallsIntakeOut by driver.pukeBallsIntakeOut.readEagerly().withoutStamps
 
     val aim by operator.aim.readEagerly().withoutStamps
     val hoodDownShift by operator.hoodDownShift.readEagerly().withoutStamps
@@ -56,8 +56,11 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
         runWhenever(
             { eatBalls } to { intakeBalls() },
-            { pukeBalls } to { intakeRollers?.set(-100.Percent) ?: freeze() },
-            { intakeOut } to { intakeSlider?.set(IntakeSliderState.Out) ?: freeze() },
+            { pukeBallsIntakeIn } to { intakeRollers?.set(-100.Percent) ?: freeze() },
+            { pukeBallsIntakeOut } to {
+                launch { intakeSlider?.set(IntakeSliderState.Out) }
+                intakeRollers?.set(-100.Percent) ?: freeze()
+            },
 
             { aim } to { turret?.trackTarget(limelight) },
             { shoot } to { shootAll(hoodDownShift) },
