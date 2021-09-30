@@ -19,6 +19,8 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     val steering by driver.steering.readOnTick.withoutStamps
     val absSteering by driver.absSteering.readOnTick.withoutStamps
 
+    val stopDrivetrain by driver.stopDrivetrain.readOnTick.withoutStamps
+
     val position by hardware.position.readOnTick.withStamps
 
     val uni = UnicycleDrive(this@teleop, this@startRoutine)
@@ -29,6 +31,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     var startingAngle = -absSteering + position.y.bearing
 
     var lastGc = 0.Second
+
     controller {
         lastGc = if (
             speedL.isZero && speedR.isZero && accelerator.isZero && steering.isZero &&
@@ -38,28 +41,35 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
             currentTime
         } else lastGc
 
-        // https://www.desmos.com/calculator/qkczjursq7
-        val cappedAccelerator = accelerator cap `±`(100.Percent - steering.abs)
+        if (stopDrivetrain) {
+            TwoSided(
+                VelocityOutput(hardware.escConfig, velocityGains.left, 0.0),
+                VelocityOutput(hardware.escConfig, velocityGains.right, 0.0)
+            )
+        } else {
+            // https://www.desmos.com/calculator/qkczjursq7
+            val cappedAccelerator = accelerator cap `±`(100.Percent - steering.abs)
 
 
-        val forwardVelocity = maxSpeed * cappedAccelerator
-        val steeringVelocity = maxSpeed * steering
+            val forwardVelocity = maxSpeed * cappedAccelerator
+            val steeringVelocity = maxSpeed * steering
 
-        if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
+            if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
 
-        val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, absSteering + startingAngle)
+            val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, absSteering + startingAngle)
 
-        val nativeL = hardware.conversions.encoder.left.native(
-            target.left + steeringVelocity
-        )
-        val nativeR = hardware.conversions.encoder.right.native(
-            target.right - steeringVelocity
-        )
+            val nativeL = hardware.conversions.encoder.left.native(
+                target.left + steeringVelocity
+            )
+            val nativeR = hardware.conversions.encoder.right.native(
+                target.right - steeringVelocity
+            )
 
-        TwoSided(
-            VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
-            VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
-        )
+            TwoSided(
+                VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
+                VelocityOutput(hardware.escConfig, velocityGains.right, nativeR)
+            )
+        }
     }
 }
 

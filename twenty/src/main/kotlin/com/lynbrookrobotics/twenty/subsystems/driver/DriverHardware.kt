@@ -75,6 +75,8 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val absSteering = s { (-180).Degree * absoluteWheel.x }
         .with(graph("Absolute Steering", Degree))
 
+    val stopDrivetrain = s { stick[ThrustmasterButtons.LeftTrigger] }
+
     val eatBalls = s { stick[ThrustmasterButtons.Trigger] && !stick[ThrustmasterButtons.BottomTrigger] }
     val pukeBallsIntakeIn = s { stick[ThrustmasterButtons.BottomTrigger] && !stick[ThrustmasterButtons.Trigger] }
     val pukeBallsIntakeOut = s { stick[ThrustmasterButtons.BottomTrigger] && stick[ThrustmasterButtons.Trigger] }
