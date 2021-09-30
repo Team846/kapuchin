@@ -15,8 +15,7 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import info.kunalsheth.units.generated.*
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
@@ -146,7 +145,11 @@ suspend fun Subsystems.shootAll(hoodDown: Boolean) = startChoreo("Shoot All") {
             }
             carousel.set(carousel.fireAllDutycycle)
         } finally {
-            carousel.state.clear()
+            withContext(NonCancellable) {
+                carousel.state.clear()
+                carousel.rezero()
+                carousel.hardware.encoder.position = 0.0
+            }
         }
     }
 }
@@ -162,6 +165,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         choreography {
             launch { feederRoller.set(0.Rpm) }
 
+            carousel.rezero()
             carousel.set(carousel.state.shootInitialAngle() ?: (carousel.hardware.nearestSlot() + 0.5.CarouselSlot))
 
             launch { flywheel.set(flywheelTarget) }
