@@ -78,8 +78,9 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val eatBalls = s { stick[ThrustmasterButtons.Trigger] && !stick[ThrustmasterButtons.BottomTrigger] }
     val pukeBalls = s { stick[ThrustmasterButtons.BottomTrigger] }
     val intakeOut = s { stick[ThrustmasterButtons.BottomTrigger] && stick[ThrustmasterButtons.LeftTrigger] }
-    val indexCarouselLeft = s { stick[ThrustmasterButtons.LeftTrigger] && !stick[ThrustmasterButtons.BottomTrigger] }
-    val indexCarouselRight = s { stick[ThrustmasterButtons.RightTrigger] }
+
+    val carouselLeft = s { stick[ThrustmasterButtons.LeftTrigger] && !stick[ThrustmasterButtons.BottomTrigger] }
+    val carouselRight = s { stick[ThrustmasterButtons.RightTrigger] }
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->

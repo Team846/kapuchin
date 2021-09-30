@@ -8,12 +8,12 @@ import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
-enum class ClimberPivotState(val output: Boolean) { Down(false), Up(true) }
+enum class ClimberPivotState(val output: Boolean) { Down(true), Up(false) }
 
 class ClimberPivotComponent(hardware: ClimberPivotHardware) :
     Component<ClimberPivotComponent, ClimberPivotHardware, ClimberPivotState>(hardware, Subsystems.pneumaticTicker) {
 
-    override val fallbackController: ClimberPivotComponent.(Time) -> ClimberPivotState = { ClimberPivotState.Down }
+    override val fallbackController: ClimberPivotComponent.(Time) -> ClimberPivotState = { ClimberPivotState.Up }
 
     override fun ClimberPivotHardware.output(value: ClimberPivotState) {
         pivotSolenoid.set(value.output)

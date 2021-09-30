@@ -59,7 +59,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val takeItBackNowYall = s { xbox.startButton }
 
     val aim = s { lt }
-    val hoodUp = s { lb }
+    val hoodDownShift = s { lb }
     val shoot = s { rt }
 
     val shooterPresetAnitez = s { xbox.pov == 270 }
@@ -68,7 +68,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val shooterPresetHigh = s { xbox.pov == 0 }
 
     val carouselBall0 = s { xbox.yButton }
-    val rezeroTurret = s { xbox.xButton }
+    val centerTurret = s { xbox.xButton }
     val reindexCarousel = s { xbox.aButton }
 
     val turretManual = s {

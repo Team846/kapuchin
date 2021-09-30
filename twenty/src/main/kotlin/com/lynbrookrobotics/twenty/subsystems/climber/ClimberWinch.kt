@@ -46,7 +46,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
                 value.esc.writeTo(masterEsc, pidController)
             }
 
-            brakeSolenoid.set(ClimberBrakeState.On.output)
+            brakeSolenoid.set(ClimberBrakeState.Off.output)
         }
     }
 }
@@ -73,8 +73,8 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
     val masterEsc by hardw { CANSparkMax(masterEscId, MotorType.kBrushless) }.configure {
         generalSetup(it, escConfig)
         it.inverted = invert
-        +it.enableSoftLimit(SoftLimitDirection.kReverse, true)
-        +it.setSoftLimit(SoftLimitDirection.kReverse, it.encoder.position.toFloat())
+//        +it.enableSoftLimit(SoftLimitDirection.kReverse, true)
+//        +it.setSoftLimit(SoftLimitDirection.kReverse, it.encoder.position.toFloat())
     }
 
     val slaveEsc by hardw { CANSparkMax(slaveEscId, MotorType.kBrushless) }.configure {

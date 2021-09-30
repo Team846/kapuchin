@@ -26,7 +26,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val intakeOut by driver.intakeOut.readEagerly().withoutStamps
 
     val aim by operator.aim.readEagerly().withoutStamps
-    val hoodUp by operator.hoodUp.readEagerly().withoutStamps
+    val hoodDownShift by operator.hoodDownShift.readEagerly().withoutStamps
     val shoot by operator.shoot.readEagerly().withoutStamps
 
     val shooterPresetAnitez by operator.shooterPresetAnitez.readEagerly().withoutStamps
@@ -35,24 +35,17 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val shooterPresetHigh by operator.shooterPresetHigh.readEagerly().withoutStamps
 
     val carouselBall0 by operator.carouselBall0.readEagerly().withoutStamps
-    val rezeroTurret by operator.rezeroTurret.readEagerly().withoutStamps
+    val centerTurret by operator.centerTurret.readEagerly().withoutStamps
     val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
 
     val turretManual by operator.turretManual.readEagerly().withoutStamps
     val turretPrecisionManual by operator.turretPrecisionManual.readEagerly().withoutStamps
 
-    val carouselClockwise by driver.indexCarouselRight.readEagerly().withoutStamps
-    val carouselCounterclockwise by driver.indexCarouselLeft.readEagerly().withoutStamps
+    val carouselLeft by driver.carouselLeft.readEagerly().withoutStamps
+    val carouselRight by driver.carouselRight.readEagerly().withoutStamps
 
     choreography {
-        val rezeroCarousel = launch { carousel.rezero() }
-
-        if (turret != null && turret.zeroOnStart) launch {
-            log(Debug) { "Rezeroing turret" }
-            turret.rezero(electrical)
-        }
-
-        rezeroCarousel.join()
+        withTimeout(2.Second) { carousel.rezero() }
 
         if (carousel.indexOnStart) {
             withTimeout(15.Second) {
@@ -64,11 +57,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
         runWhenever(
             { eatBalls } to { intakeBalls() },
             { pukeBalls } to { intakeRollers?.set(-100.Percent) ?: freeze() },
-            { intakeOut } to { intakeSlider?.set(IntakeSliderState.Out) },
+            { intakeOut } to { intakeSlider?.set(IntakeSliderState.Out) ?: freeze() },
 
-            { aim } to { visionAimTurret() },
-            { hoodUp } to { shooterHood?.set(ShooterHoodState.Up) ?: freeze() },
-            { shoot } to { shootAll() },
+            { aim } to { turret?.trackTarget(limelight) },
+            { shoot } to { shootAll(hoodDownShift) },
 
             { shooterPresetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
             { shooterPresetLow } to { flywheel?.let { spinUpShooter(it.presetLow) } ?: freeze() },
@@ -76,25 +68,20 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { shooterPresetHigh } to { flywheel?.let { spinUpShooter(it.presetHigh) } ?: freeze() },
 
             { carouselBall0 } to { carousel.state.clear() },
-            { rezeroTurret } to { turret?.rezero(electrical) ?: freeze() },
+            { centerTurret } to { turret?.set(0.Degree) ?: freeze() },
             { reindexCarousel } to { whereAreMyBalls() },
 
             { !turretManual.isZero && turretPrecisionManual.isZero } to {
-                scope.launch { withTimeout(5.Second) { flashlight?.set(FlashlightState.On) } }
+                scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) } }
                 turret?.manualOverride(operator) ?: freeze()
             },
             { turretManual.isZero && !turretPrecisionManual.isZero } to {
-                scope.launch { withTimeout(5.Second) { flashlight?.set(FlashlightState.On) } }
+                scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) } }
                 turret?.manualPrecisionOverride(operator) ?: freeze()
             },
-            { carouselClockwise } to {
-                carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot)
-                freeze()
-            },
-            { carouselCounterclockwise } to {
-                carousel.set(carousel.hardware.nearestSlot() - 1.CarouselSlot)
-                freeze()
-            }
+
+            { carouselLeft } to { carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot, 0.Degree) },
+            { carouselRight } to { carousel.set(carousel.hardware.nearestSlot() - 1.CarouselSlot, 0.Degree) }
         )
     }
 }
@@ -137,14 +124,9 @@ suspend fun Subsystems.visionAimTurret() {
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
 
         choreography {
-            val snapshot = reading?.copy()
-            if (snapshot == null) {
-                return@choreography
-            } else {
-                log(Debug) { "target ${(turretPos - snapshot.tx).Degree}" }
-
+            reading?.let { snapshot ->
                 turret.set(
-                    turretPos - snapshot.tx,
+                    turretPos - snapshot.tx + limelight.hardware.conversions.mountingBearing,
                     0.Degree
                 )
             }
@@ -152,9 +134,13 @@ suspend fun Subsystems.visionAimTurret() {
     }
 }
 
-suspend fun Subsystems.shootAll() = startChoreo("Shoot All") {
+suspend fun Subsystems.shootAll(hoodDown: Boolean) = startChoreo("Shoot All") {
     choreography {
         try {
+            if (!hoodDown) {
+                launch { shooterHood?.set(ShooterHoodState.Up) }
+                delay(0.3.Second)
+            }
             carousel.set(carousel.fireAllDutycycle)
         } finally {
             carousel.state.clear()
