@@ -82,8 +82,9 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         )
         it.configureProximitySensorLED(LEDPulseFrequency.kFreq60kHz, LEDCurrent.kPulse125mA, 8)
     }.verify("the color sensor is connected") {
-        it.proximity.Each / 2047 > 50.Percent
+        it.red != 0 && it.green != 0 && it.blue != 0
     }
+
     private val colorNamed = Named("Color Sensor", this)
     val color = sensor(colorSensor) { color stampWith it }
         .with(graph("R", Percent, colorNamed)) { it.red.Each }
