@@ -61,7 +61,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 intakeRollers?.set(-100.Percent) ?: freeze()
             },
 
-            { aim } to { turret?.trackTarget(limelight) },
+            { aim } to { visionAimTurret() },
             { shoot } to { shootAll(hoodDownShift) },
 
             { shooterPresetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
@@ -127,11 +127,22 @@ suspend fun Subsystems.visionAimTurret() {
 
         choreography {
             reading?.let { snapshot ->
-                turret.set(
-                    turretPos - snapshot.tx + limelight.hardware.conversions.mountingBearing,
-                    0.Degree
-                )
+                launch {
+                    turret.set(
+                        turretPos - snapshot.tx + limelight.hardware.conversions.mountingBearing,
+                        0.Degree
+                    )
+                }
             }
+
+            runWhenever(
+                {
+                    reading?.tx?.let { tx -> (tx + limelight.hardware.conversions.mountingBearing).abs < 2.Degree }
+                        ?: false
+                } to {
+                    flashlight?.strobe()
+                }
+            )
         }
     }
 }
