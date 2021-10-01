@@ -29,8 +29,7 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
     }
 
     val startingLoc = pos.vector
-//    val startingRot = RotationMatrix(-(if (Auto.recordReverse) 180.Degree `coterminal +` pos.bearing else pos.bearing))
-    val startingRot = RotationMatrix(-pos.bearing)
+    val startingRot = RotationMatrix(-(if (journalReverse) 180.Degree `coterminal +` pos.bearing else pos.bearing))
     var last = pos
 
     val drivetrainEscs = with(drivetrain.hardware) { setOf(leftMasterEsc, rightMasterEsc, leftSlaveEsc, rightSlaveEsc) }

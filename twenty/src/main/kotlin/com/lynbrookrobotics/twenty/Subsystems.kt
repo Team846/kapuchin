@@ -65,7 +65,10 @@ class Subsystems(
     private val autos = listOf(
         ::autoGetOffLine,
         ::autoShootGetOffLine,
+        ::autoL1ShootGetOffLine,
+        ::autoL2ShootGetOffLine,
         ::autoL1ShootI1IntakeS1Shoot,
+        ::autoL2ShootI1IntakeS1Shoot,
     )
 
     private val autoIdGraph = graph("Auto ID", Each)
@@ -81,6 +84,7 @@ class Subsystems(
         }
 
     val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
+    val journalReverse by pref(false)
 
     suspend fun auto() = coroutineScope {
         when (autoId) {

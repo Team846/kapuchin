@@ -20,10 +20,12 @@ object AutoPrefs : Named by Named("Auto") {
     val L1I1PathConfig by autoPathConfigPref("L1I1", defaultReverse = true)
 
     val getOffLineDistance by pref(3, Foot)
+    val L2I1Distance by pref(16, Foot)
     val I1S1Distance by pref(6, Foot)
 
     val L1TurretPos by pref(0, Degree)
-    val S1TurretPos by pref(-20, Degree)
+    val L2TurretPos by pref(-30, Degree)
+    val S1TurretPos by pref(-15, Degree)
 }
 
 suspend fun Subsystems.autoGetOffLine() = startChoreo("Auto Drive") {
@@ -46,13 +48,41 @@ suspend fun Subsystems.autoShootGetOffLine() {
     }
 }
 
+suspend fun Subsystems.autoL1ShootGetOffLine() {
+    if (flywheel == null) {
+        log(Error) { "Requires flywheel" }
+    } else startChoreo("Auto L1Shoot GetOffLine") {
+        choreography {
+            withTimeout(AutoPrefs.getOffLineTimeout) {
+                turret?.set(AutoPrefs.L1TurretPos, 5.Degree)
+                autoFire(flywheel.presetLow)
+            }
+            autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
+        }
+    }
+}
+
+suspend fun Subsystems.autoL2ShootGetOffLine() {
+    if (flywheel == null) {
+        log(Error) { "Requires flywheel" }
+    } else startChoreo("Auto L1Shoot GetOffLine") {
+        choreography {
+            withTimeout(AutoPrefs.getOffLineTimeout) {
+                turret?.set(AutoPrefs.L2TurretPos, 5.Degree)
+                autoFire(flywheel.presetLow)
+            }
+            autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
+        }
+    }
+}
+
 suspend fun Subsystems.autoL1ShootI1IntakeS1Shoot() {
     if (flywheel == null) {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto L1Shoot I1Intake S1Shoot") {
         choreography {
             withTimeout(AutoPrefs.getOffLineTimeout) {
-                turret?.set(AutoPrefs.L1TurretPos, 3.Degree)
+                turret?.set(AutoPrefs.L1TurretPos, 5.Degree)
                 autoFire(flywheel.presetLow)
             }
 
@@ -64,13 +94,39 @@ suspend fun Subsystems.autoL1ShootI1IntakeS1Shoot() {
                 intakeJob.cancel()
 
                 // go to S1
-                val turretJob = launch { turret?.set(AutoPrefs.S1TurretPos, 3.Degree) }
-                autoDriveLine(AutoPrefs.I1S1Distance, reverse = false) // worried robot wont go straight if it ended prev path off
+                val turretJob = launch { turret?.set(AutoPrefs.S1TurretPos, 5.Degree) }
+                autoDriveLine(AutoPrefs.I1S1Distance, reverse = false)
                 turretJob.join()
 
                 // shoot
                 autoFire(flywheel.presetMed)
             } ?: autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
+        }
+    }
+}
+
+suspend fun Subsystems.autoL2ShootI1IntakeS1Shoot() {
+    if (flywheel == null) {
+        log(Error) { "Requires flywheel" }
+    } else startChoreo("Auto L1Shoot I1Intake S1Shoot") {
+        choreography {
+            withTimeout(AutoPrefs.getOffLineTimeout) {
+                turret?.set(AutoPrefs.L2TurretPos, 5.Degree)
+                autoFire(flywheel.presetLow)
+            }
+
+            // intake and go to I1
+            val intakeJob = launch { intakeBalls() }
+            autoDriveLine(AutoPrefs.L2I1Distance, reverse = true)
+            intakeJob.cancel()
+
+            // go to S1
+            val turretJob = launch { turret?.set(AutoPrefs.S1TurretPos, 5.Degree) }
+            autoDriveLine(AutoPrefs.I1S1Distance, reverse = false)
+            turretJob.join()
+
+            // shoot
+            autoFire(flywheel.presetMed)
         }
     }
 }
