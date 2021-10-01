@@ -20,12 +20,13 @@ import kotlinx.coroutines.*
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
+    val shift by operator.shift.readEagerly().withoutStamps
+
     val eatBalls by driver.eatBalls.readEagerly().withoutStamps
     val pukeBallsIntakeIn by driver.pukeBallsIntakeIn.readEagerly().withoutStamps
     val pukeBallsIntakeOut by driver.pukeBallsIntakeOut.readEagerly().withoutStamps
 
     val aim by operator.aim.readEagerly().withoutStamps
-    val hoodDownShift by operator.hoodDownShift.readEagerly().withoutStamps
     val shoot by operator.shoot.readEagerly().withoutStamps
 
     val shooterPresetAnitez by operator.shooterPresetAnitez.readEagerly().withoutStamps
@@ -62,7 +63,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             },
 
             { aim } to { visionAimTurret() },
-            { shoot } to { shootAll(hoodDownShift) },
+            { shoot } to { shootAll(hoodDown = shift) },
 
             { shooterPresetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
             { shooterPresetLow } to { flywheel?.let { spinUpShooter(it.presetLow) } ?: freeze() },

@@ -23,8 +23,10 @@ sealed class ClimberWinchOutput {
 class ClimberWinchComponent(hardware: ClimberWinchHardware) :
     Component<ClimberWinchComponent, ClimberWinchHardware, ClimberWinchOutput>(hardware, Subsystems.pneumaticTicker) {
 
-    val extendSpeed by pref(20, Percent)
-    val retractSpeed by pref(20, Percent)
+    val extendSpeed by pref(50, Percent)
+    val retractSpeed by pref(-50, Percent)
+    val extendSlowSpeed by pref(10, Percent)
+    val retractSlowSpeed by pref(-10, Percent)
 
     private val chodeDelaySafety by pref(1, Second)
 
