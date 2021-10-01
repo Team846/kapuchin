@@ -177,7 +177,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
             launch { feederRoller.set(0.Rpm) }
 
             carousel.rezero()
-            carousel.set(carousel.state.shootInitialAngle() ?: (carousel.hardware.nearestSlot() + 0.5.CarouselSlot))
+            carousel.set(carousel.state.shootInitialAngle() ?: carousel.hardware.nearestSlot())
 
             launch { flywheel.set(flywheelTarget) }
             launch { feederRoller.set(feederRoller.feedSpeed) }

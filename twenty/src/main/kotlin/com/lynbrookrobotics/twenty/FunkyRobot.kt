@@ -5,7 +5,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.auto.Auto
+import com.lynbrookrobotics.twenty.choreos.auto.AutoPrefs
 import com.lynbrookrobotics.twenty.choreos.journalPath
 import edu.wpi.first.cameraserver.CameraServer
 import edu.wpi.first.hal.HAL
@@ -26,7 +26,7 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         // Initialize preferences
         Field
-        Auto
+        AutoPrefs
 
         println("Initializing hardware...")
         CameraServer.getInstance().startAutomaticCapture().also {

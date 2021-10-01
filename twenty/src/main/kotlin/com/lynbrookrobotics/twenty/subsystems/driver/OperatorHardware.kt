@@ -55,8 +55,8 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     private val rb get() = xbox.getBumper(Hand.kRight)
 
     val toggleClimberArms = s { rb }
-    val chaChaRealSmooth = s { xbox.backButton }
-    val takeItBackNowYall = s { xbox.startButton }
+    val chaChaRealSmooth = s { xbox.backButton && !xbox.startButton }
+    val takeItBackNowYall = s { xbox.backButton && xbox.startButton }
 
     val aim = s { lt }
     val hoodDownShift = s { lb }

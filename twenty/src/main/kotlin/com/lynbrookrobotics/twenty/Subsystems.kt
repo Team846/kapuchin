@@ -9,8 +9,7 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.auto.`auto I shoot line`
-import com.lynbrookrobotics.twenty.choreos.auto.`auto line`
+import com.lynbrookrobotics.twenty.choreos.auto.*
 import com.lynbrookrobotics.twenty.choreos.climberTeleop
 import com.lynbrookrobotics.twenty.choreos.digestionTeleop
 import com.lynbrookrobotics.twenty.routines.autoZoom
@@ -64,8 +63,9 @@ class Subsystems(
 ) : Named by Named("Subsystems") {
 
     private val autos = listOf(
-        ::`auto line`,
-        ::`auto I shoot line`
+        ::autoGetOffLine,
+        ::autoShootGetOffLine,
+        ::autoL1ShootI1IntakeS1Shoot,
     )
 
     private val autoIdGraph = graph("Auto ID", Each)
@@ -85,12 +85,12 @@ class Subsystems(
     suspend fun auto() = coroutineScope {
         when (autoId) {
             -1 -> {
-                log(Warning) { "DB Slider 0 is set to -1, running `auto L`" }
-                `auto line`()
+                log(Warning) { "DB Slider 0 is set to -1, getting off the line`" }
+                autoGetOffLine()
             }
             !in autos.indices -> {
                 log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
-                `auto line`()
+                autoShootGetOffLine()
             }
             else -> autos[autoId].invoke()
         }
