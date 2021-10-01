@@ -9,9 +9,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.choreos.*
 import com.lynbrookrobotics.twenty.choreos.auto.*
-import com.lynbrookrobotics.twenty.choreos.climberTeleop
-import com.lynbrookrobotics.twenty.choreos.digestionTeleop
 import com.lynbrookrobotics.twenty.routines.autoZoom
 import com.lynbrookrobotics.twenty.routines.teleop
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
@@ -114,7 +113,9 @@ class Subsystems(
 
 
     suspend fun test() = runAll(
-        { drivetrain.teleop(driver) }
+        { drivetrain.teleop(driver) },
+        { climberTest() },
+        { digestionTest() },
     )
 
     suspend fun warmup() {

@@ -17,7 +17,6 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
-
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val shift by operator.shift.readEagerly().withoutStamps
@@ -85,6 +84,40 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
             { carouselLeft } to { carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot, 0.Degree) },
             { carouselRight } to { carousel.set(carousel.hardware.nearestSlot() - 1.CarouselSlot, 0.Degree) }
+        )
+    }
+}
+
+suspend fun Subsystems.digestionTest() = startChoreo("Digestion Test") {
+
+    val turretManual by operator.turretManual.readEagerly().withoutStamps
+
+    choreography {
+        runWhenever(
+            // carousel
+            { operator.xbox.pov == 270 } to {
+                carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot,
+                    0.Degree)
+            },
+            { operator.xbox.pov == 90 } to { carousel.set(carousel.hardware.nearestSlot() - 1.CarouselSlot, 0.Degree) },
+
+            // intake
+            { operator.lb } to { intakeSlider?.set(IntakeSliderState.Out) },
+            { operator.lt } to { intakeRollers?.set(intakeRollers.eatSpeed) },
+            { operator.rt } to { intakeRollers?.set(-100.Percent) },
+
+            // flywheel
+            { operator.xbox.xButton } to { flywheel?.set(flywheel.presetAnitez) },
+
+            // turret
+            { !turretManual.isZero } to { turret?.manualOverride(operator) },
+            { operator.xbox.pov == 0 } to { turret?.set(0.Degree, 0.Degree) },
+
+            // feeder roller
+            { operator.xbox.aButton } to { feederRoller?.set(feederRoller.feedSpeed) },
+
+            // flashlight
+            { operator.xbox.bButton } to { flashlight?.set(FlashlightState.On) },
         )
     }
 }

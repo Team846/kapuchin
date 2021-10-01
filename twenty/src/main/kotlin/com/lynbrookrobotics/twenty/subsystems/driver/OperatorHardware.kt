@@ -49,10 +49,10 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     private fun <Input> s(f: XboxController.() -> Input) = sensor { f(xbox) stampWith it }
 
-    private val lt get() = xbox.getTriggerAxis(Hand.kLeft) > triggerPressure.Each
-    private val rt get() = xbox.getTriggerAxis(Hand.kRight) > triggerPressure.Each
-    private val lb get() = xbox.getBumper(Hand.kLeft)
-    private val rb get() = xbox.getBumper(Hand.kRight)
+    val lt get() = xbox.getTriggerAxis(Hand.kLeft) > triggerPressure.Each
+    val rt get() = xbox.getTriggerAxis(Hand.kRight) > triggerPressure.Each
+    val lb get() = xbox.getBumper(Hand.kLeft)
+    val rb get() = xbox.getBumper(Hand.kRight)
 
     val shift = s { lb }
 
