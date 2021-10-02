@@ -83,7 +83,7 @@ suspend fun Subsystems.autoL1ShootI1IntakeS1Shoot() {
         choreography {
             withTimeout(AutoPrefs.getOffLineTimeout) {
                 turret?.set(AutoPrefs.L1TurretPos, 5.Degree)
-                autoFire(flywheel.presetLow)
+                autoFire(flywheel.presetAnitez)
             }
 
             loadRobotPath(AutoPrefs.L1I1PathConfig.name)?.let { path ->
@@ -99,7 +99,7 @@ suspend fun Subsystems.autoL1ShootI1IntakeS1Shoot() {
                 turretJob.join()
 
                 // shoot
-                autoFire(flywheel.presetMed)
+                autoFire(flywheel.presetAnitez)
             } ?: autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
         }
     }

@@ -64,8 +64,12 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { aim } to { visionAimTurret() },
             { shoot } to { shootAll(hoodDown = shift) },
 
-            { shooterPresetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
-            { shooterPresetLow } to { flywheel?.let { spinUpShooter(it.presetLow) } ?: freeze() },
+            { shooterPresetAnitez } to {
+                scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) },
+                flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
+            { shooterPresetLow } to { scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) }
+                flywheel?.let { spinUpShooter(it.presetLow) } ?: freeze()
+            } },
             { shooterPresetMed } to { flywheel?.let { spinUpShooter(it.presetMed) } ?: freeze() },
             { shooterPresetHigh } to { flywheel?.let { spinUpShooter(it.presetHigh) } ?: freeze() },
 
