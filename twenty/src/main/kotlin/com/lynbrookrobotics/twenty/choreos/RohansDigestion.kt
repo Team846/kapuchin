@@ -64,12 +64,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { aim } to { visionAimTurret() },
             { shoot } to { shootAll(hoodDown = shift) },
 
-            { shooterPresetAnitez } to {
-                scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) },
-                flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
-            { shooterPresetLow } to { scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) }
-                flywheel?.let { spinUpShooter(it.presetLow) } ?: freeze()
-            } },
+            { shooterPresetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
+            { shooterPresetLow } to { flywheel?.let { spinUpShooter(it.presetLow) } ?: freeze() },
             { shooterPresetMed } to { flywheel?.let { spinUpShooter(it.presetMed) } ?: freeze() },
             { shooterPresetHigh } to { flywheel?.let { spinUpShooter(it.presetHigh) } ?: freeze() },
 
@@ -212,6 +208,7 @@ suspend fun Subsystems.spinUpShooter(flywheelTarget: AngularVelocity, hoodTarget
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
+            launch { flashlight?.set(FlashlightState.On) }
             launch { feederRoller.set(0.Rpm) }
 
             carousel.rezero()
@@ -299,19 +296,20 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-            log(Debug) { "Waiting for feeder roller to get up to speed" }
-            delayUntil {
-                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-            }
-            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}" }
-            log(Debug) { "Feeder roller set" }
-
-            log(Debug) { "Waiting for flywheel to get up to speed" }
-            delayUntil {
-                flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-            }
-            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
-            log(Debug) { "Flywheel set" }
+//            log(Debug) { "Waiting for feeder roller to get up to speed" }
+//            delayUntil {
+//                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+//            }
+//            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}" }
+//            log(Debug) { "Feeder roller set" }
+//
+//            log(Debug) { "Waiting for flywheel to get up to speed" }
+//            delayUntil {
+//                flywheelSpeed in flywheelTarget `±` flywheel.tolerance
+//            }
+//            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
+//            log(Debug) { "Flywheel set" }
+            delay(2.Second)
         }
     }
 }
