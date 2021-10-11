@@ -20,11 +20,6 @@ class CarouselState(component: Named) : Named by Named("State", component) {
         return (balls - 1).CarouselSlot
     }
 
-    fun shootAngle(): Angle? {
-        if (balls == 0) return null
-        return (balls - 1.5).CarouselSlot
-    }
-
     fun push(count: Int = 1) {
         balls += count
     }

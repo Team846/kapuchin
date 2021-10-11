@@ -5,28 +5,30 @@ import com.lynbrookrobotics.kapuchin.hardware.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
-import edu.wpi.first.networktables.NetworkTable
+import com.lynbrookrobotics.twenty.Subsystems
 import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.lang.Double.NaN
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponent>() {
-    override val period by sharedTickerTiming
+    override val period by Subsystems.sharedTickerTiming
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
     override val name = "Limelight"
 
     val invertTx by pref(false)
-    val invertTy by pref(true)
+    private val invertTy by pref(true)
 
-    val table: NetworkTable by hardw {
-        NetworkTableInstance.getDefault().getTable("/limelight")
+    private val table by hardw {
+        NetworkTableInstance.getDefault().getTable("/limelight")!!
     }.verify("Limelight is connected") {
         !it.getEntry("tx").getDouble(NaN).isNaN()
     }
-    val pipelineEntry by hardw { table.getEntry("pipeline") }
+
+    val pipelineEntry by hardw { table.getEntry("pipeline")!! }
+
+    val conversions = LimelightConversions(this)
 
     private fun l(key: String) = table.getEntry(key).getDouble(0.0)
     private infix fun <Q> Q.lstamp(withTime: Time) = TimeStamped(
@@ -43,7 +45,7 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
      *
      * Same goes for vertical offset - call readings.ty
      */
-    val readings = sensor {
+    val readings = sensor { t ->
         when {
             l("tv").toInt() == 1 -> LimelightReading(
                 tx = l("ty").Degree * if (invertTy) -1 else 1,
@@ -54,17 +56,16 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
                 l("ta").Each,// this is actually Pixels Squared
                 l("getpipe").toInt().let { rawpipe ->
                     Pipeline.values().firstOrNull { it.number == rawpipe }
-                }
+                },
+                l("ts").Degree
             )
             else -> null
-        } lstamp it
+        } lstamp t
     }
 
-    val pipeline = sensor {
-        l("getpipe").toInt().let { rawpipe ->
-            Pipeline.values().firstOrNull { it.number == rawpipe }
-        } lstamp it
-    }
-
-    val conversions = LimelightConversions(this)
+//    private val pipeline = sensor { t ->
+//        l("getpipe").toInt().let { rawpipe ->
+//            Pipeline.values().firstOrNull { it.number == rawpipe }
+//        } lstamp t
+//    }
 }

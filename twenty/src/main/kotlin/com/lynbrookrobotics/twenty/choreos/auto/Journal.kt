@@ -21,7 +21,7 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
     val pos by drivetrain.hardware.position.readEagerly(2.milli(Second)).withoutStamps
 
     val logDir = "/home/lvuser/"
-    val logPath = "0.tsv"
+    val logPath = "${journalId}.tsv"
 
     val log = File(logPath).printWriter().also {
         it.println("x\ty")
@@ -29,9 +29,7 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
     }
 
     val startingLoc = pos.vector
-//    val startingRot = RotationMatrix(-(if (Auto.recordReverse) 180.Degree `coterminal +` pos.bearing else pos.bearing))
-    val startingRot = RotationMatrix(-pos.bearing)
-
+    val startingRot = RotationMatrix(-(if (journalReverse) 180.Degree `coterminal +` pos.bearing else pos.bearing))
     var last = pos
 
     val drivetrainEscs = with(drivetrain.hardware) { setOf(leftMasterEsc, rightMasterEsc, leftSlaveEsc, rightSlaveEsc) }
@@ -55,6 +53,7 @@ suspend fun Subsystems.journalPath(cut: Length = 3.Inch) = startChoreo("Journal 
             log.close()
 
             scope.launch {
+                @Suppress("BlockingMethodInNonBlockingContext")
                 ProcessBuilder("sync").directory(File(logDir)).inheritIO().start().waitFor(5, TimeUnit.SECONDS)
                 log(Debug) { "Done syncing $logDir." }
             }

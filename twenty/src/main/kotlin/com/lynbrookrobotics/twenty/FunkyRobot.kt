@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.choreos.auto.AutoPrefs
 import com.lynbrookrobotics.twenty.choreos.journalPath
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.Compressor
@@ -15,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-
 fun main() {
     printBuildInfo()
     RobotBase.startRobot(::FunkyRobot)
@@ -25,8 +25,13 @@ class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         // Initialize preferences
         Field
+        AutoPrefs
 
         println("Initializing hardware...")
+//        CameraServer.getInstance().startAutomaticCapture().also {
+//            it.setResolution(240, 240)
+//            it.setFPS(30)
+//        }
         Compressor()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!
@@ -55,9 +60,10 @@ class FunkyRobot : RobotBase() {
                 },
                 { isTest } to {
                     System.gc()
+                    HAL.observeUserProgramTest()
 
                     launch { subsystems.journalPath() }
-                    subsystems.teleop()
+                    subsystems.test()
                     freeze()
                 },
                 { isDisabled && !isTest } to {
@@ -92,7 +98,7 @@ class FunkyRobot : RobotBase() {
 
 val classPreloading = scope.launch {
     println("Loading classes...")
-    val classNameRegex = """\[Loaded ([\w.$]+) from .+]""".toRegex()
+    val classNameRegex = """\[class,load] ([\w.$]+) source: .+""".toRegex()
     Thread.currentThread()
         .contextClassLoader
         .getResourceAsStream("com/lynbrookrobotics/twenty/preload")!!

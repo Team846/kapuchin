@@ -10,11 +10,11 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
-import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import com.revrobotics.ColorSensorV3
 import com.revrobotics.ColorSensorV3.*
 import edu.wpi.first.wpilibj.DigitalInput
-import edu.wpi.first.wpilibj.I2C.Port.kOnboard
+import edu.wpi.first.wpilibj.I2C.Port
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -36,19 +36,16 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
 
     val conversions = CarouselConversions(this)
     var isZeroed = false
-        set(value) {
-//          log(Debug) { "Setting isZeroed to $value" }
-            field = value
-        }
 
-    val esc by hardw { CANSparkMax(escId, kBrushless) }.configure {
+    val esc by hardw { CANSparkMax(escId, MotorType.kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invert
         +it.setIdleMode(IdleMode.kCoast)
     }
-    val pidController by hardw { esc.pidController }
 
-    val encoder by hardw { esc.encoder }.configure {
+    val pidController by hardw { esc.pidController!! }
+
+    val encoder by hardw { esc.encoder!! }.configure {
         it.position = 0.0
     }
 
@@ -57,24 +54,23 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     }.with(graph("Angle", Degree))
         .with(graph("Error off slot", Degree)) { it - it.roundToInt(CarouselSlot).CarouselSlot }
 
+    fun nearestSlot() = position.optimizedRead(currentTime,
+        0.Second).y.roundToInt(CarouselSlot).CarouselSlot
+
     // Sensor is electrically inverted
     private val hallEffect by hardw { DigitalInput(hallEffectChannel) }.configure { dio ->
         dio.requestInterrupts {
-            encoder.position = conversions.encoder.native(
-                position.optimizedRead(
-                    dio.readFallingTimestamp().Second, syncThreshold
-                ).y.roundToInt(CarouselSlot).CarouselSlot
-            )
-//          log(Debug) { "Running hall effect ISR" }
+            encoder.position = conversions.encoder.native(nearestSlot())
             isZeroed = true
         }
         dio.setUpSourceEdge(false, true)
         dio.enableInterrupts()
     }
-    val alignedToSlot = sensor(hallEffect) { get() stampWith it }
+
+    private val alignedToSlot = sensor(hallEffect) { get() stampWith it }
         .with(graph("Aligned to Slot", Each)) { (if (it) 1 else 0).Each }
 
-    private val colorSensor by hardw { ColorSensorV3(kOnboard) }.configure {
+    private val colorSensor by hardw { ColorSensorV3(Port.kOnboard) }.configure {
         it.configureColorSensor(
             ColorSensorResolution.kColorSensorRes18bit,
             ColorSensorMeasurementRate.kColorRate25ms,
@@ -86,8 +82,9 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         )
         it.configureProximitySensorLED(LEDPulseFrequency.kFreq60kHz, LEDCurrent.kPulse125mA, 8)
     }.verify("the color sensor is connected") {
-        it.proximity.Each / 2047 > 50.Percent
+        it.red != 0 && it.green != 0 && it.blue != 0
     }
+
     private val colorNamed = Named("Color Sensor", this)
     val color = sensor(colorSensor) { color stampWith it }
         .with(graph("R", Percent, colorNamed)) { it.red.Each }

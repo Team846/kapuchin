@@ -7,7 +7,8 @@ data class LimelightReading(
     val tx: Angle, val ty: Angle,
     val tx0: Dimensionless, val ty0: Dimensionless,
     val thor: Pixel, val tvert: Pixel,
-    val ta: Dimensionless, val pipeline: Pipeline?
+    val ta: Dimensionless, val pipeline: Pipeline?,
+    val ts: Angle,
 )
 
 enum class Pipeline(val number: Int) {

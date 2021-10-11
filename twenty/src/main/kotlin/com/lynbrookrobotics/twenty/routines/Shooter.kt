@@ -1,18 +1,14 @@
 package com.lynbrookrobotics.twenty.routines
 
 import com.lynbrookrobotics.kapuchin.control.data.*
-import com.lynbrookrobotics.kapuchin.control.electrical.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
-import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
-import com.lynbrookrobotics.twenty.subsystems.shooter.FeederRollerComponent
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodComponent
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
+import com.lynbrookrobotics.twenty.subsystems.shooter.*
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import info.kunalsheth.units.generated.*
@@ -56,9 +52,13 @@ suspend fun TurretComponent.manualOverride(operator: OperatorHardware) = startRo
     controller { PercentOutput(hardware.escConfig, precision) }
 }
 
-suspend fun TurretComponent.trackTarget(
-    limelight: LimelightComponent, flywheel: FlywheelComponent, drivetrain: DrivetrainComponent
-) = startRoutine("Track Target") {
+suspend fun TurretComponent.manualPrecisionOverride(operator: OperatorHardware) =
+    startRoutine("Manual Precision Override") {
+        val precision by operator.turretPrecisionManual.readOnTick.withoutStamps
+        controller { PercentOutput(hardware.escConfig, precision) }
+    }
+
+suspend fun TurretComponent.trackTarget(limelight: LimelightComponent) = startRoutine("Track Target") {
 
     val reading by limelight.hardware.readings.readOnTick.withoutStamps
     val current by hardware.position.readOnTick.withoutStamps
@@ -110,14 +110,14 @@ suspend fun TurretComponent.fieldOrientedPosition(drivetrain: DrivetrainComponen
         }
     }
 
-suspend fun TurretComponent.rezero(electrical: ElectricalSystemHardware) = startRoutine("Re-zero") {
-    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
-
-    hardware.isZeroed = false
-    controller {
-        PercentOutput(hardware.escConfig, voltageToDutyCycle(safeSpeed, vBat)).takeUnless { hardware.isZeroed }
-    }
-}
+//suspend fun TurretComponent.rezero(electrical: ElectricalSystemHardware) = startRoutine("Re-zero") {
+//    val vBat by electrical.batteryVoltage.readEagerly.withoutStamps
+//
+//    hardware.isZeroed = false
+//    controller {
+//        PercentOutput(hardware.escConfig, voltageToDutyCycle(safeSpeed, vBat)).takeUnless { hardware.isZeroed }
+//    }
+//}
 
 suspend fun ShooterHoodComponent.set(target: ShooterHoodState) = startRoutine("Set") {
     controller { target }

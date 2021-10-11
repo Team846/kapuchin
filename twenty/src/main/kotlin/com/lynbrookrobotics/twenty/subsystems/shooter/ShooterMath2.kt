@@ -34,7 +34,7 @@ private fun calculateShot(
     maxSpeed: AngularVelocity,
     shooterHeight: Length,
     hoodUpLaunch: Angle,
-    hoodDownLaunch: Angle
+    hoodDownLaunch: Angle,
 ): ShotState? {
     val distToBase = sqrt(target.x.squared + target.y.squared)
     val height = Field.targetHeight - shooterHeight

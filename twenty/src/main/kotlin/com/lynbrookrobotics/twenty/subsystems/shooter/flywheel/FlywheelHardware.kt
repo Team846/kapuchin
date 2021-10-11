@@ -8,21 +8,21 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
-import com.lynbrookrobotics.twenty.Subsystems.Companion.sharedTickerTiming
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
-import com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless
+import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>() {
-    override val period by sharedTickerTiming
+    override val period by Subsystems.sharedTickerTiming
     override val syncThreshold = 5.milli(Second)
     override val priority = Priority.High
     override val name = "Shooter Flywheel"
 
     private val invertMaster by pref(false)
     private val invertSlave by pref(true)
+
     val escConfig by escConfigPref(
         defaultContinuousCurrentLimit = 30.Ampere,
         defaultPeakCurrentLimit = 60.Ampere,
@@ -34,20 +34,21 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     private val masterEscId = 50
     private val slaveEscId = 51
 
-    val masterEsc by hardw { CANSparkMax(masterEscId, kBrushless) }.configure {
+    val masterEsc by hardw { CANSparkMax(masterEscId, MotorType.kBrushless) }.configure {
         setupMaster(it, escConfig, false)
         it.inverted = invertMaster
         +it.setIdleMode(IdleMode.kCoast)
     }
 
-    val slaveEsc by hardw { CANSparkMax(slaveEscId, kBrushless) }.configure {
+    @Suppress("unused")
+    val slaveEsc by hardw { CANSparkMax(slaveEscId, MotorType.kBrushless) }.configure {
         generalSetup(it, escConfig)
         +it.follow(masterEsc, invertMaster != invertSlave)
         +it.setIdleMode(IdleMode.kCoast)
     }
 
-    val pidController by hardw { masterEsc.pidController }
-    val encoder by hardw { masterEsc.encoder }
+    val pidController by hardw { masterEsc.pidController!! }
+    val encoder by hardw { masterEsc.encoder!! }
 
     val speed = sensor(encoder) {
         conversions.encoder.realVelocity(velocity) stampWith it

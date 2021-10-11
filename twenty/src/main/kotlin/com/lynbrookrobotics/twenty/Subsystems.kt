@@ -9,32 +9,18 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.choreos.climberTeleop
-import com.lynbrookrobotics.twenty.choreos.controlPanelTeleop
-import com.lynbrookrobotics.twenty.choreos.digestionTeleop
+import com.lynbrookrobotics.twenty.choreos.*
+import com.lynbrookrobotics.twenty.choreos.auto.*
 import com.lynbrookrobotics.twenty.routines.autoZoom
 import com.lynbrookrobotics.twenty.routines.teleop
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselHardware
-import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotComponent
-import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotHardware
-import com.lynbrookrobotics.twenty.subsystems.climber.ClimberWinchComponent
-import com.lynbrookrobotics.twenty.subsystems.climber.ClimberWinchHardware
-import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelPivotComponent
-import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelPivotHardware
-import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelSpinnerComponent
-import com.lynbrookrobotics.twenty.subsystems.controlpanel.ControlPanelSpinnerHardware
-import com.lynbrookrobotics.twenty.subsystems.driver.DriverHardware
-import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
-import com.lynbrookrobotics.twenty.subsystems.driver.RumbleComponent
-import com.lynbrookrobotics.twenty.subsystems.driver.RumbleHardware
+import com.lynbrookrobotics.twenty.subsystems.climber.*
+import com.lynbrookrobotics.twenty.subsystems.driver.*
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainHardware
-import com.lynbrookrobotics.twenty.subsystems.intake.IntakeRollersComponent
-import com.lynbrookrobotics.twenty.subsystems.intake.IntakeRollersHardware
-import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderComponent
-import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderHardware
+import com.lynbrookrobotics.twenty.subsystems.intake.*
 import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
 import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightHardware
 import com.lynbrookrobotics.twenty.subsystems.shooter.*
@@ -51,7 +37,6 @@ import kotlinx.coroutines.*
 import java.io.File
 import kotlin.math.roundToInt
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
 
 class Subsystems(
@@ -66,23 +51,24 @@ class Subsystems(
 
     val climberPivot: ClimberPivotComponent?,
     val climberWinch: ClimberWinchComponent?,
-    val controlPanelPivot: ControlPanelPivotComponent?,
-    val controlPanelSpinner: ControlPanelSpinnerComponent?,
+
     val intakeRollers: IntakeRollersComponent?,
     val intakeSlider: IntakeSliderComponent?,
     val flywheel: FlywheelComponent?,
     val turret: TurretComponent?,
     val feederRoller: FeederRollerComponent?,
     val flashlight: FlashlightComponent?,
-    val shooterHood: ShooterHoodComponent?
+    val shooterHood: ShooterHoodComponent?,
 ) : Named by Named("Subsystems") {
 
-//    private val autos = listOf(
-//        ::`shoot wall`,
-//        ::`I1 shoot C1 I2 shoot`,
-//        ::`I2 shoot C1 I2 shoot`,
-//        ::`verify odometry`
-//    )
+    private val autos = listOf(
+        ::autoGetOffLine,
+        ::autoShootGetOffLine,
+        ::autoL1ShootGetOffLine,
+        ::autoL2ShootGetOffLine,
+        ::autoL1ShootI1IntakeS1Shoot,
+        ::autoL2ShootI1IntakeS1Shoot,
+    )
 
     private val autoIdGraph = graph("Auto ID", Each)
 
@@ -90,37 +76,47 @@ class Subsystems(
     private val autoId
         get() = SmartDashboard.getEntry("DB/Slider 0").getDouble(-1.0).roundToInt().also {
             if (it != prevAutoId) {
-//                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
-//                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
+                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
+                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
                 prevAutoId = it
             }
         }
 
     val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
+    val journalReverse by pref(false)
 
-    suspend fun teleop() {
+    suspend fun auto() = coroutineScope {
+        when (autoId) {
+            -1 -> {
+                log(Warning) { "DB Slider 0 is set to -1, getting off the line`" }
+                autoGetOffLine()
+            }
+            !in autos.indices -> {
+                log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
+                autoShootGetOffLine()
+            }
+            else -> autos[autoId].invoke()
+        }
+    }
+
+    suspend fun teleop() =
         runAll(
             { climberTeleop() },
-            { controlPanelTeleop() },
             { digestionTeleop() },
             {
                 launchWhenever(
-                    { limelight.routine == null } to choreography { limelight.autoZoom() },
-                    { drivetrain.routine == null } to choreography { drivetrain.teleop(driver) }
+                    { limelight.routine == null } to { limelight.autoZoom() },
+                    { drivetrain.routine == null } to { drivetrain.teleop(driver) }
                 )
             }
         )
-    }
 
-    suspend fun auto() = coroutineScope {
-//        if (autoId == -1) {
-//            log(Error) { "DB Slider 0 is set to -1, running wall auto" }
-//            `wall`()
-//        } else if (autoId !in autos.indices) {
-//            log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
-//            freeze()
-//        } else autos[autoId].get().invoke(this@Subsystems).invoke(this@coroutineScope)
-    }
+
+    suspend fun test() = runAll(
+        { drivetrain.teleop(driver) },
+        { climberTest() },
+        { digestionTest() },
+    )
 
     suspend fun warmup() {
         runAll(
@@ -164,8 +160,7 @@ class Subsystems(
 
         private val initClimberPivot by pref(false)
         private val initClimberWinch by pref(false)
-        private val initControlPanelPivot by pref(false)
-        private val initControlPanelSpinner by pref(false)
+
         private val initIntakeRollers by pref(false)
         private val initIntakeSlider by pref(false)
         private val initFlywheel by pref(false)
@@ -181,12 +176,10 @@ class Subsystems(
         val shooterTicker = ticker(Highest, 30.milli(Second), "Shooter System Ticker")
         val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
 
-        val SubsystemHardware<*, *>.sharedTickerTiming
-            get() = object : ReadOnlyProperty<SubsystemHardware<*, *>, Time> {
-                override fun getValue(thisRef: SubsystemHardware<*, *>, property: KProperty<*>): Time {
-                    thisRef.log(Error) { "Subsystem should use shared ticker values!" }
-                    return 20.milli(Second)
-                }
+        val sharedTickerTiming
+            get() = ReadOnlyProperty<SubsystemHardware<*, *>, Time> { thisRef, _ ->
+                thisRef.log(Error) { "Subsystem should use shared ticker values!" }
+                20.milli(Second)
             }
 
         fun concurrentInit() = scope.launch {
@@ -197,6 +190,7 @@ class Subsystems(
                     if (crashOnFailure) throw t else null
                 }
 
+                @Suppress("DeferredIsResult")
                 suspend fun <R> i(shouldInit: Boolean, producer: suspend () -> R) =
                     async { if (shouldInit) producer() else null }
 
@@ -212,16 +206,7 @@ class Subsystems(
 
                 val climberPivotAsync = i(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
                 val climberWinchAsync = i(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
-                val controlPanelPivotAsync =
-                    i(initControlPanelPivot) { ControlPanelPivotComponent(ControlPanelPivotHardware()) }
-                val controlPanelSpinnerAsync =
-                    i(initControlPanelSpinner) {
-                        ControlPanelSpinnerComponent(
-                            ControlPanelSpinnerHardware(
-                                driverAsync.await()
-                            )
-                        )
-                    }
+
                 val intakeRollersAsync = i(initIntakeRollers) { IntakeRollersComponent(IntakeRollersHardware()) }
                 val intakeSliderAsync = i(initIntakeSlider) { IntakeSliderComponent(IntakeSliderHardware()) }
                 val flywheelAsync = i(initFlywheel) { FlywheelComponent(FlywheelHardware()) }
@@ -242,8 +227,7 @@ class Subsystems(
 
                     t { climberPivotAsync.await() },
                     t { climberWinchAsync.await() },
-                    t { controlPanelPivotAsync.await() },
-                    t { controlPanelSpinnerAsync.await() },
+
                     t { intakeRollersAsync.await() },
                     t { intakeSliderAsync.await() },
                     t { flywheelAsync.await() },
@@ -254,40 +238,5 @@ class Subsystems(
                 )
             }
         }.also { runBlocking { it.join() } }
-
-        fun sequentialInit() {
-            fun <T> t(f: () -> T): T? = try {
-                f()
-            } catch (t: Throwable) {
-                if (crashOnFailure) throw t else null
-            }
-
-            fun <R> i(shouldInit: Boolean, producer: () -> R) = if (shouldInit) producer() else null
-
-            val driver = DriverHardware()
-            val operator = OperatorHardware()
-            instance = Subsystems(
-                DrivetrainComponent(DrivetrainHardware()),
-                CarouselComponent(CarouselHardware()),
-                ElectricalSystemHardware(),
-                LimelightComponent(LimelightHardware()),
-
-                driver,
-                operator,
-                RumbleComponent(RumbleHardware(driver, operator)),
-
-                i(initClimberPivot) { t { ClimberPivotComponent(ClimberPivotHardware()) } },
-                i(initClimberWinch) { t { ClimberWinchComponent(ClimberWinchHardware()) } },
-                i(initControlPanelPivot) { t { ControlPanelPivotComponent(ControlPanelPivotHardware()) } },
-                i(initControlPanelSpinner) { t { ControlPanelSpinnerComponent(ControlPanelSpinnerHardware(driver)) } },
-                i(initIntakeRollers) { t { IntakeRollersComponent(IntakeRollersHardware()) } },
-                i(initIntakeSlider) { t { IntakeSliderComponent(IntakeSliderHardware()) } },
-                i(initFlywheel) { t { FlywheelComponent(FlywheelHardware()) } },
-                i(initTurret) { t { TurretComponent(TurretHardware()) } },
-                i(initFeederRoller) { t { FeederRollerComponent(FeederRollerHardware()) } },
-                i(initFlashlight) { t { FlashlightComponent(FlashlightHardware()) } },
-                i(initShooterHood) { t { ShooterHoodComponent(ShooterHoodHardware()) } }
-            )
-        }
     }
 }

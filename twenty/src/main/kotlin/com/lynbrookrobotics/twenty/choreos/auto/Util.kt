@@ -1,11 +1,7 @@
 package com.lynbrookrobotics.twenty.choreos.auto
 
-import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.drivetrain.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.twenty.Subsystems
-import com.lynbrookrobotics.twenty.routines.followTrajectory
 import info.kunalsheth.units.generated.*
 import java.io.BufferedReader
 import java.io.File
@@ -20,17 +16,6 @@ fun loadResourcePath(name: String) = Thread.currentThread()
     .getResourceAsStream("com/lynbrookrobotics/twenty/paths/$name.tsv")
     ?.bufferedReader()
     ?.toPath()
-
-/**
- * Load a trajectory bundled in twenty/resources/paths.
- *
- * @param name of the trajectory (without .tsv)
- */
-fun loadResourceTrajectory(name: String) = Thread.currentThread()
-    .contextClassLoader
-    .getResourceAsStream("com/lynbrookrobotics/twenty/paths/$name.tsv")
-    ?.bufferedReader()
-    ?.toTrajectory()
 
 /**
  * Load the most recently recorded path on robot.
@@ -50,28 +35,11 @@ fun loadRobotPath(name: String) = File("/home/lvuser/$name.tsv")
     ?.bufferedReader()
     ?.toPath()
 
-/**
- * Load a trajectory on robot home path.
- *
- * @param name of the trajectory (without .tsv)
- */
-fun loadRobotTrajectory(name: String) = File("/home/lvuser/$name.tsv")
-    .takeIf { it.exists() }
-    ?.bufferedReader()
-    ?.toTrajectory()
-
-private fun BufferedReader.toPath() = lineSequence()
+private fun BufferedReader.toPath(): Path = lineSequence()
     .drop(1)
     .map { it.split('\t') }
     .map { it.map { tkn -> tkn.trim() } }
     .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) }
-    .toList()
-
-private fun BufferedReader.toTrajectory() = lineSequence()
-    .drop(1)
-    .map { it.split('\t') }
-    .map { it.map { tkn -> tkn.trim() } }
-    .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) stampWith it[2].toDouble().Second }
     .toList()
 
 fun Subsystems.fastAsFuckLine(dist: Length, config: AutoPathConfiguration): Trajectory =
@@ -84,7 +52,7 @@ fun Subsystems.fastAsFuckLine(dist: Length, config: AutoPathConfiguration): Traj
         config.endingVelocity,
     )
 
-fun Subsystems.fastAsFuckPath(path: Path, config: AutoPathConfiguration): Trajectory =
+fun Subsystems.fastAsFuckTrajectory(path: Path, config: AutoPathConfiguration): Trajectory =
     pathToTrajectory(
         path,
         drivetrain.maxSpeed * config.speedFactor,
@@ -93,11 +61,3 @@ fun Subsystems.fastAsFuckPath(path: Path, config: AutoPathConfiguration): Trajec
         config.maxDecel,
         config.endingVelocity,
     )
-
-suspend fun Subsystems.followPath(config: AutoPathConfiguration) = loadRobotPath(config.name)?.let { path ->
-    drivetrain.followTrajectory(fastAsFuckPath(path, config), config)
-} ?: log(Error) { "Couldn't find path ${config.name}" }
-
-suspend fun Subsystems.followTraj(config: AutoPathConfiguration) = loadRobotTrajectory(config.name)?.let { traj ->
-    drivetrain.followTrajectory(traj, config)
-} ?: log(Error) { "Couldn't find traj ${config.name}" }

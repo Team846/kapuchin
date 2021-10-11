@@ -2,55 +2,18 @@ package com.lynbrookrobotics.twenty.subsystems.shooter.flywheel
 
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
-import com.lynbrookrobotics.twenty.Subsystems.Companion.shooterTicker
+import com.lynbrookrobotics.twenty.Subsystems
 import info.kunalsheth.units.generated.*
 
 class FlywheelComponent(hardware: FlywheelHardware) :
-    Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, shooterTicker) {
+    Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, Subsystems.shooterTicker) {
 
-    private val accuracyChallengeNamed = Named("Accuracy Challenge", this)
-    val greenZone by accuracyChallengeNamed.pref {
-        val distance by pref(0, Inch)
-        val rpm by pref(2000, Rpm)
-        ({
-            distance to rpm
-        })
-    }
-    val yellowZone by accuracyChallengeNamed.pref {
-        val distance by pref(120, Inch)
-        val rpm by pref(2000, Rpm)
-        ({
-            distance to rpm
-        })
-    }
-    val blueZone by accuracyChallengeNamed.pref {
-        val distance by pref(180, Inch)
-        val rpm by pref(2000, Rpm)
-        ({
-            distance to rpm
-        })
-    }
-    val redZone by accuracyChallengeNamed.pref {
-        val distance by pref(240, Inch)
-        val rpm by pref(2000, Rpm)
-        ({
-            distance to rpm
-        })
-    }
-
-    val reIntroZone by accuracyChallengeNamed.pref {
-        val distance by pref(300, Inch)
-        val rpm by pref(2000, Rpm)
-        ({
-            distance to rpm
-        })
-    }
-
-    val preset by pref(6000, Rpm)
-
+    val presetAnitez by pref(3000, Rpm)
+    val presetLow by pref(4500, Rpm)
+    val presetMed by pref(5000, Rpm)
+    val presetHigh by pref(6000, Rpm)
 
     val maxSpeed by pref(9632, Rpm)
     val momentFactor by pref(1.4)
@@ -59,7 +22,6 @@ class FlywheelComponent(hardware: FlywheelHardware) :
     val fudgeFactor by pref(100, Percent)
     val shooterHeight by pref(24, Inch) // shooter height from the floor
 
-    val idleOutput by pref(50, Percent)
     val tolerance by pref(10, Rpm)
 
     val velocityGains by pref {
@@ -74,6 +36,8 @@ class FlywheelComponent(hardware: FlywheelHardware) :
             )
         })
     }
+
+    private val idleOutput by pref(50, Percent)
 
     override val fallbackController: FlywheelComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, idleOutput)
