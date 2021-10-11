@@ -296,20 +296,19 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-//            log(Debug) { "Waiting for feeder roller to get up to speed" }
-//            delayUntil {
-//                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
-//            }
-//            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}" }
-//            log(Debug) { "Feeder roller set" }
-//
-//            log(Debug) { "Waiting for flywheel to get up to speed" }
-//            delayUntil {
-//                flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-//            }
-//            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
-//            log(Debug) { "Flywheel set" }
-            delay(2.Second)
+            log(Debug) { "Waiting for feeder roller to get up to speed" }
+            delayUntil {
+                feederSpeed in feederRoller.feedSpeed `±` feederRoller.tolerance
+            }
+            log(Debug) { "${feederSpeed.Rpm} | ${feederRoller.feedSpeed.Rpm}" }
+            log(Debug) { "Feeder roller set" }
+
+            log(Debug) { "Waiting for flywheel to get up to speed" }
+            delayUntil {
+                flywheelSpeed in flywheelTarget `±` flywheel.tolerance
+            }
+            log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
+            log(Debug) { "Flywheel set" }
         }
     }
 }

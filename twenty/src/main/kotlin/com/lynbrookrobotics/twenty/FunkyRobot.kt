@@ -88,16 +88,6 @@ class FunkyRobot : RobotBase() {
 
             if (eventLoopTime > eventLoopPeriod * 5)
                 println("Overran event loop by ${(eventLoopTime - eventLoopPeriod) withDecimals 3}")
-
-//            val file = File("/home/lvuser/loopTimes.tsv")
-//            val fr = FileWriter(file, true)
-//            val br = BufferedWriter(fr)
-//            val pr = PrintWriter(br)
-//            pr.println("Time remaining on loop: ${eventLoopPeriod - eventLoopTime}")
-//            pr.close()
-//            br.close()
-//            fr.close()
-
         }
     }
 
