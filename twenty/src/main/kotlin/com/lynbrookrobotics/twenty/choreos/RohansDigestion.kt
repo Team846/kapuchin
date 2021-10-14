@@ -11,11 +11,12 @@ import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
-import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
+import com.lynbrookrobotics.twenty.subsystems.shooter.*
 import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
+import java.io.FileWriter
+import java.io.IOException
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -108,7 +109,6 @@ suspend fun Subsystems.digestionTest() = startChoreo("Digestion Test") {
 
             // flywheel
             { operator.xbox.xButton } to { flywheel?.set(flywheel.presetAnitez) },
-
             // turret
             { !turretManual.isZero } to { turret?.manualOverride(operator) },
             { operator.xbox.pov == 0 } to { turret?.set(0.Degree, 0.Degree) },
@@ -288,12 +288,16 @@ suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball")
 suspend fun Subsystems.delayUntilFeederAndFlywheel(
     flywheelTarget: AngularVelocity,
 ) {
+    val logPath = "${"/home/lvuser/flywheel"}.tsv"
+
     if (flywheel == null || feederRoller == null) {
         log(Error) { "Need flywheel and feeder to run." }
     } else startChoreo("Delay until feeder and flywheel") {
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
         val feederSpeed by feederRoller.hardware.speed.readEagerly().withoutStamps
+        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
+        val reading by limelight.hardware.readings.readEagerly().withoutStamps
 
         choreography {
             log(Debug) { "Waiting for feeder roller to get up to speed" }
@@ -309,6 +313,18 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
             }
             log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
             log(Debug) { "Flywheel set" }
+
+            reading?.let { snapshot ->
+                try {
+                    val fw = FileWriter(logPath, true)
+                    fw.write("\n${
+                        limelight.hardware.conversions.distanceToGoal(snapshot!!,
+                            pitch)
+                    }\t${flywheelTarget}\t${flywheelSpeed}")
+                    fw.close()
+                } catch (e: IOException) {
+                }
+            }
         }
     }
 }
@@ -334,5 +350,19 @@ suspend fun Subsystems.whereAreMyBalls() = startChoreo("Re-Index") {
             j.cancel()
         }
         rumble.set(TwoSided(0.Percent, 100.Percent))
+    }
+}
+
+suspend fun Subsystems.interpolatedRPM() = startChoreo("Distance Based RPM") {
+    val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
+    val reading by limelight.hardware.readings.readEagerly().withoutStamps
+
+    choreography {
+        reading?.let { snapshot ->
+            val distance = limelight.hardware.conversions.distanceToGoal(snapshot!!,
+                pitch)
+        }
+        val RPM = 10 * distance.squared + 4 * distance + 1000
+        spinUpShooter(RPM)
     }
 }
