@@ -59,7 +59,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val toggleClimberArms = s { rb }
     val chaChaRealSmooth = s { xbox.backButton && !xbox.startButton }
     val takeItBackNowYall = s { xbox.backButton && xbox.startButton }
-//    val setLimit = s { lt }
+    val setLimit = s { lt }
 
     val aim = s { lt }
     val shoot = s { rt }
