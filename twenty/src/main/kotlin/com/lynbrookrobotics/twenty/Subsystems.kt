@@ -9,6 +9,8 @@ import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.subsystems.driver.LedComponent
+import com.lynbrookrobotics.twenty.subsystems.driver.LedHardware
 import com.lynbrookrobotics.twenty.choreos.*
 import com.lynbrookrobotics.twenty.choreos.auto.*
 import com.lynbrookrobotics.twenty.routines.autoZoom
@@ -59,6 +61,7 @@ class Subsystems(
     val feederRoller: FeederRollerComponent?,
     val flashlight: FlashlightComponent?,
     val shooterHood: ShooterHoodComponent?,
+    val leds: LedComponent?,
 ) : Named by Named("Subsystems") {
 
     private val autos = listOf(
@@ -168,6 +171,7 @@ class Subsystems(
         private val initFeederRoller by pref(false)
         private val initFlashlight by pref(false)
         private val initShooterHood by pref(false)
+        private val initLeds by pref(true)
 
         var instance: Subsystems? = null
             private set
@@ -214,6 +218,7 @@ class Subsystems(
                 val feederRollerAsync = i(initFeederRoller) { FeederRollerComponent(FeederRollerHardware()) }
                 val flashlightAsync = i(initFlashlight) { FlashlightComponent(FlashlightHardware()) }
                 val shooterHoodAsync = i(initShooterHood) { ShooterHoodComponent(ShooterHoodHardware()) }
+                val ledsAsync = i(initLeds) { LedComponent(LedHardware(driverAsync.await())) }
 
                 instance = Subsystems(
                     drivetrainAsync.await(),
@@ -234,7 +239,8 @@ class Subsystems(
                     t { turretAsync.await() },
                     t { feederRollerAsync.await() },
                     t { flashlightAsync.await() },
-                    t { shooterHoodAsync.await() }
+                    t { shooterHoodAsync.await() },
+                    t { ledsAsync.await() },
                 )
             }
         }.also { runBlocking { it.join() } }
