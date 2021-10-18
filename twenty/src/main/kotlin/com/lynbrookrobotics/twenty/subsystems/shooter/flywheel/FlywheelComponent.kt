@@ -15,12 +15,7 @@ class FlywheelComponent(hardware: FlywheelHardware) :
     val presetMed by pref(5000, Rpm)
     val presetHigh by pref(6000, Rpm)
 
-    val maxSpeed by pref(9632, Rpm)
-    val momentFactor by pref(1.4)
-    val rollerRadius by pref(2, Inch)
-    val momentOfInertia by pref(1.2, PoundFootSquared)
-    val fudgeFactor by pref(100, Percent)
-    val shooterHeight by pref(24, Inch) // shooter height from the floor
+    private val maxSpeed by pref(9632, Rpm)
 
     val tolerance by pref(10, Rpm)
 

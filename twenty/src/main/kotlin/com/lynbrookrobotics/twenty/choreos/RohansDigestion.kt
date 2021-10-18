@@ -13,7 +13,6 @@ import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
 import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
-import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 
@@ -247,41 +246,6 @@ suspend fun CarouselComponent.delayUntilBall() = startChoreo("Delay Until Ball")
     }
 }
 
-suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball") {
-    val speed by hardware.speed.readEagerly().withStamps
-    val dvdt = differentiator(::p, speed.x, speed.y)
-
-    val initialSpeed = speed.y
-
-    var lastAcceleration = 0.Rpm / Second
-    var lastPercentSpeed = 0.Percent
-
-    choreography {
-        delayUntil(clock) {
-            val acceleration = dvdt(speed.x, speed.y)
-            val percentSpeed = (speed.y - initialSpeed) / initialSpeed
-
-            val accelerating = percentSpeed > lastPercentSpeed
-            if (acceleration > lastAcceleration) log(Debug) {
-                "Peak deceleration: ${lastAcceleration.RpmPerSecond withDecimals 2} RPM/sec"
-            }
-
-            if (percentSpeed > lastPercentSpeed) log(Debug) {
-                "Peak percent drop: ${lastPercentSpeed.Percent withDecimals 1}%"
-            }
-
-            (accelerating &&
-                    lastAcceleration < hardware.conversions.ballDecelerationThreshold &&
-                    lastPercentSpeed < hardware.conversions.ballPercentDropThreshold)
-
-                .also {
-                    lastAcceleration = acceleration
-                    lastPercentSpeed = percentSpeed
-                }
-        }
-    }
-}
-
 suspend fun Subsystems.delayUntilFeederAndFlywheel(
     flywheelTarget: AngularVelocity,
 ) {
@@ -307,29 +271,5 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
             log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
             log(Debug) { "Flywheel set" }
         }
-    }
-}
-
-suspend fun Subsystems.whereAreMyBalls() = startChoreo("Re-Index") {
-    val color by carousel.hardware.color.readEagerly().withoutStamps
-    val proximity by carousel.hardware.proximity.readEagerly().withoutStamps
-
-    choreography {
-        carousel.rezero()
-        var slotsSkipped = 0
-        carousel.state.clear()
-        for (i in 0 until carousel.state.maxBalls) {
-            carousel.set(i.CarouselSlot)
-            val j = launch { carousel.set(i.CarouselSlot, 0.Degree) }
-            delay(0.1.Second)
-            if (carousel.hardware.conversions.detectingBall(proximity, color)) {
-                carousel.state.push(slotsSkipped + 1)
-                slotsSkipped = 0
-            } else {
-                slotsSkipped++
-            }
-            j.cancel()
-        }
-        rumble.set(TwoSided(0.Percent, 100.Percent))
     }
 }

@@ -17,7 +17,7 @@ import info.kunalsheth.units.math.*
 class FeederRollerComponent(hardware: FeederRollerHardware) :
     Component<FeederRollerComponent, FeederRollerHardware, OffloadedOutput>(hardware, Subsystems.shooterTicker) {
 
-    val maxSpeed by pref(11000, Rpm)
+    private val maxSpeed by pref(11000, Rpm)
     val feedSpeed by pref(2500, Rpm)
     val tolerance by pref(10, Rpm)
 
