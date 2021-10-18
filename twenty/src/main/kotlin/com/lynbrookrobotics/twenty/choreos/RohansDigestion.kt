@@ -61,7 +61,13 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 intakeRollers?.set(-100.Percent) ?: freeze()
             },
 
-            { aim } to { visionAimTurret() },
+            { aim } to {
+                limelight.hardware.pipeline.optimizedRead(currentTime, 0.Second).y?.let { pipeline ->
+                    log(Debug) { "Freezing at $pipeline pipline" }
+                    launch { limelight.set(pipeline) }
+                }
+                turret?.trackTarget(drivetrain, limelight)
+            },
             { shoot } to { shootAll(hoodDown = shift) },
 
             { shooterPresetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
