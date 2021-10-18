@@ -152,15 +152,29 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 }
 
 suspend fun Subsystems.visionAimTurret() {
+    val logPath = "${"/home/lvuser/visionaim"}.tsv"
+
     if (turret == null) {
         log(Error) { "Need turret for vision" }
         freeze()
     } else startChoreo("Vision Aim Turret") {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
         val turretPos by turret.hardware.position.readEagerly().withoutStamps
+        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
 
         choreography {
             reading?.let { snapshot ->
+                scope.launch {
+                    try {
+                        val fw = FileWriter(logPath, true)
+                        fw.write("\n${reading!!.tx}\t${reading!!.ty}\t${reading!!.tx0}\t${reading!!.ty0}\t${reading!!.tvert}\t${reading!!.thor}\t${reading!!.ta}\t${reading!!.pipeline}\t${reading!!.ts}\t${turretPos}\t${
+                            limelight.hardware.conversions.distanceToGoal(reading!!,
+                                pitch)
+                        }")
+                        fw.close()
+                    } catch (e: IOException) {
+                    }
+                }
                 launch {
                     turret.set(
                         turretPos - snapshot.tx + limelight.hardware.conversions.mountingBearing,
@@ -318,7 +332,7 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
                 try {
                     val fw = FileWriter(logPath, true)
                     fw.write("\n${
-                        limelight.hardware.conversions.distanceToGoal(snapshot!!,
+                        limelight.hardware.conversions.distanceToGoal(snapshot,
                             pitch)
                     }\t${flywheelTarget}\t${flywheelSpeed}")
                     fw.close()
@@ -353,16 +367,16 @@ suspend fun Subsystems.whereAreMyBalls() = startChoreo("Re-Index") {
     }
 }
 
-suspend fun Subsystems.interpolatedRPM() = startChoreo("Distance Based RPM") {
-    val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
-    val reading by limelight.hardware.readings.readEagerly().withoutStamps
-
-    choreography {
-        reading?.let { snapshot ->
-            val distance = limelight.hardware.conversions.distanceToGoal(snapshot!!,
-                pitch)
-        }
-        val RPM = 10 * distance.squared + 4 * distance + 1000
-        spinUpShooter(RPM)
-    }
-}
+//suspend fun Subsystems.interpolatedRPM() = startChoreo("Distance Based RPM") {
+//    val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
+//    val reading by limelight.hardware.readings.readEagerly().withoutStamps
+//
+//    choreography {
+//        reading?.let { snapshot ->
+//            val distance = limelight.hardware.conversions.distanceToGoal(snapshot,
+//                pitch)
+//            val RPM = 40 * distance.squared + 40 * distance + 1000
+//            spinUpShooter(RPM)
+//        }
+//    }
+//}
