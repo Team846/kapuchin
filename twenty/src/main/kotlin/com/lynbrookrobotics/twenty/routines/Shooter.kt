@@ -3,8 +3,6 @@ package com.lynbrookrobotics.twenty.routines
 import com.lynbrookrobotics.kapuchin.control.data.*
 import com.lynbrookrobotics.kapuchin.control.math.*
 import com.lynbrookrobotics.kapuchin.hardware.offloaded.*
-import com.lynbrookrobotics.kapuchin.logging.*
-import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.twenty.subsystems.driver.OperatorHardware
 import com.lynbrookrobotics.twenty.subsystems.drivetrain.DrivetrainComponent
 import com.lynbrookrobotics.twenty.subsystems.limelight.LimelightComponent
@@ -58,24 +56,28 @@ suspend fun TurretComponent.manualPrecisionOverride(operator: OperatorHardware) 
         controller { PercentOutput(hardware.escConfig, precision) }
     }
 
-suspend fun TurretComponent.trackTarget(limelight: LimelightComponent) = startRoutine("Track Target") {
+suspend fun TurretComponent.trackTarget(drivetrain: DrivetrainComponent, limelight: LimelightComponent) =
+    startRoutine("Track Target") {
+        val reading by limelight.hardware.readings.readOnTick.withoutStamps
+        val drivetrainPosition by drivetrain.hardware.position.readEagerly.withoutStamps
+        val turretPosition by hardware.position.readOnTick.withoutStamps
 
-    val reading by limelight.hardware.readings.readOnTick.withoutStamps
-    val current by hardware.position.readOnTick.withoutStamps
+        var lastAngle: Angle? = null
 
-    controller {
-        reading?.let { snapshot ->
-            val target = current + snapshot.tx + limelight.hardware.conversions.mountingBearing
+        controller {
+            reading?.let { snapshot ->
+                val target = turretPosition - snapshot.tx + limelight.hardware.conversions.mountingBearing
+                lastAngle = drivetrainPosition.bearing `coterminal +` target
 
-            PositionOutput(
-                hardware.escConfig, positionGains, hardware.conversions.encoder.native(target)
-            )
-        } ?: run {
-            log(Debug) { "Lost sight of target!" }
-            PercentOutput(hardware.escConfig, 0.Percent)
+                PositionOutput(
+                    hardware.escConfig, positionGains, hardware.conversions.encoder.native(target)
+                )
+            } ?: lastAngle?.let { lastAngle ->
+                val target = lastAngle `coterminal -` drivetrainPosition.bearing
+                PositionOutput(hardware.escConfig, positionGains, hardware.conversions.encoder.native(target))
+            } ?: PercentOutput(hardware.escConfig, 0.Percent)
         }
     }
-}
 
 suspend fun TurretComponent.fieldOrientedAngle(drivetrain: DrivetrainComponent, toTurretPosition: Angle? = null) =
     startRoutine("Field Oriented Position") {

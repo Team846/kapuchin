@@ -70,7 +70,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val carouselBall0 = s { xbox.yButton }
     val centerTurret = s { xbox.xButton }
-    val reindexCarousel = s { xbox.aButton }
+    val setClimberLimit = s { xbox.aButton }
 
     val turretManual = s {
         turretMapping(getX(Hand.kLeft).Each)

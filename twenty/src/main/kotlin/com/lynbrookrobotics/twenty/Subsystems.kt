@@ -48,6 +48,7 @@ class Subsystems(
     val driver: DriverHardware,
     val operator: OperatorHardware,
     val rumble: RumbleComponent,
+    val leds: LedComponent?,
 
     val climberPivot: ClimberPivotComponent?,
     val climberWinch: ClimberWinchComponent?,
@@ -158,6 +159,8 @@ class Subsystems(
             }
         }
 
+        private val initLeds by pref(false)
+
         private val initClimberPivot by pref(false)
         private val initClimberWinch by pref(false)
 
@@ -203,6 +206,7 @@ class Subsystems(
                 val operatorAsync = async { OperatorHardware() }
                 val rumbleAsync =
                     async { RumbleComponent(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
+                val ledsAsync = i(initLeds) { LedComponent(LedHardware()) }
 
                 val climberPivotAsync = i(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
                 val climberWinchAsync = i(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
@@ -224,6 +228,7 @@ class Subsystems(
                     driverAsync.await(),
                     operatorAsync.await(),
                     rumbleAsync.await(),
+                    t { ledsAsync.await() },
 
                     t { climberPivotAsync.await() },
                     t { climberWinchAsync.await() },
@@ -234,7 +239,7 @@ class Subsystems(
                     t { turretAsync.await() },
                     t { feederRollerAsync.await() },
                     t { flashlightAsync.await() },
-                    t { shooterHoodAsync.await() }
+                    t { shooterHoodAsync.await() },
                 )
             }
         }.also { runBlocking { it.join() } }

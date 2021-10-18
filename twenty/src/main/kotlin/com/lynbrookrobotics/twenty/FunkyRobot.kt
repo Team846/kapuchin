@@ -24,7 +24,6 @@ fun main() {
 class FunkyRobot : RobotBase() {
     override fun startCompetition() {
         // Initialize preferences
-        Field
         AutoPrefs
 
         println("Initializing hardware...")

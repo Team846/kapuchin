@@ -63,9 +63,9 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
         } lstamp t
     }
 
-//    private val pipeline = sensor { t ->
-//        l("getpipe").toInt().let { rawpipe ->
-//            Pipeline.values().firstOrNull { it.number == rawpipe }
-//        } lstamp t
-//    }
+    val pipeline = sensor { t ->
+        l("getpipe").toInt().let { rawpipe ->
+            Pipeline.values().firstOrNull { it.number == rawpipe }
+        } lstamp t
+    }
 }

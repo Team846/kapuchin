@@ -20,7 +20,4 @@ class FlywheelConversions(hardware: FlywheelHardware) : Named by Named("Conversi
             )
         })
     }
-
-    val ballDecelerationThreshold by pref(-400, RpmPerSecond)
-    val ballPercentDropThreshold by pref(-10, Percent)
 }

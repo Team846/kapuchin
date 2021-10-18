@@ -15,6 +15,8 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
     val chaChaRealSmooth by operator.chaChaRealSmooth.readEagerly().withoutStamps
     val takeItBackNowYall by operator.takeItBackNowYall.readEagerly().withoutStamps
 
+    val setClimberLimit by operator.setClimberLimit.readEagerly().withoutStamps
+
     var climberArms =
         if (climberPivot?.hardware?.pivotSolenoid?.get() == ClimberPivotState.Up.output) ClimberPivotState.Up else ClimberPivotState.Down
 
@@ -22,14 +24,21 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
         runWhenever(
             { climberArms == ClimberPivotState.Down } to { climberPivot?.set(ClimberPivotState.Down) },
             { chaChaRealSmooth && !shift } to { climberWinch?.set(climberWinch.extendSpeed) },
-            { chaChaRealSmooth && shift } to { climberWinch?.set(climberWinch.extendSlowSpeed) },
+            { chaChaRealSmooth && shift } to { climberWinch?.set(climberWinch.extendSlowSpeed, ignoreLimit = true) },
             { takeItBackNowYall && !shift } to { climberWinch?.set(climberWinch.retractSpeed) },
-            { takeItBackNowYall && shift } to { climberWinch?.set(climberWinch.retractSlowSpeed) },
+            { takeItBackNowYall && shift } to { climberWinch?.set(climberWinch.retractSlowSpeed, ignoreLimit = true) },
 
             { toggleClimberArms } to {
                 delay(1.Second) // prevent accidental taps
                 climberArms = if (climberArms == ClimberPivotState.Up) ClimberPivotState.Down else ClimberPivotState.Up
                 freeze()
+            },
+
+            { setClimberLimit } to {
+                delay(1.Second)
+                climberWinch?.hardware?.masterEsc?.encoder?.position?.let { pos ->
+                    climberWinch.retractLimit = pos
+                }
             },
         )
     }

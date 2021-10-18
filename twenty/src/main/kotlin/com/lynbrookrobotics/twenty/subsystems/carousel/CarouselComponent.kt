@@ -26,8 +26,6 @@ class CarouselComponent(hardware: CarouselHardware) :
     val fireAllDutycycle by pref(50, Percent)
     val zeroSpeed by pref(30, Percent)
 
-    val indexOnStart by pref(false)
-
     val state = CarouselState(this)
 
     override val fallbackController: CarouselComponent.(Time) -> OffloadedOutput = {

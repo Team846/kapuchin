@@ -11,8 +11,8 @@ import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
-import com.lynbrookrobotics.twenty.subsystems.shooter.*
-import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.FlywheelComponent
+import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
+import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 import java.io.FileWriter
@@ -36,7 +36,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val carouselBall0 by operator.carouselBall0.readEagerly().withoutStamps
     val centerTurret by operator.centerTurret.readEagerly().withoutStamps
-    val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
 
     val turretManual by operator.turretManual.readEagerly().withoutStamps
     val turretPrecisionManual by operator.turretPrecisionManual.readEagerly().withoutStamps
@@ -47,13 +46,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     choreography {
         withTimeout(2.Second) { carousel.rezero() }
 
-        if (carousel.indexOnStart) {
-            withTimeout(15.Second) {
-                log(Debug) { "Reindexing carousel" }
-                whereAreMyBalls()
-            }
-        }
-
         runWhenever(
             { eatBalls } to { intakeBalls() },
             { pukeBallsIntakeIn } to { intakeRollers?.set(-100.Percent) ?: freeze() },
@@ -62,7 +54,13 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 intakeRollers?.set(-100.Percent) ?: freeze()
             },
 
-            { aim } to { visionAimTurret() },
+            { aim } to {
+                limelight.hardware.pipeline.optimizedRead(currentTime, 0.Second).y?.let { pipeline ->
+                    log(Debug) { "Freezing at $pipeline pipline" }
+                    launch { limelight.set(pipeline) }
+                }
+                turret?.trackTarget(drivetrain, limelight)
+            },
             { shoot } to { shootAll(hoodDown = shift) },
 
             { shooterPresetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
@@ -72,7 +70,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
             { carouselBall0 } to { carousel.state.clear() },
             { centerTurret } to { turret?.set(0.Degree) ?: freeze() },
-            { reindexCarousel } to { whereAreMyBalls() },
 
             { !turretManual.isZero && turretPrecisionManual.isZero } to {
                 scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) } }
@@ -264,41 +261,6 @@ suspend fun CarouselComponent.delayUntilBall() = startChoreo("Delay Until Ball")
     }
 }
 
-suspend fun FlywheelComponent.delayUntilBall() = startChoreo("Delay Until Ball") {
-    val speed by hardware.speed.readEagerly().withStamps
-    val dvdt = differentiator(::p, speed.x, speed.y)
-
-    val initialSpeed = speed.y
-
-    var lastAcceleration = 0.Rpm / Second
-    var lastPercentSpeed = 0.Percent
-
-    choreography {
-        delayUntil(clock) {
-            val acceleration = dvdt(speed.x, speed.y)
-            val percentSpeed = (speed.y - initialSpeed) / initialSpeed
-
-            val accelerating = percentSpeed > lastPercentSpeed
-            if (acceleration > lastAcceleration) log(Debug) {
-                "Peak deceleration: ${lastAcceleration.RpmPerSecond withDecimals 2} RPM/sec"
-            }
-
-            if (percentSpeed > lastPercentSpeed) log(Debug) {
-                "Peak percent drop: ${lastPercentSpeed.Percent withDecimals 1}%"
-            }
-
-            (accelerating &&
-                    lastAcceleration < hardware.conversions.ballDecelerationThreshold &&
-                    lastPercentSpeed < hardware.conversions.ballPercentDropThreshold)
-
-                .also {
-                    lastAcceleration = acceleration
-                    lastPercentSpeed = percentSpeed
-                }
-        }
-    }
-}
-
 suspend fun Subsystems.delayUntilFeederAndFlywheel(
     flywheelTarget: AngularVelocity,
 ) {
@@ -328,55 +290,33 @@ suspend fun Subsystems.delayUntilFeederAndFlywheel(
             log(Debug) { "${flywheelSpeed.Rpm} | ${flywheelTarget.Rpm}" }
             log(Debug) { "Flywheel set" }
 
-            reading?.let { snapshot ->
-                try {
-                    val fw = FileWriter(logPath, true)
-                    fw.write("\n${
-                        limelight.hardware.conversions.distanceToGoal(snapshot,
-                            pitch)
-                    }\t${flywheelTarget}\t${flywheelSpeed}")
-                    fw.close()
-                } catch (e: IOException) {
+            scope.launch {
+                reading?.let { snapshot ->
+                    try {
+                        val fw = FileWriter(logPath, true)
+                        fw.write("\n${
+                            limelight.hardware.conversions.distanceToGoal(snapshot,
+                                pitch)
+                        }\t${flywheelTarget}\t${flywheelSpeed}")
+                        fw.close()
+                    } catch (e: IOException) {
+                    }
                 }
             }
         }
     }
 }
 
-suspend fun Subsystems.whereAreMyBalls() = startChoreo("Re-Index") {
-    val color by carousel.hardware.color.readEagerly().withoutStamps
-    val proximity by carousel.hardware.proximity.readEagerly().withoutStamps
+suspend fun Subsystems.interpolatedRPM() = startChoreo("Distance Based RPM") {
+    val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
+    val reading by limelight.hardware.readings.readEagerly().withoutStamps
 
     choreography {
-        carousel.rezero()
-        var slotsSkipped = 0
-        carousel.state.clear()
-        for (i in 0 until carousel.state.maxBalls) {
-            carousel.set(i.CarouselSlot)
-            val j = launch { carousel.set(i.CarouselSlot, 0.Degree) }
-            delay(0.1.Second)
-            if (carousel.hardware.conversions.detectingBall(proximity, color)) {
-                carousel.state.push(slotsSkipped + 1)
-                slotsSkipped = 0
-            } else {
-                slotsSkipped++
-            }
-            j.cancel()
+        reading?.let { snapshot ->
+            val distance = limelight.hardware.conversions.distanceToGoal(snapshot,
+                pitch)
+            val RPM = 40 * distance.squared + 40 * distance + 1000
+            spinUpShooter(RPM)
         }
-        rumble.set(TwoSided(0.Percent, 100.Percent))
     }
 }
-
-//suspend fun Subsystems.interpolatedRPM() = startChoreo("Distance Based RPM") {
-//    val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
-//    val reading by limelight.hardware.readings.readEagerly().withoutStamps
-//
-//    choreography {
-//        reading?.let { snapshot ->
-//            val distance = limelight.hardware.conversions.distanceToGoal(snapshot,
-//                pitch)
-//            val RPM = 40 * distance.squared + 40 * distance + 1000
-//            spinUpShooter(RPM)
-//        }
-//    }
-//}

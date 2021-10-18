@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.twenty.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
@@ -13,9 +12,6 @@ enum class ShooterHoodState(val output: Boolean) { Up(true), Down(false) }
 
 class ShooterHoodComponent(hardware: ShooterHoodHardware) :
     Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, Subsystems.shooterTicker) {
-
-    val hoodUpLaunch by pref(20, Degree)
-    val hoodDownLaunch by pref(50, Degree)
 
     override val fallbackController: ShooterHoodComponent.(Time) -> ShooterHoodState = { ShooterHoodState.Down }
 
