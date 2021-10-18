@@ -6,32 +6,12 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.subsystems.driver.DriverHardware
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import java.awt.Color
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.sin
 
 class LedComponent(hardware: LedHardware) : Component<LedComponent, LedHardware, Color>(hardware, EventLoop) {
-
-    override val fallbackController: LedComponent.(Time) -> Color = {
-        Color(Color.HSBtoRGB(
-            ((currentTime.Second / periods.first.Second % 1.0)).toFloat(),
-            1f, 1f
-        ))
-    }
-
-    override fun LedHardware.output(value: Color) {
-        channels(value)
-    }
-
-    val periods by pref {
-        val rainbow by pref(1, Second)
-        val fade by pref(3, Second)
-        ({ rainbow to fade })
-    }
+    val rainbowPeriod by pref(1, Second)
 
     val channels by pref {
         val red by pref("LEDChannelA")
@@ -46,16 +26,25 @@ class LedComponent(hardware: LedHardware) : Component<LedComponent, LedHardware,
         })
     }
 
+    override val fallbackController: LedComponent.(Time) -> Color = {
+        Color(Color.HSBtoRGB(
+            ((currentTime.Second / rainbowPeriod.Second % 1.0)).toFloat(),
+            1f, 1f
+        )) // TODO change to off after testing
+    }
+
+
+    override fun LedHardware.output(value: Color) {
+        channels(value)
+    }
 }
 
-class LedHardware(
-    val driver: DriverHardware
-) : SubsystemHardware<LedHardware, LedComponent>() {
+class LedHardware : SubsystemHardware<LedHardware, LedComponent>() {
     override val name = "LEDs"
     override val period = 50.milli(Second)
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.Low
 
-    val canifierDeviceId = 60
+    private val canifierDeviceId = 60
     val canifier by hardw { CANifier(canifierDeviceId) }
 }

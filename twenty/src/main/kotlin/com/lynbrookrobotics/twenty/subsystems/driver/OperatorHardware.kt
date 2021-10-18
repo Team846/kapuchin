@@ -59,7 +59,6 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val toggleClimberArms = s { rb }
     val chaChaRealSmooth = s { xbox.backButton && !xbox.startButton }
     val takeItBackNowYall = s { xbox.backButton && xbox.startButton }
-    val setLimit = s { lt }
 
     val aim = s { lt }
     val shoot = s { rt }
@@ -71,7 +70,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val carouselBall0 = s { xbox.yButton }
     val centerTurret = s { xbox.xButton }
-    val reindexCarousel = s { xbox.aButton }
+    val setClimberLimit = s { xbox.aButton }
 
     val turretManual = s {
         turretMapping(getX(Hand.kLeft).Each)
@@ -89,4 +88,3 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
         }
     }
 }
-

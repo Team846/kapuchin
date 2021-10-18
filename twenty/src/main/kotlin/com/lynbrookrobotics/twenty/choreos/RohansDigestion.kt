@@ -35,7 +35,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     val carouselBall0 by operator.carouselBall0.readEagerly().withoutStamps
     val centerTurret by operator.centerTurret.readEagerly().withoutStamps
-    val reindexCarousel by operator.reindexCarousel.readEagerly().withoutStamps
 
     val turretManual by operator.turretManual.readEagerly().withoutStamps
     val turretPrecisionManual by operator.turretPrecisionManual.readEagerly().withoutStamps
@@ -45,13 +44,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
     choreography {
         withTimeout(2.Second) { carousel.rezero() }
-
-        if (carousel.indexOnStart) {
-            withTimeout(15.Second) {
-                log(Debug) { "Reindexing carousel" }
-                whereAreMyBalls()
-            }
-        }
 
         runWhenever(
             { eatBalls } to { intakeBalls() },
@@ -77,7 +69,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
             { carouselBall0 } to { carousel.state.clear() },
             { centerTurret } to { turret?.set(0.Degree) ?: freeze() },
-            { reindexCarousel } to { whereAreMyBalls() },
 
             { !turretManual.isZero && turretPrecisionManual.isZero } to {
                 scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) } }
