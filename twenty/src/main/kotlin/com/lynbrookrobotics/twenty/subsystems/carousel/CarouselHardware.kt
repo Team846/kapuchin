@@ -85,19 +85,12 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         it.red != 0 && it.green != 0 && it.blue != 0
     }
 
-    private val colorNamed = Named("Color Sensor", this)
-    val color = sensor(colorSensor) { color stampWith it }
-        .with(graph("R", Percent, colorNamed)) { it.red.Each }
-        .with(graph("G", Percent, colorNamed)) { it.green.Each }
-        .with(graph("B", Percent, colorNamed)) { it.blue.Each }
-        .with(graph("Similarity", Each, colorNamed)) { conversions.similarity(it).Each }
-
     val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
-        .with(graph("IR", Percent, colorNamed))
+        .with(graph("IR", Percent))
 
     init {
         Subsystems.uiBaselineTicker.runOnTick { time ->
-            setOf(alignedToSlot, position, color, proximity).forEach {
+            setOf(alignedToSlot, position, proximity).forEach {
                 it.optimizedRead(time, .5.Second)
             }
         }

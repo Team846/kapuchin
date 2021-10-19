@@ -41,10 +41,9 @@ class CarouselComponent(hardware: CarouselHardware) :
         ammoGraph(currentTime, state.balls.Each)
 
         with(hardware) {
-            isBallGraph(currentTime, conversions.detectingBall(
-                proximity.optimizedRead(currentTime, syncThreshold).y,
-                color.optimizedRead(currentTime, syncThreshold).y
-            ).let { if (it) 1.Each else 0.Each })
+            val isBall = (proximity.optimizedRead(currentTime,
+                syncThreshold).y in conversions.ballIrRange)
+            isBallGraph(currentTime, isBall.let { if (it) 1.Each else 0.Each })
         }
     }
 }
