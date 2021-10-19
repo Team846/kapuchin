@@ -23,7 +23,8 @@ class CarouselComponent(hardware: CarouselHardware) :
         })
     }
 
-    val fireAllDutycycle by pref(50, Percent)
+    val shootAllSpeed by pref(50, Percent)
+    val shootOnePeriod by pref(1, Second)
     val zeroSpeed by pref(30, Percent)
 
     val state = CarouselState(this)

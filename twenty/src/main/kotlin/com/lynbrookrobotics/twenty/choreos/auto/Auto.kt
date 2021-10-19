@@ -42,7 +42,7 @@ suspend fun Subsystems.autoShootGetOffLine() {
     } else startChoreo("Auto Shoot GetOffLine") {
         choreography {
             delay(1.Second)
-            withTimeout(AutoPrefs.getOffLineTimeout) { autoFire(flywheel.presetLow) }
+            withTimeout(AutoPrefs.getOffLineTimeout) { autoFire(flywheel.presetClose) }
             autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
         }
     }
@@ -57,7 +57,7 @@ suspend fun Subsystems.autoL1ShootGetOffLine() {
 
             withTimeout(AutoPrefs.getOffLineTimeout) {
                 turret?.set(AutoPrefs.L1TurretPos, 5.Degree)
-                autoFire(flywheel.presetLow)
+                autoFire(flywheel.presetClose)
             }
             autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
         }
@@ -73,7 +73,7 @@ suspend fun Subsystems.autoL2ShootGetOffLine() {
 
             withTimeout(AutoPrefs.getOffLineTimeout) {
                 turret?.set(AutoPrefs.L2TurretPos, 5.Degree)
-                autoFire(flywheel.presetLow)
+                autoFire(flywheel.presetClose)
             }
             autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
         }
@@ -117,7 +117,7 @@ suspend fun Subsystems.autoL2ShootI1IntakeS1Shoot() {
         choreography {
             withTimeout(AutoPrefs.getOffLineTimeout) {
                 turret?.set(AutoPrefs.L2TurretPos, 5.Degree)
-                autoFire(flywheel.presetLow)
+                autoFire(flywheel.presetClose)
             }
 
             // intake and go to I1
@@ -161,7 +161,7 @@ private suspend fun Subsystems.autoFire(speed: AngularVelocity) {
 
             delay(1.Second)
 
-            withTimeout(AutoPrefs.shootTime) { carousel.set(carousel.fireAllDutycycle) }
+            withTimeout(AutoPrefs.shootTime) { carousel.set(carousel.shootAllSpeed) }
             j1.cancel()
             j2.cancel()
             j3.cancel()

@@ -61,12 +61,13 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val takeItBackNowYall = s { xbox.backButton && xbox.startButton }
 
     val aim = s { lt }
-    val shoot = s { rt }
+    val shootAll = s { rt }
+    val shootOne = s { rb }
 
-    val shooterPresetAnitez = s { xbox.pov == 270 }
-    val shooterPresetLow = s { xbox.pov == 180 }
-    val shooterPresetMed = s { xbox.pov == 90 }
-    val shooterPresetHigh = s { xbox.pov == 0 }
+    val presetAnitez = s { xbox.pov == 270 }
+    val presetClose = s { xbox.pov == 0 }
+    val presetMed = s { xbox.pov == 90 }
+    val presetFar = s { xbox.pov == 180 }
 
     val carouselBall0 = s { xbox.yButton }
     val centerTurret = s { xbox.xButton }

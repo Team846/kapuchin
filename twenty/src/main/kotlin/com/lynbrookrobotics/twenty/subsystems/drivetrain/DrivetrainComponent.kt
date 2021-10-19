@@ -45,6 +45,8 @@ class DrivetrainComponent(hardware: DrivetrainHardware) :
     override val bearingKp by bearingGainsNamed.pref(5, FootPerSecond, 45, Degree)
     override val bearingKd by bearingGainsNamed.pref(3, FootPerSecond, 360, DegreePerSecond)
 
+    val shootTolerance by pref(5, Percent) // max drivetrain output when shooting
+
     override val fallbackController: DrivetrainComponent.(Time) -> TwoSided<OffloadedOutput> = {
         TwoSided(PercentOutput(hardware.escConfig, 0.Percent))
     }

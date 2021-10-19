@@ -11,9 +11,9 @@ class FlywheelComponent(hardware: FlywheelHardware) :
     Component<FlywheelComponent, FlywheelHardware, OffloadedOutput>(hardware, Subsystems.shooterTicker) {
 
     val presetAnitez by pref(3000, Rpm)
-    val presetLow by pref(4500, Rpm)
+    val presetClose by pref(4500, Rpm)
     val presetMed by pref(5000, Rpm)
-    val presetHigh by pref(6000, Rpm)
+    val presetFar by pref(6000, Rpm)
 
     private val maxSpeed by pref(9632, Rpm)
 

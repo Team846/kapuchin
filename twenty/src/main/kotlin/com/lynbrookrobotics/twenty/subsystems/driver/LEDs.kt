@@ -11,8 +11,6 @@ import info.kunalsheth.units.math.*
 import java.awt.Color
 
 class LedComponent(hardware: LedHardware) : Component<LedComponent, LedHardware, Color>(hardware, EventLoop) {
-    val rainbowPeriod by pref(1, Second)
-
     val channels by pref {
         val red by pref("LEDChannelA")
         val green by pref("LEDChannelB")
@@ -28,7 +26,7 @@ class LedComponent(hardware: LedHardware) : Component<LedComponent, LedHardware,
 
     override val fallbackController: LedComponent.(Time) -> Color = {
         Color(Color.HSBtoRGB(
-            ((currentTime.Second / rainbowPeriod.Second % 1.0)).toFloat(),
+            ((currentTime.Second / 2.0 % 1.0)).toFloat(),
             1f, 1f
         )) // TODO change to off after testing
     }
