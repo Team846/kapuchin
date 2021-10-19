@@ -204,8 +204,7 @@ class Subsystems(
 
                 val driverAsync = async { DriverHardware() }
                 val operatorAsync = async { OperatorHardware() }
-                val rumbleAsync =
-                    async { RumbleComponent(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
+                val rumbleAsync = async { RumbleComponent(RumbleHardware(operatorAsync.await())) }
                 val ledsAsync = i(initLeds) { LedComponent(LedHardware()) }
 
                 val climberPivotAsync = i(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }

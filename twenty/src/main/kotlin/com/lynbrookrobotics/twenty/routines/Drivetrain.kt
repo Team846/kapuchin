@@ -17,7 +17,6 @@ suspend fun DrivetrainComponent.set(target: DutyCycle) = startRoutine("Set") {
 suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("Teleop") {
     val accelerator by driver.accelerator.readOnTick.withoutStamps
     val steering by driver.steering.readOnTick.withoutStamps
-    val absSteering by driver.absSteering.readOnTick.withoutStamps
 
     val stopDrivetrain by driver.stopDrivetrain.readOnTick.withoutStamps
 
@@ -28,7 +27,7 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
     val speedL by hardware.leftSpeed.readOnTick.withoutStamps
     val speedR by hardware.rightSpeed.readOnTick.withoutStamps
 
-    var startingAngle = -absSteering + position.y.bearing
+    var startingAngle = position.y.bearing
 
     var lastGc = 0.Second
 
@@ -50,20 +49,15 @@ suspend fun DrivetrainComponent.teleop(driver: DriverHardware) = startRoutine("T
             // https://www.desmos.com/calculator/qkczjursq7
             val cappedAccelerator = accelerator cap `±`(100.Percent - steering.abs)
 
-
             val forwardVelocity = maxSpeed * cappedAccelerator
             val steeringVelocity = maxSpeed * steering
 
-            if (!steering.isZero) startingAngle = -absSteering + position.y.bearing
+            if (!steering.isZero) startingAngle = position.y.bearing
 
-            val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, absSteering + startingAngle)
+            val (target, _) = uni.speedTargetAngleTarget(forwardVelocity, startingAngle)
 
-            val nativeL = hardware.conversions.encoder.left.native(
-                target.left + steeringVelocity
-            )
-            val nativeR = hardware.conversions.encoder.right.native(
-                target.right - steeringVelocity
-            )
+            val nativeL = hardware.conversions.encoder.left.native(target.left + steeringVelocity)
+            val nativeR = hardware.conversions.encoder.right.native(target.right - steeringVelocity)
 
             TwoSided(
                 VelocityOutput(hardware.escConfig, velocityGains.left, nativeL),
