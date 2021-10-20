@@ -29,7 +29,6 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
     val extendSlowSpeed by pref(10, Percent)
     val retractSlowSpeed by pref(-10, Percent)
 
-
     private val chodeDelaySafety by pref(1, Second)
 
     override val fallbackController: ClimberWinchComponent.(Time) -> ClimberWinchOutput = { ClimberWinchOutput.Stopped }

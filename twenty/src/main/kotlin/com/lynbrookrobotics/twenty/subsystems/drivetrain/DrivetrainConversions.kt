@@ -14,13 +14,15 @@ class DrivetrainConversions(val hardware: DrivetrainHardware) : Named by Named("
     GenericDrivetrainConversions {
 
     override val trackLength by pref(2, Foot)
-    private val leftTrim by pref(1.0)
-    private val rightTrim by pref(1.0)
+
     private val wheelRadius by pref {
         val left by pref(3, Inch)
         val right by pref(3, Inch)
         ({ TwoSided(left, right) })
     }
+
+    private val leftTrim by pref(1.0)
+    private val rightTrim by pref(1.0)
 
     val encoder by pref {
         val motorGear by pref(18)

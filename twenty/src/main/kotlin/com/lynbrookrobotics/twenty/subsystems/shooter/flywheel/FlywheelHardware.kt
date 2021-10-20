@@ -11,6 +11,7 @@ import com.lynbrookrobotics.twenty.Subsystems
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
+import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -55,10 +56,9 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     }.with(graph("Speed", Rpm))
 
     init {
-        Subsystems.shooterTicker.runOnTick { time ->
-            setOf(speed).forEach {
-                it.optimizedRead(time, .5.Second)
-            }
+        Subsystems.fastUiTicker.runOnTick { time -> // TODO revert
+            speed.optimizedRead(time, Subsystems.fastUiTicker.period)
+            NetworkTableInstance.getDefault().flush()
         }
     }
 }

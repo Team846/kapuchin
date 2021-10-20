@@ -7,7 +7,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.Subsystems
 import edu.wpi.first.wpilibj.GenericHID.Hand
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
@@ -82,9 +82,9 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     }.with(graph("Turret Precsion Manual", Percent))
 
     init {
-        EventLoop.runOnTick { time ->
+        Subsystems.uiTicker.runOnTick { time ->
             setOf(turretManual, turretPrecisionManual).forEach {
-                it.optimizedRead(time, 0.1.Second)
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

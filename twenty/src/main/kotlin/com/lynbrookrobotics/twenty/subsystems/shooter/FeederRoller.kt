@@ -19,7 +19,6 @@ class FeederRollerComponent(hardware: FeederRollerHardware) :
 
     private val maxSpeed by pref(11000, Rpm)
     val feedSpeed by pref(2500, Rpm)
-    val tolerance by pref(10, Rpm)
 
     val velocityGains by pref {
         val kP by pref(10, Volt, 100, Rpm)
@@ -80,9 +79,9 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
     )
 
     init {
-        Subsystems.shooterTicker.runOnTick { time ->
+        Subsystems.uiTicker.runOnTick { time ->
             setOf(speed).forEach {
-                it.optimizedRead(time, .5.Second)
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

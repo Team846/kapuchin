@@ -67,9 +67,9 @@ class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
     }
 
     init {
-        Subsystems.uiBaselineTicker.runOnTick { time ->
+        Subsystems.uiTicker.runOnTick { time ->
             setOf(atZero, position).forEach {
-                it.optimizedRead(time, .5.Second)
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

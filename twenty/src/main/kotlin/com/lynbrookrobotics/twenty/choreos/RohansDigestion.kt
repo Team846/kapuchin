@@ -120,7 +120,7 @@ suspend fun Subsystems.digestionTest() = startChoreo("Digestion Test") {
 }
 
 suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
-    val proximity by carousel.hardware.proximity.readEagerly().withoutStamps
+    val isBall by carousel.hardware.isBall.readEagerly().withoutStamps
 
     choreography {
         while (isActive) {
@@ -142,7 +142,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
 
-                delayUntil { proximity in carousel.hardware.conversions.ballIrRange }
+                delayUntil { isBall }
                 carousel.state.push()
             }
         }

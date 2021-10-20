@@ -5,6 +5,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
+import com.lynbrookrobotics.twenty.Subsystems
 import info.kunalsheth.units.generated.*
 
 class CarouselComponent(hardware: CarouselHardware) :
@@ -33,18 +34,17 @@ class CarouselComponent(hardware: CarouselHardware) :
         PercentOutput(hardware.escConfig, 0.Percent)
     }
 
-    private val isBallGraph = graph("isBall", Each)
     private val ammoGraph = graph("ammo", Each)
 
     override fun CarouselHardware.output(value: OffloadedOutput) {
         value.writeTo(esc, pidController)
 
         ammoGraph(currentTime, state.balls.Each)
+    }
 
-        with(hardware) {
-            val isBall = (proximity.optimizedRead(currentTime,
-                syncThreshold).y in conversions.ballIrRange)
-            isBallGraph(currentTime, isBall.let { if (it) 1.Each else 0.Each })
+    init {
+        Subsystems.uiTicker.runOnTick { time ->
+            ammoGraph(time, state.balls.Each)
         }
     }
 }

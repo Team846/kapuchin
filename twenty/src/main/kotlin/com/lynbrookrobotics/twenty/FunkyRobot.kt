@@ -28,11 +28,6 @@ class FunkyRobot : RobotBase() {
         AutoPrefs
 
         println("Initializing hardware...")
-        NetworkTableInstance.getDefault().setUpdateRate(0.01)
-//        CameraServer.getInstance().startAutomaticCapture().also {
-//            it.setResolution(240, 240)
-//            it.setFPS(30)
-//        }
         Compressor()
         Subsystems.concurrentInit()
         val subsystems = Subsystems.instance!!

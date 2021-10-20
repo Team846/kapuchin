@@ -12,7 +12,6 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import com.revrobotics.ColorSensorV3
-import com.revrobotics.ColorSensorV3.*
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.I2C.Port
 import info.kunalsheth.units.generated.*
@@ -85,13 +84,16 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         it.red != 0 && it.green != 0 && it.blue != 0
     }
 
-    val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
+    private val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
         .with(graph("IR", Percent))
 
+    val isBall = sensor { (proximity.optimizedRead(it, syncThreshold).y in conversions.ballIrRange) stampWith it }
+        .with(graph("Is Ball", Each)) { (if (it) 1 else 0).Each }
+
     init {
-        Subsystems.uiBaselineTicker.runOnTick { time ->
-            setOf(alignedToSlot, position, proximity).forEach {
-                it.optimizedRead(time, .5.Second)
+        Subsystems.uiTicker.runOnTick { time ->
+            setOf(alignedToSlot, position, isBall).forEach {
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

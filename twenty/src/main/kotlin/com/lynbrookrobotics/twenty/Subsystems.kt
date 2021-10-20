@@ -133,7 +133,7 @@ class Subsystems(
     }
 
     init {
-        uiBaselineTicker.runOnTick { time ->
+        uiTicker.runOnTick { time ->
             autoIdGraph(time, autoId.Each)
         }
     }
@@ -177,7 +177,8 @@ class Subsystems(
 
         val pneumaticTicker = ticker(Low, 50.milli(Second), "Pneumatic System Ticker")
         val shooterTicker = ticker(Highest, 30.milli(Second), "Shooter System Ticker")
-        val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
+        val uiTicker = ticker(Lowest, 500.milli(Second), "UI Ticker")
+        val fastUiTicker = ticker(Medium, 10.milli(Second), "Fast UI Ticker")
 
         val sharedTickerTiming
             get() = ReadOnlyProperty<SubsystemHardware<*, *>, Time> { thisRef, _ ->

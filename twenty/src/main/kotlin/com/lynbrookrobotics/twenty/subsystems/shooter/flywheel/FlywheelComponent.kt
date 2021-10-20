@@ -21,12 +21,10 @@ class FlywheelComponent(hardware: FlywheelHardware) :
 
     val velocityGains by pref {
         val kP by pref(10, Volt, 100, Rpm)
-        val kD by pref(0, Volt, 100, RpmPerSecond)
         val kF by pref(110, Percent)
         ({
             OffloadedEscGains(
                 kP = hardware.conversions.encoder.native(kP),
-                kD = hardware.conversions.encoder.native(kD),
                 kF = hardware.conversions.encoder.native(
                     Gain(hardware.escConfig.voltageCompSaturation, maxSpeed)
                 ) * kF.Each

@@ -70,9 +70,9 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val carouselRight = s { stick.pov in (90 - 45)..(90 + 45) }
 
     init {
-        Subsystems.uiBaselineTicker.runOnTick { time ->
+        Subsystems.uiTicker.runOnTick { time ->
             setOf(accelerator, steering).forEach {
-                it.optimizedRead(time, .5.Second)
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

@@ -11,7 +11,7 @@ import info.kunalsheth.units.math.*
 enum class FlashlightState(val output: Boolean) { Off(false), On(true) }
 
 class FlashlightComponent(hardware: FlashlightHardware) :
-    Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, Subsystems.uiBaselineTicker) {
+    Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, Subsystems.uiTicker) {
 
     override val fallbackController: FlashlightComponent.(Time) -> FlashlightState = { FlashlightState.Off }
 

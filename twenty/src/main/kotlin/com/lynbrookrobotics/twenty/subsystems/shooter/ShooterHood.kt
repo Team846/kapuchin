@@ -11,7 +11,7 @@ import info.kunalsheth.units.math.*
 enum class ShooterHoodState(val output: Boolean) { Up(true), Down(false) }
 
 class ShooterHoodComponent(hardware: ShooterHoodHardware) :
-    Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, Subsystems.shooterTicker) {
+    Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, Subsystems.pneumaticTicker) {
 
     override val fallbackController: ShooterHoodComponent.(Time) -> ShooterHoodState = { ShooterHoodState.Down }
 
