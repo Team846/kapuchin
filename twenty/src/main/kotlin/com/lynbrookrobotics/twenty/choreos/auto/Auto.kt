@@ -161,7 +161,7 @@ private suspend fun Subsystems.autoFire(speed: AngularVelocity) {
 
             delay(1.Second)
 
-            withTimeout(AutoPrefs.shootTime) { carousel.set(carousel.shootAllSpeed) }
+            withTimeout(AutoPrefs.shootTime) { carousel.set(carousel.shootFastSpeed) }
             j1.cancel()
             j2.cancel()
             j3.cancel()

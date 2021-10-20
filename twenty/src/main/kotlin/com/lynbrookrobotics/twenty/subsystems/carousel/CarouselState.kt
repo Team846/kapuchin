@@ -25,6 +25,8 @@ class CarouselState(component: Named) : Named by Named("State", component) {
 
     suspend fun push(count: Int = 1) = mutex.withLock { balls += count }
 
+    suspend fun pop() = mutex.withLock { balls-- }
+
     suspend fun clear() = mutex.withLock { balls = 0 }
 
     override fun toString() = "CarouselState($balls/$maxBalls)"

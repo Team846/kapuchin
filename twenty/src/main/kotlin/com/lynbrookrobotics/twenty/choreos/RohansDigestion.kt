@@ -23,8 +23,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val pukeBallsIntakeOut by driver.pukeBallsIntakeOut.readEagerly().withoutStamps
 
     val aim by operator.aim.readEagerly().withoutStamps
-    val shootAll by operator.shootAll.readEagerly().withoutStamps
-    val shootOne by operator.shootOne.readEagerly().withoutStamps
+    val shootFast by operator.shootFast.readEagerly().withoutStamps
+    val shootSlow by operator.shootSlow.readEagerly().withoutStamps
 
     val presetAnitez by operator.presetAnitez.readEagerly().withoutStamps
     val presetClose by operator.presetClose.readEagerly().withoutStamps
@@ -54,13 +54,8 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
             { aim && !shift } to { visionTrackTarget() },
             { aim && shift } to { flashlight?.set(FlashlightState.On) },
-            { shootAll } to { shootAll() },
-            { shootOne } to {
-                withTimeout(carousel.shootOnePeriod) {
-                    carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot,
-                        0.Degree)
-                }
-            },
+            { shootFast } to { shootAll(carousel.shootFastSpeed) },
+            { shootSlow } to { shootAll(carousel.shootSlowSpeed) },
 
             { presetAnitez } to { flywheel?.let { spinUpShooter(it.presetAnitez) } ?: freeze() },
             { presetClose } to { flywheel?.let { spinUpShooter(it.presetClose) } ?: freeze() },
@@ -194,12 +189,18 @@ suspend fun Subsystems.visionTrackTarget() = startChoreo("Vision Aim Turret") {
     }
 }
 
-suspend fun Subsystems.shootAll() = startChoreo("Shoot All") {
+suspend fun Subsystems.shootAll(speed: DutyCycle) = startChoreo("Shoot All") {
     choreography {
+        val j = launch { shooterHood?.set(ShooterHoodState.Up) }
         try {
-            carousel.set(carousel.shootAllSpeed)
+            delay(0.3.Second)
+            carousel.set(speed)
         } finally {
             withContext(NonCancellable) {
+                launch {
+                    delay(0.3.Second)
+                    j.cancel()
+                }
                 carousel.state.clear()
                 carousel.rezero()
                 carousel.hardware.encoder.position = 0.0
@@ -221,7 +222,6 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
 
         choreography {
             launch { feederRoller.set(0.Rpm) }
-            launch { shooterHood?.set(ShooterHoodState.Up) }
 
             carousel.rezero()
             carousel.set(carousel.state.shootInitialAngle() ?: carousel.hardware.nearestSlot())
