@@ -79,8 +79,14 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 turret?.manualPrecisionOverride(operator) ?: freeze()
             },
 
-            { carouselLeft } to { carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot, 0.Degree) },
-            { carouselRight } to { carousel.set(carousel.hardware.nearestSlot() - 1.CarouselSlot, 0.Degree) }
+            { carouselLeft && !eatBalls } to {
+                carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot,
+                    0.Degree)
+            },
+            { carouselRight && !eatBalls } to {
+                carousel.set(carousel.hardware.nearestSlot() - 1.CarouselSlot,
+                    0.Degree)
+            }
         )
     }
 }
@@ -121,6 +127,8 @@ suspend fun Subsystems.digestionTest() = startChoreo("Digestion Test") {
 
 suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
     val isBall by carousel.hardware.isBall.readEagerly().withoutStamps
+    val carouselLeft by driver.carouselLeft.readEagerly().withoutStamps
+    val carouselRight by driver.carouselRight.readEagerly().withoutStamps
 
     choreography {
         while (isActive) {
@@ -142,7 +150,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
 
-                delayUntil { isBall }
+                delayUntil { isBall && carouselLeft && carouselRight }
                 carousel.state.push()
             }
         }
