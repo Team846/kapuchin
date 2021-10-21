@@ -235,13 +235,12 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
             } to {
                 var flywheelSetpoint = flywheelPreset
 
-                println("ASDF${reading}\t${pitch}\t${
-                    limelight.hardware.pipeline.optimizedRead(currentTime,
-                        0.Second).y
-                }FDSA")
-
                 if (!shift) {
                     reading?.let { reading ->
+                        val distance = limelight.hardware.conversions.distanceToGoal(reading, pitch)
+                        val log = listOf(distance.Foot, reading.ty.Degree, pitch.Degree, reading.pipeline?.number ?: -1)
+                        println("SHOOTING ${log.joinToString()}")
+
                         val target = 0.Rpm // TODO vision stuff
 
                         if ((target - flywheelPreset).abs > 1000.Rpm) {
