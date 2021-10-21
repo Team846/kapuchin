@@ -42,7 +42,9 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val carouselRight by driver.carouselRight.readEagerly().withoutStamps
 
     choreography {
-        withTimeout(2.Second) { carousel.rezero() }
+        if (!carousel.hardware.isZeroed) {
+            withTimeout(2.Second) { carousel.rezero() }
+        }
 
         runWhenever(
             { eatBalls } to { intakeBalls() },
