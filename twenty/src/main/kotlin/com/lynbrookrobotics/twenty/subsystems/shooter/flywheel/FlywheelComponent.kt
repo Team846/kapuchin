@@ -16,7 +16,9 @@ class FlywheelComponent(hardware: FlywheelHardware) :
     val presetHigh by pref(6000, Rpm)
 
     private val maxSpeed by pref(9632, Rpm)
-
+    val coefA by pref (10)
+    val coeffB by pref (10)
+    val coeffC by pref (10)
     val tolerance by pref(10, Rpm)
 
     val velocityGains by pref {

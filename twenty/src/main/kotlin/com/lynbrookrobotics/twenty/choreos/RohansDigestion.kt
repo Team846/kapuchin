@@ -13,6 +13,7 @@ import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
 import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
+import com.lynbrookrobotics.twenty.subsystems.shooter.flywheel.interpolatedRPMCalc
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
 import java.io.FileWriter
@@ -313,10 +314,10 @@ suspend fun Subsystems.interpolatedRPM() = startChoreo("Distance Based RPM") {
 
     choreography {
         reading?.let { snapshot ->
-            val distance = limelight.hardware.conversions.distanceToGoal(snapshot,
+            val distance: L = limelight.hardware.conversions.distanceToGoal(snapshot,
                 pitch)
-            val RPM = 40 * distance.squared + 40 * distance + 1000
-            spinUpShooter(RPM)
+            val targetRPM = flywheel?.interpolatedRPMCalc(distance)
+            spinUpShooter(targetRPM)
         }
     }
 }
