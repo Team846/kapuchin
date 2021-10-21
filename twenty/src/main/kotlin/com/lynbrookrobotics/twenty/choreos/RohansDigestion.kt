@@ -22,6 +22,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val pukeBallsIntakeIn by driver.pukeBallsIntakeIn.readEagerly().withoutStamps
     val pukeBallsIntakeOut by driver.pukeBallsIntakeOut.readEagerly().withoutStamps
 
+    val centerTurret by operator.centerTurret.readEagerly().withoutStamps
     val aim by operator.aim.readEagerly().withoutStamps
     val shootFast by operator.shootFast.readEagerly().withoutStamps
     val shootSlow by operator.shootSlow.readEagerly().withoutStamps
@@ -31,13 +32,10 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val presetMed by operator.presetMed.readEagerly().withoutStamps
     val presetFar by operator.presetFar.readEagerly().withoutStamps
 
-    val driverCarouselBall0 by driver.carouselBall0.readEagerly().withoutStamps
-    val operatorCarouselBall0 by operator.carouselBall0.readEagerly().withoutStamps
-    val centerTurret by operator.centerTurret.readEagerly().withoutStamps
-
     val turretManual by operator.turretManual.readEagerly().withoutStamps
     val turretPrecisionManual by operator.turretPrecisionManual.readEagerly().withoutStamps
 
+    val carouselBall0 by driver.carouselBall0.readEagerly().withoutStamps
     val carouselLeft by driver.carouselLeft.readEagerly().withoutStamps
     val carouselRight by driver.carouselRight.readEagerly().withoutStamps
 
@@ -54,6 +52,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 intakeRollers?.set(-100.Percent) ?: freeze()
             },
 
+            { centerTurret } to { turret?.set(0.Degree) ?: freeze() },
             { aim && !shift } to { visionTrackTarget() },
             { aim && shift } to { flashlight?.set(FlashlightState.On) },
             { shootFast } to { shootAll(carousel.shootFastSpeed) },
@@ -64,9 +63,6 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { presetMed } to { flywheel?.let { spinUpShooter(it.presetMed) } ?: freeze() },
             { presetFar } to { flywheel?.let { spinUpShooter(it.presetFar) } ?: freeze() },
 
-            { driverCarouselBall0 || operatorCarouselBall0 } to { carousel.state.clear() },
-            { centerTurret } to { turret?.set(0.Degree) ?: freeze() },
-
             { !turretManual.isZero && turretPrecisionManual.isZero } to {
                 scope.launch { withTimeout(3.Second) { flashlight?.set(FlashlightState.On) } }
                 turret?.manualOverride(operator) ?: freeze()
@@ -76,6 +72,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                 turret?.manualPrecisionOverride(operator) ?: freeze()
             },
 
+            { carouselBall0 } to { carousel.state.clear() },
             { carouselLeft && !eatBalls } to {
                 carousel.set(carousel.hardware.nearestSlot() + 1.CarouselSlot,
                     0.Degree)

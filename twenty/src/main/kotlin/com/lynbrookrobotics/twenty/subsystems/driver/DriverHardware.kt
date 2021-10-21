@@ -60,12 +60,12 @@ class DriverHardware : RobotHardware<DriverHardware>() {
         .with(graph("Steering", Percent))
 
     val stopDrivetrain = s { stick[ThrustmasterButtons.LeftTrigger] }
-    val carouselBall0 = s { stick[ThrustmasterButtons.RightTrigger] }
 
     val eatBalls = s { stick[ThrustmasterButtons.Trigger] && !stick[ThrustmasterButtons.BottomTrigger] }
     val pukeBallsIntakeIn = s { stick[ThrustmasterButtons.BottomTrigger] && !stick[ThrustmasterButtons.Trigger] }
     val pukeBallsIntakeOut = s { stick[ThrustmasterButtons.BottomTrigger] && stick[ThrustmasterButtons.Trigger] }
 
+    val carouselBall0 = s { stick[ThrustmasterButtons.RightTrigger] }
     val carouselLeft = s { stick.pov in (270 - 45)..(270 + 45) }
     val carouselRight = s { stick.pov in (90 - 45)..(90 + 45) }
 

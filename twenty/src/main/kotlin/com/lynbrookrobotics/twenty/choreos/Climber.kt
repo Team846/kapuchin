@@ -12,10 +12,9 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
     val shift by operator.shift.readEagerly().withoutStamps
 
     val toggleClimberArms by operator.toggleClimberArms.readEagerly().withoutStamps
+    val setClimberLimit by operator.setClimberLimit.readEagerly().withoutStamps
     val chaChaRealSmooth by operator.chaChaRealSmooth.readEagerly().withoutStamps
     val takeItBackNowYall by operator.takeItBackNowYall.readEagerly().withoutStamps
-
-    val setClimberLimit by operator.setClimberLimit.readEagerly().withoutStamps
 
     var climberArms =
         if (climberPivot?.hardware?.pivotSolenoid?.get() == ClimberPivotState.Up.output) ClimberPivotState.Up else ClimberPivotState.Down

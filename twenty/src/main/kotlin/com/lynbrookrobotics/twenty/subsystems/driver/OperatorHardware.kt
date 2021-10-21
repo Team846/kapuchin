@@ -56,22 +56,20 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val shift = s { lb }
 
-    val toggleClimberArms = s { rb }
+    val toggleClimberArms = s { xbox.bButton }
+    val setClimberLimit = s { xbox.aButton }
     val chaChaRealSmooth = s { xbox.backButton && !xbox.startButton }
     val takeItBackNowYall = s { xbox.backButton && xbox.startButton }
 
+    val centerTurret = s { xbox.xButton }
     val aim = s { lt }
     val shootFast = s { rt }
-    val shootSlow = s { rb }
+    val shootSlow = s { xbox.yButton }
 
     val presetAnitez = s { xbox.pov == 270 }
     val presetClose = s { xbox.pov == 0 }
     val presetMed = s { xbox.pov == 90 }
     val presetFar = s { xbox.pov == 180 }
-
-    val carouselBall0 = s { xbox.yButton }
-    val centerTurret = s { xbox.xButton }
-    val setClimberLimit = s { xbox.aButton }
 
     val turretManual = s {
         turretMapping(getX(Hand.kLeft).Each)
