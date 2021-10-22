@@ -12,6 +12,7 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import com.revrobotics.ColorSensorV3
+import com.revrobotics.ColorSensorV3.*
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.I2C.Port
 import info.kunalsheth.units.generated.*
