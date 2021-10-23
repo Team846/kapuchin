@@ -20,4 +20,17 @@ class FlywheelConversions(hardware: FlywheelHardware) : Named by Named("Conversi
             )
         })
     }
+
+    val rpmCurve by pref {
+        val a by pref(2.7)
+        val b by pref(-32.8)
+        val c by pref(5767)
+        ({
+            fun(dist: Length): AngularVelocity {
+                val d = dist.Foot
+                val rpm = a * d * d + b * d + c // quadratic
+                return rpm.Rpm
+            }
+        })
+    }
 }

@@ -244,13 +244,16 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
                     var flywheelSetpoint = flywheelPreset
 
                     if (!shift) {
-                        reading?.let { reading ->
-                            val distance = limelight.hardware.conversions.distanceToGoal(reading, pitch)
+                        val snapshot = reading?.copy()
+                        if (snapshot != null) {
+//                            val distance = limelight.hardware.conversions.distanceToGoal(snapshot, pitch)
+                            val distance = limelight.hardware.conversions.distanceToGoal(snapshot, 0.Degree)
+
                             val log =
-                                listOf(distance.Foot, reading.ty.Degree, pitch.Degree, reading.pipeline?.number ?: -1)
+                                listOf(distance.Foot, snapshot.ty.Degree, pitch.Degree, snapshot.pipeline?.number ?: -1)
                             println("SHOOTING ${log.joinToString()}")
 
-                            val target = 0.Rpm // TODO vision stuff
+                            val target = flywheel.hardware.conversions.rpmCurve(distance)
 
                             if ((target - flywheelPreset).abs > 1000.Rpm) {
                                 log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
@@ -258,11 +261,13 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
                                 flywheelSetpoint = target
                                 launch { flywheel.set(target) }
                             }
-                        } ?: log(Error) { "No target found" }
+                        } else {
+                            launch { leds?.set(Color.RED) }
+                            log(Error) { "Missing target" }
+                        }
                     }
 
                     runWhenever({ flywheelSpeed in flywheelSetpoint `±` flywheel.tolerance } to {
-                        launch { leds?.blink(Color.BLUE) }
                         rumble.set(100.Percent)
                     })
                 },
