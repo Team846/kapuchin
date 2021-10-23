@@ -21,7 +21,7 @@ class FlashlightComponent(hardware: FlashlightHardware) :
 }
 
 class FlashlightHardware : SubsystemHardware<FlashlightHardware, FlashlightComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.uiTicker.period
     override val syncThreshold = 50.milli(Second)
     override val priority = Priority.Low
     override val name = "Flashlight"

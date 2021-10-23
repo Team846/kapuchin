@@ -16,7 +16,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class TurretHardware : SubsystemHardware<TurretHardware, TurretComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.shooterTicker.period
     override val syncThreshold = 15.milli(Second)
     override val priority = Priority.High
     override val name = "Shooter Turret"

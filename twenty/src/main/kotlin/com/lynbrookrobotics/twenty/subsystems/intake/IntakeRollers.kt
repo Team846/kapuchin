@@ -25,7 +25,7 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) :
 }
 
 class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRollersComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.pneumaticTicker.period
     override val syncThreshold = 20.milli(Second)
     override val priority = Priority.Low
     override val name = "Intake Rollers"

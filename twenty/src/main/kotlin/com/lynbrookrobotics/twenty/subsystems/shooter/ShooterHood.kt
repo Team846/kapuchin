@@ -21,7 +21,7 @@ class ShooterHoodComponent(hardware: ShooterHoodHardware) :
 }
 
 class ShooterHoodHardware : SubsystemHardware<ShooterHoodHardware, ShooterHoodComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.pneumaticTicker.period
     override val syncThreshold = 15.milli(Second)
     override val priority = Priority.Low
     override val name = "Shooter Hood"

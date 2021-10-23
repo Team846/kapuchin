@@ -5,7 +5,7 @@ import com.lynbrookrobotics.twenty.Subsystems
 import info.kunalsheth.units.generated.*
 
 class LimelightComponent(hardware: LimelightHardware) :
-    Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware, Subsystems.pneumaticTicker) {
+    Component<LimelightComponent, LimelightHardware, Pipeline?>(hardware, Subsystems.shooterTicker) {
 
     override val fallbackController: LimelightComponent.(Time) -> Pipeline? = { Pipeline.ZoomOut }
 

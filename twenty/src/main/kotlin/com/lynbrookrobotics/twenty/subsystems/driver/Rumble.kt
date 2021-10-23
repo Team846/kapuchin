@@ -3,7 +3,6 @@ package com.lynbrookrobotics.twenty.subsystems.driver
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
-import com.lynbrookrobotics.twenty.Subsystems
 import edu.wpi.first.wpilibj.GenericHID.RumbleType
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
@@ -24,7 +23,7 @@ class RumbleComponent(hardware: RumbleHardware) :
 class RumbleHardware(
     val operator: OperatorHardware,
 ) : SubsystemHardware<RumbleHardware, RumbleComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = 20.milli(Second)
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
     override val name = "Rumble"

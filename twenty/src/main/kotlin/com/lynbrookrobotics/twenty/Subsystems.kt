@@ -5,7 +5,6 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
@@ -36,7 +35,6 @@ import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.io.File
 import kotlin.math.roundToInt
-import kotlin.properties.ReadOnlyProperty
 import kotlin.system.exitProcess
 
 class Subsystems(
@@ -178,13 +176,6 @@ class Subsystems(
         val pneumaticTicker = ticker(Low, 50.milli(Second), "Pneumatic System Ticker")
         val shooterTicker = ticker(Highest, 30.milli(Second), "Shooter System Ticker")
         val uiTicker = ticker(Lowest, 500.milli(Second), "UI Ticker")
-        val fastUiTicker = ticker(Medium, 10.milli(Second), "Fast UI Ticker")
-
-        val sharedTickerTiming
-            get() = ReadOnlyProperty<SubsystemHardware<*, *>, Time> { thisRef, _ ->
-                thisRef.log(Error) { "Subsystem should use shared ticker values!" }
-                20.milli(Second)
-            }
 
         fun concurrentInit() = scope.launch {
             supervisorScope {

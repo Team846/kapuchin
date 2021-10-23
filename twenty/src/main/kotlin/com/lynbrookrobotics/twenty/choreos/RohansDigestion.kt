@@ -13,6 +13,7 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
 import info.kunalsheth.units.generated.*
 import kotlinx.coroutines.*
+import java.awt.Color
 
 suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
 
@@ -128,6 +129,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
         while (isActive) {
             val angle = carousel.state.intakeAngle()
             if (angle == null) {
+                launch { leds?.blink(Color.RED) }
                 log(Warning) { "I'm full. No open slots in carousel magazine." }
 
                 launch { intakeSlider?.set(IntakeSliderState.In) }
@@ -138,13 +140,15 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 
                 carousel.set(angle)
                 launch { carousel.set(angle, 0.Degree) }
+                launch { leds?.blink(Color.BLUE) }
 
                 launch { intakeSlider?.set(IntakeSliderState.Out) }
                 launch { intakeRollers?.set(intakeRollers.eatSpeed) }
 
                 log(Debug) { "Waiting for a yummy mouthful of balls." }
 
-                delayUntil { isBall && carouselLeft && carouselRight }
+                delayUntil { isBall || carouselLeft || carouselRight }
+                launch { leds?.set(Color.RED) }
                 carousel.state.push()
             }
         }
@@ -191,6 +195,7 @@ suspend fun Subsystems.visionTrackTarget() = startChoreo("Vision Aim Turret") {
 suspend fun Subsystems.shootAll(speed: DutyCycle) = startChoreo("Shoot All") {
     choreography {
         val j = launch { shooterHood?.set(ShooterHoodState.Up) }
+        launch { leds?.set(Color.GREEN) }
         try {
             delay(0.3.Second)
             carousel.set(speed)
@@ -227,35 +232,42 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
 
             launch { feederRoller.set(feederRoller.feedSpeed) }
             launch { flywheel.set(flywheelPreset) }
+            launch { leds?.set(Color.BLUE) }
 
-            runWhenever({
-                with(drivetrain) {
-                    hardware.rightMasterEsc.motorOutputPercent < shootTolerance.Percent && hardware.leftMasterEsc.motorOutputPercent < shootTolerance.Percent
-                }
-            } to {
-                var flywheelSetpoint = flywheelPreset
+            fun isDrivetrainStill() = with(drivetrain) {
+                hardware.rightMasterEsc.motorOutputPercent < shootTolerance.Percent && hardware.leftMasterEsc.motorOutputPercent < shootTolerance.Percent
+            }
 
-                if (!shift) {
-                    reading?.let { reading ->
-                        val distance = limelight.hardware.conversions.distanceToGoal(reading, pitch)
-                        val log = listOf(distance.Foot, reading.ty.Degree, pitch.Degree, reading.pipeline?.number ?: -1)
-                        println("SHOOTING ${log.joinToString()}")
+            runWhenever(
+                { isDrivetrainStill() } to {
+                    launch { leds?.blink(Color.BLUE) }
+                    var flywheelSetpoint = flywheelPreset
 
-                        val target = 0.Rpm // TODO vision stuff
+                    if (!shift) {
+                        reading?.let { reading ->
+                            val distance = limelight.hardware.conversions.distanceToGoal(reading, pitch)
+                            val log =
+                                listOf(distance.Foot, reading.ty.Degree, pitch.Degree, reading.pipeline?.number ?: -1)
+                            println("SHOOTING ${log.joinToString()}")
 
-                        if ((target - flywheelPreset).abs > 1000.Rpm) {
-                            log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
-                        } else {
-                            flywheelSetpoint = target
-                            launch { flywheel.set(target) }
-                        }
-                    } ?: log(Error) { "No target found" }
-                }
+                            val target = 0.Rpm // TODO vision stuff
 
-                runWhenever({ flywheelSpeed in flywheelSetpoint `±` flywheel.tolerance } to {
-                    rumble.set(100.Percent)
-                })
-            })
+                            if ((target - flywheelPreset).abs > 1000.Rpm) {
+                                log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
+                            } else {
+                                flywheelSetpoint = target
+                                launch { flywheel.set(target) }
+                            }
+                        } ?: log(Error) { "No target found" }
+                    }
+
+                    runWhenever({ flywheelSpeed in flywheelSetpoint `±` flywheel.tolerance } to {
+                        launch { leds?.blink(Color.BLUE) }
+                        rumble.set(100.Percent)
+                    })
+                },
+                { !isDrivetrainStill() } to { leds?.set(Color.BLUE) }
+            )
         }
     }
 }

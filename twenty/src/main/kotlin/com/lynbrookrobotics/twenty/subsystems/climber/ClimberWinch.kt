@@ -66,7 +66,7 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 }
 
 class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinchComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.pneumaticTicker.period
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.Medium
     override val name = "Climber Winch"

@@ -11,12 +11,11 @@ import com.lynbrookrobotics.twenty.Subsystems
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMaxLowLevel.MotorType
-import edu.wpi.first.networktables.NetworkTableInstance
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.shooterTicker.period
     override val syncThreshold = 5.milli(Second)
     override val priority = Priority.High
     override val name = "Shooter Flywheel"
@@ -56,9 +55,8 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     }.with(graph("Speed", Rpm))
 
     init {
-        Subsystems.fastUiTicker.runOnTick { time -> // TODO revert
-            speed.optimizedRead(time, Subsystems.fastUiTicker.period)
-            NetworkTableInstance.getDefault().flush()
+        Subsystems.uiTicker.runOnTick { time ->
+            speed.optimizedRead(time, Subsystems.uiTicker.period)
         }
     }
 }

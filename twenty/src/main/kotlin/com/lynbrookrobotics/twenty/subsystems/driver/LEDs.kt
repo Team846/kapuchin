@@ -24,13 +24,7 @@ class LedComponent(hardware: LedHardware) : Component<LedComponent, LedHardware,
         })
     }
 
-    override val fallbackController: LedComponent.(Time) -> Color = {
-        Color(Color.HSBtoRGB(
-            ((currentTime.Second / 2.0 % 1.0)).toFloat(),
-            1f, 1f
-        )) // TODO change to off after testing
-    }
-
+    override val fallbackController: LedComponent.(Time) -> Color = { Color.BLACK }
 
     override fun LedHardware.output(value: Color) {
         channels(value)
