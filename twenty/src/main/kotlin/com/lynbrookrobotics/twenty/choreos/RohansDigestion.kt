@@ -134,6 +134,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
 
                 launch { intakeSlider?.set(IntakeSliderState.In) }
                 launch { intakeRollers?.set(0.Percent) }
+                freeze()
             } else {
                 launch { feederRoller?.set(0.Rpm) }
                 launch { intakeRollers?.set(0.Percent) }
@@ -249,20 +250,25 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
 //                            val distance = limelight.hardware.conversions.distanceToGoal(snapshot, pitch)
                             val distance = limelight.hardware.conversions.distanceToGoal(snapshot, 0.Degree)
 
-                            val log =
-                                listOf(distance.Foot, snapshot.ty.Degree, pitch.Degree, snapshot.pipeline?.number ?: -1)
-                            println("SHOOTING ${log.joinToString()}")
+                            println("SHOOTING ${
+                                listOf(distance.Foot,
+                                    snapshot.ty.Degree,
+                                    pitch.Degree,
+                                    snapshot.pipeline?.number ?: -1).joinToString()
+                            }")
 
                             val target = flywheel.hardware.conversions.rpmCurve(distance)
 
-                            if ((target - flywheelPreset).abs > 1000.Rpm) {
+                            println("TARGET: ${target.Rpm}")
+
+                            if ((target - flywheelPreset).abs > 2000.Rpm) {
                                 log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
                             } else {
                                 flywheelSetpoint = target
                                 launch { flywheel.set(target) }
                             }
                         } else {
-                            launch { leds?.set(Color.RED) }
+                            launch { leds?.blink(Color.RED) }
                             log(Error) { "Missing target" }
                         }
                     }

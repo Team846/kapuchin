@@ -64,7 +64,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val centerTurret = s { xbox.xButton }
     val aim = s { lt }
     val shootFast = s { rt }
-    val shootSlow = s { xbox.yButton }
+    val shootSlow = s { rb }
 
     val presetAnitez = s { xbox.pov == 270 }
     val presetClose = s { xbox.pov == 0 }
@@ -72,11 +72,11 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val presetFar = s { xbox.pov == 180 }
 
     val turretManual = s {
-        turretMapping(getX(Hand.kLeft).Each)
+        turretMapping(getX(Hand.kRight).Each)
     }.with(graph("Turret Manual", Percent))
 
     val turretPrecisionManual = s {
-        turretPrecisionMapping(getX(Hand.kRight).Each)
+        turretPrecisionMapping(getX(Hand.kLeft).Each)
     }.with(graph("Turret Precsion Manual", Percent))
 
     init {
