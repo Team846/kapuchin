@@ -137,7 +137,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
                 freeze()
             } else {
                 launch { feederRoller?.set(0.Rpm) }
-                launch { intakeRollers?.set(0.Percent) }
+                launch { intakeRollers?.set(intakeRollers.pauseSpeed) }
 
                 carousel.set(angle)
                 launch { carousel.set(angle, 0.Degree) }
@@ -222,7 +222,7 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
-        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
+//        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
         val shift by operator.shift.readEagerly().withoutStamps
 
         choreography {
@@ -232,34 +232,34 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
             carousel.set(carousel.state.shootInitialAngle() ?: carousel.hardware.nearestSlot())
 
             launch { feederRoller.set(feederRoller.feedSpeed) }
+            launch { leds?.blink(Color.BLUE) }
+
+            var flywheelSetpoint = flywheelPreset
+
             launch { flywheel.set(flywheelPreset) }
-            launch { leds?.set(Color.BLUE) }
-
-            fun isDrivetrainStill() = with(drivetrain) {
-                hardware.rightMasterEsc.motorOutputPercent < shootTolerance.Percent && hardware.leftMasterEsc.motorOutputPercent < shootTolerance.Percent
-            }
-
-            runWhenever(
-                { isDrivetrainStill() } to {
-                    launch { leds?.blink(Color.BLUE) }
-                    var flywheelSetpoint = flywheelPreset
-
+            launch {
+                while (isActive) {
                     if (!shift) {
                         val snapshot = reading?.copy()
                         if (snapshot != null) {
 //                            val distance = limelight.hardware.conversions.distanceToGoal(snapshot, pitch)
-                            val distance = limelight.hardware.conversions.distanceToGoal(snapshot, 0.Degree)
+                            var distance = limelight.hardware.conversions.distanceToGoal(snapshot, 0.Degree)
 
-                            println("SHOOTING ${
-                                listOf(distance.Foot,
-                                    snapshot.ty.Degree,
-                                    pitch.Degree,
-                                    snapshot.pipeline?.number ?: -1).joinToString()
-                            }")
+                            if (distance > flywheel.innerPortDistanceThreshold) {
+                                log(Debug) { "Distance: ${distance.Foot} ft, aiming for outer"}
+                                val delta = 0.Foot // TODO sid
+                                distance -= delta
+                            }
+                            // TODO sid
+                            // if skew > tolerance, aim for outer
+//                            println("SHOOTING ${
+//                                listOf(distance.Foot,
+//                                    snapshot.ty.Degree,
+//                                    pitch.Degree,
+//                                    snapshot.pipeline?.number ?: -1).joinToString()
+//                            }")
 
                             val target = flywheel.hardware.conversions.rpmCurve(distance)
-
-                            println("TARGET: ${target.Rpm}")
 
                             if ((target - flywheelPreset).abs > 2000.Rpm) {
                                 log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
@@ -267,18 +267,15 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
                                 flywheelSetpoint = target
                                 launch { flywheel.set(target) }
                             }
-                        } else {
-                            launch { leds?.blink(Color.RED) }
-                            log(Error) { "Missing target" }
                         }
                     }
+                }
+            }
 
-                    runWhenever({ flywheelSpeed in flywheelSetpoint `±` flywheel.tolerance } to {
-                        rumble.set(100.Percent)
-                    })
-                },
-                { !isDrivetrainStill() } to { leds?.set(Color.BLUE) }
-            )
+            runWhenever({ flywheelSpeed in flywheelSetpoint `±` flywheel.tolerance } to {
+                launch { leds?.set(Color.GREEN) }
+                rumble.set(100.Percent)
+            })
         }
     }
 }

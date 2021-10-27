@@ -14,6 +14,7 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) :
     Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, Subsystems.pneumaticTicker) {
 
     val eatSpeed by pref(100, Percent)
+    val pauseSpeed by pref(-10, Percent)
 
     override val fallbackController: IntakeRollersComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)

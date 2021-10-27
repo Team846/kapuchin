@@ -65,6 +65,8 @@ suspend fun TurretComponent.trackTarget(drivetrain: DrivetrainComponent, limelig
         var lastAngle: Angle? = null
 
         controller {
+            // TODO sid
+            // aim for inner if within skew tolerance
             reading?.let { snapshot ->
                 val target = turretPosition - snapshot.tx + limelight.hardware.conversions.mountingBearing
                 lastAngle = drivetrainPosition.bearing `coterminal +` target
