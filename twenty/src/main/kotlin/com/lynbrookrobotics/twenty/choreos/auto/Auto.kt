@@ -153,6 +153,7 @@ suspend fun Subsystems.autoFire() {
         var target = 0.Rpm
 
         choreography {
+            if(reading == null) return@choreography
             launch { feederRoller.set(0.Rpm) }
 
             carousel.rezero()
@@ -176,7 +177,7 @@ suspend fun Subsystems.autoFire() {
             launch { leds?.set(Color.GREEN) }
             delay(0.3.Second)
 
-            withTimeout(shootTime) { carousel.set(carousel.shootFastSpeed) }
+            withTimeout(shootTime) { carousel.set(carousel.shootSlowSpeed) }
 
             launch {
                 delay(0.3.Second)
