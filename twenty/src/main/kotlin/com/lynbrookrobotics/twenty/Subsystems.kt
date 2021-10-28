@@ -10,8 +10,7 @@ import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.choreos.*
 import com.lynbrookrobotics.twenty.choreos.auto.*
-import com.lynbrookrobotics.twenty.routines.autoZoom
-import com.lynbrookrobotics.twenty.routines.teleop
+import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselHardware
@@ -62,37 +61,25 @@ class Subsystems(
 
     private val autos = listOf(
         ::autoGetOffLine,
-        ::autoShootGetOffLine,
-        ::autoL1ShootGetOffLine,
-        ::autoL2ShootGetOffLine,
-        ::autoL1ShootI1IntakeS1Shoot,
-        ::autoL2ShootI1IntakeS1Shoot,
+        ::auto3Ball,
+        ::auto6Ball,
     )
 
-    private val autoIdGraph = graph("Auto ID", Each)
-
-    private var prevAutoId = -1
-    private val autoId
-        get() = SmartDashboard.getEntry("DB/Slider 0").getDouble(-1.0).roundToInt().also {
-            if (it != prevAutoId) {
-                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
-                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
-                prevAutoId = it
-            }
-        }
+    private val autoId by pref(0)
 
     val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
     val journalReverse by pref(false)
 
     suspend fun auto() = coroutineScope {
+        launch {
+            turret?.trackTarget(drivetrain, limelight)
+        }
+        delay(AutoPrefs.initialDelay)
+
         when (autoId) {
-            -1 -> {
-                log(Warning) { "DB Slider 0 is set to -1, getting off the line`" }
-                autoGetOffLine()
-            }
             !in autos.indices -> {
                 log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
-                autoShootGetOffLine()
+                autoGetOffLine()
             }
             else -> autos[autoId].invoke()
         }
@@ -128,12 +115,6 @@ class Subsystems(
                 }
             }
         )
-    }
-
-    init {
-        uiTicker.runOnTick { time ->
-            autoIdGraph(time, autoId.Each)
-        }
     }
 
     companion object : Named by Named("Subsystems") {
