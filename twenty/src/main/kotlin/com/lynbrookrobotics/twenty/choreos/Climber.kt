@@ -22,10 +22,10 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
     choreography {
         runWhenever(
             { climberArms == ClimberPivotState.Down } to { climberPivot?.set(ClimberPivotState.Down) },
-            { chaChaRealSmooth && !shift } to { climberWinch?.set(climberWinch.extendSpeed) },
-            { chaChaRealSmooth && shift } to { climberWinch?.set(climberWinch.extendSlowSpeed, ignoreLimit = true) },
-            { takeItBackNowYall && !shift } to { climberWinch?.set(climberWinch.retractSpeed) },
-            { takeItBackNowYall && shift } to { climberWinch?.set(climberWinch.retractSlowSpeed, ignoreLimit = true) },
+            { chaChaRealSmooth && shift } to { climberWinch?.set(climberWinch.extendSpeed) },
+            { chaChaRealSmooth && !shift } to { climberWinch?.set(climberWinch.extendSlowSpeed, ignoreLimit = true) },
+            { takeItBackNowYall && shift } to { climberWinch?.set(climberWinch.retractSpeed) },
+            { takeItBackNowYall && !shift } to { climberWinch?.set(climberWinch.retractSlowSpeed, ignoreLimit = true) },
 
             { toggleClimberArms } to {
                 delay(1.Second) // prevent accidental taps

@@ -69,6 +69,9 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val carouselLeft = s { stick.pov in (270 - 45)..(270 + 45) }
     val carouselRight = s { stick.pov in (90 - 45)..(90 + 45) }
 
+    val increaseFlywheelSpeed = s { stick[ThrustmasterButtons.RightTwo] }
+    val decreaseFlywheelSpeed = s { stick[ThrustmasterButtons.RightThree] }
+
     init {
         Subsystems.uiTicker.runOnTick { time ->
             setOf(accelerator, steering).forEach {

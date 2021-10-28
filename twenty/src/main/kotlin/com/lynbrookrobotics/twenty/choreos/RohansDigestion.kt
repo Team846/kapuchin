@@ -8,6 +8,7 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
+import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotState
 import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
 import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
@@ -39,6 +40,9 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val carouselBall0 by driver.carouselBall0.readEagerly().withoutStamps
     val carouselLeft by driver.carouselLeft.readEagerly().withoutStamps
     val carouselRight by driver.carouselRight.readEagerly().withoutStamps
+
+    val increaseFlywheelSpeed by driver.increaseFlywheelSpeed.readEagerly().withoutStamps
+    val decreaseFlywheelSpeed by driver.decreaseFlywheelSpeed.readEagerly().withoutStamps
 
     choreography {
         if (!carousel.hardware.isZeroed) {
@@ -81,6 +85,13 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             { carouselRight && !eatBalls } to {
                 carousel.set(carousel.hardware.nearestSlot() - 1.CarouselSlot,
                     0.Degree)
+            },
+
+            {  increaseFlywheelSpeed } to {
+                flywheel?.changeFlywheelSpeed(true) ?: freeze()
+            },
+            { decreaseFlywheelSpeed } to {
+                flywheel?.changeFlywheelSpeed(false) ?: freeze()
             }
         )
     }
@@ -265,7 +276,7 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
                                 log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
                             } else {
                                 flywheelSetpoint = target
-                                launch { flywheel.set(target) }
+                                launch { flywheel.set(target*flywheel.rpmPercentage) }
                             }
                         } else {
                             launch { leds?.blink(Color.RED) }
