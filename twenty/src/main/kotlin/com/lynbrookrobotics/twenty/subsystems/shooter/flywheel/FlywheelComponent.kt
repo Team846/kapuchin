@@ -16,7 +16,7 @@ class FlywheelComponent(hardware: FlywheelHardware) :
     val presetClose by pref(4500, Rpm)
     val presetMed by pref(5000, Rpm)
     val presetFar by pref(6000, Rpm)
-    private val fudgeFactor by pref (2, Percent)
+    private val fudgeFactor by pref(2, Percent)
 
     var rpmPercentage = 100.Percent
         private set
@@ -37,14 +37,17 @@ class FlywheelComponent(hardware: FlywheelHardware) :
         })
     }
 
-    suspend fun changeFlywheelSpeed(increment: Boolean) {
+    fun changeFlywheelSpeed(increment: Boolean) {
         val value = if (increment) fudgeFactor else -fudgeFactor
         rpmPercentage += value
         if (rpmPercentage < 0.Percent) rpmPercentage = 0.Percent
     }
+
     private val idleOutput by pref(50, Percent)
 
     private val rpmPercentageOfGraph = graph("rpmPercentageOf", Each)
+    val innerPortDistanceThreshold by pref(20, Foot)
+    val innerOuterDelta by pref(29.25, Inch)
 
     override val fallbackController: FlywheelComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, idleOutput)
@@ -61,6 +64,3 @@ class FlywheelComponent(hardware: FlywheelHardware) :
         }
     }
 }
-
-
-

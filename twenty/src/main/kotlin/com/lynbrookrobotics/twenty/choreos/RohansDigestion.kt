@@ -10,9 +10,9 @@ import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
 import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotState
 import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
-import com.lynbrookrobotics.twenty.subsystems.shooter.FlashlightState
-import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
+import com.lynbrookrobotics.twenty.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.awt.Color
 
@@ -148,7 +148,7 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
                 freeze()
             } else {
                 launch { feederRoller?.set(0.Rpm) }
-                launch { intakeRollers?.set(0.Percent) }
+                launch { intakeRollers?.set(intakeRollers.pauseSpeed) }
 
                 carousel.set(angle)
                 launch { carousel.set(angle, 0.Degree) }
@@ -163,36 +163,6 @@ suspend fun Subsystems.intakeBalls() = startChoreo("Intake Balls") {
                 launch { leds?.set(Color.RED) }
                 carousel.state.push()
             }
-        }
-    }
-}
-
-suspend fun Subsystems.visionAimTurretSnapshot() {
-    if (turret == null) {
-        log(Error) { "Need turret for vision" }
-        freeze()
-    } else startChoreo("Vision Aim Turret") {
-        val reading by limelight.hardware.readings.readEagerly().withoutStamps
-        val turretPos by turret.hardware.position.readEagerly().withoutStamps
-
-        choreography {
-            reading?.let { snapshot ->
-                launch {
-                    turret.set(
-                        turretPos - snapshot.tx + limelight.hardware.conversions.mountingBearing,
-                        0.Degree
-                    )
-                }
-            }
-
-            runWhenever(
-                {
-                    reading?.tx?.let { tx -> (tx + limelight.hardware.conversions.mountingBearing).abs < 2.Degree }
-                        ?: false
-                } to {
-                    flashlight?.strobe()
-                }
-            )
         }
     }
 }
@@ -233,7 +203,6 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
 
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
-        val pitch by drivetrain.hardware.pitch.readEagerly().withoutStamps
         val shift by operator.shift.readEagerly().withoutStamps
 
         choreography {
@@ -243,53 +212,33 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
             carousel.set(carousel.state.shootInitialAngle() ?: carousel.hardware.nearestSlot())
 
             launch { feederRoller.set(feederRoller.feedSpeed) }
+            launch { leds?.blink(Color.BLUE) }
+
+            var flywheelTarget = flywheelPreset
+
             launch { flywheel.set(flywheelPreset) }
-            launch { leds?.set(Color.BLUE) }
-
-            fun isDrivetrainStill() = with(drivetrain) {
-                hardware.rightMasterEsc.motorOutputPercent < shootTolerance.Percent && hardware.leftMasterEsc.motorOutputPercent < shootTolerance.Percent
-            }
-
-            runWhenever(
-                { isDrivetrainStill() } to {
-                    launch { leds?.blink(Color.BLUE) }
-                    var flywheelSetpoint = flywheelPreset
-
+            launch {
+                while (isActive) {
                     if (!shift) {
                         val snapshot = reading?.copy()
                         if (snapshot != null) {
-//                            val distance = limelight.hardware.conversions.distanceToGoal(snapshot, pitch)
-                            val distance = limelight.hardware.conversions.distanceToGoal(snapshot, 0.Degree)
-
-                            println("SHOOTING ${
-                                listOf(distance.Foot,
-                                    snapshot.ty.Degree,
-                                    pitch.Degree,
-                                    snapshot.pipeline?.number ?: -1).joinToString()
-                            }")
-
-                            val target = flywheel.hardware.conversions.rpmCurve(distance)
-
-                            println("TARGET: ${target.Rpm}")
-
+                            val target = targetFlywheelSpeed(flywheel, snapshot)
                             if ((target - flywheelPreset).abs > 2000.Rpm) {
                                 log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
                             } else {
-                                flywheelSetpoint = target
+                                flywheelTarget = target
                                 launch { flywheel.set(target*flywheel.rpmPercentage) }
                             }
-                        } else {
-                            launch { leds?.blink(Color.RED) }
-                            log(Error) { "Missing target" }
                         }
                     }
+                    delay(200.milli(Second)) // TODO idk how long
+                }
+            }
 
-                    runWhenever({ flywheelSpeed in flywheelSetpoint `±` flywheel.tolerance } to {
-                        rumble.set(100.Percent)
-                    })
-                },
-                { !isDrivetrainStill() } to { leds?.set(Color.BLUE) }
-            )
+            runWhenever({ flywheelSpeed in flywheelTarget `±` flywheel.tolerance } to {
+                launch { leds?.set(Color.GREEN) }
+                rumble.set(100.Percent)
+            })
         }
     }
 }
