@@ -28,12 +28,10 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretHardware
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.io.File
-import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
 class Subsystems(
@@ -59,21 +57,19 @@ class Subsystems(
     val shooterHood: ShooterHoodComponent?,
 ) : Named by Named("Subsystems") {
 
-    private val autos = listOf(
-        ::autoGetOffLine,
-        ::auto3Ball,
-        ::auto6Ball,
-    )
-
     private val autoId by pref(0)
-
-    val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
+    val journalId by pref(0)
     val journalReverse by pref(false)
 
     suspend fun auto() = coroutineScope {
-        launch {
-            turret?.trackTarget(drivetrain, limelight)
-        }
+        val initialBearing = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y.bearing
+        val autos = listOf(
+            ::autoGetOffLine,
+            ::auto3Ball,
+            { auto6Ball(initialBearing) },
+        )
+
+        launch { turret?.trackTarget(drivetrain, limelight) }
         delay(AutoPrefs.initialDelay)
 
         when (autoId) {
@@ -85,17 +81,16 @@ class Subsystems(
         }
     }
 
-    suspend fun teleop() =
-        runAll(
-            { climberTeleop() },
-            { digestionTeleop() },
-            {
-                launchWhenever(
-                    { limelight.routine == null } to { limelight.autoZoom() },
-                    { drivetrain.routine == null } to { drivetrain.teleop(driver) }
-                )
-            }
-        )
+    suspend fun teleop() = runAll(
+        { climberTeleop() },
+        { digestionTeleop() },
+        {
+            launchWhenever(
+                { limelight.routine == null } to { limelight.autoZoom() },
+                { drivetrain.routine == null } to { drivetrain.teleop(driver) }
+            )
+        }
+    )
 
 
     suspend fun test() = runAll(
@@ -104,18 +99,16 @@ class Subsystems(
         { digestionTest() },
     )
 
-    suspend fun warmup() {
-        runAll(
-            { drivetrain.teleop(driver) },
-            { limelight.autoZoom() },
-            {
-                while (isActive) {
-                    delay(0.3.Second)
-                    if (RobotController.getUserButton()) exitProcess(0)
-                }
+    suspend fun warmup() = runAll(
+        { drivetrain.teleop(driver) },
+        { limelight.autoZoom() },
+        {
+            while (isActive) {
+                delay(0.3.Second)
+                if (RobotController.getUserButton()) exitProcess(0)
             }
-        )
-    }
+        }
+    )
 
     companion object : Named by Named("Subsystems") {
 

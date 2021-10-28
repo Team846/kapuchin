@@ -51,7 +51,7 @@ suspend fun Subsystems.auto3Ball() {
     }
 }
 
-suspend fun Subsystems.auto6Ball() {
+suspend fun Subsystems.auto6Ball(initialBearing: Angle) {
     if (flywheel == null) {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto L1Shoot I1Intake S1Shoot") {
@@ -60,11 +60,11 @@ suspend fun Subsystems.auto6Ball() {
 
             // intake and go to I1
             val intakeJob = launch { intakeBalls() }
-            autoDriveLine(AutoPrefs.L2I1Distance, reverse = true)
+            autoDriveLine(AutoPrefs.L2I1Distance, reverse = true, initialBearing)
             intakeJob.cancel()
 
             // go to S1
-            autoDriveLine(AutoPrefs.I1S1Distance, reverse = false)
+            autoDriveLine(AutoPrefs.I1S1Distance, reverse = false, initialBearing)
 
             // shoot
             autoFire(flywheel.presetMed)
@@ -127,7 +127,10 @@ suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
     }
 }
 
-private suspend fun Subsystems.autoDriveLine(distance: Length, reverse: Boolean) {
+private suspend fun Subsystems.autoDriveLine(distance: Length, reverse: Boolean, initialBearing: Angle? = null) {
     val config = AutoPrefs.genericLinePathConfig.copy(reverse = reverse)
-    drivetrain.followTrajectory(fastAsFuckLine(distance, config), config)
+    var origin = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y
+
+    initialBearing?.let { origin = origin.copy(bearing = it) }
+    drivetrain.followTrajectory(fastAsFuckLine(distance, config), config, origin = origin)
 }
