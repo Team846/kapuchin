@@ -27,13 +27,8 @@ fun Subsystems.targetFlywheelSpeed(flywheel: FlywheelComponent, snapshot: Limeli
     var distance = distanceToGoal(snapshot, 0.Degree)
 
     if (distance > flywheel.innerPortDistanceThreshold) {
-        log(Debug) { "Distance: ${distance.Foot} ft, aiming for outer" }
-        val delta = 0.Foot // TODO sid
-        distance -= delta
-
-        // TODO sid
-
-        // if skew > tolerance, aim for outer
+        distance -= flywheel.innerOuterDelta
+        log(Debug) { "${distance.Foot} > ${flywheel.innerPortDistanceThreshold.Foot} ft, aiming for outer" }
     }
 
     return flywheel.hardware.conversions.rpmCurve(distance)

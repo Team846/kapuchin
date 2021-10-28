@@ -35,7 +35,7 @@ class FlywheelComponent(hardware: FlywheelHardware) :
     private val idleOutput by pref(50, Percent)
 
     val innerPortDistanceThreshold by pref(20, Foot)
-    val innerPortSkewTolerance by pref(10, Degree)
+    val innerOuterDelta by pref(29.25, Inch)
 
     override val fallbackController: FlywheelComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, idleOutput)
@@ -45,6 +45,3 @@ class FlywheelComponent(hardware: FlywheelHardware) :
         value.writeTo(masterEsc, pidController)
     }
 }
-
-
-
