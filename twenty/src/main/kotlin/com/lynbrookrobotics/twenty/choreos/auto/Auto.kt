@@ -45,7 +45,11 @@ suspend fun Subsystems.auto3Ball() {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto 3 ball") {
         choreography {
-            withTimeout(AutoPrefs.getOffLineTimeout) { autoFire(flywheel.presetClose) }
+            withTimeout(AutoPrefs.getOffLineTimeout) {
+                val j = launch { flywheel.set(flywheel.presetClose) }
+                autoFire(flywheel.presetClose)
+                j.cancel()
+            }
             autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
         }
     }
@@ -56,7 +60,11 @@ suspend fun Subsystems.auto6Ball(initialBearing: Angle) {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto L1Shoot I1Intake S1Shoot") {
         choreography {
-            withTimeout(AutoPrefs.getOffLineTimeout) { autoFire(flywheel.presetClose) }
+            withTimeout(AutoPrefs.getOffLineTimeout) {
+                val flywheelJob = launch { flywheel.set(flywheel.presetClose) }
+                autoFire(flywheel.presetClose)
+                flywheelJob.cancel()
+            }
 
             // intake and go to I1
             val intakeJob = launch { intakeBalls() }
@@ -64,10 +72,12 @@ suspend fun Subsystems.auto6Ball(initialBearing: Angle) {
             intakeJob.cancel()
 
             // go to S1
+            val flywheelJob = launch { flywheel.set(flywheel.presetClose) }
             autoDriveLine(AutoPrefs.I1S1Distance, reverse = false, initialBearing)
 
             // shoot
             autoFire(flywheel.presetMed)
+            flywheelJob.cancel()
         }
     }
 }
@@ -79,24 +89,25 @@ suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
         val flywheelSpeed by flywheel.hardware.speed.readEagerly().withoutStamps
 
         choreography {
-            val snapshot = reading?.copy()
-
             var flywheelTarget = flywheelPreset
 
             val jobs = mutableListOf(
                 launch { feederRoller?.set(feederRoller.feedSpeed) },
                 launch {
-                    snapshot?.let {
-                        val target = targetFlywheelSpeed(flywheel, it)
+                    val snapshot = reading?.copy()
+                    if (snapshot != null) {
+                        val target = targetFlywheelSpeed(flywheel, snapshot)
 
                         if ((target - flywheelPreset).abs > 2000.Rpm) {
                             log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
                         } else {
                             flywheelTarget = target
-                            leds?.blink(Color.BLUE)
+                            launch { leds?.blink(Color.BLUE) }
                             flywheel.set(target)
                         }
-                    } ?: leds?.set(Color.RED)
+                    } else {
+                        leds?.set(Color.RED)
+                    }
                 },
                 launch { shooterHood?.set(ShooterHoodState.Up) }
             )
