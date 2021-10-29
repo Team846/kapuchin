@@ -15,6 +15,7 @@ import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
 import com.lynbrookrobotics.twenty.subsystems.shooter.targetFlywheelSpeed
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
 import kotlinx.coroutines.launch
 import java.awt.Color
 import java.io.File
@@ -73,7 +74,7 @@ suspend fun Subsystems.auto6Ball(initialBearing: Angle) {
             val intakeJob = launch { intakeBalls() }
             val file = File("/home/lvuser/6_Ball_Auto.tsv")
 //            autoDriveLine(AutoPrefs.L2I1Distance, reverse = true, initialBearing)
-            autoDriveTraj(file ,reverse = true, initialBearing)
+            autoDriveTraj(file, reverse = true, initialBearing)
             intakeJob.cancel()
 
             // go to S1
@@ -117,7 +118,7 @@ suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
                 launch { shooterHood?.set(ShooterHoodState.Up) }
             )
 
-            delay(500.milli( Second))
+            delay(500.milli(Second))
             println("DELAYING")
             withTimeout(3.Second) {
                 delayUntil {
@@ -153,7 +154,7 @@ private suspend fun Subsystems.autoDriveLine(distance: Length, reverse: Boolean,
     drivetrain.followTrajectory(fastAsFuckLine(distance, config), config, origin = origin)
 }
 
-private suspend fun Subsystems.autoDriveTraj(trajectoryFile : File, reverse: Boolean, initialBearing: Angle? = null) {
+private suspend fun Subsystems.autoDriveTraj(trajectoryFile: File, reverse: Boolean, initialBearing: Angle? = null) {
     val config = AutoPrefs.genericLinePathConfig.copy(reverse = reverse)
     var origin = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y
     val traj = trajectoryFile
@@ -162,7 +163,7 @@ private suspend fun Subsystems.autoDriveTraj(trajectoryFile : File, reverse: Boo
         .drop(1)
         .map { it.split('\t') }
         .map { it.map { tkn -> tkn.trim() } }
-        .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) stampWith it[2].toDouble().Second}
+        .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) stampWith it[2].toDouble().Second }
         .toList()
     initialBearing?.let { origin = origin.copy(bearing = it) }
     drivetrain.followTrajectory(traj, config)
