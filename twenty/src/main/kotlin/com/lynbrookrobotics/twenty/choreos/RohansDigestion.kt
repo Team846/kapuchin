@@ -88,10 +88,12 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             },
 
             {  increaseFlywheelSpeed } to {
-                flywheel?.changeFlywheelSpeed(true) ?: freeze()
+                flywheel?.changeFlywheelSpeed(true)
+                delay(1.Second)
             },
             { decreaseFlywheelSpeed } to {
-                flywheel?.changeFlywheelSpeed(false) ?: freeze()
+                flywheel?.changeFlywheelSpeed(false)
+                delay(1.Second)
             }
         )
     }
