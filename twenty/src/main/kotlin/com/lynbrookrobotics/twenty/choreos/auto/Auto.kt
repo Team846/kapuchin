@@ -6,6 +6,7 @@ import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
 import com.lynbrookrobotics.twenty.Subsystems
+import com.lynbrookrobotics.twenty.choreos.auto.AutoPrefs.RPMtolerance
 import com.lynbrookrobotics.twenty.choreos.auto.AutoPrefs.aimError
 import com.lynbrookrobotics.twenty.choreos.auto.AutoPrefs.defaultRPM
 import com.lynbrookrobotics.twenty.choreos.auto.AutoPrefs.shootTime
@@ -31,15 +32,15 @@ object AutoPrefs : Named by Named("Auto") {
     val L2TurretPos by pref(-30, Degree)
     val S1TurretPos by pref(-15, Degree)
 
-    val aimError by pref(0.5, Degree)
-    val defaultRPM by pref (5500, Rpm)
+    val aimError by pref(4, Degree)
+    val defaultRPM by pref(5500, Rpm)
+
+    val RPMtolerance by pref(50, Rpm)
 }
 
 suspend fun Subsystems.autoGetOffLine() = startChoreo("Auto Drive") {
     choreography {
-        launch {
-            carousel.rezero()
-        }
+        launch { carousel.rezero() }
         autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
     }
 }
@@ -49,8 +50,9 @@ suspend fun Subsystems.autoShootGetOffLine() {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto Shoot GetOffLine") {
         choreography {
-            delay(1.Second)
-            withTimeout(AutoPrefs.getOffLineTimeout) { autoFire() }
+            withTimeout(5.Second) {
+                autoFire()
+            }
             autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
         }
     }
@@ -61,10 +63,8 @@ suspend fun Subsystems.autoL1ShootGetOffLine() {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto L1Shoot GetOffLine") {
         choreography {
-            delay(1.Second)
-
-            withTimeout(AutoPrefs.getOffLineTimeout) {
-                turret?.set(AutoPrefs.L1TurretPos, 5.Degree)
+            turret?.set(AutoPrefs.L1TurretPos, 5.Degree)
+            withTimeout(5.Second) {
                 autoFire()
             }
             autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
@@ -77,10 +77,8 @@ suspend fun Subsystems.autoL2ShootGetOffLine() {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto L1Shoot GetOffLine") {
         choreography {
-            delay(1.Second)
-
-            withTimeout(AutoPrefs.getOffLineTimeout) {
-                turret?.set(AutoPrefs.L2TurretPos, 5.Degree)
+            turret?.set(AutoPrefs.L2TurretPos, 5.Degree)
+            withTimeout(5.Second) {
                 autoFire()
             }
             autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
@@ -93,12 +91,10 @@ suspend fun Subsystems.autoL1ShootI1IntakeS1Shoot() {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto L1Shoot I1Intake S1Shoot") {
         choreography {
-            delay(1.Second)
-            withTimeout(AutoPrefs.getOffLineTimeout) {
-                turret?.set(AutoPrefs.L1TurretPos, 5.Degree)
+            turret?.set(AutoPrefs.L1TurretPos, 5.Degree)
+            withTimeout(5.Second) {
                 autoFire()
             }
-
             loadRobotPath(AutoPrefs.L1I1PathConfig.name)?.let { path ->
                 // intake and go to I1
                 val intakeJob = launch { intakeBalls() }
@@ -112,7 +108,9 @@ suspend fun Subsystems.autoL1ShootI1IntakeS1Shoot() {
                 turretJob.join()
 
                 // shoot
-                autoFire()
+                withTimeout(5.Second) {
+                    autoFire()
+                }
             } ?: autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
         }
     }
@@ -123,8 +121,8 @@ suspend fun Subsystems.autoL2ShootI1IntakeS1Shoot() {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto L1Shoot I1Intake S1Shoot") {
         choreography {
-            withTimeout(AutoPrefs.getOffLineTimeout) {
-                turret?.set(AutoPrefs.L2TurretPos, 5.Degree)
+            turret?.set(AutoPrefs.L2TurretPos, 5.Degree)
+            withTimeout(5.Second) {
                 autoFire()
             }
 
@@ -139,7 +137,33 @@ suspend fun Subsystems.autoL2ShootI1IntakeS1Shoot() {
             turretJob.join()
 
             // shoot
-            autoFire()
+            withTimeout(5.Second) {
+                autoFire()
+            }
+        }
+    }
+}
+
+suspend fun Subsystems.auto6Ball() {
+    if (flywheel == null) {
+        log(Error) { "Requires flywheel" }
+    } else startChoreo("Auto L1Shoot I1Intake S1Shoot") {
+        choreography {
+            withTimeout(5.Second) {
+                autoFire()
+            }
+            // intake and go to I1
+            val intakeJob = launch { intakeBalls() }
+            autoDriveLine(AutoPrefs.L2I1Distance, reverse = true)
+            intakeJob.cancel()
+
+            // go to S1
+            autoDriveLine(AutoPrefs.I1S1Distance, reverse = false)
+
+            // shoot
+            withTimeout(5.Second) {
+                autoFire()
+            }
         }
     }
 }
@@ -153,7 +177,7 @@ suspend fun Subsystems.autoFire() {
         var target = 0.Rpm
 
         choreography {
-            if(reading == null) return@choreography
+            if (reading == null) return@choreography
             launch { feederRoller.set(0.Rpm) }
 
             carousel.rezero()
@@ -162,7 +186,8 @@ suspend fun Subsystems.autoFire() {
             launch { feederRoller.set(feederRoller.feedSpeed) }
 
             launch {
-                val distance = reading?.let { limelight.hardware.conversions.distanceToGoal(it, pitch) } //may need to be 0.Degree
+                val distance =
+                    reading?.let { limelight.hardware.conversions.distanceToGoal(it, pitch) } //may need to be 0.Degree
                 target = distance?.let { flywheel.hardware.conversions.rpmCurve(it) } ?: defaultRPM
                 flywheel.set(target)
             }
@@ -171,7 +196,7 @@ suspend fun Subsystems.autoFire() {
                 turret.trackTarget(drivetrain, limelight)
             }
 
-            delayUntil { flywheelSpeed in target `±` flywheel.tolerance && reading!!.tx.abs < aimError }
+            delayUntil { flywheelSpeed in target `±` RPMtolerance && reading!!.tx.abs < aimError }
 
             val j = launch { shooterHood?.set(ShooterHoodState.Up) }
             launch { leds?.set(Color.GREEN) }
@@ -187,6 +212,7 @@ suspend fun Subsystems.autoFire() {
             carousel.state.clear()
             carousel.rezero()
             carousel.hardware.encoder.position = 0.0
+            return@choreography
         }
     }
 }

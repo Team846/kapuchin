@@ -59,7 +59,7 @@ class Subsystems(
     val flashlight: FlashlightComponent?,
     val shooterHood: ShooterHoodComponent?,
 ) : Named by Named("Subsystems") {
-
+    val initialBearing = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y.bearing
     private val autos = listOf(
         ::autoGetOffLine,
         ::autoShootGetOffLine,
@@ -67,6 +67,7 @@ class Subsystems(
         ::autoL2ShootGetOffLine,
         ::autoL1ShootI1IntakeS1Shoot,
         ::autoL2ShootI1IntakeS1Shoot,
+        ::auto6Ball,
     )
 
     private val autoIdGraph = graph("Auto ID", Each)
