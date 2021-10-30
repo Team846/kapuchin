@@ -16,7 +16,7 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.ShooterHoodState
 import com.lynbrookrobotics.twenty.subsystems.shooter.targetFlywheelSpeed
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.awt.Color
 import java.io.File
 
@@ -25,7 +25,9 @@ object AutoPrefs : Named by Named("Auto") {
     val getOffLineTimeout by pref(12, Second)
     val initialDelay by pref(0, Second)
 
-    val genericLinePathConfig by autoPathConfigPref("")
+    val slowLineConfig by autoPathConfigPref("")
+    val fastLineConfig by autoPathConfigPref("")
+    val L1I1Config by autoPathConfigPref("", defaultReverse = true)
 
     val getOffLineDistance by pref(3, Foot)
     val L2I1Distance by pref(16, Foot)
@@ -40,52 +42,91 @@ suspend fun Subsystems.autoGetOffLine() = startChoreo("Auto Drive") {
             carousel.rezero()
             carousel.hardware.encoder.position = 0.0
         }
-        autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
+        autoDriveLine(AutoPrefs.getOffLineDistance, AutoPrefs.fastLineConfig.copy(reverse = true))
     }
 }
 
-suspend fun Subsystems.auto3Ball() {
+suspend fun Subsystems.auto3BallReverse() {
     if (flywheel == null) {
         log(Error) { "Requires flywheel" }
-    } else startChoreo("Auto 3 ball") {
+    } else startChoreo("Auto 3 Ball Reverse") {
         choreography {
             withTimeout(AutoPrefs.getOffLineTimeout) {
-                val j = launch { flywheel.set(flywheel.presetClose) }
+                val spinJob = launch { autoSpinUp(flywheel.presetClose) }
                 autoFire(flywheel.presetClose)
-                j.cancel()
+                spinJob.cancel()
             }
-            autoDriveLine(AutoPrefs.getOffLineDistance, reverse = true)
+            autoDriveLine(AutoPrefs.getOffLineDistance, AutoPrefs.fastLineConfig.copy(reverse = true))
         }
     }
 }
 
-suspend fun Subsystems.auto6Ball(initialBearing: Angle) {
+suspend fun Subsystems.auto3BallForward() {
     if (flywheel == null) {
         log(Error) { "Requires flywheel" }
-    } else startChoreo("Auto L1Shoot I1Intake S1Shoot") {
+    } else startChoreo("Auto 3 Ball Forward") {
         choreography {
             withTimeout(AutoPrefs.getOffLineTimeout) {
-                val flywheelJob = launch { flywheel.set(flywheel.presetClose) }
+                val spinJob = launch { autoSpinUp(flywheel.presetClose) }
                 autoFire(flywheel.presetClose)
-                flywheelJob.cancel()
+                spinJob.cancel()
+            }
+            autoDriveLine(AutoPrefs.getOffLineDistance, AutoPrefs.fastLineConfig.copy(reverse = false))
+        }
+    }
+}
+
+suspend fun Subsystems.auto6BallStraight(initialBearing: Angle) {
+    if (flywheel == null) {
+        log(Error) { "Requires flywheel" }
+    } else startChoreo("Auto 6 Ball Straight") {
+        choreography {
+            withTimeout(AutoPrefs.getOffLineTimeout) {
+                val spinJob = launch { autoSpinUp(flywheel.presetClose) }
+                autoFire(flywheel.presetClose)
+                spinJob.cancel()
             }
 
-            // intake and go to I1
             val intakeJob = launch { intakeBalls() }
-            val file = File("/home/lvuser/6_Ball_Auto.tsv")
-//            autoDriveLine(AutoPrefs.L2I1Distance, reverse = true, initialBearing)
-            autoDriveTraj(file, reverse = true, initialBearing)
+            autoDriveLine(AutoPrefs.L2I1Distance, AutoPrefs.slowLineConfig.copy(reverse = true), initialBearing)
             intakeJob.cancel()
 
-            // go to S1
-            val flywheelJob = launch { flywheel.set(flywheel.presetClose) }
-            autoDriveLine(AutoPrefs.I1S1Distance, reverse = false, initialBearing)
-
-            // shoot
+            val spinJob = launch { autoSpinUp(flywheel.presetMed) }
+            autoDriveLine(AutoPrefs.I1S1Distance, AutoPrefs.fastLineConfig.copy(reverse = false), initialBearing)
             autoFire(flywheel.presetMed)
-            flywheelJob.cancel()
+            spinJob.cancel()
         }
     }
+}
+
+suspend fun Subsystems.auto6BallCurved(initialBearing: Angle) {
+    if (flywheel == null) {
+        log(Error) { "Requires flywheel" }
+    } else startChoreo("Auto 6 Ball Curved") {
+        choreography {
+            withTimeout(AutoPrefs.getOffLineTimeout) {
+                val spinJob = launch { autoSpinUp(flywheel.presetClose) }
+                autoFire(flywheel.presetClose)
+                spinJob.cancel()
+            }
+
+            val intakeJob = launch { intakeBalls() }
+            val file = File("/home/lvuser/6_Ball_Auto.tsv")
+            autoDriveTraj(file, AutoPrefs.L1I1Config, initialBearing)
+            intakeJob.cancel()
+
+            val spinJob = launch { autoSpinUp(flywheel.presetMed) }
+            autoDriveLine(AutoPrefs.I1S1Distance, AutoPrefs.fastLineConfig.copy(reverse = false), initialBearing)
+            autoFire(flywheel.presetMed)
+            spinJob.cancel()
+        }
+    }
+}
+
+suspend fun Subsystems.autoSpinUp(flywheelPreset: AngularVelocity) = coroutineScope {
+    launch { flywheel?.set(flywheelPreset) }
+    launch { feederRoller?.set(feederRoller.feedSpeed) }
+    launch { shooterHood?.set(ShooterHoodState.Up) }
 }
 
 suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
@@ -97,39 +138,33 @@ suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
         choreography {
             var flywheelTarget = flywheelPreset
 
-            val jobs = mutableListOf(
-                launch { feederRoller?.set(feederRoller.feedSpeed) },
-                launch {
-                    val snapshot = reading?.copy()
-                    if (snapshot != null) {
-                        val target = targetFlywheelSpeed(flywheel, snapshot)
+            val snapshot = reading?.copy()
+            if (snapshot != null) {
+                val target = targetFlywheelSpeed(flywheel, snapshot)
 
-                        if ((target - flywheelPreset).abs > 2000.Rpm) {
-                            log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
-                        } else {
-                            flywheelTarget = target
-                            launch { leds?.blink(Color.BLUE) }
-                            flywheel.set(target)
-                        }
-                    } else {
-                        leds?.set(Color.RED)
-                    }
-                },
-                launch { shooterHood?.set(ShooterHoodState.Up) }
-            )
+                if (target !in 5000.Rpm `±` 2000.Rpm) {
+                    log(Error) { "Calculated target (${target.Rpm} rpm) is too far off" }
+                    launch { leds?.set(Color.RED) }
+                } else {
+                    launch { leds?.blink(Color.BLUE) }
+                    flywheelTarget = target
+                    launch { flywheel.set(target) }
+                }
+            } else {
+                launch { leds?.set(Color.RED) }
+            }
 
             delay(500.milli(Second))
-            println("DELAYING")
-            withTimeout(3.Second) {
+            withTimeout(2.Second) {
                 delayUntil {
                     flywheelSpeed in flywheelTarget `±` flywheel.tolerance
-                            && reading?.let { it.tx < AutoPrefs.aimTolerance } ?: false
+                            && reading?.let { it.tx < AutoPrefs.aimTolerance } != false
                 }
             }
 
-            if (reading?.let { it.tx < AutoPrefs.aimTolerance } == true) {
-                jobs.add(launch { leds?.set(Color.GREEN) })
-                withTimeout(shootTime) { carousel.set(carousel.shootSlowSpeed) }
+            if (reading?.let { it.tx < AutoPrefs.aimTolerance } != false) {
+                launch { leds?.set(Color.GREEN) }
+                withTimeout(shootTime) { carousel.set(carousel.shootFastSpeed) }
             } else {
                 scope.launch {
                     withTimeout(2.Second) {
@@ -138,7 +173,8 @@ suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
                 }
             }
 
-            jobs.forEach { it.cancel() }
+            coroutineContext[Job]!!.cancelChildren()
+
             carousel.state.clear()
             carousel.rezero()
             carousel.hardware.encoder.position = 0.0
@@ -146,16 +182,22 @@ suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
     }
 }
 
-private suspend fun Subsystems.autoDriveLine(distance: Length, reverse: Boolean, initialBearing: Angle? = null) {
-    val config = AutoPrefs.genericLinePathConfig.copy(reverse = reverse)
+private suspend fun Subsystems.autoDriveLine(
+    distance: Length,
+    config: AutoPathConfiguration,
+    initialBearing: Angle? = null,
+) {
     var origin = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y
 
     initialBearing?.let { origin = origin.copy(bearing = it) }
     drivetrain.followTrajectory(fastAsFuckLine(distance, config), config, origin = origin)
 }
 
-private suspend fun Subsystems.autoDriveTraj(trajectoryFile: File, reverse: Boolean, initialBearing: Angle? = null) {
-    val config = AutoPrefs.genericLinePathConfig.copy(reverse = reverse)
+private suspend fun Subsystems.autoDriveTraj(
+    trajectoryFile: File,
+    config: AutoPathConfiguration,
+    initialBearing: Angle? = null,
+) {
     var origin = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y
     val traj = trajectoryFile
         .bufferedReader()
@@ -163,7 +205,7 @@ private suspend fun Subsystems.autoDriveTraj(trajectoryFile: File, reverse: Bool
         .drop(1)
         .map { it.split('\t') }
         .map { it.map { tkn -> tkn.trim() } }
-        .map { Waypoint(it[0].toDouble().Foot, it[1].toDouble().Foot) stampWith it[2].toDouble().Second }
+        .map { Waypoint(it[1].toDouble().Foot * -1, it[0].toDouble().Foot) stampWith it[2].toDouble().Second }
         .toList()
     initialBearing?.let { origin = origin.copy(bearing = it) }
     drivetrain.followTrajectory(traj, config)

@@ -6,6 +6,8 @@ import com.lynbrookrobotics.twenty.routines.set
 import com.lynbrookrobotics.twenty.subsystems.climber.ClimberBrakeState
 import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotState
 import info.kunalsheth.units.generated.*
+import info.kunalsheth.units.math.*
+import kotlinx.coroutines.launch
 
 suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
 
@@ -16,14 +18,20 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
     val chaChaRealSmooth by operator.chaChaRealSmooth.readEagerly().withoutStamps
     val takeItBackNowYall by operator.takeItBackNowYall.readEagerly().withoutStamps
 
-    var climberArms =
-        if (climberPivot?.hardware?.pivotSolenoid?.get() == ClimberPivotState.Up.output) ClimberPivotState.Up else ClimberPivotState.Down
+//    var climberArms = if (climberPivot?.hardware?.pivotSolenoid?.get() == ClimberPivotState.Up.output) ClimberPivotState.Up else ClimberPivotState.Down
+    var climberArms = ClimberPivotState.Down
 
     choreography {
         runWhenever(
             { climberArms == ClimberPivotState.Down } to { climberPivot?.set(ClimberPivotState.Down) },
-            { chaChaRealSmooth && shift } to { climberWinch?.set(climberWinch.extendSpeed) },
-            { chaChaRealSmooth && !shift } to { climberWinch?.set(climberWinch.extendSlowSpeed, ignoreLimit = true) },
+            { chaChaRealSmooth && shift } to {
+                climberArms = ClimberPivotState.Up
+                climberWinch?.set(climberWinch.extendSpeed)
+            },
+            { chaChaRealSmooth && !shift } to {
+                climberArms = ClimberPivotState.Up
+                climberWinch?.set(climberWinch.extendSlowSpeed, ignoreLimit = true)
+            },
             { takeItBackNowYall && shift } to { climberWinch?.set(climberWinch.retractSpeed) },
             { takeItBackNowYall && !shift } to { climberWinch?.set(climberWinch.retractSlowSpeed, ignoreLimit = true) },
 

@@ -65,8 +65,10 @@ class Subsystems(
         val initialBearing = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y.bearing
         val autos = listOf(
             ::autoGetOffLine,
-            ::auto3Ball,
-            { auto6Ball(initialBearing) },
+            ::auto3BallReverse,
+            ::auto3BallForward,
+            { auto6BallStraight(initialBearing) },
+            { auto6BallCurved(initialBearing) },
         )
 
         launch { turret?.trackTarget(drivetrain, limelight) }

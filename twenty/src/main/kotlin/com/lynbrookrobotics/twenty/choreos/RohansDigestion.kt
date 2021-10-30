@@ -8,7 +8,6 @@ import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
 import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselSlot
-import com.lynbrookrobotics.twenty.subsystems.climber.ClimberPivotState
 import com.lynbrookrobotics.twenty.subsystems.intake.IntakeSliderState
 import com.lynbrookrobotics.twenty.subsystems.shooter.*
 import info.kunalsheth.units.generated.*
@@ -87,7 +86,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
                     0.Degree)
             },
 
-            {  increaseFlywheelSpeed } to {
+            { increaseFlywheelSpeed } to {
                 flywheel?.changeFlywheelSpeed(true)
                 delay(1.Second)
             },
@@ -225,11 +224,12 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
                         val snapshot = reading?.copy()
                         if (snapshot != null) {
                             val target = targetFlywheelSpeed(flywheel, snapshot)
-                            if ((target - flywheelPreset).abs > 2000.Rpm) {
-                                log(Error) { "Calculated target (${target.Rpm} rpm) differs greatly from preset (${flywheelPreset.Rpm} rpm)" }
+                            if (target !in 5000.Rpm `±` 2000.Rpm) {
+                                log(Error) { "Calculated target (${target.Rpm} rpm) is too far off" }
                             } else {
                                 flywheelTarget = target
-                                launch { flywheel.set(target*flywheel.rpmPercentage) }
+                                log(Debug) { "New target ${target.Rpm} * ${flywheel.rpmPercentage.Percent}%" }
+                                launch { flywheel.set(target * flywheel.rpmPercentage) }
                             }
                         }
                     }
