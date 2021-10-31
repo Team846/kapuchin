@@ -32,7 +32,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     )
 
     private val escId = 60
-    private val hallEffectChannel = 1
+    private val hallEffectChannel = 2
 
     val conversions = CarouselConversions(this)
     var isZeroed = false

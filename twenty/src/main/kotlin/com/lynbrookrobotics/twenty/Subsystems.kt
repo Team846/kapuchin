@@ -61,14 +61,16 @@ class Subsystems(
     val journalId by pref(0)
     val journalReverse by pref(false)
 
+    var initialBearing = 0.Degree
+
     suspend fun auto() = coroutineScope {
-        val initialBearing = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y.bearing
         val autos = listOf(
             ::autoGetOffLine,
             ::auto3BallReverse,
             ::auto3BallForward,
-            { auto6BallStraight(initialBearing) },
-            { auto6BallCurved(initialBearing) },
+            { auto6BallStraight(initialBearing, currentTime) },
+            { auto6BallCurved(initialBearing, currentTime) },
+            { auto5Ball(initialBearing, currentTime) },
         )
 
         launch { turret?.trackTarget(drivetrain, limelight) }
@@ -97,8 +99,9 @@ class Subsystems(
 
     suspend fun test() = runAll(
         { drivetrain.teleop(driver) },
-        { climberTest() },
-        { digestionTest() },
+//        { climberTest() },
+//        { digestionTest() },
+        { journalPath() }
     )
 
     suspend fun warmup() = runAll(
@@ -108,6 +111,14 @@ class Subsystems(
             while (isActive) {
                 delay(0.3.Second)
                 if (RobotController.getUserButton()) exitProcess(0)
+            }
+        },
+        {
+            while (isActive) {
+                if (turret?.hardware?.atZero?.optimizedRead(currentTime, 0.Second)?.y == true) {
+                    initialBearing = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y.bearing
+                    log(Debug) { "Set initial bearing to ${initialBearing.Degree} deg" }
+                }
             }
         }
     )

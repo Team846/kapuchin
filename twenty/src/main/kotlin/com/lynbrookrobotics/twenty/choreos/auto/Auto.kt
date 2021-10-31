@@ -76,7 +76,7 @@ suspend fun Subsystems.auto3BallForward() {
     }
 }
 
-suspend fun Subsystems.auto6BallStraight(initialBearing: Angle) {
+suspend fun Subsystems.auto6BallStraight(initialBearing: Angle, startTime: Time) {
     if (flywheel == null) {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto 6 Ball Straight") {
@@ -93,13 +93,13 @@ suspend fun Subsystems.auto6BallStraight(initialBearing: Angle) {
 
             val spinJob = launch { autoSpinUp(flywheel.presetMed) }
             autoDriveLine(AutoPrefs.I1S1Distance, AutoPrefs.fastLineConfig.copy(reverse = false), initialBearing)
-            autoFire(flywheel.presetMed)
+            autoFire(flywheel.presetMed, startTime)
             spinJob.cancel()
         }
     }
 }
 
-suspend fun Subsystems.auto6BallCurved(initialBearing: Angle) {
+suspend fun Subsystems.auto6BallCurved(initialBearing: Angle, startTime: Time) {
     if (flywheel == null) {
         log(Error) { "Requires flywheel" }
     } else startChoreo("Auto 6 Ball Curved") {
@@ -117,7 +117,32 @@ suspend fun Subsystems.auto6BallCurved(initialBearing: Angle) {
 
             val spinJob = launch { autoSpinUp(flywheel.presetMed) }
             autoDriveLine(AutoPrefs.I1S1Distance, AutoPrefs.fastLineConfig.copy(reverse = false), initialBearing)
-            autoFire(flywheel.presetMed)
+            autoFire(flywheel.presetMed, startTime)
+            spinJob.cancel()
+        }
+    }
+}
+
+suspend fun Subsystems.auto5Ball(initialBearing: Angle, startTime: Time) {
+    if (flywheel == null) {
+        log(Error) { "Requires flywheel" }
+    } else startChoreo("Auto 5 Ball") {
+        choreography {
+            withTimeout(AutoPrefs.getOffLineTimeout) {
+                val spinJob = launch { autoSpinUp(flywheel.presetClose) }
+                autoFire(flywheel.presetClose)
+                spinJob.cancel()
+            }
+
+            val intakeJob = launch { intakeBalls() }
+            val file1 = File("/home/lvuser/5_Ball_Auto.tsv")
+            autoDriveTraj(file1, AutoPrefs.L1I1Config, initialBearing)
+            intakeJob.cancel()
+
+            val spinJob = launch { autoSpinUp(flywheel.presetMed) }
+//            val file2 = File("/home/lvuser/2.tsv")
+//            autoDriveTraj(file2, AutoPrefs.L1I1Config)
+            autoFire(flywheel.presetMed, startTime)
             spinJob.cancel()
         }
     }
@@ -129,7 +154,7 @@ suspend fun Subsystems.autoSpinUp(flywheelPreset: AngularVelocity) = coroutineSc
     launch { shooterHood?.set(ShooterHoodState.Up) }
 }
 
-suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
+suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity, startTime: Time? = null) {
     if (flywheel == null) log(Error) { "Requires flywheel" }
     else startChoreo("Auto Fire") {
         val reading by limelight.hardware.readings.readEagerly().withoutStamps
@@ -164,7 +189,11 @@ suspend fun Subsystems.autoFire(flywheelPreset: AngularVelocity) {
 
             if (reading?.let { it.tx < AutoPrefs.aimTolerance } != false) {
                 launch { leds?.set(Color.GREEN) }
-                withTimeout(shootTime) { carousel.set(carousel.shootFastSpeed) }
+                withTimeout(shootTime) {
+                    val j = launch { carousel.set(carousel.shootFastSpeed) }
+                    delayUntil { startTime?.let { currentTime - it > (15 - 1).Second } ?: false }
+                    j.cancel()
+                }
             } else {
                 scope.launch {
                     withTimeout(2.Second) {

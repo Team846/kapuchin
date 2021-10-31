@@ -55,7 +55,6 @@ class FlywheelComponent(hardware: FlywheelHardware) :
 
     override fun FlywheelHardware.output(value: OffloadedOutput) {
         value.writeTo(masterEsc, pidController)
-        rpmPercentageOfGraph(currentTime, rpmPercentage)
     }
 
     init {

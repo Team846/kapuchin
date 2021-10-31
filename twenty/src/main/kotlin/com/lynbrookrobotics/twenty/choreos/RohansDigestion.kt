@@ -24,6 +24,7 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
     val pukeBallsIntakeOut by driver.pukeBallsIntakeOut.readEagerly().withoutStamps
 
     val centerTurret by operator.centerTurret.readEagerly().withoutStamps
+    val unjamFeeder by operator.unjamFeeder.readEagerly().withoutStamps
     val aim by operator.aim.readEagerly().withoutStamps
     val shootFast by operator.shootFast.readEagerly().withoutStamps
     val shootSlow by operator.shootSlow.readEagerly().withoutStamps
@@ -57,6 +58,12 @@ suspend fun Subsystems.digestionTeleop() = startChoreo("Digestion Teleop") {
             },
 
             { centerTurret } to { turret?.set(0.Degree) ?: freeze() },
+            { unjamFeeder } to {
+                launch { feederRoller?.let { it.set(it.feedSpeed) } }
+                launch { shooterHood?.set (ShooterHoodState.Up)}
+                launch { flywheel?.set(2500.Rpm)}
+                freeze()
+            },
             { aim && !shift } to { visionTrackTarget() },
             { aim && shift } to { flashlight?.set(FlashlightState.On) },
             { shootFast } to { shootAll(carousel.shootFastSpeed) },
@@ -228,8 +235,8 @@ suspend fun Subsystems.spinUpShooter(flywheelPreset: AngularVelocity) {
                                 log(Error) { "Calculated target (${target.Rpm} rpm) is too far off" }
                             } else {
                                 flywheelTarget = target
-                                log(Debug) { "New target ${target.Rpm} * ${flywheel.rpmPercentage.Percent}%" }
-                                launch { flywheel.set(target * flywheel.rpmPercentage) }
+                                log(Debug) { "New target ${target.Rpm}" }
+                                launch { flywheel.set(target) }
                             }
                         }
                     }

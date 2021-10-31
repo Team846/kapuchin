@@ -25,11 +25,19 @@ suspend fun Subsystems.climberTeleop() = startChoreo("Climber Teleop") {
         runWhenever(
             { climberArms == ClimberPivotState.Down } to { climberPivot?.set(ClimberPivotState.Down) },
             { chaChaRealSmooth && shift } to {
-                climberArms = ClimberPivotState.Up
+                if (climberArms == ClimberPivotState.Down) {
+                    delay(200.milli(Second))
+                    climberArms = ClimberPivotState.Up
+                    delay(500.milli(Second))
+                }
                 climberWinch?.set(climberWinch.extendSpeed)
             },
             { chaChaRealSmooth && !shift } to {
-                climberArms = ClimberPivotState.Up
+                if (climberArms == ClimberPivotState.Down) {
+                    delay(200.milli(Second))
+                    climberArms = ClimberPivotState.Up
+                    delay(500.milli(Second))
+                }
                 climberWinch?.set(climberWinch.extendSlowSpeed, ignoreLimit = true)
             },
             { takeItBackNowYall && shift } to { climberWinch?.set(climberWinch.retractSpeed) },

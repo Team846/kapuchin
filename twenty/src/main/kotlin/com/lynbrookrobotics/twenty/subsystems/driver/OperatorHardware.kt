@@ -62,6 +62,7 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
     val takeItBackNowYall = s { xbox.backButton && xbox.startButton }
 
     val centerTurret = s { xbox.xButton }
+    val unjamFeeder = s { xbox.yButton }
     val aim = s { lt }
     val shootFast = s { rt }
     val shootSlow = s { rb }
