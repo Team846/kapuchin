@@ -5,14 +5,12 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.logging.Level.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.routines.*
-import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.kapuchin.timing.Priority.*
 import com.lynbrookrobotics.kapuchin.timing.clock.*
 import com.lynbrookrobotics.twenty.choreos.*
 import com.lynbrookrobotics.twenty.choreos.auto.*
-import com.lynbrookrobotics.twenty.routines.autoZoom
-import com.lynbrookrobotics.twenty.routines.teleop
+import com.lynbrookrobotics.twenty.routines.*
 import com.lynbrookrobotics.twenty.subsystems.ElectricalSystemHardware
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselComponent
 import com.lynbrookrobotics.twenty.subsystems.carousel.CarouselHardware
@@ -30,13 +28,10 @@ import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretComponent
 import com.lynbrookrobotics.twenty.subsystems.shooter.turret.TurretHardware
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.RobotController
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 import kotlinx.coroutines.*
 import java.io.File
-import kotlin.math.roundToInt
-import kotlin.properties.ReadOnlyProperty
 import kotlin.system.exitProcess
 
 class Subsystems(
@@ -48,6 +43,7 @@ class Subsystems(
     val driver: DriverHardware,
     val operator: OperatorHardware,
     val rumble: RumbleComponent,
+    val leds: LedComponent?,
 
     val climberPivot: ClimberPivotComponent?,
     val climberWinch: ClimberWinchComponent?,
@@ -61,81 +57,71 @@ class Subsystems(
     val shooterHood: ShooterHoodComponent?,
 ) : Named by Named("Subsystems") {
 
-    private val autos = listOf(
-        ::autoGetOffLine,
-        ::autoShootGetOffLine,
-        ::autoL1ShootGetOffLine,
-        ::autoL2ShootGetOffLine,
-        ::autoL1ShootI1IntakeS1Shoot,
-        ::autoL2ShootI1IntakeS1Shoot,
-    )
-
-    private val autoIdGraph = graph("Auto ID", Each)
-
-    private var prevAutoId = -1
-    private val autoId
-        get() = SmartDashboard.getEntry("DB/Slider 0").getDouble(-1.0).roundToInt().also {
-            if (it != prevAutoId) {
-                if (it in autos.indices) log(Debug) { "Selected auto ${autos[it].name}" }
-                else log(Error) { "No auto with ID $it! Must be from 0 to ${autos.size}" }
-                prevAutoId = it
-            }
-        }
-
-    val journalId get() = SmartDashboard.getEntry("DB/Slider 1").getDouble(0.0).roundToInt()
+    private val autoId by pref(0)
+    val journalId by pref(0)
     val journalReverse by pref(false)
 
+    var initialBearing = 0.Degree
+
     suspend fun auto() = coroutineScope {
+        val autos = listOf(
+            ::autoGetOffLine,
+            ::auto3BallReverse,
+            ::auto3BallForward,
+            { auto6BallStraight(initialBearing, currentTime) },
+            { auto6BallCurved(initialBearing, currentTime) },
+            { auto5Ball(initialBearing, currentTime) },
+        )
+
+        launch { turret?.trackTarget(drivetrain, limelight) }
+        delay(AutoPrefs.initialDelay)
+
         when (autoId) {
-            -1 -> {
-                log(Warning) { "DB Slider 0 is set to -1, getting off the line`" }
-                autoGetOffLine()
-            }
             !in autos.indices -> {
                 log(Error) { "$autoId isn't an auto!! you fucked up!!!" }
-                autoShootGetOffLine()
+                autoGetOffLine()
             }
             else -> autos[autoId].invoke()
         }
     }
 
-    suspend fun teleop() =
-        runAll(
-            { climberTeleop() },
-            { digestionTeleop() },
-            {
-                launchWhenever(
-                    { limelight.routine == null } to { limelight.autoZoom() },
-                    { drivetrain.routine == null } to { drivetrain.teleop(driver) }
-                )
-            }
-        )
+    suspend fun teleop() = runAll(
+        { climberTeleop() },
+        { digestionTeleop() },
+        {
+            launchWhenever(
+                { limelight.routine == null } to { limelight.autoZoom() },
+                { drivetrain.routine == null } to { drivetrain.teleop(driver) }
+            )
+        }
+    )
 
 
     suspend fun test() = runAll(
         { drivetrain.teleop(driver) },
-        { climberTest() },
-        { digestionTest() },
+//        { climberTest() },
+//        { digestionTest() },
+        { journalPath() }
     )
 
-    suspend fun warmup() {
-        runAll(
-            { drivetrain.teleop(driver) },
-            { limelight.autoZoom() },
-            {
-                while (isActive) {
-                    delay(0.3.Second)
-                    if (RobotController.getUserButton()) exitProcess(0)
+    suspend fun warmup() = runAll(
+        { drivetrain.teleop(driver) },
+        { limelight.autoZoom() },
+        {
+            while (isActive) {
+                delay(0.3.Second)
+                if (RobotController.getUserButton()) exitProcess(0)
+            }
+        },
+        {
+            while (isActive) {
+                if (turret?.hardware?.atZero?.optimizedRead(currentTime, 0.Second)?.y == true) {
+                    initialBearing = drivetrain.hardware.position.optimizedRead(currentTime, 0.Second).y.bearing
+                    log(Debug) { "Set initial bearing to ${initialBearing.Degree} deg" }
                 }
             }
-        )
-    }
-
-    init {
-        uiBaselineTicker.runOnTick { time ->
-            autoIdGraph(time, autoId.Each)
         }
-    }
+    )
 
     companion object : Named by Named("Subsystems") {
 
@@ -158,6 +144,8 @@ class Subsystems(
             }
         }
 
+        private val initLeds by pref(false)
+
         private val initClimberPivot by pref(false)
         private val initClimberWinch by pref(false)
 
@@ -174,13 +162,7 @@ class Subsystems(
 
         val pneumaticTicker = ticker(Low, 50.milli(Second), "Pneumatic System Ticker")
         val shooterTicker = ticker(Highest, 30.milli(Second), "Shooter System Ticker")
-        val uiBaselineTicker = ticker(Lowest, 500.milli(Second), "UI Baseline Ticker")
-
-        val sharedTickerTiming
-            get() = ReadOnlyProperty<SubsystemHardware<*, *>, Time> { thisRef, _ ->
-                thisRef.log(Error) { "Subsystem should use shared ticker values!" }
-                20.milli(Second)
-            }
+        val uiTicker = ticker(Lowest, 500.milli(Second), "UI Ticker")
 
         fun concurrentInit() = scope.launch {
             supervisorScope {
@@ -201,8 +183,8 @@ class Subsystems(
 
                 val driverAsync = async { DriverHardware() }
                 val operatorAsync = async { OperatorHardware() }
-                val rumbleAsync =
-                    async { RumbleComponent(RumbleHardware(driverAsync.await(), operatorAsync.await())) }
+                val rumbleAsync = async { RumbleComponent(RumbleHardware(operatorAsync.await())) }
+                val ledsAsync = i(initLeds) { LedComponent(LedHardware()) }
 
                 val climberPivotAsync = i(initClimberPivot) { ClimberPivotComponent(ClimberPivotHardware()) }
                 val climberWinchAsync = i(initClimberWinch) { ClimberWinchComponent(ClimberWinchHardware()) }
@@ -224,6 +206,7 @@ class Subsystems(
                     driverAsync.await(),
                     operatorAsync.await(),
                     rumbleAsync.await(),
+                    t { ledsAsync.await() },
 
                     t { climberPivotAsync.await() },
                     t { climberWinchAsync.await() },
@@ -234,7 +217,7 @@ class Subsystems(
                     t { turretAsync.await() },
                     t { feederRollerAsync.await() },
                     t { flashlightAsync.await() },
-                    t { shooterHoodAsync.await() }
+                    t { shooterHoodAsync.await() },
                 )
             }
         }.also { runBlocking { it.join() } }

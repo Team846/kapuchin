@@ -17,9 +17,8 @@ import info.kunalsheth.units.math.*
 class FeederRollerComponent(hardware: FeederRollerHardware) :
     Component<FeederRollerComponent, FeederRollerHardware, OffloadedOutput>(hardware, Subsystems.shooterTicker) {
 
-    val maxSpeed by pref(11000, Rpm)
+    private val maxSpeed by pref(11000, Rpm)
     val feedSpeed by pref(2500, Rpm)
-    val tolerance by pref(10, Rpm)
 
     val velocityGains by pref {
         val kP by pref(10, Volt, 100, Rpm)
@@ -44,7 +43,7 @@ class FeederRollerComponent(hardware: FeederRollerHardware) :
 }
 
 class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRollerComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.shooterTicker.period
     override val syncThreshold = 15.milli(Second)
     override val priority = Priority.Medium
     override val name = "Feeder Roller"
@@ -80,9 +79,9 @@ class FeederRollerHardware : SubsystemHardware<FeederRollerHardware, FeederRolle
     )
 
     init {
-        Subsystems.shooterTicker.runOnTick { time ->
+        Subsystems.uiTicker.runOnTick { time ->
             setOf(speed).forEach {
-                it.optimizedRead(time, .5.Second)
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

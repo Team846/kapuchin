@@ -114,14 +114,14 @@ data class OffloadedEscConfiguration(
 
             writeTo(esc, timeoutMs, cached)
 
-            if (cached?.continuousCurrentLimit != this.continuousCurrentLimit)
-                println("Cannot write `continuousCurrentLimit` to VictorSPX ${esc.deviceID}")
-
-            if (cached?.peakCurrentLimit != this.peakCurrentLimit)
-                println("Cannot write `peakCurrentLimit` to VictorSPX ${esc.deviceID}")
-
-            if (cached?.peakCurrentDuration != this.peakCurrentDuration)
-                println("Cannot write `peakCurrentDuration` to VictorSPX ${esc.deviceID}")
+//            if (cached?.continuousCurrentLimit != this.continuousCurrentLimit)
+//                println("Cannot write `continuousCurrentLimit` to VictorSPX ${esc.deviceID}")
+//
+//            if (cached?.peakCurrentLimit != this.peakCurrentLimit)
+//                println("Cannot write `peakCurrentLimit` to VictorSPX ${esc.deviceID}")
+//
+//            if (cached?.peakCurrentDuration != this.peakCurrentDuration)
+//                println("Cannot write `peakCurrentDuration` to VictorSPX ${esc.deviceID}")
         }
         cache[esc] = this
     }
@@ -137,11 +137,11 @@ data class OffloadedEscConfiguration(
             if (cached?.closedloopRamp != this.closedloopRamp)
                 +esc.setClosedLoopRampRate(closedloopRamp.Second)
 
-            if (cached?.nominalOutputForward != this.nominalOutputForward)
-                println("Cannot write `nominalOutputForward` to SparkMAX ${esc.deviceId}")
-
-            if (cached?.nominalOutputReverse != this.nominalOutputReverse)
-                println("Cannot write `nominalOutputReverse` to SparkMAX ${esc.deviceId}")
+//            if (cached?.nominalOutputForward != this.nominalOutputForward)
+//                println("Cannot write `nominalOutputForward` to SparkMAX ${esc.deviceId}")
+//
+//            if (cached?.nominalOutputReverse != this.nominalOutputReverse)
+//                println("Cannot write `nominalOutputReverse` to SparkMAX ${esc.deviceId}")
 
             if (cached == null ||
                 cached.peakOutputReverse != this.peakOutputReverse ||
@@ -160,8 +160,8 @@ data class OffloadedEscConfiguration(
             if (cached?.peakCurrentLimit != this.peakCurrentLimit)
                 +esc.setSecondaryCurrentLimit(peakCurrentLimit.Ampere)
 
-            if (cached?.peakCurrentDuration != this.peakCurrentDuration)
-                println("Cannot write `peakCurrentDuration` to SparkMAX ${esc.deviceId}")
+//            if (cached?.peakCurrentDuration != this.peakCurrentDuration)
+//                println("Cannot write `peakCurrentDuration` to SparkMAX ${esc.deviceId}")
         }
         cache[esc] = this
     }

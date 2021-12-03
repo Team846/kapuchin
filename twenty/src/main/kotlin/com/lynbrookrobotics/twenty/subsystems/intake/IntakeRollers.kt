@@ -14,6 +14,7 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) :
     Component<IntakeRollersComponent, IntakeRollersHardware, OffloadedOutput>(hardware, Subsystems.pneumaticTicker) {
 
     val eatSpeed by pref(100, Percent)
+    val pauseSpeed by pref(-10, Percent)
 
     override val fallbackController: IntakeRollersComponent.(Time) -> OffloadedOutput = {
         PercentOutput(hardware.escConfig, 0.Percent)
@@ -25,7 +26,7 @@ class IntakeRollersComponent(hardware: IntakeRollersHardware) :
 }
 
 class IntakeRollersHardware : SubsystemHardware<IntakeRollersHardware, IntakeRollersComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.pneumaticTicker.period
     override val syncThreshold = 20.milli(Second)
     override val priority = Priority.Low
     override val name = "Intake Rollers"

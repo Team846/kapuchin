@@ -11,11 +11,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType
 import edu.wpi.first.wpilibj.Solenoid
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
+import kotlin.math.min
 
 enum class ClimberBrakeState(val output: Boolean) { On(false), Off(true) }
 
 sealed class ClimberWinchOutput {
     data class Running(val esc: OffloadedOutput) : ClimberWinchOutput()
+    data class RunningNoSafety(val esc: OffloadedOutput) : ClimberWinchOutput()
     object Stopped : ClimberWinchOutput()
 }
 
@@ -32,8 +34,26 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
     override val fallbackController: ClimberWinchComponent.(Time) -> ClimberWinchOutput = { ClimberWinchOutput.Stopped }
 
     private var lastBrakeTime = currentTime
+    var retractLimit = hardware.masterEsc.encoder.position
 
     override fun ClimberWinchHardware.output(value: ClimberWinchOutput) = when (value) {
+        is ClimberWinchOutput.Running -> {
+            if (currentTime - lastBrakeTime >= chodeDelaySafety && brakeSolenoid.get() != ClimberBrakeState.On.output) {
+                val safeties = OffloadedEscSafeties(retractLimit, null)
+                value.esc.with(safeties).writeTo(masterEsc, pidController)
+            }
+
+            brakeSolenoid.set(ClimberBrakeState.Off.output)
+        }
+        is ClimberWinchOutput.RunningNoSafety -> {
+            retractLimit = min(retractLimit, masterEsc.encoder.position)
+
+            if (currentTime - lastBrakeTime >= chodeDelaySafety && brakeSolenoid.get() != ClimberBrakeState.On.output) {
+                value.esc.writeTo(masterEsc, pidController)
+            }
+
+            brakeSolenoid.set(ClimberBrakeState.Off.output)
+        }
         is ClimberWinchOutput.Stopped -> {
             if (masterEsc.appliedOutput == 0.0 && slaveEsc.appliedOutput == 0.0) {
                 brakeSolenoid.set(ClimberBrakeState.On.output)
@@ -42,18 +62,11 @@ class ClimberWinchComponent(hardware: ClimberWinchHardware) :
 
             masterEsc.set(0.0)
         }
-        is ClimberWinchOutput.Running -> {
-            if (currentTime - lastBrakeTime >= chodeDelaySafety && brakeSolenoid.get() != ClimberBrakeState.On.output) {
-                value.esc.writeTo(masterEsc, pidController)
-            }
-
-            brakeSolenoid.set(ClimberBrakeState.Off.output)
-        }
     }
 }
 
 class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinchComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.pneumaticTicker.period
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.Medium
     override val name = "Climber Winch"
@@ -74,8 +87,6 @@ class ClimberWinchHardware : SubsystemHardware<ClimberWinchHardware, ClimberWinc
     val masterEsc by hardw { CANSparkMax(masterEscId, MotorType.kBrushless) }.configure {
         generalSetup(it, escConfig)
         it.inverted = invert
-//        +it.enableSoftLimit(SoftLimitDirection.kReverse, true)
-//        +it.setSoftLimit(SoftLimitDirection.kReverse, it.encoder.position.toFloat())
     }
 
     val slaveEsc by hardw { CANSparkMax(slaveEscId, MotorType.kBrushless) }.configure {

@@ -21,7 +21,7 @@ class ClimberPivotComponent(hardware: ClimberPivotHardware) :
 }
 
 class ClimberPivotHardware : SubsystemHardware<ClimberPivotHardware, ClimberPivotComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.pneumaticTicker.period
     override val syncThreshold = 100.milli(Second)
     override val priority = Priority.Low
     override val name = "Climber Pivot"

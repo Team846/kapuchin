@@ -1,7 +1,6 @@
 package com.lynbrookrobotics.twenty.subsystems.shooter
 
 import com.lynbrookrobotics.kapuchin.hardware.*
-import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
@@ -12,10 +11,7 @@ import info.kunalsheth.units.math.*
 enum class ShooterHoodState(val output: Boolean) { Up(true), Down(false) }
 
 class ShooterHoodComponent(hardware: ShooterHoodHardware) :
-    Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, Subsystems.shooterTicker) {
-
-    val hoodUpLaunch by pref(20, Degree)
-    val hoodDownLaunch by pref(50, Degree)
+    Component<ShooterHoodComponent, ShooterHoodHardware, ShooterHoodState>(hardware, Subsystems.pneumaticTicker) {
 
     override val fallbackController: ShooterHoodComponent.(Time) -> ShooterHoodState = { ShooterHoodState.Down }
 
@@ -25,7 +21,7 @@ class ShooterHoodComponent(hardware: ShooterHoodHardware) :
 }
 
 class ShooterHoodHardware : SubsystemHardware<ShooterHoodHardware, ShooterHoodComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.pneumaticTicker.period
     override val syncThreshold = 15.milli(Second)
     override val priority = Priority.Low
     override val name = "Shooter Hood"

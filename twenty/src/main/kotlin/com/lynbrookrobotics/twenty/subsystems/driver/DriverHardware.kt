@@ -8,8 +8,7 @@ import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
 import com.lynbrookrobotics.twenty.Subsystems
-import edu.wpi.first.wpilibj.*
-import edu.wpi.first.wpilibj.GenericHID.Hand
+import edu.wpi.first.wpilibj.Joystick
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
@@ -46,8 +45,6 @@ class DriverHardware : RobotHardware<DriverHardware>() {
 
     private fun <Input> s(f: () -> Input) = sensor { f() stampWith it }
 
-    val station by hardw { DriverStation.getInstance()!! }
-
     private val stick by hardw { Joystick(0) }.verify("the driver joystick is connected") {
         it.name == "T.16000M"
     }
@@ -56,24 +53,11 @@ class DriverHardware : RobotHardware<DriverHardware>() {
         it.name == "FGT Rumble 3-in-1"
     }
 
-    private val absoluteWheel by hardw { Joystick(3) }.verify("the absolute wheel is connected") {
-        it.name == "Kunals Absolute Steering Wheel"
-    }
-
-    val rumble by hardw<XboxController?> { XboxController(4) }.verify("the rumblr is connected") {
-        it!!.name == "Controller (XBOX 360 For Windows)"
-    }.verify("xbox controller and rumblr are not swapped") {
-        it!!.getTriggerAxis(Hand.kLeft) > 0.1 && it.getTriggerAxis(Hand.kRight) > 0.1
-    }.otherwise(hardw { null })
-
     val accelerator = s { joystickMapping(-stick.y.Each) }
         .with(graph("Accelerator", Percent))
 
     val steering = s { wheelMapping(wheel.x.Each) }
         .with(graph("Steering", Percent))
-
-    val absSteering = s { (-180).Degree * absoluteWheel.x }
-        .with(graph("Absolute Steering", Degree))
 
     val stopDrivetrain = s { stick[ThrustmasterButtons.LeftTrigger] }
 
@@ -81,13 +65,17 @@ class DriverHardware : RobotHardware<DriverHardware>() {
     val pukeBallsIntakeIn = s { stick[ThrustmasterButtons.BottomTrigger] && !stick[ThrustmasterButtons.Trigger] }
     val pukeBallsIntakeOut = s { stick[ThrustmasterButtons.BottomTrigger] && stick[ThrustmasterButtons.Trigger] }
 
+    val carouselBall0 = s { stick[ThrustmasterButtons.RightTrigger] }
     val carouselLeft = s { stick.pov in (270 - 45)..(270 + 45) }
     val carouselRight = s { stick.pov in (90 - 45)..(90 + 45) }
 
+    val increaseFlywheelSpeed = s { stick[ThrustmasterButtons.RightTwo] }
+    val decreaseFlywheelSpeed = s { stick[ThrustmasterButtons.RightThree] }
+
     init {
-        Subsystems.uiBaselineTicker.runOnTick { time ->
-            setOf(accelerator, steering, absSteering).forEach {
-                it.optimizedRead(time, .5.Second)
+        Subsystems.uiTicker.runOnTick { time ->
+            setOf(accelerator, steering).forEach {
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

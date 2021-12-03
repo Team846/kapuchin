@@ -110,11 +110,6 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
 
     private val escNamed = Named("ESC Odometry", this)
     override val position = sensor {
-        conversions.odometry(
-            leftPosition.optimizedRead(it, syncThreshold).y,
-            rightPosition.optimizedRead(it, syncThreshold).y,
-            gyro.yaw.Degree
-        )
         conversions.tracking.run { Position(x, y, bearing) } stampWith it
     }
         .with(graph("X Location", Foot, escNamed)) { it.x }
@@ -150,9 +145,9 @@ class DrivetrainHardware : SubsystemHardware<DrivetrainHardware, DrivetrainCompo
     }.with(graph("Right Speed", FootPerSecond))
 
     init {
-        Subsystems.uiBaselineTicker.runOnTick { time ->
+        Subsystems.uiTicker.runOnTick { time ->
             setOf(pitch, leftSpeed, rightSpeed, leftPosition, rightPosition).forEach {
-                it.optimizedRead(time, .5.Second)
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
 

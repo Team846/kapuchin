@@ -12,7 +12,7 @@ import info.kunalsheth.units.math.*
 import java.lang.Double.NaN
 
 class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.shooterTicker.period
     override val syncThreshold = 10.milli(Second)
     override val priority = Priority.High
     override val name = "Limelight"
@@ -62,10 +62,4 @@ class LimelightHardware : SubsystemHardware<LimelightHardware, LimelightComponen
             else -> null
         } lstamp t
     }
-
-//    private val pipeline = sensor { t ->
-//        l("getpipe").toInt().let { rawpipe ->
-//            Pipeline.values().firstOrNull { it.number == rawpipe }
-//        } lstamp t
-//    }
 }

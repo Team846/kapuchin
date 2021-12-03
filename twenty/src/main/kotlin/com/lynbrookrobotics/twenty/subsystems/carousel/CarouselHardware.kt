@@ -32,7 +32,7 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
     )
 
     private val escId = 60
-    private val hallEffectChannel = 1
+    private val hallEffectChannel = 2
 
     val conversions = CarouselConversions(this)
     var isZeroed = false
@@ -85,20 +85,16 @@ class CarouselHardware : SubsystemHardware<CarouselHardware, CarouselComponent>(
         it.red != 0 && it.green != 0 && it.blue != 0
     }
 
-    private val colorNamed = Named("Color Sensor", this)
-    val color = sensor(colorSensor) { color stampWith it }
-        .with(graph("R", Percent, colorNamed)) { it.red.Each }
-        .with(graph("G", Percent, colorNamed)) { it.green.Each }
-        .with(graph("B", Percent, colorNamed)) { it.blue.Each }
-        .with(graph("Similarity", Each, colorNamed)) { conversions.similarity(it).Each }
+    private val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
+        .with(graph("IR", Percent))
 
-    val proximity = sensor(colorSensor) { proximity.Each / 2047 stampWith it }
-        .with(graph("IR", Percent, colorNamed))
+    val isBall = sensor { (proximity.optimizedRead(it, syncThreshold).y in conversions.ballIrRange) stampWith it }
+        .with(graph("Is Ball", Each)) { (if (it) 1 else 0).Each }
 
     init {
-        Subsystems.uiBaselineTicker.runOnTick { time ->
-            setOf(alignedToSlot, position, color, proximity).forEach {
-                it.optimizedRead(time, .5.Second)
+        Subsystems.uiTicker.runOnTick { time ->
+            setOf(alignedToSlot, position, isBall).forEach {
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

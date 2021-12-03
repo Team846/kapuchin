@@ -11,7 +11,7 @@ import info.kunalsheth.units.math.*
 enum class FlashlightState(val output: Boolean) { Off(false), On(true) }
 
 class FlashlightComponent(hardware: FlashlightHardware) :
-    Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, Subsystems.uiBaselineTicker) {
+    Component<FlashlightComponent, FlashlightHardware, FlashlightState>(hardware, Subsystems.uiTicker) {
 
     override val fallbackController: FlashlightComponent.(Time) -> FlashlightState = { FlashlightState.Off }
 
@@ -21,7 +21,7 @@ class FlashlightComponent(hardware: FlashlightHardware) :
 }
 
 class FlashlightHardware : SubsystemHardware<FlashlightHardware, FlashlightComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.uiTicker.period
     override val syncThreshold = 50.milli(Second)
     override val priority = Priority.Low
     override val name = "Flashlight"

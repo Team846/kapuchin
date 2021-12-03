@@ -7,7 +7,7 @@ import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
 import com.lynbrookrobotics.kapuchin.subsystems.*
 import com.lynbrookrobotics.kapuchin.timing.*
-import com.lynbrookrobotics.kapuchin.timing.clock.*
+import com.lynbrookrobotics.twenty.Subsystems
 import edu.wpi.first.wpilibj.GenericHID.Hand
 import edu.wpi.first.wpilibj.XboxController
 import info.kunalsheth.units.generated.*
@@ -56,34 +56,34 @@ class OperatorHardware : RobotHardware<OperatorHardware>() {
 
     val shift = s { lb }
 
-    val toggleClimberArms = s { rb }
+    val toggleClimberArms = s { xbox.bButton }
+    val setClimberLimit = s { xbox.aButton }
     val chaChaRealSmooth = s { xbox.backButton && !xbox.startButton }
     val takeItBackNowYall = s { xbox.backButton && xbox.startButton }
 
-    val aim = s { lt }
-    val shoot = s { rt }
-
-    val shooterPresetAnitez = s { xbox.pov == 270 }
-    val shooterPresetLow = s { xbox.pov == 180 }
-    val shooterPresetMed = s { xbox.pov == 90 }
-    val shooterPresetHigh = s { xbox.pov == 0 }
-
-    val carouselBall0 = s { xbox.yButton }
     val centerTurret = s { xbox.xButton }
-    val reindexCarousel = s { xbox.aButton }
+    val unjamFeeder = s { xbox.yButton }
+    val aim = s { lt }
+    val shootFast = s { rt }
+    val shootSlow = s { rb }
+
+    val presetAnitez = s { xbox.pov == 270 }
+    val presetClose = s { xbox.pov == 0 }
+    val presetMed = s { xbox.pov == 90 }
+    val presetFar = s { xbox.pov == 180 }
 
     val turretManual = s {
-        turretMapping(getX(Hand.kLeft).Each)
+        turretMapping(getX(Hand.kRight).Each)
     }.with(graph("Turret Manual", Percent))
 
     val turretPrecisionManual = s {
-        turretPrecisionMapping(getX(Hand.kRight).Each)
+        turretPrecisionMapping(getX(Hand.kLeft).Each)
     }.with(graph("Turret Precsion Manual", Percent))
 
     init {
-        EventLoop.runOnTick { time ->
+        Subsystems.uiTicker.runOnTick { time ->
             setOf(turretManual, turretPrecisionManual).forEach {
-                it.optimizedRead(time, 0.1.Second)
+                it.optimizedRead(time, Subsystems.uiTicker.period)
             }
         }
     }

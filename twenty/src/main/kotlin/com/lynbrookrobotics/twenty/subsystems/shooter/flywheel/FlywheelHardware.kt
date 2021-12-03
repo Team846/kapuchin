@@ -15,7 +15,7 @@ import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
 
 class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>() {
-    override val period by Subsystems.sharedTickerTiming
+    override val period = Subsystems.shooterTicker.period
     override val syncThreshold = 5.milli(Second)
     override val priority = Priority.High
     override val name = "Shooter Flywheel"
@@ -55,10 +55,8 @@ class FlywheelHardware : SubsystemHardware<FlywheelHardware, FlywheelComponent>(
     }.with(graph("Speed", Rpm))
 
     init {
-        Subsystems.shooterTicker.runOnTick { time ->
-            setOf(speed).forEach {
-                it.optimizedRead(time, .5.Second)
-            }
+        Subsystems.uiTicker.runOnTick { time ->
+            speed.optimizedRead(time, Subsystems.uiTicker.period)
         }
     }
 }

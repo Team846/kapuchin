@@ -3,10 +3,8 @@ package com.lynbrookrobotics.twenty.subsystems.carousel
 import com.lynbrookrobotics.kapuchin.control.conversion.*
 import com.lynbrookrobotics.kapuchin.logging.*
 import com.lynbrookrobotics.kapuchin.preferences.*
-import edu.wpi.first.wpilibj.util.Color
 import info.kunalsheth.units.generated.*
 import info.kunalsheth.units.math.*
-import kotlin.math.pow
 
 class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversions", hardware) {
     val encoder by pref {
@@ -29,26 +27,9 @@ class CarouselConversions(hardware: CarouselHardware) : Named by Named("Conversi
         })
     }
 
-    private val ballIrRange by pref {
+    val ballIrRange by pref {
         val min by pref(87.5, Percent)
         val max by pref(100, Percent)
         ({ min..max })
     }
-
-    private val ballColor by pref {
-        val r by pref(29.8, Percent)
-        val g by pref(53.2, Percent)
-        val b by pref(16.8, Percent)
-        ({ Color(r.Each, g.Each, b.Each) })
-    }
-
-    private val ballColorTolerance by pref(0.1)
-
-    fun similarity(colorA: Color, colorB: Color = ballColor) =
-        (colorA.red - colorB.red).pow(2) +
-                (colorA.green - colorB.green).pow(2) +
-                (colorA.blue - colorB.blue).pow(2)
-
-    fun detectingBall(proximity: Dimensionless, color: Color) =
-        proximity in ballIrRange && similarity(color) < ballColorTolerance
 }
